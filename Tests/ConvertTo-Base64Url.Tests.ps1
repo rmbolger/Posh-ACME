@@ -21,6 +21,13 @@ Describe "ConvertTo-Base64Url" {
         It "encodes strings from pipeline" {
             'asdf','qwer' | ConvertTo-Base64Url | Should -Be 'YXNkZg','cXdlcg'
         }
-    }
 
+        # RFC 7515 examples
+        It "rfc7515#section-3.3 header" {
+            "{`"typ`":`"JWT`",`r`n `"alg`":`"HS256`"}" | ConvertTo-Base64Url | Should -Be 'eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9'
+        }
+        It "rfc7515#section-3.3 payload" {
+            "{`"iss`":`"joe`",`r`n `"exp`":1300819380,`r`n `"http://example.com/is_root`":true}" | ConvertTo-Base64Url | Should -Be 'eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ'
+        }
+    }
 }
