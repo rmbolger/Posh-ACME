@@ -3,7 +3,8 @@ function ConvertFrom-Base64Url {
     param(
         [Parameter(Mandatory,Position=0,ValueFromPipeline)]
         [AllowEmptyString()]
-        [string]$Base64Url
+        [string]$Base64Url,
+        [switch]$AsByteArray
     )
 
     Process {
@@ -25,7 +26,11 @@ function ConvertFrom-Base64Url {
         }
 
         # convert it using standard base64 stuff
-        return [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($s))
+        if ($AsByteArray) {
+            return [Convert]::FromBase64String($s)
+        } else {
+            return [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($s))
+        }
         
     }
     

@@ -19,6 +19,10 @@ Describe "ConvertFrom-Base64Url" {
             { ConvertFrom-Base64Url '12345' } | Should -Throw
         }
 
+        It "returns byte[] with -AsByteArray" {
+            ConvertFrom-Base64Url 'Zm9vYmFy' -AsByteArray | Should -Be ([byte[]](102,111,111,98,97,114))
+        }
+
         # Since we're using the native [Convert]::FromBase64String under the hood, we'll
         # skip testing the various combinations of characters that should throw an error.
 
