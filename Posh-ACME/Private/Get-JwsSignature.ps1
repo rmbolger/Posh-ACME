@@ -5,7 +5,7 @@ function Get-JwsSignature {
         [AllowEmptyString()]
         [string]$Message,
         [Parameter(Position=1)]
-        [ValidateSet('RS256')]
+        [ValidateSet('RS256','ES256')]
         [Alias('algorithm')]
         [string]$JwsAlgorithm='RS256',
         [object]$Key
@@ -14,11 +14,8 @@ function Get-JwsSignature {
     Process {
 
         # Per https://tools.ietf.org/html/rfc7518#section-3.1, both RS256 and ES256 are
-        # recommended algorithms for Jws. We eventually want to support both. But we'll
-        # start with RS256 and code as if there were multiple.
-        
-        # For our purposes, the "required" HS256 is actually banned for use
-        # with ACME v2 as it is a MAC-based algorithm.
+        # recommended algorithms for Jws and HS256 is "required". However, HS256 is called
+        # out in the ACME v2 RFC as banned for use because it's MAC based..
         # https://tools.ietf.org/html/draft-ietf-acme-acme-09#section-6.2
 
         switch ($JwsAlgorithm) {
@@ -26,6 +23,7 @@ function Get-JwsSignature {
 
                 if ($Key) {
                     # validate the key type
+                    # RSASSA-PKCS1-v1_5 using SHA-256
                     if ($Key -isnot [Security.Cryptography.RSA]) {
                         throw "Key parameter type doesn't match the JwsAlgorithm"
                     }
@@ -43,7 +41,24 @@ function Get-JwsSignature {
                 break;
             }
             'ES256' {
-                throw "Unsupported JwsAlgorithm"
+
+                if ($Key) {
+                    # validate the key type
+                    # ECDSA using P-256 and SHA-256
+                    if ($Key -isnot [Security.Cryptography.ECDsa]) {
+                        throw "Key parameter type doesn't match the JwsAlgorithm"
+                    }
+                } else {
+                    # generate a new random key
+                    $Curve = [Security.Cryptography.ECCurve]::CreateFromValue('1.2.840.10045.3.1.7')
+                    $Key = [Security.Cryptography.ECDsa]::Create($Curve)
+                }
+
+                # sign the message
+                $MessageBytes = [Text.Encoding]::ASCII.GetBytes($Message)
+                $SignedBytes = $Key.SignData($MessageBytes)
+
+                break;
             }
             default { throw "Unsupported JwsAlgorithm" }
         }
