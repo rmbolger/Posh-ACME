@@ -16,3 +16,19 @@ Foreach($import in @($Public + $Private))
 
 # Export everything in the public folder
 Export-ModuleMember -Function $Public.Basename
+
+# setup some module wide variables
+$script:LE_PROD = 'https://acme-v02.api.letsencrypt.org/'
+$script:LE_STAGE = 'https://acme-staging-v02.api.letsencrypt.org/'
+$script:NextNonce = ''
+
+# Set the config path based on edition/platform
+if ('PSEdition' -notin $PSVersionTable.Keys -or $PSVersionTable.PSEdition -eq 'Desktop' -or $IsWindows) {
+    $script:ConfigFolder = Join-Path $env:LOCALAPPDATA 'Posh-ACME'
+} elseif ($IsLinux) {
+    $script:ConfigFolder = Join-Path $env:HOME '.config/Posh-ACME'
+} elseif ($IsMacOs) {
+    $script:ConfigFolder = Join-Path $env:HOME 'Library/Preferences/Posh-ACME'
+} else {
+    throw "Unrecognized PowerShell platform"
+}
