@@ -474,7 +474,12 @@ Describe "ConvertFrom-Jwk" {
             }
             $ec256Params = $ec256test.ExportParameters($true)
             It "should have correct curve name" {
-                $ec256Params.Curve.Oid.FriendlyName | Should -BeExactly 'nistP256'
+                # curve names appear to be platform specific
+                $curveName = 'ECDSA_P256'
+                if ($PSVersionTable.PSEdition -eq 'Desktop' -or $IsWindows) {
+                    $curveName = 'nistP256'
+                }
+                $ec256Params.Curve.Oid.FriendlyName | Should -BeExactly $curveName
             }
             It "should match 'x'" {
                 $ec256Params.Q.X | Should -Be ($ec256.x | ConvertFrom-Base64Url -AsByteArray)
@@ -503,7 +508,12 @@ Describe "ConvertFrom-Jwk" {
             }
             $ec256Params = $ec256test.ExportParameters($false)
             It "should have correct curve name" {
-                $ec256Params.Curve.Oid.FriendlyName | Should -BeExactly 'nistP256'
+                # curve names appear to be platform specific
+                $curveName = 'ECDSA_P256'
+                if ($PSVersionTable.PSEdition -eq 'Desktop' -or $IsWindows) {
+                    $curveName = 'nistP256'
+                }
+                $ec256Params.Curve.Oid.FriendlyName | Should -BeExactly $curveName
             }
             It "should match 'x'" {
                 $ec256Params.Q.X | Should -Be ($ec256.x | ConvertFrom-Base64Url -AsByteArray)
@@ -529,7 +539,12 @@ Describe "ConvertFrom-Jwk" {
             }
             $ec384Params = $ec384test.ExportParameters($true)
             It "should have correct curve name" {
-                $ec384Params.Curve.Oid.FriendlyName | Should -BeExactly 'nistP384'
+                # curve names appear to be platform specific
+                $curveName = 'ECDSA_P384'
+                if ($PSVersionTable.PSEdition -eq 'Desktop' -or $IsWindows) {
+                    $curveName = 'nistP384'
+                }
+                $ec384Params.Curve.Oid.FriendlyName | Should -BeExactly $curveName
             }
             It "should match 'x'" {
                 $ec384Params.Q.X | Should -Be ($ec384.x | ConvertFrom-Base64Url -AsByteArray)
@@ -558,7 +573,12 @@ Describe "ConvertFrom-Jwk" {
             }
             $ec384Params = $ec384test.ExportParameters($false)
             It "should have correct curve name" {
-                $ec384Params.Curve.Oid.FriendlyName | Should -BeExactly 'nistP384'
+                # curve names appear to be platform specific
+                $curveName = 'ECDSA_P384'
+                if ($PSVersionTable.PSEdition -eq 'Desktop' -or $IsWindows) {
+                    $curveName = 'nistP384'
+                }
+                $ec384Params.Curve.Oid.FriendlyName | Should -BeExactly $curveName
             }
             It "should match 'x'" {
                 $ec384Params.Q.X | Should -Be ($ec384.x | ConvertFrom-Base64Url -AsByteArray)
@@ -584,7 +604,12 @@ Describe "ConvertFrom-Jwk" {
             }
             $ec521Params = $ec521test.ExportParameters($true)
             It "should have correct curve name" {
-                $ec521Params.Curve.Oid.FriendlyName | Should -BeExactly 'nistP521'
+                # curve names appear to be platform specific
+                $curveName = 'ECDSA_P521'
+                if ($PSVersionTable.PSEdition -eq 'Desktop' -or $IsWindows) {
+                    $curveName = 'nistP521'
+                }
+                $ec521Params.Curve.Oid.FriendlyName | Should -BeExactly $curveName
             }
             It "should match 'x'" {
                 $ec521Params.Q.X | Should -Be ($ec521.x | ConvertFrom-Base64Url -AsByteArray)
@@ -613,7 +638,12 @@ Describe "ConvertFrom-Jwk" {
             }
             $ec521Params = $ec521test.ExportParameters($false)
             It "should have correct curve name" {
-                $ec521Params.Curve.Oid.FriendlyName | Should -BeExactly 'nistP521'
+                # curve names appear to be platform specific
+                $curveName = 'ECDSA_P521'
+                if ($PSVersionTable.PSEdition -eq 'Desktop' -or $IsWindows) {
+                    $curveName = 'nistP521'
+                }
+                $ec521Params.Curve.Oid.FriendlyName | Should -BeExactly $curveName
             }
             It "should match 'x'" {
                 $ec521Params.Q.X | Should -Be ($ec521.x | ConvertFrom-Base64Url -AsByteArray)
