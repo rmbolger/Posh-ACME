@@ -1,4 +1,5 @@
-Import-Module Posh-ACME
+Get-Module Posh-ACME | Remove-Module -Force
+Import-Module Posh-ACME -Force
 
 Describe "Get-JwsSignature" {
 
