@@ -33,21 +33,7 @@ function New-Jwk {
     # create the new key
     switch ($KeyType) {
         'RSA' {
-            $key = New-Object Security.Cryptography.RSACryptoServiceProvider $KeySize
-            $keyParams = $Key.ExportParameters($true)
-
-            # put the pieces into an alpha ordered hashtable
-            $keyHT = [ordered]@{
-                d = (ConvertTo-Base64Url $keyParams.D);
-                dp = (ConvertTo-Base64Url $keyParams.DP);
-                dq = (ConvertTo-Base64Url $keyParams.DQ);
-                e = (ConvertTo-Base64Url $keyParams.Exponent);
-                kty = 'RSA';
-                n = (ConvertTo-Base64Url $keyParams.Modulus);
-                p = (ConvertTo-Base64Url $keyParams.P);
-                q = (ConvertTo-Base64Url $keyParams.Q);
-                qi = (ConvertTo-Base64Url $keyParams.InverseQ);
-            }
+            $Key = New-Object Security.Cryptography.RSACryptoServiceProvider $KeySize
             break;
         }
         'EC' {
@@ -58,39 +44,26 @@ function New-Jwk {
                 256 {
                     # nistP256 / secP256r1 / x962P256v1
                     $Curve = [Security.Cryptography.ECCurve]::CreateFromValue('1.2.840.10045.3.1.7')
-                    $crv = 'P-256'
                     break;
                 }
                 384 {
                     # secP384r1
                     $Curve = [Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.34')
-                    $crv = 'P-384'
                     break;
                 }
                 521 {
                     # secP521r1
                     $Curve = [Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.35')
-                    $crv = 'P-521'
                     break;
                 }
                 default { throw "Unsupported EC KeySize. Try 256, 384, or 521." }
             }
             $Key = [Security.Cryptography.ECDsa]::Create($Curve)
-            $KeyParams = $Key.ExportParameters($true)
-
-            # put the pieces into an alpha ordered hashtable
-            $keyHT = [ordered]@{
-                crv = $crv;
-                d = (ConvertTo-Base64Url $keyParams.D);
-                kty = 'EC';
-                x = (ConvertTo-Base64Url $keyParams.Q.X);
-                y = (ConvertTo-Base64Url $keyParams.Q.Y);
-            }
             break;
         }
         default { throw "Unsupported KeyType parameter" }
     }
 
-    Write-Output ($keyHT | ConvertTo-Json -Compress)
+    Write-Output ($Key | ConvertTo-Jwk )
 }
 

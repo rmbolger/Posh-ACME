@@ -20,6 +20,12 @@ function ConvertTo-Jwk {
     # This basically includes RSA keys 2048-4096 bits and EC keys utilizing
     # P-256, P-384, or P-521 curves.
 
+    # Things to remember:
+    # 'kty' is case-sensitive per
+    # https://tools.ietf.org/html/rfc7517#section-4.1
+    # Some things using JWKs require keys to be in alphabetical order. So we might
+    # as well just always output them as such.
+
     Process {
 
         switch ($PSCmdlet.ParameterSetName) {
