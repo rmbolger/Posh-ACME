@@ -5,7 +5,8 @@ function New-Jwk {
         [Alias('type','kty')]
         [string]$KeyType='RSA',
         [Alias('size')]
-        [int]$KeySize=2048
+        [int]$KeySize=2048,
+        [switch]$Pretty
     )
 
     # 'kty' is case-sensitive
@@ -64,6 +65,10 @@ function New-Jwk {
         default { throw "Unsupported KeyType parameter" }
     }
 
-    Write-Output ($Key | ConvertTo-Jwk )
+    if ($Pretty) {
+        return ($Key | ConvertTo-Jwk -Pretty)
+    } else {
+        return ($Key | ConvertTo-Jwk)
+    }
 }
 

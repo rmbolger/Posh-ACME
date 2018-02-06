@@ -5,9 +5,8 @@ function ConvertTo-Jwk {
         [Security.Cryptography.RSA]$RSAKey,
         [Parameter(ParameterSetName='ECKey',Mandatory,Position=0,ValueFromPipeline)]
         [Security.Cryptography.ECDsa]$ECKey,
-        [Parameter(ParameterSetName='RSAKey')]
-        [Parameter(ParameterSetName='ECKey')]
-        [switch]$PublicOnly
+        [switch]$PublicOnly,
+        [switch]$Pretty
     )
 
     # RFC 7515 - JSON Web Key (JWK)
@@ -34,15 +33,14 @@ function ConvertTo-Jwk {
                 if ($PublicOnly -Or $RSAKey.PublicOnly) {
                     # grab the public parameters only
                     $keyParams = $RSAKey.ExportParameters($false)
-                    $jwk = $keyParams | Select-Object `
+                    $jwkObj = $keyParams | Select-Object `
                         @{L='e';  E={ConvertTo-Base64Url $_.Exponent}},
                         @{L='kty';E={'RSA'}},
-                        @{L='n';  E={ConvertTo-Base64Url $_.Modulus}} | 
-                        ConvertTo-Json -Compress
+                        @{L='n';  E={ConvertTo-Base64Url $_.Modulus}}
                 } else {
                     # grab all parameters
                     $keyParams = $RSAKey.ExportParameters($true)
-                    $jwk = $keyParams | Select-Object `
+                    $jwkObj = $keyParams | Select-Object `
                         @{L='d';  E={ConvertTo-Base64Url $_.D}},
                         @{L='dp'; E={ConvertTo-Base64Url $_.DP}},
                         @{L='dq'; E={ConvertTo-Base64Url $_.DQ}},
@@ -51,8 +49,7 @@ function ConvertTo-Jwk {
                         @{L='n';  E={ConvertTo-Base64Url $_.Modulus}},
                         @{L='p';  E={ConvertTo-Base64Url $_.P}},
                         @{L='q';  E={ConvertTo-Base64Url $_.Q}},
-                        @{L='qi'; E={ConvertTo-Base64Url $_.InverseQ}} |
-                        ConvertTo-Json -Compress
+                        @{L='qi'; E={ConvertTo-Base64Url $_.InverseQ}}
                 }
             }
 
@@ -70,28 +67,30 @@ function ConvertTo-Jwk {
 
                 if ($PublicOnly -or $noPrivate) {
                     $keyParams = $ECKey.ExportParameters($false)
-                    $jwk = $keyParams | Select-Object `
+                    $jwkObj = $keyParams | Select-Object `
                         @{L='crv';E={$crv}},
                         @{L='kty';E={'EC'}},
                         @{L='x';  E={ConvertTo-Base64Url $_.Q.X}},
-                        @{L='y';  E={ConvertTo-Base64Url $_.Q.Y}} | 
-                        ConvertTo-Json -Compress
+                        @{L='y';  E={ConvertTo-Base64Url $_.Q.Y}}
                 } else {
                     $keyParams = $ECKey.ExportParameters($true)
-                    $jwk = $keyParams | Select-Object `
+                    $jwkObj = $keyParams | Select-Object `
                         @{L='crv';E={$crv}},
                         @{L='d';  E={ConvertTo-Base64Url $_.D}},
                         @{L='kty';E={'EC'}},
                         @{L='x';  E={ConvertTo-Base64Url $_.Q.X}},
-                        @{L='y';  E={ConvertTo-Base64Url $_.Q.Y}} | 
-                        ConvertTo-Json -Compress
+                        @{L='y';  E={ConvertTo-Base64Url $_.Q.Y}}
                 }
             }
 
             default { throw 'Unsupported key type' }
         }
 
-        return $jwk
+        if ($Pretty) {
+            return ($jwkObj | ConvertTo-Json)
+        } else {
+            return ($jwkObj | ConvertTo-Json -Compress)
+        }
         
     }
 
