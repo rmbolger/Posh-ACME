@@ -25,7 +25,8 @@ function ConvertTo-Jwk {
         switch ($PSCmdlet.ParameterSetName) {
 
             'RSAKey' {
-                if ($PublicOnly) {
+                if ($PublicOnly -Or $RSAKey.$PublicOnly) {
+                    # grab the public parameters only
                     $keyParams = $RSAKey.ExportParameters($false)
                     $jwk = $keyParams | Select-Object `
                         @{L='e';  E={ConvertTo-Base64Url $_.Exponent}},
@@ -33,6 +34,7 @@ function ConvertTo-Jwk {
                         @{L='n';  E={ConvertTo-Base64Url $_.Modulus}} | 
                         ConvertTo-Json -Compress
                 } else {
+                    # grab all parameters
                     $keyParams = $RSAKey.ExportParameters($true)
                     $jwk = $keyParams | Select-Object `
                         @{L='d';  E={ConvertTo-Base64Url $_.D}},
@@ -53,7 +55,14 @@ function ConvertTo-Jwk {
                 # https://tools.ietf.org/html/rfc7518#section-6.2.1.1
                 $crv = "P-$($ECKey.KeySize)"
 
-                if ($PublicOnly) {
+                # since there's no PublicOnly property, we have to fake it by trying to export
+                # the private parameters and catching the error
+                try {
+                    $ECKey.ExportParameters($true) | Out-Null
+                    $noPrivate = $false
+                } catch { $noPrivate = $true }
+
+                if ($PublicOnly -or $noPrivate) {
                     $keyParams = $ECKey.ExportParameters($false)
                     $jwk = $keyParams | Select-Object `
                         @{L='crv';E={$crv}},
