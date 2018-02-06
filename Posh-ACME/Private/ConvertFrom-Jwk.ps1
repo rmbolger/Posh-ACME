@@ -46,25 +46,23 @@ function ConvertFrom-Jwk {
                 # Per https://tools.ietf.org/html/rfc7518#section-6.3.2, 
                 # 'd' is the only required private parameter. The rest SHOULD
                 # be included and if any *are* included then they all MUST be included.
-                if (![string]::IsNullOrWhiteSpace($jwkObject.d)) {
-                    $keyParams.D = $jwkObject.d | ConvertFrom-Base64Url -AsByteArray
-
-                    # check for the rest
-                    $hasP = ![string]::IsNullOrWhiteSpace($jwkObject.P)
-                    $hasQ = ![string]::IsNullOrWhiteSpace($jwkObject.Q)
-                    $hasDP = ![string]::IsNullOrWhiteSpace($jwkObject.DP)
-                    $hasDQ = ![string]::IsNullOrWhiteSpace($jwkObject.DQ)
-                    $hasQI = ![string]::IsNullOrWhiteSpace($jwkObject.QI)
-
-                    if ($hasP -and $hasQ -and $hasDP -and $hasDQ -and $hasQI) {
-                        $keyParams.P        = $jwkObject.p  | ConvertFrom-Base64Url -AsByteArray
-                        $keyParams.Q        = $jwkObject.q  | ConvertFrom-Base64Url -AsByteArray
-                        $keyParams.DP       = $jwkObject.dp | ConvertFrom-Base64Url -AsByteArray
-                        $keyParams.DQ       = $jwkObject.dq | ConvertFrom-Base64Url -AsByteArray
-                        $keyParams.InverseQ = $jwkObject.qi | ConvertFrom-Base64Url -AsByteArray
-                    } elseif ($hasP -or $hasQ -or $hasDP -or $hasDQ -or $hasQI) {
-                        throw "Invalid RSA JWK. Incomplete set of private key parameters."
-                    }
+                # HOWEVER, Microsoft's RSA implementation either can't or won't create
+                # a private key unless all (d,p,q,dp,dq,qi) are included.
+                $hasD = ![string]::IsNullOrWhiteSpace($jwkObject.D)
+                $hasP = ![string]::IsNullOrWhiteSpace($jwkObject.P)
+                $hasQ = ![string]::IsNullOrWhiteSpace($jwkObject.Q)
+                $hasDP = ![string]::IsNullOrWhiteSpace($jwkObject.DP)
+                $hasDQ = ![string]::IsNullOrWhiteSpace($jwkObject.DQ)
+                $hasQI = ![string]::IsNullOrWhiteSpace($jwkObject.QI)
+                if ($hasD -and $hasP -and $hasQ -and $hasDP -and $hasDQ -and $hasQI) {
+                    $keyParams.D        = $jwkObject.d  | ConvertFrom-Base64Url -AsByteArray
+                    $keyParams.P        = $jwkObject.p  | ConvertFrom-Base64Url -AsByteArray
+                    $keyParams.Q        = $jwkObject.q  | ConvertFrom-Base64Url -AsByteArray
+                    $keyParams.DP       = $jwkObject.dp | ConvertFrom-Base64Url -AsByteArray
+                    $keyParams.DQ       = $jwkObject.dq | ConvertFrom-Base64Url -AsByteArray
+                    $keyParams.InverseQ = $jwkObject.qi | ConvertFrom-Base64Url -AsByteArray
+                } elseif ($hasD -or $hasP -or $hasQ -or $hasDP -or $hasDQ -or $hasQI) {
+                    throw "Invalid RSA JWK. Incomplete set of private key parameters."
                 }
 
                 # create the key
