@@ -78,16 +78,17 @@ function ConvertFrom-Jwk {
                 }
                 switch ($jwkObject.crv) {
                     'P-256' {
-                        # nistP256 / secP256r1 / x962P256v1
+                        # nistP256 / ECDSA_P256 / secP256r1 / x962P256v1
                         $Curve = [Security.Cryptography.ECCurve]::CreateFromValue('1.2.840.10045.3.1.7')
                         break;
                     }
                     'P-384' {
-                        # secP384r1
+                        # nistP384 / ECDSA_P384 / secP384r1
                         $Curve = [Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.34')
                         break;
                     }
                     'P-521' {
+                        # nistP521 / ECDSA_P521
                         $Curve = [Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.35')
                         break;
                     }
