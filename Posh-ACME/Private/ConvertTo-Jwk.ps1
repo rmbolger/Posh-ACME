@@ -25,7 +25,7 @@ function ConvertTo-Jwk {
         switch ($PSCmdlet.ParameterSetName) {
 
             'RSAKey' {
-                if ($PublicOnly -Or $RSAKey.$PublicOnly) {
+                if ($PublicOnly -Or $RSAKey.PublicOnly) {
                     # grab the public parameters only
                     $keyParams = $RSAKey.ExportParameters($false)
                     $jwk = $keyParams | Select-Object `
