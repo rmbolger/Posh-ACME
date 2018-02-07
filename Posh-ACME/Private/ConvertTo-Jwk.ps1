@@ -6,6 +6,7 @@ function ConvertTo-Jwk {
         [Parameter(ParameterSetName='ECKey',Mandatory,Position=0,ValueFromPipeline)]
         [Security.Cryptography.ECDsa]$ECKey,
         [switch]$PublicOnly,
+        [switch]$Raw,
         [switch]$Pretty
     )
 
@@ -86,7 +87,9 @@ function ConvertTo-Jwk {
             default { throw 'Unsupported key type' }
         }
 
-        if ($Pretty) {
+        if ($Raw) {
+            return $jwkObj
+        } elseif ($Pretty) {
             return ($jwkObj | ConvertTo-Json)
         } else {
             return ($jwkObj | ConvertTo-Json -Compress)
