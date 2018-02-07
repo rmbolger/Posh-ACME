@@ -9,10 +9,10 @@ function ConvertTo-Jwk {
         [switch]$Pretty
     )
 
-    # RFC 7515 - JSON Web Key (JWK)
+    # RFC 7517 - JSON Web Key (JWK)
     # https://tools.ietf.org/html/rfc7517
 
-    # Support enough of a subset of RFC 7515 to implement the ACME v2
+    # Support enough of a subset of RFC 7517 to implement the ACME v2
     # protocol.
     # https://tools.ietf.org/html/draft-ietf-acme-acme-09
 
