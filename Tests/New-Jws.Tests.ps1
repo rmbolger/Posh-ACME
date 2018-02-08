@@ -7,7 +7,7 @@ Describe "New-Jws" {
     $rsaKey = New-Object Security.Cryptography.RSACryptoServiceProvider 2048
     $ecKey = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve]::CreateFromValue('1.2.840.10045.3.1.7'))
     $rsaHeader = @{alg='RS256';jwk=($rsaKey | ConvertTo-Jwk -PublicOnly -Raw);nonce='fakenonce';url='https://example.com'}
-    $ecHeader = @{alg='EC256';jwk=($ecKey | ConvertTo-Jwk -PublicOnly -Raw);nonce='fakenonce';url='https://example.com'}
+    $ecHeader = @{alg='ES256';jwk=($ecKey | ConvertTo-Jwk -PublicOnly -Raw);nonce='fakenonce';url='https://example.com'}
     $payload = '{"mykey":"myvalue"}'
 
     Context "Parameter validation" {
@@ -35,14 +35,14 @@ Describe "New-Jws" {
             $rsaHeader.alg = 'RS256'
         }
         It "mis-matched 'alg' #1" {
-            $rsaHeader.alg = 'EC256'
+            $rsaHeader.alg = 'ES256'
             { New-Jws $rsaKey $rsaHeader $payload } | Should -Throw
             $rsaHeader.alg = 'RS256'
         }
         It "mis-matched 'alg' #2" {
             $ecHeader.alg = 'RS256'
             { New-Jws $ecKey $ecHeader $payload } | Should -Throw
-            $ecHeader.alg = 'EC256'
+            $ecHeader.alg = 'ES256'
         }
         It "both 'jwk' and 'kid' supplied" {
             $rsaHeader.kid = 'blah'
