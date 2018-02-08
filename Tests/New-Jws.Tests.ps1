@@ -12,17 +12,14 @@ Describe "New-Jws" {
 
     Context "Parameter validation" {
 
-        It "no parameters" {
-            { New-Jws } | Should -Throw
+        It "invalid Key type #1" {
+            { New-Jws -Key 'blah' -Header $rsaHeader -Payload $payload } | Should -Throw
         }
-        It "invalid RSAKey type" {
-            { New-Jws -RSAKey 'blah' -Header $rsaHeader -Payload $payload } | Should -Throw
-        }
-        It "invalid ECKey type" {
-            { New-Jws -ECKey 'blah' -Header $ecHeader -Payload $payload } | Should -Throw
+        It "invalid Key type #2" {
+            { New-Jws -Key (new-object Security.Cryptography.DSACng) -Header $rsaHeader -Payload $payload } | Should -Throw
         }
         It "invalid Header type" {
-            { New-Jws -RSAKey $rsaKey -Header 'blah' -Payload $payload } | Should -Throw
+            { New-Jws -Key $rsaKey -Header 'blah' -Payload $payload } | Should -Throw
         }
         It "missing 'alg'" {
             $rsaHeader.Remove('alg')
