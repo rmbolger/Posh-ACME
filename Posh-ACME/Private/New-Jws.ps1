@@ -23,7 +23,7 @@ function New-Jws {
     # being made.
 
     # validate the header
-    if ('alg' -notin $Header.Keys -or $Header.alg -notin 'RS256','EC256') {
+    if ('alg' -notin $Header.Keys -or $Header.alg -notin 'RS256','ES256') {
         throw "Missing or invalid 'alg' in supplied Header"
     }
     if (!('jwk' -in $Header.Keys -xor 'kid' -in $Header.Keys)) {
@@ -56,7 +56,7 @@ function New-Jws {
 
     switch ($PSCmdlet.ParameterSetName) {
         'RSAKey' {
-            # Make sure header 'alg' matches key type: RSAKey = RS256, ECKey = EC256
+            # Make sure header 'alg' matches key type: RSAKey = RS256, ECKey = ES256
             if ($Header.alg -ne 'RS256') {
                 throw "Supplied key object does not match 'alg' in supplied Header."
             }
@@ -68,8 +68,8 @@ function New-Jws {
             break;
         }
         'ECKey' {
-            # Make sure header 'alg' matches key type: RSAKey = RS256, ECKey = EC256
-            if ($Header.alg -ne 'EC256') {
+            # Make sure header 'alg' matches key type: RSAKey = RS256, ECKey = ES256
+            if ($Header.alg -ne 'ES256') {
                 throw "Supplied key object does not match 'alg' in supplied Header."
             }
 
