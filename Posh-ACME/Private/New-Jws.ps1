@@ -1,13 +1,11 @@
 function New-Jws {
     [CmdletBinding()]
     param(
-        [Parameter(ParameterSetName='RSAKey',Mandatory,Position=0)]
-        [Security.Cryptography.RSA]$RSAKey,
-        [Parameter(ParameterSetName='ECKey',Mandatory,Position=0)]
-        [Security.Cryptography.ECDsa]$ECKey,
-        [Parameter(Mandatory,Position=1)]
+        [Parameter(Mandatory)]
+        [Security.Cryptography.AsymmetricAlgorithm]$Key,
+        [Parameter(Mandatory)]
         [hashtable]$Header,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(Mandatory)]
         [string]$PayloadJson
     )
 
@@ -18,12 +16,45 @@ function New-Jws {
     # cater to making JWS messages for the ACME v2 protocol.
     # https://tools.ietf.org/html/draft-ietf-acme-acme-09
 
-    # ACME messages should have either 'jwk' or 'kid' in the header.
-    # It is assumed the caller has built the header properly for the call
-    # being made.
+    # validate the key type
+    if ($Key -is [Security.Cryptography.RSA]) {
+        $IsRSA = $true
+
+        # validate the key size
+        # LE supports 2048-4096
+        # Windows claims to support 8-bit increments (mod 128)
+        if ($Key.KeySize -lt 2048 -or $Key.KeySize -gt 4096 -or ($Key.KeySize % 128) -ne 0) {
+            throw "Unsupported RSA key size. Must be 2048-4096 in 8 bit increments."
+        }
+
+        # make sure we have a private key to sign with
+        if ($Key.PublicOnly) {
+            throw "Supplied Key has no private key portion."
+        }
+
+    } elseif ($Key -is [Security.Cryptography.ECDsa]) {
+        $IsRSA = $false
+
+        # validate the curve size which is exposed via KeySize
+        if ($Key.KeySize -ne 256 -and $Key.KeySize -ne 384) {
+            throw "Unsupported EC curve. Must be P-256 or P-384"
+        }
+
+        # make sure we have a private key to sign with
+        # since there's no PublicOnly property, we have to fake it by trying to export
+        # the private parameters and catching the error
+        try {
+            $ECKey.ExportParameters($true) | Out-Null
+        } catch {
+            throw "Supplied Key has no private key portion."
+        }
+
+    } else {
+        throw "Unsupported Key type. Must be RSA or ECDsa"
+    }
 
     # validate the header
-    if ('alg' -notin $Header.Keys -or $Header.alg -notin 'RS256','ES256') {
+    if ('alg' -notin $Header.Keys -or $Header.alg -notin 'RS256','ES256','ES384') {
         throw "Missing or invalid 'alg' in supplied Header"
     }
     if (!('jwk' -in $Header.Keys -xor 'kid' -in $Header.Keys)) {
@@ -54,30 +85,24 @@ function New-Jws {
     $Message = "$HeaderB64.$PayloadB64"
     $MessageBytes = [Text.Encoding]::ASCII.GetBytes($Message)
 
-    switch ($PSCmdlet.ParameterSetName) {
-        'RSAKey' {
-            # Make sure header 'alg' matches key type: RSAKey = RS256, ECKey = ES256
-            if ($Header.alg -ne 'RS256') {
-                throw "Supplied key object does not match 'alg' in supplied Header."
-            }
-
-            # create the signature
-            $HashAlgo = [Security.Cryptography.HashAlgorithmName]::SHA256
-            $PaddingType = [Security.Cryptography.RSASignaturePadding]::Pkcs1
-            $SignedBytes = $RSAKey.SignData($MessageBytes, $HashAlgo, $PaddingType)
-            break;
+    if ($IsRSA) {
+        # Make sure header 'alg' matches key type
+        if ($Header.alg -ne 'RS256') {
+            throw "Supplied Key does not match 'alg' in supplied Header."
         }
-        'ECKey' {
-            # Make sure header 'alg' matches key type: RSAKey = RS256, ECKey = ES256
-            if ($Header.alg -ne 'ES256') {
-                throw "Supplied key object does not match 'alg' in supplied Header."
-            }
 
-            # create the signature
-            $SignedBytes = $ECKey.SignData($MessageBytes)
-            break;
+        # create the signature
+        $HashAlgo = [Security.Cryptography.HashAlgorithmName]::SHA256
+        $PaddingType = [Security.Cryptography.RSASignaturePadding]::Pkcs1
+        $SignedBytes = $RSAKey.SignData($MessageBytes, $HashAlgo, $PaddingType)
+    } else {
+        # Make sure header 'alg' matches key type
+        if ($Header.alg -ne 'ES256') {
+            throw "Supplied key object does not match 'alg' in supplied Header."
         }
-        default { throw "Unsupported key type" }
+
+        # create the signature
+        $SignedBytes = $ECKey.SignData($MessageBytes)
     }
 
     # now put everything together into the final JWS format
