@@ -20,6 +20,7 @@ Export-ModuleMember -Function $Public.Basename
 # setup some module wide variables
 $script:LE_PROD = 'https://acme-v02.api.letsencrypt.org/'
 $script:LE_STAGE = 'https://acme-staging-v02.api.letsencrypt.org/'
+$script:HEADER_NONCE = 'Replay-Nonce'
 $script:NextNonce = ''
 $script:UserAgent = "Posh-ACME/0.1 PowerShell/$($PSVersionTable.PSVersion)"
 $script:CommonHeaders = @{'Accept-Language'='en-us,en;q=0.5'}
