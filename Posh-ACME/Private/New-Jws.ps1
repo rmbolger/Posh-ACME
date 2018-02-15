@@ -44,7 +44,7 @@ function New-Jws {
         # since there's no PublicOnly property, we have to fake it by trying to export
         # the private parameters and catching the error
         try {
-            $ECKey.ExportParameters($true) | Out-Null
+            $Key.ExportParameters($true) | Out-Null
         } catch {
             throw "Supplied Key has no private key portion."
         }
@@ -94,7 +94,7 @@ function New-Jws {
         # create the signature
         $HashAlgo = [Security.Cryptography.HashAlgorithmName]::SHA256
         $PaddingType = [Security.Cryptography.RSASignaturePadding]::Pkcs1
-        $SignedBytes = $RSAKey.SignData($MessageBytes, $HashAlgo, $PaddingType)
+        $SignedBytes = $Key.SignData($MessageBytes, $HashAlgo, $PaddingType)
     } else {
         # Make sure header 'alg' matches key type
         if ($Header.alg -ne 'ES256') {
@@ -102,7 +102,7 @@ function New-Jws {
         }
 
         # create the signature
-        $SignedBytes = $ECKey.SignData($MessageBytes)
+        $SignedBytes = $Key.SignData($MessageBytes)
     }
 
     # now put everything together into the final JWS format
@@ -112,7 +112,7 @@ function New-Jws {
     $jws.signature = ConvertTo-Base64Url $SignedBytes
 
     # and return it
-    Write-Verbose ($jws | ConvertTo-Json)
+    #Write-Verbose ($jws | ConvertTo-Json)
     return ($jws | ConvertTo-Json -Compress)
 
 }
