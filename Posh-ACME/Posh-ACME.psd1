@@ -44,15 +44,16 @@ FormatsToProcess = 'Posh-ACME.Format.ps1xml'
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = @(
-     'Invoke-ACME',
-     'ConvertFrom-Base64Url',
-     'ConvertFrom-Jwk',
-     'ConvertTo-Base64Url',
-     'ConvertTo-Jwk',
-     'Get-Nonce',
-     'New-Jwk',
-     'New-Jws',
-     'Update-ACMEDirectory'
+    'Get-ACMECert',
+    'Invoke-ACME',
+    'ConvertFrom-Base64Url',
+    'ConvertFrom-Jwk',
+    'ConvertTo-Base64Url',
+    'ConvertTo-Jwk',
+    'Get-Nonce',
+    'New-Jwk',
+    'New-Jws',
+    'Update-ACMEDirectory'
 )
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
