@@ -33,37 +33,33 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $rsa2048Priv } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $rsa2048Priv
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'RSA'
+                $result.kty | Should -BeExactly 'RSA'
             }
             $origParams = $rsa2048Priv.ExportParameters($true)
             It "has correct 'e'" {
-                $resultObj.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
+                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
             }
             It "has correct 'n'" {
-                $resultObj.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
+                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
             }
             It "has correct 'd'" {
-                $resultObj.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
+                $result.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
             }
             It "has correct 'p'" {
-                $resultObj.p | Should -BeExactly (ConvertTo-Base64Url $origParams.P)
+                $result.p | Should -BeExactly (ConvertTo-Base64Url $origParams.P)
             }
             It "has correct 'q'" {
-                $resultObj.q | Should -BeExactly (ConvertTo-Base64Url $origParams.Q)
+                $result.q | Should -BeExactly (ConvertTo-Base64Url $origParams.Q)
             }
             It "has correct 'dp'" {
-                $resultObj.dp | Should -BeExactly (ConvertTo-Base64Url $origParams.DP)
+                $result.dp | Should -BeExactly (ConvertTo-Base64Url $origParams.DP)
             }
             It "has correct 'dq'" {
-                $resultObj.dq | Should -BeExactly (ConvertTo-Base64Url $origParams.DQ)
+                $result.dq | Should -BeExactly (ConvertTo-Base64Url $origParams.DQ)
             }
             It "has correct 'qi'" {
-                $resultObj.qi | Should -BeExactly (ConvertTo-Base64Url $origParams.InverseQ)
+                $result.qi | Should -BeExactly (ConvertTo-Base64Url $origParams.InverseQ)
             }
 
         }
@@ -74,26 +70,22 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $rsa2048Priv -PublicOnly } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $rsa2048Priv -PublicOnly
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'RSA'
+                $result.kty | Should -BeExactly 'RSA'
             }
             $origParams = $rsa2048Priv.ExportParameters($false)
             It "has correct 'e'" {
-                $resultObj.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
+                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
             }
             It "has correct 'n'" {
-                $resultObj.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
+                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
             }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
 
         }
 
@@ -103,26 +95,22 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $rsa2048Pub } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $rsa2048Pub
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'RSA'
+                $result.kty | Should -BeExactly 'RSA'
             }
             $origParams = $rsa2048Pub.ExportParameters($false)
             It "has correct 'e'" {
-                $resultObj.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
+                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
             }
             It "has correct 'n'" {
-                $resultObj.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
+                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
             }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
 
         }
 
@@ -132,26 +120,22 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $rsa2048Pub -PublicOnly } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $rsa2048Pub -PublicOnly
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'RSA'
+                $result.kty | Should -BeExactly 'RSA'
             }
             $origParams = $rsa2048Pub.ExportParameters($false)
             It "has correct 'e'" {
-                $resultObj.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
+                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
             }
             It "has correct 'n'" {
-                $resultObj.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
+                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
             }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
 
         }
 
@@ -161,37 +145,33 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $rsa3072Priv } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $rsa3072Priv
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'RSA'
+                $result.kty | Should -BeExactly 'RSA'
             }
             $origParams = $rsa3072Priv.ExportParameters($true)
             It "has correct 'e'" {
-                $resultObj.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
+                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
             }
             It "has correct 'n'" {
-                $resultObj.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
+                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
             }
             It "has correct 'd'" {
-                $resultObj.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
+                $result.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
             }
             It "has correct 'p'" {
-                $resultObj.p | Should -BeExactly (ConvertTo-Base64Url $origParams.P)
+                $result.p | Should -BeExactly (ConvertTo-Base64Url $origParams.P)
             }
             It "has correct 'q'" {
-                $resultObj.q | Should -BeExactly (ConvertTo-Base64Url $origParams.Q)
+                $result.q | Should -BeExactly (ConvertTo-Base64Url $origParams.Q)
             }
             It "has correct 'dp'" {
-                $resultObj.dp | Should -BeExactly (ConvertTo-Base64Url $origParams.DP)
+                $result.dp | Should -BeExactly (ConvertTo-Base64Url $origParams.DP)
             }
             It "has correct 'dq'" {
-                $resultObj.dq | Should -BeExactly (ConvertTo-Base64Url $origParams.DQ)
+                $result.dq | Should -BeExactly (ConvertTo-Base64Url $origParams.DQ)
             }
             It "has correct 'qi'" {
-                $resultObj.qi | Should -BeExactly (ConvertTo-Base64Url $origParams.InverseQ)
+                $result.qi | Should -BeExactly (ConvertTo-Base64Url $origParams.InverseQ)
             }
 
         }
@@ -202,26 +182,22 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $rsa3072Priv -PublicOnly } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $rsa3072Priv -PublicOnly
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'RSA'
+                $result.kty | Should -BeExactly 'RSA'
             }
             $origParams = $rsa3072Priv.ExportParameters($false)
             It "has correct 'e'" {
-                $resultObj.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
+                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
             }
             It "has correct 'n'" {
-                $resultObj.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
+                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
             }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
 
         }
 
@@ -231,26 +207,22 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $rsa3072Pub } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $rsa3072Pub
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'RSA'
+                $result.kty | Should -BeExactly 'RSA'
             }
             $origParams = $rsa3072Pub.ExportParameters($false)
             It "has correct 'e'" {
-                $resultObj.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
+                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
             }
             It "has correct 'n'" {
-                $resultObj.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
+                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
             }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
 
         }
 
@@ -260,26 +232,22 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $rsa3072Pub -PublicOnly } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $rsa3072Pub -PublicOnly
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'RSA'
+                $result.kty | Should -BeExactly 'RSA'
             }
             $origParams = $rsa3072Pub.ExportParameters($false)
             It "has correct 'e'" {
-                $resultObj.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
+                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
             }
             It "has correct 'n'" {
-                $resultObj.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
+                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
             }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
 
         }
 
@@ -289,37 +257,33 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $rsa4096Priv } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $rsa4096Priv
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'RSA'
+                $result.kty | Should -BeExactly 'RSA'
             }
             $origParams = $rsa4096Priv.ExportParameters($true)
             It "has correct 'e'" {
-                $resultObj.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
+                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
             }
             It "has correct 'n'" {
-                $resultObj.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
+                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
             }
             It "has correct 'd'" {
-                $resultObj.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
+                $result.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
             }
             It "has correct 'p'" {
-                $resultObj.p | Should -BeExactly (ConvertTo-Base64Url $origParams.P)
+                $result.p | Should -BeExactly (ConvertTo-Base64Url $origParams.P)
             }
             It "has correct 'q'" {
-                $resultObj.q | Should -BeExactly (ConvertTo-Base64Url $origParams.Q)
+                $result.q | Should -BeExactly (ConvertTo-Base64Url $origParams.Q)
             }
             It "has correct 'dp'" {
-                $resultObj.dp | Should -BeExactly (ConvertTo-Base64Url $origParams.DP)
+                $result.dp | Should -BeExactly (ConvertTo-Base64Url $origParams.DP)
             }
             It "has correct 'dq'" {
-                $resultObj.dq | Should -BeExactly (ConvertTo-Base64Url $origParams.DQ)
+                $result.dq | Should -BeExactly (ConvertTo-Base64Url $origParams.DQ)
             }
             It "has correct 'qi'" {
-                $resultObj.qi | Should -BeExactly (ConvertTo-Base64Url $origParams.InverseQ)
+                $result.qi | Should -BeExactly (ConvertTo-Base64Url $origParams.InverseQ)
             }
 
         }
@@ -330,26 +294,22 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $rsa4096Priv -PublicOnly } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $rsa4096Priv -PublicOnly
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'RSA'
+                $result.kty | Should -BeExactly 'RSA'
             }
             $origParams = $rsa4096Priv.ExportParameters($false)
             It "has correct 'e'" {
-                $resultObj.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
+                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
             }
             It "has correct 'n'" {
-                $resultObj.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
+                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
             }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
 
         }
 
@@ -359,26 +319,22 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $rsa4096Pub } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $rsa4096Pub
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'RSA'
+                $result.kty | Should -BeExactly 'RSA'
             }
             $origParams = $rsa4096Pub.ExportParameters($false)
             It "has correct 'e'" {
-                $resultObj.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
+                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
             }
             It "has correct 'n'" {
-                $resultObj.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
+                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
             }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
 
         }
 
@@ -388,26 +344,22 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $rsa4096Pub -PublicOnly } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $rsa4096Pub -PublicOnly
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'RSA'
+                $result.kty | Should -BeExactly 'RSA'
             }
             $origParams = $rsa4096Pub.ExportParameters($false)
             It "has correct 'e'" {
-                $resultObj.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
+                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
             }
             It "has correct 'n'" {
-                $resultObj.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
+                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
             }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
+            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
 
         }
 
@@ -429,25 +381,21 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $ec256Priv } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $ec256Priv
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'EC'
+                $result.kty | Should -BeExactly 'EC'
             }
             It "has correct 'crv'" {
-                $resultObj.crv | Should -BeExactly 'P-256'
+                $result.crv | Should -BeExactly 'P-256'
             }
             $origParams = $ec256Priv.ExportParameters($true)
             It "has correct 'd'" {
-                $resultObj.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
+                $result.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
             }
             It "has correct 'x'" {
-                $resultObj.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
+                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
             }
             It "has correct 'y'" {
-                $resultObj.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
+                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
             }
 
         }
@@ -458,23 +406,19 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $ec256Priv -PublicOnly } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $ec256Priv -PublicOnly
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'EC'
+                $result.kty | Should -BeExactly 'EC'
             }
             It "has correct 'crv'" {
-                $resultObj.crv | Should -BeExactly 'P-256'
+                $result.crv | Should -BeExactly 'P-256'
             }
             $origParams = $ec256Priv.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
             It "has correct 'x'" {
-                $resultObj.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
+                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
             }
             It "has correct 'y'" {
-                $resultObj.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
+                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
             }
 
         }
@@ -485,23 +429,19 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $ec256Pub } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $ec256Pub
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'EC'
+                $result.kty | Should -BeExactly 'EC'
             }
             It "has correct 'crv'" {
-                $resultObj.crv | Should -BeExactly 'P-256'
+                $result.crv | Should -BeExactly 'P-256'
             }
             $origParams = $ec256Pub.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
             It "has correct 'x'" {
-                $resultObj.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
+                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
             }
             It "has correct 'y'" {
-                $resultObj.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
+                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
             }
 
         }
@@ -512,23 +452,19 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $ec256Pub -PublicOnly } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $ec256Pub -PublicOnly
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'EC'
+                $result.kty | Should -BeExactly 'EC'
             }
             It "has correct 'crv'" {
-                $resultObj.crv | Should -BeExactly 'P-256'
+                $result.crv | Should -BeExactly 'P-256'
             }
             $origParams = $ec256Pub.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
             It "has correct 'x'" {
-                $resultObj.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
+                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
             }
             It "has correct 'y'" {
-                $resultObj.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
+                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
             }
 
         }
@@ -539,25 +475,21 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $ec384Priv } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $ec384Priv
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'EC'
+                $result.kty | Should -BeExactly 'EC'
             }
             It "has correct 'crv'" {
-                $resultObj.crv | Should -BeExactly 'P-384'
+                $result.crv | Should -BeExactly 'P-384'
             }
             $origParams = $ec384Priv.ExportParameters($true)
             It "has correct 'd'" {
-                $resultObj.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
+                $result.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
             }
             It "has correct 'x'" {
-                $resultObj.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
+                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
             }
             It "has correct 'y'" {
-                $resultObj.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
+                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
             }
 
         }
@@ -568,23 +500,19 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $ec384Priv -PublicOnly } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $ec384Priv -PublicOnly
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'EC'
+                $result.kty | Should -BeExactly 'EC'
             }
             It "has correct 'crv'" {
-                $resultObj.crv | Should -BeExactly 'P-384'
+                $result.crv | Should -BeExactly 'P-384'
             }
             $origParams = $ec384Priv.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
             It "has correct 'x'" {
-                $resultObj.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
+                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
             }
             It "has correct 'y'" {
-                $resultObj.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
+                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
             }
 
         }
@@ -595,23 +523,19 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $ec384Pub } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $ec384Pub
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'EC'
+                $result.kty | Should -BeExactly 'EC'
             }
             It "has correct 'crv'" {
-                $resultObj.crv | Should -BeExactly 'P-384'
+                $result.crv | Should -BeExactly 'P-384'
             }
             $origParams = $ec384Pub.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
             It "has correct 'x'" {
-                $resultObj.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
+                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
             }
             It "has correct 'y'" {
-                $resultObj.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
+                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
             }
 
         }
@@ -622,23 +546,19 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $ec384Pub -PublicOnly } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $ec384Pub -PublicOnly
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'EC'
+                $result.kty | Should -BeExactly 'EC'
             }
             It "has correct 'crv'" {
-                $resultObj.crv | Should -BeExactly 'P-384'
+                $result.crv | Should -BeExactly 'P-384'
             }
             $origParams = $ec384Pub.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
             It "has correct 'x'" {
-                $resultObj.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
+                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
             }
             It "has correct 'y'" {
-                $resultObj.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
+                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
             }
 
         }
@@ -649,25 +569,21 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $ec521Priv } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $ec521Priv
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'EC'
+                $result.kty | Should -BeExactly 'EC'
             }
             It "has correct 'crv'" {
-                $resultObj.crv | Should -BeExactly 'P-521'
+                $result.crv | Should -BeExactly 'P-521'
             }
             $origParams = $ec521Priv.ExportParameters($true)
             It "has correct 'd'" {
-                $resultObj.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
+                $result.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
             }
             It "has correct 'x'" {
-                $resultObj.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
+                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
             }
             It "has correct 'y'" {
-                $resultObj.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
+                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
             }
 
         }
@@ -678,23 +594,19 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $ec521Priv -PublicOnly } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $ec521Priv -PublicOnly
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'EC'
+                $result.kty | Should -BeExactly 'EC'
             }
             It "has correct 'crv'" {
-                $resultObj.crv | Should -BeExactly 'P-521'
+                $result.crv | Should -BeExactly 'P-521'
             }
             $origParams = $ec521Priv.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
             It "has correct 'x'" {
-                $resultObj.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
+                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
             }
             It "has correct 'y'" {
-                $resultObj.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
+                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
             }
 
         }
@@ -705,23 +617,19 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $ec521Pub } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $ec521Pub
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'EC'
+                $result.kty | Should -BeExactly 'EC'
             }
             It "has correct 'crv'" {
-                $resultObj.crv | Should -BeExactly 'P-521'
+                $result.crv | Should -BeExactly 'P-521'
             }
             $origParams = $ec521Pub.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
             It "has correct 'x'" {
-                $resultObj.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
+                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
             }
             It "has correct 'y'" {
-                $resultObj.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
+                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
             }
 
         }
@@ -732,23 +640,19 @@ Describe "ConvertTo-Jwk" {
                 { ConvertTo-Jwk $ec521Pub -PublicOnly } | Should -Not -Throw
             }
             $result = ConvertTo-Jwk $ec521Pub -PublicOnly
-            It "is parseable JSON" {
-                { $result | ConvertFrom-Json } | Should -Not -Throw
-            }
-            $resultObj = $result | ConvertFrom-Json
             It "has correct 'kty'" {
-                $resultObj.kty | Should -BeExactly 'EC'
+                $result.kty | Should -BeExactly 'EC'
             }
             It "has correct 'crv'" {
-                $resultObj.crv | Should -BeExactly 'P-521'
+                $result.crv | Should -BeExactly 'P-521'
             }
             $origParams = $ec521Pub.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $resultObj.PSObject.Properties.Name }
+            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
             It "has correct 'x'" {
-                $resultObj.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
+                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
             }
             It "has correct 'y'" {
-                $resultObj.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
+                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
             }
 
         }
