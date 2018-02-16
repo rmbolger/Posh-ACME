@@ -1,8 +1,10 @@
 function ConvertFrom-Jwk {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='JSON')]
     param(
-        [Parameter(Mandatory,Position=0,ValueFromPipeline)]
-        [string]$JWK
+        [Parameter(ParameterSetName='JSON',Mandatory,Position=0,ValueFromPipeline)]
+        [string]$JwkJson,
+        [Parameter(ParameterSetName='Object',Mandatory,Position=0,ValueFromPipeline)]
+        [pscustomobject]$Jwk
     )
 
     # RFC 7515 - JSON Web Key (JWK)
@@ -17,27 +19,29 @@ function ConvertFrom-Jwk {
 
     Process {
 
-        try {
-            $jwkObject = $JWK | ConvertFrom-Json
-        } catch { throw }
+        if ($PSCmdlet.ParameterSetName -eq 'JSON') {
+            try {
+                $Jwk = $JwkJson | ConvertFrom-Json
+            } catch { throw }
+        }
 
-        if ('kty' -notin $jwkObject.PSObject.Properties.Name) {
+        if ('kty' -notin $Jwk.PSObject.Properties.Name) {
             throw "Invalid JWK. No 'kty' element found."
         }
 
         # create a KeyParameters object from the values given for each key type
-        switch ($jwkObject.kty) {
+        switch ($Jwk.kty) {
 
             'RSA' {
                 $keyParams = New-Object Security.Cryptography.RSAParameters
 
                 # make sure we have the required public key parameters per
                 # https://tools.ietf.org/html/rfc7518#section-6.3.1
-                $hasE = ![string]::IsNullOrWhiteSpace($jwkObject.e)
-                $hasN = ![string]::IsNullOrWhiteSpace($jwkObject.n)
+                $hasE = ![string]::IsNullOrWhiteSpace($Jwk.e)
+                $hasN = ![string]::IsNullOrWhiteSpace($Jwk.n)
                 if ($hasE -and $hasN) {
-                    $keyParams.Exponent = $jwkObject.e  | ConvertFrom-Base64Url -AsByteArray
-                    $keyParams.Modulus  = $jwkObject.n  | ConvertFrom-Base64Url -AsByteArray
+                    $keyParams.Exponent = $Jwk.e  | ConvertFrom-Base64Url -AsByteArray
+                    $keyParams.Modulus  = $Jwk.n  | ConvertFrom-Base64Url -AsByteArray
                 } else {
                     throw "Invalid RSA JWK. Missing one or more public key parameters."
                 }
@@ -48,19 +52,19 @@ function ConvertFrom-Jwk {
                 # be included and if any *are* included then they all MUST be included.
                 # HOWEVER, Microsoft's RSA implementation either can't or won't create
                 # a private key unless all (d,p,q,dp,dq,qi) are included.
-                $hasD = ![string]::IsNullOrWhiteSpace($jwkObject.D)
-                $hasP = ![string]::IsNullOrWhiteSpace($jwkObject.P)
-                $hasQ = ![string]::IsNullOrWhiteSpace($jwkObject.Q)
-                $hasDP = ![string]::IsNullOrWhiteSpace($jwkObject.DP)
-                $hasDQ = ![string]::IsNullOrWhiteSpace($jwkObject.DQ)
-                $hasQI = ![string]::IsNullOrWhiteSpace($jwkObject.QI)
+                $hasD = ![string]::IsNullOrWhiteSpace($Jwk.D)
+                $hasP = ![string]::IsNullOrWhiteSpace($Jwk.P)
+                $hasQ = ![string]::IsNullOrWhiteSpace($Jwk.Q)
+                $hasDP = ![string]::IsNullOrWhiteSpace($Jwk.DP)
+                $hasDQ = ![string]::IsNullOrWhiteSpace($Jwk.DQ)
+                $hasQI = ![string]::IsNullOrWhiteSpace($Jwk.QI)
                 if ($hasD -and $hasP -and $hasQ -and $hasDP -and $hasDQ -and $hasQI) {
-                    $keyParams.D        = $jwkObject.d  | ConvertFrom-Base64Url -AsByteArray
-                    $keyParams.P        = $jwkObject.p  | ConvertFrom-Base64Url -AsByteArray
-                    $keyParams.Q        = $jwkObject.q  | ConvertFrom-Base64Url -AsByteArray
-                    $keyParams.DP       = $jwkObject.dp | ConvertFrom-Base64Url -AsByteArray
-                    $keyParams.DQ       = $jwkObject.dq | ConvertFrom-Base64Url -AsByteArray
-                    $keyParams.InverseQ = $jwkObject.qi | ConvertFrom-Base64Url -AsByteArray
+                    $keyParams.D        = $Jwk.d  | ConvertFrom-Base64Url -AsByteArray
+                    $keyParams.P        = $Jwk.p  | ConvertFrom-Base64Url -AsByteArray
+                    $keyParams.Q        = $Jwk.q  | ConvertFrom-Base64Url -AsByteArray
+                    $keyParams.DP       = $Jwk.dp | ConvertFrom-Base64Url -AsByteArray
+                    $keyParams.DQ       = $Jwk.dq | ConvertFrom-Base64Url -AsByteArray
+                    $keyParams.InverseQ = $Jwk.qi | ConvertFrom-Base64Url -AsByteArray
                 } elseif ($hasD -or $hasP -or $hasQ -or $hasDP -or $hasDQ -or $hasQI) {
                     throw "Invalid RSA JWK. Incomplete set of private key parameters."
                 }
@@ -73,10 +77,10 @@ function ConvertFrom-Jwk {
 
             'EC' {
                 # check for a valid curve
-                if ('crv' -notin $jwkObject.PSObject.Properties.Name) {
+                if ('crv' -notin $Jwk.PSObject.Properties.Name) {
                     throw "Invalid JWK. No 'crv' found for key type EC."
                 }
-                switch ($jwkObject.crv) {
+                switch ($Jwk.crv) {
                     'P-256' {
                         # nistP256 / ECDSA_P256 / secP256r1 / x962P256v1
                         $Curve = [Security.Cryptography.ECCurve]::CreateFromValue('1.2.840.10045.3.1.7')
@@ -99,12 +103,12 @@ function ConvertFrom-Jwk {
 
                 # make sure we have the required public key parameters per
                 # https://tools.ietf.org/html/rfc7518#section-6.2.1
-                $hasX = ![string]::IsNullOrWhiteSpace($jwkObject.x)
-                $hasY = ![string]::IsNullOrWhiteSpace($jwkObject.y)
+                $hasX = ![string]::IsNullOrWhiteSpace($Jwk.x)
+                $hasY = ![string]::IsNullOrWhiteSpace($Jwk.y)
                 if ($hasX -and $hasY) {
                     $Q = New-Object Security.Cryptography.ECPoint
-                    $Q.X = $jwkObject.x | ConvertFrom-Base64Url -AsByteArray
-                    $Q.Y = $jwkObject.y | ConvertFrom-Base64Url -AsByteArray
+                    $Q.X = $Jwk.x | ConvertFrom-Base64Url -AsByteArray
+                    $Q.Y = $Jwk.y | ConvertFrom-Base64Url -AsByteArray
                     $keyParams = New-Object Security.Cryptography.ECParameters
                     $keyParams.Q = $Q
                     $keyParams.Curve = $Curve
@@ -113,8 +117,8 @@ function ConvertFrom-Jwk {
                 }
 
                 # build the key parameters
-                if (![string]::IsNullOrWhiteSpace($jwkObject.d)) {
-                    $keyParams.D = $jwkObject.d | ConvertFrom-Base64Url -AsByteArray
+                if (![string]::IsNullOrWhiteSpace($Jwk.d)) {
+                    $keyParams.D = $Jwk.d | ConvertFrom-Base64Url -AsByteArray
                 }
 
                 # create the key
