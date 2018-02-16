@@ -16,16 +16,16 @@ Describe "ConvertFrom-Jwk" {
                 { '{}' | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on missing 'kty' #3" {
-                { '{"key1"="asdf"}' | ConvertFrom-Jwk } | Should -Throw
+                { '{"key1":"asdf"}' | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on empty 'kty'" {
-                { '{"kty"=""}' | ConvertFrom-Jwk } | Should -Throw
+                { '{"kty":""}' | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on invalid 'kty'" {
-                { '{"kty"="asdf"}' | ConvertFrom-Jwk } | Should -Throw
+                { '{"kty":"asdf"}' | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on whitespace 'kty'" {
-                { '{"kty"="   "}' | ConvertFrom-Jwk } | Should -Throw
+                { '{"kty":"   "}' | ConvertFrom-Jwk } | Should -Throw
             }
         }
 
@@ -68,105 +68,105 @@ Describe "ConvertFrom-Jwk" {
 
             # test public pieces
             It "throws on missing 'e'" {
-                $missingE = $rsa2048 | Select kty,n | ConvertTo-Json -Compress
+                $missingE = $rsa2048 | Select kty,n
                 { $missingE | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on whitespace 'e'" {
-                $whitespaceE = $rsa2048 | Select kty,n,@{L='e';E={'   '}} | ConvertTo-Json -Compress
+                $whitespaceE = $rsa2048 | Select kty,n,@{L='e';E={'   '}}
                 { $whitespaceE | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on invalid 'e'" {
-                $invalidE = $rsa2048 | Select kty,n,@{L='e';E={'12345'}} | ConvertTo-Json -Compress
+                $invalidE = $rsa2048 | Select kty,n,@{L='e';E={'12345'}}
                 { $invalidE | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on missing 'n'" {
-                $missingN = $rsa2048 | Select kty,e | ConvertTo-Json -Compress
+                $missingN = $rsa2048 | Select kty,e
                 { $missingN | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on whitespace 'n'" {
-                $whitespaceN = $rsa2048 | Select kty,e,@{L='n';E={'   '}} | ConvertTo-Json -Compress
+                $whitespaceN = $rsa2048 | Select kty,e,@{L='n';E={'   '}}
                 { $whitespaceN | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on invalid 'n'" {
-                $invalidN = $rsa2048 | Select kty,e,@{L='n';E={'12345'}} | ConvertTo-Json -Compress
+                $invalidN = $rsa2048 | Select kty,e,@{L='n';E={'12345'}}
                 { $invalidN | ConvertFrom-Jwk } | Should -Throw
             }
 
             # Test missing each one of these d,p,q,dp,dq,qi
             It "throws on incomplete priv key params #1" {
-                $incompletePriv = $rsa2048 | Select kty,e,n,p,q,dp,dq,qi | ConvertTo-Json -Compress
+                $incompletePriv = $rsa2048 | Select kty,e,n,p,q,dp,dq,qi
                 { $incompletePriv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on incomplete priv key params #2" {
-                $incompletePriv = $rsa2048 | Select kty,e,n,d,q,dp,dq,qi | ConvertTo-Json -Compress
+                $incompletePriv = $rsa2048 | Select kty,e,n,d,q,dp,dq,qi
                 { $incompletePriv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on incomplete priv key params #3" {
-                $incompletePriv = $rsa2048 | Select kty,e,n,d,p,dp,dq,qi | ConvertTo-Json -Compress
+                $incompletePriv = $rsa2048 | Select kty,e,n,d,p,dp,dq,qi
                 { $incompletePriv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on incomplete priv key params #4" {
-                $incompletePriv = $rsa2048 | Select kty,e,n,d,p,q,dq,qi | ConvertTo-Json -Compress
+                $incompletePriv = $rsa2048 | Select kty,e,n,d,p,q,dq,qi
                 { $incompletePriv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on incomplete priv key params #5" {
-                $incompletePriv = $rsa2048 | Select kty,e,n,d,p,q,dp,qi | ConvertTo-Json -Compress
+                $incompletePriv = $rsa2048 | Select kty,e,n,d,p,q,dp,qi
                 { $incompletePriv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on incomplete priv key params #6" {
-                $incompletePriv = $rsa2048 | Select kty,e,n,d,p,q,dp,dq | ConvertTo-Json -Compress
+                $incompletePriv = $rsa2048 | Select kty,e,n,d,p,q,dp,dq
                 { $incompletePriv | ConvertFrom-Jwk } | Should -Throw
             }
 
             # Test whitespace in each one of these d,p,q,dp,dq,qi
             It "throws on whitespace priv key params #1" {
-                $whitespacePriv = $rsa2048 | Select kty,e,n,p,q,dp,dq,qi,@{L='d';E={'   '}} | ConvertTo-Json -Compress
+                $whitespacePriv = $rsa2048 | Select kty,e,n,p,q,dp,dq,qi,@{L='d';E={'   '}}
                 { $whitespacePriv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on whitespace priv key params #2" {
-                $whitespacePriv = $rsa2048 | Select kty,e,n,d,q,dp,dq,qi,@{L='p';E={'   '}} | ConvertTo-Json -Compress
+                $whitespacePriv = $rsa2048 | Select kty,e,n,d,q,dp,dq,qi,@{L='p';E={'   '}}
                 { $whitespacePriv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on whitespace priv key params #3" {
-                $whitespacePriv = $rsa2048 | Select kty,e,n,d,p,dp,dq,qi,@{L='q';E={'   '}} | ConvertTo-Json -Compress
+                $whitespacePriv = $rsa2048 | Select kty,e,n,d,p,dp,dq,qi,@{L='q';E={'   '}}
                 { $whitespacePriv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on whitespace priv key params #4" {
-                $whitespacePriv = $rsa2048 | Select kty,e,n,d,p,q,dq,qi,@{L='dp';E={'   '}} | ConvertTo-Json -Compress
+                $whitespacePriv = $rsa2048 | Select kty,e,n,d,p,q,dq,qi,@{L='dp';E={'   '}}
                 { $whitespacePriv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on whitespace priv key params #5" {
-                $whitespacePriv = $rsa2048 | Select kty,e,n,d,p,q,dp,qi,@{L='dq';E={'   '}} | ConvertTo-Json -Compress
+                $whitespacePriv = $rsa2048 | Select kty,e,n,d,p,q,dp,qi,@{L='dq';E={'   '}}
                 { $whitespacePriv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on whitespace priv key params #6" {
-                $whitespacePriv = $rsa2048 | Select kty,e,n,d,p,q,dp,dq,@{L='qi';E={'   '}} | ConvertTo-Json -Compress
+                $whitespacePriv = $rsa2048 | Select kty,e,n,d,p,q,dp,dq,@{L='qi';E={'   '}}
                 { $whitespacePriv | ConvertFrom-Jwk } | Should -Throw
             }
 
             # Test invalid in each one of these d,p,q,dp,dq,qi
             It "throws on invalid priv key params #1" {
-                $invalidPriv = $rsa2048 | Select kty,e,n,p,q,dp,dq,qi,@{L='d';E={'12345'}} | ConvertTo-Json -Compress
+                $invalidPriv = $rsa2048 | Select kty,e,n,p,q,dp,dq,qi,@{L='d';E={'12345'}}
                 { $invalidPriv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on invalid priv key params #2" {
-                $invalidPriv = $rsa2048 | Select kty,e,n,d,q,dp,dq,qi,@{L='p';E={'12345'}} | ConvertTo-Json -Compress
+                $invalidPriv = $rsa2048 | Select kty,e,n,d,q,dp,dq,qi,@{L='p';E={'12345'}}
                 { $invalidPriv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on invalid priv key params #3" {
-                $invalidPriv = $rsa2048 | Select kty,e,n,d,p,dp,dq,qi,@{L='q';E={'12345'}} | ConvertTo-Json -Compress
+                $invalidPriv = $rsa2048 | Select kty,e,n,d,p,dp,dq,qi,@{L='q';E={'12345'}}
                 { $invalidPriv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on invalid priv key params #4" {
-                $invalidPriv = $rsa2048 | Select kty,e,n,d,p,q,dq,qi,@{L='dp';E={'12345'}} | ConvertTo-Json -Compress
+                $invalidPriv = $rsa2048 | Select kty,e,n,d,p,q,dq,qi,@{L='dp';E={'12345'}}
                 { $invalidPriv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on invalid priv key params #5" {
-                $invalidPriv = $rsa2048 | Select kty,e,n,d,p,q,dp,qi,@{L='dq';E={'12345'}} | ConvertTo-Json -Compress
+                $invalidPriv = $rsa2048 | Select kty,e,n,d,p,q,dp,qi,@{L='dq';E={'12345'}}
                 { $invalidPriv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on invalid priv key params #6" {
-                $invalidPriv = $rsa2048 | Select kty,e,n,d,p,q,dp,dq,@{L='qi';E={'12345'}} | ConvertTo-Json -Compress
+                $invalidPriv = $rsa2048 | Select kty,e,n,d,p,q,dp,dq,@{L='qi';E={'12345'}}
                 { $invalidPriv | ConvertFrom-Jwk } | Should -Throw
             }
             
@@ -218,7 +218,7 @@ Describe "ConvertFrom-Jwk" {
 
         Context "RSA 2048 Public Test" {
 
-            $rsa2048test = $rsa2048 | Select kty,n,e | ConvertTo-Json -Compress | ConvertFrom-Jwk
+            $rsa2048test = $rsa2048 | Select kty,n,e | ConvertFrom-Jwk
 
             It "is an RSA object" {
                 $rsa2048test | Should -BeOfType [Security.Cryptography.RSA]
@@ -291,7 +291,7 @@ Describe "ConvertFrom-Jwk" {
 
         Context "RSA 3072 Public Test" {
 
-            $rsa3072test = $rsa3072 | Select kty,n,e | ConvertTo-Json -Compress | ConvertFrom-Jwk
+            $rsa3072test = $rsa3072 | Select kty,n,e | ConvertFrom-Jwk
 
             It "is an RSA object" {
                 $rsa3072test | Should -BeOfType [Security.Cryptography.RSA]
@@ -364,7 +364,7 @@ Describe "ConvertFrom-Jwk" {
 
         Context "RSA 4096 Public Test" {
 
-            $rsa4096test = $rsa4096 | Select kty,n,e | ConvertTo-Json -Compress | ConvertFrom-Jwk
+            $rsa4096test = $rsa4096 | Select kty,n,e | ConvertFrom-Jwk
 
             It "is an RSA object" {
                 $rsa4096test | Should -BeOfType [Security.Cryptography.RSA]
@@ -417,43 +417,43 @@ Describe "ConvertFrom-Jwk" {
         Context "EC Error Conditions" {
 
             It "throws on missing 'crv'" {
-                $missingCrv = $ec256 | Select kty,x,y | ConvertTo-Json -Compress
+                $missingCrv = $ec256 | Select kty,x,y
                 { $missingCrv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on whitespace 'crv'" {
-                $whitespaceCrv = $ec256 | Select kty,x,y,@{L='crv';E={'    '}} | ConvertTo-Json -Compress
+                $whitespaceCrv = $ec256 | Select kty,x,y,@{L='crv';E={'    '}}
                 { $whitespaceCrv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on invalid 'crv'" {
-                $invalidCrv = $ec256 | Select kty,x,y,@{L='crv';E={'FAKE'}} | ConvertTo-Json -Compress
+                $invalidCrv = $ec256 | Select kty,x,y,@{L='crv';E={'FAKE'}}
                 { $invalidCrv | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on missing 'x'" {
-                $missingX = $ec256 | Select kty,crv,y | ConvertTo-Json -Compress
+                $missingX = $ec256 | Select kty,crv,y
                 { $missingX | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on whitespace 'x'" {
-                $whitespaceX = $ec256 | Select kty,crv,y,@{L='x';E={'    '}} | ConvertTo-Json -Compress
+                $whitespaceX = $ec256 | Select kty,crv,y,@{L='x';E={'    '}}
                 { $whitespaceX | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on invalid 'x'" {
-                $invalidX = $ec256 | Select kty,crv,y,@{L='x';E={'FAKE'}} | ConvertTo-Json -Compress
+                $invalidX = $ec256 | Select kty,crv,y,@{L='x';E={'FAKE'}}
                 { $invalidX | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on missing 'y'" {
-                $missingY = $ec256 | Select kty,crv,x | ConvertTo-Json -Compress
+                $missingY = $ec256 | Select kty,crv,x
                 { $missingY | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on whitespace 'y'" {
-                $whitespaceY = $ec256 | Select kty,crv,x,@{L='y';E={'    '}} | ConvertTo-Json -Compress
+                $whitespaceY = $ec256 | Select kty,crv,x,@{L='y';E={'    '}}
                 { $whitespaceY | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on invalid 'y'" {
-                $invalidY = $ec256 | Select kty,crv,x,@{L='y';E={'FAKE'}} | ConvertTo-Json -Compress
+                $invalidY = $ec256 | Select kty,crv,x,@{L='y';E={'FAKE'}}
                 { $invalidY | ConvertFrom-Jwk } | Should -Throw
             }
             It "throws on invalid 'd'" {
-                $invalidD = $ec256 | Select kty,crv,x,y,@{L='d';E={'FAKE'}} | ConvertTo-Json -Compress
+                $invalidD = $ec256 | Select kty,crv,x,y,@{L='d';E={'FAKE'}}
                 { $invalidD | ConvertFrom-Jwk } | Should -Throw
             }
 
@@ -495,7 +495,7 @@ Describe "ConvertFrom-Jwk" {
 
         Context "EC P-256 Public Test" {
 
-            $ec256test = $ec256 | Select kty,crv,x,y | ConvertTo-Json -Compress | ConvertFrom-Jwk
+            $ec256test = $ec256 | Select kty,crv,x,y | ConvertFrom-Jwk
 
             It "is an ECDsa object" {
                 $ec256test | Should -BeOfType [Security.Cryptography.ECDsa]
@@ -560,7 +560,7 @@ Describe "ConvertFrom-Jwk" {
 
         Context "EC P-384 Public Test" {
 
-            $ec384test = $ec384 | Select kty,crv,x,y | ConvertTo-Json -Compress | ConvertFrom-Jwk
+            $ec384test = $ec384 | Select kty,crv,x,y | ConvertFrom-Jwk
 
             It "is an ECDsa object" {
                 $ec384test | Should -BeOfType [Security.Cryptography.ECDsa]
@@ -625,7 +625,7 @@ Describe "ConvertFrom-Jwk" {
 
         Context "EC P-521 Public Test" {
 
-            $ec521test = $ec521 | Select kty,crv,x,y | ConvertTo-Json -Compress | ConvertFrom-Jwk
+            $ec521test = $ec521 | Select kty,crv,x,y | ConvertFrom-Jwk
 
             It "is an ECDsa object" {
                 $ec521test | Should -BeOfType [Security.Cryptography.ECDsa]
