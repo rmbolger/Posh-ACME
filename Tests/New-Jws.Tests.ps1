@@ -6,8 +6,8 @@ Describe "New-Jws" {
     # generate some valid parameters
     $rsaKey = New-Object Security.Cryptography.RSACryptoServiceProvider 2048
     $ecKey = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve]::CreateFromValue('1.2.840.10045.3.1.7'))
-    $rsaHeader = @{alg='RS256';jwk=($rsaKey | ConvertTo-Jwk -PublicOnly -Raw);nonce='fakenonce';url='https://example.com'}
-    $ecHeader = @{alg='ES256';jwk=($ecKey | ConvertTo-Jwk -PublicOnly -Raw);nonce='fakenonce';url='https://example.com'}
+    $rsaHeader = @{alg='RS256';jwk=($rsaKey | ConvertTo-Jwk -PublicOnly);nonce='fakenonce';url='https://example.com'}
+    $ecHeader = @{alg='ES256';jwk=($ecKey | ConvertTo-Jwk -PublicOnly);nonce='fakenonce';url='https://example.com'}
     $payload = '{"mykey":"myvalue"}'
 
     Context "Parameter validation" {
@@ -49,18 +49,18 @@ Describe "New-Jws" {
         It "missing both 'jwk' and 'kid'" {
             $rsaHeader.Remove('jwk')
             { New-Jws $rsaKey $rsaHeader $payload } | Should -Throw
-            $rsaHeader.jwk = ($rsaKey | ConvertTo-Jwk -PublicOnly -Raw)
+            $rsaHeader.jwk = ($rsaKey | ConvertTo-Jwk -PublicOnly)
         }
         It "empty 'jwk'" {
             $rsaHeader.jwk = ''
             { New-Jws $rsaKey $rsaHeader $payload } | Should -Throw
-            $rsaHeader.jwk = ($rsaKey | ConvertTo-Jwk -PublicOnly -Raw)
+            $rsaHeader.jwk = ($rsaKey | ConvertTo-Jwk -PublicOnly)
         }
         It "empty 'kid'" {
             $rsaHeader.Remove('jwk')
             $rsaHeader.kid = ''
             { New-Jws $rsaKey $rsaHeader $payload } | Should -Throw
-            $rsaHeader.jwk = ($rsaKey | ConvertTo-Jwk -PublicOnly -Raw)
+            $rsaHeader.jwk = ($rsaKey | ConvertTo-Jwk -PublicOnly)
             $rsaHeader.Remove('kid')
         }
         It "missing 'nonce'" {
