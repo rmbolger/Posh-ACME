@@ -26,7 +26,9 @@ function Set-ACMEConfig {
         # create the config entry for this Uri if it doesn't exist
         if (!$script:cfg.$DirUri) {
             $newcfg = [pscustomobject]@{
-                Accounts = @{}
+                Account = @{};
+                AccountUri = [string]::Empty;
+                AccountKey = @{};
             }
             $script:cfg | Add-Member -MemberType NoteProperty -Name $DirUri -Value $newcfg
             $SaveChanges = $true
