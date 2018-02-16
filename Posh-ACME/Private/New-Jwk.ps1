@@ -6,7 +6,8 @@ function New-Jwk {
         [string]$KeyType='RSA',
         [Alias('size')]
         [int]$KeySize=2048,
-        [switch]$Pretty
+        [switch]$AsJson,
+        [switch]$AsPrettyJson
     )
 
     # 'kty' is case-sensitive
@@ -65,8 +66,10 @@ function New-Jwk {
         default { throw "Unsupported KeyType parameter" }
     }
 
-    if ($Pretty) {
-        return ($Key | ConvertTo-Jwk -Pretty)
+    if ($AsPrettyJson) {
+        return ($Key | ConvertTo-Jwk -AsPrettyJson)
+    } elseif ($AsJson) {
+        return ($Key | ConvertTo-Jwk -AsJson)
     } else {
         return ($Key | ConvertTo-Jwk)
     }
