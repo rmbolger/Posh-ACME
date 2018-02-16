@@ -7,14 +7,21 @@ function Update-ACMEDirectory {
 
     # because we need headers, gotta use Invoke-WebRequest until they back port 
     # PowerShell Core's -ResponseHeadersVariable parameter for Invoke-RestMethod
+    Write-Verbose "Updating directory info from $Uri"
     $response = Invoke-WebRequest $Uri
     $dir = $response.Content | ConvertFrom-Json
 
     if ($dir -is [pscustomobject] -and 'newAccount' -in $dir.PSObject.Properties.name) {
         $script:dir = $dir
-        $script:NextNonce = $response.Headers.'Replay-Nonce'
+
+        # grab the next nonce
+        if ($response.Headers.ContainsKey($script:HEADER_NONCE)) {
+            $script:NextNonce = $response.Headers.$script:HEADER_NONCE
+        } else {
+            $Script:NextNonce = Get-Nonce
+        }
     } else {
-        Write-Debug ($dir | ConvertTo-Json)
+        Write-Verbose ($dir | ConvertTo-Json)
         throw "Unexpected ACME directory response."
     }
 }

@@ -8,18 +8,16 @@ function Get-Nonce {
 
     # if there was no Uri passed in, check if there's a saved one
     if (!$NewNonceUri) {
-        if (![string]::IsNullOrWhiteSpace($script:NewNonceUri)) {
-            $NewNonceUri = $script:NewNonceUri
+        if (![string]::IsNullOrWhiteSpace($script:dir.newNonce)) {
+            $NewNonceUri = $script:dir.newNonce
         } else {
             throw "No newNonce Uri passed in or previously saved."
         }
     }
 
     # super basic for now, no error checking
+    Write-Verbose "Requesting new nonce from $NewNonceUri"
     $response = Invoke-WebRequest $NewNonceUri -Method Head -UserAgent $script:UserAgent -Headers $script:CommonHeaders -EA Stop
 
-    # save the last used Uri
-    $script:NewNonceUri = $NewNonceUri
-
-    return $response.Headers.'Replay-Nonce'
+    return $response.Headers.$script:HEADER_NONCE
 }

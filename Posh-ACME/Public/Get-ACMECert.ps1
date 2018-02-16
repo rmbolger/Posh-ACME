@@ -1,5 +1,5 @@
 function Get-ACMECert {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='WellKnown')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string[]]$Domain,
@@ -14,12 +14,20 @@ function Get-ACMECert {
 
     Begin {
 
+        # determine which ACME server to use
+        if ($PSCmdlet.ParameterSetName -eq 'WellKnown') {
+            $DirUri = $script:WellKnownDirs[$WellKnownACMEServer]
+        } else {
+            $DirUri = $CustomACMEServer
+        }
+
+        # refresh the directory info (which should also populate $script:NextNonce)
+        Update-ACMEDirectory $DirUri
+
     }
 
     Process {
         Write-Host $($Domain.Count)
-        Write-Host $WellKnownACMEServer
-        Write-Host $CustomACMEServer
     }
 
     End {}
