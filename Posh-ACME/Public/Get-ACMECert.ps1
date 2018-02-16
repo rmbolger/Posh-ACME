@@ -17,8 +17,10 @@ function Get-ACMECert {
         # determine which ACME server to use
         if ($PSCmdlet.ParameterSetName -eq 'WellKnown') {
             $DirUri = $script:WellKnownDirs[$WellKnownACMEServer]
+            Set-ACMEConfig -WellKnownACMEServer $WellKnownACMEServer
         } else {
             $DirUri = $CustomACMEServer
+            Set-ACMEConfig -CustomACMEServer $CustomACMEServer
         }
 
         # refresh the directory info (which should also populate $script:NextNonce)
