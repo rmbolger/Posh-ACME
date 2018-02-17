@@ -1,35 +1,24 @@
 function New-Jwk {
     [CmdletBinding()]
     param(
-        [ValidateSet('RSA','EC')]
-        [Alias('type','kty')]
-        [string]$KeyType='RSA',
-        [Alias('size')]
-        [int]$KeySize=2048,
+        [Parameter(Position=0)]
+        [ValidateScript({Test-ValidKeyLength $_})]
+        [string]$KeyLength='2048',
         [switch]$AsJson,
         [switch]$AsPrettyJson
     )
 
-    # 'kty' is case-sensitive
+    # RFC Note: 'kty' is case-sensitive
     # https://tools.ietf.org/html/rfc7517#section-4.1
-    $KeyType = $KeyType.ToUpper()
 
-    # For EC keys, the KeySize parameter is going to dictate the curve used,
-    # so validate that they passed a supported one or default to 256.
-    $ECSupported = 256,384,521
-    if ($KeyType -eq 'EC') {
-        if (!$PSBoundParameters.ContainsKey('KeySize')) {
-            $KeySize = 256
-        } elseif ($KeySize -notin $ECSupported) {
-            throw "Unsupported EC KeySize. Try 256, 384, or 521."
-        }
-    }
-
-    # For RSA keys, Windows supports a huge range of key sizes. But LE's current Boulder server only supports
-    # between 2048-4096 keys. So we'll limit to that until someone complains.
-    # https://msdn.microsoft.com/en-us/library/system.security.cryptography.rsacryptoserviceprovider.keysize(v=vs.110).aspx
-    if ($KeyType -eq 'RSA' -and ($KeySize -lt 2048 -or $KeySize -gt 4096 -or ($KeySize % 128) -ne 0)) {
-        throw "Unsupported RSA KeySize. Try between 2048-4096."
+    # KeyLength should have already been validated which means it should be a parseable
+    # [int] that may have an "ec-" prefix
+    if ($KeyLength -like 'ec-*') {
+        $KeyType = 'EC'
+        $KeySize = [int]::Parse($KeyLength.Substring(3))
+    } else {
+        $KeyType = 'RSA'
+        $KeySize = [int]::Parse($KeyLength)
     }
 
     # create the new key
