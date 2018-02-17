@@ -10,16 +10,6 @@ function Get-ACMEAccount {
         [switch]$NoCreate
     )
 
-    # make sure the Contact emails have a "mailto:" prefix
-    # this may get more complex later if ACME server support more than email based contacts
-    if ($Contact.Count -gt 0) {
-        0..($Contact.Count-1) | %{
-            if ($Contact[$_] -notlike 'mailto:*') {
-                $Contact[$_] = "mailto:$($Contact[$_])"
-            }
-        }
-    }
-
     # Determine the proper 'alg' from the key based on
     # https://tools.ietf.org/html/rfc7518
     # and what we know LetsEncrypt supports today which includes
@@ -43,12 +33,41 @@ function Get-ACMEAccount {
         }
     }
 
-
-
     # build the protected header for the request
     $header = @{
-
+        alg = $alg;
+        jwk = (Key | ConvertTo-Jwk -PublicOnly);
+        nonce = $script:NextNonce;
+        url = $script:dir.newAccount;
     }
+
+    # build the payload
+    $payload = @{}
+
+    # make sure the Contact emails have a "mailto:" prefix
+    # this may get more complex later if ACME server support more than email based contacts
+    if ($Contact.Count -gt 0) {
+        0..($Contact.Count-1) | %{
+            if ($Contact[$_] -notlike 'mailto:*') {
+                $Contact[$_] = "mailto:$($Contact[$_])"
+            }
+        }
+
+        $payload.contact = $Contact
+    }
+
+    if ($AcceptTOS) {
+        $payload.termsOfServiceAgreed = $true
+    }
+
+    if ($NoCreate) {
+        $payload.onlyReturnExisting = $true
+    }
+
+    $payloadJson = $payload | ConvertTo-Json -Compress
+
+
+
 
 
 

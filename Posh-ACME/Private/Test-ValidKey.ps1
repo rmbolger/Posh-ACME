@@ -37,6 +37,6 @@ function Test-ValidKey {
         }
         return $false
     }
-    
+
     return $true
 }
