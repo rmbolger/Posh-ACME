@@ -5,7 +5,8 @@ function Set-ACMEConfig {
         [ValidateSet('LE_PROD','LE_STAGE')]
         [string]$WellKnownACMEServer='LE_STAGE',
         [Parameter(ParameterSetName='Custom')]
-        [string]$CustomACMEServer
+        [string]$CustomACMEServer,
+        [pscustomobject]$AccountKey
     )
 
     $SaveChanges = $false
@@ -39,7 +40,30 @@ function Set-ACMEConfig {
     }
 
     # make a variable shortcut to the current server's config
-    $curcfg = $script:cfg.$script:CurrentDir
+    $curcfg = $script:cfg.($script:cfg.CurrentDir)
+
+    # deal with account key changes
+    if ($AccountKey) {
+
+        # make sure it's valid before saving it
+        try { $AccountKey | ConvertFrom-Jwk -EA Stop | Out-Null }
+        catch { throw 'Invalid AccountKey' }
+
+        # don't bother saving it unless it's different than the old one
+        if (($AccountKey | ConvertTo-Json -Compress) -ne ($curcfg.AccountKey | ConvertTo-Json -Compress)) {
+
+            $curcfg.AccountKey = $AccountKey
+            $SaveChanges = $true
+
+            # new account key means the other account metadata is no longer valid
+            # so wipe it
+            $curcfg.AccountUri = [string]::Empty
+            $curcfg.Account = [pscustomobject]@{}
+        }
+
+    }
+
+
 
 
 

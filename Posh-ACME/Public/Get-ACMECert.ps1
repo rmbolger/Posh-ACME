@@ -10,7 +10,7 @@ function Get-ACMECert {
         [string]$WellKnownACMEServer='LE_STAGE',
         [Parameter(ParameterSetName='Custom')]
         [string]$CustomACMEServer,
-        [ValidateScript({Test-ValidKeyLength $_})]
+        [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$AccountKeyLength='2048'
     )
 
@@ -35,18 +35,34 @@ function Get-ACMECert {
 
         # refresh the directory info (which should also populate $script:NextNonce)
         Update-ACMEDirectory $script:cfg.CurrentDir
-        $curcfg = $script:cfg.$script.CurrentDir
+        $curcfg = $script:cfg.($script:cfg.CurrentDir)
 
-        # check if we have an existing account key
-        if ($curcfg.AccountKey) {
+        # import the existing account key
+        try {
+            $acctKey = $curcfg.AccountKey | ConvertFrom-Jwk -EA Stop
+
+            # warn if they specified an AccountKeyLength that we won't be using
+            if ($PSBoundParameters.ContainsKey('AccountKeyLength')) {
+                Write-Warning 'Existing account key found. Ignoring -AccountKeyLength parameter.'
+            }
+        } catch {
+            # existing key either doesn't exist or is corrupt
+            # so we need to generate a new one
+            Write-Verbose 'Creating account key.'
+            $acctJwk = New-Jwk $AccountKeyLength
+            Set-ACMEConfig -AccountKey $acctJwk -EA Stop
+            $acctKey = $acctJwk | ConvertFrom-Jwk
+        }
+
+        # make sure we have a valid AccountUri
+        if ([string]::IsNullOrWhiteSpace($curcfg.AccountUri)) {
 
         }
 
 
 
-        Write-Host $AccountKeyLength
-        Write-Host (Test-ValidKeyLength $AccountKeyLength)
 
+        Write-Host ($acctKey | ConvertTo-Jwk -AsPrettyJson)
 
 
     }

@@ -2,7 +2,7 @@ function New-Jwk {
     [CmdletBinding()]
     param(
         [Parameter(Position=0)]
-        [ValidateScript({Test-ValidKeyLength $_})]
+        [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$KeyLength='2048',
         [switch]$AsJson,
         [switch]$AsPrettyJson
@@ -20,6 +20,7 @@ function New-Jwk {
         $KeyType = 'RSA'
         $KeySize = [int]::Parse($KeyLength)
     }
+    Write-Verbose "Creating new $KeyType $KeySize key"
 
     # create the new key
     switch ($KeyType) {
@@ -52,7 +53,7 @@ function New-Jwk {
             $Key = [Security.Cryptography.ECDsa]::Create($Curve)
             break;
         }
-        default { throw "Unsupported KeyType parameter" }
+        default { throw "Unsupported key type" }
     }
 
     if ($AsPrettyJson) {
