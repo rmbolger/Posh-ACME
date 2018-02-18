@@ -14,62 +14,52 @@ function Get-ACMECert {
         [string]$AccountKeyLength='2048'
     )
 
-    Begin {
+    # We want to make sure we have a valid directory specified
+    # But we don't want to overwrite a saved one unless they explicitly
+    # specified a new one
+    if ([string]::IsNullOrWhiteSpace($script:cfg.CurrentDir) -or
+        ('WellKnownACMEServer' -in $PSBoundParameters.Keys -or 'CustomACMEServer' -in $PSBoundParameters.Keys)) {
 
-        # We want to make sure we have a valid directory specified
-        # But we don't want to overwrite a saved one unless they explicitly
-        # specified a new one
-        if ([string]::IsNullOrWhiteSpace($script:cfg.CurrentDir) -or
-            ('WellKnownACMEServer' -in $PSBoundParameters.Keys -or 'CustomACMEServer' -in $PSBoundParameters.Keys)) {
-
-            # determine which ACME server to use
-            if ($PSCmdlet.ParameterSetName -eq 'WellKnown') {
-                $DirUri = $script:WellKnownDirs[$WellKnownACMEServer]
-                Set-ACMEConfig -WellKnownACMEServer $WellKnownACMEServer
-            } else {
-                $DirUri = $CustomACMEServer
-                Set-ACMEConfig -CustomACMEServer $CustomACMEServer
-            }
-
+        # determine which ACME server to use
+        if ($PSCmdlet.ParameterSetName -eq 'WellKnown') {
+            $DirUri = $script:WellKnownDirs[$WellKnownACMEServer]
+            Set-ACMEConfig -WellKnownACMEServer $WellKnownACMEServer
+        } else {
+            $DirUri = $CustomACMEServer
+            Set-ACMEConfig -CustomACMEServer $CustomACMEServer
         }
-
-        # refresh the directory info (which should also populate $script:NextNonce)
-        Update-ACMEDirectory $script:cfg.CurrentDir
-        $curcfg = $script:cfg.($script:cfg.CurrentDir)
-
-        # import the existing account key
-        try {
-            $acctKey = $curcfg.AccountKey | ConvertFrom-Jwk -EA Stop
-
-            # warn if they specified an AccountKeyLength that we won't be using
-            if ($PSBoundParameters.ContainsKey('AccountKeyLength')) {
-                Write-Warning 'Existing account key found. Ignoring -AccountKeyLength parameter.'
-            }
-        } catch {
-            # existing key either doesn't exist or is corrupt
-            # so we need to generate a new one
-            Write-Verbose 'Creating account key.'
-            $acctJwk = New-Jwk $AccountKeyLength
-            Set-ACMEConfig -AccountKey $acctJwk -EA Stop
-            $acctKey = $acctJwk | ConvertFrom-Jwk
-        }
-
-        # make sure we have a valid AccountUri
-        if ([string]::IsNullOrWhiteSpace($curcfg.AccountUri)) {
-
-        }
-
-
-
-
-        Write-Host ($acctKey | ConvertTo-Jwk -AsPrettyJson)
-
 
     }
 
-    Process {
-        Write-Host $($Domain.Count)
+    # refresh the directory info (which should also populate $script:NextNonce)
+    Update-ACMEDirectory $script:cfg.CurrentDir
+    $curcfg = $script:cfg.($script:cfg.CurrentDir)
+
+    # import the existing account key
+    try {
+        $acctKey = $curcfg.AccountKey | ConvertFrom-Jwk -EA Stop
+        $SavedKey = $true
+
+        # warn if they specified an AccountKeyLength that we won't be using
+        if ($PSBoundParameters.ContainsKey('AccountKeyLength')) {
+            Write-Warning 'Existing account key found. Ignoring -AccountKeyLength parameter.'
+        }
+    } catch {
+        # existing key either doesn't exist or is corrupt
+        # so we need to generate a new one
+        Write-Verbose 'Creating account key.'
+        $acctJwk = New-Jwk $AccountKeyLength
+        Set-ACMEConfig -AccountKey $acctJwk -EA Stop
+        $acctKey = $acctJwk | ConvertFrom-Jwk
     }
 
-    End {}
+    # make sure we have a valid AccountUri
+    if ([string]::IsNullOrWhiteSpace($curcfg.AccountUri)) {
+        Get-ACMEAccount $acctKey $Contact -AcceptTOS
+    }
+
+
+
+
+
 }
