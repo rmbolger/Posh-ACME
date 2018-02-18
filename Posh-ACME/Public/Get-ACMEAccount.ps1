@@ -35,10 +35,10 @@ function Get-ACMEAccount {
 
     # build the protected header for the request
     $header = @{
-        alg = $alg;
-        jwk = (Key | ConvertTo-Jwk -PublicOnly);
+        alg   = $alg;
+        jwk   = ($Key | ConvertTo-Jwk -PublicOnly);
         nonce = $script:NextNonce;
-        url = $script:dir.newAccount;
+        url   = $script:dir.newAccount;
     }
 
     # build the payload
@@ -55,20 +55,20 @@ function Get-ACMEAccount {
 
         $payload.contact = $Contact
     }
-
     if ($AcceptTOS) {
         $payload.termsOfServiceAgreed = $true
     }
-
     if ($NoCreate) {
         $payload.onlyReturnExisting = $true
     }
-
     $payloadJson = $payload | ConvertTo-Json -Compress
 
+    # send the request
+    $response = Invoke-ACME $script:dir.newAccount $Key $header $payloadJson -EA Stop
 
-
-
-
+    if ($response.Headers.ContainsKey('Location')) {
+        Write-Host "Location: $($response.Headers['Location'])"
+    }
+    Write-Host ($response.Content)
 
 }
