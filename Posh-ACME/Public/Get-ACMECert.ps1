@@ -60,6 +60,6 @@ function Get-ACMECert {
 
     Write-Verbose "AccountUri = $($curcfg.AccountUri)"
 
-
+    New-ACMEOrder
 
 }
