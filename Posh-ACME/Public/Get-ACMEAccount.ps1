@@ -10,32 +10,9 @@ function Get-ACMEAccount {
         [switch]$NoCreate
     )
 
-    # Determine the proper 'alg' from the key based on
-    # https://tools.ietf.org/html/rfc7518
-    # and what we know LetsEncrypt supports today which includes
-    # RS256 for all RSA keys
-    # ES256 for P-256 keys
-    # ES384 for P-384 keys
-    # ES512 for P-521 keys (not a typo, 521 is the curve, 512 is the SHA512 hash algorithm)
-    if ($Key -is [Security.Cryptography.RSA]) {
-        $alg = 'RS256'
-    } else {
-        # key must be EC due to earlier validation
-        if ($Key.KeySize -eq 256) {
-            $alg = 'ES256'
-        } elseif ($Key.KeySize -eq 384) {
-            $alg = 'ES384'
-        } elseif ($Key.KeySize -eq 521) {
-            $alg = 'ES512'
-        } else {
-            # this means the validation script broken or wer'e out of date
-            throw "Unsupported EC curve."
-        }
-    }
-
     # build the protected header for the request
     $header = @{
-        alg   = $alg;
+        alg   = (Get-JwsAlg $Key);
         jwk   = ($Key | ConvertTo-Jwk -PublicOnly);
         nonce = $script:NextNonce;
         url   = $script:dir.newAccount;
