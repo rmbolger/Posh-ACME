@@ -56,6 +56,9 @@ function Set-ACMEConfig {
             $curcfg.AccountKey = $AccountKey
             $SaveChanges = $true
 
+            # make sure AccountAlg matches
+            $curcfg.AccountAlg = (Get-JwsAlg $AccountKey)
+
             # new account key means the other account metadata is no longer valid
             # so wipe it
             $curcfg.AccountUri = [string]::Empty
