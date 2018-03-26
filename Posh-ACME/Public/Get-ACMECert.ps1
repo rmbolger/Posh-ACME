@@ -38,7 +38,6 @@ function Get-ACMECert {
     # import the existing account key or create a new one
     try {
         $acctKey = $curcfg.AccountKey | ConvertFrom-Jwk -EA Stop
-        $SavedKey = $true
 
         # warn if they specified an AccountKeyLength that we won't be using
         if ($PSBoundParameters.ContainsKey('AccountKeyLength')) {
