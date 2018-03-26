@@ -35,7 +35,7 @@ function Get-ACMECert {
     Update-ACMEDirectory $script:cfg.CurrentDir
     $curcfg = $script:cfg.($script:cfg.CurrentDir)
 
-    # import the existing account key
+    # import the existing account key or create a new one
     try {
         $acctKey = $curcfg.AccountKey | ConvertFrom-Jwk -EA Stop
         $SavedKey = $true
@@ -55,10 +55,10 @@ function Get-ACMECert {
 
     # make sure we have a valid AccountUri
     if ([string]::IsNullOrWhiteSpace($curcfg.AccountUri)) {
-        Get-ACMEAccount $acctKey $Contact -AcceptTOS
+        Set-ACMEConfig -AccountUri (Get-ACMEAccount $acctKey $Contact -AcceptTOS)
     }
 
-
+    Write-Verbose "AccountUri = $($curcfg.AccountUri)"
 
 
 

@@ -67,8 +67,10 @@ function Get-ACMEAccount {
     $response = Invoke-ACME $script:dir.newAccount $Key $header $payloadJson -EA Stop
 
     if ($response.Headers.ContainsKey('Location')) {
-        Write-Host "Location: $($response.Headers['Location'])"
+        return $response.Headers['Location']
+    } else {
+        #Write-Host ($response.Content)
+        throw 'No Location header found in newAccount output'
     }
-    Write-Host ($response.Content)
 
 }

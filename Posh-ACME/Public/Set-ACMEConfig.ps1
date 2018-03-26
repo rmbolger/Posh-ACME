@@ -6,7 +6,8 @@ function Set-ACMEConfig {
         [string]$WellKnownACMEServer='LE_STAGE',
         [Parameter(ParameterSetName='Custom')]
         [string]$CustomACMEServer,
-        [pscustomobject]$AccountKey
+        [pscustomobject]$AccountKey,
+        [string]$AccountUri
     )
 
     $SaveChanges = $false
@@ -61,6 +62,14 @@ function Set-ACMEConfig {
             $curcfg.Account = [pscustomobject]@{}
         }
 
+    }
+
+    if ($AccountUri) {
+        # there's not much to validate here, so just make sure it's different than the old one
+        if ($AccountUri -ne $curCfg.AccountUri) {
+            $curCfg.AccountUri = $AccountUri
+            $SaveChanges = $true
+        }
     }
 
 
