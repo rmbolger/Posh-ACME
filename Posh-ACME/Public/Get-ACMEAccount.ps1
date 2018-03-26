@@ -24,7 +24,7 @@ function Get-ACMEAccount {
     # make sure the Contact emails have a "mailto:" prefix
     # this may get more complex later if ACME server support more than email based contacts
     if ($Contact.Count -gt 0) {
-        0..($Contact.Count-1) | %{
+        0..($Contact.Count-1) | ForEach-Object {
             if ($Contact[$_] -notlike 'mailto:*') {
                 $Contact[$_] = "mailto:$($Contact[$_])"
             }
