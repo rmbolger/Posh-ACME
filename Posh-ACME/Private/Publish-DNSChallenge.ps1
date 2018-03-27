@@ -11,7 +11,7 @@ function Publish-DNSChallenge {
         [hashtable]$PluginArgs
     )
 
-    $recordName = "_acme_challenge.$Domain"
+    $recordName = "_acme-challenge.$Domain"
 
     # hash and encode the key authorization value
     $keyAuthBytes = [Text.Encoding]::UTF8.GetBytes($KeyAuthorization)

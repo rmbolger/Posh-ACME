@@ -15,7 +15,7 @@ function Add-DnsChallengeInfoblox {
         $Splat
     )
 
-    $apiUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&view=$IBView"
+    $apiUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&ttl=0&view=$IBView"
 
     try {
         # ignore cert validation for the duration of the call
@@ -109,6 +109,16 @@ function Remove-DnsChallengeInfoblox {
         if ($IBIgnoreCert) { [CertValidation]::Restore() }
     }
 
+}
+
+function Save-DnsChallengeInfoblox {
+    [CmdletBinding()]
+    param(
+        [Parameter(ValueFromRemainingArguments=$true)]
+        $Splat
+    )
+
+    # Infoblox doesn't require a save step
 }
 
 # Enable the ability to ignore cert validation

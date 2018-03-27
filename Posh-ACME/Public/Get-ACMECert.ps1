@@ -14,7 +14,8 @@ function Get-ACMECert {
         [string]$AccountKeyLength='2048',
         [ValidateScript({Test-ValidDnsPlugin $_ -ThrowOnFail})]
         [string[]]$DNSPlugin,
-        [hashtable]$PluginArgs
+        [hashtable]$PluginArgs,
+        [int]$DNSSleep=120
     )
 
     # We want to make sure we have a valid directory specified
@@ -25,10 +26,8 @@ function Get-ACMECert {
 
         # determine which ACME server to use
         if ($PSCmdlet.ParameterSetName -eq 'WellKnown') {
-            $DirUri = $script:WellKnownDirs[$WellKnownACMEServer]
             Set-ACMEConfig -WellKnownACMEServer $WellKnownACMEServer
         } else {
-            $DirUri = $CustomACMEServer
             Set-ACMEConfig -CustomACMEServer $CustomACMEServer
         }
     }
@@ -46,6 +45,7 @@ function Get-ACMECert {
     }
 
     # refresh the directory info (which should also populate $script:NextNonce)
+    Write-Host "Using directory $($script:cfg.CurrentDir)"
     Update-ACMEDirectory $script:cfg.CurrentDir
     $curcfg = $script:cfg.($script:cfg.CurrentDir)
 
@@ -60,7 +60,7 @@ function Get-ACMECert {
     } catch {
         # existing key either doesn't exist or is corrupt
         # so we need to generate a new one
-        Write-Verbose 'Creating account key.'
+        Write-Host "Creating account key with length $AccountKeyLength"
         $acctJwk = New-Jwk $AccountKeyLength
         Set-ACMEConfig -AccountKey $acctJwk -EA Stop
         $acctKey = $acctJwk | ConvertFrom-Jwk
@@ -68,12 +68,14 @@ function Get-ACMECert {
 
     # make sure we have a valid AccountUri
     if ([string]::IsNullOrWhiteSpace($curcfg.AccountUri)) {
+        Write-Host "Creating account with contact(s) $($Contact -join ', ')"
         Set-ACMEConfig -AccountUri (Get-ACMEAccount $acctKey $Contact -AcceptTOS)
     }
     Write-Verbose "AccountUri = $($curcfg.AccountUri)"
 
     # create a new order with the associated domains
     try {
+        Write-Host "Creating new order with domain(s) $($Domain -join ', ')"
         $order = New-ACMEOrder -Key $acctKey -Domain $Domain
     } catch {
         $acmeErr = $_.Exception.Data
@@ -97,7 +99,10 @@ function Get-ACMECert {
 
     # Deal with authorizations. There should be exactly as many as the number of domains
     # passed in for the cert.
+    $chalToValidate = @()
     for ($i=0; $i -lt $order.authorizations.Count; $i++) {
+
+        # get auth details
         $authUrl = $order.authorizations[$i]
         $auth = Invoke-RestMethod $authUrl -Method Get
 
@@ -106,22 +111,40 @@ function Get-ACMECert {
             $challenge = $auth.challenges | Where-Object { $_.type -eq 'dns-01' } | Select-Object -first 1
 
             if ($challenge.status -eq 'pending') {
-                Write-Verbose ($auth.identifier.value)
+                # publish the necessary record
                 $fqdn = $auth.identifier.value
                 $keyauth = (Get-KeyAuthorization $acctKey $challenge.token)
                 $plugin = $DNSPlugin[$i]
+                Write-Host "Publishing DNS challenge for $fqdn"
                 Publish-DNSChallenge $fqdn $keyauth $plugin $PluginArgs
+
+                # Save the URL to validate later
+                $chalToValidate += $challenge.url
+            } else {
+                throw "Unexpected challenge status: $($challenge.status)"
             }
-
-
         } else {
             throw "Unexpected authorization status: $($auth.status)"
         }
-
-        #Unpublish-DNSChallenge $fqdn $plugin $PluginArgs
-
-
     }
+
+    # Call the Save function for each unique DNS Plugin used
+    $DNSPlugin | Select-Object -Unique | ForEach-Object {
+        Write-Host "Saving changes for $_ plugin"
+        Save-DNSChallenge $_ $PluginArgs
+    }
+
+    # sleep while the DNS changes propagate
+    Write-Host "Sleeping for $DNSSleep seconds while DNS change take effect"
+    Start-Sleep -Seconds $DNSSleep
+
+    # ask the server to validate the challenges
+    Write-Host "Validating challenge(s)"
+    $chalToValidate | ForEach-Object {
+        Invoke-ChallengeValidation $acctKey $_
+    }
+
+    #Unpublish-DNSChallenge $fqdn $plugin $PluginArgs
 
 
 }
