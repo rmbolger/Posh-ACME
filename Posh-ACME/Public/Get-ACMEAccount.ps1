@@ -41,7 +41,7 @@ function Get-ACMEAccount {
     $payloadJson = $payload | ConvertTo-Json -Compress
 
     # send the request
-    $response = Invoke-ACME $script:dir.newAccount $Key $header $payloadJson -EA Stop
+    $response = Invoke-ACME $header.url $Key $header $payloadJson -EA Stop
 
     if ($response.Headers.ContainsKey('Location')) {
         return $response.Headers['Location']

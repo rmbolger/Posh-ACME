@@ -28,7 +28,7 @@ function Set-ACMEConfig {
         # create the config entry for this Uri if it doesn't exist
         if (!$script:cfg.$DirUri) {
             $newcfg = [pscustomobject]@{
-                Account = @{};
+                AccountAlg = [string]::Empty;
                 AccountUri = [string]::Empty;
                 AccountKey = @{};
             }
