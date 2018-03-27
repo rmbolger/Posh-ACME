@@ -35,3 +35,17 @@ function Remove-DnsChallengeExample {
     # Do work here to remove the TXT record
 
 }
+
+function Save-DnsChallengeExample {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$MyAPIVar1,
+        [Parameter(Mandatory)]
+        [int]$MyAPIVar2,
+        [Parameter(ValueFromRemainingArguments=$true)]
+        $Splat
+    )
+
+    # Do work here to save or finalize changes performed by Add/Remove functions
+}

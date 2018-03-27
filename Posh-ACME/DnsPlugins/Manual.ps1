@@ -31,3 +31,12 @@ function Remove-DnsChallengeManual {
     Read-Host -Prompt "Press any key to continue once the record has been deleted"
 }
 
+function Save-DnsChallengeManual {
+    [CmdletBinding()]
+    param(
+        [Parameter(ValueFromRemainingArguments=$true)]
+        $Splat
+    )
+
+    # Manual DNS modification doesn't require a save step.
+}
