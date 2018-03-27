@@ -33,7 +33,7 @@ function Publish-DNSChallenge {
         throw "Expected plugin command $addCommand not found."
     }
 
-    
-    
+    # call the function with the required parameters and splatting the rest
+    &$addCommand $recordName $txtValue @PluginArgs
 
 }
