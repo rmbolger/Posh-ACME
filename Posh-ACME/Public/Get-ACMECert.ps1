@@ -107,6 +107,7 @@ function Get-ACMECert {
 
             if ($challenge.status -eq 'pending') {
                 Write-Verbose ($auth.identifier.value)
+                $fqdn = $auth.identifier.value
                 $keyauth = (Get-KeyAuthorization $acctKey $challenge.token)
                 $plugin = $DNSPlugin[$i]
                 Publish-DNSChallenge $fqdn $keyauth $plugin $PluginArgs
@@ -116,6 +117,9 @@ function Get-ACMECert {
         } else {
             throw "Unexpected authorization status: $($auth.status)"
         }
+
+        #Unpublish-DNSChallenge $fqdn $plugin $PluginArgs
+
 
     }
 
