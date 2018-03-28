@@ -144,7 +144,40 @@ function Get-ACMECert {
         Invoke-ChallengeValidation $acctKey $_
     }
 
-    #Unpublish-DNSChallenge $fqdn $plugin $PluginArgs
+    # wait for authorizations to complete
+    $authCache = @($null) * $order.authorizations.count
+    for ($tries=1; $tries -le 30; $tries++) {
+
+        # check each authorization for its status
+        for ($i=0; $i -lt $order.authorizations.Count; $i++) {
+
+            # skip ones that are already valid
+            if ($authCache[$i] -and $authCache[$i].status -eq 'valid') { continue; }
+
+            # grab a fresh copy
+            $authCache[$i] = Invoke-RestMethod $order.authorizations[$i] -Method Get
+
+            # check for bad news
+            if ($authCache[$i].status -eq 'invalid') {
+                throw "Authorization for $($authCache[$i].identifier.value) is invalid"
+            } else {
+                Write-Verbose "Authorization for $($authCache[$i].identifier.value) is $($authCache[$i].status)"
+            }
+        }
+
+        # finish up if all are valid
+        if (0 -eq ($authCache.status | Where-Object { $_ -ne 'valid' }).Count) {
+            Write-Host "All authorizations are valid."
+            break;
+        } else {
+            Start-Sleep 2
+        }
+    }
+
+    for ($i=0; $i -lt $order.authorizations.Count; $i++) {
+        Unpublish-DNSChallenge $authCache[$i].identifier.value $DNSPlugin[$i] $PluginArgs
+    }
+
 
 
 }
