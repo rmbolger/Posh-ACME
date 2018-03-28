@@ -26,6 +26,4 @@ function Invoke-ChallengeValidation {
     $response = Invoke-ACME $header.url $Key $header $payloadJson -EA Stop
 
     Write-Verbose "$($response.Content)"
-    return ($response.Content | ConvertFrom-Json)
-
 }

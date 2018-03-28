@@ -30,5 +30,15 @@ function New-ACMEOrder {
     $response = Invoke-ACME $header.url $Key $header $payloadJson -EA Stop
 
     Write-Verbose "$($response.Content)"
-    return ($response.Content | ConvertFrom-Json)
+    $ret = $response.Content | ConvertFrom-Json
+
+    if ($response.Headers.ContainsKey('Location')) {
+        Write-Verbose "Order Location: $($response.Headers['Location'])"
+        # add a custom property to the return object with the location
+        $ret | Add-Member -MemberType NoteProperty -Name '_location' -Value $response.Headers['Location']
+    } else {
+        throw 'No Location header found in newOrder output'
+    }
+
+    return $ret
 }
