@@ -48,7 +48,7 @@ function Get-ACMECert {
 
     # refresh the directory info (which should also populate $script:NextNonce)
     Write-Host "Using directory $($script:cfg.CurrentDir)"
-    Update-ACMEDirectory $script:cfg.CurrentDir
+    Update-PAServer $script:cfg.CurrentDir
     $curcfg = $script:cfg.($script:cfg.CurrentDir)
 
     # import the existing account key or create a new one
