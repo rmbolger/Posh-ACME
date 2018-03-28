@@ -15,7 +15,9 @@ function Get-ACMECert {
         [ValidateScript({Test-ValidDnsPlugin $_ -ThrowOnFail})]
         [string[]]$DNSPlugin,
         [hashtable]$PluginArgs,
-        [int]$DNSSleep=120
+        [int]$DNSSleep=120,
+        [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
+        [string]$CertKeyLength='4096'
     )
 
     # We want to make sure we have a valid directory specified
@@ -155,7 +157,7 @@ function Get-ACMECert {
             if ($authCache[$i] -and $authCache[$i].status -eq 'valid') { continue; }
 
             # grab a fresh copy
-            $authCache[$i] = Invoke-RestMethod $order.authorizations[$i] -Method Get
+            $authCache[$i] = Invoke-RestMethod $order.authorizations[$i] -Method Get -Verbose:$false
 
             # check for bad news
             if ($authCache[$i].status -eq 'invalid') {
@@ -174,6 +176,7 @@ function Get-ACMECert {
         }
     }
 
+    # cleanup the challenge records
     for ($i=0; $i -lt $order.authorizations.Count; $i++) {
         Unpublish-DNSChallenge $authCache[$i].identifier.value $DNSPlugin[$i] $PluginArgs
     }
