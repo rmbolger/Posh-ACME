@@ -13,7 +13,7 @@ function ConvertTo-Jwk {
 
     # Support enough of a subset of RFC 7517 to implement the ACME v2
     # protocol.
-    # https://tools.ietf.org/html/draft-ietf-acme-acme-09
+    # https://tools.ietf.org/html/draft-ietf-acme-acme-10
 
     # This basically includes RSA keys 2048-4096 bits and EC keys utilizing
     # P-256, P-384, or P-521 curves.

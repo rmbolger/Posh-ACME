@@ -4,7 +4,7 @@ function Get-Nonce {
         [string]$NewNonceUri
     )
 
-    # https://tools.ietf.org/html/draft-ietf-acme-acme-09#section-7.2
+    # https://tools.ietf.org/html/draft-ietf-acme-acme-10#section-7.2
 
     # if there was no Uri passed in, check if there's a saved one
     if (!$NewNonceUri) {

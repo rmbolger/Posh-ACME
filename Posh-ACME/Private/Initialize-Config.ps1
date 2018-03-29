@@ -48,28 +48,4 @@ function Initialize-Config {
         }
     }
 
-
-    # $script:ConfigFile = Join-Path $script:ConfigFolder 'posh-acme.json'
-
-    # # Import the existing config if there is one
-    # try {
-    #     $cfg = Get-Content $script:ConfigFile -Encoding UTF8 -EA Stop | ConvertFrom-Json -EA Stop
-    #     $script:cfg = $cfg
-    # } catch {
-    #     # throw a warning if the config file was found but just couldn't be parsed
-    #     if (Test-Path $script:ConfigFile) {
-    #         Write-Warning "Config file found but content is invalid. Creating new config."
-    #         Move-Item $script:ConfigFile "$($script:ConfigFile).bad" -Force
-    #     }
-
-    #     # create a new config
-    #     $script:cfg = [pscustomobject]@{
-    #         CurrentDir = [string]::Empty
-    #     }
-
-    #     # write the config to disk
-    #     $script:cfg | ConvertTo-Json | Out-File $script:ConfigFile -Encoding UTF8
-    # }
-
-
 }
