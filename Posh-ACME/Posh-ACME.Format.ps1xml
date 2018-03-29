@@ -2,6 +2,66 @@
 <Configuration>
     <ViewDefinitions>
         <View>
+            <Name>PAServer</Name>
+            <ViewSelectedBy>
+                <TypeName>PoshACME.PAServer</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader/>
+                    <TableColumnHeader><Label>newNonce</Label></TableColumnHeader>
+                    <TableColumnHeader><Label>newAccount</Label></TableColumnHeader>
+                    <TableColumnHeader><Label>newOrder</Label></TableColumnHeader>
+                    <TableColumnHeader><Label>revokeCert</Label></TableColumnHeader>
+                    <TableColumnHeader><Label>keyChange</Label></TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>location</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>
+                                    if ($_.newNonce) {
+                                        $_.newNonce.Substring($_.newNonce.LastIndexOf('/'))
+                                    } else { $_.newNonce }
+                                </ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>
+                                    if ($_.newAccount) {
+                                        $_.newAccount.Substring($_.newAccount.LastIndexOf('/'))
+                                    } else { $_.newAccount }
+                                </ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>
+                                    if ($_.newOrder) {
+                                        $_.newOrder.Substring($_.newOrder.LastIndexOf('/'))
+                                    } else { $_.newOrder }
+                                </ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>
+                                    if ($_.revokeCert) {
+                                        $_.revokeCert.Substring($_.revokeCert.LastIndexOf('/'))
+                                    } else { $_.revokeCert }
+                                </ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>
+                                    if ($_.keyChange) {
+                                        $_.keyChange.Substring($_.keyChange.LastIndexOf('/'))
+                                    } else { $_.keyChange }
+                                </ScriptBlock>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+        <View>
             <Name>PAAccount</Name>
             <ViewSelectedBy>
                 <TypeName>PoshACME.PAAccount</TypeName>

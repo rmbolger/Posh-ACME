@@ -1,29 +1,19 @@
 function Set-PAServer {
-    [CmdletBinding(DefaultParameterSetName='WellKnown')]
+    [CmdletBinding()]
     param(
-        [Parameter(ParameterSetName='WellKnown')]
-        [ValidateSet('LE_PROD','LE_STAGE')]
-        [string]$WellKnown='LE_STAGE',
-        [Parameter(Mandatory,ParameterSetName='Custom')]
-        [string]$Custom
+        [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
+        [Alias('location')]
+        [string]$DirUrl='LE_STAGE'
     )
 
-    # grab the appropriate directory URI
-    if ($PSCmdlet.ParameterSetName -eq 'WellKnown') {
-        $DirUrl = $script:WellKnownDirs[$WellKnown]
-    } else {
-        $DirUrl = $Custom
-    }
-
-    # create the folder if it doesn't exist
-    $DirFolder = Convert-DirToFolder $DirUrl
-    if (!(Test-Path $DirFolder -PathType Container)) {
-        New-Item -ItemType Directory -Path $DirFolder -Force | Out-Null
+    # convert non-WellKnown names to their associated Url
+    if ($DirUrl -notlike 'https://*') {
+        $DirUrl = $script:WellKnownDirs.$DirUrl
     }
 
     # save to disk
     $DirUrl | Out-File (Join-Path $script:ConfigRoot 'current-server.txt') -Force
-    $DirUrl | Out-File (Join-Path $DirFolder 'dir.txt') -Force
 
     # reload config from disk
     Import-PAConfig

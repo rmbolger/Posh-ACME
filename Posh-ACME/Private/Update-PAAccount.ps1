@@ -38,7 +38,7 @@ function Update-PAAccount {
     $acct.orderlocation = $respObj.orders
 
     # save it to and disk
-    $acctFolder = Join-Path $script:DirUrlFolder $acct.id
+    $acctFolder = Join-Path $script:DirFolder $acct.id
     $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force
 
 }
