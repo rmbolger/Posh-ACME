@@ -9,14 +9,17 @@
             <TableControl>
                 <TableHeaders>
                     <TableColumnHeader>
-                        <Width>13</Width>
+                        <Width>20</Width>
                     </TableColumnHeader>
                     <TableColumnHeader>
                         <Width>15</Width>
                     </TableColumnHeader>
                     <TableColumnHeader/>
                     <TableColumnHeader>
-                        <Label>KeyType</Label>
+                        <Width>10</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Width>10</Width>
                     </TableColumnHeader>
                 </TableHeaders>
                 <TableRowEntries>
@@ -32,9 +35,10 @@
                                 <PropertyName>contact</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
-                                <ScriptBlock>
-                                    $_.key.kty
-                                </ScriptBlock>
+                                <PropertyName>alg</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>KeySize</PropertyName>
                             </TableColumnItem>
                         </TableColumnItems>
                     </TableRowEntry>

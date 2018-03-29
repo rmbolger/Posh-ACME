@@ -11,10 +11,11 @@ function New-Jws {
 
     # RFC 7515 - JSON Web Signature (JWS)
     # https://tools.ietf.org/html/rfc7515
+    # https://tools.ietf.org/html/rfc7518#section-3.1
 
     # This is not a general JWS implementation. It will specifically
     # cater to making JWS messages for the ACME v2 protocol.
-    # https://tools.ietf.org/html/draft-ietf-acme-acme-09
+    # https://tools.ietf.org/html/draft-ietf-acme-acme-10
 
     # validate the key type
     if ($Key -is [Security.Cryptography.RSA]) {
@@ -86,9 +87,10 @@ function New-Jws {
     $MessageBytes = [Text.Encoding]::ASCII.GetBytes($Message)
 
     if ($IsRSA) {
-        # Make sure header 'alg' matches key type
+        # Make sure header 'alg' matches key type. All RSA keys are currently
+        # restricted to RS256 regardless of key size.
         if ($Header.alg -ne 'RS256') {
-            throw "Supplied Key does not match 'alg' in supplied Header."
+            throw "Supplied RSA Key does not match 'alg' ($($Header.alg)) in supplied Header."
         }
 
         # create the signature
@@ -96,9 +98,17 @@ function New-Jws {
         $PaddingType = [Security.Cryptography.RSASignaturePadding]::Pkcs1
         $SignedBytes = $Key.SignData($MessageBytes, $HashAlgo, $PaddingType)
     } else {
-        # Make sure header 'alg' matches key type
-        if ($Header.alg -ne 'ES256') {
-            throw "Supplied key object does not match 'alg' in supplied Header."
+        # Make sure header 'alg' matches key type. EC keys depend on the curve
+        # being used.
+        # ES256 = P-256 and SHA256 hash
+        # ES384 = P-384 and SHA384 hash
+        # ES521 = P-521 and SHA512 hash (note 521 vs 512, very confusing)
+        $size = $Key.KeySize
+        $hashAlgo = $Key.HashAlgorithm.Algorithm
+        if (($Header.alg -eq 'ES256' -and ($size -ne 256 -or $hashAlgo -ne 'SHA256')) -or
+            ($Header.alg -eq 'ES384' -and ($size -ne 384 -or $hashAlgo -ne 'SHA384')) -or
+            ($Header.alg -eq 'ES512' -and ($size -ne 521 -or $hashAlgo -ne 'SHA512'))) {
+            throw "Supplied EC Key (P-$size/$hashAlgo) does not match 'alg' ($($Header.alg)) in supplied Header."
         }
 
         # create the signature

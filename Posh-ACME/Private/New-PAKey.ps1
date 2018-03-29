@@ -36,21 +36,25 @@ function New-PAKey {
                 256 {
                     # nistP256 / secP256r1 / x962P256v1
                     $Curve = [Security.Cryptography.ECCurve]::CreateFromValue('1.2.840.10045.3.1.7')
+                    $HashAlgo = [Security.Cryptography.CngAlgorithm]::SHA256
                     break;
                 }
                 384 {
                     # secP384r1
                     $Curve = [Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.34')
+                    $HashAlgo = [Security.Cryptography.CngAlgorithm]::SHA384
                     break;
                 }
                 521 {
                     # secP521r1
                     $Curve = [Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.35')
+                    $HashAlgo = [Security.Cryptography.CngAlgorithm]::SHA512
                     break;
                 }
                 default { throw "Unsupported EC KeySize. Try 256, 384, or 521." }
             }
             $Key = [Security.Cryptography.ECDsa]::Create($Curve)
+            $Key.HashAlgorithm = $HashAlgo
             break;
         }
         default { throw "Unsupported key type" }
