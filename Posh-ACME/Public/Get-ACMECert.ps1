@@ -20,24 +20,34 @@ function Get-ACMECert {
         [string]$CertKeyLength='4096'
     )
 
-    # We want to make sure we have a valid directory specified
-    # But we don't want to overwrite a saved one unless they explicitly
-    # specified a new one
-    if ([string]::IsNullOrWhiteSpace($script:cfg.CurrentDir) -or
+    # Make sure we have a valid directory specified.
+    # But don't override the current one unless explicitly specified
+    if ([string]::IsNullOrWhiteSpace($script:CurrentDir) -or
         ('WellKnownACMEServer' -in $PSBoundParameters.Keys -or 'CustomACMEServer' -in $PSBoundParameters.Keys)) {
 
         # determine which ACME server to use
         if ($PSCmdlet.ParameterSetName -eq 'WellKnown') {
-            Set-ACMEConfig -WellKnownACMEServer $WellKnownACMEServer
+            Set-PAServer -WellKnown $WellKnownACMEServer
         } else {
-            Set-ACMEConfig -CustomACMEServer $CustomACMEServer
+            Set-PAServer -Custom $CustomACMEServer
         }
+    } else {
+        # refresh the directory info (which should also populate $script:NextNonce)
+        Update-PAServer $script:CurrentDir
     }
+    Write-Host "Using directory $($script:CurrentDir)"
+
+
+
+
+    return
+
+    $curcfg = $script:cfg.($script:cfg.CurrentDir)
 
     # normalize the DNSPlugin attribute so there's a value for each domain passed in
     Write-Verbose "Checking DNSPlugin"
     if (!$DNSPlugin) {
-        Write-Warning "DNSPlugin not specified. Setting to Manual."
+        Write-Warning "DNSPlugin not specified. Defaulting to Manual."
         $DNSPlugin = @()
         for ($i=0; $i -lt $Domain.Count; $i++) { $DNSPlugin += 'Manual' }
     } elseif ($DNSPlugin.Count -lt $Domain.Count) {
@@ -46,10 +56,6 @@ function Get-ACMECert {
         for ($i=$DNSPlugin.Count; $i -lt $Domain.Count; $i++) { $DNSPlugin += $lastPlugin }
     }
 
-    # refresh the directory info (which should also populate $script:NextNonce)
-    Write-Host "Using directory $($script:cfg.CurrentDir)"
-    Update-PAServer $script:cfg.CurrentDir
-    $curcfg = $script:cfg.($script:cfg.CurrentDir)
 
     # import the existing account key or create a new one
     try {
@@ -63,9 +69,8 @@ function Get-ACMECert {
         # existing key either doesn't exist or is corrupt
         # so we need to generate a new one
         Write-Host "Creating account key with length $AccountKeyLength"
-        $acctJwk = New-Jwk $AccountKeyLength
-        Set-ACMEConfig -AccountKey $acctJwk -EA Stop
-        $acctKey = $acctJwk | ConvertFrom-Jwk
+        $acctKey = New-PAKey $AccountKeyLength
+        Set-ACMEConfig -AccountKey (ConvertTo-Jwk $acctKey) -EA Stop
     }
 
     # make sure we have a valid AccountUri

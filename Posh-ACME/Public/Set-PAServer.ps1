@@ -1,7 +1,7 @@
 function Set-PAServer {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='WellKnown')]
     param(
-        [Parameter(Mandatory,ParameterSetName='WellKnown')]
+        [Parameter(ParameterSetName='WellKnown')]
         [ValidateSet('LE_PROD','LE_STAGE')]
         [string]$WellKnown='LE_STAGE',
         [Parameter(Mandatory,ParameterSetName='Custom')]
@@ -26,6 +26,7 @@ function Set-PAServer {
 
     # save it to memory, current-server.txt, and the folder's dir.txt
     $script:CurrentDir = $DirUri
+    $script:CurrentDirFolder = $DirFolder
     $DirUri | Out-File (Join-Path $script:ConfigRoot 'current-server.txt') -Force
     $DirUri | Out-File (Join-Path $DirFolder 'dir.txt') -Force
 

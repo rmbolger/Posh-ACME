@@ -52,7 +52,6 @@ FunctionsToExport = '*'#@(
 #     'ConvertTo-Base64Url',
 #     'ConvertTo-Jwk',
 #     'Get-Nonce',
-#     'New-Jwk',
 #     'New-Jws',
 #     'Get-PAServer',
 #     'Update-PAServer'
