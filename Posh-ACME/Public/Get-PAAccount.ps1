@@ -17,8 +17,8 @@ function Get-PAAccount {
 
                 $_.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
 
-                # update the data from the server if requested
-                if ($Refresh) { Update-PAAccount $_ }
+                # update the data from the server for anything not deactivated
+                if ($Refresh -and $_.status -ne 'deactivated') { Update-PAAccount $_ }
                 Write-Output $_
             }
     } else {
