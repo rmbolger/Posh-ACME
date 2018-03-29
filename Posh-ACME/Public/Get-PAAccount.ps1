@@ -12,7 +12,7 @@ function Get-PAAccount {
 
     if ($List) {
         # read the contents of each accounts's acct.json
-        Get-Content "$($script:CurrentDirFolder)\*\acct.json" -Raw |
+        Get-ChildItem "$($script:CurrentDirFolder)\*\acct.json" | Get-Content -Raw |
             ConvertFrom-Json | Sort-Object id | ForEach-Object {
 
                 $_.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')

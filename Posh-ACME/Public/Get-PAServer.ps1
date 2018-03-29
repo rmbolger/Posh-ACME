@@ -6,7 +6,7 @@ function Get-PAServer {
 
     if ($List) {
         # read the contents of each server's dir.txt
-        Get-Content "$($script:ConfigRoot)\*\dir.txt" | Sort-Object
+        Get-ChildItem "$($script:ConfigRoot)\*\dir.txt" | Get-Content | Sort-Object
 
     } else {
 
