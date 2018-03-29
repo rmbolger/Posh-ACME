@@ -18,4 +18,15 @@ Foreach($import in @($Public + $Private))
 Export-ModuleMember -Function $Public.Basename
 Export-ModuleMember -Function $Private.Basename
 
-Initialize-Config
+# setup some module wide variables
+$script:WellKnownDirs = @{
+    LE_PROD = 'https://acme-v02.api.letsencrypt.org/directory';
+    LE_STAGE = 'https://acme-staging-v02.api.letsencrypt.org/directory';
+}
+$script:HEADER_NONCE = 'Replay-Nonce'
+$script:USER_AGENT = "Posh-ACME/0.1 PowerShell/$($PSVersionTable.PSVersion)"
+$script:COMMON_HEADERS = @{'Accept-Language'='en-us,en;q=0.5'}
+$script:CONTENT_TYPE = 'application/jose+json'
+$script:NextNonce = ''
+
+Import-PAConfig

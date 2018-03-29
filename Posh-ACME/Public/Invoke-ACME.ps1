@@ -21,9 +21,9 @@ function Invoke-ACME {
 
     $CommonParams = @{
         Method = 'Post';
-        ContentType = $script:ContentType;
-        UserAgent = $script:UserAgent;
-        Headers = $script:CommonHeaders
+        ContentType = $script:CONTENT_TYPE;
+        UserAgent = $script:USER_AGENT;
+        Headers = $script:COMMON_HEADERS;
     }
 
     # since HTTP error codes make Invoke-WebRequest throw an exception,

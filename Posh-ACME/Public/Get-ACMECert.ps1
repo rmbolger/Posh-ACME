@@ -22,7 +22,7 @@ function Get-ACMECert {
 
     # Make sure we have a valid directory specified.
     # But don't override the current one unless explicitly specified
-    if ([string]::IsNullOrWhiteSpace($script:CurrentDir) -or
+    if ([string]::IsNullOrWhiteSpace($script:DirUrl) -or
         ('WellKnownACMEServer' -in $PSBoundParameters.Keys -or 'CustomACMEServer' -in $PSBoundParameters.Keys)) {
 
         # determine which ACME server to use
@@ -33,9 +33,9 @@ function Get-ACMECert {
         }
     } else {
         # refresh the directory info (which should also populate $script:NextNonce)
-        Update-PAServer $script:CurrentDir
+        Update-PAServer $script:DirUrl
     }
-    Write-Host "Using directory $($script:CurrentDir)"
+    Write-Host "Using directory $($script:DirUrl)"
 
 
 

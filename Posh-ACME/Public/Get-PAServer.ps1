@@ -10,7 +10,7 @@ function Get-PAServer {
 
     } else {
 
-        $script:CurrentDir
+        $script:DirUrl
 
     }
 

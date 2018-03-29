@@ -18,7 +18,7 @@ function Update-PAAccount {
     # build the header
     $header = @{
         alg   = $acct.alg;
-        kid   = $acct.id;
+        kid   = $acct.location;
         nonce = $script:NextNonce;
         url   = $acct.location;
     }
@@ -38,7 +38,7 @@ function Update-PAAccount {
     $acct.orderlocation = $respObj.orders
 
     # save it to and disk
-    $acctFolder = Join-Path $script:CurrentDirFolder $acct.id
+    $acctFolder = Join-Path $script:DirUrlFolder $acct.id
     $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force
 
 }
