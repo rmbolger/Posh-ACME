@@ -1,11 +1,11 @@
-function New-Jwk {
+function New-PAKey {
     [CmdletBinding()]
     param(
         [Parameter(Position=0)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$KeyLength='2048',
-        [switch]$AsJson,
-        [switch]$AsPrettyJson
+        [switch]$AsJwk,
+        [switch]$AsPrettyJwk
     )
 
     # RFC Note: 'kty' is case-sensitive
@@ -56,12 +56,12 @@ function New-Jwk {
         default { throw "Unsupported key type" }
     }
 
-    if ($AsPrettyJson) {
+    if ($AsPrettyJwk) {
         return ($Key | ConvertTo-Jwk -AsPrettyJson)
     } elseif ($AsJson) {
         return ($Key | ConvertTo-Jwk -AsJson)
     } else {
-        return ($Key | ConvertTo-Jwk)
+        return $Key
     }
 }
 

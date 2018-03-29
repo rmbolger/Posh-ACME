@@ -32,7 +32,21 @@ function Initialize-Config {
 
     # load the current directory into memory if it exists on disk
     $script:CurrentDir = Get-Content (Join-Path $script:ConfigRoot 'current-server.txt') -ErrorAction SilentlyContinue
-    $script:CurrentDirFolder = Convert-DirToFolder $script:CurrentDir
+    if (![string]::IsNullOrWhiteSpace($script:CurrentDir)) {
+
+        $script:CurrentDirFolder = Convert-DirToFolder $script:CurrentDir
+        Update-PAServer $script:CurrentDir
+
+        # load the current account into memory if it exists on disk
+        $curAcctID = Get-Content (Join-Path $script:CurrentDirFolder 'current-account.txt') -ErrorAction SilentlyContinue
+        if (![string]::IsNullOrWhiteSpace($curAcctID)) {
+
+            $script:CurrentAccountFolder = Join-Path $script:CurrentDirFolder $curAcctID
+            $script:CurrentAccount = Get-Content (Join-Path $script:CurrentAccountFolder 'acct.json') -Raw | ConvertFrom-Json
+            $script:CurrentAccount.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
+
+        }
+    }
 
 
     # $script:ConfigFile = Join-Path $script:ConfigFolder 'posh-acme.json'
