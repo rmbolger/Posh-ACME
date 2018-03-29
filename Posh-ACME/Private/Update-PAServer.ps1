@@ -1,28 +1,44 @@
 function Update-PAServer {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
-        [string]$Url
     )
 
-    # Because we need headers, must use Invoke-WebRequest until MS back ports
-    # PowerShell Core's -ResponseHeadersVariable parameter for Invoke-RestMethod
+    # make sure we have a server configured
+    if ([string]::IsNullOrWhiteSpace($script:DirUrl)) {
+        throw "No ACME server configured. Run Set-PAServer first."
+    }
 
-    Write-Verbose "Updating directory info from $Url"
-    $response = Invoke-WebRequest $Url -Verbose:$false
-    $dir = $response.Content | ConvertFrom-Json
+    Write-Verbose "Updating directory info from $script:DirUrl"
+    $response = Invoke-WebRequest $script:DirUrl -Verbose:$false
+    $dirObj = $response.Content | ConvertFrom-Json
 
-    if ($dir -is [pscustomobject] -and 'newAccount' -in $dir.PSObject.Properties.name) {
-        $script:Dir = $dir
+    if ($dirObj -is [pscustomobject] -and 'newAccount' -in $dirObj.PSObject.Properties.name) {
+
+        # add the location and type to the returned directory object
+        $dirObj | Add-Member -MemberType NoteProperty -Name 'location' -value $script:DirUrl
+        $dirObj.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
+
+        # save to memory
+        $script:Dir = $dirObj
+
+        # save to disk
+        $dirFolder = $script:DirUrl.Replace('https://','').Replace(':','_')
+        $dirFolder = Join-Path $script:ConfigRoot $dirFolder.Substring(0,$dirFolder.IndexOf('/'))
+        $script:DirFolder = $dirFolder
+        if (!(Test-Path $script:DirFolder -PathType Container)) {
+            New-Item -ItemType Directory -Path $script:DirFolder -Force | Out-Null
+        }
+        $script:Dir | ConvertTo-Json | Out-File (Join-Path $script:DirFolder 'dir.json') -Force
 
         # grab the next nonce
         if ($response.Headers.ContainsKey($script:HEADER_NONCE)) {
             $script:NextNonce = $response.Headers.$script:HEADER_NONCE
         } else {
-            $Script:NextNonce = Get-Nonce $Url
+            $Script:NextNonce = Get-Nonce $script:DirUrl
         }
+
     } else {
-        Write-Verbose ($dir | ConvertTo-Json)
-        throw "Unexpected ACME directory response."
+        Write-Verbose ($dirObj | ConvertTo-Json)
+        throw "Unexpected ACME response querying directory. Check with -Verbose."
     }
 }

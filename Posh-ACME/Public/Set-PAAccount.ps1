@@ -16,7 +16,7 @@ function Set-PAAccount {
     if ($id) {
 
         # check for the account folder
-        $acctFolder = Join-Path $script:DirUrlFolder $id
+        $acctFolder = Join-Path $script:DirFolder $id
         if (!(Test-Path $acctFolder -PathType Container)) {
             throw "No account folder found with id $id."
         }
@@ -83,8 +83,8 @@ function Set-PAAccount {
         $acct.contact = $respObj.contact
         $acct.orderlocation = $respObj.orders
 
-        # save it to and disk
-        $acctFolder = Join-Path $script:DirUrlFolder $acct.id
+        # save it to disk
+        $acctFolder = Join-Path $script:DirFolder $acct.id
         $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force
 
     }

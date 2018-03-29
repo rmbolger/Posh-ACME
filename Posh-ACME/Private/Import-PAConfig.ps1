@@ -7,8 +7,10 @@ function Import-PAConfig {
     # %LOCALAPPDATA%\Posh-ACME
     # - current-server.txt
     # %LOCALAPPDATA%\Posh-ACME\(server)
+    # - dir.json
     # - current-account.txt
     # %LOCALAPPDATA%\Posh-ACME\(server)\(account)
+    # - acct.json
     # - current-cert.txt
     # %LOCALAPPDATA%\Posh-ACME\(server)\(account)\(cert)
     # - conf.json
@@ -23,17 +25,16 @@ function Import-PAConfig {
     }
 
     # load the current ACME directory into memory if it exists on disk
-    $script:DirUrl = Get-Content (Join-Path $script:ConfigRoot 'current-server.txt') -ErrorAction SilentlyContinue
+    $script:DirUrl = [string](Get-Content (Join-Path $script:ConfigRoot 'current-server.txt') -ErrorAction SilentlyContinue)
     if (![string]::IsNullOrWhiteSpace($script:DirUrl)) {
 
-        $script:DirUrlFolder = Convert-DirToFolder $script:DirUrl
-        Update-PAServer $script:DirUrl
+        Update-PAServer
 
         # load the current account into memory if it exists on disk
-        $AcctID = Get-Content (Join-Path $script:DirUrlFolder 'current-account.txt') -ErrorAction SilentlyContinue
+        $AcctID = Get-Content (Join-Path $script:DirFolder 'current-account.txt') -ErrorAction SilentlyContinue
         if (![string]::IsNullOrWhiteSpace($AcctID)) {
 
-            $script:AcctFolder = Join-Path $script:DirUrlFolder $AcctID
+            $script:AcctFolder = Join-Path $script:DirFolder $AcctID
             $script:Acct = Get-Content (Join-Path $script:AcctFolder 'acct.json') -Raw | ConvertFrom-Json
             $script:Acct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
 
