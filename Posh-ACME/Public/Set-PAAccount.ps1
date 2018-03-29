@@ -18,7 +18,7 @@ function Set-PAAccount {
         # check for the account folder
         $acctFolder = Join-Path $script:DirFolder $id
         if (!(Test-Path $acctFolder -PathType Container)) {
-            throw "No account folder found with id $id."
+            throw "No account folder found with id '$id'."
         }
 
         # try to load the acct.json file
