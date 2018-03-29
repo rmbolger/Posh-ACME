@@ -12,7 +12,7 @@ function Get-PAAccount {
 
     if ($List) {
         # read the contents of each accounts's acct.json
-        Get-ChildItem "$($script:CurrentDirFolder)\*\acct.json" | Get-Content -Raw |
+        Get-ChildItem "$($script:DirUrlFolder)\*\acct.json" | Get-Content -Raw |
             ConvertFrom-Json | Sort-Object id | ForEach-Object {
 
                 $_.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
@@ -23,12 +23,12 @@ function Get-PAAccount {
             }
     } else {
 
-        $acct = $script:CurrentAccount
+        $acct = $script:Acct
 
         # update the data from the server if requested
         if ($Refresh) { Update-PAAccount $acct }
 
-        $script:CurrentAccount
+        $script:Acct
     }
 
 }

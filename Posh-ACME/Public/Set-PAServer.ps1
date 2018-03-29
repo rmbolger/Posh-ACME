@@ -10,27 +10,21 @@ function Set-PAServer {
 
     # grab the appropriate directory URI
     if ($PSCmdlet.ParameterSetName -eq 'WellKnown') {
-        $DirUri = $script:WellKnownDirs[$WellKnown]
+        $DirUrl = $script:WellKnownDirs[$WellKnown]
     } else {
-        $DirUri = $Custom
+        $DirUrl = $Custom
     }
 
-    # tweak it so we can create a folder from it
-    $DirFolder = $DirUri.Replace('https://','').Replace(':','_')
-    $DirFolder = Join-Path $script:ConfigRoot $DirFolder.Substring(0,$DirFolder.IndexOf('/'))
-
     # create the folder if it doesn't exist
+    $DirFolder = Convert-DirToFolder $DirUrl
     if (!(Test-Path $DirFolder -PathType Container)) {
         New-Item -ItemType Directory -Path $DirFolder -Force | Out-Null
     }
 
-    # save it to memory, current-server.txt, and the folder's dir.txt
-    $script:CurrentDir = $DirUri
-    $script:CurrentDirFolder = $DirFolder
-    $DirUri | Out-File (Join-Path $script:ConfigRoot 'current-server.txt') -Force
-    $DirUri | Out-File (Join-Path $DirFolder 'dir.txt') -Force
+    # save to disk
+    $DirUrl | Out-File (Join-Path $script:ConfigRoot 'current-server.txt') -Force
+    $DirUrl | Out-File (Join-Path $DirFolder 'dir.txt') -Force
 
-    # refresh the directory in memory
-    Update-PAServer $DirUri
-
+    # reload config from disk
+    Import-PAConfig
 }

@@ -20,7 +20,7 @@ function New-PAAccount {
         alg   = (Get-JwsAlg $key);
         jwk   = ($key | ConvertTo-Jwk -PublicOnly);
         nonce = $script:NextNonce;
-        url   = $script:dir.newAccount;
+        url   = $script:Dir.newAccount;
     }
 
     # init the payload
@@ -59,7 +59,7 @@ function New-PAAccount {
     $respObj = ($response.Content | ConvertFrom-Json);
     $acct = [pscustomobject]@{
         PSTypeName = 'PoshACME.PAAccount';
-        id = $respObj.ID;
+        id = $respObj.ID.ToString();    # Boulder currently returns ID as an integer
         status = $respObj.status;
         contact = $respObj.contact;
         location = $location;
@@ -72,9 +72,9 @@ function New-PAAccount {
     }
 
     # save it to memory and disk
-    $script:CurrentAccount = $acct
-    $acct.id | Out-File (Join-Path $script:CurrentDirFolder 'current-account.txt') -Force
-    $acctFolder = Join-Path $script:CurrentDirFolder $acct.id
+    $script:Acct = $acct
+    $acct.id | Out-File (Join-Path $script:DirUrlFolder 'current-account.txt') -Force
+    $acctFolder = Join-Path $script:DirUrlFolder $acct.id
     if (!(Test-Path $acctFolder -PathType Container)) {
         New-Item -ItemType Directory -Path $acctFolder -Force | Out-Null
     }

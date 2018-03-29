@@ -16,7 +16,7 @@ function Set-PAAccount {
     if ($id) {
 
         # check for the account folder
-        $acctFolder = Join-Path $script:CurrentDirFolder $id
+        $acctFolder = Join-Path $script:DirUrlFolder $id
         if (!(Test-Path $acctFolder -PathType Container)) {
             throw "No account folder found with id $id."
         }
@@ -26,12 +26,12 @@ function Set-PAAccount {
         $acct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
 
         # save it to memory
-        $script:CurrentAccount = $acct
+        $script:Acct = $acct
 
     } else {
 
         # just use the current account
-        $acct = $script:CurrentAccount
+        $acct = $script:Acct
         $id = $acct.id
     }
 
@@ -44,7 +44,7 @@ function Set-PAAccount {
         # build the header
         $header = @{
             alg   = $acct.alg;
-            kid   = $acct.id;
+            kid   = $acct.location;
             nonce = $script:NextNonce;
             url   = $acct.location;
         }
@@ -84,7 +84,7 @@ function Set-PAAccount {
         $acct.orderlocation = $respObj.orders
 
         # save it to and disk
-        $acctFolder = Join-Path $script:CurrentDirFolder $acct.id
+        $acctFolder = Join-Path $script:DirUrlFolder $acct.id
         $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force
 
     }

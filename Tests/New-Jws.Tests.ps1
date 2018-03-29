@@ -42,7 +42,7 @@ Describe "New-Jws" {
             $ecHeader.alg = 'ES256'
         }
         It "both 'jwk' and 'kid' supplied" {
-            $rsaHeader.kid = 'blah'
+            $rsaHeader.kid = 'https://fake/account'
             { New-Jws $rsaKey $rsaHeader $payload } | Should -Throw
             $rsaHeader.Remove('kid')
         }

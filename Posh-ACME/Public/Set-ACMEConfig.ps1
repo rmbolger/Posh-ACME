@@ -15,24 +15,24 @@ function Set-ACMEConfig {
     if ('WellKnownACMEServer' -in $PSBoundParameters.Keys -or 'CustomACMEServer' -in $PSBoundParameters.Keys) {
         # grab the appropriate directory URI
         if ($PSCmdlet.ParameterSetName -eq 'WellKnown') {
-            $DirUri = $script:WellKnownDirs[$WellKnownACMEServer]
+            $DirUrl = $script:WellKnownDirs[$WellKnownACMEServer]
         } else {
-            $DirUri = $CustomACMEServer
+            $DirUrl = $CustomACMEServer
         }
 
-        if ($script:cfg.CurrentDir -ne $DirUri) {
-            $script:cfg.CurrentDir = $DirUri
+        if ($script:cfg.CurrentDir -ne $DirUrl) {
+            $script:cfg.CurrentDir = $DirUrl
             $SaveChanges = $true
         }
 
         # create the config entry for this Uri if it doesn't exist
-        if (!$script:cfg.$DirUri) {
+        if (!$script:cfg.$DirUrl) {
             $newcfg = [pscustomobject]@{
                 AccountAlg = [string]::Empty;
                 AccountUri = [string]::Empty;
                 AccountKey = @{};
             }
-            $script:cfg | Add-Member -MemberType NoteProperty -Name $DirUri -Value $newcfg
+            $script:cfg | Add-Member -MemberType NoteProperty -Name $DirUrl -Value $newcfg
             $SaveChanges = $true
         }
 

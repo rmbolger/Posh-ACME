@@ -2,19 +2,15 @@ function Invoke-ChallengeValidation {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [ValidateScript({Test-ValidKey $_ -ThrowOnFail})]
-        [Security.Cryptography.AsymmetricAlgorithm]$Key,
+        [PSTypeName('PoshACME.PAAccount')]$acct,
         [Parameter(Mandatory,Position=1)]
         [string]$ChallengeUrl
     )
 
-    # make a variable shortcut to the current server's config
-    $curcfg = $script:cfg.($script:cfg.CurrentDir)
-
     # build the protected header for the request
     $header = @{
-        alg   = (Get-JwsAlg $Key);
-        kid   = $curcfg.AccountUri;
+        alg   = $acct.alg;
+        kid   = $acct.location;
         nonce = $script:NextNonce;
         url   = $ChallengeUrl;
     }
