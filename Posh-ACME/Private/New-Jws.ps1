@@ -105,7 +105,8 @@ function New-Jws {
         # ES521 = P-521 and SHA512 hash (note 521 vs 512, very confusing)
         $size = $Key.KeySize
         $hashAlgo = $Key.HashAlgorithm.Algorithm
-        if (($Header.alg -eq 'ES256' -and ($size -ne 256 -or $hashAlgo -ne 'SHA256')) -or
+        if (($Header.alg -notin 'ES256','ES384','ES512') -or
+            ($Header.alg -eq 'ES256' -and ($size -ne 256 -or $hashAlgo -ne 'SHA256')) -or
             ($Header.alg -eq 'ES384' -and ($size -ne 384 -or $hashAlgo -ne 'SHA384')) -or
             ($Header.alg -eq 'ES512' -and ($size -ne 521 -or $hashAlgo -ne 'SHA512'))) {
             throw "Supplied EC Key (P-$size/$hashAlgo) does not match 'alg' ($($Header.alg)) in supplied Header."
