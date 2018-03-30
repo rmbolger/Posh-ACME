@@ -1,9 +1,9 @@
 function New-PAAccount {
     [CmdletBinding()]
     param(
+        [string[]]$Contact,
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$KeyLength='2048',
-        [string[]]$Contact,
         [switch]$AcceptTOS
     )
 

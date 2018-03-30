@@ -28,44 +28,19 @@ function Get-ACMECert {
     }
     Write-Host "Using directory $($script:DirUrl)"
 
-    # Make sure the Contact emails have a "mailto:" prefix
-    # This may get more complex later if ACME servers support more than email based contacts
-    if ($Contact.Count -gt 0) {
-        0..($Contact.Count-1) | ForEach-Object {
-            if ($Contact[$_] -notlike 'mailto:*') {
-                $Contact[$_] = "mailto:$($Contact[$_])"
-            }
-        }
-    }
-
     # Make sure we have an account set. But create a new one if Contact
     # and/or AccountKeyLength were specified and don't match the existing one.
-    if (!(Get-PAAccount)) {
-        if ($AcceptTOS) {
-            Write-Host "Creating a new account."
-            #$acct = New-PAAccount
-        } else {
-            throw "The -AcceptTOS parameter is required when creating a new account. Please review the Terms of Service here: $($script:Dir.meta.termsOfService)"
-        }
-    } else {
-        $acct = Get-PAAccount
+    $acct = Set-PAAccount -Search -CreateIfNecessary @PSBoundParameters
+    Write-Host "Using account $($acct.id)"
 
-        # build a subset of parameters to test account equivalence
-        $testParams = @{}
-        if ('Contact' -in $PSBoundParameters.Keys) { $testParams.Contact = $Contact }
-        if ('AccountKeyLength' -in $PSBoundParameters.Keys) { $testParams.KeyLength = $AccountKeyLength }
 
-        if (!(Test-AcctEquivalent $acct @testParams)) {
-            if ($AcceptTOS) {
-                Write-Host "Creating a new account."
-                #$acct = New-PAAccount
-            } else {
-                throw "The -AcceptTOS parameter is required when creating a new account. Please review the Terms of Service here: $($script:Dir.meta.termsOfService)"
-            }
-        }
 
-        Write-Host "Using account $($acct.id)"
-    }
+
+
+
+
+
+
 
     return
 
@@ -79,30 +54,6 @@ function Get-ACMECert {
         Write-Warning "Fewer DNSPlugin values than Domain values supplied. Using $lastPlugin for the rest."
         for ($i=$DNSPlugin.Count; $i -lt $Domain.Count; $i++) { $DNSPlugin += $lastPlugin }
     }
-
-
-    # import the existing account key or create a new one
-    try {
-        $acctKey = $curcfg.AccountKey | ConvertFrom-Jwk -EA Stop
-
-        # warn if they specified an AccountKeyLength that we won't be using
-        if ($PSBoundParameters.ContainsKey('AccountKeyLength')) {
-            Write-Warning 'Existing account key found. Ignoring -AccountKeyLength parameter.'
-        }
-    } catch {
-        # existing key either doesn't exist or is corrupt
-        # so we need to generate a new one
-        Write-Host "Creating account key with length $AccountKeyLength"
-        $acctKey = New-PAKey $AccountKeyLength
-        Set-ACMEConfig -AccountKey (ConvertTo-Jwk $acctKey) -EA Stop
-    }
-
-    # make sure we have a valid AccountUri
-    if ([string]::IsNullOrWhiteSpace($curcfg.AccountUri)) {
-        Write-Host "Creating account with contact(s) $($Contact -join ', ')"
-        Set-ACMEConfig -AccountUri (Get-ACMEAccount $acctKey $Contact -AcceptTOS)
-    }
-    Write-Verbose "AccountUri = $($curcfg.AccountUri)"
 
     # create a new order with the associated domains
     try {
