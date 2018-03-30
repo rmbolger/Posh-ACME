@@ -25,8 +25,9 @@ function Set-PAAccount {
         $acct = Get-Content (Join-Path $acctFolder 'acct.json') -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
         $acct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
 
-        # save it to memory
+        # save it
         $script:Acct = $acct
+        $acct.id | Out-File (Join-Path $script:DirFolder 'current-account.txt') -Force
 
     } else {
 
