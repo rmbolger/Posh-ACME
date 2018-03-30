@@ -65,7 +65,7 @@ function New-PAAccount {
         location = $location;
         key = ($key | ConvertTo-Jwk);
         alg = (Get-JwsAlg $key);
-        KeySize = $key.KeySize;
+        KeyLength = $KeyLength;
         # This is supposed to exist according to https://tools.ietf.org/html/draft-ietf-acme-acme-10#section-7.1.2
         # But it's not currently showing up via Pebble or the LE v2 Staging server
         orderlocation = $respObj.orders;
