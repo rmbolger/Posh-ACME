@@ -1,15 +1,13 @@
 function Get-ACMECert {
-    [CmdletBinding(DefaultParameterSetName='WellKnown')]
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
         [string[]]$Domain,
         [string[]]$Contact,
         [switch]$AcceptTOS,
-        [Parameter(ParameterSetName='WellKnown')]
-        [ValidateSet('LE_PROD','LE_STAGE')]
-        [string]$WellKnownACMEServer='LE_STAGE',
-        [Parameter(ParameterSetName='Custom')]
-        [string]$CustomACMEServer,
+        [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
+        [Alias('location')]
+        [string]$DirUrl='LE_STAGE',
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$AccountKeyLength='2048',
         [ValidateScript({Test-ValidDnsPlugin $_ -ThrowOnFail})]
@@ -20,32 +18,58 @@ function Get-ACMECert {
         [string]$CertKeyLength='4096'
     )
 
-    # Make sure we have a valid directory specified.
-    # But don't override the current one unless explicitly specified
-    if ([string]::IsNullOrWhiteSpace($script:DirUrl) -or
-        ('WellKnownACMEServer' -in $PSBoundParameters.Keys -or 'CustomACMEServer' -in $PSBoundParameters.Keys)) {
-
-        # determine which ACME server to use
-        if ($PSCmdlet.ParameterSetName -eq 'WellKnown') {
-            Set-PAServer -WellKnown $WellKnownACMEServer
-        } else {
-            Set-PAServer -Custom $CustomACMEServer
-        }
+    # Make sure we have a server set. But don't override the current
+    # one unless explicitly specified.
+    if (!(Get-PAServer) -or 'DirUrl' -in $PSBoundParameters.Keys) {
+        Set-PAServer $DirUrl
     } else {
         # refresh the directory info (which should also populate $script:NextNonce)
-        Update-PAServer $script:DirUrl
+        Update-PAServer
     }
     Write-Host "Using directory $($script:DirUrl)"
 
+    # Make sure the Contact emails have a "mailto:" prefix
+    # This may get more complex later if ACME servers support more than email based contacts
+    if ($Contact.Count -gt 0) {
+        0..($Contact.Count-1) | ForEach-Object {
+            if ($Contact[$_] -notlike 'mailto:*') {
+                $Contact[$_] = "mailto:$($Contact[$_])"
+            }
+        }
+    }
 
+    # Make sure we have an account set. But create a new one if Contact
+    # and/or AccountKeyLength were specified and don't match the existing one.
+    if (!(Get-PAAccount)) {
+        if ($AcceptTOS) {
+            Write-Host "Creating a new account."
+            #$acct = New-PAAccount
+        } else {
+            throw "The -AcceptTOS parameter is required when creating a new account. Please review the Terms of Service here: $($script:Dir.meta.termsOfService)"
+        }
+    } else {
+        $acct = Get-PAAccount
 
+        # build a subset of parameters to test account equivalence
+        $testParams = @{}
+        if ('Contact' -in $PSBoundParameters.Keys) { $testParams.Contact = $Contact }
+        if ('AccountKeyLength' -in $PSBoundParameters.Keys) { $testParams.KeyLength = $AccountKeyLength }
+
+        if (!(Test-AcctEquivalent $acct @testParams)) {
+            if ($AcceptTOS) {
+                Write-Host "Creating a new account."
+                #$acct = New-PAAccount
+            } else {
+                throw "The -AcceptTOS parameter is required when creating a new account. Please review the Terms of Service here: $($script:Dir.meta.termsOfService)"
+            }
+        }
+
+        Write-Host "Using account $($acct.id)"
+    }
 
     return
 
-    $curcfg = $script:cfg.($script:cfg.CurrentDir)
-
     # normalize the DNSPlugin attribute so there's a value for each domain passed in
-    Write-Verbose "Checking DNSPlugin"
     if (!$DNSPlugin) {
         Write-Warning "DNSPlugin not specified. Defaulting to Manual."
         $DNSPlugin = @()
