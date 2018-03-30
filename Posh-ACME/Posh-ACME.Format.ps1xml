@@ -98,7 +98,7 @@
                                 <PropertyName>alg</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
-                                <PropertyName>KeySize</PropertyName>
+                                <PropertyName>KeyLength</PropertyName>
                             </TableColumnItem>
                         </TableColumnItems>
                     </TableRowEntry>
