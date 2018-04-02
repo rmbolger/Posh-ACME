@@ -1,4 +1,4 @@
-function Get-ACMECert {
+function New-PACert {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
