@@ -1,7 +1,7 @@
 function Update-PAAccount {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory,Position=0,ValueFromPipeline)]
         [PSTypeName('PoshACME.PAAccount')]$acct
     )
 
@@ -37,7 +37,7 @@ function Update-PAAccount {
     $acct.contact = $respObj.contact
     $acct.orderlocation = $respObj.orders
 
-    # save it to and disk
+    # save it to disk
     $acctFolder = Join-Path $script:DirFolder $acct.id
     $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force
 

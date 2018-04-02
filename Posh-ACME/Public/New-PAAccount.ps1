@@ -56,7 +56,7 @@ function New-PAAccount {
     }
 
     # build the return value
-    $respObj = ($response.Content | ConvertFrom-Json);
+    $respObj = $response.Content | ConvertFrom-Json
     $acct = [pscustomobject]@{
         PSTypeName = 'PoshACME.PAAccount';
         id = $respObj.ID.ToString();    # Boulder currently returns ID as an integer
@@ -72,14 +72,13 @@ function New-PAAccount {
     }
 
     # save it to memory and disk
-    $script:Acct = $acct
     $acct.id | Out-File (Join-Path $script:DirFolder 'current-account.txt') -Force
-    $acctFolder = Join-Path $script:DirFolder $acct.id
-    if (!(Test-Path $acctFolder -PathType Container)) {
-        New-Item -ItemType Directory -Path $acctFolder -Force | Out-Null
+    $script:Acct = $acct
+    $script:AcctFolder = Join-Path $script:DirFolder $acct.id
+    if (!(Test-Path $script:AcctFolder -PathType Container)) {
+        New-Item -ItemType Directory -Path $script:AcctFolder -Force | Out-Null
     }
-    $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force
+    $acct | ConvertTo-Json | Out-File (Join-Path $script:AcctFolder 'acct.json') -Force
 
     return $acct
-
 }

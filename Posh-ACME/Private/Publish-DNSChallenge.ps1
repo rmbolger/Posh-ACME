@@ -21,11 +21,9 @@ function Publish-DNSChallenge {
 
     Write-Verbose "Must set $recordName TXT to $txtValue"
 
-    $pluginDir = Join-Path $MyInvocation.MyCommand.Module.ModuleBase 'DnsPlugins'
-    $pluginFile = Join-Path $pluginDir "$Plugin.ps1"
-
     # dot source the plugin file
-    . $pluginFile
+    $pluginDir = Join-Path $MyInvocation.MyCommand.Module.ModuleBase 'DnsPlugins'
+    . (Join-Path $pluginDir "$Plugin.ps1")
 
     # check for the command that should exist now based on plugin name
     $addCommand = "Add-DnsChallenge$Plugin"
