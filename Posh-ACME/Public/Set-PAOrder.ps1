@@ -27,7 +27,7 @@ function Set-PAOrder {
         # save it
         $script:Order = $order
         $script:OrderFolder = $orderFolder
-        $acct.MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force
+        $order.MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force
 
     } else {
 
