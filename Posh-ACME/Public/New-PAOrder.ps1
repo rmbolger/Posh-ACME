@@ -38,7 +38,7 @@ function New-PAOrder {
     $order = $response.Content | ConvertFrom-Json
     $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
     $order | Add-Member -MemberType NoteProperty -Name 'MainDomain' -Value $Domain[0]
-    $order | Add-Member -MemberType NoteProperty -Name 'SANs' -Value @($Domain | ?{ $_ -ne $Domain[0] })
+    $order | Add-Member -MemberType NoteProperty -Name 'SANs' -Value @($Domain | Where-Object { $_ -ne $Domain[0] })
     $order | Add-Member -MemberType NoteProperty -Name 'KeyLength' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'RenewAfter' -Value $null
 
