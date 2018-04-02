@@ -4,23 +4,23 @@ function Get-ACMECert {
         [Parameter(Mandatory,Position=0)]
         [string[]]$Domain,
         [string[]]$Contact,
+        [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
+        [string]$CertKeyLength='4096',
         [switch]$AcceptTOS,
+        [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
+        [string]$AccountKeyLength='2048',
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
         [Alias('location')]
         [string]$DirUrl='LE_STAGE',
-        [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
-        [string]$AccountKeyLength='2048',
         [ValidateScript({Test-ValidDnsPlugin $_ -ThrowOnFail})]
         [string[]]$DNSPlugin,
         [hashtable]$PluginArgs,
-        [int]$DNSSleep=120,
-        [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
-        [string]$CertKeyLength='4096'
+        [int]$DNSSleep=120
     )
 
     # Make sure we have a server set. But don't override the current
     # one unless explicitly specified.
-    if (!(Get-PAServer) -or 'DirUrl' -in $PSBoundParameters.Keys) {
+    if (!(Get-PAServer) -or ('DirUrl' -in $PSBoundParameters.Keys)) {
         Set-PAServer $DirUrl
     } else {
         # refresh the directory info (which should also populate $script:NextNonce)

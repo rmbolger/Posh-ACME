@@ -31,12 +31,22 @@ function Import-PAConfig {
         Update-PAServer
 
         # load the current account into memory if it exists on disk
-        $AcctID = Get-Content (Join-Path $script:DirFolder 'current-account.txt') -ErrorAction SilentlyContinue
+        $AcctID = [string](Get-Content (Join-Path $script:DirFolder 'current-account.txt') -ErrorAction SilentlyContinue)
         if (![string]::IsNullOrWhiteSpace($AcctID)) {
 
             $script:AcctFolder = Join-Path $script:DirFolder $AcctID
             $script:Acct = Get-Content (Join-Path $script:AcctFolder 'acct.json') -Raw | ConvertFrom-Json
             $script:Acct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
+
+            # load the current order into memory if it exists on disk
+            $domain = [string](Get-Content (Join-Path $script:AcctFolder 'current-order.txt') -ErrorAction SilentlyContinue)
+            if (![string]::IsNullOrEmpty($domain)) {
+
+                $script:OrderFolder = Join-Path $script:AcctFolder $domain.Replace('*','!')
+                $script:Order = Get-Content (Join-Path $script:OrderFolder 'order.json') -Raw | ConvertFrom-Json
+                $script:Order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
+
+            }
 
         }
     }
