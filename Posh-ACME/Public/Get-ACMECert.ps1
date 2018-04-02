@@ -33,10 +33,16 @@ function Get-ACMECert {
     $acct = Set-PAAccount -Search -CreateIfNecessary @PSBoundParameters
     Write-Host "Using account $($acct.id)"
 
-
-
-
-
+    # Check for an existing order from the MainDomain for this call and create a new
+    # one if it doesn't exist, is invalid, or is within the renewal window
+    $order = Get-PAOrder $Domain[0] -Refresh
+    if (!$order -or
+        $order.status -eq 'invalid' -or
+        ($order.status -eq 'valid' -and (Get-Date) -ge (Get-Date $order.RenewAfter) )) {
+        Write-Host "Creating a new order for $($Domain -join ', ')"
+        $order = New-PAOrder $Domain
+    }
+    Write-Host "Using order for $($order.MainDomain) with status $($order.status)"
 
 
 
@@ -53,21 +59,6 @@ function Get-ACMECert {
         $lastPlugin = $DNSPlugin[-1]
         Write-Warning "Fewer DNSPlugin values than Domain values supplied. Using $lastPlugin for the rest."
         for ($i=$DNSPlugin.Count; $i -lt $Domain.Count; $i++) { $DNSPlugin += $lastPlugin }
-    }
-
-    # create a new order with the associated domains
-    try {
-        Write-Host "Creating new order with domain(s) $($Domain -join ', ')"
-        $order = New-ACMEOrder -Key $acctKey -Domain $Domain
-    } catch {
-        $acmeErr = $_.Exception.Data
-        if ($acmeErr.type -and $acmeErr.type -like '*:accountDoesNotExist') {
-            Write-Warning "Server claims existing account not found. Creating a new one and trying again."
-            Set-ACMEConfig -AccountUri (Get-ACMEAccount $acctKey $Contact -AcceptTOS)
-            $order = New-ACMEOrder -Key $acctKey -Domain $Domain
-        } else {
-            throw
-        }
     }
 
     # throw if the status is anything but pending
