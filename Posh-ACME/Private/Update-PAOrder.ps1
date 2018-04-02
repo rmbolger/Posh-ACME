@@ -17,7 +17,7 @@ function Update-PAOrder {
     $respObj = $response.Content | ConvertFrom-Json
 
     # update the things that could have changed
-    $order.status = 'valid'#$respObj.status
+    $order.status = $respObj.status
     $order.expires = $respObj.expires
     if ($order.status -eq 'valid') {
         $order.RenewAfter = (Get-Date $order.expires).ToUniversalTime().AddDays(-30).ToString('yyyy-MM-ddTHH:mm:ssZ')
