@@ -1,5 +1,5 @@
 function Update-PAOrder {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory,Position=0,ValueFromPipeline)]
         [PSTypeName('PoshACME.PAOrder')]$order

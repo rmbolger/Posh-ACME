@@ -1,5 +1,5 @@
 function New-PAOrder {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory,Position=0)]
         [string[]]$Domain
@@ -10,6 +10,23 @@ function New-PAOrder {
     # Make sure we have an account configured
     if (!$acct) {
         throw "No ACME account configured. Run Set-PAAccount first."
+    }
+
+    # There's a chance we may be overwriting an existing order here. So check for
+    # confirmation unless any of the following are true:
+    # - no existing order
+    # - status = 'invalid'
+    # - status = 'valid' and current date is after RenewAfter
+    $order = Get-PAOrder $Domain[0] -Refresh
+    if ($order -and $order.status -in 'pending','ready','processing') {
+
+        if (!$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
+            "Existing order with status $($order.status).")) { return }
+
+    } elseif ($order -and $order.status -eq 'valid' -and (Get-Date) -lt (Get-Date $order.RenewAfter)) {
+
+        if (!$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
+            "Existing order has not reached renewal window.")) { return }
     }
 
     # convert the key

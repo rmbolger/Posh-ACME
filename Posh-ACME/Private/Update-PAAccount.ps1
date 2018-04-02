@@ -1,5 +1,5 @@
 function Update-PAAccount {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory,Position=0,ValueFromPipeline)]
         [PSTypeName('PoshACME.PAAccount')]$acct
