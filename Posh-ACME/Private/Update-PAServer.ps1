@@ -1,5 +1,5 @@
 function Update-PAServer {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param(
     )
 

@@ -51,7 +51,7 @@ function Get-PAOrder {
 
         if ($order) {
             # update the data from the server if requested
-            if ($Refresh) { Update-PAOrder $order }
+            if ($Refresh) { Update-PAOrder $order -Confirm:$false }
 
             return $order
         }
