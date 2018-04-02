@@ -51,7 +51,11 @@ function Set-PAAccount {
         # ID Mode
 
         # check if we're switching accounts
-        if ($ID) {
+        if ($ID -and $ID -ne $script:Acct.id) {
+
+            # reset child object references if we're actually changing accounts
+            $script:Order = $null
+            $script:OrderFolder = $null
 
             # check for the account folder
             $acctFolder = Join-Path $script:DirFolder $ID
