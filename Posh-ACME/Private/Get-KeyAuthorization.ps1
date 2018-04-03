@@ -2,7 +2,7 @@ function Get-KeyAuthorization {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [Security.Cryptography.AsymmetricAlgorithm]$Key,
+        [PSTypeName('PoshACME.PAAccount')]$Account,
         [Parameter(Mandatory,Position=1)]
         [string]$Token
     )
@@ -26,9 +26,11 @@ function Get-KeyAuthorization {
     # safe base64 alphabet.  The "||" operator indicates concatenation of
     # strings.
 
+    # hydrate the key
+    $key = $Account.key | ConvertFrom-Jwk
 
     # create the key thumbprint
-    $pubJwk = ConvertTo-Jwk $Key -PublicOnly -AsJson
+    $pubJwk = $key | ConvertTo-Jwk -PublicOnly -AsJson
     $jwkBytes = [Text.Encoding]::UTF8.GetBytes($pubJwk)
     $sha256 = [Security.Cryptography.SHA256]::Create()
     $jwkHash = $sha256.ComputeHash($jwkBytes)

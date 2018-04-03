@@ -21,6 +21,8 @@ function Remove-DnsChallengeManual {
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
+        [Parameter(Mandatory,Position=1)]
+        [string]$TxtValue,
         [Parameter(ValueFromRemainingArguments=$true)]
         $Splat
     )

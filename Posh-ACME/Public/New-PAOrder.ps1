@@ -1,8 +1,13 @@
 function New-PAOrder {
+    [OutputType('PoshACME.PAOrder')]
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory,Position=0)]
-        [string[]]$Domain
+        [string[]]$Domain,
+        [Parameter(Position=1)]
+        [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
+        [string]$KeyLength='4096',
+        [switch]$Force
     )
 
     $acct = Get-PAAccount
@@ -13,16 +18,23 @@ function New-PAOrder {
     }
 
     # There's a chance we may be overwriting an existing order here. So check for
-    # confirmation unless any of the following are true:
-    # - no existing order
-    # - status = 'invalid'
-    # - status = 'valid' and current date is after RenewAfter
+    # confirmation if certain conditions are true
     $order = Get-PAOrder $Domain[0] -Refresh
-    if ($order -and $order.status -in 'pending','ready','processing') {
+    $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
+
+    # skip confirmation if -Force was used or the SANs or KeyLength are different 
+    # regardless of the original order status
+    if ( $Force -or ($order -and ($KeyLength -ne $order.KeyLength -or
+         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') ))) {
+        # do nothing
+
+    # confirm if previous order is still in progress
+    } elseif ($order -and $order.status -in 'pending','ready','processing') {
 
         if (!$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
             "Existing order with status $($order.status).")) { return }
 
+    # confirm if previous order not up for renewal
     } elseif ($order -and $order.status -eq 'valid' -and (Get-Date) -lt (Get-Date $order.RenewAfter)) {
 
         if (!$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
@@ -30,7 +42,7 @@ function New-PAOrder {
     }
 
     # convert the key
-    $key = $acct.key | ConvertFrom-Jwk
+    $acctKey = $acct.key | ConvertFrom-Jwk
 
     # build the protected header for the request
     $header = @{
@@ -48,15 +60,15 @@ function New-PAOrder {
     $payloadJson = $payload | ConvertTo-Json -Compress
 
     # send the request
-    $response = Invoke-ACME $header.url $key $header $payloadJson -EA Stop
+    $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
 
     # process the response
     Write-Verbose "$($response.Content)"
     $order = $response.Content | ConvertFrom-Json
     $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
     $order | Add-Member -MemberType NoteProperty -Name 'MainDomain' -Value $Domain[0]
-    $order | Add-Member -MemberType NoteProperty -Name 'SANs' -Value @($Domain | Where-Object { $_ -ne $Domain[0] })
-    $order | Add-Member -MemberType NoteProperty -Name 'KeyLength' -Value $null
+    $order | Add-Member -MemberType NoteProperty -Name 'SANs' -Value $SANs
+    $order | Add-Member -MemberType NoteProperty -Name 'KeyLength' -Value $KeyLength
     $order | Add-Member -MemberType NoteProperty -Name 'RenewAfter' -Value $null
 
     # add the location from the header
