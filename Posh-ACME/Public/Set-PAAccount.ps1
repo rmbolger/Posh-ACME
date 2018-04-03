@@ -53,10 +53,6 @@ function Set-PAAccount {
         # check if we're switching accounts
         if ($ID -and $ID -ne $script:Acct.id) {
 
-            # reset child object references if we're actually changing accounts
-            $script:Order = $null
-            $script:OrderFolder = $null
-
             # check for the account folder
             $acctFolder = Join-Path $script:DirFolder $ID
             if (!(Test-Path $acctFolder -PathType Container)) {
@@ -68,8 +64,13 @@ function Set-PAAccount {
             $acct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
 
             # save it
-            $script:Acct = $acct
             $acct.id | Out-File (Join-Path $script:DirFolder 'current-account.txt') -Force
+
+            # reset child object references
+            $script:Order = $null
+            $script:OrderFolder = $null
+
+            Import-PAConfig
 
         } else {
 
