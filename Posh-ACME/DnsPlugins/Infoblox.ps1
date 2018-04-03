@@ -58,6 +58,8 @@ function Remove-DnsChallengeInfoblox {
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
+        [Parameter(Mandatory,Position=1)]
+        [string]$TxtValue,
         [Parameter(Mandatory)]
         [string]$IBServer,
         [Parameter(Mandatory)]
@@ -73,7 +75,7 @@ function Remove-DnsChallengeInfoblox {
         if ($IBIgnoreCert) { [CertValidation]::Ignore() }
 
         # query the _ref for the txt record object we want to delete
-        $checkUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&view=$IBView"
+        $checkUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&view=$IBView"
         $response = Invoke-RestMethod -Uri $checkUrl -Method Get -Credential $IBCred
 
         if ($response -and $response.'_ref') {

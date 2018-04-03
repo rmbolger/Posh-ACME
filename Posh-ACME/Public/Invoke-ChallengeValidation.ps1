@@ -2,15 +2,18 @@ function Invoke-ChallengeValidation {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [PSTypeName('PoshACME.PAAccount')]$acct,
+        [PSTypeName('PoshACME.PAAccount')]$Account,
         [Parameter(Mandatory,Position=1)]
         [string]$ChallengeUrl
     )
 
+    # hydrate the key
+    $key = $Account.key | ConvertFrom-Jwk
+
     # build the protected header for the request
     $header = @{
-        alg   = $acct.alg;
-        kid   = $acct.location;
+        alg   = $Account.alg;
+        kid   = $Account.location;
         nonce = $script:NextNonce;
         url   = $ChallengeUrl;
     }
@@ -19,7 +22,7 @@ function Invoke-ChallengeValidation {
     $payloadJson = '{}'
 
     # send the request
-    $response = Invoke-ACME $header.url $Key $header $payloadJson -EA Stop
+    $response = Invoke-ACME $header.url $key $header $payloadJson -EA Stop
 
     Write-Verbose "$($response.Content)"
 }
