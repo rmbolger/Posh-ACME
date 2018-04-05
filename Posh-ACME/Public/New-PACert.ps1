@@ -74,93 +74,56 @@ function New-PACert {
         # loop through the authorizations looking for challenges to validate
         $authIndexesToValidate = @()
         $allAuths = $order | Get-PAAuthorizations
-        for ($i=0; $i -lt ($allAuths.Count); $i++) {
-            $auth = $allAuths[$i]
+        try {
 
-            # skip ones that are already valid
-            if ($auth.status -eq 'valid') {
-                Write-Host "$($auth.fqdn) authorization is already valid"
-                continue
+            for ($i=0; $i -lt ($allAuths.Count); $i++) {
+                $auth = $allAuths[$i]
 
-            } elseif ($auth.status -eq 'pending') {
+                # skip ones that are already valid
+                if ($auth.status -eq 'valid') {
+                    Write-Host "$($auth.fqdn) authorization is already valid"
+                    continue
 
-                if ($auth.DNS01Status -eq 'pending') {
-                    # publish the necessary TXT record
-                    Write-Host "Publishing DNS challenge for $($auth.fqdn)"
-                    Publish-DNSChallenge $auth.DNsId $acct $auth.DNS01Token $Plugin[$i] $PluginArgs
-                    $authIndexesToValidate += $i
-                } else {
-                    throw "Unexpected challenge status '$($auth.DNS01Status)' for $($auth.fqdn)."
+                } elseif ($auth.status -eq 'pending') {
+
+                    if ($auth.DNS01Status -eq 'pending') {
+                        # publish the necessary TXT record
+                        Write-Host "Publishing DNS challenge for $($auth.fqdn)"
+                        Publish-DNSChallenge $auth.DNSId $acct $auth.DNS01Token $DNSPlugin[$i] $PluginArgs
+                        $authIndexesToValidate += $i
+                    } else {
+                        throw "Unexpected challenge status '$($auth.DNS01Status)' for $($auth.fqdn)."
+                    }
+
+                } else { #status invalid, revoked, deactivated, or expired
+                    throw "$($auth.fqdn) authorization status is '$($auth.status)'. Create a new order and try again."
+                }
+            }
+
+            if ($authIndexesToValidate.Count -gt 0) {
+
+                # Call the Save function for each unique DNS Plugin used
+                $DNSPlugin[$authIndexesToValidate] | Select-Object -Unique | ForEach-Object {
+                    Write-Host "Saving changes for $_ plugin"
+                    Save-DNSChallenge $_ $PluginArgs
                 }
 
-            } else { #status invalid, revoked, deactivated, or expired
-                throw "$($auth.fqdn) authorization status is '$($auth.status)'. Create a new order and try again."
-            }
-        }
+                # sleep while the DNS changes propagate
+                Write-Host "Sleeping for $DNSSleep seconds while DNS change take effect"
+                Start-Sleep -Seconds $DNSSleep
 
-        if ($authIndexesToValidate.Count -gt 0) {
-
-            # Call the Save function for each unique DNS Plugin used
-            $DNSPlugin[$authIndexesToValidate] | Select-Object -Unique | ForEach-Object {
-                Write-Host "Saving changes for $_ plugin"
-                Save-DNSChallenge $_ $PluginArgs
+                # ask the server to validate the challenges
+                Write-Host "Validating challenge(s)"
+                Invoke-ChallengeValidation $acct $allAuths[$authIndexesToValidate].location $allAuths[$authIndexesToValidate].DNS01Url
             }
 
-            # sleep while the DNS changes propagate
-            Write-Host "Sleeping for $DNSSleep seconds while DNS change take effect"
-            Start-Sleep -Seconds $DNSSleep
-
-            # ask the server to validate the challenges
-            Write-Host "Validating challenge(s)"
-            $allAuths[$authIndexesToValidate] | ForEach-Object {
-                Invoke-ChallengeValidation $acct $_.DNS01Url
+        } finally {
+            # always cleanup the TXT records if they were added
+            for ($i=0; $i -lt $authIndexesToValidate.Count; $i++) {
+                Unpublish-DNSChallenge $allAuths[$i].DNSId $acct $allAuths[$i].DNS01Token $DNSPlugin[$i] $PluginArgs
             }
-
-            # cleanup the TXT records
-            for ($i=0; $i -lt $order.authorizations.Count; $i++) {
-                Unpublish-DNSChallenge $authCache[$i].identifier.value $DNSPlugin[$i] $PluginArgs
-            }
-
         }
 
     }
-
-
-
-    return
-
-
-    # wait for authorizations to complete
-    $authCache = @($null) * $order.authorizations.count
-    for ($tries=1; $tries -le 30; $tries++) {
-
-        # check each authorization for its status
-        for ($i=0; $i -lt $order.authorizations.Count; $i++) {
-
-            # skip ones that are already valid
-            if ($authCache[$i] -and $authCache[$i].status -eq 'valid') { continue; }
-
-            # grab a fresh copy
-            $authCache[$i] = Invoke-RestMethod $order.authorizations[$i] -Method Get -Verbose:$false
-
-            # check for bad news
-            if ($authCache[$i].status -eq 'invalid') {
-                throw "Authorization for $($authCache[$i].identifier.value) is invalid"
-            } else {
-                Write-Verbose "Authorization for $($authCache[$i].identifier.value) is $($authCache[$i].status)"
-            }
-        }
-
-        # finish up if all are valid
-        if (0 -eq ($authCache.status | Where-Object { $_ -ne 'valid' }).Count) {
-            Write-Host "All authorizations are valid."
-            break;
-        } else {
-            Start-Sleep 2
-        }
-    }
-
-
-
 
 }
