@@ -42,6 +42,8 @@ function Get-PAOrder {
             if (Test-Path $orderFile -PathType Leaf) {
                 $order = Get-ChildItem $orderFile | Get-Content -Raw | ConvertFrom-Json
                 $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
+            } else {
+                return $null
             }
 
         } else {
