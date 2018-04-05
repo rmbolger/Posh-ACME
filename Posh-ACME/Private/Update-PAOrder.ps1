@@ -13,7 +13,9 @@ function Update-PAOrder {
     Write-Verbose "Refreshing order $($order.MainDomain)"
 
     # we can request the order info via an anonymous GET request
-    $response = Invoke-WebRequest $order.location -Verbose:$false
+    try {
+        $response = Invoke-WebRequest $order.location -Verbose:$false -ErrorAction Stop
+    } catch { throw }
     $respObj = $response.Content | ConvertFrom-Json
 
     # update the things that could have changed

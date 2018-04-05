@@ -27,7 +27,7 @@ function Update-PAAccount {
     $payloadJson = '{}'
 
     # send the request
-    $response = Invoke-ACME $header.url $key $header $payloadJson -EA Stop
+    $response = Invoke-ACME $header.url $key $header $payloadJson -ErrorAction Stop
     Write-Verbose $response.Content
 
     $respObj = ($response.Content | ConvertFrom-Json);
