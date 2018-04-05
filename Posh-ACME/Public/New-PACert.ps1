@@ -58,7 +58,8 @@ function New-PACert {
     if ($order.status -eq 'pending') {
 
         # For the time being we're only going to support the 'dns-01' challenge because it's the
-        # only challenge type supported for wildcard domains and dealing with web servers will be a pain.
+        # only challenge type supported for wildcard domains, dealing with web servers for http-01
+        # will be a pain and both versions of the tls-sni challenge have had support dropped.
 
         # normalize the DNSPlugin attribute so there's a value for each domain passed in
         if (!$DNSPlugin) {
