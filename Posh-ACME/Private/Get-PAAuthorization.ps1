@@ -21,13 +21,14 @@ function Get-PAAuthorization {
         foreach ($AuthUrl in $AuthUrls) {
 
             # request the object and inject the type name
-            $auth = Invoke-RestMethod $AuthUrl
+            $auth = Invoke-RestMethod $AuthUrl -Verbose:$false
             $auth.PSObject.TypeNames.Insert(0,'PoshACME.PAAuthorization')
             Write-Verbose ($auth | ConvertTo-Json)
 
-            # add the identifier domain to the root (ACME only currently supports identifier type='dns')
+            # add "nice to have" members to the auth object
             $auth | Add-Member -MemberType NoteProperty -Name 'DNSId' -Value $auth.identifier.value
             $auth | Add-Member -MemberType NoteProperty -Name 'fqdn' -Value "$(if ($auth.wildcard) {'*.'})$($auth.DNSId)"
+            $auth | Add-Member -MemberType NoteProperty -Name 'location' -Value $AuthUrl
 
             # add members that expose the details of the 'dns-01' challenge
             # in the root of the object
