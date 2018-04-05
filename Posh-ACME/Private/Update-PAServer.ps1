@@ -9,7 +9,9 @@ function Update-PAServer {
     }
 
     Write-Verbose "Updating directory info from $script:DirUrl"
-    $response = Invoke-WebRequest $script:DirUrl -Verbose:$false
+    try {
+        $response = Invoke-WebRequest $script:DirUrl -Verbose:$false -ErrorAction Stop
+    } catch { throw }
     $dirObj = $response.Content | ConvertFrom-Json
 
     if ($dirObj -is [pscustomobject] -and 'newAccount' -in $dirObj.PSObject.Properties.name) {

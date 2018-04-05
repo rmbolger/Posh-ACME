@@ -30,7 +30,7 @@ function Invoke-ACME {
     # we need to wrap it in a try/catch. But we can still get the response
     # object via the exception.
     try {
-        $response = Invoke-WebRequest -Uri $Uri -Body $Jws @CommonParams
+        $response = Invoke-WebRequest -Uri $Uri -Body $Jws @CommonParams -ErrorAction Stop
 
         # update the next nonce if it was sent
         if ($response.Headers.ContainsKey($script:HEADER_NONCE)) {

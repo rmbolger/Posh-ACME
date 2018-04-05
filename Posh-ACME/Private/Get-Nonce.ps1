@@ -17,7 +17,9 @@ function Get-Nonce {
 
     # super basic for now, no error checking
     Write-Verbose "Requesting new nonce from $NewNonceUrl"
-    $response = Invoke-WebRequest $NewNonceUrl -Method Head -UserAgent $script:USER_AGENT -Headers $script:COMMON_HEADERS -EA Stop
+    try {
+        $response = Invoke-WebRequest $NewNonceUrl -Method Head -UserAgent $script:USER_AGENT -Headers $script:COMMON_HEADERS -EA Stop
+    } catch { throw }
 
     return $response.Headers.$script:HEADER_NONCE
 }
