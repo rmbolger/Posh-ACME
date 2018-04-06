@@ -123,6 +123,10 @@ function New-PACert {
             for ($i=0; $i -lt $authIndexesToValidate.Count; $i++) {
                 Unpublish-DNSChallenge $allAuths[$i].DNSId $acct $allAuths[$i].DNS01Token $DNSPlugin[$i] $PluginArgs
             }
+            $DNSPlugin[$authIndexesToValidate] | Select-Object -Unique | ForEach-Object {
+                Write-Host "Saving changes for $_ plugin"
+                Save-DNSChallenge $_ $PluginArgs
+            }
         }
 
     }
