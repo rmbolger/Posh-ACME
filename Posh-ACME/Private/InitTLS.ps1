@@ -54,8 +54,8 @@ if ('SslProtocol' -notin (Get-Command Invoke-RestMethod).Parameters.Keys) {
     # the default set of protocols to include all protocol types beyond 1.0 (or currently configured
     # max level) supported in the current installed .NET framework.
     $currentMaxTls = [Math]::Max([Net.ServicePointManager]::SecurityProtocol.value__,[Net.SecurityProtocolType]::Tls.value__)
-    $newTlsTypes = [enum]::GetValues('Net.SecurityProtocolType') | ?{ $_ -gt $currentMaxTls }
-    $newTlsTypes | %{
+    $newTlsTypes = [enum]::GetValues('Net.SecurityProtocolType') | Where-Object { $_ -gt $currentMaxTls }
+    $newTlsTypes | ForEach-Object {
         [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor $_
     }
 
