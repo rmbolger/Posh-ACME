@@ -4,6 +4,8 @@ function ConvertTo-Base64Url {
         [Parameter(ParameterSetName='String',Mandatory,Position=0,ValueFromPipeline)]
         [AllowEmptyString()]
         [string]$Text,
+        [Parameter(ParameterSetName='String')]
+        [switch]$FromBase64,
         [Parameter(ParameterSetName='Bytes',Mandatory,Position=0)]
         [AllowEmptyCollection()]
         [byte[]]$Bytes
@@ -11,12 +13,20 @@ function ConvertTo-Base64Url {
 
     Process {
 
-        if ($PSCmdlet.ParameterSetName -eq 'String') {
-            $Bytes = [Text.Encoding]::UTF8.GetBytes($Text)
-        }
+        if (!$FromBase64) {
 
-        # standard base64 encoder
-        $s = [Convert]::ToBase64String($Bytes)
+            # get a byte array from the input string
+            if ($PSCmdlet.ParameterSetName -eq 'String') {
+                $Bytes = [Text.Encoding]::UTF8.GetBytes($Text)
+            }
+
+            # standard base64 encoder
+            $s = [Convert]::ToBase64String($Bytes)
+
+        } else {
+            # $Text is already Base64 encoded, we just need the Url'ized version
+            $s = $Text
+        }
 
         # remove trailing '='s
         $s = $s.Split('=')[0]
@@ -25,7 +35,7 @@ function ConvertTo-Base64Url {
         $s = $s.Replace('+','-').Replace('/','_')
 
         return $s
-        
+
     }
-    
+
 }
