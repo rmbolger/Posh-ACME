@@ -24,6 +24,9 @@ function Update-PAOrder {
     if ($order.status -eq 'valid') {
         $order.RenewAfter = (Get-Date $order.expires).ToUniversalTime().AddDays(-30).ToString('yyyy-MM-ddTHH:mm:ssZ')
     }
+    if ($respObj.certificate) {
+        $order.certificate = $respObj.certificate
+    }
 
     # save it to disk
     $orderFolder = Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')
