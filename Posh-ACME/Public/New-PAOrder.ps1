@@ -71,6 +71,11 @@ function New-PAOrder {
     $order | Add-Member -MemberType NoteProperty -Name 'KeyLength' -Value $KeyLength
     $order | Add-Member -MemberType NoteProperty -Name 'RenewAfter' -Value $null
 
+    # make sure there's a certificate field for later
+    if ('certificate' -notin $order.PSObject.Properties.Name) {
+        $order | Add-Member -MemberType NoteProperty -Name 'certificate' -Value $null
+    }
+
     # add the location from the header
     if ($response.Headers.ContainsKey('Location')) {
         Write-Verbose "Adding location $($response.Headers['Location'])"
