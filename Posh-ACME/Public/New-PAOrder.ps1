@@ -22,10 +22,12 @@ function New-PAOrder {
     $order = Get-PAOrder $Domain[0] -Refresh
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
 
-    # skip confirmation if -Force was used or the SANs or KeyLength are different 
+    # skip confirmation if -Force was used or the SANs or KeyLength are different
     # regardless of the original order status
+    # or if the order is pending but expired
     if ( $Force -or ($order -and ($KeyLength -ne $order.KeyLength -or
-         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') ))) {
+         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') -or
+         ($order -and $order.status -eq 'pending' -and (Get-Date) -gt (Get-Date $order.expires)) ))) {
         # do nothing
 
     # confirm if previous order is still in progress
