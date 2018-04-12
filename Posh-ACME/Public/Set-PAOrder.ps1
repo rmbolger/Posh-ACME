@@ -2,8 +2,7 @@ function Set-PAOrder {
     [CmdletBinding()]
     param(
         [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
-        [string]$MainDomain,
-        [switch]$Finalize
+        [string]$MainDomain
     )
 
     # Make sure we have an account configured
@@ -34,13 +33,6 @@ function Set-PAOrder {
         # just use the current order
         $order = $script:Order
         $MainDomain = $order.MainDomain
-    }
-
-    # check for a finalize request
-    if ($Finalize) {
-
-        Write-Verbose "Finalizing..."
-
     }
 
 }
