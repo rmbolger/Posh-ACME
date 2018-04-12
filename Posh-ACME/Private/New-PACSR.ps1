@@ -23,7 +23,9 @@ function New-PACSR {
         # [ValidateScript({Test-ValidKey $_ -ThrowOnFail})]
         # [Security.Cryptography.AsymmetricAlgorithm]$Key
 
-        [switch]$OCSPMustStaple
+        [switch]$OCSPMustStaple,
+        [Parameter(Mandatory)]
+        [string]$OutputFolder
     )
 
     # Unfortunately, the .NET managed X509 classes aren't quite there yet in terms of the functionality
@@ -47,6 +49,7 @@ function New-PACSR {
 
         if ($KeyLength -like 'ec-*') {
 
+            Write-Verbose "Creating BC EC keypair of type $KeyLength"
             $isRSA = $false
             $keySize = [int]$KeyLength.Substring(3)
             $curveOid = [NistNamedCurves]::GetOid("P-$keySize")
@@ -62,6 +65,7 @@ function New-PACSR {
 
         } else {
 
+            Write-Verbose "Creating BC RSA keypair of type $KeyLength"
             $isRSA = $true
             $keySize = [int]$KeyLength
             $sigAlgo = 'SHA256WITHRSA'
@@ -73,6 +77,8 @@ function New-PACSR {
 
         }
 
+        # export the key to a file
+        Export-Pem $keyPair (Join-Path $OutputFolder 'cert.key')
     }
 
     # create the subject
@@ -99,6 +105,7 @@ function New-PACSR {
 
     # add OCSP Must Staple if requested
     if ($OCSPMustStaple) {
+        Write-Verbose "Adding OCSP Must-Staple"
         $mustStaple = New-Object X509Extension($false, (New-Object DerOctetString(@(,[byte[]](0x30,0x03,0x02,0x01,0x05)))))
         $extDict.Add((New-Object DerObjectIdentifier('1.3.6.1.5.5.7.1.24')), $mustStaple)
     }
@@ -110,5 +117,9 @@ function New-PACSR {
     # create the request object
     $req = New-Object Pkcs10CertificationRequest($sigAlgo,$subject,$keyPair.Public,$extDerSet,$keyPair.Private)
 
-    $req
+    # export the csr to a file
+    Export-Pem $req (Join-Path $OutputFolder 'request.csr')
+
+    # return the raw Base64 encoded version
+    return (ConvertTo-Base64Url $req.GetEncoded())
 }

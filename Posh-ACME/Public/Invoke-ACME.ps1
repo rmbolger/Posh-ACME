@@ -12,11 +12,16 @@ function Invoke-ACME {
         [switch]$NoRetry
     )
 
-    # We're purposefully not going to do any validation on the Header/Key/Payload
-    # because New-Jws will do it for us. And the only reason we aren't just simplifying
-    # by changing the input param to a completed JWS string is because we want to be
-    # able to auto-retry on errors like badNonce which requires modifying the Header
-    # and re-signing a new JWS.
+    # Because we're not refreshing the server on module load, we may not have a
+    # NextNonce set yet. So check the header, and grab a fresh one if it's empty.
+    if ([string]::IsNullOrWhiteSpace($Header.nonce)) {
+        $Header.nonce = Get-Nonce
+    }
+
+    # Validation on the rest of the header will be taken care of by New-Jws. And
+    # the only reason we aren't just simplifying by changing the input param to a
+    # completed JWS string is because we want to be able to auto-retry on errors
+    # like badNonce which requires modifying the Header and re-signing a new JWS.
     $Jws = New-Jws $Key $Header $PayloadJson
 
     $CommonParams = @{
