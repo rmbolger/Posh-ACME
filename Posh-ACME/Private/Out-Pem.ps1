@@ -1,3 +1,10 @@
+using namespace Org.BouncyCastle.Asn1
+using namespace Org.BouncyCastle.Asn1.Sec
+using namespace Org.BouncyCastle.Asn1.X9
+using namespace Org.BouncyCastle.Crypto
+using namespace Org.BouncyCastle.Crypto.Parameters
+using namespace Org.BouncyCastle.Pkcs
+
 function Out-Pem {
     [CmdletBinding()]
     param(
@@ -7,19 +14,19 @@ function Out-Pem {
         [string]$FilePath
     )
 
-    if ($InputObject -is [Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair]) {
+    if ($InputObject -is [AsymmetricCipherKeyPair]) {
         $BCKeyPair = $InputObject
 
-        if ($BCKeyPair.Private -is [Org.BouncyCastle.Crypto.Parameters.ECPrivateKeyParameters]) {
+        if ($BCKeyPair.Private -is [ECPrivateKeyParameters]) {
 
             # grab the things we need to build an ECPrivateKeyStructure that includes the public key
             $privParam = $keyPair.Private
             $orderBitLength = $privParam.Parameters.N.BitLength
-            $x962 = New-Object Org.BouncyCastle.Asn1.X9.X962Parameters -ArgumentList $privParam.PublicKeyParamSet
-            $pubKey = New-Object Org.BouncyCastle.Asn1.DerBitString -ArgumentList @(,$keyPair.Public.Q.GetEncoded())
+            $x962 = New-Object X962Parameters -ArgumentList $privParam.PublicKeyParamSet
+            $pubKey = New-Object DerBitString -ArgumentList @(,$keyPair.Public.Q.GetEncoded())
 
             # create the structure
-            $privKeyStruct = New-Object Org.BouncyCastle.Asn1.Sec.ECPrivateKeyStructure -ArgumentList $orderBitLength,$privParam.D,$pubKey,$x962
+            $privKeyStruct = New-Object ECPrivateKeyStructure -ArgumentList $orderBitLength,$privParam.D,$pubKey,$x962
 
             # get the raw Base64
             $privKeyStr = [Convert]::ToBase64String($privKeyStruct.GetDerEncoded())
@@ -31,10 +38,10 @@ function Out-Pem {
             }
             $pem += '-----END EC PRIVATE KEY-----'
 
-        } elseif ($BCKeyPair.Private -is [Org.BouncyCastle.Crypto.Parameters.RsaPrivateCrtKeyParameters]) {
+        } elseif ($BCKeyPair.Private -is [RsaPrivateCrtKeyParameters]) {
 
             # build the PrivateKeyInfoFactory
-            $rsaInfo = [Org.BouncyCastle.Pkcs.PrivateKeyInfoFactory]::CreatePrivateKeyInfo($rsaPair.Private)
+            $rsaInfo = [PrivateKeyInfoFactory]::CreatePrivateKeyInfo($rsaPair.Private)
 
             # get the raw Base64
             $privKeyStr = [Convert]::ToBase64String($rsaInfo.GetDerEncoded())
@@ -50,7 +57,7 @@ function Out-Pem {
             throw "Unsupported BouncyCastle KeyPair type"
         }
 
-    } elseif ($InputObject -is [Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest]) {
+    } elseif ($InputObject -is [Pkcs10CertificationRequest]) {
 
         # get the raw Base64 encoded version
         $reqStr = [Convert]::ToBase64String($InputObject.GetEncoded())
