@@ -40,6 +40,7 @@ function New-PACert {
     # - it doesn't exist
     # - is invalid
     # - is valid and within the renewal window
+    # - is pending, but expired
     # - has different KeyLength
     # - has different SANs
     $order = Get-PAOrder $Domain[0] -Refresh
@@ -47,6 +48,7 @@ function New-PACert {
     if ($Force -or !$order -or
         $order.status -eq 'invalid' -or
         ($order.status -eq 'valid' -and (Get-Date) -ge (Get-Date $order.RenewAfter)) -or
+        ($order.status -eq 'pending' -and (Get-Date) -gt (Get-Date $order.expires)) -or
         $CertKeyLength -ne $order.KeyLength -or
         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') ) {
         Write-Host "Creating a new order for $($Domain -join ', ')"
@@ -130,5 +132,10 @@ function New-PACert {
         }
 
     }
+
+    # refresh the order status
+    $order = Get-PAOrder $Domain[0] -Refresh
+
+    $order
 
 }
