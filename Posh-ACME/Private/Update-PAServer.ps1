@@ -1,11 +1,18 @@
 function Update-PAServer {
     [CmdletBinding(SupportsShouldProcess)]
-    param(
-    )
+    param()
 
     # make sure we have a server configured
     if ([string]::IsNullOrWhiteSpace($script:DirUrl)) {
         throw "No ACME server configured. Run Set-PAServer first."
+    }
+
+    # set the DirFolder
+    $dirFolder = $script:DirUrl.Replace('https://','').Replace(':','_')
+    $dirFolder = Join-Path $script:ConfigRoot $dirFolder.Substring(0,$dirFolder.IndexOf('/'))
+    $script:DirFolder = $dirFolder
+    if (!(Test-Path $script:DirFolder -PathType Container)) {
+        New-Item -ItemType Directory -Path $script:DirFolder -Force | Out-Null
     }
 
     Write-Verbose "Updating directory info from $script:DirUrl"
@@ -24,12 +31,6 @@ function Update-PAServer {
         $script:Dir = $dirObj
 
         # save to disk
-        $dirFolder = $script:DirUrl.Replace('https://','').Replace(':','_')
-        $dirFolder = Join-Path $script:ConfigRoot $dirFolder.Substring(0,$dirFolder.IndexOf('/'))
-        $script:DirFolder = $dirFolder
-        if (!(Test-Path $script:DirFolder -PathType Container)) {
-            New-Item -ItemType Directory -Path $script:DirFolder -Force | Out-Null
-        }
         $script:Dir | ConvertTo-Json | Out-File (Join-Path $script:DirFolder 'dir.json') -Force
 
         # grab the next nonce
