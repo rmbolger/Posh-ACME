@@ -28,7 +28,10 @@ function Import-PAConfig {
     $script:DirUrl = [string](Get-Content (Join-Path $script:ConfigRoot 'current-server.txt') -ErrorAction SilentlyContinue)
     if (![string]::IsNullOrWhiteSpace($script:DirUrl)) {
 
-        Update-PAServer
+        $dirFolder = $script:DirUrl.Replace('https://','').Replace(':','_')
+        $script:DirFolder = Join-Path $script:ConfigRoot $dirFolder.Substring(0,$dirFolder.IndexOf('/'))
+        $script:Dir = Get-Content (Join-Path $script:DirFolder 'dir.json') -Raw | ConvertFrom-Json
+        $script:Dir.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
 
         # load the current account into memory if it exists on disk
         $AcctID = [string](Get-Content (Join-Path $script:DirFolder 'current-account.txt') -ErrorAction SilentlyContinue)
