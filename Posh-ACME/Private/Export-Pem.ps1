@@ -5,7 +5,7 @@ using namespace Org.BouncyCastle.Crypto
 using namespace Org.BouncyCastle.Crypto.Parameters
 using namespace Org.BouncyCastle.Pkcs
 
-function Out-Pem {
+function Export-Pem {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
@@ -76,7 +76,7 @@ function Out-Pem {
     # resolve relative paths
     $FilePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($FilePath)
 
-    # Usually, PEM files are ANSI encoded with UNIX line endings which means none of the
+    # Usually, PEM files are ANSI/ASCII encoded with UNIX line endings which means none of the
     # normal Powershell stuff for outputting files will work. So we'll use a .NET StreamWriter
     # instead.
     try {

@@ -31,6 +31,17 @@ function Invoke-Finalize {
     $response = Invoke-ACME $header.url $key $header $payloadJson -EA Stop
     Write-Verbose "$($response.Content)"
 
+    # Boulder's ACME implementation (at least on Staging) currently doesn't
+    # quite follow the spec at this point. What I've observed is that the
+    # response to the finalize request is indeed the order object and it appears
+    # to have 'valid' status and a URL for the certificate. It skips the 'processing'
+    # status entirely which we shouldn't rely on according to the spec.
+    #
+    # So, we start polling the order directly, and the first response comes back with
+    # 'valid' status, but no certificate URL. Not sure if that means the previous
+    # certificate URL was invalid. But we ultimately need to check for both 'valid'
+    # status and a certificate URL to return.
+
     # now we poll
     for ($tries=1; $tries -le ($SecondsToWait/2); $tries++) {
 
@@ -38,7 +49,7 @@ function Invoke-Finalize {
 
         if ($Order.status -eq 'invalid') {
             throw "Order status for $($Order.MainDomain) is invalid."
-        } elseif ($Order.status -eq 'valid') {
+        } elseif ($Order.status -eq 'valid' -and ![string]::IsNullOrWhiteSpace($Order.certificate)) {
             return $Order
         } else {
             # According to spec, the only other statuses are pending, ready, or processing
@@ -47,5 +58,8 @@ function Invoke-Finalize {
         }
 
     }
+
+    # If we're here, it means our poll timed out because we didn't return. So throw.
+    throw "Timed out waiting $SecondsToWait seconds for order to become valid."
 
 }
