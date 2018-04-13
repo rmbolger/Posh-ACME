@@ -2,18 +2,18 @@ function Test-ValidDirUrl {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [string]$DirUrl,
+        [string]$DirectoryUrl,
         [switch]$ThrowOnFail
     )
 
     # anything that begins with https:// is hypothetically ok
     # we're not going to actually query the directory here
-    if ($DirUrl -like 'https://*') {
+    if ($DirectoryUrl -like 'https://*') {
         return $true
     }
 
     # anything else must exist in our WellKnownDirs object
-    if ($script:WellKnownDirs.ContainsKey($DirUrl)) {
+    if ($script:WellKnownDirs.ContainsKey($DirectoryUrl)) {
         return $true
     }
 

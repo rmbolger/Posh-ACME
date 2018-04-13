@@ -11,7 +11,7 @@ function New-PACert {
         [string]$AccountKeyLength='2048',
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
         [Alias('location')]
-        [string]$DirUrl='LE_STAGE',
+        [string]$DirectoryUrl='LE_STAGE',
         [ValidateScript({Test-ValidDnsPlugin $_ -ThrowOnFail})]
         [string[]]$DNSPlugin,
         [hashtable]$PluginArgs,
@@ -21,13 +21,14 @@ function New-PACert {
 
     # Make sure we have a server set. But don't override the current
     # one unless explicitly specified.
-    if (!(Get-PAServer) -or ('DirUrl' -in $PSBoundParameters.Keys)) {
-        Set-PAServer $DirUrl
+    $dir = Get-PAServer
+    if (!$dir -or ('DirectoryUrl' -in $PSBoundParameters.Keys)) {
+        Set-PAServer $DirectoryUrl
     } else {
         # refresh the directory info (which should also populate $script:NextNonce)
         Update-PAServer
     }
-    Write-Host "Using directory $($script:DirUrl)"
+    Write-Host "Using directory $($dir.location)"
 
     # Make sure we have an account set. But create a new one if Contact
     # and/or AccountKeyLength were specified and don't match the existing one.
