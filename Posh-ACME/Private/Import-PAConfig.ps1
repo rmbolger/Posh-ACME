@@ -11,9 +11,9 @@ function Import-PAConfig {
     # - current-account.txt
     # %LOCALAPPDATA%\Posh-ACME\(server)\(account)
     # - acct.json
-    # - current-cert.txt
-    # %LOCALAPPDATA%\Posh-ACME\(server)\(account)\(cert)
-    # - conf.json
+    # - current-order.txt
+    # %LOCALAPPDATA%\Posh-ACME\(server)\(account)\(order)
+    # - order.json
     # - cert.cer/key/pfx/etc
 
     # make sure we have the root config folder
@@ -25,13 +25,12 @@ function Import-PAConfig {
     }
 
     # load the current ACME directory into memory if it exists on disk
-    $script:DirUrl = [string](Get-Content (Join-Path $script:ConfigRoot 'current-server.txt') -ErrorAction SilentlyContinue)
-    if (![string]::IsNullOrWhiteSpace($script:DirUrl)) {
+    $dirUrl = [string](Get-Content (Join-Path $script:ConfigRoot 'current-server.txt') -ErrorAction SilentlyContinue)
+    if (![string]::IsNullOrWhiteSpace($dirUrl)) {
 
-        $dirFolder = $script:DirUrl.Replace('https://','').Replace(':','_')
+        $dirFolder = $dirUrl.Replace('https://','').Replace(':','_')
         $script:DirFolder = Join-Path $script:ConfigRoot $dirFolder.Substring(0,$dirFolder.IndexOf('/'))
-        $script:Dir = Get-Content (Join-Path $script:DirFolder 'dir.json') -Raw | ConvertFrom-Json
-        $script:Dir.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
+        $script:Dir = Get-PAServer $dirUrl
 
         # load the current account into memory if it exists on disk
         $AcctID = [string](Get-Content (Join-Path $script:DirFolder 'current-account.txt') -ErrorAction SilentlyContinue)

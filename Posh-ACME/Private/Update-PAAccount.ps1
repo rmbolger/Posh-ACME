@@ -19,7 +19,7 @@ function Update-PAAccount {
     $header = @{
         alg   = $acct.alg;
         kid   = $acct.location;
-        nonce = $script:NextNonce;
+        nonce = $script:Dir.nonce;
         url   = $acct.location;
     }
 
