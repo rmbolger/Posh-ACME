@@ -19,7 +19,7 @@ function New-PAAccount {
     $header = @{
         alg   = (Get-JwsAlg $key);
         jwk   = ($key | ConvertTo-Jwk -PublicOnly);
-        nonce = $script:NextNonce;
+        nonce = $script:Dir.nonce;
         url   = $script:Dir.newAccount;
     }
 
@@ -66,9 +66,9 @@ function New-PAAccount {
         key = ($key | ConvertTo-Jwk);
         alg = (Get-JwsAlg $key);
         KeyLength = $KeyLength;
-        # This is supposed to exist according to https://tools.ietf.org/html/draft-ietf-acme-acme-10#section-7.1.2
-        # But it's not currently showing up via Pebble or the LE v2 Staging server
-        orderlocation = $respObj.orders;
+        # This is supposed to exist according to https://tools.ietf.org/html/draft-ietf-acme-acme-11#section-7.1.2
+        # But it's not currently showing up via Pebble or Boulder
+        orders = $respObj.orders;
     }
 
     # save it to memory and disk

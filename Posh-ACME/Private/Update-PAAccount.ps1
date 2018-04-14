@@ -1,44 +1,67 @@
 function Update-PAAccount {
     [CmdletBinding(SupportsShouldProcess)]
     param(
-        [Parameter(Mandatory,Position=0,ValueFromPipeline)]
-        [PSTypeName('PoshACME.PAAccount')]$acct
+        [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [string]$ID
     )
 
-    # make sure we have a server configured
-    if (!(Get-PAServer)) {
-        throw "No ACME server configured. Run Set-PAServer first."
+    Begin {
+        # make sure we have a server configured
+        if (!(Get-PAServer)) {
+            throw "No ACME server configured. Run Set-PAServer first."
+        }
     }
 
-    Write-Verbose "Refreshing account $($acct.id) $($acct.alg)"
+    Process {
 
-    # hydrate the key
-    $key = $acct.key | ConvertFrom-Jwk
+        # grab the account from explicit parameters or the current memory copy
+        if (!$ID) {
+            if (!$script:Acct -or !$script:Acct.id) {
+                throw "No ACME account configured. Run Set-PAAccount or specify an ID."
+            }
+            $acct = $script:Acct
+            $UpdatingCurrent = $true
+        } else {
+            # even if they specified the account explicitly, we may still be updating the
+            # "current" server. So figure that out and set a flag for later.
+            if ($script:Acct -and $script:Acct.id -and $script:Acct.id -eq $ID) {
+                $UpdatingCurrent = $true
+                $acct = $script:Acct
+            } else {
+                $UpdatingCurrent = $false
+                $acct = Get-PAAccount $ID
+            }
+        }
 
-    # build the header
-    $header = @{
-        alg   = $acct.alg;
-        kid   = $acct.location;
-        nonce = $script:Dir.nonce;
-        url   = $acct.location;
+        Write-Verbose "Refreshing account $($acct.id)"
+
+        # hydrate the key
+        $key = $acct.key | ConvertFrom-Jwk
+
+        # build the header
+        $header = @{
+            alg   = $acct.alg;
+            kid   = $acct.location;
+            nonce = $script:Dir.nonce;
+            url   = $acct.location;
+        }
+
+        # empty payload to get the current details
+        $payloadJson = '{}'
+
+        # send the request
+        $response = Invoke-ACME $header.url $key $header $payloadJson -ErrorAction Stop
+        Write-Verbose $response.Content
+
+        $respObj = ($response.Content | ConvertFrom-Json);
+
+        # update the things that could have changed
+        $acct.status = $respObj.status
+        $acct.contact = $respObj.contact
+
+        # save it to disk
+        $acctFolder = Join-Path $script:DirFolder $acct.id
+        $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force
     }
-
-    # empty payload
-    $payloadJson = '{}'
-
-    # send the request
-    $response = Invoke-ACME $header.url $key $header $payloadJson -ErrorAction Stop
-    Write-Verbose $response.Content
-
-    $respObj = ($response.Content | ConvertFrom-Json);
-
-    # update the things that could have changed
-    $acct.status = $respObj.status
-    $acct.contact = $respObj.contact
-    $acct.orderlocation = $respObj.orders
-
-    # save it to disk
-    $acctFolder = Join-Path $script:DirFolder $acct.id
-    $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force
 
 }
