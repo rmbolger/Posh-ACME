@@ -41,7 +41,7 @@ function Export-Pem {
         } elseif ($BCKeyPair.Private -is [RsaPrivateCrtKeyParameters]) {
 
             # build the PrivateKeyInfoFactory
-            $rsaInfo = [PrivateKeyInfoFactory]::CreatePrivateKeyInfo($rsaPair.Private)
+            $rsaInfo = [PrivateKeyInfoFactory]::CreatePrivateKeyInfo($BCKeyPair.Private)
 
             # get the raw Base64
             $privKeyStr = [Convert]::ToBase64String($rsaInfo.GetDerEncoded())
