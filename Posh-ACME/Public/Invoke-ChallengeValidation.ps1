@@ -17,6 +17,10 @@ function Invoke-ChallengeValidation {
     # We'll basically poll the authorizations until they are all valid or any one is
     # not valid (invalid, revoked, deactivated, expired) or our timeout elapses.
 
+    # make sure we have a server configured
+    if (!(Get-PAServer)) {
+        throw "No ACME server configured. Run Set-PAServer first."
+    }
 
     # hydrate the key
     $key = $Account.key | ConvertFrom-Jwk
@@ -34,7 +38,7 @@ function Invoke-ChallengeValidation {
 
     foreach ($chalUrl in $ChallengeUrls) {
         # update the header for this challenge
-        $header.nonce = $script:NextNonce
+        $header.nonce = $script:Dir.nonce
         $header.url   = $chalUrl
 
         # send the request

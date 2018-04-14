@@ -14,6 +14,11 @@ function Invoke-Finalize {
     # certificate request and wait for it to generate the signed cert. We'll poll
     # the order until it's valid, invalid, or our timeout elapses.
 
+    # make sure we have a server configured
+    if (!(Get-PAServer)) {
+        throw "No ACME server configured. Run Set-PAServer first."
+    }
+
     # hydrate the key
     $key = $Account.key | ConvertFrom-Jwk
 
@@ -21,7 +26,7 @@ function Invoke-Finalize {
     $header = @{
         alg   = $Account.alg;
         kid   = $Account.location;
-        nonce = $script:NextNonce;
+        nonce = $script:Dir.nonce;
         url   = $Order.finalize;
     }
 

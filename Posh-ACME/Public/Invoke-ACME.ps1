@@ -12,6 +12,11 @@ function Invoke-ACME {
         [switch]$NoRetry
     )
 
+    # make sure we have a server configured
+    if (!(Get-PAServer)) {
+        throw "No ACME server configured. Run Set-PAServer first."
+    }
+
     # Because we're not refreshing the server on module load, we may not have a
     # NextNonce set yet. So check the header, and grab a fresh one if it's empty.
     if ([string]::IsNullOrWhiteSpace($Header.nonce)) {
@@ -40,7 +45,7 @@ function Invoke-ACME {
         # update the next nonce if it was sent
         if ($response.Headers.ContainsKey($script:HEADER_NONCE)) {
             Write-Verbose "Updating NextNonce"
-            $script:NextNonce = $response.Headers[$script:HEADER_NONCE]
+            $script:Dir.nonce = $response.Headers[$script:HEADER_NONCE]
         }
 
         return $response
@@ -53,7 +58,7 @@ function Invoke-ACME {
         # update the next nonce if it was sent
         if ($script:HEADER_NONCE -in $response.Headers) {
             Write-Verbose "Updating NextNonce from error response"
-            $script:NextNonce = $response.GetResponseHeader($script:HEADER_NONCE)
+            $script:Dir.nonce = $response.GetResponseHeader($script:HEADER_NONCE)
             $freshNonce = $true
         }
 
@@ -77,8 +82,8 @@ function Invoke-ACME {
         }
 
         # check for badNonce and retry once
-        if (!$NoRetry -and $freshNonce -and $acmeError.type -and $acmeError.type -like '*badNonce') {
-            $Header.nonce = $script:NextNonce
+        if (!$NoRetry -and $freshNonce -and $acmeError.type -and $acmeError.type -like '*:badNonce') {
+            $Header.nonce = $script:Dir.nonce
             Write-Verbose "Retrying with updated Nonce"
             return (Invoke-ACME $Uri $Key $Header $PayloadJson -NoRetry)
         }

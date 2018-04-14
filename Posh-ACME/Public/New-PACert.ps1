@@ -25,7 +25,7 @@ function New-PACert {
     if (!$dir -or ('DirectoryUrl' -in $PSBoundParameters.Keys)) {
         Set-PAServer $DirectoryUrl
     } else {
-        # refresh the directory info (which should also populate $script:NextNonce)
+        # refresh the directory info (which should also get a fresh nonce)
         Update-PAServer
     }
     Write-Host "Using directory $($dir.location)"
