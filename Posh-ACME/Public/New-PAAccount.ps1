@@ -97,15 +97,30 @@ function New-PAAccount {
         One or more email addresses to associate with this account. These addresses will be used by the ACME server to send certificate expiration notifications or other important account notices.
 
     .PARAMETER KeyLength
-        TODO
+        The type and size of private key to use. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to 'ec-256'.
 
     .PARAMETER AcceptTOS
         If not specified, the ACME server will throw an error with a link to the current Terms of Service. Using this switch indicates acceptance of those Terms of Service and is required for successful account creation.
 
     .EXAMPLE
-        TODO
+        New-PAAccount -AcceptTOS
 
-        TODO
+        Create a new account with no contact email and the default key length.
+
+    .EXAMPLE
+        New-PAAccount -Contact user1@example.com -AcceptTOS
+
+        Create a new account with the specified email and the default key length.
+
+    .EXAMPLE
+        New-PAAccount -Contact user1@example.com -KeyLength 4096 -AcceptTOS
+
+        Create a new account with the specified email and an RSA 4096 bit key.
+
+    .EXAMPLE
+        New-PAAccount -KeyLength 'ec-384' -AcceptTOS
+
+        Create a new account with no contact email and an ECC key using P-384 curve.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME

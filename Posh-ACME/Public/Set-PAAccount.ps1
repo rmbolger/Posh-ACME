@@ -31,7 +31,7 @@ function Set-PAAccount {
         # throw an error if there's no current account and no ID
         # passed in
         if (!$script:Acct -and !$ID) {
-            throw "No ACME account configured. Run Set-PAAccount or specify an account ID."
+            throw "No ACME account configured. Run New-PAAccount or specify an account ID."
         }
 
         # There are 3 types of calls the user might be making here.
@@ -48,7 +48,7 @@ function Set-PAAccount {
             # account specified
             $acct = Get-PAAccount $ID
 
-        } elseif (!$script:Acct -or ($script:Acct.id -ne $ID)) {
+        } elseif (!$script:Acct -or ($ID -and ($ID -ne $script:Acct.id))) {
             # This is a definite account switch
 
             # Check for the associated account folder. Even if this account
@@ -58,6 +58,8 @@ function Set-PAAccount {
             if (!(Test-Path $acctFolder -PathType Container)) {
                 throw "No account found with id '$ID'."
             }
+
+            Write-Verbose "Switching to account $($acct.id)"
 
             # save it as current
             $acct.id | Out-File (Join-Path $script:DirFolder 'current-account.txt') -Force

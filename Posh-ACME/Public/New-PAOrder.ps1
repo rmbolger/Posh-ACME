@@ -50,7 +50,7 @@ function New-PAOrder {
     $header = @{
         alg   = $acct.alg;
         kid   = $acct.location;
-        nonce = $script:NextNonce;
+        nonce = $script:Dir.nonce;
         url   = $script:Dir.newOrder;
     }
 
