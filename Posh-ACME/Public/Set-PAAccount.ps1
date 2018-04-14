@@ -124,4 +124,62 @@ function Set-PAAccount {
 
     }
 
+
+
+
+
+    <#
+    .SYNOPSIS
+        Set the current ACME account and/or update account details.
+
+    .DESCRIPTION
+        This function allows you to switch between ACME accounts for a particular server. It also allows you to update the contact information associated with an account or deactivate the account.
+
+    .PARAMETER ID
+        The account id value as returned by the ACME server. If not specified, the function will attempt to use the currently active account.
+
+    .PARAMETER Contact
+        One or more email addresses to associate with this account. These addresses will be used by the ACME server to send certificate expiration notifications or other important account notices.
+
+    .PARAMETER Deactivate
+        If specified, a request will be sent to the associated ACME server to deactivate the account. Clients may wish to do this if the account key is compromised or decommissioned.
+
+    .PARAMETER NoSwitch
+        If specified, the currently active account will not change. Useful primarily for bulk updating contact information across accounts. This switch is ignored if no ID is specified.
+
+    .EXAMPLE
+        Set-PAAccount -ID 1234567
+
+        Switch to the specified account.
+
+    .EXAMPLE
+        Set-PAAccount -Contact 'user1@example.com','user2@example.com'
+
+        Set new contacts for the current account.
+
+    .EXAMPLE
+        Set-PAAccount -ID 1234567 -Contact 'user1@example.com','user2@example.com'
+
+        Set new contacts for the specified account.
+
+    .EXAMPLE
+        Get-PAAccount -List | Set-PAAccount -Contact user1@example.com -NoSwitch
+
+        Set a new contact for all known accounts without switching from the current.
+
+    .EXAMPLE
+        Set-PAAccount -Deactivate
+
+        Deactivate the current account.
+
+    .LINK
+        Project: https://github.com/rmbolger/Posh-ACME
+
+    .LINK
+        Get-PAAccount
+
+    .LINK
+        New-PAAccount
+
+    #>
 }

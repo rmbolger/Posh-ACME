@@ -1,9 +1,10 @@
 function New-PAAccount {
+    [OutputType('PoshACME.PAAccount')]
     [CmdletBinding()]
     param(
         [string[]]$Contact,
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
-        [string]$KeyLength='2048',
+        [string]$KeyLength='ec-256',
         [switch]$AcceptTOS
     )
 
@@ -81,4 +82,39 @@ function New-PAAccount {
     $acct | ConvertTo-Json | Out-File (Join-Path $script:AcctFolder 'acct.json') -Force
 
     return $acct
+
+
+
+
+    <#
+    .SYNOPSIS
+        Create a new account on the current ACME server.
+
+    .DESCRIPTION
+        All certificate requests require a valid account on an ACME server. Adding an email contact is not required. But without one, certificate expiration notices will not be sent. The account KeyLength is personal preference and doesn't correspond to the KeyLength of the generated certificates.
+
+    .PARAMETER Contact
+        One or more email addresses to associate with this account. These addresses will be used by the ACME server to send certificate expiration notifications or other important account notices.
+
+    .PARAMETER KeyLength
+        TODO
+
+    .PARAMETER AcceptTOS
+        If not specified, the ACME server will throw an error with a link to the current Terms of Service. Using this switch indicates acceptance of those Terms of Service and is required for successful account creation.
+
+    .EXAMPLE
+        TODO
+
+        TODO
+
+    .LINK
+        Project: https://github.com/rmbolger/Posh-ACME
+
+    .LINK
+        Get-PAAccount
+
+    .LINK
+        Set-PAAccount
+
+    #>
 }
