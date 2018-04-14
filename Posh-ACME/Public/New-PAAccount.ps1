@@ -4,8 +4,11 @@ function New-PAAccount {
     param(
         [string[]]$Contact,
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
+        [Alias('AccountKeyLength')]
         [string]$KeyLength='ec-256',
-        [switch]$AcceptTOS
+        [switch]$AcceptTOS,
+        [Parameter(ValueFromRemainingArguments=$true)]
+        $Splat
     )
 
     # make sure we have a server configured

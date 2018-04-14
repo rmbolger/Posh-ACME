@@ -5,10 +5,10 @@ function New-PACert {
         [string[]]$Domain,
         [string[]]$Contact,
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
-        [string]$CertKeyLength='4096',
+        [string]$CertKeyLength='2048',
         [switch]$AcceptTOS,
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
-        [string]$AccountKeyLength='2048',
+        [string]$AccountKeyLength='ec-256',
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
         [Alias('location')]
         [string]$DirectoryUrl='LE_STAGE',
@@ -30,9 +30,23 @@ function New-PACert {
     }
     Write-Host "Using directory $($dir.location)"
 
-    # Make sure we have an account set. But create a new one if Contact
-    # and/or AccountKeyLength were specified and don't match the existing one.
-    $acct = Set-PAAccount -Search -CreateIfNecessary @PSBoundParameters
+    # Make sure we have an account set. If Contact and/or AccountKeyLength
+    # were specified and don't match the current one but do match a different,
+    # one, switch to that. If the specified details don't match any existing
+    # accounts, create a new one.
+    $accts = Get-PAAccount -List -Refresh | Where-Object { $_.status -ne 'deactivated' }
+    if ('AccountKeyLength' -in $PSBoundParameters.Keys) {
+        $accts = $accts | Where-Object { $_.KeyLength -eq $AccountKeyLength }
+    }
+    if ('Contact' -in $PSBoundParameters.Keys) {
+        $accts = $accts | Where-Object { (Compare-Object $Contact $_.contact) -eq $null }
+    }
+    if ($accts -and $accts.Count -gt 0) {
+        $acct = $accts[0]
+        Set-PAAccount $acct.id
+    } else {
+        $acct = New-PAAccount @PSBoundParameters
+    }
     Write-Host "Using account $($acct.id)"
 
     # Check for an existing order from the MainDomain for this call and create a new
