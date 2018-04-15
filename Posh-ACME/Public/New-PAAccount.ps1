@@ -8,7 +8,7 @@ function New-PAAccount {
         [string]$KeyLength='ec-256',
         [switch]$AcceptTOS,
         [Parameter(ValueFromRemainingArguments=$true)]
-        $Splat
+        $ExtraParams
     )
 
     # make sure we have a server configured

@@ -6,13 +6,33 @@ function Get-PAAccount {
         [string]$ID,
         [Parameter(ParameterSetName='List',Mandatory)]
         [switch]$List,
-        [switch]$Refresh
+        [Parameter(ParameterSetName='List')]
+        [ValidateSet('valid','deactivated','revoked')]
+        [string]$Status,
+        [Parameter(ParameterSetName='List')]
+        [string[]]$Contact,
+        [Parameter(ParameterSetName='List')]
+        [Alias('AccountKeyLength')]
+        [string[]]$KeyLength,
+        [switch]$Refresh,
+        [Parameter(ValueFromRemainingArguments=$true)]
+        $ExtraParams
     )
 
     Begin {
         # make sure we have a server configured
         if (!(Get-PAServer)) {
             throw "No ACME server configured. Run Set-PAServer first."
+        }
+
+        # make sure the Contact emails have a "mailto:" prefix
+        # this may get more complex later if ACME servers support more than email based contacts
+        if ($Contact.Count -gt 0) {
+            0..($Contact.Count-1) | ForEach-Object {
+                if ($Contact[$_] -notlike 'mailto:*') {
+                    $Contact[$_] = "mailto:$($Contact[$_])"
+                }
+            }
         }
     }
 
@@ -29,14 +49,29 @@ function Get-PAAccount {
             # read the contents of each accounts's acct.json
             Write-Verbose "Loading PAAccount list from disk"
             $rawFiles = Get-ChildItem "$($script:DirFolder)\*\acct.json" | Get-Content -Raw
-            $rawFiles | ConvertFrom-Json | Sort-Object id | ForEach-Object {
+            $accts = $rawFiles | ConvertFrom-Json | Sort-Object id | ForEach-Object {
 
-                    # insert the type name so it displays properly
+                    # insert the type name and send the results to the pipeline
                     $_.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
-
-                    # send the result to the pipeline
-                    Write-Output $_
+                    $_
             }
+
+            # filter by Status if specified
+            if ('Status' -in $PSBoundParameters.Keys) {
+                $accts = $accts | Where-Object { $_.status -eq $Status }
+            }
+
+            # filter by KeyLength if specified
+            if ('KeyLength' -in $PSBoundParameters.Keys) {
+                $accts = $accts | Where-Object { $_.KeyLength -eq $KeyLength }
+            }
+
+            # filter by Contact if specified
+            if ('Contact' -in $PSBoundParameters.Keys) {
+                $accts = $accts | Where-Object { (Compare-Object $Contact $_.contact) -eq $null }
+            }
+
+            return $accts
 
         # Specific mode
         } else {
@@ -86,13 +121,22 @@ function Get-PAAccount {
         Get ACME account details.
 
     .DESCRIPTION
-        Returns the details for one or more ACME accounts previously created such as Email contacts, and key length.
+        Returns details such as Email, key length, and status for one or more ACME accounts previously created.
 
     .PARAMETER ID
         The account id value as returned by the ACME server.
 
     .PARAMETER List
         If specified, the details for all accounts will be returned.
+
+    .PARAMETER Status
+        A Status string to filter the list of accounts with.
+
+    .PARAMETER Contact
+        One or more email addresses to filter the list of accounts with. Returned accounts must match exactly (not including the order).
+
+    .PARAMETER KeyLength
+        The type and size of private key to filter the list of accounts with. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'.
 
     .PARAMETER Refresh
         If specified, any account details returned will be freshly queried from the ACME server (excluding deactivated accounts). Otherwise, cached details will be returned.

@@ -34,18 +34,16 @@ function New-PACert {
     # were specified and don't match the current one but do match a different,
     # one, switch to that. If the specified details don't match any existing
     # accounts, create a new one.
-    $accts = Get-PAAccount -List -Refresh | Where-Object { $_.status -ne 'deactivated' }
-    if ('AccountKeyLength' -in $PSBoundParameters.Keys) {
-        $accts = $accts | Where-Object { $_.KeyLength -eq $AccountKeyLength }
-    }
-    if ('Contact' -in $PSBoundParameters.Keys) {
-        $accts = $accts | Where-Object { (Compare-Object $Contact $_.contact) -eq $null }
-    }
-    if ($accts -and $accts.Count -gt 0) {
+    $acct = Get-PAAccount
+    $accts = Get-PAAccount -List -Refresh -Status 'valid' @PSBoundParameters
+    if (!$accts -or $accts.Count -eq 0) {
+        # no matches for the set of filters, so create new
+        $acct = New-PAAccount @PSBoundParameters
+    } elseif ($accts.Count -gt 0 -and (!$acct -or $acct.id -notin $accts.id)) {
+        # we got matches, but there's no current account or the current one doesn't match
+        # so set the first match as current
         $acct = $accts[0]
         Set-PAAccount $acct.id
-    } else {
-        $acct = New-PAAccount @PSBoundParameters
     }
     Write-Host "Using account $($acct.id)"
 
