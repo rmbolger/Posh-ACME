@@ -28,6 +28,11 @@ function Set-PAServer {
 
         # reload config from disk
         Import-PAConfig
+
+        # Show a link to the TOS if this server has no accounts associated with it yet.
+        if (!(Get-PAAccount -List)) {
+            Write-Host "Please review the Terms of Service here: $($script:Dir.meta.termsOfService)"
+        }
     }
 
 
