@@ -51,25 +51,17 @@ function Set-PAAccount {
         } elseif (!$script:Acct -or ($ID -and ($ID -ne $script:Acct.id))) {
             # This is a definite account switch
 
-            # Check for the associated account folder. Even if this account
-            # ID exists on the server, we can't do anything with it unless we
-            # have the associated private key.
-            $acctFolder = Join-Path $script:DirFolder $ID
-            if (!(Test-Path $acctFolder -PathType Container)) {
-                throw "No account found with id '$ID'."
-            }
+            # refresh the cached copy
+            Update-PAAccount $ID
 
-            Write-Verbose "Switching to account $($acct.id)"
+            Write-Verbose "Switching to account $ID"
 
             # save it as current
-            $acct.id | Out-File (Join-Path $script:DirFolder 'current-account.txt') -Force
+            $ID | Out-File (Join-Path $script:DirFolder 'current-account.txt') -Force
 
             # reset child object references
             $script:Order = $null
             $script:OrderFolder = $null
-
-            # refresh the cached copy
-            Update-PAAccount $acct.id
 
             # reload the cache from disk
             Import-PAConfig
