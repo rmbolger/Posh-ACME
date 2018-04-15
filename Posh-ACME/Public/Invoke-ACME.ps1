@@ -44,7 +44,7 @@ function Invoke-ACME {
 
         # update the next nonce if it was sent
         if ($response.Headers.ContainsKey($script:HEADER_NONCE)) {
-            Write-Verbose "Updating NextNonce"
+            Write-Verbose "Updating nonce: $($response.Headers[$script:HEADER_NONCE])"
             $script:Dir.nonce = $response.Headers[$script:HEADER_NONCE]
         }
 
@@ -57,7 +57,7 @@ function Invoke-ACME {
 
         # update the next nonce if it was sent
         if ($script:HEADER_NONCE -in $response.Headers) {
-            Write-Verbose "Updating NextNonce from error response"
+            Write-Verbose "Updating nonce from error response: $($response.Headers[$script:HEADER_NONCE])"
             $script:Dir.nonce = $response.GetResponseHeader($script:HEADER_NONCE)
             $freshNonce = $true
         }
@@ -84,7 +84,7 @@ function Invoke-ACME {
         # check for badNonce and retry once
         if (!$NoRetry -and $freshNonce -and $acmeError.type -and $acmeError.type -like '*:badNonce') {
             $Header.nonce = $script:Dir.nonce
-            Write-Verbose "Retrying with updated Nonce"
+            Write-Verbose "Retrying with updated nonce"
             return (Invoke-ACME $Uri $Key $Header $PayloadJson -NoRetry)
         }
 

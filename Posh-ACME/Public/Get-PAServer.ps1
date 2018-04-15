@@ -60,7 +60,6 @@ function Get-PAServer {
 
             } else {
                 # just use the current one
-                Write-Verbose "Loading PAServer from memory"
                 $dir = $script:Dir
             }
 
