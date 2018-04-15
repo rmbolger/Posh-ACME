@@ -12,6 +12,7 @@ function Get-PAAccount {
         [Parameter(ParameterSetName='List')]
         [string[]]$Contact,
         [Parameter(ParameterSetName='List')]
+        [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [Alias('AccountKeyLength')]
         [string[]]$KeyLength,
         [switch]$Refresh,
@@ -43,7 +44,8 @@ function Get-PAAccount {
 
             # update from the server first if requested
             if ($Refresh) {
-                Get-PAAccount -List | Where-Object { $_.status -ne 'deactivated' } | Update-PAAccount
+                Write-Verbose "Refreshing valid accounts"
+                Get-PAAccount -List -Status 'valid' | Update-PAAccount
             }
 
             # read the contents of each accounts's acct.json
@@ -68,7 +70,11 @@ function Get-PAAccount {
 
             # filter by Contact if specified
             if ('Contact' -in $PSBoundParameters.Keys) {
-                $accts = $accts | Where-Object { (Compare-Object $Contact $_.contact) -eq $null }
+                if (!$Contact) {
+                    $accts = $accts | Where-Object { $_.contact -eq $null }
+                } else {
+                    $accts = $accts | Where-Object { $_.contact -and (Compare-Object $Contact $_.contact) -eq $null }
+                }
             }
 
             return $accts
@@ -80,7 +86,7 @@ function Get-PAAccount {
 
                 # build the path to acct.json
                 $acctFile = Join-Path $script:DirFolder $ID
-                $acctFile = Join-Path $acctFile 'dir.json'
+                $acctFile = Join-Path $acctFile 'acct.json'
 
                 # check if it exists
                 if (Test-Path $acctFile -PathType Leaf) {
@@ -88,13 +94,11 @@ function Get-PAAccount {
                     $acct = Get-ChildItem $acctFile | Get-Content -Raw | ConvertFrom-Json
                     $acct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
                 } else {
-                    Write-Warning "Unable to find cached PAAccount info for ID $ID."
-                    return $null
+                    throw "Unable to find cached PAAccount info for ID $ID."
                 }
 
             } else {
                 # just use the current one
-                Write-Verbose "Loading PAAccount from memory"
                 $acct = $script:Acct
             }
 

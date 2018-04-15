@@ -16,6 +16,8 @@ function New-PAAccount {
         throw "No ACME server configured. Run Set-PAServer first."
     }
 
+    Write-Verbose "Creating new $KeyLength account with contact: $($Contact -join ',')"
+
     # create the account key
     $key = New-PAKey $KeyLength
 
@@ -50,7 +52,9 @@ function New-PAAccount {
     $payloadJson = $payload | ConvertTo-Json -Compress
 
     # send the request
-    $response = Invoke-ACME $header.url $key $header $payloadJson -EA Stop
+    try {
+        $response = Invoke-ACME $header.url $key $header $payloadJson -EA Stop
+    } catch { throw }
 
     # grab the Location header
     if ($response.Headers.ContainsKey('Location')) {
