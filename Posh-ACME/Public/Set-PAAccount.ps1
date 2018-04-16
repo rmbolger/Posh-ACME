@@ -76,7 +76,7 @@ function Set-PAAccount {
         }
 
         # check if there's anything to change
-        if ($Contact -or $Deactivate) {
+        if ('Contact' -in $PSBoundParameters.Keys -or $Deactivate) {
 
             # hydrate the key
             $key = $acct.key | ConvertFrom-Jwk
@@ -91,8 +91,14 @@ function Set-PAAccount {
 
             # build the payload
             $payload = @{}
-            if ($Contact) {
-                $payload.contact = $Contact
+            if ('Contact' -in $PSBoundParameters.Keys) {
+                # We want to allow people to clear their contact field either by specifying $null or an empty array @()
+                # But currently, Boulder only works by sending the empty array. So use that if they sent $null.
+                if (!$Contact) {
+                    $payload.contact = @()
+                } else {
+                    $payload.contact = $Contact
+                }
             }
             if ($Deactivate) {
                 $payload.status = 'deactivated'
