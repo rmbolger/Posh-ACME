@@ -56,7 +56,7 @@ function New-PACert {
     # - is pending, but expired
     # - has different KeyLength
     # - has different SANs
-    $order = Get-PAOrder $Domain[0] -Refresh
+    try { $order = Get-PAOrder $Domain[0] -Refresh } catch {}
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
     if ($Force -or !$order -or
         $order.status -eq 'invalid' -or
@@ -74,7 +74,8 @@ function New-PACert {
 
         # For the time being we're only going to support the 'dns-01' challenge because it's the
         # only challenge type supported for wildcard domains, dealing with web servers for http-01
-        # will be a pain and both versions of the tls-sni challenge have had support dropped.
+        # will be a pain, and both versions of the tls-sni challenge have had support dropped
+        # pending a new tls replacement.
 
         # normalize the DNSPlugin attribute so there's a value for each domain passed in
         if (!$DNSPlugin) {

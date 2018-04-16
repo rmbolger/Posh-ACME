@@ -20,14 +20,14 @@ function New-PAOrder {
     # There's a chance we may be overwriting an existing order here. So check for
     # confirmation if certain conditions are true
     if (!$Force) {
-        $order = Get-PAOrder $Domain[0] -Refresh
+        try { $order = Get-PAOrder $Domain[0] -Refresh } catch {}
 
         # skip confirmation if the SANs or KeyLength are different
         # regardless of the original order status
         # or if the order is pending but expired
         if ( ($order -and ($KeyLength -ne $order.KeyLength -or
              ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') -or
-             ($order -and $order.status -eq 'pending' -and (Get-Date) -gt (Get-Date $order.expires)) ))) {
+             ($order.status -eq 'pending' -and (Get-Date) -gt (Get-Date $order.expires)) ))) {
             # do nothing
 
         # confirm if previous order is still in progress
