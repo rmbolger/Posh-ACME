@@ -1,5 +1,6 @@
 function ConvertFrom-Jwk {
     [CmdletBinding(DefaultParameterSetName='JSON')]
+    [OutputType('System.Security.Cryptography.AsymmetricAlgorithm')]
     param(
         [Parameter(ParameterSetName='JSON',Mandatory,Position=0,ValueFromPipeline)]
         [string]$JwkJson,
@@ -47,7 +48,7 @@ function ConvertFrom-Jwk {
                 }
 
                 # Add the private key parameters if they were included
-                # Per https://tools.ietf.org/html/rfc7518#section-6.3.2, 
+                # Per https://tools.ietf.org/html/rfc7518#section-6.3.2,
                 # 'd' is the only required private parameter. The rest SHOULD
                 # be included and if any *are* included then they all MUST be included.
                 # HOWEVER, Microsoft's RSA implementation either can't or won't create

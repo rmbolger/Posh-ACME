@@ -1,6 +1,6 @@
 function Get-PAAuthorizations {
-    [OutputType('PoshACME.PAAuthorization')]
     [CmdletBinding()]
+    [OutputType('PoshACME.PAAuthorization')]
     param(
         [Parameter(ParameterSetName='Order',Mandatory,Position=0,ValueFromPipeline)]
         [PSTypeName('PoshACME.PAOrder')]$Order,

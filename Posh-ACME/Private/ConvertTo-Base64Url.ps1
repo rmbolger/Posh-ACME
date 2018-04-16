@@ -1,5 +1,6 @@
 function ConvertTo-Base64Url {
     [CmdletBinding()]
+    [OutputType('System.String')]
     param(
         [Parameter(ParameterSetName='String',Mandatory,Position=0,ValueFromPipeline)]
         [AllowEmptyString()]

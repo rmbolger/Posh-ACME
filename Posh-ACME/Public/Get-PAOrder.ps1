@@ -1,6 +1,6 @@
 function Get-PAOrder {
-    [OutputType('PoshACME.PAOrder')]
     [CmdletBinding()]
+    [OutputType('PoshACME.PAOrder')]
     param(
         [Parameter(ParameterSetName='Specific',Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$MainDomain,
