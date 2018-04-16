@@ -1,5 +1,6 @@
 function New-Jws {
     [CmdletBinding()]
+    [OutputType('System.String')]
     param(
         [Parameter(Mandatory)]
         [Security.Cryptography.AsymmetricAlgorithm]$Key,

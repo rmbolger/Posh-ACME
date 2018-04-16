@@ -1,6 +1,6 @@
 function Get-PAAccount {
-    [OutputType('PoshACME.PAAccount')]
     [CmdletBinding()]
+    [OutputType('PoshACME.PAAccount')]
     param(
         [Parameter(ParameterSetName='Specific',Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$ID,

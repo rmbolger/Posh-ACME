@@ -1,6 +1,6 @@
 function Get-PAAuthorization {
-    [OutputType('PoshACME.PAAuthorization')]
     [CmdletBinding()]
+    [OutputType('PoshACME.PAAuthorization')]
     param(
         [Parameter(Mandatory,Position=0,ValueFromPipeline)]
         [string[]]$AuthUrls

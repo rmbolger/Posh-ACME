@@ -11,6 +11,7 @@ using namespace Org.BouncyCastle.X509.Extension
 
 function New-PACSR {
     [CmdletBinding()]
+    [OutputType('System.String')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string[]]$Domain,

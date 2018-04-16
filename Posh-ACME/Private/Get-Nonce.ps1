@@ -1,5 +1,6 @@
 function Get-Nonce {
     [CmdletBinding()]
+    [OutputType('System.String')]
     param(
         [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [Alias('newNonce')]

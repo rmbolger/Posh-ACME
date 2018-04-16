@@ -1,6 +1,6 @@
 function New-PAAccount {
-    [OutputType('PoshACME.PAAccount')]
     [CmdletBinding(SupportsShouldProcess)]
+    [OutputType('PoshACME.PAAccount')]
     param(
         [Parameter(Position=0)]
         [string[]]$Contact,

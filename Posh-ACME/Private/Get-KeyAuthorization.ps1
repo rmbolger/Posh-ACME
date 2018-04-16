@@ -1,5 +1,6 @@
 function Get-KeyAuthorization {
     [CmdletBinding()]
+    [OutputType('System.String')]
     param(
         [Parameter(Mandatory,Position=0)]
         [PSTypeName('PoshACME.PAAccount')]$Account,

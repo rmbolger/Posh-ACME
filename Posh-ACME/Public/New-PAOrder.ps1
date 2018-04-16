@@ -1,6 +1,6 @@
 function New-PAOrder {
-    [OutputType('PoshACME.PAOrder')]
     [CmdletBinding(SupportsShouldProcess)]
+    [OutputType('PoshACME.PAOrder')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string[]]$Domain,

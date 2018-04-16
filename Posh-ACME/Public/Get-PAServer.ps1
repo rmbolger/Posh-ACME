@@ -1,6 +1,6 @@
 function Get-PAServer {
-    [OutputType('PoshACME.PAServer')]
     [CmdletBinding()]
+    [OutputType('PoshACME.PAServer')]
     param(
         [Parameter(ParameterSetName='Specific',Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
