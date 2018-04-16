@@ -1,38 +1,68 @@
 function Set-PAOrder {
     [CmdletBinding()]
     param(
-        [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$MainDomain
     )
 
-    # Make sure we have an account configured
-    if (!(Get-PAAccount)) {
-        throw "No ACME account configured. Run Set-PAAccount first."
+    Begin {
+        # Make sure we have an account configured
+        if (!(Get-PAAccount)) {
+            throw "No ACME account configured. Run Set-PAAccount first."
+        }
     }
 
-    # check if we're switching orders
-    if ($MainDomain -and $MainDomain -ne $script:Order.MainDomain) {
+    Process {
 
-        # check for the order folder
-        $orderFolder = Join-Path $script:AcctFolder $MainDomain.Replace('*','!')
-        if (!(Test-Path $orderFolder -PathType Container)) {
-            throw "No order folder found with MainDomain '$MainDomain'."
+        # It's entirely possible that someone could pipe a bunch of domains to this function
+        # and basically switch orders a bunch of times. But ultimately there's no harm in it,
+        # so there's not reason to do anything about it.
+
+        # check if we're switching orders
+        if ($script:Order -and $MainDomain -ne $script:Order.MainDomain) {
+
+            # refresh the cached copy
+            Update-PAOrder $MainDomain
+
+            Write-Verbose "Switching to order $MainDomain"
+
+            # save it as current
+            $MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force
+
+            # reload the cache from disk
+            Import-PAConfig
+
         }
 
-        # try to load the order.json file
-        $order = Get-Content (Join-Path $orderFolder 'order.json') -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-        $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
-
-        # save it
-        $script:Order = $order
-        $script:OrderFolder = $orderFolder
-        $order.MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force
-
-    } else {
-
-        # just use the current order
-        $order = $script:Order
-        $MainDomain = $order.MainDomain
     }
 
+
+
+
+
+    <#
+    .SYNOPSIS
+        Set the current ACME order.
+
+    .DESCRIPTION
+        Allows you to switch between ACME orders for a particular account.
+
+    .PARAMETER MainDomain
+        The primary domain for the order. For a SAN order, this was the first domain in the list when creating the order.
+
+    .EXAMPLE
+        Set-PAOrder site1.example.com
+
+        Switch to the specified domain's order.
+
+    .LINK
+        Project: https://github.com/rmbolger/Posh-ACME
+
+    .LINK
+        Get-PAOrder
+
+    .LINK
+        New-PAOrder
+
+    #>
 }

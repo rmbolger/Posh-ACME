@@ -6,44 +6,47 @@ function New-PAOrder {
         [string[]]$Domain,
         [Parameter(Position=1)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
-        [string]$KeyLength='4096',
+        [string]$KeyLength='2048',
         [switch]$Force
     )
 
-    $acct = Get-PAAccount
-
     # Make sure we have an account configured
-    if (!$acct) {
+    if (!($acct = Get-PAAccount)) {
         throw "No ACME account configured. Run Set-PAAccount first."
     }
 
-    # There's a chance we may be overwriting an existing order here. So check for
-    # confirmation if certain conditions are true
-    $order = Get-PAOrder $Domain[0] -Refresh
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
 
-    # skip confirmation if -Force was used or the SANs or KeyLength are different
-    # regardless of the original order status
-    # or if the order is pending but expired
-    if ( $Force -or ($order -and ($KeyLength -ne $order.KeyLength -or
-         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') -or
-         ($order -and $order.status -eq 'pending' -and (Get-Date) -gt (Get-Date $order.expires)) ))) {
-        # do nothing
+    # There's a chance we may be overwriting an existing order here. So check for
+    # confirmation if certain conditions are true
+    if (!$Force) {
+        $order = Get-PAOrder $Domain[0] -Refresh
 
-    # confirm if previous order is still in progress
-    } elseif ($order -and $order.status -in 'pending','ready','processing') {
+        # skip confirmation if the SANs or KeyLength are different
+        # regardless of the original order status
+        # or if the order is pending but expired
+        if ( ($order -and ($KeyLength -ne $order.KeyLength -or
+             ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') -or
+             ($order -and $order.status -eq 'pending' -and (Get-Date) -gt (Get-Date $order.expires)) ))) {
+            # do nothing
 
-        if (!$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
-            "Existing order with status $($order.status).")) { return }
+        # confirm if previous order is still in progress
+        } elseif ($order -and $order.status -in 'pending','ready','processing') {
 
-    # confirm if previous order not up for renewal
-    } elseif ($order -and $order.status -eq 'valid' -and (Get-Date) -lt (Get-Date $order.RenewAfter)) {
+            if (!$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
+                "Existing order with status $($order.status).")) { return }
 
-        if (!$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
-            "Existing order has not reached renewal window.")) { return }
+        # confirm if previous order not up for renewal
+        } elseif ($order -and $order.status -eq 'valid' -and (Get-Date) -lt (Get-Date $order.RenewAfter)) {
+
+            if (!$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
+                "Existing order has not reached suggested renewal window.")) { return }
+        }
     }
 
-    # convert the key
+    Write-Verbose "Creating new $KeyLength order with domains: $($Domain -join ', ')"
+
+    # hydrate the key
     $acctKey = $acct.key | ConvertFrom-Jwk
 
     # build the protected header for the request
@@ -62,10 +65,12 @@ function New-PAOrder {
     $payloadJson = $payload | ConvertTo-Json -Compress
 
     # send the request
-    $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
+    try {
+        $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
+    } catch { throw }
+    Write-Verbose $response.Content
 
     # process the response
-    Write-Verbose "$($response.Content)"
     $order = $response.Content | ConvertFrom-Json
     $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
     $order | Add-Member -MemberType NoteProperty -Name 'MainDomain' -Value $Domain[0]
@@ -100,4 +105,56 @@ function New-PAOrder {
     $oldFiles | Move-Item -Destination { "$($_.FullName).bak" } -Force
 
     return $order
+
+
+
+
+    <#
+    .SYNOPSIS
+        Create a new order on the current ACME account.
+
+    .DESCRIPTION
+        Creating an ACME order is the first step of the certificate request process. To create a SAN certificate with multiple names, include them all in an array for the -Domain parameter. The first name in the list will be considered the "MainDomain" and will also be in the certificate subject field. LetsEncrypt currently limits SAN certificates to 100 names.
+
+        Be aware that only one order per MainDomain can exist with this module. Subsequent orders that have the same MainDomain will overwrite previous orders and certificates under the assumption that you are trying to renew or update the certificate with additional names.
+
+    .PARAMETER Domain
+        One or more domain names to include in this order/certificate. The first one in the list will be considered the "MainDomain" and be set as the subject of the finalized certificate.
+
+    .PARAMETER KeyLength
+        The type and size of private key to use. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to '2048'.
+
+    .PARAMETER Force
+        If specified, confirmation prompts that may have been generated will be skipped.
+
+    .EXAMPLE
+        New-PAOrder site1.example.com
+
+        Create a new order for the specified domain using the default key length.
+
+    .EXAMPLE
+        New-PAOrder -Domain 'site1.example.com','site2.example.com','site3.example.com'
+
+        Create a new SAN order for the specified domains using the default key length.
+
+    .EXAMPLE
+        New-PAOrder site1.example.com 4096
+
+        Create a new order for the specified domain using an RSA 4096 bit key.
+
+    .EXAMPLE
+        New-PAOrder 'site1.example.com','site2.example.com' ec-384 -Force
+
+        Create a new SAN order for the specified domains using an ECC key using P-384 curve that ignores any confirmations.
+
+    .LINK
+        Project: https://github.com/rmbolger/Posh-ACME
+
+    .LINK
+        Get-PAOrder
+
+    .LINK
+        Set-PAOrder
+
+    #>
 }
