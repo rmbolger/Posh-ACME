@@ -85,8 +85,8 @@ function Get-PAAccount {
             if ($ID) {
 
                 # build the path to acct.json
-                $acctFile = Join-Path $script:DirFolder $ID
-                $acctFile = Join-Path $acctFile 'acct.json'
+                $acctFolder = Join-Path $script:DirFolder $ID
+                $acctFile = Join-Path $acctFolder 'acct.json'
 
                 # check if it exists
                 if (Test-Path $acctFile -PathType Leaf) {
@@ -109,7 +109,6 @@ function Get-PAAccount {
                 return (Get-PAAccount $acct.id)
 
             } else {
-
                 # just return whatever we've got
                 return $acct
             }
@@ -168,7 +167,12 @@ function Get-PAAccount {
     .EXAMPLE
         Get-PAAccount -List -Refresh
 
-        Get fresh ACME account details for all (non-deactivated) accounts.
+        Get fresh ACME account details for all accounts.
+
+    .EXAMPLE
+        Get-PAAccount -List -Contact user1@example.com
+
+        Get cached ACME account details for all accounts that have user1@example.com as the only contact.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME
