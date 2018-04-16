@@ -1,6 +1,9 @@
 function Import-PAConfig {
     [CmdletBinding()]
     param(
+        [Parameter(Position=0)]
+        [ValidateSet('Server','Account','Order')]
+        [string]$Level
     )
 
     # The config structure looks like this:
@@ -16,6 +19,10 @@ function Import-PAConfig {
     # - order.json
     # - cert.cer/key/pfx/etc
 
+    # Each leve of the config is dependent on its parent. So if the user changes the server,
+    # they need to reload the server and all of the child accounts and orders. But if they only
+    # change the account, they only need to reload the accounts and orders. And so on.
+
     # make sure we have the root config folder
     if ([string]::IsNullOrWhiteSpace($script:ConfigRoot)) {
         $script:ConfigRoot = Join-Path $env:LOCALAPPDATA 'Posh-ACME'
@@ -24,32 +31,42 @@ function Import-PAConfig {
         }
     }
 
-    # load the current ACME directory into memory if it exists on disk
-    $dirUrl = [string](Get-Content (Join-Path $script:ConfigRoot 'current-server.txt') -ErrorAction SilentlyContinue)
-    if (![string]::IsNullOrWhiteSpace($dirUrl)) {
+    # start at the server level if nothing was specified or specifically requested
+    if (!$Level -or $Level -eq 'Server') {
 
-        $dirFolder = $dirUrl.Replace('https://','').Replace(':','_')
-        $script:DirFolder = Join-Path $script:ConfigRoot $dirFolder.Substring(0,$dirFolder.IndexOf('/'))
-        $script:Dir = Get-PAServer $dirUrl
+        # load the current ACME directory into memory if it exists on disk
+        $dirUrl = [string](Get-Content (Join-Path $script:ConfigRoot 'current-server.txt') -EA SilentlyContinue)
+        if (![string]::IsNullOrWhiteSpace($dirUrl)) {
+
+            $dirFolder = $dirUrl.Replace('https://','').Replace(':','_')
+            $script:DirFolder = Join-Path $script:ConfigRoot $dirFolder.Substring(0,$dirFolder.IndexOf('/'))
+            $script:Dir = Get-PAServer $dirUrl
+
+            $ImportAccount = $true
+        }
+    }
+
+    if ($ImportAccount -or $Level -eq 'Account') {
 
         # load the current account into memory if it exists on disk
-        $AcctID = [string](Get-Content (Join-Path $script:DirFolder 'current-account.txt') -ErrorAction SilentlyContinue)
-        if (![string]::IsNullOrWhiteSpace($AcctID)) {
+        $acctID = [string](Get-Content (Join-Path $script:DirFolder 'current-account.txt') -EA SilentlyContinue)
+        if (![string]::IsNullOrWhiteSpace($acctID)) {
 
-            $script:AcctFolder = Join-Path $script:DirFolder $AcctID
-            $script:Acct = Get-Content (Join-Path $script:AcctFolder 'acct.json') -Raw | ConvertFrom-Json
-            $script:Acct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
+            $script:AcctFolder = Join-Path $script:DirFolder $acctID
+            $script:Acct = Get-PAAccount $acctID
 
-            # load the current order into memory if it exists on disk
-            $domain = [string](Get-Content (Join-Path $script:AcctFolder 'current-order.txt') -ErrorAction SilentlyContinue)
-            if (![string]::IsNullOrEmpty($domain)) {
+            $ImportOrder = $true
+        }
+    }
 
-                $script:OrderFolder = Join-Path $script:AcctFolder $domain.Replace('*','!')
-                $script:Order = Get-Content (Join-Path $script:OrderFolder 'order.json') -Raw | ConvertFrom-Json
-                $script:Order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
+    if ($ImportOrder -or $Level -eq 'Order') {
 
-            }
+        # load the current order into memory if it exists on disk
+        $domain = [string](Get-Content (Join-Path $script:AcctFolder 'current-order.txt') -EA SilentlyContinue)
+        if (![string]::IsNullOrWhiteSpace($domain)) {
 
+            $script:OrderFolder = Join-Path $script:AcctFolder $domain.Replace('*','!')
+            $script:Order = Get-PAOrder $domain
         }
     }
 

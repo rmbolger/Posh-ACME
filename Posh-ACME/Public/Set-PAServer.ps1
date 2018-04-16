@@ -27,7 +27,7 @@ function Set-PAServer {
         $DirectoryUrl | Out-File (Join-Path $script:ConfigRoot 'current-server.txt') -Force
 
         # reload config from disk
-        Import-PAConfig
+        Import-PAConfig 'Server'
 
         # Show a link to the TOS if this server has no accounts associated with it yet.
         if (!(Get-PAAccount -List)) {
