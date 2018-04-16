@@ -23,7 +23,7 @@ function Update-PAAccount {
             $UpdatingCurrent = $true
         } else {
             # even if they specified the account explicitly, we may still be updating the
-            # "current" server. So figure that out and set a flag for later.
+            # "current" account. So figure that out and set a flag for later.
             if ($script:Acct -and $script:Acct.id -and $script:Acct.id -eq $ID) {
                 $UpdatingCurrent = $true
                 $acct = $script:Acct
@@ -50,10 +50,12 @@ function Update-PAAccount {
         $payloadJson = '{}'
 
         # send the request
-        $response = Invoke-ACME $header.url $key $header $payloadJson -ErrorAction Stop
+        try {
+            $response = Invoke-ACME $header.url $key $header $payloadJson -ErrorAction Stop
+        } catch { throw }
         Write-Verbose $response.Content
 
-        $respObj = ($response.Content | ConvertFrom-Json);
+        $respObj = $response.Content | ConvertFrom-Json
 
         # update the things that could have changed
         $acct.status = $respObj.status
