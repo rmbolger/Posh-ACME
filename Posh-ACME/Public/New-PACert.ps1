@@ -35,7 +35,7 @@ function New-PACert {
     # one, switch to that. If the specified details don't match any existing
     # accounts, create a new one.
     $acct = Get-PAAccount
-    $accts = Get-PAAccount -List -Refresh -Status 'valid' @PSBoundParameters
+    $accts = @(Get-PAAccount -List -Refresh -Status 'valid' @PSBoundParameters)
     if (!$accts -or $accts.Count -eq 0) {
         # no matches for the set of filters, so create new
         $acct = New-PAAccount @PSBoundParameters
