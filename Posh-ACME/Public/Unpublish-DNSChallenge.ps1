@@ -30,7 +30,7 @@ function Unpublish-DNSChallenge {
     . (Join-Path $pluginDir "$Plugin.ps1")
 
     # check for the command that should exist now based on plugin name
-    $delCommand = "Remove-DnsChallenge$Plugin"
+    $delCommand = "Remove-DnsTxt$Plugin"
     if (!(Get-Command $delCommand -ErrorAction SilentlyContinue)) {
         throw "Expected plugin command $delCommand not found."
     }

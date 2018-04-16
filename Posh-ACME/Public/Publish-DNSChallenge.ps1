@@ -30,7 +30,7 @@ function Publish-DNSChallenge {
     . (Join-Path $pluginDir "$Plugin.ps1")
 
     # check for the command that should exist now based on plugin name
-    $addCommand = "Add-DnsChallenge$Plugin"
+    $addCommand = "Add-DnsTxt$Plugin"
     if (!(Get-Command $addCommand -ErrorAction SilentlyContinue)) {
         throw "Expected plugin command $addCommand not found."
     }
