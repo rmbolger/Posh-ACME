@@ -1,4 +1,4 @@
-function Add-DnsChallengeInfoblox {
+function Add-DnsTxtInfoblox {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
@@ -11,7 +11,7 @@ function Add-DnsChallengeInfoblox {
         [pscredential]$IBCred,
         [string]$IBView='default',
         [switch]$IBIgnoreCert,
-        [Parameter(ValueFromRemainingArguments=$true)]
+        [Parameter(ValueFromRemainingArguments)]
         $Splat
     )
 
@@ -53,7 +53,7 @@ function Add-DnsChallengeInfoblox {
 
 }
 
-function Remove-DnsChallengeInfoblox {
+function Remove-DnsTxtInfoblox {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
@@ -66,7 +66,7 @@ function Remove-DnsChallengeInfoblox {
         [pscredential]$IBCred,
         [string]$IBView='default',
         [switch]$IBIgnoreCert,
-        [Parameter(ValueFromRemainingArguments=$true)]
+        [Parameter(ValueFromRemainingArguments)]
         $Splat
     )
 
@@ -113,10 +113,10 @@ function Remove-DnsChallengeInfoblox {
 
 }
 
-function Save-DnsChallengeInfoblox {
+function Save-DnsTxtInfoblox {
     [CmdletBinding()]
     param(
-        [Parameter(ValueFromRemainingArguments=$true)]
+        [Parameter(ValueFromRemainingArguments)]
         $Splat
     )
 

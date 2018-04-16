@@ -1,11 +1,11 @@
-function Add-DnsChallengeManual {
+function Add-DnsTxtManual {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(ValueFromRemainingArguments=$true)]
+        [Parameter(ValueFromRemainingArguments)]
         $Splat
     )
 
@@ -16,14 +16,14 @@ function Add-DnsChallengeManual {
     Read-Host -Prompt "Press any key to continue once the record has been created"
 }
 
-function Remove-DnsChallengeManual {
+function Remove-DnsTxtManual {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(ValueFromRemainingArguments=$true)]
+        [Parameter(ValueFromRemainingArguments)]
         $Splat
     )
 
@@ -33,10 +33,10 @@ function Remove-DnsChallengeManual {
     Read-Host -Prompt "Press any key to continue once the record has been deleted"
 }
 
-function Save-DnsChallengeManual {
+function Save-DnsTxtManual {
     [CmdletBinding()]
     param(
-        [Parameter(ValueFromRemainingArguments=$true)]
+        [Parameter(ValueFromRemainingArguments)]
         $Splat
     )
 
