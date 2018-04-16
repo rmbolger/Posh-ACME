@@ -56,7 +56,7 @@ function Invoke-ChallengeValidation {
             # don't re-query things we know are already valid
             if ($i -in $skips) { continue; }
 
-            $auth = Get-PAAuthorization $AuthUrls[$i] -Verbose:$false
+            $auth = Get-PAAuthorizations $AuthUrls[$i] -Verbose:$false
             Write-Verbose "T$tries Authorization for $($auth.fqdn) status '$($auth.status)'."
 
             if ($auth.status -eq 'valid') {
