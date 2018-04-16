@@ -50,6 +50,7 @@ function Get-PAOrder {
 
                 # check for an order.json
                 if (Test-Path $orderFile -PathType Leaf) {
+                    Write-Verbose "Loading PAOrder from disk"
                     $order = Get-ChildItem $orderFile | Get-Content -Raw | ConvertFrom-Json
                     $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
                 } else {

@@ -30,7 +30,7 @@ function Set-PAOrder {
             $MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force
 
             # reload the cache from disk
-            Import-PAConfig
+            Import-PAConfig 'Order'
 
         }
 
