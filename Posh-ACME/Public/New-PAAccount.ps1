@@ -44,9 +44,21 @@ function New-PAAccount {
     # create the account key
     $key = New-PAKey $KeyLength
 
+    # create the algorithm identifier as described by
+    # https://tools.ietf.org/html/rfc7518#section-3.1
+    # and what we know LetsEncrypt supports today which includes
+    # RS256 for all RSA keys
+    # ES256 for P-256 keys
+    # ES384 for P-384 keys
+    # ES512 for P-521 keys (not a typo, 521 is the curve, 512 is the SHA512 hash algorithm)
+    $alg = 'RS256'
+    if     ($KeyLength -eq 'ec-256') { $alg = 'ES256' }
+    elseif ($KeyLength -eq 'ec-384') { $alg = 'ES384' }
+    elseif ($KeyLength -eq 'ec-521') { $alg = 'ES512' }
+
     # build the protected header for the request
     $header = @{
-        alg   = (Get-JwsAlg $key);
+        alg   = $alg;
         jwk   = ($key | ConvertTo-Jwk -PublicOnly);
         nonce = $script:Dir.nonce;
         url   = $script:Dir.newAccount;
@@ -85,10 +97,12 @@ function New-PAAccount {
         contact = $respObj.contact;
         location = $location;
         key = ($key | ConvertTo-Jwk);
-        alg = (Get-JwsAlg $key);
+        alg = $alg;
         KeyLength = $KeyLength;
-        # This is supposed to exist according to https://tools.ietf.org/html/draft-ietf-acme-acme-11#section-7.1.2
-        # But it's not currently showing up via Pebble or Boulder
+        # The orders field is supposed to exist according to
+        # https://tools.ietf.org/html/draft-ietf-acme-acme-11#section-7.1.2
+        # But it's not currently implemented in Boulder. Tracking issue is here:
+        # https://github.com/letsencrypt/boulder/issues/3335
         orders = $respObj.orders;
     }
 
