@@ -1,12 +1,15 @@
 function New-PAAccount {
     [OutputType('PoshACME.PAAccount')]
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param(
+        [Parameter(Position=0)]
         [string[]]$Contact,
+        [Parameter(Position=1)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [Alias('AccountKeyLength')]
         [string]$KeyLength='ec-256',
         [switch]$AcceptTOS,
+        [switch]$Force,
         [Parameter(ValueFromRemainingArguments=$true)]
         $ExtraParams
     )
@@ -16,7 +19,27 @@ function New-PAAccount {
         throw "No ACME server configured. Run Set-PAServer first."
     }
 
-    Write-Verbose "Creating new $KeyLength account with contact: $($Contact -join ',')"
+    # make sure the Contact emails have a "mailto:" prefix
+    # this may get more complex later if ACME servers support more than email based contacts
+    if ($Contact.Count -gt 0) {
+        0..($Contact.Count-1) | ForEach-Object {
+            if ($Contact[$_] -notlike 'mailto:*') {
+                $Contact[$_] = "mailto:$($Contact[$_])"
+            }
+        }
+    }
+
+    # There's a chance we may be creating effectively a duplicate account. So check
+    # for confirmation if there's already one with the same contacts and keylength.
+    if (!$Force) {
+        $accts = @(Get-PAAccount -List -Refresh -Contact $Contact -KeyLength $KeyLength -Status 'valid')
+        if ($accts.Count -gt 0) {
+            if (!$PSCmdlet.ShouldContinue("Do you wish to duplicate?",
+                "Existing account with matching contacts and key length.")) { return }
+        }
+    }
+
+    Write-Verbose "Creating new $KeyLength account with contact: $($Contact -join ', ')"
 
     # create the account key
     $key = New-PAKey $KeyLength
@@ -31,19 +54,9 @@ function New-PAAccount {
 
     # init the payload
     $payload = @{}
-
-    # make sure the Contact emails have a "mailto:" prefix
-    # this may get more complex later if ACME servers support more than email based contacts
     if ($Contact.Count -gt 0) {
-        0..($Contact.Count-1) | ForEach-Object {
-            if ($Contact[$_] -notlike 'mailto:*') {
-                $Contact[$_] = "mailto:$($Contact[$_])"
-            }
-        }
         $payload.contact = $Contact
     }
-
-    # accept the Terms of Service
     if ($AcceptTOS) {
         $payload.termsOfServiceAgreed = $true
     }
@@ -109,6 +122,12 @@ function New-PAAccount {
     .PARAMETER AcceptTOS
         If not specified, the ACME server will throw an error with a link to the current Terms of Service. Using this switch indicates acceptance of those Terms of Service and is required for successful account creation.
 
+    .PARAMETER Force
+        If specified, confirmation prompts that may have been generated will be skipped.
+
+    .PARAMETER ExtraParams
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+
     .EXAMPLE
         New-PAAccount -AcceptTOS
 
@@ -125,9 +144,9 @@ function New-PAAccount {
         Create a new account with the specified email and an RSA 4096 bit key.
 
     .EXAMPLE
-        New-PAAccount -KeyLength 'ec-384' -AcceptTOS
+        New-PAAccount -KeyLength 'ec-384' -AcceptTOS -Force
 
-        Create a new account with no contact email and an ECC key using P-384 curve.
+        Create a new account with no contact email and an ECC key using P-384 curve that ignores any confirmations.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME
