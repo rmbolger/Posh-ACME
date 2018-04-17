@@ -3,7 +3,7 @@ function Invoke-ChallengeValidation {
     param(
         [Parameter(Position=0)]
         [ValidateScript({Test-ValidDnsPlugin $_ -ThrowOnFail})]
-        [string[]]$DNSPlugin,
+        [string[]]$DnsPlugin,
         [Parameter(Position=1)]
         [hashtable]$PluginArgs,
         [int]$DnsSleep=120,
@@ -60,7 +60,7 @@ function Invoke-ChallengeValidation {
         throw "Order status is invalid for $($Order.MainDomain). Unable to continue."
 
     } elseif ($Order.status -eq 'valid' -or $Order.status -eq 'processing') {
-        Write-Warning "The server is already issuing or has issued a certificate for order $($Order.MainDomain)."
+        Write-Warning "The server has already issued or is processing a certificate for order $($Order.MainDomain)."
         return
     } elseif ($Order.status -eq 'ready') {
         Write-Warning "The order $($Order.MainDomain) has already completed challenge validation and is awaiting finalization."
@@ -78,16 +78,16 @@ function Invoke-ChallengeValidation {
     $allAuths = $Order | Get-PAAuthorizations
     $toValidate = @()
 
-    # fill out the DNSPlugin attribute so there's a value for each authorization in the order
-    if (!$DNSPlugin) {
-        Write-Warning "DNSPlugin not specified. Defaulting to Manual."
-        $DNSPlugin = @('Manual') * $allAuths.Count
-    } elseif ($DNSPlugin.Count -lt $Domain.Count) {
-        $lastPlugin = $DNSPlugin[-1]
-        Write-Warning "Fewer DNSPlugin values than Domain values supplied. Using $lastPlugin for the rest."
-        $DNSPlugin += @($lastPlugin) * ($allAuths.Count-$DNSPlugin.Count)
+    # fill out the DnsPlugin attribute so there's a value for each authorization in the order
+    if (!$DnsPlugin) {
+        Write-Warning "DnsPlugin not specified. Defaulting to Manual."
+        $DnsPlugin = @('Manual') * $allAuths.Count
+    } elseif ($DnsPlugin.Count -lt $Domain.Count) {
+        $lastPlugin = $DnsPlugin[-1]
+        Write-Warning "Fewer DnsPlugin values than Domain values supplied. Using $lastPlugin for the rest."
+        $DnsPlugin += @($lastPlugin) * ($allAuths.Count-$DnsPlugin.Count)
     }
-    Write-Verbose "DNSPlugin: $($DNSPlugin -join ',')"
+    Write-Verbose "DnsPlugin: $($DnsPlugin -join ',')"
 
     try {
         # loop through the authorizations looking for challenges to validate
@@ -104,7 +104,7 @@ function Invoke-ChallengeValidation {
                 if ($auth.DNS01Status -eq 'pending') {
                     # publish the necessary TXT record
                     Write-Host "Publishing DNS challenge for $($auth.fqdn)"
-                    Publish-DNSChallenge $auth.DNSId $Account $auth.DNS01Token $DNSPlugin[$i] $PluginArgs
+                    Publish-DNSChallenge $auth.DNSId $Account $auth.DNS01Token $DnsPlugin[$i] $PluginArgs
                     $toValidate += $i
                 } else {
                     throw "Unexpected challenge status '$($auth.DNS01Status)' for $($auth.fqdn)."
@@ -120,7 +120,7 @@ function Invoke-ChallengeValidation {
         if ($toValidate.Count -gt 0) {
 
             # Call the Save function for each unique DNS Plugin used
-            $DNSPlugin[$toValidate] | Select-Object -Unique | ForEach-Object {
+            $DnsPlugin[$toValidate] | Select-Object -Unique | ForEach-Object {
                 Write-Host "Saving changes for $_ plugin"
                 Save-DNSChallenge $_ $PluginArgs
             }
@@ -146,12 +146,70 @@ function Invoke-ChallengeValidation {
     } finally {
         # always cleanup the TXT records if they were added
         for ($i=0; $i -lt $toValidate.Count; $i++) {
-            Unpublish-DNSChallenge $allAuths[$i].DNSId $Account $allAuths[$i].DNS01Token $DNSPlugin[$i] $PluginArgs
+            Unpublish-DNSChallenge $allAuths[$i].DNSId $Account $allAuths[$i].DNS01Token $DnsPlugin[$i] $PluginArgs
         }
-        $DNSPlugin[$toValidate] | Select-Object -Unique | ForEach-Object {
+        $DnsPlugin[$toValidate] | Select-Object -Unique | ForEach-Object {
             Write-Host "Saving changes for $_ plugin"
             Save-DNSChallenge $_ $PluginArgs
         }
     }
 
+
+
+
+
+    <#
+    .SYNOPSIS
+        Respond to authorization challenges for an ACME order and wait for the ACME server to validate them.
+
+    .DESCRIPTION
+        An ACME order contains an authorization object for each domain in the order. The client must complete at least one of a set of challenges for each authorization in order to prove they own the domain. Once complete, the client asks the server to validate each challenge and waits for the server to do so and update the authorization status.
+
+    .PARAMETER DnsPlugin
+        One or more DNS plugin names to use for this order's DNS challenges. If no plugin is specified, the "Manual" plugin will be used. If the same plugin is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many plugin names as there are domains in the order and in the same sequence as the ACME order.
+
+    .PARAMETER PluginArgs
+        A hashtable containing the plugin arguments to use with the specified DnsPlugin list. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
+
+    .PARAMETER DnsSleep
+        Number of seconds to wait for DNS changes to propagate before asking the server to validate DNS challenges. Default is 120.
+
+    .PARAMETER ValidationTimeout
+        Number of seconds to wait for the ACME server to validate the challenges after asking it to do so. Default is 60. If the timeout is exceeded, an error will be thrown.
+
+    .PARAMETER Account
+        If specified, switch to and use this account for the validations. It must be associated with the current server or an error will be thrown.
+
+    .PARAMETER Order
+        If specified, switch to and use this order for the validations. It must be associated with the current or specified account or an error will be thrown.
+
+    .PARAMETER ExtraParams
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+
+    .EXAMPLE
+        Invoke-ChallengeValidation
+
+        Invoke manual DNS challenge validation on the currently selected account and order.
+
+    .EXAMPLE
+        Invoke-ChallengeValidation Infoblox @{IBServer="ipam.example.com";IBView="External";IBCred=(Get-Credential)}
+
+        Invoke DNS challenge validation using the Infoblox plugin and the set of required Infoblox parameters on the currently selected account and order.
+
+    .EXAMPLE
+        $order = Get-PAOrder site1.example.com
+        PS C:\>Invoke-ChallengeValidation -Order $order
+
+        Invoke manual DNS challenge validation on the specified order and currently selected account.
+
+    .LINK
+        Project: https://github.com/rmbolger/Posh-ACME
+
+    .LINK
+        Get-PAOrder
+
+    .LINK
+        New-PAOrder
+
+    #>
 }
