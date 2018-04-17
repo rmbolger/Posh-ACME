@@ -1,0 +1,4 @@
+- Figure out saving plugin params
+- Add cleanup functions
+- Finish adding help for public functions
+- Implement renewals
