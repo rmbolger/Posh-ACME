@@ -13,11 +13,13 @@ function New-PACert {
         [Alias('location')]
         [string]$DirectoryUrl='LE_STAGE',
         [ValidateScript({Test-ValidDnsPlugin $_ -ThrowOnFail})]
-        [string[]]$DNSPlugin,
+        [string[]]$DnsPlugin,
         [hashtable]$PluginArgs,
+        [switch]$OCSPMustStaple,
         [switch]$Force,
         [int]$DNSSleep=120,
-        [int]$ValidationTimeout=60
+        [int]$ValidationTimeout=60,
+        [int]$CertIssueTimeout=60
     )
 
     # Make sure we have a server set. But don't override the current
@@ -67,7 +69,7 @@ function New-PACert {
         $CertKeyLength -ne $order.KeyLength -or
         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') ) {
 
-        Write-Host "Creating a new order for $($Domain -join ', ') with key length $CertKeyLength"
+        Write-Host "Creating a new order for $($Domain -join ', ')"
         $order = New-PAOrder $Domain $CertKeyLength -Force
     } else {
         $order | Set-PAOrder
@@ -77,11 +79,44 @@ function New-PACert {
     # deal with "pending" orders that may have authorization challenges to prove
     if ($order.status -eq 'pending') {
         Invoke-ChallengeValidation @PSBoundParameters
+
+        # refresh the order status
+        $order = Get-PAOrder -Refresh
     }
 
-    # refresh the order status
-    $order = Get-PAOrder $Domain[0] -Refresh
+    # if we've reached this point, it should mean that we're ready to finalize the
+    # order. The order status is supposed to be 'ready', but that ready status is a
+    # recent addition to the ACME spec and LetsEncrypt hasn't implemented it yet.
+    # So for now, we have to check the status of the order's authorizations to make
+    # sure it's ready for finalization.
+    $auths = $order | Get-PAAuthorizations
+    if ($order.status -eq 'ready' -or
+        ($order.status -eq 'pending' -and !($auths | Where-Object { $_.status -ne 'valid' })) ) {
 
-    $order
+        # create the cert request
+        Write-Host "Creating new certificate request with key length $CertKeyLength$(if ($OCSPMustStaple){' and OCSP Must-Staple'})."
+        $csr = New-PACSR $Domain $CertKeyLength -OCSPMustStaple:$OCSPMustStaple -OutputFolder $script:OrderFolder
+
+        # make the finalize call
+        Write-Host "Finalizing the order by sending the certificate request."
+        Invoke-Finalize $csr @PSBoundParameters
+
+        # refresh the order status
+        $order = Get-PAOrder -Refresh
+    }
+
+    # The order should now be finalized and the status should be valid. The only
+    # thing left to do is download the cert and chain and write the results to
+    # disk
+    if ($order.status -eq 'valid') {
+        if ([string]::IsNullOrWhiteSpace($order.certificate)) {
+            throw "Order status is valid, but no certificate URL was found."
+        }
+
+        # Download the cert which should come with the chain appended
+        $fullchain = Join-Path $script:OrderFolder 'fullchain.cer'
+        Invoke-WebRequest $order.certificate -OutFile $fullchain
+        Write-Host "Downloaded $fullchain"
+    }
 
 }

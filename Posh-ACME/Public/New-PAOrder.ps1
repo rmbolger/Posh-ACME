@@ -101,7 +101,7 @@ function New-PAOrder {
     $order | ConvertTo-Json | Out-File (Join-Path $script:OrderFolder 'order.json') -Force
 
     # backup any old certs/keys/requests that might exist
-    $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include *.key,*.csr,*.cer
+    $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include *.csr,*.key,*.cer,*.pfx
     $oldFiles | Move-Item -Destination { "$($_.FullName).bak" } -Force
 
     return $order
