@@ -126,7 +126,7 @@ function Invoke-ChallengeValidation {
             }
 
             # sleep while the DNS changes propagate
-            Write-Host "Sleeping for $DNSSleep seconds while DNS change take effect"
+            Write-Host "Sleeping for $DNSSleep seconds while DNS change(s) propagate"
             Start-Sleep -Seconds $DNSSleep
 
             # ask the server to validate the challenges

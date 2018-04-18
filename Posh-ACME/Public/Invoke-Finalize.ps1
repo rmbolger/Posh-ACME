@@ -2,25 +2,46 @@ function Invoke-Finalize {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [PSTypeName('PoshACME.PAAccount')]$Account,
-        [Parameter(Mandatory,Position=1)]
-        [PSTypeName('PoshACME.PAOrder')]$Order,
-        [Parameter(Mandatory,Position=2)]
         [string]$CSR,
-        [int]$SecondsToWait=60
+        [int]$CertIssueTimeout=60,
+        [PSTypeName('PoshACME.PAAccount')]$Account,
+        [PSTypeName('PoshACME.PAOrder')]$Order,
+        [Parameter(ValueFromRemainingArguments)]
+        $ExtraParams
     )
 
     # The purpose of this function is to complete the order process by sending our
     # certificate request and wait for it to generate the signed cert. We'll poll
     # the order until it's valid, invalid, or our timeout elapses.
 
-    # make sure we have a server configured
-    if (!(Get-PAServer)) {
-        throw "No ACME server configured. Run Set-PAServer first."
+    # make sure any account passed in is actually associated with the current server
+    # or if no account was specified, that there's a current account.
+    if (!$Account) {
+        if (!($Account = Get-PAAccount)) {
+            throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first."
+        }
+    } else {
+        if ($Account.id -notin (Get-PAAccount -List).id) {
+            throw "Specified account id $($Account.id) was not found in the current server's account list."
+        }
+    }
+    # make sure it's valid
+    if ($Account.status -ne 'valid') {
+        throw "Account status is $($Account.status)."
     }
 
-    # hydrate the key
-    $key = $Account.key | ConvertFrom-Jwk
+    # make sure any order passed in is actually associated with the account
+    # or if no order was specified, that there's a current order.
+    if (!$Order) {
+        if (!($Order = Get-PAOrder)) {
+            throw "No Order parameter specified and no current order selected. Try running Set-PAOrder first."
+        }
+    } else {
+        if ($Order.MainDomain -notin (Get-PAOrder -List).MainDomain) {
+            throw "Specified order for $($Order.MainDomain) was not found in the current account's order list."
+        }
+    }
+
 
     # build the protected header
     $header = @{
@@ -30,10 +51,9 @@ function Invoke-Finalize {
         url   = $Order.finalize;
     }
 
-    $payloadJson = "{`"csr`":`"$CSR`"}"
-
     # send the request
-    $response = Invoke-ACME $header.url $key $header $payloadJson -EA Stop
+    try { $response = Invoke-ACME $header.url ($Account.key | ConvertFrom-Jwk) $header "{`"csr`":`"$CSR`"}" -EA Stop }
+    catch { throw }
     Write-Verbose "$($response.Content)"
 
     # Boulder's ACME implementation (at least on Staging) currently doesn't
@@ -42,20 +62,20 @@ function Invoke-Finalize {
     # to have 'valid' status and a URL for the certificate. It skips the 'processing'
     # status entirely which we shouldn't rely on according to the spec.
     #
-    # So, we start polling the order directly, and the first response comes back with
+    # So we start polling the order directly and the first response comes back with
     # 'valid' status, but no certificate URL. Not sure if that means the previous
     # certificate URL was invalid. But we ultimately need to check for both 'valid'
     # status and a certificate URL to return.
 
     # now we poll
-    for ($tries=1; $tries -le ($SecondsToWait/2); $tries++) {
+    for ($tries=1; $tries -le ($CertIssueTimeout/2); $tries++) {
 
         $Order = Get-PAOrder $Order.MainDomain -Refresh
 
         if ($Order.status -eq 'invalid') {
             throw "Order status for $($Order.MainDomain) is invalid."
         } elseif ($Order.status -eq 'valid' -and ![string]::IsNullOrWhiteSpace($Order.certificate)) {
-            return $Order
+            return
         } else {
             # According to spec, the only other statuses are pending, ready, or processing
             # which means we should wait more.
@@ -64,7 +84,55 @@ function Invoke-Finalize {
 
     }
 
-    # If we're here, it means our poll timed out because we didn't return. So throw.
-    throw "Timed out waiting $SecondsToWait seconds for order to become valid."
+    # If we're here, it means our poll timed out because we didn't return already. So throw.
+    throw "Timed out waiting $CertIssueTimeout seconds for order to become valid."
 
+
+
+
+
+    <#
+    .SYNOPSIS
+        TODO
+
+    .DESCRIPTION
+        TODO
+
+    .PARAMETER CSR
+        TODO
+
+    .PARAMETER CertIssueTimeout
+        TODO
+
+    .PARAMETER Account
+        If specified, switch to and use this account for the finalization. It must be associated with the current server or an error will be thrown.
+
+    .PARAMETER Order
+        If specified, switch to and use this order for the finalization. It must be associated with the current or specified account or an error will be thrown.
+
+    .EXAMPLE
+        TODO
+
+        TODO
+
+    .EXAMPLE
+        TODO
+
+        TODO
+
+    .EXAMPLE
+        TODO
+
+        TODO
+
+    .LINK
+        Project: https://github.com/rmbolger/Posh-ACME
+
+    .LINK
+        Get-PAOrder
+
+    .LINK
+        Invoke-ChallengeValidation
+
+    #>
 }
