@@ -11,7 +11,7 @@ function Export-Pem {
         [Parameter(Mandatory,Position=0)]
         [psobject]$InputObject,
         [Parameter(Mandatory,Position=1)]
-        [string]$FilePath
+        [string]$OutputFile
     )
 
     if ($InputObject -is [AsymmetricCipherKeyPair]) {
@@ -74,13 +74,13 @@ function Export-Pem {
     }
 
     # resolve relative paths
-    $FilePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($FilePath)
+    $OutputFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($OutputFile)
 
     # Usually, PEM files are ANSI/ASCII encoded with UNIX line endings which means none of the
     # normal Powershell stuff for outputting files will work. So we'll use a .NET StreamWriter
     # instead.
     try {
-        $sw = New-Object IO.StreamWriter($FilePath, $false, [Text.Encoding]::ASCII)
+        $sw = New-Object IO.StreamWriter($OutputFile, $false, [Text.Encoding]::ASCII)
         $sw.NewLine = "`n"
         foreach ($line in $pem) {
             $sw.WriteLine($line)
