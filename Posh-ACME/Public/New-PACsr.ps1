@@ -9,7 +9,7 @@ using namespace Org.BouncyCastle.Pkcs
 using namespace Org.BouncyCastle.Security
 using namespace Org.BouncyCastle.X509.Extension
 
-function New-PACSR {
+function New-PACsr {
     [CmdletBinding()]
     [OutputType('System.String')]
     param(
