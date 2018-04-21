@@ -109,11 +109,15 @@ function Import-Pem {
     # certificates
     } elseif ($pemStr -like '*-----BEGIN CERTIFICATE-----*' -and $pemStr -like '*-----END CERTIFICATE-----*') {
 
-        $base64 = $pemStr.Substring($pemStr.IndexOf('CERTIFICATE-----')+16)
-        $base64 = $base64.Substring(0,$base64.IndexOf('-'))
-        $certBytes = [Convert]::FromBase64String($base64)
-
-        throw "Certificate parsing not implemented yet"
+        # For certs, we can use the native PemReader to make things easier
+        try {
+            $sr = New-Object IO.StreamReader($InputFile)
+            $reader = New-Object Org.BouncyCastle.OpenSsl.PemReader($sr)
+            $cert = $reader.ReadObject()
+            return $cert
+        } finally {
+            if ($sr -ne $null) { $sr.Close() }
+        }
 
     } else {
         throw "Unsupported PEM type"

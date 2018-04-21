@@ -113,10 +113,18 @@ function New-PACert {
             throw "Order status is valid, but no certificate URL was found."
         }
 
-        # Download the cert which should come with the chain appended
-        $fullchain = Join-Path $script:OrderFolder 'fullchain.cer'
-        Invoke-WebRequest $order.certificate -OutFile $fullchain
-        Write-Host "Downloaded $fullchain"
+        # build output paths
+        $certFile = Join-Path $script:OrderFolder 'cert.cer'
+        $keyFile = Join-Path $script:OrderFolder 'cert.key'
+        $chainFile = Join-Path $script:OrderFolder 'chain.cer'
+        $fullchainFile = Join-Path $script:OrderFolder 'fullchain.cer'
+        $pfxFile = Join-Path $script:OrderFolder 'cert.pfx'
+
+        # Download the cert chain, split it up, and generate a PFX
+        Invoke-WebRequest $order.certificate -OutFile $fullchainFile
+        Split-CertChain $fullchainFile $certFile $chainFile
+
+        Write-Host "Wrote certificate files to $($script:OrderFolder)"
     }
 
 }
