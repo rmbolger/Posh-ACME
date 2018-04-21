@@ -17,7 +17,6 @@ function New-PACert {
         [hashtable]$PluginArgs,
         [switch]$OCSPMustStaple,
         [switch]$Force,
-        [string]$PfxPassword='poshacme',
         [int]$DNSSleep=120,
         [int]$ValidationTimeout=60,
         [int]$CertIssueTimeout=60
@@ -115,16 +114,16 @@ function New-PACert {
         }
 
         # build output paths
-        $certFile = Join-Path $script:OrderFolder 'cert.cer'
-        $keyFile = Join-Path $script:OrderFolder 'cert.key'
-        $chainFile = Join-Path $script:OrderFolder 'chain.cer'
+        $certFile      = Join-Path $script:OrderFolder 'cert.cer'
+        $keyFile       = Join-Path $script:OrderFolder 'cert.key'
+        $chainFile     = Join-Path $script:OrderFolder 'chain.cer'
         $fullchainFile = Join-Path $script:OrderFolder 'fullchain.cer'
-        $pfxFile = Join-Path $script:OrderFolder 'cert.pfx'
+        $pfxFile       = Join-Path $script:OrderFolder 'cert.pfx'
 
         # Download the cert chain, split it up, and generate a PFX
         Invoke-WebRequest $order.certificate -OutFile $fullchainFile
         Split-CertChain $fullchainFile $certFile $chainFile
-        Export-CertPfx $certFile $keyFile $pfxFile $PfxPassword
+        Export-CertPfx $certFile $keyFile $pfxFile
 
         Write-Host "Wrote certificate files to $($script:OrderFolder)"
     }

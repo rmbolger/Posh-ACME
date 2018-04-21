@@ -7,8 +7,6 @@ function Export-CertPfx {
         [string]$KeyFile,
         [Parameter(Mandatory,Position=2)]
         [string]$OutputFile,
-        [Parameter(Mandatory,Position=3)]
-        [string]$ExportPass,
         [string]$Alias
     )
 
@@ -33,7 +31,7 @@ function Export-CertPfx {
     $sRandom = New-Object Org.BouncyCastle.Security.SecureRandom
     try {
         $fs = New-Object IO.FileStream($OutputFile,'Create')
-        $store.Save($fs, $ExportPass, $sRandom)
+        $store.Save($fs, $null, $sRandom)
     } finally {
         if ($fs -ne $null) { $fs.Close() }
     }
