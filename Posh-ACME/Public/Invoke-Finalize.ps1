@@ -93,16 +93,16 @@ function Invoke-Finalize {
 
     <#
     .SYNOPSIS
-        TODO
+        Finalize a certificate order
 
     .DESCRIPTION
-        TODO
+        Finalizing a certificate order will send a new certificate request to the server and then wait for it to become valid or invalid.
 
     .PARAMETER CSR
-        TODO
+        A Base64 encoded certificate request with no headers, footers, or line breaks as returned by New-PACsr.
 
     .PARAMETER CertIssueTimeout
-        TODO
+        Number of seconds to wait for the server to finish the order before giving up and throwing an error.
 
     .PARAMETER Account
         If specified, switch to and use this account for the finalization. It must be associated with the current server or an error will be thrown.
@@ -110,15 +110,8 @@ function Invoke-Finalize {
     .PARAMETER Order
         If specified, switch to and use this order for the finalization. It must be associated with the current or specified account or an error will be thrown.
 
-    .EXAMPLE
-        TODO
-
-        TODO
-
-    .EXAMPLE
-        TODO
-
-        TODO
+    .PARAMETER ExtraParams
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
         TODO
