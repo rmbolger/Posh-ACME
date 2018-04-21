@@ -17,6 +17,7 @@ function New-PACert {
         [hashtable]$PluginArgs,
         [switch]$OCSPMustStaple,
         [switch]$Force,
+        [string]$PfxPassword='poshacme',
         [int]$DNSSleep=120,
         [int]$ValidationTimeout=60,
         [int]$CertIssueTimeout=60
@@ -123,6 +124,7 @@ function New-PACert {
         # Download the cert chain, split it up, and generate a PFX
         Invoke-WebRequest $order.certificate -OutFile $fullchainFile
         Split-CertChain $fullchainFile $certFile $chainFile
+        Export-CertPfx $certFile $keyFile $pfxFile $PfxPassword
 
         Write-Host "Wrote certificate files to $($script:OrderFolder)"
     }
