@@ -6,9 +6,9 @@ function Export-CertPfx {
         [Parameter(Mandatory,Position=1)]
         [string]$KeyFile,
         [Parameter(Mandatory,Position=2)]
-        [string]$ExportPass,
-        [Parameter(Mandatory,Position=3)]
         [string]$OutputFile,
+        [Parameter(Mandatory,Position=3)]
+        [string]$ExportPass,
         [string]$Alias
     )
 
