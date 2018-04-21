@@ -1,10 +1,3 @@
-#using namespace Org.BouncyCastle.Asn1
-#using namespace Org.BouncyCastle.Asn1.Sec
-#using namespace Org.BouncyCastle.Asn1.X9
-#using namespace Org.BouncyCastle.Crypto
-#using namespace Org.BouncyCastle.Crypto.Parameters
-#using namespace Org.BouncyCastle.Pkcs
-
 function Export-Pem {
     [CmdletBinding()]
     param(

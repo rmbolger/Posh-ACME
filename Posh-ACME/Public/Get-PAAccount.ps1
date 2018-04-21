@@ -144,6 +144,9 @@ function Get-PAAccount {
     .PARAMETER Refresh
         If specified, any account details returned will be freshly queried from the ACME server (excluding deactivated accounts). Otherwise, cached details will be returned.
 
+    .PARAMETER ExtraParams
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+
     .EXAMPLE
         Get-PAAccount
 

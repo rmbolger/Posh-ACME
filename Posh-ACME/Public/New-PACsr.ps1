@@ -1,14 +1,3 @@
-#using namespace Org.BouncyCastle.Asn1
-#using namespace Org.BouncyCastle.Asn1.Nist
-#using namespace Org.BouncyCastle.Asn1.Pkcs
-#using namespace Org.BouncyCastle.Asn1.X509
-#using namespace Org.BouncyCastle.Crypto
-#using namespace Org.BouncyCastle.Crypto.Generators
-#using namespace Org.BouncyCastle.Crypto.Parameters
-#using namespace Org.BouncyCastle.Pkcs
-#using namespace Org.BouncyCastle.Security
-#using namespace Org.BouncyCastle.X509.Extension
-
 function New-PACsr {
     [CmdletBinding()]
     [OutputType('System.String')]
@@ -19,10 +8,6 @@ function New-PACsr {
         [Parameter(ParameterSetName='NewKey',Position=1)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$KeyLength='4096',
-
-        # [Parameter(ParameterSetName='OldKey',Position=1)]
-        # [ValidateScript({Test-ValidKey $_ -ThrowOnFail})]
-        # [Security.Cryptography.AsymmetricAlgorithm]$Key
 
         [switch]$OCSPMustStaple,
         [Parameter(Mandatory)]
