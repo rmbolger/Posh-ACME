@@ -1,9 +1,9 @@
-using namespace Org.BouncyCastle.Asn1
-using namespace Org.BouncyCastle.Asn1.Sec
-using namespace Org.BouncyCastle.Asn1.X9
-using namespace Org.BouncyCastle.Crypto
-using namespace Org.BouncyCastle.Crypto.Parameters
-using namespace Org.BouncyCastle.Pkcs
+#using namespace Org.BouncyCastle.Asn1
+#using namespace Org.BouncyCastle.Asn1.Sec
+#using namespace Org.BouncyCastle.Asn1.X9
+#using namespace Org.BouncyCastle.Crypto
+#using namespace Org.BouncyCastle.Crypto.Parameters
+#using namespace Org.BouncyCastle.Pkcs
 
 function Export-Pem {
     [CmdletBinding()]
@@ -14,50 +14,52 @@ function Export-Pem {
         [string]$OutputFile
     )
 
-    if ($InputObject -is [AsymmetricCipherKeyPair]) {
+    if ($InputObject -is [Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair]) {
         $BCKeyPair = $InputObject
 
-        if ($BCKeyPair.Private -is [ECPrivateKeyParameters]) {
+        if ($BCKeyPair.Private -is [Org.BouncyCastle.Crypto.Parameters.ECPrivateKeyParameters]) {
 
             # grab the things we need to build an ECPrivateKeyStructure that includes the public key
-            $privParam = $keyPair.Private
+            $privParam = $BCKeyPair.Private
             $orderBitLength = $privParam.Parameters.N.BitLength
-            $x962 = New-Object X962Parameters -ArgumentList $privParam.PublicKeyParamSet
-            $pubKey = New-Object DerBitString -ArgumentList @(,$keyPair.Public.Q.GetEncoded())
+            $x962 = New-Object Org.BouncyCastle.Asn1.X9.X962Parameters -ArgumentList $privParam.PublicKeyParamSet
+            $pubKey = New-Object Org.BouncyCastle.Asn1.DerBitString -ArgumentList @(,$BCKeyPair.Public.Q.GetEncoded())
 
             # create the structure
-            $privKeyStruct = New-Object ECPrivateKeyStructure -ArgumentList $orderBitLength,$privParam.D,$pubKey,$x962
+            $privKeyStruct = New-Object Org.BouncyCastle.Asn1.Sec.ECPrivateKeyStructure -ArgumentList $orderBitLength,$privParam.D,$pubKey,$x962
 
-            # get the raw Base64
+            # ECPrivateKeyStructure.GetDerEncoded() seems to return a PKCS1 version of the key
             $privKeyStr = [Convert]::ToBase64String($privKeyStruct.GetDerEncoded())
 
-            # build an array with the header/footer
+            # PKCS1 means 'EC PRIVATE KEY' rather than just 'PRIVATE KEY'
+            # build an array with the proper header/footer
             $pem = @('-----BEGIN EC PRIVATE KEY-----')
             for ($i=0; $i -lt $privKeyStr.Length; $i += 64) {
                 $pem += $privKeyStr.Substring($i,[Math]::Min(64,($privKeyStr.Length-$i)))
             }
             $pem += '-----END EC PRIVATE KEY-----'
 
-        } elseif ($BCKeyPair.Private -is [RsaPrivateCrtKeyParameters]) {
+        } elseif ($BCKeyPair.Private -is [Org.BouncyCastle.Crypto.Parameters.RsaPrivateCrtKeyParameters]) {
 
-            # build the PrivateKeyInfoFactory
-            $rsaInfo = [PrivateKeyInfoFactory]::CreatePrivateKeyInfo($BCKeyPair.Private)
+            # build the PrivateKeyInfo object
+            $rsaInfo = [Org.BouncyCastle.Pkcs.PrivateKeyInfoFactory]::CreatePrivateKeyInfo($BCKeyPair.Private)
 
-            # get the raw Base64
+            # the PrivateKeyInfo.GetDerEncoded() method seems to return a PKCS8 version of the key
             $privKeyStr = [Convert]::ToBase64String($rsaInfo.GetDerEncoded())
 
-            # build an array with the header/footer
-            $pem = @('-----BEGIN RSA PRIVATE KEY-----')
+            # PKCS8 means 'PRIVATE KEY' rather than 'RSA PRIVATE KEY'
+            # build an array with the proper header/footer
+            $pem = @('-----BEGIN PRIVATE KEY-----')
             for ($i=0; $i -lt $privKeyStr.Length; $i += 64) {
                 $pem += $privKeyStr.Substring($i,[Math]::Min(64,($privKeyStr.Length-$i)))
             }
-            $pem += '-----END RSA PRIVATE KEY-----'
+            $pem += '-----END PRIVATE KEY-----'
 
         } else {
             throw "Unsupported BouncyCastle KeyPair type"
         }
 
-    } elseif ($InputObject -is [Pkcs10CertificationRequest]) {
+    } elseif ($InputObject -is [Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest]) {
 
         # get the raw Base64 encoded version
         $reqStr = [Convert]::ToBase64String($InputObject.GetEncoded())
