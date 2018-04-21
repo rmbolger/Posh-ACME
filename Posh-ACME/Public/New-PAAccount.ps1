@@ -27,6 +27,8 @@ function New-PAAccount {
                 $Contact[$_] = "mailto:$($Contact[$_])"
             }
         }
+    } else {
+        Write-Warning "No email contacts specified for this account. Certificate expiration warnings will not be sent unless you add at least one with Set-PAAccount."
     }
 
     # There's a chance we may be creating effectively a duplicate account. So check
