@@ -104,7 +104,7 @@ function Invoke-ChallengeValidation {
                 if ($auth.DNS01Status -eq 'pending') {
                     # publish the necessary TXT record
                     Write-Host "Publishing DNS challenge for $($auth.fqdn)"
-                    Publish-DNSChallenge $auth.DNSId $Account $auth.DNS01Token $DnsPlugin[$i] $PluginArgs
+                    Publish-DnsChallenge $auth.DNSId $Account $auth.DNS01Token $DnsPlugin[$i] $PluginArgs
                     $toValidate += $i
                 } else {
                     throw "Unexpected challenge status '$($auth.DNS01Status)' for $($auth.fqdn)."
@@ -122,7 +122,7 @@ function Invoke-ChallengeValidation {
             # Call the Save function for each unique DNS Plugin used
             $DnsPlugin[$toValidate] | Select-Object -Unique | ForEach-Object {
                 Write-Host "Saving changes for $_ plugin"
-                Save-DNSChallenge $_ $PluginArgs
+                Save-DnsChallenge $_ $PluginArgs
             }
 
             # sleep while the DNS changes propagate
@@ -146,11 +146,11 @@ function Invoke-ChallengeValidation {
     } finally {
         # always cleanup the TXT records if they were added
         for ($i=0; $i -lt $toValidate.Count; $i++) {
-            Unpublish-DNSChallenge $allAuths[$i].DNSId $Account $allAuths[$i].DNS01Token $DnsPlugin[$i] $PluginArgs
+            Unpublish-DnsChallenge $allAuths[$i].DNSId $Account $allAuths[$i].DNS01Token $DnsPlugin[$i] $PluginArgs
         }
         $DnsPlugin[$toValidate] | Select-Object -Unique | ForEach-Object {
             Write-Host "Saving changes for $_ plugin"
-            Save-DNSChallenge $_ $PluginArgs
+            Save-DnsChallenge $_ $PluginArgs
         }
     }
 

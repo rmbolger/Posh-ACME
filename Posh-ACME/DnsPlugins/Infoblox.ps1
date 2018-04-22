@@ -12,7 +12,7 @@ function Add-DnsTxtInfoblox {
         [string]$IBView='default',
         [switch]$IBIgnoreCert,
         [Parameter(ValueFromRemainingArguments)]
-        $Splat
+        $ExtraParams
     )
 
     $apiUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&ttl=0&view=$IBView"
@@ -51,6 +51,41 @@ function Add-DnsTxtInfoblox {
         if ($IBIgnoreCert) { [CertValidation]::Restore() }
     }
 
+    <#
+    .SYNOPSIS
+        Add a DNS TXT record to Infoblox
+
+    .DESCRIPTION
+        Add a DNS TXT record to Infoblox
+
+    .PARAMETER RecordName
+        The fully qualified name of the TXT record.
+
+    .PARAMETER TxtValue
+        The value of the TXT record.
+
+    .PARAMETER IBServer
+        The IP or hostname of the Infoblox server.
+
+    .PARAMETER IBCred
+        Credentials for Infoblox that have permission to write TXT records to the specified zone.
+
+    .PARAMETER IBView
+        The name of the DNS View for the specified zone. Defaults to 'default'.
+
+    .PARAMETER IBIgnoreCert
+        Use this switch to prevent certificate errors when your Infoblox server is using a self-signed or other untrusted SSL certificate. When passing parameters via hashtable, set it as a boolean such as @{IBIgnoreCert=$true}.
+
+    .PARAMETER ExtraParams
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+
+    .EXAMPLE
+        $cred = Get-Credential
+        PS C:\>$pluginArgs = @{IBServer='gridmaster.example.com'; IBCred=$cred; IBView='External'; IBIgnoreCert=$true}
+        PS C:\>Add-DnsTxtInfoblox '_acme-challenge.site1.example.com' 'asdfqwer12345678' @pluginArgs
+
+        Adds a TXT record for the specified site/value using a hashtable to pass plugin specific parameters.
+    #>
 }
 
 function Remove-DnsTxtInfoblox {
@@ -67,7 +102,7 @@ function Remove-DnsTxtInfoblox {
         [string]$IBView='default',
         [switch]$IBIgnoreCert,
         [Parameter(ValueFromRemainingArguments)]
-        $Splat
+        $ExtraParams
     )
 
     try {
@@ -111,16 +146,62 @@ function Remove-DnsTxtInfoblox {
         if ($IBIgnoreCert) { [CertValidation]::Restore() }
     }
 
+    <#
+    .SYNOPSIS
+        Remove a DNS TXT record from Infoblox
+
+    .DESCRIPTION
+        Remove a DNS TXT record from Infoblox
+
+    .PARAMETER RecordName
+        The fully qualified name of the TXT record.
+
+    .PARAMETER TxtValue
+        The value of the TXT record.
+
+    .PARAMETER IBServer
+        The IP or hostname of the Infoblox server.
+
+    .PARAMETER IBCred
+        Credentials for Infoblox that have permission to write TXT records to the specified zone.
+
+    .PARAMETER IBView
+        The name of the DNS View for the specified zone. Defaults to 'default'.
+
+    .PARAMETER IBIgnoreCert
+        Use this switch to prevent certificate errors when your Infoblox server is using a self-signed or other untrusted SSL certificate. When passing parameters via hashtable, set it as a boolean such as @{IBIgnoreCert=$true}.
+
+    .PARAMETER ExtraParams
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+
+    .EXAMPLE
+        $cred = Get-Credential
+        PS C:\>$pluginArgs = @{IBServer='gridmaster.example.com'; IBCred=$cred; IBView='External'; IBIgnoreCert=$true}
+        PS C:\>Remove-DnsTxtInfoblox '_acme-challenge.site1.example.com' 'asdfqwer12345678' @pluginArgs
+
+        Removes a TXT record for the specified site/value using a hashtable to pass plugin specific parameters.
+    #>
 }
 
 function Save-DnsTxtInfoblox {
     [CmdletBinding()]
     param(
         [Parameter(ValueFromRemainingArguments)]
-        $Splat
+        $ExtraParams
     )
 
-    # Infoblox doesn't require a save step
+    # Nothing to do. Infoblox doesn't require a save step
+
+    <#
+    .SYNOPSIS
+        Not required for Infoblox.
+
+    .DESCRIPTION
+        Infoblox does not require calling this function to commit changes to DNS records.
+
+    .PARAMETER ExtraParams
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+    #>
 }
 
 # Enable the ability to ignore cert validation

@@ -1,4 +1,4 @@
-function Publish-DNSChallenge {
+function Publish-DnsChallenge {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
@@ -49,7 +49,7 @@ function Publish-DNSChallenge {
     .DESCRIPTION
         Uses one of the DNS plugins and its associated parameters to write a TXT record to DNS that satisfies the dns-01 authorization challenge in an ACME order.
 
-        Depending on the plugin, calling Save-DNSChallenge may be required to commit changes to the DNS server. If multiple challenges are being published, make all Publish-DNSChallenge calls first. Then, Save-DNSChallenge once to commit them all.
+        Depending on the plugin, calling Save-DnsChallenge may be required to commit changes to the DNS server. If multiple challenges are being published, make all Publish-DnsChallenge calls first. Then, Save-DnsChallenge once to commit them all.
 
     .PARAMETER Domain
         The domain name that the TXT record will be written for.
@@ -68,14 +68,14 @@ function Publish-DNSChallenge {
 
     .EXAMPLE
         $auths = Get-PAOrder | Get-PAAuthorizations
-        PS C:\>Publish-DNSChallenge $auths[0].fqdn (Get-PAAccount) $auths[0].DNS01Token Manual @{}
+        PS C:\>Publish-DnsChallenge $auths[0].fqdn (Get-PAAccount) $auths[0].DNS01Token Manual @{}
 
         Publish the DNS challenge for the first authorization in the current order using the Manual DNS plugin.
 
     .EXAMPLE
         $auths = Get-PAOrder | Get-PAAuthorizations
         PS C:\>$acct = Get-PAAccount
-        PS C:\>$auths | %{ Publish-DNSChallenge $_.fqdn $acct $_.DNS01Token Flurbog @{FBServer='127.0.0.1';FBToken='abc123'} }
+        PS C:\>$auths | %{ Publish-DnsChallenge $_.fqdn $acct $_.DNS01Token Flurbog @{FBServer='127.0.0.1';FBToken='abc123'} }
 
         Publish all DNS challenges for the current order using the Flurbog DNS plugin.
 
@@ -83,10 +83,10 @@ function Publish-DNSChallenge {
         Project: https://github.com/rmbolger/Posh-ACME
 
     .LINK
-        Unpublish-DNSChallenge
+        Unpublish-DnsChallenge
 
     .LINK
-        Save-DNSChallenge
+        Save-DnsChallenge
 
     .LINK
         Get-DnsPlugins
