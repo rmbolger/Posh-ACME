@@ -6,16 +6,37 @@ function Add-DnsTxtExample {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ValueFromRemainingArguments)]
-        $Splat
+        $ExtraParams
     )
 
     # Add DNS provider specific parameters after $TxtValue and
-    # before $Splat. Make sure their names are unique across all
+    # before $ExtraParams. Make sure their names are unique across all
     # existing plugins. But make sure common ones across this
     # plugin are the same.
 
     # Do work here to add the TXT record
 
+    <#
+    .SYNOPSIS
+        Add a DNS TXT record to <My DNS Server/Provider>
+
+    .DESCRIPTION
+        Description for <My DNS Server/Provider>
+
+    .PARAMETER RecordName
+        The fully qualified name of the TXT record.
+
+    .PARAMETER TxtValue
+        The value of the TXT record.
+
+    .PARAMETER ExtraParams
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+
+    .EXAMPLE
+        Add-DnsTxtExample '_acme-challenge.site1.example.com' 'asdfqwer12345678'
+
+        Adds a TXT record for the specified site with the specified value.
+    #>
 }
 
 function Remove-DnsTxtExample {
@@ -26,26 +47,47 @@ function Remove-DnsTxtExample {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ValueFromRemainingArguments)]
-        $Splat
+        $ExtraParams
     )
 
     # Add DNS provider specific parameters after $TxtValue and
-    # before $Splat. Make sure their names are unique across all
+    # before $ExtraParams. Make sure their names are unique across all
     # existing plugins. But make sure common ones across this
     # plugin are the same.
 
     # Do work here to remove the TXT record
 
+    <#
+    .SYNOPSIS
+        Remove a DNS TXT record from <My DNS Server/Provider>
+
+    .DESCRIPTION
+        Description for <My DNS Server/Provider>
+
+    .PARAMETER RecordName
+        The fully qualified name of the TXT record.
+
+    .PARAMETER TxtValue
+        The value of the TXT record.
+
+    .PARAMETER ExtraParams
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+
+    .EXAMPLE
+        Remove-DnsTxtExample '_acme-challenge.site1.example.com' 'asdfqwer12345678'
+
+        Removes a TXT record for the specified site with the specified value.
+    #>
 }
 
 function Save-DnsTxtExample {
     [CmdletBinding()]
     param(
         [Parameter(ValueFromRemainingArguments)]
-        $Splat
+        $ExtraParams
     )
 
-    # Add DNS provider specific parameters before $Splat. Make sure
+    # Add DNS provider specific parameters before $ExtraParams. Make sure
     # their names are unique across all existing plugins. But make
     # sure common ones across this plugin are the same.
 
@@ -53,4 +95,21 @@ function Save-DnsTxtExample {
     # Add/Remove functions. It is not uncommon for this function to have
     # no work to do depending on the DNS provider. In that case, remove
     # the $MyAPIVar parameters and just leave the body empty.
+
+    <#
+    .SYNOPSIS
+        Commits changes for pending DNS TXT record modifications to <My DNS Server/Provider>
+
+    .DESCRIPTION
+        Description for <My DNS Server/Provider>
+
+    .PARAMETER ExtraParams
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+
+    .EXAMPLE
+        Save-DnsTxtExample
+
+        Commits changes for pending DNS TXT record modifications.
+
+    #>
 }

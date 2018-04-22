@@ -4,7 +4,6 @@
 - Add cleanup functions (Remove-Blah)
 - Finish adding help for public functions
 - Implement renewals
-- Add discovery/help functions for plugin parameters
 
 # After release
 
