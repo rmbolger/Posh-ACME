@@ -2,7 +2,7 @@ function Invoke-Finalize {
     [CmdletBinding()]
     param(
         [int]$CertIssueTimeout=60,
-        [Alias('CertNewKey')]
+        [Alias('NewCertKey')]
         [switch]$NewKey,
         [PSTypeName('PoshACME.PAAccount')]$Account,
         [PSTypeName('PoshACME.PAOrder')]$Order,
