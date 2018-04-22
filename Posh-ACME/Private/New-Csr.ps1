@@ -1,40 +1,49 @@
-function New-PACsr {
+function New-Csr {
     [CmdletBinding()]
     [OutputType('System.String')]
     param(
         [Parameter(Mandatory,Position=0)]
-        [string[]]$Domain,
-
-        [Parameter(ParameterSetName='NewKey',Position=1)]
-        [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
-        [string]$KeyLength='4096',
-
-        [switch]$OCSPMustStaple,
-        [Parameter(Mandatory)]
-        [string]$OutputFolder
+        [PSTypeName('PoshACME.PAOrder')]$Order,
+        [switch]$NewKey
     )
 
-    # Unfortunately, the .NET managed X509 classes aren't quite there yet in terms of the functionality
-    # we need. There's a new CertificateRequest class in .NET Core 2.0, but it won't be in the full
-    # .NET Framework until 4.7.2 which is still in preview and who knows what the platform requirements
-    # will be when they release. The legacy CertEnroll COM APIs are an option but my first attempt at
-    # at working with them ultimately ended in failure and they felt too tightly coupled to the Windows
-    # cert store. I contemplated just shell'ing out to certreq.exe and certutil.exe, but they're just
-    # not granular enough to do what I want to do.
+    # Make sure we have an account configured
+    if (!(Get-PAAccount)) {
+        throw "No ACME account configured. Run Set-PAAccount first."
+    }
 
-    # So for now, we're going to leverage the .NET version of the Bouncy Castle libraries. It's a binary
-    # dependency I was hoping to avoid. But it seems like the best option until the native BCL matures.
+    # Order verification should have already been taken care of
+    $orderFolder = Join-Path $script:AcctFolder $Order.MainDomain.Replace('*','!')
+    $keyFile = Join-Path $orderFolder 'cert.key'
+    $reqFile = Join-Path $orderFolder 'request.csr'
 
-    # create the private key if necessary
-    if ('NewKey' -eq $PSCmdlet.ParameterSetName) {
+    # Check for an existing key unless otherwise requested
+    if (!$NewKey -and (Test-Path $keyFile -PathType Leaf)) {
+
+        $keyPair = Import-Pem $keyFile
+
+        if ($Order.KeyLength -notlike 'ec-*') {
+            $sigAlgo = 'SHA256WITHRSA'
+        } else {
+            $keySize = [int]$Order.KeyLength.Substring(3)
+            if ($keySize -eq 256) { $sigAlgo = 'SHA256WITHECDSA' }
+            elseif ($keySize -eq 384) { $sigAlgo = 'SHA384WITHECDSA' }
+            elseif ($keySize -eq 521) { $sigAlgo = 'SHA512WITHECDSA' }
+        }
+
+    # Nope, new key needed
+    } else {
+
+        Write-Host "Creating new private key for the certificate request."
 
         $sRandom = New-Object Org.BouncyCastle.Security.SecureRandom
 
-        if ($KeyLength -like 'ec-*') {
+        if ($Order.KeyLength -like 'ec-*') {
 
-            Write-Verbose "Creating BC EC keypair of type $KeyLength"
+            # EC key
+            Write-Verbose "Creating BC EC keypair of type $($Order.KeyLength)"
             $isRSA = $false
-            $keySize = [int]$KeyLength.Substring(3)
+            $keySize = [int]$Order.KeyLength.Substring(3)
             $curveOid = [Org.BouncyCastle.Asn1.Nist.NistNamedCurves]::GetOid("P-$keySize")
 
             if ($keySize -eq 256) { $sigAlgo = 'SHA256WITHECDSA' }
@@ -48,9 +57,10 @@ function New-PACsr {
 
         } else {
 
-            Write-Verbose "Creating BC RSA keypair of type $KeyLength"
+            # RSA key
+            Write-Verbose "Creating BC RSA keypair of type $($Order.KeyLength)"
             $isRSA = $true
-            $keySize = [int]$KeyLength
+            $keySize = [int]$Order.KeyLength
             $sigAlgo = 'SHA256WITHRSA'
 
             $rsaGen = New-Object Org.BouncyCastle.Crypto.Generators.RsaKeyPairGenerator
@@ -61,11 +71,14 @@ function New-PACsr {
         }
 
         # export the key to a file
-        Export-Pem $keyPair (Join-Path $OutputFolder 'cert.key')
+        Export-Pem $keyPair $keyFile
+
     }
 
+    # start building the cert request
+
     # create the subject
-    $subject = New-Object Org.BouncyCastle.Asn1.X509.X509Name("CN=$($Domain[0])")
+    $subject = New-Object Org.BouncyCastle.Asn1.X509.X509Name("CN=$($Order.MainDomain)")
 
     # create a .NET Dictionary to hold our extensions because that's what BouncyCastle needs
     $extDict = New-Object 'Collections.Generic.Dictionary[Org.BouncyCastle.Asn1.DerObjectIdentifier,Org.BouncyCastle.Asn1.X509.X509Extension]'
@@ -75,7 +88,8 @@ function New-PACsr {
     $keyUsage = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($true, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.KeyUsage([Org.BouncyCastle.Asn1.X509.KeyUsage]::DigitalSignature -bor [Org.BouncyCastle.Asn1.X509.KeyUsage]::KeyEncipherment))))
     $extKeyUsage = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.ExtendedKeyUsage([Org.BouncyCastle.Asn1.X509.KeyPurposeID]::IdKPServerAuth, [Org.BouncyCastle.Asn1.X509.KeyPurposeID]::IdKPClientAuth))))
     $genNames = @()
-    foreach ($name in $Domain) { $genNames += New-Object Org.BouncyCastle.Asn1.X509.GeneralName([Org.BouncyCastle.Asn1.X509.GeneralName]::DnsName, $name) }
+    $allSANs = @($Order.MainDomain); if ($Order.SANs.Count -gt 0) { $allSANs += @($Order.SANs) }
+    foreach ($name in $allSANs) { $genNames += New-Object Org.BouncyCastle.Asn1.X509.GeneralName([Org.BouncyCastle.Asn1.X509.GeneralName]::DnsName, $name) }
     $sans = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.GeneralNames(@(,$genNames)))))
     $ski = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.X509.Extension.SubjectKeyIdentifierStructure($keyPair.Public))))
 
@@ -87,7 +101,7 @@ function New-PACsr {
     $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::SubjectKeyIdentifier, $ski)
 
     # add OCSP Must Staple if requested
-    if ($OCSPMustStaple) {
+    if ($Order.OCSPMustStaple) {
         Write-Verbose "Adding OCSP Must-Staple"
         $mustStaple = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(@(,[byte[]](0x30,0x03,0x02,0x01,0x05)))))
         $extDict.Add((New-Object DerObjectIdentifier('1.3.6.1.5.5.7.1.24')), $mustStaple)
@@ -101,7 +115,7 @@ function New-PACsr {
     $req = New-Object Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest($sigAlgo,$subject,$keyPair.Public,$extDerSet,$keyPair.Private)
 
     # export the csr to a file
-    Export-Pem $req (Join-Path $OutputFolder 'request.csr')
+    Export-Pem $req $reqFile
 
     # return the raw Base64 encoded version
     return (ConvertTo-Base64Url $req.GetEncoded())

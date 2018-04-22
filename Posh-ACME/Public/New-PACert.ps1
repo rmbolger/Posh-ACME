@@ -6,6 +6,7 @@ function New-PACert {
         [string[]]$Contact,
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$CertKeyLength='2048',
+        [switch]$NewCertKey,
         [switch]$AcceptTOS,
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$AccountKeyLength='ec-256',
@@ -60,6 +61,7 @@ function New-PACert {
     # - is pending, but expired
     # - has different KeyLength
     # - has different SANs
+    $order = $null
     try { $order = Get-PAOrder $Domain[0] -Refresh } catch {}
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
     if ($Force -or !$order -or
@@ -93,13 +95,9 @@ function New-PACert {
     if ($order.status -eq 'ready' -or
         ($order.status -eq 'pending' -and !($auths | Where-Object { $_.status -ne 'valid' })) ) {
 
-        # create the cert request
-        Write-Host "Creating new certificate request with key length $CertKeyLength$(if ($OCSPMustStaple){' and OCSP Must-Staple'})."
-        $csr = New-PACSR $Domain $CertKeyLength -OCSPMustStaple:$OCSPMustStaple -OutputFolder $script:OrderFolder
-
         # make the finalize call
-        Write-Host "Finalizing the order by sending the certificate request."
-        Invoke-Finalize $csr @PSBoundParameters
+        Write-Host "Finalizing the order."
+        Invoke-Finalize @PSBoundParameters
 
         # refresh the order status
         $order = Get-PAOrder -Refresh
