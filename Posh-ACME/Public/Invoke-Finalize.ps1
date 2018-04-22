@@ -1,9 +1,9 @@
 function Invoke-Finalize {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
-        [string]$CSR,
         [int]$CertIssueTimeout=60,
+        [Alias('CertNewKey')]
+        [switch]$NewKey,
         [PSTypeName('PoshACME.PAAccount')]$Account,
         [PSTypeName('PoshACME.PAOrder')]$Order,
         [Parameter(ValueFromRemainingArguments)]
@@ -42,6 +42,9 @@ function Invoke-Finalize {
         }
     }
 
+    # generate the CSR
+    Write-Host "Creating new certificate request with key length $($Order.KeyLength)$(if ($Order.OCSPMustStaple){' and OCSP Must-Staple'})."
+    $csr = New-Csr $Order -NewKey:($NewKey.IsPresent)
 
     # build the protected header
     $header = @{
@@ -52,7 +55,7 @@ function Invoke-Finalize {
     }
 
     # send the request
-    try { $response = Invoke-ACME $header.url ($Account.key | ConvertFrom-Jwk) $header "{`"csr`":`"$CSR`"}" -EA Stop }
+    try { $response = Invoke-ACME $header.url ($Account.key | ConvertFrom-Jwk) $header "{`"csr`":`"$csr`"}" -EA Stop }
     catch { throw }
     Write-Verbose "$($response.Content)"
 
@@ -98,11 +101,11 @@ function Invoke-Finalize {
     .DESCRIPTION
         Finalizing a certificate order will send a new certificate request to the server and then wait for it to become valid or invalid.
 
-    .PARAMETER CSR
-        A Base64 encoded certificate request with no headers, footers, or line breaks as returned by New-PACsr.
-
     .PARAMETER CertIssueTimeout
         Number of seconds to wait for the server to finish the order before giving up and throwing an error.
+
+    .PARAMETER NewKey
+        If specified, a new private key will be created for this order. Otherwise if an old key exists, it will be used instead.
 
     .PARAMETER Account
         If specified, switch to and use this account for the finalization. It must be associated with the current server or an error will be thrown.
@@ -114,9 +117,15 @@ function Invoke-Finalize {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        TODO
+        Invoke-Finalize
 
-        TODO
+        Submit the finalize request using the current order, account, and private key if it exists.
+
+    .EXAMPLE
+        $order = Get-PAOrder site1.example.com
+        PS C:\>Invoke-Finalize -Order $order -NewKey
+
+        Submit the finalize request using the specified order with a new private key on the current account.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME

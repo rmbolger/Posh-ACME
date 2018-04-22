@@ -7,6 +7,7 @@ function New-PAOrder {
         [Parameter(Position=1)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$KeyLength='2048',
+        [switch]$OCSPMustStaple,
         [switch]$Force
     )
 
@@ -15,6 +16,10 @@ function New-PAOrder {
         throw "No ACME account configured. Run Set-PAAccount first."
     }
 
+    # null the local instance of $order so it's not confused with the script-scoped version
+    $order = $null
+
+    # separate the SANs
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
 
     # There's a chance we may be overwriting an existing order here. So check for
@@ -77,6 +82,7 @@ function New-PAOrder {
     $order | Add-Member -MemberType NoteProperty -Name 'SANs' -Value $SANs
     $order | Add-Member -MemberType NoteProperty -Name 'KeyLength' -Value $KeyLength
     $order | Add-Member -MemberType NoteProperty -Name 'RenewAfter' -Value $null
+    $order | Add-Member -MemberType NoteProperty -Name 'MustStaple' -Value $OCSPMustStaple.IsPresent
 
     # make sure there's a certificate field for later
     if ('certificate' -notin $order.PSObject.Properties.Name) {
@@ -100,10 +106,12 @@ function New-PAOrder {
     }
     $order | ConvertTo-Json | Out-File (Join-Path $script:OrderFolder 'order.json') -Force
 
-    # backup any old certs/keys/requests that might exist
-    $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include *.csr,*.key,*.cer,*.pfx
+    # backup any old certs/requests that might exist
+    $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include *.csr,*.cer,*.pfx
     $oldFiles | Move-Item -Destination { "$($_.FullName).bak" } -Force
-
+    # keep a copy of the private key in case we need to re-use
+    $oldKey = Get-ChildItem (Join-Path $script:OrderFolder *) -Include *.key
+    $oldKey | Copy-Item -Destination { "$($_.FullName).bak" } -Force
     return $order
 
 
@@ -123,6 +131,9 @@ function New-PAOrder {
 
     .PARAMETER KeyLength
         The type and size of private key to use. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to '2048'.
+
+    .PARAMETER OCSPMustStaple
+        If specified, the certificate generated for this order will have the OCSP Must-Staple flag set.
 
     .PARAMETER Force
         If specified, confirmation prompts that may have been generated will be skipped.
