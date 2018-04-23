@@ -1,9 +1,8 @@
 # Before initial release
 
-- Figure out saving plugin params
+- Implement renewals
 - Add cleanup functions (Remove-Blah)
 - Finish adding help for public functions
-- Implement renewals
 
 # After release
 
