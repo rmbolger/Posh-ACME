@@ -60,7 +60,7 @@ function Get-DnsPluginHelp {
         Get-DnsPlugins
 
     .LINK
-        New-PACert
+        New-PACertificate
 
     .LINK
         Publish-DnsChallenge
