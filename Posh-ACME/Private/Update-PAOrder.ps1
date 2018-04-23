@@ -2,7 +2,8 @@ function Update-PAOrder {
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
-        [string]$MainDomain
+        [string]$MainDomain,
+        [switch]$SaveOnly
     )
 
     Begin {
@@ -33,24 +34,26 @@ function Update-PAOrder {
             }
         }
 
-        Write-Verbose "Refreshing order $($order.MainDomain)"
+        if (!$SaveOnly) {
+            Write-Verbose "Refreshing order $($order.MainDomain)"
 
-        # we can request the order info via an anonymous GET request
-        try {
-            $response = Invoke-WebRequest $order.location -Verbose:$false -ErrorAction Stop
-        } catch { throw }
-        Write-Verbose $response.Content
+            # we can request the order info via an anonymous GET request
+            try {
+                $response = Invoke-WebRequest $order.location -Verbose:$false -ErrorAction Stop
+            } catch { throw }
+            Write-Verbose $response.Content
 
-        $respObj = $response.Content | ConvertFrom-Json
+            $respObj = $response.Content | ConvertFrom-Json
 
-        # update the things that could have changed
-        $order.status = $respObj.status
-        $order.expires = $respObj.expires
-        if ($order.status -eq 'valid') {
-            $order.RenewAfter = (Get-Date $order.expires).ToUniversalTime().AddDays(-30).ToString('yyyy-MM-ddTHH:mm:ssZ')
-        }
-        if ($respObj.certificate) {
-            $order.certificate = $respObj.certificate
+            # update the things that could have changed
+            $order.status = $respObj.status
+            $order.expires = $respObj.expires
+            if ($order.status -eq 'valid') {
+                $order.RenewAfter = (Get-Date $order.expires).ToUniversalTime().AddDays(-30).ToString('yyyy-MM-ddTHH:mm:ssZ')
+            }
+            if ($respObj.certificate) {
+                $order.certificate = $respObj.certificate
+            }
         }
 
         # save it to disk
