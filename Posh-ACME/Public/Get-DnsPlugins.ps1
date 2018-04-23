@@ -27,7 +27,7 @@ function Get-DnsPlugins {
         Project: https://github.com/rmbolger/Posh-ACME
 
     .LINK
-        New-PACert
+        New-PACertificate
 
     .LINK
         Publish-DnsChallenge

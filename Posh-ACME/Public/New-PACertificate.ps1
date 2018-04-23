@@ -1,4 +1,4 @@
-function New-PACert {
+function New-PACertificate {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
