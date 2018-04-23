@@ -1,4 +1,4 @@
-function Invoke-ChallengeValidation {
+function Submit-ChallengeValidation {
     [CmdletBinding()]
     param(
         [Parameter(Position=0)]
@@ -196,18 +196,18 @@ function Invoke-ChallengeValidation {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Invoke-ChallengeValidation
+        Submit-ChallengeValidation
 
         Invoke manual DNS challenge validation on the currently selected account and order.
 
     .EXAMPLE
-        Invoke-ChallengeValidation Infoblox @{IBServer="ipam.example.com";IBView="External";IBCred=(Get-Credential)}
+        Submit-ChallengeValidation Infoblox @{IBServer="ipam.example.com";IBView="External";IBCred=(Get-Credential)}
 
         Invoke DNS challenge validation using the Infoblox plugin and the set of required Infoblox parameters on the currently selected account and order.
 
     .EXAMPLE
         $order = Get-PAOrder site1.example.com
-        PS C:\>Invoke-ChallengeValidation -Order $order
+        PS C:\>Submit-ChallengeValidation -Order $order
 
         Invoke manual DNS challenge validation on the specified order and currently selected account.
 

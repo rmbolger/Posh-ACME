@@ -80,7 +80,7 @@ function New-PACertificate {
 
     # deal with "pending" orders that may have authorization challenges to prove
     if ($order.status -eq 'pending') {
-        Invoke-ChallengeValidation @PSBoundParameters
+        Submit-ChallengeValidation @PSBoundParameters
 
         # refresh the order status
         $order = Get-PAOrder -Refresh
@@ -97,7 +97,7 @@ function New-PACertificate {
 
         # make the finalize call
         Write-Host "Finalizing the order."
-        Invoke-OrderFinalize @PSBoundParameters
+        Submit-OrderFinalize @PSBoundParameters
 
         # refresh the order status
         $order = Get-PAOrder -Refresh
