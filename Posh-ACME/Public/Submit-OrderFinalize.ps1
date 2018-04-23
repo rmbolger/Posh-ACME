@@ -1,4 +1,4 @@
-function Invoke-OrderFinalize {
+function Submit-OrderFinalize {
     [CmdletBinding()]
     param(
         [int]$CertIssueTimeout=60,
@@ -117,13 +117,13 @@ function Invoke-OrderFinalize {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Invoke-OrderFinalize
+        Submit-OrderFinalize
 
         Submit the finalize request using the current order, account, and private key if it exists.
 
     .EXAMPLE
         $order = Get-PAOrder site1.example.com
-        PS C:\>Invoke-OrderFinalize -Order $order -NewKey
+        PS C:\>Submit-OrderFinalize -Order $order -NewKey
 
         Submit the finalize request using the specified order with a new private key on the current account.
 
@@ -134,7 +134,7 @@ function Invoke-OrderFinalize {
         Get-PAOrder
 
     .LINK
-        Invoke-ChallengeValidation
+        Submit-ChallengeValidation
 
     #>
 }
