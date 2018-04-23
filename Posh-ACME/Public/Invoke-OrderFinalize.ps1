@@ -1,4 +1,4 @@
-function Invoke-Finalize {
+function Invoke-OrderFinalize {
     [CmdletBinding()]
     param(
         [int]$CertIssueTimeout=60,
@@ -117,13 +117,13 @@ function Invoke-Finalize {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Invoke-Finalize
+        Invoke-OrderFinalize
 
         Submit the finalize request using the current order, account, and private key if it exists.
 
     .EXAMPLE
         $order = Get-PAOrder site1.example.com
-        PS C:\>Invoke-Finalize -Order $order -NewKey
+        PS C:\>Invoke-OrderFinalize -Order $order -NewKey
 
         Submit the finalize request using the specified order with a new private key on the current account.
 

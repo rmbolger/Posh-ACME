@@ -97,7 +97,7 @@ function New-PACert {
 
         # make the finalize call
         Write-Host "Finalizing the order."
-        Invoke-Finalize @PSBoundParameters
+        Invoke-OrderFinalize @PSBoundParameters
 
         # refresh the order status
         $order = Get-PAOrder -Refresh
