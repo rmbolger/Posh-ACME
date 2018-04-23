@@ -89,9 +89,14 @@ function Invoke-ChallengeValidation {
     }
     Write-Verbose "DnsPlugin: $($DnsPlugin -join ',')"
 
-    # save the plugin list to the order so we can renew later
+    # save order specific parameters to order object so we can renew later
     $order.DnsPlugin = $DnsPlugin
+    $order.DnsSleep = $DnsSleep
+    $order.ValidationTimeout = $ValidationTimeout
     $order | Update-PAOrder -SaveOnly
+
+    # export the plugin args so we can renew later
+    Export-PluginArgs $PluginArgs $Account
 
     try {
         # loop through the authorizations looking for challenges to validate
