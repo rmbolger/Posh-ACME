@@ -102,7 +102,7 @@ function Submit-OrderFinalize {
         Finalizing a certificate order will send a new certificate request to the server and then wait for it to become valid or invalid.
 
     .PARAMETER CertIssueTimeout
-        Number of seconds to wait for the server to finish the order before giving up and throwing an error.
+        Number of seconds to wait for the ACME server to finish the order before giving up and throwing an error.
 
     .PARAMETER NewKey
         If specified, a new private key will be created for this order. Otherwise if an old key exists, it will be used instead.
