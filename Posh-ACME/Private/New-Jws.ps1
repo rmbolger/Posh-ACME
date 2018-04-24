@@ -80,9 +80,9 @@ function New-Jws {
     }
 
     # build the "<protected>.<payload>" string we're going to be signing
-    Write-Verbose "Header: $($Header | ConvertTo-Json)"
+    Write-Debug "Header: $($Header | ConvertTo-Json)"
     $HeaderB64 = ConvertTo-Base64Url ($Header | ConvertTo-Json -Compress)
-    Write-Verbose "Payload: $PayloadJson"
+    Write-Debug "Payload: $PayloadJson"
     $PayloadB64 = ConvertTo-Base64Url $PayloadJson
     $Message = "$HeaderB64.$PayloadB64"
     $MessageBytes = [Text.Encoding]::ASCII.GetBytes($Message)
@@ -124,7 +124,6 @@ function New-Jws {
     $jws.signature = ConvertTo-Base64Url $SignedBytes
 
     # and return it
-    #Write-Verbose ($jws | ConvertTo-Json)
     return ($jws | ConvertTo-Json -Compress)
 
 }

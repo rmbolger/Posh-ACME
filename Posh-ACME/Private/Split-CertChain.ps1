@@ -40,7 +40,7 @@ function Split-CertChain {
             # find the first line of the cert
             if (!$startCert) {
                 if ($line -like $CERT_BEGIN) {
-                    Write-Verbose "found first cert start"
+                    Write-Debug "found first cert start"
                     $startCert = $true
                     $swCert.WriteLine($line)
                 }
@@ -51,7 +51,7 @@ function Split-CertChain {
             if ($startCert -and !$endCert) {
                 $swCert.WriteLine($line)
                 if ($line -like $CERT_END) {
-                    Write-Verbose "found first cert end"
+                    Write-Debug "found first cert end"
                     $endCert = $true
                 }
                 continue
@@ -60,7 +60,7 @@ function Split-CertChain {
             # now we're looking for chain certs
             if (!$startChain) {
                 if ($line -like $CERT_BEGIN) {
-                    Write-Verbose "found chain cert start"
+                    Write-Debug "found chain cert start"
                     $startChain = $true
                     $swChain.WriteLine($line)
                 }
@@ -68,7 +68,7 @@ function Split-CertChain {
             } else {
                 $swChain.WriteLine($line)
                 if ($line -like $CERT_END) {
-                    Write-Verbose "found chain cert end"
+                    Write-Debug "found chain cert end"
                     $startChain = $false
                 }
                 continue

@@ -48,11 +48,11 @@ function Import-Pem {
             ($seq[1] -is [Org.BouncyCastle.Asn1.DerInteger] -or
             ($seq[1].Count -eq 2 -and $seq[1][0] -eq [Org.BouncyCastle.Asn1.Pkcs.PkcsObjectIdentifiers]::RsaEncryption)) ) {
 
-            Write-Verbose "Found RSA key type"
+            Write-Debug "Found RSA key type"
 
             # We can deal with either PKCS1 or PKCS8, because the PKCS1 can be extracted from PKCS8
             if ($seq.Count -eq 3) {
-                Write-Verbose "Extracting RSA PKCS1 from PKCS8"
+                Write-Debug "Extracting RSA PKCS1 from PKCS8"
                 $seq = [Org.BouncyCastle.Asn1.Asn1Sequence]::GetInstance($seq[2].GetOctets())
             }
 
@@ -72,7 +72,7 @@ function Import-Pem {
                   ($seq[0] -eq 0 -and $seq[1].Count -eq 2 -and
                    $seq[1][0] -eq [Org.BouncyCastle.Asn1.X9.X9ObjectIdentifiers]::IdECPublicKey) ) {
 
-            Write-Verbose "Found EC key type"
+            Write-Debug "Found EC key type"
 
             # Haven't figured out how to extract the key from PKCS8 yet because it's not the same format
             # as a raw SEC1 key

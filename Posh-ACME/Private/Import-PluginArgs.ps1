@@ -19,7 +19,7 @@ function Import-PluginArgs {
     # build the path to the plugin file and import it
     $pluginFile = Join-Path (Join-Path $script:DirFolder $Account.id) 'plugindata.xml'
     if (Test-Path -Path $pluginFile -PathType Leaf) {
-        Write-Verbose "Loading existing plugin data"
+        Write-Debug "Loading existing plugin data"
 
         # import the existing file
         $pArgs = Import-CliXml $pluginFile

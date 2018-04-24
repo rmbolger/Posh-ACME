@@ -24,7 +24,7 @@ function Add-DnsTxtInfoblox {
         # send the POST
         $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Credential $IBCred
 
-        Write-Host "TXT Record created: $response"
+        Write-Verbose "TXT Record created: $response"
 
     } catch {
         $response = $_.Exception.Response
@@ -37,8 +37,8 @@ function Add-DnsTxtInfoblox {
             $reader.BaseStream.Position = 0
             $reader.DiscardBufferedData()
             $responseBody = $reader.ReadToEnd();
+            Write-Debug $responseBody
 
-            Write-Verbose $responseBody
             $wapiErr = ConvertFrom-Json $responseBody
             throw [Exception] "$($wapiErr.Error)"
 
@@ -118,7 +118,7 @@ function Remove-DnsTxtInfoblox {
             # delete the record
             $delUrl = "https://$IBServer/wapi/v1.0/$($response.'_ref')"
             $response = Invoke-RestMethod -Uri $delUrl -Method Delete -Credential $cred
-            Write-Host "TXT Record deleted: $response"
+            Write-Verbose "TXT Record deleted: $response"
         }
 
     } catch {
@@ -132,8 +132,8 @@ function Remove-DnsTxtInfoblox {
             $reader.BaseStream.Position = 0
             $reader.DiscardBufferedData()
             $responseBody = $reader.ReadToEnd();
+            Write-Debug $responseBody
 
-            Write-Verbose $responseBody
             $wapiErr = ConvertFrom-Json $responseBody
             throw [Exception] "$($wapiErr.Error)"
 

@@ -23,7 +23,7 @@ function Unpublish-DnsChallenge {
     $keyAuthHash = $sha256.ComputeHash($keyAuthBytes)
     $txtValue = ConvertTo-Base64Url $keyAuthHash
 
-    Write-Verbose "Calling $Plugin plugin to remove $recordName TXT with value $txtValue"
+    Write-Debug "Calling $Plugin plugin to remove $recordName TXT with value $txtValue"
 
     # dot source the plugin file
     $pluginDir = Join-Path $MyInvocation.MyCommand.Module.ModuleBase 'DnsPlugins'

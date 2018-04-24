@@ -44,12 +44,12 @@ function Get-PAAccount {
 
             # update from the server first if requested
             if ($Refresh) {
-                Write-Verbose "Refreshing valid accounts"
+                Write-Debug "Refreshing valid accounts"
                 Get-PAAccount -List -Status 'valid' | Update-PAAccount
             }
 
             # read the contents of each accounts's acct.json
-            Write-Verbose "Loading PAAccount list from disk"
+            Write-Debug "Loading PAAccount list from disk"
             $rawFiles = Get-ChildItem "$($script:DirFolder)\*\acct.json" | Get-Content -Raw
             $accts = $rawFiles | ConvertFrom-Json | Sort-Object id | ForEach-Object {
 
@@ -90,7 +90,7 @@ function Get-PAAccount {
 
                 # check if it exists
                 if (Test-Path $acctFile -PathType Leaf) {
-                    Write-Verbose "Loading PAAccount from disk"
+                    Write-Debug "Loading PAAccount from disk"
                     $acct = Get-ChildItem $acctFile | Get-Content -Raw | ConvertFrom-Json
                     $acct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
                 } else {

@@ -23,7 +23,7 @@ function Get-PAAuthorizations {
             # request the object and inject the type name
             $auth = Invoke-RestMethod $AuthUrl -Verbose:$false
             $auth.PSObject.TypeNames.Insert(0,'PoshACME.PAAuthorization')
-            Write-Verbose ($auth | ConvertTo-Json)
+            Write-Debug "Response: $($auth | ConvertTo-Json)"
 
             # add "nice to have" members to the auth object
             $auth | Add-Member -MemberType NoteProperty -Name 'DNSId' -Value $auth.identifier.value

@@ -18,7 +18,7 @@ function Wait-AuthValidation {
             if ($i -in $skips) { continue; }
 
             $auth = Get-PAAuthorizations $AuthUrls[$i] -Verbose:$false
-            Write-Verbose "T$tries Authorization for $($auth.fqdn) status '$($auth.status)'."
+            Write-Debug "T$tries Authorization for $($auth.fqdn) status '$($auth.status)'."
 
             if ($auth.status -eq 'valid') {
                 # add this to the skip list

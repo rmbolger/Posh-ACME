@@ -23,12 +23,12 @@ function Get-PAOrder {
 
             # update from the server first if requested
             if ($Refresh) {
-                Write-Verbose "Refreshing orders"
+                Write-Debug "Refreshing orders"
                 Get-PAOrder -List  | Update-PAOrder
             }
 
             # read the contents of each order's order.json
-            Write-Verbose "Loading PAOrder list from disk"
+            Write-Debug "Loading PAOrder list from disk"
             $rawOrders = Get-ChildItem "$($script:AcctFolder)\*\order.json" | Get-Content -Raw
             $orders = $rawOrders | ConvertFrom-Json | Sort-Object MainDomain | ForEach-Object {
 
@@ -50,7 +50,7 @@ function Get-PAOrder {
 
                 # check for an order.json
                 if (Test-Path $orderFile -PathType Leaf) {
-                    Write-Verbose "Loading PAOrder from disk"
+                    Write-Debug "Loading PAOrder from disk"
                     $order = Get-ChildItem $orderFile | Get-Content -Raw | ConvertFrom-Json
                     $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
                 } else {
