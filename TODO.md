@@ -1,6 +1,5 @@
 # Before initial release
 
-- Implement renewals
 - Add cleanup functions (Remove-Blah)
 - Finish adding help for public functions
 
