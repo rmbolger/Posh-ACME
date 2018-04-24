@@ -107,7 +107,7 @@
                             <TableColumnItem><PropertyName>status</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>KeyLength</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>SANs</PropertyName></TableColumnItem>
-                            <TableColumnItem><PropertyName>MustStaple</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>OCSPMustStaple</PropertyName></TableColumnItem>
                             <TableColumnItem>
                                 <ScriptBlock>
                                     if ($_.Expires) { Get-Date $_.Expires } else { $_.Expires }
