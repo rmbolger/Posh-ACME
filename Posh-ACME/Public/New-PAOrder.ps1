@@ -82,7 +82,7 @@ function New-PAOrder {
     $order | Add-Member -MemberType NoteProperty -Name 'SANs' -Value $SANs
     $order | Add-Member -MemberType NoteProperty -Name 'KeyLength' -Value $KeyLength
     $order | Add-Member -MemberType NoteProperty -Name 'RenewAfter' -Value $null
-    $order | Add-Member -MemberType NoteProperty -Name 'MustStaple' -Value $OCSPMustStaple.IsPresent
+    $order | Add-Member -MemberType NoteProperty -Name 'OCSPMustStaple' -Value $OCSPMustStaple.IsPresent
     $order | Add-Member -MemberType NoteProperty -Name 'DnsPlugin' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'DnsSleep' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'ValidationTimeout' -Value $null
