@@ -43,7 +43,7 @@ function Submit-OrderFinalize {
     }
 
     # generate the CSR
-    Write-Host "Creating new certificate request with key length $($Order.KeyLength)$(if ($Order.OCSPMustStaple){' and OCSP Must-Staple'})."
+    Write-Verbose "Creating new certificate request with key length $($Order.KeyLength)$(if ($Order.OCSPMustStaple){' and OCSP Must-Staple'})."
     $csr = New-Csr $Order -NewKey:($NewKey.IsPresent)
 
     # build the protected header
@@ -57,7 +57,7 @@ function Submit-OrderFinalize {
     # send the request
     try { $response = Invoke-ACME $header.url ($Account.key | ConvertFrom-Jwk) $header "{`"csr`":`"$csr`"}" -EA Stop }
     catch { throw }
-    Write-Verbose "$($response.Content)"
+    Write-Debug "Response: $($response.Content)"
 
     # Boulder's ACME implementation (at least on Staging) currently doesn't
     # quite follow the spec at this point. What I've observed is that the

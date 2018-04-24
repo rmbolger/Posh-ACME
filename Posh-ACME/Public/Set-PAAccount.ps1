@@ -54,7 +54,7 @@ function Set-PAAccount {
             # refresh the cached copy
             Update-PAAccount $ID
 
-            Write-Verbose "Switching to account $ID"
+            Write-Debug "Switching to account $ID"
 
             # save it as current
             $ID | Out-File (Join-Path $script:DirFolder 'current-account.txt') -Force
@@ -109,7 +109,7 @@ function Set-PAAccount {
 
             # send the request
             $response = Invoke-ACME $header.url $key $header $payloadJson -EA Stop
-            Write-Verbose $response.Content
+            Write-Debug $response.Content
 
             $respObj = ($response.Content | ConvertFrom-Json)
 

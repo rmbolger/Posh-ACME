@@ -49,7 +49,7 @@ function New-PAOrder {
         }
     }
 
-    Write-Verbose "Creating new $KeyLength order with domains: $($Domain -join ', ')"
+    Write-Debug "Creating new $KeyLength order with domains: $($Domain -join ', ')"
 
     # hydrate the key
     $acctKey = $acct.key | ConvertFrom-Jwk
@@ -73,7 +73,7 @@ function New-PAOrder {
     try {
         $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
     } catch { throw }
-    Write-Verbose $response.Content
+    Write-Debug "Response: $($response.Content)"
 
     # process the response
     $order = $response.Content | ConvertFrom-Json
@@ -94,7 +94,7 @@ function New-PAOrder {
 
     # add the location from the header
     if ($response.Headers.ContainsKey('Location')) {
-        Write-Verbose "Adding location $($response.Headers['Location'])"
+        Write-Debug "Adding location $($response.Headers['Location'])"
         $order | Add-Member -MemberType NoteProperty -Name 'location' -Value $response.Headers['Location']
     } else {
         throw 'No Location header found in newOrder output'

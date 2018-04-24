@@ -21,7 +21,7 @@ function Get-Nonce {
         }
 
         # make the request
-        Write-Verbose "Requesting nonce from $NewNonceUrl"
+        Write-Debug "Requesting nonce from $NewNonceUrl"
         try {
             $response = Invoke-WebRequest $NewNonceUrl -Method Head -UserAgent $script:USER_AGENT -Headers $script:COMMON_HEADERS -EA Stop -Verbose:$false
         } catch { throw }

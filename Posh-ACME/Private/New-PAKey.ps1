@@ -20,7 +20,7 @@ function New-PAKey {
         $KeyType = 'RSA'
         $KeySize = [int]::Parse($KeyLength)
     }
-    Write-Verbose "Creating new $KeyType $KeySize key"
+    Write-Debug "Creating new $KeyType $KeySize key"
 
     # create the new key
     switch ($KeyType) {
@@ -68,4 +68,3 @@ function New-PAKey {
         return $Key
     }
 }
-

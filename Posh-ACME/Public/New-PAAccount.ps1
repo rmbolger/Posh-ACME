@@ -41,7 +41,7 @@ function New-PAAccount {
         }
     }
 
-    Write-Verbose "Creating new $KeyLength account with contact: $($Contact -join ', ')"
+    Write-Debug "Creating new $KeyLength account with contact: $($Contact -join ', ')"
 
     # create the account key
     $key = New-PAKey $KeyLength

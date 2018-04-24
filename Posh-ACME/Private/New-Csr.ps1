@@ -34,14 +34,14 @@ function New-Csr {
     # Nope, new key needed
     } else {
 
-        Write-Host "Creating new private key for the certificate request."
+        Write-Verbose "Creating new private key for the certificate request."
 
         $sRandom = New-Object Org.BouncyCastle.Security.SecureRandom
 
         if ($Order.KeyLength -like 'ec-*') {
 
             # EC key
-            Write-Verbose "Creating BC EC keypair of type $($Order.KeyLength)"
+            Write-Debug "Creating BC EC keypair of type $($Order.KeyLength)"
             $isRSA = $false
             $keySize = [int]$Order.KeyLength.Substring(3)
             $curveOid = [Org.BouncyCastle.Asn1.Nist.NistNamedCurves]::GetOid("P-$keySize")
@@ -58,7 +58,7 @@ function New-Csr {
         } else {
 
             # RSA key
-            Write-Verbose "Creating BC RSA keypair of type $($Order.KeyLength)"
+            Write-Debug "Creating BC RSA keypair of type $($Order.KeyLength)"
             $isRSA = $true
             $keySize = [int]$Order.KeyLength
             $sigAlgo = 'SHA256WITHRSA'
@@ -102,7 +102,7 @@ function New-Csr {
 
     # add OCSP Must Staple if requested
     if ($Order.OCSPMustStaple) {
-        Write-Verbose "Adding OCSP Must-Staple"
+        Write-Debug "Adding OCSP Must-Staple"
         $mustStaple = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(@(,[byte[]](0x30,0x03,0x02,0x01,0x05)))))
         $extDict.Add((New-Object DerObjectIdentifier('1.3.6.1.5.5.7.1.24')), $mustStaple)
     }

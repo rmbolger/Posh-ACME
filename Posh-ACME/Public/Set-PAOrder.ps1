@@ -24,7 +24,7 @@ function Set-PAOrder {
             # refresh the cached copy
             Update-PAOrder $MainDomain
 
-            Write-Verbose "Switching to order $MainDomain"
+            Write-Debug "Switching to order $MainDomain"
 
             # save it as current
             $MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force

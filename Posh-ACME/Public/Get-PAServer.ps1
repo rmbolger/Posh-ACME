@@ -22,7 +22,7 @@ function Get-PAServer {
             }
 
             # read the contents of each server's dir.json
-            Write-Verbose "Loading PAServer list from disk"
+            Write-Debug "Loading PAServer list from disk"
             $rawFiles = Get-ChildItem "$($script:ConfigRoot)\*\dir.json" | Get-Content -Raw
             $rawFiles | ConvertFrom-Json | Sort-Object location | ForEach-Object {
 
@@ -50,7 +50,7 @@ function Get-PAServer {
 
                 # check if it exists
                 if (Test-Path $dirFile -PathType Leaf) {
-                    Write-Verbose "Loading PAServer from disk"
+                    Write-Debug "Loading PAServer from disk"
                     $dir = Get-ChildItem $dirFile | Get-Content -Raw | ConvertFrom-Json
                     $dir.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
                 } else {

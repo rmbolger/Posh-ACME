@@ -33,7 +33,7 @@ function Update-PAAccount {
             }
         }
 
-        Write-Verbose "Refreshing account $($acct.id)"
+        Write-Debug "Refreshing account $($acct.id)"
 
         # hydrate the key
         $key = $acct.key | ConvertFrom-Jwk
@@ -53,7 +53,7 @@ function Update-PAAccount {
         try {
             $response = Invoke-ACME $header.url $key $header $payloadJson -ErrorAction Stop
         } catch { throw }
-        Write-Verbose $response.Content
+        Write-Debug "Response: $($response.Content)"
 
         $respObj = $response.Content | ConvertFrom-Json
 

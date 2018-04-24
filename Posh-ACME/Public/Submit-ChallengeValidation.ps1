@@ -87,7 +87,7 @@ function Submit-ChallengeValidation {
         Write-Warning "Fewer DnsPlugin values than Domain values supplied. Using $lastPlugin for the rest."
         $DnsPlugin += @($lastPlugin) * ($allAuths.Count-$DnsPlugin.Count)
     }
-    Write-Verbose "DnsPlugin: $($DnsPlugin -join ',')"
+    Write-Debug "DnsPlugin: $($DnsPlugin -join ',')"
 
     # save order specific parameters to order object so we can renew later
     $order.DnsPlugin = $DnsPlugin
@@ -105,14 +105,14 @@ function Submit-ChallengeValidation {
 
             # skip ones that are already valid
             if ($auth.status -eq 'valid') {
-                Write-Host "$($auth.fqdn) authorization is already valid"
+                Write-Verbose "$($auth.fqdn) authorization is already valid"
                 continue
 
             } elseif ($auth.status -eq 'pending') {
 
                 if ($auth.DNS01Status -eq 'pending') {
                     # publish the necessary TXT record
-                    Write-Host "Publishing DNS challenge for $($auth.fqdn)"
+                    Write-Verbose "Publishing DNS challenge for $($auth.fqdn)"
                     Publish-DnsChallenge $auth.DNSId $Account $auth.DNS01Token $DnsPlugin[$i] $PluginArgs
                     $toValidate += $i
                 } else {
@@ -130,22 +130,22 @@ function Submit-ChallengeValidation {
 
             # Call the Save function for each unique DNS Plugin used
             $DnsPlugin[$toValidate] | Select-Object -Unique | ForEach-Object {
-                Write-Host "Saving changes for $_ plugin"
+                Write-Verbose "Saving changes for $_ plugin"
                 Save-DnsChallenge $_ $PluginArgs
             }
 
             # sleep while the DNS changes propagate
-            Write-Host "Sleeping for $DNSSleep seconds while DNS change(s) propagate"
+            Write-Verbose "Sleeping for $DNSSleep seconds while DNS change(s) propagate"
             Start-Sleep -Seconds $DNSSleep
 
             # ask the server to validate the challenges
-            Write-Host "Requesting challenge validations"
+            Write-Verbose "Requesting challenge validations"
             $header = @{ alg=$Account.alg; kid=$Account.location; nonce=''; url='' }
             foreach ($chalUrl in $allAuths[$toValidate].DNS01Url) {
                 $header.nonce = $script:Dir.nonce
                 $header.url   = $chalUrl
                 try { $response = Invoke-ACME $header.url ($Account.key | ConvertFrom-Jwk) $header '{}' -EA Stop } catch {}
-                Write-Verbose "$($response.Content)"
+                Write-Debug "Response: $($response.Content)"
             }
 
             # and wait for them to succeed or fail
@@ -158,7 +158,7 @@ function Submit-ChallengeValidation {
             Unpublish-DnsChallenge $allAuths[$i].DNSId $Account $allAuths[$i].DNS01Token $DnsPlugin[$i] $PluginArgs
         }
         $DnsPlugin[$toValidate] | Select-Object -Unique | ForEach-Object {
-            Write-Host "Saving changes for $_ plugin"
+            Write-Verbose "Saving changes for $_ plugin"
             Save-DnsChallenge $_ $PluginArgs
         }
     }

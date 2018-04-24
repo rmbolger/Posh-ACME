@@ -42,7 +42,7 @@ function Update-PAServer {
             }
 
             # make the request
-            Write-Verbose "Updating directory info from $DirectoryUrl"
+            Write-Debug "Updating directory info from $DirectoryUrl"
             try {
                 $response = Invoke-WebRequest $DirectoryUrl -Verbose:$false -ErrorAction Stop
             } catch { throw }
@@ -69,15 +69,15 @@ function Update-PAServer {
                 }
 
                 # save to disk
-                Write-Verbose "Saving PAServer to disk"
+                Write-Debug "Saving PAServer to disk"
                 $dirObj | ConvertTo-Json | Out-File $dirFile -Force
 
                 # overwrite the in-memory copy if we're actually updating the current one
                 if ($UpdatingCurrent) { $script:Dir = $dirObj }
 
             } else {
-                Write-Verbose ($dirObj | ConvertTo-Json)
-                throw "Unexpected ACME response querying directory. Check with -Verbose."
+                Write-Debug ($dirObj | ConvertTo-Json)
+                throw "Unexpected ACME response querying directory. Check with -Debug."
             }
 
         # Nonce only refresh
@@ -85,7 +85,6 @@ function Update-PAServer {
 
             # grab a reference to the object we'll be updating
             if ($UpdatingCurrent) {
-                Write-Verbose "Nonce Before: $($script:Dir.nonce)"
                 $dirObj = $script:Dir
             } else {
                 $dirObj = Get-PAServer $DirectoryUrl
@@ -95,10 +94,9 @@ function Update-PAServer {
             $dirObj.nonce = Get-Nonce $dirObj.newNonce
 
             # save to disk
-            Write-Verbose "Saving PAServer to disk"
+            Write-Debug "Saving PAServer to disk"
             $dirObj | ConvertTo-Json | Out-File $dirFile -Force
 
-            if ($UpdatingCurrent) { Write-Verbose "Nonce After: $($script:Dir.nonce)" }
         }
 
     }

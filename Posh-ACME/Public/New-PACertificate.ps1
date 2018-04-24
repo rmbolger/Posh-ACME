@@ -32,7 +32,7 @@ function New-PACertificate {
         # refresh the directory info (which should also get a fresh nonce)
         Update-PAServer
     }
-    Write-Host "Using directory $($dir.location)"
+    Write-Verbose "Using directory $($dir.location)"
 
     # Make sure we have an account set. If Contact and/or AccountKeyLength
     # were specified and don't match the current one but do match a different,
@@ -42,7 +42,7 @@ function New-PACertificate {
     $accts = @(Get-PAAccount -List -Refresh -Status 'valid' @PSBoundParameters)
     if (!$accts -or $accts.Count -eq 0) {
         # no matches for the set of filters, so create new
-        Write-Host "Creating a new $AccountKeyLength account with contact: $($Contact -join ', ')"
+        Write-Verbose "Creating a new $AccountKeyLength account with contact: $($Contact -join ', ')"
         $acct = New-PAAccount @PSBoundParameters
     } elseif ($accts.Count -gt 0 -and (!$acct -or $acct.id -notin $accts.id)) {
         # we got matches, but there's no current account or the current one doesn't match
@@ -50,7 +50,7 @@ function New-PACertificate {
         $acct = $accts[0]
         Set-PAAccount $acct.id
     }
-    Write-Host "Using account $($acct.id)"
+    Write-Verbose "Using account $($acct.id)"
 
     # Check for an existing order from the MainDomain for this call and create a new
     # one if:
@@ -71,12 +71,12 @@ function New-PACertificate {
         $CertKeyLength -ne $order.KeyLength -or
         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') ) {
 
-        Write-Host "Creating a new order for $($Domain -join ', ')"
+        Write-Verbose "Creating a new order for $($Domain -join ', ')"
         $order = New-PAOrder $Domain $CertKeyLength -Force
     } else {
         $order | Set-PAOrder
     }
-    Write-Host "Using order for $($order.MainDomain) with status $($order.status)"
+    Write-Verbose "Using order for $($order.MainDomain) with status $($order.status)"
 
     # deal with "pending" orders that may have authorization challenges to prove
     if ($order.status -eq 'pending') {
@@ -96,7 +96,7 @@ function New-PACertificate {
         ($order.status -eq 'pending' -and !($auths | Where-Object { $_.status -ne 'valid' })) ) {
 
         # make the finalize call
-        Write-Host "Finalizing the order."
+        Write-Verbose "Finalizing the order."
         Submit-OrderFinalize @PSBoundParameters
 
         # refresh the order status
@@ -123,7 +123,7 @@ function New-PACertificate {
         Split-CertChain $fullchainFile $certFile $chainFile
         Export-CertPfx $certFile $keyFile $pfxFile
 
-        Write-Host "Wrote certificate files to $($script:OrderFolder)"
+        Write-Verbose "Wrote certificate files to $($script:OrderFolder)"
     }
 
 }
