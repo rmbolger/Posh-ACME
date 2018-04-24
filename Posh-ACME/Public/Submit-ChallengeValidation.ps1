@@ -181,7 +181,7 @@ function Submit-ChallengeValidation {
         A hashtable containing the plugin arguments to use with the specified DnsPlugin list. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
 
     .PARAMETER DnsSleep
-        Number of seconds to wait for DNS changes to propagate before asking the server to validate DNS challenges. Default is 120.
+        Number of seconds to wait for DNS changes to propagate before asking the ACME server to validate DNS challenges. Default is 120.
 
     .PARAMETER ValidationTimeout
         Number of seconds to wait for the ACME server to validate the challenges after asking it to do so. Default is 60. If the timeout is exceeded, an error will be thrown.

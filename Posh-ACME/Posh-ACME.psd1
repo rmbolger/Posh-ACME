@@ -43,9 +43,26 @@ FormatsToProcess = 'Posh-ACME.Format.ps1xml'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = '*'#@(
-#     'Get-ACMECert',
-# )
+FunctionsToExport = @(
+    'Get-DnsPluginHelp',
+    'Get-DnsPlugins',
+    'Get-PAAccount',
+    'Get-PAAuthorizations',
+    'Get-PAOrder',
+    'Get-PAServer',
+    'New-PAAccount',
+    'New-PACertificate',
+    'New-PAOrder',
+    'Publish-DnsChallenge',
+    'Save-DnsChallenge',
+    'Set-PAAccount',
+    'Set-PAOrder',
+    'Set-PAServer',
+    'Submit-ChallengeValidation',
+    'Submit-OrderFinalize',
+    'Submit-Renewal',
+    'Unpublish-DnsChallenge'
+)
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
@@ -97,4 +114,3 @@ PrivateData = @{
 # DefaultCommandPrefix = ''
 
 }
-

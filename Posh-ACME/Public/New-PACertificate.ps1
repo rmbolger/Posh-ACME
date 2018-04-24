@@ -12,7 +12,7 @@ function New-PACertificate {
         [string]$AccountKeyLength='ec-256',
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
         [Alias('location')]
-        [string]$DirectoryUrl='LE_STAGE',
+        [string]$DirectoryUrl='LE_PROD',
         [ValidateScript({Test-ValidDnsPlugin $_ -ThrowOnFail})]
         [string[]]$DnsPlugin,
         [hashtable]$PluginArgs,
@@ -126,4 +126,82 @@ function New-PACertificate {
         Write-Verbose "Wrote certificate files to $($script:OrderFolder)"
     }
 
+
+
+
+
+    <#
+    .SYNOPSIS
+        Request a new certificate
+
+    .DESCRIPTION
+        This is the primary function for this module and is capable executing the entire ACME certificate request process from start to finish without any prerequisite steps. However, utilizing the module's other functions can enable more complicated workflows and reduce the number of parameters you need to supply to this function.
+
+    .PARAMETER Domain
+        One or more domain names to include in this order/certificate. The first one in the list will be considered the "MainDomain" and be set as the subject of the finalized certificate.
+
+    .PARAMETER Contact
+        One or more email addresses to associate with this certificate. These addresses will be used by the ACME server to send certificate expiration notifications or other important account notices.
+
+    .PARAMETER CertKeyLength
+        The type and size of private key to use for the certificate. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to '2048'.
+
+    .PARAMETER NewCertKey
+        If specified, a new private key will be generated for the certificate. Otherwise, a new key will only be generated if one doesn't already exist for the primary domain or the key type or length have changed from the previous order.
+
+    .PARAMETER AcceptTOS
+        This switch is required when creating a new account as part of a certificate request. It implies you have read and accepted the Terms of Service for the ACME server you are connected to. The first time you connect to an ACME server, a link to the Terms of Service should have been displayed.
+
+    .PARAMETER AccountKeyLength
+        The type and size of private key to use for the account associated with this certificate. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to 'ec-256'.
+
+    .PARAMETER DirectoryUrl
+        Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production v2) and LE_STAGE (LetsEncrypt Staging v2). Defaults to 'LE_PROD'.
+
+    .PARAMETER DnsPlugin
+        One or more DNS plugin names to use for this order's DNS challenges. If no plugin is specified, the "Manual" plugin will be used. If the same plugin is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many plugin names as there are domains in the order and in the same sequence as the ACME order.
+
+    .PARAMETER PluginArgs
+        A hashtable containing the plugin arguments to use with the specified DnsPlugin list. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
+
+    .PARAMETER OCSPMustStaple
+        If specified, the certificate generated for this order will have the OCSP Must-Staple flag set.
+
+    .PARAMETER Force
+        If specified, a new certificate order will always be created regardless of the status of a previous order for the same primary domain. Otherwise, the previous order still in progress will be used instead.
+
+    .PARAMETER DnsSleep
+        Number of seconds to wait for DNS changes to propagate before asking the ACME server to validate DNS challenges. Default is 120.
+
+    .PARAMETER ValidationTimeout
+        Number of seconds to wait for the ACME server to validate the challenges after asking it to do so. Default is 60. If the timeout is exceeded, an error will be thrown.
+
+    .PARAMETER CertIssueTimeout
+        Number of seconds to wait for the server to finish the order before giving up and throwing an error.
+
+    .EXAMPLE
+        New-PACertificate site1.example.com -AcceptTOS
+
+        This is the minimum parameters needed to generate a certificate for the specified site if you haven't already setup an ACME account. It will prompt you to add the required DNS TXT record manually. Once you have an account created, you can omit the -AcceptTOS parameter.
+
+    .EXAMPLE
+        New-PACertificate 'site1.example.com','site2.example.com' -Contact admin@example.com
+
+        Request a SAN certificate with multiple names and have notifications sent to the specified email address.
+
+    .EXAMPLE
+        New-PACertificate '*.example.com','example.com'
+
+        Request a wildcard certificate that includes the root domain as a SAN.
+
+    .LINK
+        Project: https://github.com/rmbolger/Posh-ACME
+
+    .LINK
+        Submit-Renewal
+
+    .LINK
+        Get-DnsPlugins
+
+    #>
 }
