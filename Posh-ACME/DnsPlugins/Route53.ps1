@@ -35,9 +35,9 @@ function Add-DnsTxtRoute53 {
     # It's possible there could already be a TXT record for this name with one or more existing
     # values and we don't want to overwrite them. So check first and add to it if it exists.
     $response = Get-R53ResourceRecordSet $zoneID $RecordName 'TXT' @credParam
-    if ($response.ResourceRecordSets.Count -gt 0) {
+    $rrSet = $response.ResourceRecordSets | Where-Object { $_.Name -eq "$RecordName." -and $_.Type -eq 'TXT' }
+    if ($rrSet.ResourceRecords) {
         # add to the existing record
-        $rrSet = $response.ResourceRecordSets | Where-Object { $_.Name -eq "$RecordName." }
         $rrSet.ResourceRecords += @{Value="`"$TxtValue`""}
     } else {
         # create a new one
@@ -122,25 +122,21 @@ function Remove-DnsTxtRoute53 {
     # The TXT record for this name could potentially have multiple values and we only want to
     # remove this specific one.
     $response = Get-R53ResourceRecordSet $zoneID $RecordName 'TXT' @credParam
-    if ($response.ResourceRecordSets.Count -gt 0) {
+    $rrSet = $response.ResourceRecordSets | Where-Object { $_.Name -eq "$RecordName." -and $_.Type -eq 'TXT' }
 
-        # check the existing record
-        $rrSet = $response.ResourceRecordSets | Where-Object { $_.Name -eq "$RecordName." }
+    $change = New-Object Amazon.Route53.Model.Change
+    $change.ResourceRecordSet = $rrSet
 
-        $change = New-Object Amazon.Route53.Model.Change
-        $change.ResourceRecordSet = $rrSet
-
-        if ($rrSet.ResourceRecords.Count -gt 1) {
-            # update the values to exclude one we want to delete
-            $change.Action = 'UPSERT'
-            $rrSet.ResourceRecords = $rrSet.ResourceRecords | Where-Object { $_.Value -ne "`"$TxtValue`"" }
-        } else {
-            # just delete the record
-            $change.Action = 'DELETE'
-        }
-
-    } else {
+    if (!$rrSet) {
         Write-Verbose "TXT record for $Record name not found. Already deleted?"
+        return
+    } elseif ($rrSet.ResourceRecords.Count -gt 1) {
+        # update the values to exclude one we want to delete
+        $change.Action = 'UPSERT'
+        $rrSet.ResourceRecords = $rrSet.ResourceRecords | Where-Object { $_.Value -ne "`"$TxtValue`"" }
+    } else {
+        # just delete the record
+        $change.Action = 'DELETE'
     }
 
     # remove the record
