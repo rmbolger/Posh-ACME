@@ -75,7 +75,7 @@ function Submit-ChallengeValidation {
     # check all of the authorization statuses, but there might still end up
     # being nothing to do.
 
-    $allAuths = $Order | Get-PAAuthorizations
+    $allAuths = @($Order | Get-PAAuthorizations)
     $toValidate = @()
 
     # fill out the DnsPlugin attribute so there's a value for each authorization in the order
