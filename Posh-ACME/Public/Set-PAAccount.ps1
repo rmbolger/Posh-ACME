@@ -108,8 +108,10 @@ function Set-PAAccount {
             $payloadJson = $payload | ConvertTo-Json -Compress
 
             # send the request
-            $response = Invoke-ACME $header.url $key $header $payloadJson -EA Stop
-            Write-Debug $response.Content
+            try {
+                $response = Invoke-ACME $header.url $key $header $payloadJson -EA Stop
+            } catch { throw }
+            Write-Debug "Response: $($response.Content)"
 
             $respObj = ($response.Content | ConvertFrom-Json)
 
