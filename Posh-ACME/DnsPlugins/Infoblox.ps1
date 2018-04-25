@@ -117,7 +117,7 @@ function Remove-DnsTxtInfoblox {
 
             # delete the record
             $delUrl = "https://$IBServer/wapi/v1.0/$($response.'_ref')"
-            $response = Invoke-RestMethod -Uri $delUrl -Method Delete -Credential $cred
+            $response = Invoke-RestMethod -Uri $delUrl -Method Delete -Credential $IBCred
             Write-Verbose "TXT Record deleted: $response"
         }
 
