@@ -2,7 +2,8 @@ function Set-PAOrder {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
-        [string]$MainDomain
+        [string]$MainDomain,
+        [switch]$RevokeCert
     )
 
     Begin {
