@@ -55,8 +55,9 @@ function Submit-OrderFinalize {
     }
 
     # send the request
-    try { $response = Invoke-ACME $header.url ($Account.key | ConvertFrom-Jwk) $header "{`"csr`":`"$csr`"}" -EA Stop }
-    catch { throw }
+    try {
+        $response = Invoke-ACME $header.url ($Account.key | ConvertFrom-Jwk) $header "{`"csr`":`"$csr`"}" -EA Stop
+    } catch { throw }
     Write-Debug "Response: $($response.Content)"
 
     # Boulder's ACME implementation (at least on Staging) currently doesn't

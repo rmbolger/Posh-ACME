@@ -44,7 +44,7 @@ function New-PAAccount {
     Write-Debug "Creating new $KeyLength account with contact: $($Contact -join ', ')"
 
     # create the account key
-    $key = New-PAKey $KeyLength
+    $acctKey = New-PAKey $KeyLength
 
     # create the algorithm identifier as described by
     # https://tools.ietf.org/html/rfc7518#section-3.1
@@ -61,7 +61,7 @@ function New-PAAccount {
     # build the protected header for the request
     $header = @{
         alg   = $alg;
-        jwk   = ($key | ConvertTo-Jwk -PublicOnly);
+        jwk   = ($acctKey | ConvertTo-Jwk -PublicOnly);
         nonce = $script:Dir.nonce;
         url   = $script:Dir.newAccount;
     }
@@ -80,8 +80,9 @@ function New-PAAccount {
 
     # send the request
     try {
-        $response = Invoke-ACME $header.url $key $header $payloadJson -EA Stop
+        $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
     } catch { throw }
+    Write-Debug "Response: $($response.Content)"
 
     # grab the Location header
     if ($response.Headers.ContainsKey('Location')) {
@@ -98,7 +99,7 @@ function New-PAAccount {
         status = $respObj.status;
         contact = $respObj.contact;
         location = $location;
-        key = ($key | ConvertTo-Jwk);
+        key = ($acctKey | ConvertTo-Jwk);
         alg = $alg;
         KeyLength = $KeyLength;
         # The orders field is supposed to exist according to

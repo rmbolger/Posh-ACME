@@ -51,7 +51,7 @@ function Update-PAAccount {
 
         # send the request
         try {
-            $response = Invoke-ACME $header.url $key $header $payloadJson -ErrorAction Stop
+            $response = Invoke-ACME $header.url $key $header $payloadJson -EA Stop
         } catch { throw }
         Write-Debug "Response: $($response.Content)"
 
