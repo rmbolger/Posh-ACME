@@ -8,9 +8,9 @@ function Add-DnsTxtRoute53 {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Keys',Mandatory,Position=2)]
-        [string]$R53AccessKeyId,
+        [string]$R53AccessKey,
         [Parameter(ParameterSetName='Keys',Mandatory,Position=3)]
-        [securestring]$R53SecretAccessKey,
+        [securestring]$R53SecretKey,
         [Parameter(ParameterSetName='Profile',Mandatory)]
         [string]$R53ProfileName,
         [Parameter(ValueFromRemainingArguments)]
@@ -22,7 +22,7 @@ function Add-DnsTxtRoute53 {
     # currently 75 MB by itself) for people who use the Access/Secret key pair.
 
     if ('Keys' -eq $PSCmdlet.ParameterSetName) {
-        $credParam = @{AccessKey=$R53AccessKeyId; SecretKey=((New-Object PSCredential "user",$R53SecretAccessKey).GetNetworkCredential().Password)}
+        $credParam = @{AccessKey=$R53AccessKey; SecretKey=((New-Object PSCredential "user",$R53SecretKey).GetNetworkCredential().Password)}
     } else {
         $credParam = @{ProfileName=$R53ProfileName}
     }
@@ -32,9 +32,28 @@ function Add-DnsTxtRoute53 {
         throw "Unable to find Route53 hosted zone for $RecordName"
     }
 
+    # It's possible there could already be a TXT record for this name with one or more existing
+    # values and we don't want to overwrite them. So check first and add to it if it exists.
+    $response = Get-R53ResourceRecordSet $zoneID $RecordName 'TXT' @credParam
+    if ($response.ResourceRecordSets.Count -gt 0) {
+        # add to the existing record
+        $rrSet = $response.ResourceRecordSets | Where-Object { $_.Name -eq "$RecordName." }
+        $rrSet.ResourceRecords += @{Value="`"$TxtValue`""}
+    } else {
+        # create a new one
+        $rrSet = New-Object Amazon.Route53.Model.ResourceRecordSet
+        $rrSet.Name = $RecordName
+        $rrSet.Type = 'TXT'
+        $rrSet.TTL = 0
+        $rrSet.ResourceRecords.Add(@{Value="`"$TxtValue`""})
+    }
 
-
-
+    # send the change
+    Write-Verbose "Adding the record to zone ID $zoneID"
+    $change = New-Object Amazon.Route53.Model.Change
+    $change.Action = 'UPSERT'
+    $change.ResourceRecordSet = $rrSet
+    Edit-R53ResourceRecordSet -HostedZoneId $zoneID -ChangeBatch_Change $change @credParam | Out-Null
 
     <#
     .SYNOPSIS
@@ -49,11 +68,11 @@ function Add-DnsTxtRoute53 {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER R53AccessKeyId
+    .PARAMETER R53AccessKey
         The Access Key ID for the IAM account with permissions to write to the specified hosted zone.
 
-    .PARAMETER R53SecretAccessKey
-        The Secret Key for the IAM account specified by -R53AccessKeyId.
+    .PARAMETER R53SecretKey
+        The Secret Key for the IAM account specified by -R53AccessKey.
 
     .PARAMETER R53ProfileName
         The profile name of a previously stored credential using Set-AWSCredential from the AwsPowershell module. This only works if the AwsPowershell module is installed.
@@ -76,9 +95,9 @@ function Remove-DnsTxtRoute53 {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Keys',Mandatory,Position=2)]
-        [string]$R53AccessKeyId,
+        [string]$R53AccessKey,
         [Parameter(ParameterSetName='Keys',Mandatory,Position=3)]
-        [securestring]$R53SecretAccessKey,
+        [securestring]$R53SecretKey,
         [Parameter(ParameterSetName='Profile',Mandatory)]
         [string]$R53ProfileName,
         [Parameter(ValueFromRemainingArguments)]
@@ -90,7 +109,7 @@ function Remove-DnsTxtRoute53 {
     # currently 75 MB by itself) for people who use the Access/Secret key pair.
 
     if ('Keys' -eq $PSCmdlet.ParameterSetName) {
-        $credParam = @{AccessKey=$R53AccessKeyId; SecretKey=((New-Object PSCredential "user",$R53SecretAccessKey).GetNetworkCredential().Password)}
+        $credParam = @{AccessKey=$R53AccessKey; SecretKey=((New-Object PSCredential "user",$R53SecretKey).GetNetworkCredential().Password)}
     } else {
         $credParam = @{ProfileName=$R53ProfileName}
     }
@@ -99,6 +118,34 @@ function Remove-DnsTxtRoute53 {
     if (!($zoneID = Get-R53ZoneId $RecordName $credParam)) {
         throw "Unable to find Route53 hosted zone for $RecordName"
     }
+
+    # The TXT record for this name could potentially have multiple values and we only want to
+    # remove this specific one.
+    $response = Get-R53ResourceRecordSet $zoneID $RecordName 'TXT' @credParam
+    if ($response.ResourceRecordSets.Count -gt 0) {
+
+        # check the existing record
+        $rrSet = $response.ResourceRecordSets | Where-Object { $_.Name -eq "$RecordName." }
+
+        $change = New-Object Amazon.Route53.Model.Change
+        $change.ResourceRecordSet = $rrSet
+
+        if ($rrSet.ResourceRecords.Count -gt 1) {
+            # update the values to exclude one we want to delete
+            $change.Action = 'UPSERT'
+            $rrSet.ResourceRecords = $rrSet.ResourceRecords | Where-Object { $_.Value -ne "`"$TxtValue`"" }
+        } else {
+            # just delete the record
+            $change.Action = 'DELETE'
+        }
+
+    } else {
+        Write-Verbose "TXT record for $Record name not found. Already deleted?"
+    }
+
+    # remove the record
+    Write-Verbose "Removing the record from zone ID $zoneID"
+    Edit-R53ResourceRecordSet -HostedZoneId $zoneID -ChangeBatch_Change $change @credParam | Out-Null
 
     <#
     .SYNOPSIS
@@ -113,11 +160,11 @@ function Remove-DnsTxtRoute53 {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER R53AccessKeyId
+    .PARAMETER R53AccessKey
         The Access Key ID for the IAM account with permissions to write to the specified hosted zone.
 
-    .PARAMETER R53SecretAccessKey
-        The Secret Key for the IAM account specified by -R53AccessKeyId.
+    .PARAMETER R53SecretKey
+        The Secret Key for the IAM account specified by -R53AccessKey.
 
     .PARAMETER R53ProfileName
         The profile name of a previously stored credential using Set-AWSCredential from the AwsPowershell module. This only works if the AwsPowershell module is installed.

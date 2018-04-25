@@ -204,6 +204,10 @@ function Save-DnsTxtInfoblox {
     #>
 }
 
+############################
+# Helper Functions
+############################
+
 # Enable the ability to ignore cert validation
 if (-not ([System.Management.Automation.PSTypeName]'CertValidation').Type)
 {
