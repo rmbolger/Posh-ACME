@@ -2,8 +2,6 @@ function Submit-OrderFinalize {
     [CmdletBinding()]
     param(
         [int]$CertIssueTimeout=60,
-        [Alias('NewCertKey')]
-        [switch]$NewKey,
         [PSTypeName('PoshACME.PAAccount')]$Account,
         [PSTypeName('PoshACME.PAOrder')]$Order,
         [Parameter(ValueFromRemainingArguments)]
@@ -44,7 +42,7 @@ function Submit-OrderFinalize {
 
     # generate the CSR
     Write-Verbose "Creating new certificate request with key length $($Order.KeyLength)$(if ($Order.OCSPMustStaple){' and OCSP Must-Staple'})."
-    $csr = New-Csr $Order -NewKey:($NewKey.IsPresent)
+    $csr = New-Csr $Order
 
     # build the protected header
     $header = @{
@@ -105,9 +103,6 @@ function Submit-OrderFinalize {
     .PARAMETER CertIssueTimeout
         Number of seconds to wait for the ACME server to finish the order before giving up and throwing an error.
 
-    .PARAMETER NewKey
-        If specified, a new private key will be created for this order. Otherwise if an old key exists, it will be used instead.
-
     .PARAMETER Account
         If specified, switch to and use this account for the finalization. It must be associated with the current server or an error will be thrown.
 
@@ -124,9 +119,9 @@ function Submit-OrderFinalize {
 
     .EXAMPLE
         $order = Get-PAOrder site1.example.com
-        PS C:\>Submit-OrderFinalize -Order $order -NewKey
+        PS C:\>Submit-OrderFinalize -Order $order
 
-        Submit the finalize request using the specified order with a new private key on the current account.
+        Submit the finalize request using the specified order on the current account.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME

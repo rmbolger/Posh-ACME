@@ -72,7 +72,7 @@ function New-PACertificate {
         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') ) {
 
         Write-Verbose "Creating a new order for $($Domain -join ', ')"
-        $order = New-PAOrder $Domain $CertKeyLength -Force
+        $order = New-PAOrder $Domain $CertKeyLength -Force -NewKey:$NewCertKey.IsPresent
     } else {
         $order | Set-PAOrder
     }

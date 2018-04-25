@@ -8,6 +8,8 @@ function New-PAOrder {
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$KeyLength='2048',
         [switch]$OCSPMustStaple,
+        [Alias('NewCertKey')]
+        [switch]$NewKey,
         [switch]$Force
     )
 
@@ -18,6 +20,7 @@ function New-PAOrder {
 
     # null the local instance of $order so it's not confused with the script-scoped version
     $order = $null
+    try { $order = Get-PAOrder $Domain[0] -Refresh } catch {}
 
     # separate the SANs
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
@@ -25,7 +28,6 @@ function New-PAOrder {
     # There's a chance we may be overwriting an existing order here. So check for
     # confirmation if certain conditions are true
     if (!$Force) {
-        try { $order = Get-PAOrder $Domain[0] -Refresh } catch {}
 
         # skip confirmation if the SANs or KeyLength are different
         # regardless of the original order status
@@ -51,7 +53,11 @@ function New-PAOrder {
 
     Write-Debug "Creating new $KeyLength order with domains: $($Domain -join ', ')"
 
-    # hydrate the key
+    # Determine whether to remove the old private key. This is necessary if explicitly
+    # requested or the new KeyLength doesn't match the old one.
+    $removeOldKey = ($NewKey -or ($order -and $KeyLength -ne $order.KeyLength))
+
+    # hydrate the account key
     $acctKey = $acct.key | ConvertFrom-Jwk
 
     # build the protected header for the request
@@ -109,12 +115,17 @@ function New-PAOrder {
     }
     $order | ConvertTo-Json | Out-File (Join-Path $script:OrderFolder 'order.json') -Force
 
+    # backup the old private key if necessary, otherwise keep it around for re-use
+    if ($removeOldKey) {
+        Write-Verbose "Preparing for new private key"
+        $oldKey = Get-ChildItem (Join-Path $script:OrderFolder *) -Include *.key
+        $oldKey | Move-Item -Destination { "$($_.FullName).bak" } -Force
+    }
+
     # backup any old certs/requests that might exist
     $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include *.csr,*.cer,*.pfx
     $oldFiles | Move-Item -Destination { "$($_.FullName).bak" } -Force
-    # keep a copy of the private key in case we need to re-use
-    $oldKey = Get-ChildItem (Join-Path $script:OrderFolder *) -Include *.key
-    $oldKey | Copy-Item -Destination { "$($_.FullName).bak" } -Force
+
     return $order
 
 
