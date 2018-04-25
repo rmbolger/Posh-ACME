@@ -194,6 +194,12 @@ function New-PACertificate {
 
         Request a wildcard certificate that includes the root domain as a SAN.
 
+    .EXAMPLE
+        $pluginArgs = @{FBServer='fb.example.com'; FBCred=(Get-Credential)}
+        PS C:\>New-PACertificate site1.example.com -DnsPlugin Flurbog -PluginArgs $pluginArgs
+
+        Request a certificate using a hypothetical Flurbog DNS plugin that requires a server name and set of credentials.
+
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME
 
