@@ -3,8 +3,7 @@ function New-Csr {
     [OutputType('System.String')]
     param(
         [Parameter(Mandatory,Position=0)]
-        [PSTypeName('PoshACME.PAOrder')]$Order,
-        [switch]$NewKey
+        [PSTypeName('PoshACME.PAOrder')]$Order
     )
 
     # Make sure we have an account configured
@@ -17,8 +16,8 @@ function New-Csr {
     $keyFile = Join-Path $orderFolder 'cert.key'
     $reqFile = Join-Path $orderFolder 'request.csr'
 
-    # Check for an existing key unless otherwise requested
-    if (!$NewKey -and (Test-Path $keyFile -PathType Leaf)) {
+    # Check for an existing key
+    if (Test-Path $keyFile -PathType Leaf) {
 
         $keyPair = Import-Pem $keyFile
 
