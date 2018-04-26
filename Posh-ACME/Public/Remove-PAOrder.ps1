@@ -21,7 +21,7 @@ function Remove-PAOrder {
 
         # revoke first, if asked
         if ($RevokeCert -and $order.status -eq 'valid') {
-            Set-PAOrder $order -RevokeCert -NoSwitch -Force:$Force.IsPresent
+            $order | Set-PAOrder -RevokeCert -NoSwitch -Force:$Force.IsPresent
         }
 
         # confirm deletion unless -Force was used
