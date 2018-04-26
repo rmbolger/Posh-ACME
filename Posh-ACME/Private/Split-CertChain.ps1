@@ -22,7 +22,7 @@ function Split-CertChain {
     $OutputChain = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($OutputChain)
 
     # Usually, PEM files are ANSI/ASCII encoded with UNIX line endings which means none of the
-    # normal Powershell stuff for outputting files will work. So we'll use a .NET StreamWriter
+    # normal PowerShell stuff for outputting files will work. So we'll use a .NET StreamWriter
     # instead.
     try {
         $swCert = New-Object IO.StreamWriter($OutputCert, $false, [Text.Encoding]::ASCII)

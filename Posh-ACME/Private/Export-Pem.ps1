@@ -72,7 +72,7 @@ function Export-Pem {
     $OutputFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($OutputFile)
 
     # Usually, PEM files are ANSI/ASCII encoded with UNIX line endings which means none of the
-    # normal Powershell stuff for outputting files will work. So we'll use a .NET StreamWriter
+    # normal PowerShell stuff for outputting files will work. So we'll use a .NET StreamWriter
     # instead.
     try {
         $sw = New-Object IO.StreamWriter($OutputFile, $false, [Text.Encoding]::ASCII)
