@@ -1,4 +1,4 @@
-# The version of Invoke-RestMethod included with Powershell Core 6 now has a
+# The version of Invoke-RestMethod included with PowerShell Core 6 now has a
 # native -SkipCertificateCheck parameter. So we don't always need to mess around with
 # ServicePointManager anymore. But rather than checking $PSVersionTable.PSEdition,
 # we're going to explicitly check the parameter list of Invoke-RestMethod.
@@ -33,7 +33,7 @@ if ('SkipCertificateCheck' -notin (Get-Command Invoke-RestMethod).Parameters.Key
     $script:SkipCertSupported = $true
 }
 
-# The version of Invoke-RestMethod included with Powershell Core 6 now has a native
+# The version of Invoke-RestMethod included with PowerShell Core 6 now has a native
 # -SslProtocol parameter. According to the docs, it defaults to supporting all
 # protocols "supported by the system". So we shouldn't need to tweak the supported
 # protocols in [Net.ServicePointManager] like we do for the Desktop edition.
