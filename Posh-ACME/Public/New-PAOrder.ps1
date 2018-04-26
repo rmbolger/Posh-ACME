@@ -15,7 +15,7 @@ function New-PAOrder {
 
     # Make sure we have an account configured
     if (!($acct = Get-PAAccount)) {
-        throw "No ACME account configured. Run Set-PAAccount first."
+        throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
     }
 
     # null the local instance of $order so it's not confused with the script-scoped version

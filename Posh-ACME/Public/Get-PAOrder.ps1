@@ -12,7 +12,7 @@ function Get-PAOrder {
     Begin {
         # Make sure we have an account configured
         if (!(Get-PAAccount)) {
-            throw "No ACME account configured. Run Set-PAAccount first."
+            throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
         }
     }
 
