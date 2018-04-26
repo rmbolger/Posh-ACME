@@ -10,10 +10,15 @@ function Publish-DnsChallenge {
         [Parameter(Mandatory,Position=3)]
         [string]$Plugin,
         [Parameter(Position=4)]
-        [hashtable]$PluginArgs
+        [hashtable]$PluginArgs,
+        [switch]$NoPrefix
     )
 
-    $recordName = "_acme-challenge.$Domain"
+    if ($NoPrefix) {
+        $recordName = $Domain
+    } else {
+        $recordName = "_acme-challenge.$Domain"
+    }
 
     $keyAuth = Get-KeyAuthorization $Account $Token
 
@@ -65,6 +70,9 @@ function Publish-DnsChallenge {
 
     .PARAMETER PluginArgs
         A hashtable containing the plugin arguments to use with the specified DnsPlugin list. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
+
+    .PARAMETER NoPrefix
+        If specified, '_acme-challenge.' will not be added to record name being written in DNS. This normally only used when using challenge aliases.
 
     .EXAMPLE
         $auths = Get-PAOrder | Get-PAAuthorizations

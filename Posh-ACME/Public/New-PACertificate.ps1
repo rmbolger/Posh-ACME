@@ -16,6 +16,7 @@ function New-PACertificate {
         [ValidateScript({Test-ValidDnsPlugin $_ -ThrowOnFail})]
         [string[]]$DnsPlugin,
         [hashtable]$PluginArgs,
+        [string[]]$DnsAlias,
         [switch]$OCSPMustStaple,
         [switch]$Force,
         [int]$DNSSleep=120,
@@ -159,10 +160,13 @@ function New-PACertificate {
         Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production v2) and LE_STAGE (LetsEncrypt Staging v2). Defaults to 'LE_PROD'.
 
     .PARAMETER DnsPlugin
-        One or more DNS plugin names to use for this order's DNS challenges. If no plugin is specified, the "Manual" plugin will be used. If the same plugin is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many plugin names as there are domains in the order and in the same sequence as the ACME order.
+        One or more DNS plugin names to use for this order's DNS challenges. If no plugin is specified, the "Manual" plugin will be used. If the same plugin is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many plugin names as there are domains in the order and in the same sequence as the order.
 
     .PARAMETER PluginArgs
         A hashtable containing the plugin arguments to use with the specified DnsPlugin list. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
+
+    .PARAMETER DnsAlias
+        One or more FQDNs that DNS challenges should be published to instead of the certificate domain's zone. This is used in advanced setups where a CNAME in the certificate domain's zone has been pre-created to point to the alias's FQDN which makes the ACME server check the alias domain when validation challenge TXT records. If the same alias is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many alias FQDNs as there are domains in the order and in the same sequence as the order.
 
     .PARAMETER OCSPMustStaple
         If specified, the certificate generated for this order will have the OCSP Must-Staple flag set.
@@ -198,7 +202,13 @@ function New-PACertificate {
         $pluginArgs = @{FBServer='fb.example.com'; FBCred=(Get-Credential)}
         PS C:\>New-PACertificate site1.example.com -DnsPlugin Flurbog -PluginArgs $pluginArgs
 
-        Request a certificate using a hypothetical Flurbog DNS plugin that requires a server name and set of credentials.
+        Request a certificate using the hypothetical Flurbog DNS plugin that requires a server name and set of credentials.
+
+    .EXAMPLE
+        $pluginArgs = @{FBServer='fb.example.com'; FBCred=(Get-Credential)}
+        PS C:\>New-PACertificate site1.example.com -DnsPlugin Flurbog -PluginArgs $pluginArgs -DnsAlias validate.alt-example.com
+
+        This is the same as the previous example except that it's telling the Flurbog plugin to write to an alias domain. This only works if you have already created a CNAME record for _acme-challenge.site1.example.com that points to validate.alt-example.com.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME

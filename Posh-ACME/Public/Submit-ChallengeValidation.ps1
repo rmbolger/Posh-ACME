@@ -6,6 +6,7 @@ function Submit-ChallengeValidation {
         [string[]]$DnsPlugin,
         [Parameter(Position=1)]
         [hashtable]$PluginArgs,
+        [string[]]$DnsAlias,
         [int]$DnsSleep=120,
         [int]$ValidationTimeout=60,
         [PSTypeName('PoshACME.PAAccount')]$Account,
@@ -81,16 +82,28 @@ function Submit-ChallengeValidation {
     # fill out the DnsPlugin attribute so there's a value for each authorization in the order
     if (!$DnsPlugin) {
         Write-Warning "DnsPlugin not specified. Defaulting to Manual."
-        $DnsPlugin = @('Manual') * $allAuths.Count
+        $DnsPlugin = @('Manual') * $Domain.Count
     } elseif ($DnsPlugin.Count -lt $Domain.Count) {
         $lastPlugin = $DnsPlugin[-1]
         Write-Warning "Fewer DnsPlugin values than Domain values supplied. Using $lastPlugin for the rest."
-        $DnsPlugin += @($lastPlugin) * ($allAuths.Count-$DnsPlugin.Count)
+        $DnsPlugin += @($lastPlugin) * ($Domain.Count-$DnsPlugin.Count)
     }
     Write-Debug "DnsPlugin: $($DnsPlugin -join ',')"
 
+    # fill out the DnsAlias attribute so there's a value for each authorization in the order
+    if (!$DnsAlias) {
+        # no alias means they should all just be empty
+        $DnsAlias = @('') * $Domain.Count
+    } elseif ($DnsAlias.Count -lt $Domain.Count) {
+        $lastAlias = $DnsAlias[-1]
+        Write-Warning "Fewer DnsAlias values that Domain values supplied. Using $lastAlias for the rest."
+        $DnsAlias += @($lastAlias) * ($Domain.Count-$DnsAlias.Count)
+    }
+    Write-Debug "DnsAlias: $($DnsAlias -join ',')"
+
     # save order specific parameters to order object so we can renew later
     $order.DnsPlugin = $DnsPlugin
+    $order.DnsAlias = $DnsAlias
     $order.DnsSleep = $DnsSleep
     $order.ValidationTimeout = $ValidationTimeout
     $order | Update-PAOrder -SaveOnly
@@ -113,7 +126,13 @@ function Submit-ChallengeValidation {
                 if ($auth.DNS01Status -eq 'pending') {
                     # publish the necessary TXT record
                     Write-Verbose "Publishing DNS challenge for $($auth.fqdn)"
-                    Publish-DnsChallenge $auth.DNSId $Account $auth.DNS01Token $DnsPlugin[$i] $PluginArgs
+                    if ([string]::IsNullOrWhiteSpace($DnsAlias[$i])) {
+                        # publish normally
+                        Publish-DnsChallenge $auth.DNSId $Account $auth.DNS01Token $DnsPlugin[$i] $PluginArgs
+                    } else {
+                        # publish to alias
+                        Publish-DnsChallenge $DnsAlias[$i] $Account $auth.DNS01Token $DnsPlugin[$i] $PluginArgs -NoPrefix
+                    }
                     $toValidate += $i
                 } else {
                     throw "Unexpected challenge status '$($auth.DNS01Status)' for $($auth.fqdn)."
@@ -155,7 +174,13 @@ function Submit-ChallengeValidation {
     } finally {
         # always cleanup the TXT records if they were added
         for ($i=0; $i -lt $toValidate.Count; $i++) {
-            Unpublish-DnsChallenge $allAuths[$i].DNSId $Account $allAuths[$i].DNS01Token $DnsPlugin[$i] $PluginArgs
+            if ([string]::IsNullOrWhiteSpace($DnsAlias[$i])) {
+                # unpublish normally
+                Unpublish-DnsChallenge $allAuths[$i].DNSId $Account $allAuths[$i].DNS01Token $DnsPlugin[$i] $PluginArgs
+            } else {
+                # unpublish from alias
+                Unpublish-DnsChallenge $DnsAlias[$i] $Account $allAuths[$i].DNS01Token $DnsPlugin[$i] $PluginArgs -NoPrefix
+            }
         }
         $DnsPlugin[$toValidate] | Select-Object -Unique | ForEach-Object {
             Write-Verbose "Saving changes for $_ plugin"
@@ -180,6 +205,9 @@ function Submit-ChallengeValidation {
     .PARAMETER PluginArgs
         A hashtable containing the plugin arguments to use with the specified DnsPlugin list. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
 
+    .PARAMETER DnsAlias
+        One or more FQDNs that DNS challenges should be published to instead of the certificate domain's zone. This is used in advanced setups where a CNAME in the certificate domain's zone has been pre-created to point to the alias's FQDN which makes the ACME server check the alias domain when validation challenge TXT records. If the same alias is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many alias FQDNs as there are domains in the order and in the same sequence as the order.
+
     .PARAMETER DnsSleep
         Number of seconds to wait for DNS changes to propagate before asking the ACME server to validate DNS challenges. Default is 120.
 
@@ -201,9 +229,16 @@ function Submit-ChallengeValidation {
         Invoke manual DNS challenge validation on the currently selected account and order.
 
     .EXAMPLE
-        Submit-ChallengeValidation Infoblox @{IBServer="ipam.example.com";IBView="External";IBCred=(Get-Credential)}
+        $pluginArgs = @{FBServer='fb.example.com'; FBCred=(Get-Credential)}
+        PS C:\>Submit-ChallengeValidation Flurbog $pluginArgs
 
-        Invoke DNS challenge validation using the Infoblox plugin and the set of required Infoblox parameters on the currently selected account and order.
+        Invoke DNS challenge validation using the hypothetical Flurbog plugin on the currently selected account and order.
+
+    .EXAMPLE
+        $pluginArgs = @{FBServer='fb.example.com'; FBCred=(Get-Credential)}
+        PS C:\>Submit-ChallengeValidation Flurbog $pluginArgs -DnsAlias validate.alt-example.com
+
+        This is the same as the previous example except that it's telling the Flurbog plugin to write to an alias domain. This only works if you have already created a CNAME record for the domain(s) in the order that points to validate.alt-example.com.
 
     .EXAMPLE
         $order = Get-PAOrder site1.example.com

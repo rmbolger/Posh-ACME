@@ -90,6 +90,7 @@ function New-PAOrder {
     $order | Add-Member -MemberType NoteProperty -Name 'RenewAfter' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'OCSPMustStaple' -Value $OCSPMustStaple.IsPresent
     $order | Add-Member -MemberType NoteProperty -Name 'DnsPlugin' -Value $null
+    $order | Add-Member -MemberType NoteProperty -Name 'DnsAlias' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'DnsSleep' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'ValidationTimeout' -Value $null
 
