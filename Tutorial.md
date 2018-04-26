@@ -42,4 +42,76 @@ So now you've got a certificate and that's great! But Let's Encrypt certificates
 
 ## DNS Plugins
 
-TODO
+The ability to use a DNS plugin is obviously going to depend on your DNS provider and the available plugins in the current release of the module. If your DNS provider is not supported by an existing plugin, please [submit an issue](https://github.com/rmbolger/Posh-ACME/issues) requesting support. If you have PowerShell development skills, you might also try writing a plugin yourself. Instructions can be found in the [DnsPlugins README](/Posh-ACME/DnsPlugins/README.md). Pull requests for new plugins are both welcome and appreciated. It's also possible to redirect ACME DNS validations using a [CNAME record](https://support.dnsimple.com/articles/cname-record/) in your primary zone pointing to another DNS server that is supported. More on that later.
+
+The first thing to do is figure out which DNS plugin to use and how to use it. Start by listing the available plugins.
+
+```powershell
+Get-DnsPlugins
+```
+
+Using a DNS plugin will almost always require creating a hashtable with required plugin parameters. After choosing a plugin, find out what parameters are required by displaying the help for that plugin. In these examples, we'll use the AWS Route53 plugin.
+
+```powershell
+Get-DnsPluginHelp Route53 Add
+```
+
+This forwards a help request to the plugin's Add function. The output will look something like this. *Note: You can't actually use the `get-help` calls in the Remarks section because the function isn't actually exposed by the module. But most of the parameters you could use with `Get-Help` can also be used with `Get-DnsPluginHelp`*
+
+```
+NAME
+    Add-DnsTxtRoute53
+
+SYNOPSIS
+    Add a DNS TXT record to a Route53 hosted zone.
+
+
+SYNTAX
+    Add-DnsTxtRoute53 [-RecordName] <String> [-TxtValue] <String> [-R53AccessKey] <String> [-R53SecretKey]
+    <SecureString> [-ExtraParams <Object>] [<CommonParameters>]
+
+    Add-DnsTxtRoute53 [-RecordName] <String> [-TxtValue] <String> -R53ProfileName <String> [-ExtraParams <Object>]
+    [<CommonParameters>]
+
+
+DESCRIPTION
+    This plugin currently requires the AwsPowershell module to be installed. For authentication to AWS, you can either
+    specify an Access/Secret key pair or the name of an AWS credential profile previously stored using
+    Set-AWSCredential.
+
+
+RELATED LINKS
+
+REMARKS
+    To see the examples, type: "get-help Add-DnsTxtRoute53 -examples".
+    For more information, type: "get-help Add-DnsTxtRoute53 -detailed".
+    For technical information, type: "get-help Add-DnsTxtRoute53 -full".
+```
+
+From the `SYNTAX` section, we can see there are two different ways to call the function. Regardless of the plugin, you can always ignore `RecordName`, `TxtValue`, and `ExtraParams` as those are handled by the module. 
+
+The first option requires `[-R53AccessKey] <String>` and `[-R53SecretKey] <SecureString>`. These are API credentials for AWS and presumably as an AWS user, you already know how to generate them. The access key is just a normal string variable. But the secret key is a `SecureString` which takes a bit more effort to setup. So let's create the hashtable we need.
+
+```powershell
+$r53Secret = Read-Host Secret -AsSecureString
+$r53Params = @{R53AccessKey='ABCD1234'; R53SecretKey=$r53Secret}
+```
+
+This `$r53Params` variable is what we'll ultimately pass to the `-PluginArgs` parameter on functions that use it.
+
+Another thing to notice from the plugin's help output is that the description tells us we need to have the `AwsPowershell` module installed. So make sure you have that installed or install it with `Install-Module AwsPowershell` before moving on. I'm hoping most plugins won't need external dependencies like this. But it's good to double check.
+
+Now we know what plugin we're using and we have our plugin arguments in a hashtable. If this is the first time using a particular plugin, it's usually wise to test it before actually trying to use it for a new certificate. So let's do that. The command has no output unless we add the `-Verbose` parameter to show what's going on under the hood.
+
+```powershell
+# get a reference to the current account
+$acct = Get-PAAccount
+
+Publish-DnsChallenge site1.example.com -Account $acct -Token faketoken -Plugin Route53 -PluginArgs $r53Params -Verbose
+```
+
+Assuming there was no error, you should be able to validate that the TXT record was created in the Route53 management console. If so, go ahead and unpublish the record. Otherwise, troubleshoot why it failed and get it working before moving on.
+
+```powershell
+Unpublish-DnsChallenge site1.example.com -Account $acct -Token faketoken -Plugin Route53 -PluginArgs $r53Params -Verbose
+```
