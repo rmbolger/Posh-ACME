@@ -1,8 +1,6 @@
 # Before initial release
 
-- Add cleanup functions (Remove-Blah)
 - Support DNS challenge aliases
-- Finish adding help for public functions
 
 # After release
 
