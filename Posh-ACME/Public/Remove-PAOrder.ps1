@@ -45,6 +45,8 @@ function Remove-PAOrder {
             $script:Order = $null
             $script:OrderFolder = $null
             $order = $null
+
+            Remove-Item (Join-Path $script:AcctFolder 'current-order.txt') -Force
         }
 
     }

@@ -1,12 +1,13 @@
 function Set-PAAccount {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$ID,
         [Parameter(Position=1)]
         [string[]]$Contact,
         [switch]$Deactivate,
-        [switch]$NoSwitch
+        [switch]$NoSwitch,
+        [switch]$Force
     )
 
     Begin {
@@ -101,6 +102,13 @@ function Set-PAAccount {
                 }
             }
             if ($Deactivate) {
+                if (!$Force) {
+                    if (!$PSCmdlet.ShouldContinue("Are you sure you wish to deactivate account $($acct.id)?",
+                    "Deactivating an account is irreversible and will prevent modifications or renewals for associated orders and certificates.")) {
+                        Write-Verbose "Modification aborted for account $($acct.id)."
+                        return
+                    }
+                }
                 $payload.status = 'deactivated'
             }
 
@@ -148,6 +156,9 @@ function Set-PAAccount {
 
     .PARAMETER NoSwitch
         If specified, the currently active account will not change. Useful primarily for bulk updating contact information across accounts. This switch is ignored if no ID is specified.
+
+    .PARAMETER Force
+        If specified, confirmation prompts for account deactivation will be skipped.
 
     .EXAMPLE
         Set-PAAccount -ID 1234567
