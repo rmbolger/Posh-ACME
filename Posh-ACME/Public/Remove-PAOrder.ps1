@@ -19,8 +19,32 @@ function Remove-PAOrder {
         # grab a copy of the order which also verifies its existence
         $order = Get-PAOrder $MainDomain
 
+        # revoke first, if asked
         if ($RevokeCert -and $order.status -eq 'valid') {
+            Set-PAOrder $order -RevokeCert -NoSwitch -Force:$Force.IsPresent
+        }
 
+        # confirm deletion unless -Force was used
+        if (!$Force) {
+            $msg = "Deleting an order will also delete the certificate and key if they exist."
+            $question = "Are you sure you wish to delete $($order.MainDomain)?"
+            if (!$PSCmdlet.ShouldContinue($question,$msg)) {
+                Write-Verbose "Order deletion aborted for $($order.MainDomain)."
+                return
+            }
+        }
+
+        Write-Verbose "Deleting order for $($order.MainDomain)"
+
+        # delete the order's folder
+        $orderFolder = Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')
+        Remove-Item $orderFolder -Force -Recurse
+
+        # unset the current order if it was this one
+        if ($script:Order -and $script:Order.MainDomain -eq $order.MainDomain) {
+            $script:Order = $null
+            $script:OrderFolder = $null
+            $order = $null
         }
 
     }
