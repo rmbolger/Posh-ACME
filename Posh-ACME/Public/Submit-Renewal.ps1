@@ -8,7 +8,8 @@ function Submit-Renewal {
         [Parameter(ParameterSetName='AllAccounts',Mandatory)]
         [switch]$AllAccounts,
         [switch]$NewKey,
-        [switch]$Force
+        [switch]$Force,
+        [switch]$NoSkipManualDns
     )
 
     Begin {
@@ -17,7 +18,7 @@ function Submit-Renewal {
 
             # Make sure we have an account configured
             if (!(Get-PAAccount)) {
-                throw "No ACME account configured. Run Set-PAAccount first."
+                throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
             }
 
             $pluginArgs = Import-PluginArgs
@@ -56,6 +57,12 @@ function Submit-Renewal {
                 # error if the renewal window hasn't been reached and no -Force
                 if (!$Force -and (Get-Date) -lt (Get-Date $order.RenewAfter)) {
                     throw "Order for $($order.MainDomain) is not recommended for renewal yet. Use -Force to override."
+                }
+
+                # skip orders with a Manual DNS plugin
+                if (!$NoSkipManualDns -and 'Manual' -in @($order.DnsPlugin)) {
+                    Write-Warning "Skipping renewal for order $($order.MainDomain) due to Manual DNS plugin. Use -NoSkipManualDns to avoid this."
+                    return
                 }
 
                 Write-Verbose "Renewing certificate for order $($order.MainDomain)"
@@ -149,6 +156,9 @@ function Submit-Renewal {
 
     .PARAMETER Force
         If specified, an order that hasn't reached its RenewAfter date will not throw an error and will not be skipped when using either of the -All parameters.
+
+    .PARAMETER NoSkipManualDns
+        If specified, orders that utilize the Manual DNS plugin will not be skipped and user interaction may be required to complete the process. Otherwise, orders that utilize the Manual DNS plugin will be skipped.
 
     .EXAMPLE
         Submit-Renewal
