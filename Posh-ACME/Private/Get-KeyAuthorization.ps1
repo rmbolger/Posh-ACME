@@ -8,7 +8,7 @@ function Get-KeyAuthorization {
         [string]$Token
     )
 
-    # https://tools.ietf.org/html/draft-ietf-acme-acme-10#section-8.1
+    # https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-8.1
 
     # A key authorization is a string that expresses
     # a domain holder's authorization for a specified key to satisfy a
@@ -27,11 +27,11 @@ function Get-KeyAuthorization {
     # safe base64 alphabet.  The "||" operator indicates concatenation of
     # strings.
 
-    # hydrate the key
-    $key = $Account.key | ConvertFrom-Jwk
+    # hydrate the account key
+    $acctKey = $Account.key | ConvertFrom-Jwk
 
     # create the key thumbprint
-    $pubJwk = $key | ConvertTo-Jwk -PublicOnly -AsJson
+    $pubJwk = $acctKey | ConvertTo-Jwk -PublicOnly -AsJson
     $jwkBytes = [Text.Encoding]::UTF8.GetBytes($pubJwk)
     $sha256 = [Security.Cryptography.SHA256]::Create()
     $jwkHash = $sha256.ComputeHash($jwkBytes)
