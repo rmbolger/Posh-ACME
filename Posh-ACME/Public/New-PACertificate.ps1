@@ -26,14 +26,13 @@ function New-PACertificate {
 
     # Make sure we have a server set. But don't override the current
     # one unless explicitly specified.
-    $dir = Get-PAServer
-    if (!$dir -or ('DirectoryUrl' -in $PSBoundParameters.Keys)) {
+    if (!(Get-PAServer) -or ('DirectoryUrl' -in $PSBoundParameters.Keys)) {
         Set-PAServer $DirectoryUrl
     } else {
         # refresh the directory info (which should also get a fresh nonce)
         Update-PAServer
     }
-    Write-Verbose "Using directory $($dir.location)"
+    Write-Verbose "Using directory $($script:Dir.location)"
 
     # Make sure we have an account set. If Contact and/or AccountKeyLength
     # were specified and don't match the current one but do match a different,
@@ -124,7 +123,8 @@ function New-PACertificate {
         Split-CertChain $fullchainFile $certFile $chainFile
         Export-CertPfx $certFile $keyFile $pfxFile
 
-        Write-Verbose "Wrote certificate files to $($script:OrderFolder)"
+        Write-Verbose "Successfully created certificate."
+        Write-Host "Certificate files saved to $($script:OrderFolder)"
     }
 
 
