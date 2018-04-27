@@ -1,7 +1,7 @@
 function Import-Pem {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=1)]
+        [Parameter(Mandatory,Position=0)]
         [string]$InputFile
     )
 

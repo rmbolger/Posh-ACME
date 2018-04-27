@@ -123,6 +123,14 @@ function New-PACertificate {
         Split-CertChain $fullchainFile $certFile $chainFile
         Export-CertPfx $certFile $keyFile $pfxFile
 
+        # check the certificate expiration date so we can update the CertExpires
+        # and RenewAfter fields
+        Write-Verbose "Updating cert expiration and renewal window"
+        $certExpires = (Import-Pem $certFile).NotAfter
+        $script:Order.CertExpires = $certExpires.ToString('yyyy-MM-ddTHH:mm:ssZ')
+        $script:Order.RenewAfter = $certExpires.AddDays(-30).ToString('yyyy-MM-ddTHH:mm:ssZ')
+        Update-PAOrder -SaveOnly
+
         Write-Verbose "Successfully created certificate."
         Write-Host "Certificate files saved to $($script:OrderFolder)"
     }
