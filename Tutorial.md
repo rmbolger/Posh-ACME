@@ -1,5 +1,11 @@
 # Posh-ACME Tutorial
 
+- [Picking a Server](#server)
+- [Your First Certificate](#firstcert)
+- [DNS Plugins](#dnsplugins)
+- [Renewing A Certificate](#renewing)
+
+<a name="server"/>
 ## Picking a Server
 
 Before we begin, let's configure our ACME server to be the Let's Encrypt *Staging* server. This will let us figure out all of the commands and parameters without likely running into the production server's [rate limits](https://letsencrypt.org/docs/rate-limits/). 
@@ -12,6 +18,7 @@ Set-PAServer LE_STAGE
 
 Once you set a server, the module will continue to perform future actions against that server until you change it with another call to `Set-PAServer` or using the `-DirectoryUrl` parameter in a command that supports it. The first time you connect to a server, a link to its Terms of Service will be displayed. You should review it before continuing.
 
+<a name="firstcert"/>
 ## Your First Certificate
 
 The bare minimum you need to request a certificate is just the domain name.
@@ -40,6 +47,7 @@ The command will sleep for 2 minutes by default to allow the DNS changes to prop
 
 So now you've got a certificate and that's great! But Let's Encrypt certificates expire relatively quickly (3 months). And you won't be able to renew this certificate without going through the manual DNS TXT record hassle again. So let's add a DNS plugin to the process.
 
+<a name="dnsplugins"/>
 ## DNS Plugins
 
 The ability to use a DNS plugin is obviously going to depend on your DNS provider and the available plugins in the current release of the module. If your DNS provider is not supported by an existing plugin, please [submit an issue](https://github.com/rmbolger/Posh-ACME/issues) requesting support. If you have PowerShell development skills, you might also try writing a plugin yourself. Instructions can be found in the [DnsPlugins README](/Posh-ACME/DnsPlugins/README.md). Pull requests for new plugins are both welcome and appreciated. It's also possible to redirect ACME DNS validations using a [CNAME record](https://support.dnsimple.com/articles/cname-record/) in your primary zone pointing to another DNS server that is supported. More on that later.
@@ -129,6 +137,7 @@ New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@exampl
 
 We included the `-Verbose` switch again so we can see what's going on. But normally, that wouldn't be necessary. Assuming everything went well, you should now have a fresh new wildcard cert that required no user interaction.
 
+<a name="renewing"/>
 ## Renewing A Certificate
 
 Now that you have a cert that can successfully answer DNS challenges via a plugin, it's even easier to renew it.
