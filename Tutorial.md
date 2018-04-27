@@ -107,13 +107,15 @@ Now we know what plugin we're using and we have our plugin arguments in a hashta
 # get a reference to the current account
 $acct = Get-PAAccount
 
-Publish-DnsChallenge site1.example.com -Account $acct -Token faketoken -Plugin Route53 -PluginArgs $r53Params -Verbose
+Publish-DnsChallenge site1.example.com -Account $acct -Token faketoken -Plugin Route53 `
+    -PluginArgs $r53Params -Verbose
 ```
 
 Assuming there was no error, you should be able to validate that the TXT record was created in the Route53 management console. If so, go ahead and unpublish the record. Otherwise, troubleshoot why it failed and get it working before moving on.
 
 ```powershell
-Unpublish-DnsChallenge site1.example.com -Account $acct -Token faketoken -Plugin Route53 -PluginArgs $r53Params -Verbose
+Unpublish-DnsChallenge site1.example.com -Account $acct -Token faketoken -Plugin Route53 `
+    -PluginArgs $r53Params -Verbose
 ```
 
 All we have left to do is add the necessary plugin parameters to our original certificate request command. But let's get crazy and change it up a bit by making the cert a wildcard cert with the root domain as a subject alternative name (SAN).
@@ -121,7 +123,8 @@ All we have left to do is add the necessary plugin parameters to our original ce
 *Note: According to current Let's Encrypt [rate limits](https://letsencrypt.org/docs/rate-limits/), a single certificate can have up to 100 names. However, they've recently started enforcing a requirement that wildcard certs may not contain and SANs that would overlap with the wildcard entry. So you'll get an error if you try to put `*.example.com` and `site1.example.com` in the same cert. But `*.example.com` and `example.com` or `site1.sub1.example.com` are just fine.*
 
 ```powershell
-New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@example.com -DnsPlugin Route53 -PluginArgs $r53Params -Verbose
+New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@example.com -DnsPlugin Route53 `
+    -PluginArgs $r53Params -Verbose
 ```
 
 We included the `-Verbose` switch again so we can see what's going on. But normally, that wouldn't be necessary. Assuming everything went well, you should now have a fresh new wildcard cert that required no user interaction.
