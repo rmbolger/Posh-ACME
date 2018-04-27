@@ -1,12 +1,10 @@
 # Posh-ACME Tutorial
 
-- [Picking a Server](#server)
-- [Your First Certificate](#firstcert)
-- [DNS Plugins](#dnsplugins)
-- [Renewing A Certificate](#renewing)
-- [(Advanced) DNS Challenge Aliases](#dnsalias)
-
-<a name="server"/>
+- [Picking a Server](#picking-a-server)
+- [Your First Certificate](#your-first-certificate)
+- [DNS Plugins](#dns-plugins)
+- [Renewing A Certificate](#renewing-a-certificate)
+- [(Advanced) DNS Challenge Aliases](#advanced-dns-challenge-aliases)
 
 ## Picking a Server
 
@@ -19,8 +17,6 @@ Set-PAServer LE_STAGE
 `LE_STAGE` is a shortcut for the Let's Encrypt Staging server's directory URL. You could do the same thing by specifying the actual URL which is https://acme-staging-v02.api.letsencrypt.org/directory. The other currently supported server shortcut is `LE_PROD` for the Let's Encrypt Production server.
 
 Once you set a server, the module will continue to perform future actions against that server until you change it with another call to `Set-PAServer` or using the `-DirectoryUrl` parameter in a command that supports it. The first time you connect to a server, a link to its Terms of Service will be displayed. You should review it before continuing.
-
-<a name="firstcert"/>
 
 ## Your First Certificate
 
@@ -49,8 +45,6 @@ The command will sleep for 2 minutes by default to allow the DNS changes to prop
 - **fullchain.cer** (Base64 encoded PEM that is basically cert.cer + chain.cer)
 
 So now you've got a certificate and that's great! But Let's Encrypt certificates expire relatively quickly (3 months). And you won't be able to renew this certificate without going through the manual DNS TXT record hassle again. So let's add a DNS plugin to the process.
-
-<a name="dnsplugins"/>
 
 ## DNS Plugins
 
@@ -140,8 +134,6 @@ New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@exampl
 ```
 
 We included the `-Verbose` switch again so we can see what's going on. But normally, that wouldn't be necessary. Assuming everything went well, you should now have a fresh new wildcard cert that required no user interaction.
-
-<a name="renewing"/>
 
 ## Renewing A Certificate
 
