@@ -105,7 +105,7 @@ $r53Params = @{R53AccessKey='ABCD1234'; R53SecretKey=$r53Secret}
 
 This `$r53Params` variable is what we'll ultimately pass to the `-PluginArgs` parameter on functions that use it.
 
-Another thing to notice from the plugin's help output is that the description tells us we need to have the `AwsPowershell` module installed. So make sure you have that installed or install it with `Install-Module AwsPowershell` before moving on. I'm hoping most plugins won't need external dependencies like this. But it's good to double check.
+Another thing to notice from the plugin's help output is that the description tells us we need to have the `AwsPowershell` module installed. So make sure you have that installed or install it with `Install-Module AwsPowershell` before moving on. Hopefully, most plugins won't need external dependencies like this. But it's good to double check.
 
 Now we know what plugin we're using and we have our plugin arguments in a hashtable. If this is the first time using a particular plugin, it's usually wise to test it before actually trying to use it for a new certificate. So let's do that. The command has no output unless we add the `-Verbose` switch to show what's going on under the hood.
 
