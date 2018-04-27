@@ -126,7 +126,7 @@ Unpublish-DnsChallenge site1.example.com -Account $acct -Token faketoken -Plugin
 
 All we have left to do is add the necessary plugin parameters to our original certificate request command. But let's get crazy and change it up a bit by making the cert a wildcard cert with the root domain as a subject alternative name (SAN).
 
-*Note: According to current Let's Encrypt [rate limits](https://letsencrypt.org/docs/rate-limits/), a single certificate can have up to 100 names. However, they've recently started enforcing a requirement that wildcard certs may not contain and SANs that would overlap with the wildcard entry. So you'll get an error if you try to put `*.example.com` and `site1.example.com` in the same cert. But `*.example.com` and `example.com` or `site1.sub1.example.com` are just fine.*
+*Note: According to current Let's Encrypt [rate limits](https://letsencrypt.org/docs/rate-limits/), a single certificate can have up to 100 names. However, they've recently started enforcing a requirement that wildcard certs may not contain any SANs that would overlap with the wildcard entry. So you'll get an error if you try to put `*.example.com` and `site1.example.com` in the same cert. But `*.example.com` and `example.com` or `site1.sub1.example.com` are just fine.*
 
 ```powershell
 New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@example.com -DnsPlugin Route53 `
