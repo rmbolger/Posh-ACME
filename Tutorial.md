@@ -135,6 +135,8 @@ New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@exampl
 
 We included the `-Verbose` switch again so we can see what's going on. But normally, that wouldn't be necessary. Assuming everything went well, you should now have a fresh new wildcard cert that required no user interaction.
 
+Keep in mind that **PluginArgs are saved to the local profile and tied to the current ACME account**. This is what enables easy renewals that we'll discuss in the next section. It also means you can generate additional certificates without having to specify the PluginArgs parameter again as long as you're using the same DNS plugin. However, because new values overwrite old values, it means that you can't use different sets of parameters for different certificates unless you create a different ACME account.
+
 ## Renewing A Certificate
 
 Now that you have a cert that can successfully answer DNS challenges via a plugin, it's even easier to renew it.
@@ -154,8 +156,6 @@ Submit-Renewal -AllAccounts
 ```
 
 These are designed to be used in a daily scheduled task. **Make sure to have it run as the same user you're currently logged in as** because the module config is all stored in your local profile. Each day, it will check the existing certs for ones that have reached the renewal window and renew them. It will just ignore the ones that aren't ready yet.
-
-*Note: PluginArgs are saved on a per ACME account basis. So if you need two different certs that use the same plugin with different parameters, create a new account for the second cert. Otherwise, the second cert's PluginArgs will replace the first cert's PluginArgs on the account and may then fail to renew the first.*
 
 ## (Advanced) DNS Challenge Aliases
 
