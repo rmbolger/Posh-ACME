@@ -21,7 +21,7 @@ function Submit-Renewal {
                 throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
             }
 
-            $pluginArgs = Import-PluginArgs
+            $pluginArgs = Merge-PluginArgs
         }
     }
 
