@@ -1,22 +1,20 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '0.1'
+ModuleVersion = '1.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
 Description = 'ACMEv2 protocol client for generating certificates using Let''s Encrypt (or other ACMEv2 compliant CA)'
 CompatiblePSEditions = 'Desktop'
 PowerShellVersion = '5.1'
+DotNetFrameworkVersion = '4.7.1'
 
 # Name of the Windows PowerShell host required by this module
 # PowerShellHostName = ''
 
 # Minimum version of the Windows PowerShell host required by this module
 # PowerShellHostVersion = ''
-
-# Minimum version of Microsoft .NET Framework required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
-# DotNetFrameworkVersion = ''
 
 # Minimum version of the common language runtime (CLR) required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
 # CLRVersion = ''
@@ -103,6 +101,30 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
+## 1.0 (2018-04-26)
+
+* Initial Release
+* Added functions
+    * Get-DnsPluginHelp
+    * Get-DnsPlugins
+    * Get-PAAccount
+    * Get-PAAuthorizations
+    * Get-PAOrder
+    * Get-PAServer
+    * New-PAAccount
+    * New-PACertificate
+    * New-PAOrder
+    * Publish-DnsChallenge
+    * Remove-PAAccount
+    * Remove-PAOrder
+    * Save-DnsChallenge
+    * Set-PAAccount
+    * Set-PAOrder
+    * Set-PAServer
+    * Submit-ChallengeValidation
+    * Submit-OrderFinalize
+    * Submit-Renewal
+    * Unpublish-DnsChallenge
 '@
 
     } # End of PSData hashtable
