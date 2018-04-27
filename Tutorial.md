@@ -14,7 +14,7 @@ Before we begin, let's configure our ACME server to be the Let's Encrypt *Stagin
 Set-PAServer LE_STAGE
 ```
 
-`LE_STAGE` is a shortcut for the Let's Encrypt Staging server's directory URL. You could do the same thing by specifying the actual URL which is https://acme-staging-v02.api.letsencrypt.org/directory. The other currently supported server shortcut is `LE_PROD` for the Let's Encrypt Production server.
+`LE_STAGE` is a shortcut for the Let's Encrypt Staging server's directory URL. You could do the same thing by specifying the actual URL which is https://acme-staging-v02.api.letsencrypt.org/directory. The other currently supported server shortcut is `LE_PROD` for the Let's Encrypt Production server. Any ACMEv2 compliant directory URL will work though.
 
 Once you set a server, the module will continue to perform future actions against that server until you change it with another call to `Set-PAServer` or using the `-DirectoryUrl` parameter in a command that supports it. The first time you connect to a server, a link to its Terms of Service will be displayed. You should review it before continuing.
 
