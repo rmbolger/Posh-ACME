@@ -97,8 +97,7 @@
                     <TableColumnHeader/>
                     <TableColumnHeader/>
                     <TableColumnHeader/>
-                    <TableColumnHeader><Label>Expires</Label></TableColumnHeader>
-                    <TableColumnHeader><Label>RenewAfter</Label></TableColumnHeader>
+                    <TableColumnHeader><Label>CertExpires</Label></TableColumnHeader>
                 </TableHeaders>
                 <TableRowEntries>
                     <TableRowEntry>
@@ -110,12 +109,7 @@
                             <TableColumnItem><PropertyName>OCSPMustStaple</PropertyName></TableColumnItem>
                             <TableColumnItem>
                                 <ScriptBlock>
-                                    if ($_.Expires) { Get-Date $_.Expires } else { $_.Expires }
-                                </ScriptBlock>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <ScriptBlock>
-                                    if ($_.RenewAfter) { Get-Date $_.RenewAfter } else { $_.RenewAfter }
+                                    if ($_.CertExpires) { Get-Date $_.CertExpires } else { $_.CertExpires }
                                 </ScriptBlock>
                             </TableColumnItem>
                         </TableColumnItems>

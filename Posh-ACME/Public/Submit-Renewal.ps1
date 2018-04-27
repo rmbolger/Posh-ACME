@@ -88,11 +88,11 @@ function Submit-Renewal {
             'AllOrders' {
 
                 # get the list of all completed (valid) orders
-                $orders = Get-PAOrder -List -Refresh | Where-Object { $_.status -eq 'valid' }
+                $orders = @(Get-PAOrder -List -Refresh | Where-Object { $_.status -eq 'valid' })
 
                 # remove the ones that are ready for renewal unless -Force was used
                 if (!$Force) {
-                    $orders = $orders | Where-Object { (Get-Date) -ge (Get-Date $_.RenewAfter) }
+                    $orders = @($orders | Where-Object { (Get-Date) -ge (Get-Date $_.RenewAfter) })
                 }
 
                 if ($orders.Count -gt 0) {
@@ -146,16 +146,16 @@ function Submit-Renewal {
         The primary domain associated with an order. This is the domain that goes in the certificate's subject.
 
     .PARAMETER AllOrders
-        If specified, renew all valid orders on the current account. Orders that have not reached their RenewAfter date will be skipped unless -Force is used.
+        If specified, renew all valid orders on the current account. Orders that have not reached the renewal window will be skipped unless -Force is used.
 
     .PARAMETER AllAccounts
-        If specified, renew all valid orders on all valid accounts in this profile. Orders that have not reached their RenewAfter date will be skipped unless -Force is used.
+        If specified, renew all valid orders on all valid accounts in this profile. Orders that have not reached the renewal window will be skipped unless -Force is used.
 
     .PARAMETER NewKey
         If specified, a new private key will be generated for the certificate renewal. Otherwise, the old key is re-used. This is useful if you believe the current key has been compromised.
 
     .PARAMETER Force
-        If specified, an order that hasn't reached its RenewAfter date will not throw an error and will not be skipped when using either of the -All parameters.
+        If specified, an order that hasn't reached its renewal window will not throw an error and will not be skipped when using either of the -All parameters.
 
     .PARAMETER NoSkipManualDns
         If specified, orders that utilize the Manual DNS plugin will not be skipped and user interaction may be required to complete the process. Otherwise, orders that utilize the Manual DNS plugin will be skipped.
@@ -168,22 +168,22 @@ function Submit-Renewal {
     .EXAMPLE
         Submit-Renewal -Force
 
-        Renew the current order on the current account even if it hasn't reached its suggested RenewAfter date.
+        Renew the current order on the current account even if it hasn't reached its suggested renewal window.
 
     .EXAMPLE
         Submit-Renewal -AllOrders
 
-        Renew all valid orders on the current account that have reached their suggested RenewAfter date.
+        Renew all valid orders on the current account that have reached their suggested renewal window.
 
     .EXAMPLE
         Submit-Renewal -AllAccounts
 
-        Renew all valid orders on all valid accounts that have reached their suggested RenewAfter date.
+        Renew all valid orders on all valid accounts that have reached their suggested renewal window.
 
     .EXAMPLE
         Submit-Renewal site1.example.com -NewKey -Force
 
-        Renew the order for the specified site regardless of its RenewAfter date and generate a new private key.
+        Renew the order for the specified site regardless of its renewal window and generate a new private key.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME
