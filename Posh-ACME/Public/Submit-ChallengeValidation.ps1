@@ -108,8 +108,8 @@ function Submit-ChallengeValidation {
     $order.ValidationTimeout = $ValidationTimeout
     $order | Update-PAOrder -SaveOnly
 
-    # export the plugin args so we can renew later
-    Export-PluginArgs $PluginArgs $Account
+    # merge passed in plugin args with saved args (which also saves the merged copy)
+    $PluginArgs = Merge-PluginArgs $PluginArgs $Account
 
     try {
         # loop through the authorizations looking for challenges to validate
@@ -204,6 +204,8 @@ function Submit-ChallengeValidation {
 
     .PARAMETER PluginArgs
         A hashtable containing the plugin arguments to use with the specified DnsPlugin list. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
+
+        These arguments are saved to the current ACME account so they can be used automatically for subsequent certificates and renewals. New values will overwrite saved values for existing parameters.
 
     .PARAMETER DnsAlias
         One or more FQDNs that DNS challenges should be published to instead of the certificate domain's zone. This is used in advanced setups where a CNAME in the certificate domain's zone has been pre-created to point to the alias's FQDN which makes the ACME server check the alias domain when validation challenge TXT records. If the same alias is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many alias FQDNs as there are domains in the order and in the same sequence as the order.

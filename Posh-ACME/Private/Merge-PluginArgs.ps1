@@ -1,17 +1,16 @@
-function Export-PluginArgs {
+function Merge-PluginArgs {
     [CmdletBinding()]
     param(
+        [Parameter(Position=0)]
         [hashtable]$PluginArgs,
+        [Parameter(Position=1)]
         [PSTypeName('PoshACME.PAAccount')]$Account
     )
 
-    # Ultimately what we want to do here is serialize $PluginArgs to an
-    # account specific file so that we can load them back up when it's time
-    # to renew a cert. However, we don't want to just overwrite the file
-    # that's currently there because there might be parameters for other
-    # plugins that we'd be deleting. Instead, we basically want to merge
-    # the current set with the existing set (overwriting the existing only
-    # for parameters that overlap).
+    # Each time someone creates a new cert with a particular set of plugin args,
+    # we're saving them to the account so they can be used automatically on additional
+    # certs and renewals. Passed in args take priority. So if there are conflicts,
+    # the new ones win and the old ones are overwritten.
 
     # Rather than using JSON like we do with everything else, we'll be using XML
     # because the JSON conversion doesn't support serializing things like SecureString
@@ -30,26 +29,28 @@ function Export-PluginArgs {
     }
 
     # build the path to the plugin file and import it
-    $pluginFile = Join-Path (Join-Path $script:DirFolder $Account.id) 'plugindata.xml'
-    if (Test-Path -Path $pluginFile -PathType Leaf) {
-        Write-Debug "Loading existing plugin data"
+    $pFile = Join-Path (Join-Path $script:DirFolder $Account.id) 'plugindata.xml'
+    if (Test-Path -Path $pFile -PathType Leaf) {
+        Write-Debug "Loading saved plugin data"
 
         # import the existing file
-        $pArgs = Import-CliXml $pluginFile
+        $merged = Import-CliXml $pFile
 
     } else {
         # create an empty hashtable
-        $pArgs = @{}
+        $merged = @{}
     }
 
-    # loop through the keys of the incoming args
-    foreach ($key in $PluginArgs.Keys) {
-
-        # replace things that exist and add new where they don't
-        $pArgs.$key = $PluginArgs.$key
+    # merge the incoming args
+    if ($PluginArgs) {
+        foreach ($key in $PluginArgs.Keys) {
+            $merged.$key = $PluginArgs.$key
+        }
     }
 
     # export the merged object
-    $pArgs | Export-Clixml $pluginFile -Force
+    $merged | Export-Clixml $pFile -Force
 
+    # return the merged object
+    return $merged
 }
