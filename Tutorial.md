@@ -204,7 +204,7 @@ _acme-challenge.example.com  canonical name = acme.example.net
 
 ### Using the Challenge Alias
 
-Now that your CNAMEs are all setup, you just have to add one more parameter to your certificate request command, `-DnsAlias`. It works just like `-DnsPlugin` where it's an array that should have one element for each domain in the request. But if all of your CNAMEs point to the same place, you can just specify it once and it will use it for all the names.
+Now that your CNAMEs are all setup, you just have to add one more parameter to your certificate request command, `-DnsAlias`. It works just like `-DnsPlugin` as an array that should have one element for each domain in the request. But if all of your CNAMEs point to the same place, you can just specify the alias once and it will use that alias for all the names.
 
 ```powershell
 New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@example.com -DnsPlugin Route53 `
