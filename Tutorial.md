@@ -128,3 +128,26 @@ New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@exampl
 ```
 
 We included the `-Verbose` switch again so we can see what's going on. But normally, that wouldn't be necessary. Assuming everything went well, you should now have a fresh new wildcard cert that required no user interaction.
+
+## Renewing A Certificate
+
+Now that you have a cert that can successfully answer DNS challenges via a plugin, it's even easier to renew it.
+
+```powershell
+Submit-Renewal
+```
+
+The module saves all of the parameters associated with an order and re-uses the same values to renew it. It will throw a warning right now because the cert hasn't reached the suggested renewal window. But you can use `-Force` to do it anyway if you want to try it. If you end up with multiple certs or even multiple accounts with multiple certs, there are flags to renew all of those as well.
+
+```powershell
+# renew all orders on the current account
+Submit-Renewal -AllOrders
+
+# renew all orders across all accounts in the current profile
+Submit-Renewal -AllAccounts
+```
+
+These are designed to be used in a daily scheduled task. **Make sure to have it run as the same user you're currently logged in as** because the module config is all stored in your local profile. Each day, it will check the existing certs for ones that have reached the renewal window and renew them. It will just ignore the ones that aren't ready yet.
+
+*Note: PluginArgs are saved on a per ACME account basis. So if you need two different certs that use the same plugin with different parameters, create a new account for the second cert. Otherwise, the second cert's PluginArgs will replace the first cert's PluginArgs on the account and may then fail to renew the first.*
+
