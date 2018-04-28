@@ -189,6 +189,8 @@ _acme-challenge.example.com | _acme-challenge.validation.example.net
 _acme-challenge.example.com<br>_acme-challenge.sub1.example.com<br>_acme-challenge.sub2.example.com | acme.example.net
 _acme-challenge.example.com | **(BAD)** example.net
 
+**Important:** Don't point too many CNAMES at the same record. Let's Encrypt's ACME implementation can only deal with DNS responses [up to 4096 bytes](https://github.com/letsencrypt/boulder/pull/3467) which is roughly 60-70 TXT records depending on your DNS server and query parameters. If your record is too big, the validations will fail.
+
 ### Testing
 
 You should verify your CNAME got created correctly before you try and use it. If you're inside a business with a split-brain DNS infrastructure, you might need to explicitly query a public external resolver like CloudFlare's 1.1.1.1. However, some modern firewalls can be configured to prevent this ability. So make sure you can successfully query a known-good external record first.
