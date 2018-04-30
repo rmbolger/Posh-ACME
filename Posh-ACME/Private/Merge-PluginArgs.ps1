@@ -44,6 +44,7 @@ function Merge-PluginArgs {
     # merge the incoming args
     if ($PluginArgs) {
         foreach ($key in $PluginArgs.Keys) {
+            Write-Debug "Overwriting PluginArgs key $key"
             $merged.$key = $PluginArgs.$key
         }
     }
