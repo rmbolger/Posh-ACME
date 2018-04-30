@@ -6,23 +6,53 @@ function Add-DnsTxtAcmeDns {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
-        [pscredential]$ACMECred,
+        [string]$ACMEServer,
+        [string[]]$ACMEAllowFrom,
+        [hashtable]$ACMEReg,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # create the credential header object
-    $credHead = @{'X-Api-User'=$ACMECred.UserName;'X-Api-Key'=($ACMECred.GetNetworkCredential().Password)}
+    # Because we're doing acme-dns registrations on demand for new names, even if
+    # the $ACMEReg variable was passed in, it may not reflect the true current state
+    # because Submit-ChallengeValidation doesn't re-import PluginArgs between calls
+    # to Publish-DnsChallenge. Since we know there might be updated values, we need
+    # to explicitly re-import PluginArgs here to get the most up to date version and
+    # basically ignore the passed in $ACMEReg object.
+    $pargs = Merge-PluginArgs
 
-    # RecordName can be split into the root acme-dns domain and the subdomain that we're updating
-    $subdomain = $RecordName.Substring(0,$RecordName.IndexOf('.'))
-    $apiRoot = "https://$($RecordName.Substring($RecordName.IndexOf('.')+1))/update"
+    # If an existing ACMEReg wasn't passed in, create a new one to store new registrations
+    if (!$pargs.ACMEReg) { $pargs.ACMEReg = @{} }
+
+    # create a new subdomain registration if necessary
+    if ($RecordName -notin $pargs.ACMEReg.Keys) {
+        $reg = New-AcmeDnsRegistration $ACMEServer $ACMEAllowFrom
+        $pargs.ACMEReg.$RecordName = @($reg.subdomain,$reg.username,$reg.password,$reg.fulldomain)
+
+        # we need to notify the user to create a CNAME for this registration
+        # so save it to memory to display later during Save-DnsTxtAcmeDns
+        if (!$script:ACMECNAMES) { $script:ACMECNAMES = @() }
+        $script:ACMECNAMES += [pscustomobject]@{Record=$RecordName;CNAME=$reg.fulldomain}
+
+        # merge and save the updated PluginArgs
+        Merge-PluginArgs $pargs | Out-Null
+    }
+
+    # grab a reference to this record's registration values
+    $regVals = $pargs.ACMEReg.$RecordName
+
+    # create the auth header object
+    $authHead = @{'X-Api-User'=$regVals[1];'X-Api-Key'=$regVals[2]}
 
     # create the update body
-    $updateBody = @{subdomain=$subdomain;txt=$TxtValue} | ConvertTo-Json -Compress
+    $updateBody = @{subdomain=$regVals[0];txt=$TxtValue} | ConvertTo-Json -Compress
 
     # send the update
-    Invoke-RestMethod $apiRoot -Method Post -Headers $credHead -Body $updateBody | Out-Null
+    try {
+        Write-Verbose "Updating $($regVals[3]) with $TxtValue"
+        $response = Invoke-RestMethod "https://$ACMEServer/update" -Method Post -Headers $authHead -Body $updateBody
+        Write-Debug ($response | ConvertTo-Json)
+    } catch { throw }
 
     <#
     .SYNOPSIS
@@ -37,16 +67,27 @@ function Add-DnsTxtAcmeDns {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER ACMECred
-        The username and password in the object returned by the register endpoint on acme-dns.
+    .PARAMETER ACMEServer
+        The FQDN of the acme-dns server instance.
+
+    .PARAMETER ACMEAllowFrom
+        A list of networks in CIDR notation that the acme-dns server should allow updates from. If not specified, the acme-dns server will not block any updates based on IP address.
+
+    .PARAMETER ACMEReg
+        A hashtable of existing acme-dns registrations. This parameter is managed by the plugin and you shouldn't ever need to specify it manually.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxtAcmeDns '_acme-challenge.site1.example.com' 'xxxxxxxxxxXXXXXXXXXXxxxxxxxxxxXXXXXXXXXX001' 'f48d6f87-77bf-4b86-9a51-d1aa82eab427.auth.acme-dns.io' (Get-Credential)
+        Add-DnsTxtAcmeDns '_acme-challenge.site1.example.com' 'xxxxxxxxxxXXXXXXXXXXxxxxxxxxxxXXXXXXXXXX001' 'auth.acme-dns.io'
 
-        Adds a TXT record for the specified site with the specified value.
+        Adds a TXT record for the specified site with the specified value and no IP filtering.
+
+    .EXAMPLE
+        Add-DnsTxtAcmeDns '_acme-challenge.site1.example.com' 'xxxxxxxxxxXXXXXXXXXXxxxxxxxxxxXXXXXXXXXX001' 'auth.acme-dns.io' @('192.168.100.1/24","2002:c0a8:2a00::0/40")
+
+        Adds a TXT record for the specified site with the specified value and only allowed from the specified networks.
     #>
 }
 
@@ -93,16 +134,67 @@ function Save-DnsTxtAcmeDns {
         $ExtraParams
     )
 
-    # Nothing to do. acme-dns doesn't have a remove method
+    if ($script:ACMECNAMES -and $script:ACMECNAMES.Count -gt 0) {
+
+        Write-Host
+        Write-Host "Please create the following CNAME records:"
+        Write-Host "------------------------------------------"
+        $script:ACMECNAMES | ForEach-Object {
+            Write-Host "$($_.Record) -> $($_.CNAME)"
+        }
+        Write-Host "------------------------------------------"
+        Write-Host
+
+        Read-Host -Prompt "Press any key to continue." | Out-Null
+
+        # clear out the variable so we don't notify twice
+        Remove-Variable ACMECNAMES -Scope Script
+    }
 
     <#
     .SYNOPSIS
-        Not required for acme-dns.
+        Returns CNAME records that must be created by the user.
 
     .DESCRIPTION
-        acme-dns does not have a save method. So this function does nothing.
+        If new acme-dns registrations have previously been made with Add-DnsTxtAcmeDns, the CNAMEs need to be created by the user before challenge validation will succeed. This function outputs any pending CNAMEs to be created and then waits for user confirmation to continue.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+
+    .EXAMPLE
+        Save-DnsTxtAcmeDns
+
+        Displays pending CNAME records to create.
     #>
+}
+
+############################
+# Helper Functions
+############################
+
+function New-AcmeDnsRegistration {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [string]$ACMEServer,
+        [Parameter(Position=1)]
+        [string[]]$ACMEAllowFrom
+    )
+
+    # build the registration body
+    if ($ACMEAllowFrom) {
+        $regBody = @{allowfrom=$ACMEAllowFrom} | ConvertTo-Json -Compress
+    } else {
+        $regBody = '{}'
+    }
+
+    # do the registration
+    try {
+        Write-Verbose "Registering new subdomain on $ACMEServer"
+        $reg = Invoke-RestMethod "https://$ACMEServer/register" -Method POST -Body $regBody -ContentType 'application/json'
+        Write-Debug ($reg | ConvertTo-Json)
+    } catch { throw }
+
+    # return the results
+    return $reg
 }
