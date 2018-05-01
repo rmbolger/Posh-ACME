@@ -7,7 +7,9 @@ function New-Jws {
         [Parameter(Mandatory)]
         [hashtable]$Header,
         [Parameter(Mandatory)]
-        [string]$PayloadJson
+        [string]$PayloadJson,
+        [switch]$Compact,
+        [switch]$NoHeaderValidation
     )
 
     # RFC 7515 - JSON Web Signature (JWS)
@@ -55,28 +57,30 @@ function New-Jws {
         throw "Unsupported Key type. Must be RSA or ECDsa"
     }
 
-    # validate the header
-    if ('alg' -notin $Header.Keys -or $Header.alg -notin 'RS256','ES256','ES384') {
-        throw "Missing or invalid 'alg' in supplied Header"
-    }
-    if (!('jwk' -in $Header.Keys -xor 'kid' -in $Header.Keys)) {
-        if ('jwk' -in $Header.Keys) {
-            throw "Conflicting key entries. Both 'jwk' and 'kid' found in supplied Header"
-        } else {
-            throw "Missing key entries. Neither 'jwk' or 'kid' found in supplied Header"
+    if (!$NoHeaderValidation) {
+        # validate the header
+        if ('alg' -notin $Header.Keys -or $Header.alg -notin 'RS256','ES256','ES384') {
+            throw "Missing or invalid 'alg' in supplied Header"
         }
-    }
-    if ('jwk' -in $Header.Keys -and [string]::IsNullOrWhiteSpace($Header.jwk)) {
-        throw "Empty 'jwk' in supplied Header."
-    }
-    if ('kid' -in $Header.Keys -and [string]::IsNullOrWhiteSpace($Header.kid)) {
-        throw "Empty 'kid' in supplied Header."
-    }
-    if ('nonce' -notin $Header.Keys -or [string]::IsNullOrWhiteSpace($Header.nonce)) {
-        throw "Missing or empty 'nonce' in supplied Header."
-    }
-    if ('url' -notin $Header.Keys -or [string]::IsNullOrWhiteSpace($Header.url)) {
-        throw "Missing or empty 'url' in supplied Header."
+        if (!('jwk' -in $Header.Keys -xor 'kid' -in $Header.Keys)) {
+            if ('jwk' -in $Header.Keys) {
+                throw "Conflicting key entries. Both 'jwk' and 'kid' found in supplied Header"
+            } else {
+                throw "Missing key entries. Neither 'jwk' or 'kid' found in supplied Header"
+            }
+        }
+        if ('jwk' -in $Header.Keys -and [string]::IsNullOrWhiteSpace($Header.jwk)) {
+            throw "Empty 'jwk' in supplied Header."
+        }
+        if ('kid' -in $Header.Keys -and [string]::IsNullOrWhiteSpace($Header.kid)) {
+            throw "Empty 'kid' in supplied Header."
+        }
+        if ('nonce' -notin $Header.Keys -or [string]::IsNullOrWhiteSpace($Header.nonce)) {
+            throw "Missing or empty 'nonce' in supplied Header."
+        }
+        if ('url' -notin $Header.Keys -or [string]::IsNullOrWhiteSpace($Header.url)) {
+            throw "Missing or empty 'url' in supplied Header."
+        }
     }
 
     # build the "<protected>.<payload>" string we're going to be signing
@@ -118,12 +122,23 @@ function New-Jws {
     }
 
     # now put everything together into the final JWS format
-    $jws = [ordered]@{}
-    $jws.payload = $PayloadB64
-    $jws.protected = $HeaderB64
-    $jws.signature = ConvertTo-Base64Url $SignedBytes
+    if ($Compact) {
+        # JWS Compact Serialization
+        # https://tools.ietf.org/html/rfc7515#section-3.1
 
-    # and return it
-    return ($jws | ConvertTo-Json -Compress)
+        return "$HeaderB64.$PayloadB64.$(ConvertTo-Base64Url $SignedBytes)"
+
+    } else {
+        # JWS JSON Serialization
+        # https://tools.ietf.org/html/rfc7515#section-3.2
+
+        $jws = [ordered]@{}
+        $jws.payload = $PayloadB64
+        $jws.protected = $HeaderB64
+        $jws.signature = ConvertTo-Base64Url $SignedBytes
+
+        # and return it
+        return ($jws | ConvertTo-Json -Compress)
+    }
 
 }
