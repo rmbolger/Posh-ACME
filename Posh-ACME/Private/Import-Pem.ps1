@@ -1,8 +1,10 @@
 function Import-Pem {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
-        [string]$InputFile
+        [Parameter(ParameterSetName='File',Mandatory,Position=0)]
+        [string]$InputFile,
+        [Parameter(ParameterSetName='String',Mandatory)]
+        [string]$InputString
     )
 
     # DER uses TLV (Tag/Length/Value) triplets.
@@ -13,9 +15,13 @@ function Import-Pem {
     #        0x82 (more than 0x80) means the length is the next 2 (0x82-0x80) bytes
     # Value starts the byte after the length bytes end
 
-    # normalize the file path and read it in
-    $InputFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($InputFile)
-    $pemStr = (Get-Content $InputFile) -join ''
+    if ('File' -eq $PSCmdlet.ParameterSetName) {
+        # normalize the file path and read it in
+        $InputFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($InputFile)
+        $pemStr = (Get-Content $InputFile) -join ''
+    } else {
+        $pemStr = $InputString.Replace("`n",'')
+    }
 
     # private keys
     if ($pemStr -like '*-----BEGIN *PRIVATE KEY-----*' -and $pemStr -like '*-----END *PRIVATE KEY-----*') {
