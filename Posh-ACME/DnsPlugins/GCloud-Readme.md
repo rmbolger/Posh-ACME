@@ -29,6 +29,8 @@ It's always a good idea to limit a service account's access to only what is need
   - `dns.resourceRecordSets.update`
 - Click `Create`
 
+This will give the account it is applied to the ability to edit all record types for all existing zones in the current project. Unfortunately, the current Google APIs don't allow us to further restrict this role so that the account can only modify TXT records or only specific zones.
+
 ### Create a Service Account
 
 Start by going to the [Service accounts](https://console.cloud.google.com/iam-admin/serviceaccounts) page and make sure the correct project is selected.
@@ -40,3 +42,11 @@ Start by going to the [Service accounts](https://console.cloud.google.com/iam-ad
   - Key type: `JSON`
 - Click `Create`
 - A JSON file should be automatically downloaded. **Don't lose it**.
+
+## Using the Plugin
+
+The only plugin argument you need is the path to the JSON account file you downloaded. The plugin will cache the contents of this file on first use in case the original gets deleted or moved. But you must always specify the path regardless.
+
+```powershell
+New-PACertificate test.example.com -DnsPlugin GCloud -PluginArgs @{GCKeyFile='<path to json>'}
+```
