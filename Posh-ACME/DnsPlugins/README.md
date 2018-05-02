@@ -42,3 +42,8 @@ This function is optional in a DNS plugin and only used for DNS providers where 
 Plugins can be tested using `Publish-DnsChallenge`, `Unpublish-DnsChallenge`, and `Save-DnsChallenge`. They call the Add, Remove, and Save functions respectively. Use `Get-Help` on those functions for more information on how to use them.
 
 You can also [dot source](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_scripts?view=powershell-5.1#script-scope-and-dot-sourcing) the plugin file and call the functions directly. Just remember to dot source again each time you make a change to the plugin.
+
+
+## Plugin Readme
+
+In addition to the native function help, it can be very helpful to new users to have a plugin specific readme. It should be a Markdown formatted file also in the DnsPlugins folder called `<PluginName>-Readme.md`. For people who may be setting up automation against their DNS provider for the first time, it can be helpful to add guidance on creating service accounts, limited access roles, or any prerequisite setup that the plugin requires to work properly. It should also have a section with an example on how to use the plugin with `New-PACertificate`.
