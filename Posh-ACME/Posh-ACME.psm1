@@ -27,4 +27,17 @@ $script:USER_AGENT = "Posh-ACME/0.1 PowerShell/$($PSVersionTable.PSVersion)"
 $script:COMMON_HEADERS = @{'Accept-Language'='en-us,en;q=0.5'}
 $script:CONTENT_TYPE = 'application/jose+json'
 
+# setup the DnsPlugin argument completer
+# https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/register-argumentcompleter?view=powershell-5.1
+Register-ArgumentCompleter -CommandName 'New-PACertificate','Submit-ChallengeValidation' -ParameterName 'DnsPlugin' -ScriptBlock {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+
+    #$names = 'Infoblox','GCloud','Route53','Windows' | Sort-Object
+    $names = (Get-ChildItem -Path $PSScriptRoot\DnsPlugins\*.ps1 -Exclude '_Example.ps1').BaseName
+
+    $names | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
+        [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+    }
+}
+
 Import-PAConfig
