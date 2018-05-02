@@ -8,7 +8,7 @@ An [ACME v2](https://tools.ietf.org/html/draft-ietf-acme-acme) client implemente
 - Single command for new certs, `New-PACertificate`
 - Easy renewals via `Submit-Renewal`
 - RSA and ECC private keys supported for accounts and certificates
-- DNS challenge plugins for various DNS servers and providers (PRs welcome)
+- DNS challenge plugins for various DNS providers (pull requests welcome)
 - DNS challenge CNAME support
 - Help system for DNS plugins using `Get-DnsPlugins` and `Get-DnsPluginHelp`
 - DNS plugins support batch updates
