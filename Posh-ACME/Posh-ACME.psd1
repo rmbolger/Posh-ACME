@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '1.0'
+ModuleVersion = '1.1'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -101,30 +101,14 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 1.0 (2018-04-26)
+## 1.1 (2018-05-02)
 
-* Initial Release
-* Added functions
-    * Get-DnsPluginHelp
-    * Get-DnsPlugins
-    * Get-PAAccount
-    * Get-PAAuthorizations
-    * Get-PAOrder
-    * Get-PAServer
-    * New-PAAccount
-    * New-PACertificate
-    * New-PAOrder
-    * Publish-DnsChallenge
-    * Remove-PAAccount
-    * Remove-PAOrder
-    * Save-DnsChallenge
-    * Set-PAAccount
-    * Set-PAOrder
-    * Set-PAServer
-    * Submit-ChallengeValidation
-    * Submit-OrderFinalize
-    * Submit-Renewal
-    * Unpublish-DnsChallenge
+* Added tab completion for -DnsPlugin parameter
+* Added new DNS plugins
+  * Acme-Dns
+  * Azure
+  * GCloud (Google Cloud)
+  * Windows
 '@
 
     } # End of PSData hashtable
