@@ -41,8 +41,21 @@ Do not proceed until you can successfully establish a CimSession from the client
 
 ### Permissions
 
-TODO
+Setting permissions on Windows DNS depends on whether the DNS zones are integrated with Active Directory or not. Standalone non-domain joined DNS servers don't really have granular permissions as far as I can tell. The user must be local administrator. AD integrated servers can usually set more granular permissions on a per-zone level or better. Suffice it to say, the account being used to connect must have adequate permissions to add and delete TXT records in the associated zone(s).
 
 ## Using the Plugin
 
-TODO
+In a domain joined environment, the only required parameter is the hostname or IP of the DNS server unless you want the module to use different credentials than what PowerShell is running as. In that case, you would specify credentials and optionally the `-WinUseSSL` switch. Both of those tend to be required for non-domain joined servers.
+
+```powershell
+# domain joined environment, no credentials or SSL needed
+New-PACertificate test.example.com -DnsPlugin Windows -PluginArgs @{WinServer='dns1.example.com'}
+
+# standalone environment, adding credentials and SSL flag
+$pArgs = @{WinServer='dns1.example.com'; WinCred=(Get-Credential); WinUseSSL=$true}
+New-PACertificate test.example.com -DnsPlugin Windows -PluginArgs $pArgs
+```
+
+## Advanced Features
+
+Some of the newer features of Windows DNS such as DNS Scopes and VirtualizationInstances are not currently supported in this plugin. If you use those features and need them supported, please submit an [issue](https://github.com/rmbolger/Posh-ACME/issues) describing your environment.
