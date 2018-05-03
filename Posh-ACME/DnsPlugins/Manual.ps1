@@ -9,15 +9,13 @@ function Add-DnsTxtManual {
         $ExtraParams
     )
 
-    Write-Host "Create TXT record for: $RecordName"
-    Write-Host "TXT Value: $TxtValue"
-    Write-Host
-
-    Read-Host -Prompt "Press any key to continue once the record has been created"
+    Write-Verbose "Saving TXT record to display when Save-DnsTxtManual is called."
+    if (!$script:ManualTxtAdd) { $script:ManualTxtAdd = @() }
+    $script:ManualTxtAdd += [pscustomobject]@{Record=$RecordName;TxtValue=$TxtValue}
 
     <#
     .SYNOPSIS
-        Displays TXT record data to add to your DNS server manually.
+        Stores the TXT record to display when Save-DnsTxtManual is called.
 
     .DESCRIPTION
         This plugin requires user interaction and should not be used for any certificates that require automated renewals. Renewal operations will skip these.
@@ -34,7 +32,7 @@ function Add-DnsTxtManual {
     .EXAMPLE
         Add-DnsTxtManual '_acme-challenge.site1.example.com' 'asdfqwer12345678'
 
-        Displays TXT record data for the specified site with the specified value.
+        Stores TXT record data for the specified site with the specified value.
     #>
 }
 
@@ -49,15 +47,13 @@ function Remove-DnsTxtManual {
         $ExtraParams
     )
 
-    Write-Host "Delete TXT record for: $RecordName"
-    Write-Host "TXT Value: $TxtValue"
-    Write-Host
-
-    Read-Host -Prompt "Press any key to continue once the record has been deleted"
+    Write-Verbose "Saving TXT record to display when Save-DnsTxtManual is called."
+    if (!$script:ManualTxtRemove) { $script:ManualTxtRemove = @() }
+    $script:ManualTxtRemove += [pscustomobject]@{Record=$RecordName;TxtValue=$TxtValue}
 
     <#
     .SYNOPSIS
-        Displays TXT record data to remove from your DNS server manually.
+        Stores the TXT record to display when Save-DnsTxtManual is called.
 
     .DESCRIPTION
         This plugin requires user interaction and should not be used for any certificates that require automated renewals. Renewal operations will skip these.
@@ -74,7 +70,7 @@ function Remove-DnsTxtManual {
     .EXAMPLE
         Remove-DnsTxtManual '_acme-challenge.site1.example.com' 'asdfqwer12345678'
 
-        Displays TXT record data for the specified site with the specified value.
+        Stores TXT record data for the specified site with the specified value.
     #>
 }
 
@@ -85,14 +81,44 @@ function Save-DnsTxtManual {
         $ExtraParams
     )
 
-    # Manual DNS modification doesn't require a save step.
+    if ($script:ManualTxtAdd -and $script:ManualTxtAdd.Count -gt 0) {
+
+        Write-Host
+        Write-Host "Please create the following TXT records:"
+        Write-Host "------------------------------------------"
+        $script:ManualTxtAdd | ForEach-Object {
+            Write-Host "$($_.Record) -> $($_.TxtValue)"
+        }
+        Write-Host "------------------------------------------"
+        Write-Host
+
+        # clear out the variable so we don't notify twice
+        Remove-Variable ManualTxtAdd -Scope Script
+
+        Read-Host -Prompt "Press any key to continue." | Out-Null
+    }
+
+    if ($script:ManualTxtRemove -and $script:ManualTxtRemove.Count -gt 0) {
+
+        Write-Host
+        Write-Host "Please remove the following TXT records:"
+        Write-Host "------------------------------------------"
+        $script:ManualTxtRemove | ForEach-Object {
+            Write-Host "$($_.Record) -> $($_.TxtValue)"
+        }
+        Write-Host "------------------------------------------"
+        Write-Host
+
+        # clear out the variable so we don't notify twice
+        Remove-Variable ManualTxtRemove -Scope Script
+    }
 
     <#
     .SYNOPSIS
-        Not required for Manual plugin.
+        Displays the TXT records that need to be manually created or removed by the user.
 
     .DESCRIPTION
-        Manual plugin does not require calling this function to commit changes to DNS records.
+        This function outputs the pending TXT records to be created and waits for user confirmation to continue.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
