@@ -145,10 +145,10 @@ function Save-DnsTxtAcmeDns {
         Write-Host "------------------------------------------"
         Write-Host
 
-        Read-Host -Prompt "Press any key to continue." | Out-Null
-
         # clear out the variable so we don't notify twice
         Remove-Variable ACMECNAMES -Scope Script
+
+        Read-Host -Prompt "Press any key to continue." | Out-Null
     }
 
     <#
