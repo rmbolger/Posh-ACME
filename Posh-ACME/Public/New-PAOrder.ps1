@@ -120,12 +120,12 @@ function New-PAOrder {
     # backup the old private key if necessary, otherwise keep it around for re-use
     if ($removeOldKey) {
         Write-Verbose "Preparing for new private key"
-        $oldKey = Get-ChildItem (Join-Path $script:OrderFolder *) -Include *.key
+        $oldKey = Get-ChildItem (Join-Path $script:OrderFolder 'cert.key')
         $oldKey | Move-Item -Destination { "$($_.FullName).bak" } -Force
     }
 
     # backup any old certs/requests that might exist
-    $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include *.csr,*.cer,*.pfx
+    $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include cert.cer,cert.pfx
     $oldFiles | Move-Item -Destination { "$($_.FullName).bak" } -Force
 
     return $order
