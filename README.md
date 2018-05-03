@@ -8,8 +8,9 @@ An [ACME v2](https://tools.ietf.org/html/draft-ietf-acme-acme) client implemente
 - Single command for new certs, `New-PACertificate`
 - Easy renewals via `Submit-Renewal`
 - RSA and ECC private keys supported for accounts and certificates
-- DNS challenge plugins for various DNS providers (pull requests welcome)
-- DNS challenge CNAME support
+- [OCSP Must-Staple](https://scotthelme.co.uk/ocsp-must-staple/) support
+- DNS challenge plugins for [various DNS providers](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) (pull requests welcome)
+- DNS challenge [CNAME support](https://github.com/rmbolger/Posh-ACME/blob/master/Tutorial.md#advanced-dns-challenge-aliases)
 - Help system for DNS plugins using `Get-DnsPlugins` and `Get-DnsPluginHelp`
 - DNS plugins support batch updates
 - Multiple accounts supported per user profile which allows different certs to have different contact emails
