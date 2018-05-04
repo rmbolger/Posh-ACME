@@ -106,7 +106,7 @@ function New-PACertificate {
     # The order should now be finalized and the status should be valid. The only
     # thing left to do is download the cert and chain and write the results to
     # disk
-    if ($order.status -eq 'valid') {
+    if ($order.status -eq 'valid' -and !$order.Complete) {
         if ([string]::IsNullOrWhiteSpace($order.certificate)) {
             throw "Order status is valid, but no certificate URL was found."
         }
@@ -129,10 +129,22 @@ function New-PACertificate {
         $certExpires = (Import-Pem $certFile).NotAfter
         $script:Order.CertExpires = $certExpires.ToString('yyyy-MM-ddTHH:mm:ssZ')
         $script:Order.RenewAfter = $certExpires.AddDays(-30).ToString('yyyy-MM-ddTHH:mm:ssZ')
-        Update-PAOrder -SaveOnly
 
         Write-Verbose "Successfully created certificate."
         Write-Host "Certificate files saved to $($script:OrderFolder)"
+
+        # since there's no easy way to tell that we've already downloaded the finalized cert
+        # we'll add our own boolean to the order object to keep track
+        if ('Complete' -notin $order.PSObject.Properties.Name) {
+            $script:Order | Add-Member -MemberType NoteProperty -Name 'Complete' -Value $true
+        } else {
+            $script:Order.Complete = $true
+        }
+
+        Update-PAOrder -SaveOnly
+
+    } elseif ($order.Complete) {
+        Write-Verbose "This order has already been completed."
     }
 
 
