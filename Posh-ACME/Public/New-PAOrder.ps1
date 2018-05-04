@@ -94,6 +94,7 @@ function New-PAOrder {
     $order | Add-Member -MemberType NoteProperty -Name 'DnsAlias' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'DnsSleep' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'ValidationTimeout' -Value $null
+    $order | Add-Member -MemberType NoteProperty -Name 'Complete' -Value $false
 
     # make sure there's a certificate field for later
     if ('certificate' -notin $order.PSObject.Properties.Name) {
