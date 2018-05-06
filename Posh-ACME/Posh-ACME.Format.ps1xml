@@ -145,5 +145,31 @@
                 </TableRowEntries>
             </TableControl>
         </View>
+        <View>
+            <Name>PACertificate</Name>
+            <ViewSelectedBy>
+                <TypeName>PoshACME.PACertificate</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader/>
+                    <TableColumnHeader/>
+                    <TableColumnHeader/>
+                    <TableColumnHeader/>
+                    <TableColumnHeader/>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem><PropertyName>Subject</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>NotAfter</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>KeyLength</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>Thumbprint</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>AllSANs</PropertyName></TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
     </ViewDefinitions>
 </Configuration>

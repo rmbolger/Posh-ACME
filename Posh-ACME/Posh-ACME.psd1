@@ -46,6 +46,7 @@ FunctionsToExport = @(
     'Get-DnsPlugins',
     'Get-PAAccount',
     'Get-PAAuthorizations',
+    'Get-PACertificate',
     'Get-PAOrder',
     'Get-PAServer',
     'New-PAAccount',
