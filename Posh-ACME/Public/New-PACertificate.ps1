@@ -135,6 +135,9 @@ function New-PACertificate {
 
         Update-PAOrder -SaveOnly
 
+        # output cert details
+        Get-PACertificate
+
     } elseif ($order.CertExpires) {
         Write-Verbose "This order has already been completed."
     }
