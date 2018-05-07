@@ -20,6 +20,15 @@ if ([String]::IsNullOrWhiteSpace($PSScriptRoot)) {
     $url = 'https://github.com/rmbolger/Posh-ACME/archive/master.zip'
     Write-Host "Downloading latest version of Posh-ACME from $url" -ForegroundColor Cyan
     $file = Join-Path ([system.io.path]::GetTempPath()) 'Posh-ACME.zip'
+
+    # GitHub now requires TLS 1.2
+    # https://blog.github.com/2018-02-23-weak-cryptographic-standards-removed/
+    $currentMaxTls = [Math]::Max([Net.ServicePointManager]::SecurityProtocol.value__,[Net.SecurityProtocolType]::Tls.value__)
+    $newTlsTypes = [enum]::GetValues('Net.SecurityProtocolType') | Where-Object { $_ -gt $currentMaxTls }
+    $newTlsTypes | ForEach-Object {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor $_
+    }
+
     $webclient.DownloadFile($url,$file)
     Write-Host "File saved to $file" -ForegroundColor Green
 
