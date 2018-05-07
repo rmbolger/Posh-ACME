@@ -10,6 +10,7 @@ function New-PAOrder {
         [switch]$OCSPMustStaple,
         [Alias('NewCertKey')]
         [switch]$NewKey,
+        [switch]$Install,
         [switch]$Force
     )
 
@@ -94,6 +95,7 @@ function New-PAOrder {
     $order | Add-Member -MemberType NoteProperty -Name 'DnsAlias' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'DnsSleep' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'ValidationTimeout' -Value $null
+    $order | Add-Member -MemberType NoteProperty -Name 'Install' -Value $Install.IsPresent
 
     # make sure there's a certificate field for later
     if ('certificate' -notin $order.PSObject.Properties.Name) {
@@ -150,6 +152,9 @@ function New-PAOrder {
 
     .PARAMETER OCSPMustStaple
         If specified, the certificate generated for this order will have the OCSP Must-Staple flag set.
+
+    .PARAMETER Install
+        If specified, the certificate generated for this order will be imported to the local computer's Personal certificate store.
 
     .PARAMETER Force
         If specified, confirmation prompts that may have been generated will be skipped.
