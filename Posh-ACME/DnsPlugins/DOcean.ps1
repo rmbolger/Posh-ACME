@@ -137,7 +137,7 @@ function Remove-DnsTxtDOcean {
     #>
 }
 
-function Save-DnsTxtInfoblox {
+function Save-DnsTxtDOcean {
     [CmdletBinding()]
     param(
         [Parameter(ValueFromRemainingArguments)]
