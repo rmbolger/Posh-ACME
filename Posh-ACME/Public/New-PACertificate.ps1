@@ -18,6 +18,7 @@ function New-PACertificate {
         [hashtable]$PluginArgs,
         [string[]]$DnsAlias,
         [switch]$OCSPMustStaple,
+        [switch]$Install,
         [switch]$Force,
         [int]$DNSSleep=120,
         [int]$ValidationTimeout=60,
@@ -72,7 +73,7 @@ function New-PACertificate {
         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') ) {
 
         Write-Verbose "Creating a new order for $($Domain -join ', ')"
-        $order = New-PAOrder $Domain $CertKeyLength -Force -NewKey:$NewCertKey.IsPresent
+        $order = New-PAOrder $Domain $CertKeyLength -Force -NewKey:$NewCertKey.IsPresent -Install:$Install.IsPresent
     } else {
         $order | Set-PAOrder
     }
@@ -135,11 +136,17 @@ function New-PACertificate {
 
         Update-PAOrder -SaveOnly
 
+        # install to local computer store if asked
+        if ($Install) {
+            Write-Verbose "Importing certificate to Windows certificate store."
+            Import-PfxCertInternal $pfxFile
+        }
+
         # output cert details
         Get-PACertificate
 
     } elseif ($order.CertExpires) {
-        Write-Verbose "This order has already been completed."
+        Write-Verbose "This certificate order has already been completed. Use -Force to overwrite the current certificate."
     }
 
 
@@ -185,6 +192,9 @@ function New-PACertificate {
 
     .PARAMETER OCSPMustStaple
         If specified, the certificate generated for this order will have the OCSP Must-Staple flag set.
+
+    .PARAMETER Install
+        If specified, the certificate generated for this order will be imported to the local computer's Personal certificate store. Using this switch requires running the command from an elevated PowerShell session.
 
     .PARAMETER Force
         If specified, a new certificate order will always be created regardless of the status of a previous order for the same primary domain. Otherwise, the previous order still in progress will be used instead.
