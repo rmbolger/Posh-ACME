@@ -28,14 +28,52 @@ Additional parameters should be added as necessary for the specific DNS provider
 The last parameter should always be `$ExtraParams` with the `ValueFromRemainingArguments` parameter attribute. This allows callers to [splat](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting?view=powershell-5.1) the combined collection of plugin parameters to each plugin without errors for parameters that
 don't exist.
 
-**IMPORTANT:** Certificate orders that contain a wildcard domain (`*.example.com`) and the root domain (`example.com`) will require two TXT records to be added for the same FQDN (`_acme-challenge.example.com`). In Remove-DnsTxtXXXX, be sure to only remove the value passed in via `$TxtValue` and not all records for the `$RecordName` FQDN.
-
 Many DNS providers will only need the Add and Remove functions. In those cases, remember to remove all but the `$ExtraParams` parameter in the Save function and just leave the function body empty. For other providers, it is may be more efficient to stage changes in bulk and then perform what is effectively a Save or Commit operation on those changes. In those cases, implement the Save function as described below.
 
 ### `Save-DnsTxtXXXX`
 
 This function is optional in a DNS plugin and only used for DNS providers where it is more efficient to stage changes in bulk before Saving or Committing the changes. There are no required parameters except `$ExtraParams` which should always be last and have the `ValueFromRemainingArguments` parameter attribute.
 
+## Development Tips and Tricks
+
+### Multiple TXT Values Per Record
+
+It is both supported and expected that a given TXT record may have multiple values. It's most common with wildcard certificates that contain both the wildcard name (`*.example.com`) and the root domain (`example.com`). Both names require TXT records be added for the same FQDN (`_acme-challenge.example.com`). This can also happen if the user is using CNAME challenge aliases.
+
+The Add/Remove functions need to support all potential states of the particular TXT record. But how the record is represented by a given provider seems to vary. Some represent it as a single record with multiple values that you need to add to or remove from. Others have distinct records for each value that can be created/deleted individually. So make sure you can both create a new record that doesn't exist *and* add a value to a record that already does.
+
+### Remove Only Specific TxtValue
+
+Related to having multiple TXT values per record, the remove function must not blindly delete any record that matches 
+`$RecordName`. It should be able to remove only the `$TxtValue` on a record that may have multiple values. But if the record only contains a single value, the record should be deleted entirely.
+
+### Zone Matching
+
+A particular DNS provider may be hosting both zone roots (`example.com`) and sub-zones (`sub1.example.com`). One of the first things a plugin usually has to do is figure out which zone `$RecordName` needs to be added to. This should be the deepest sub-zone that would still contain `$RecordName`. Here are some examples using the previously mentioned zones.
+
+`$RecordName` | Matching Zone
+--- | ---
+_acme-challenge.example.com | example.com
+_acme-challenge.site1.example.com | example.com
+_acme-challenge.sub1.example.com | sub1.example.com
+_acme-challenge.site1.sub1.example.com | sub1.example.com
+_acme-challenge.site1.sub3.sub2.sub1.example.com | sub1.example.com
+
+Many of the existing plugins have a helper function to handle this. Copy and modify their code where it makes sense but make sure helper function names are unique.
+
+### Trailing Dots
+
+Be aware how your particular DNS provider represents zone and record names. Some include the trailing dot (`example.com.`). Others don't. This can affect string matching when finding zones and existing records.
+
+### No Write-Host
+
+Unless your plugin requires interactive user input which should be rare, do not use `Write-Host` to display informational messages or debug output. Use `Write-Verbose` for messages you would want a potential user to see. Use `Write-Debug` for things only the plugin developer would likely care about or a user trying to troubleshoot a plugin that is not working.
+
+When testing your module, use `-Verbose` to see your verbose messages. And run `$DebugPreferene = 'Continue'` to make the debug messages show up without prompting for confirmation (which happens if you use `-Debug`).
+
+### No Pipeline Output
+
+Do not output any objects to the pipeline from your plugin. This will interfere with scripts and workflows that use the normal output of public functions. You can use `Out-Null` on functions that may generate pipeline output but you may not be using the output from.
 
 ## Testing Plugins
 
