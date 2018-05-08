@@ -4,7 +4,7 @@ This plugin works against the [AWS Route53](https://aws.amazon.com/route53/) DNS
 
 ## Setup
 
-While you can use an admin level account with Posh-ACME, it's generally a bad practice. So we want to create a dedicated IAM user with only enough privileges to create the TXT records necessary for ACME challenges.
+While you can use an admin level account with Posh-ACME, it's generally a bad practice. So we want to create a dedicated IAM user with minimum necessary privileges to create the TXT records necessary for ACME challenges.
 
 ### Setup Admin Credentials
 
@@ -15,6 +15,61 @@ Set-AWSCredential -StoreAs 'dnsadmin' -AccessKey 'xxxxxxxx' -SecretKey 'xxxxxxxx
 Initialize-AWSDefaultConfiguration -ProfileName 'dnsadmin'
 ```
 
+### Create IAM Policy
+
+Create the policy that allows modifications to hosted zones.
+
+```powershell
+$policyDef = @{
+    Version='2012-10-17';
+    Statement=@(
+        @{
+            Effect='Allow';
+            Action=@('route53:ListHostedZones');
+            Resource='*';
+        },
+        @{
+            Effect='Allow';
+            Action=@(
+                'route53:GetHostedZone',
+                'route53:ListResourceRecordSets',
+                'route53:ChangeResourceRecordSets'
+            );
+            Resource='arn:aws:route53:::hostedzone/*';
+        }
+    )
+} | ConvertTo-Json -Depth 5; $policyDef
+
+$policy = New-IAMPolicy "R53_Zone_Editor" -PolicyDocument $policyDef -Description "Allow write access to hosted zones."
+```
+
+### Create IAM Group and Associate to Policy
+
+Rather than associating the policy to a service account directly, it is wise to associate it to a group instead. That way you can easily add or replace additional users later as necessary.
+
+```powershell
+$group = New-IAMGroup -GroupName 'HostedZoneEditors'
+Register-IAMGroupPolicy $group.GroupName $policy.Arn
+```
+
+### Create IAM User and Add to Group
+
+Finally, we'll create the service account and add it to the group we created. We'll also create the access key to use with the plugin.
+
+```powershell
+$user = New-IAMUser -UserName 'posh-acme'
+Add-IAMUserToGroup $group.GroupName $user.UserName
+$key = New-IAMAccessKey $user.UserName
+$key
+```
+
+The `$key` variable output should contains `AccessKeyId` and `SecretAccessKey` which are what you ultimately use with the plugin.
+
 ## Using the Plugin
 
-TODO
+The only parameters requires for the plugin are `R53AccessKey` and `R53SecretKey` for the service account which you should have from the previous setup section. If you lost them, you can re-generate them from the AWS IAM console. But there's no way to retrieve an existing secret key value.
+
+```powershell
+$r53Params = @{R53AccessKey='xxxxxxxx';R53SecretKey='xxxxxxxx'}
+New-PACertificate test.example.com -DnsPlugin Route53 -PluginArgs $r53Params
+```
