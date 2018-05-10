@@ -7,7 +7,7 @@ function Export-CertPfx {
         [string]$KeyFile,
         [Parameter(Mandatory,Position=2)]
         [string]$OutputFile,
-        [string]$Alias
+        [string]$FriendlyName=''
     )
 
     $CertFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($CertFile)
@@ -22,10 +22,7 @@ function Export-CertPfx {
     $store = New-Object Org.BouncyCastle.Pkcs.Pkcs12Store
 
     # add the private key
-    if (!$Alias) {
-        $Alias = "{$((New-Guid).ToString().ToUpper())}"
-    }
-    $store.SetKeyEntry($Alias, $key.Private, @($cert))
+    $store.SetKeyEntry($FriendlyName, $key.Private, @($cert))
 
     # save it
     $sRandom = New-Object Org.BouncyCastle.Security.SecureRandom

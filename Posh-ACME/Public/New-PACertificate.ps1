@@ -18,6 +18,7 @@ function New-PACertificate {
         [hashtable]$PluginArgs,
         [string[]]$DnsAlias,
         [switch]$OCSPMustStaple,
+        [string]$FriendlyName='',
         [switch]$Install,
         [switch]$Force,
         [int]$DNSSleep=120,
@@ -72,9 +73,21 @@ function New-PACertificate {
         $CertKeyLength -ne $order.KeyLength -or
         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') ) {
 
+        # create a hashtable of parameters to splat
+        $orderParams = @{
+            Domain       = $Domain;
+            KeyLength    = $CertKeyLength;
+            NewKey       = $NewCertKey.IsPresent;
+            Install      = $Install.IsPresent;
+            FriendlyName = $FriendlyName;
+        }
+
+        # and force a new order
         Write-Verbose "Creating a new order for $($Domain -join ', ')"
-        $order = New-PAOrder $Domain $CertKeyLength -Force -NewKey:$NewCertKey.IsPresent -Install:$Install.IsPresent
+        $order = New-PAOrder @orderParams -Force
+
     } else {
+        # set the existing order as current
         $order | Set-PAOrder
     }
     Write-Verbose "Using order for $($order.MainDomain) with status $($order.status)"
@@ -122,7 +135,7 @@ function New-PACertificate {
         # Download the cert chain, split it up, and generate a PFX
         Invoke-WebRequest $order.certificate -OutFile $fullchainFile
         Split-CertChain $fullchainFile $certFile $chainFile
-        Export-CertPfx $certFile $keyFile $pfxFile
+        Export-CertPfx $certFile $keyFile $pfxFile -FriendlyName $FriendlyName
 
         # check the certificate expiration date so we can update the CertExpires
         # and RenewAfter fields
@@ -192,6 +205,9 @@ function New-PACertificate {
 
     .PARAMETER OCSPMustStaple
         If specified, the certificate generated for this order will have the OCSP Must-Staple flag set.
+
+    .PARAMETER FriendlyName
+        Set a friendly name for the certificate. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Defaults to an empty string.
 
     .PARAMETER Install
         If specified, the certificate generated for this order will be imported to the local computer's Personal certificate store. Using this switch requires running the command from an elevated PowerShell session.
