@@ -125,34 +125,24 @@ function New-PACertificate {
             throw "Order status is valid, but no certificate URL was found."
         }
 
-        # build output paths
-        $certFile      = Join-Path $script:OrderFolder 'cert.cer'
-        $keyFile       = Join-Path $script:OrderFolder 'cert.key'
-        $chainFile     = Join-Path $script:OrderFolder 'chain.cer'
-        $fullchainFile = Join-Path $script:OrderFolder 'fullchain.cer'
-        $pfxFile       = Join-Path $script:OrderFolder 'cert.pfx'
-
-        # Download the cert chain, split it up, and generate a PFX
-        Invoke-WebRequest $order.certificate -OutFile $fullchainFile
-        Split-CertChain $fullchainFile $certFile $chainFile
-        Export-CertPfx $certFile $keyFile $pfxFile -FriendlyName $FriendlyName
+        # Download the cert chain, split it up, and generate a PFX files
+        Export-PACertFiles $order.certificate $script:OrderFolder -FriendlyName $FriendlyName
 
         # check the certificate expiration date so we can update the CertExpires
         # and RenewAfter fields
         Write-Verbose "Updating cert expiration and renewal window"
-        $certExpires = (Import-Pem $certFile).NotAfter
+        $certExpires = (Import-Pem (Join-Path $script:OrderFolder 'cert.cer')).NotAfter
         $script:Order.CertExpires = $certExpires.ToString('yyyy-MM-ddTHH:mm:ssZ')
         $script:Order.RenewAfter = $certExpires.AddDays(-30).ToString('yyyy-MM-ddTHH:mm:ssZ')
+        Update-PAOrder -SaveOnly
 
         Write-Verbose "Successfully created certificate."
         Write-Host "Certificate files saved to $($script:OrderFolder)"
 
-        Update-PAOrder -SaveOnly
-
         # install to local computer store if asked
         if ($Install) {
             Write-Verbose "Importing certificate to Windows certificate store."
-            Import-PfxCertInternal $pfxFile
+            Import-PfxCertInternal (Join-Path $script:OrderFolder 'cert.pfx')
         }
 
         # output cert details

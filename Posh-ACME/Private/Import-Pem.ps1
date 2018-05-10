@@ -116,14 +116,25 @@ function Import-Pem {
     } elseif ($pemStr -like '*-----BEGIN CERTIFICATE-----*' -and $pemStr -like '*-----END CERTIFICATE-----*') {
 
         # For certs, we can use the native PemReader to make things easier
-        try {
-            $sr = New-Object IO.StreamReader($InputFile)
-            $reader = New-Object Org.BouncyCastle.OpenSsl.PemReader($sr)
-            $cert = $reader.ReadObject()
-            return $cert
-        } finally {
-            if ($sr -ne $null) { $sr.Close() }
+        if ('File' -eq $PSCmdlet.ParameterSetName) {
+            try {
+                $sr = New-Object IO.StreamReader($InputFile)
+                $reader = New-Object Org.BouncyCastle.OpenSsl.PemReader($sr)
+                $cert = $reader.ReadObject()
+            } finally {
+                if ($sr -ne $null) { $sr.Close() }
+            }
+        } else {
+            # get the byte array from the pem string
+            $base64 = $pemStr.Substring($pemStr.IndexOf('CERTIFICATE-----')+16)
+            $base64 = $base64.Substring(0,$base64.IndexOf('-'))
+            $certBytes = [Convert]::FromBase64String($base64)
+
+            # let BC parse it
+            $certParser = New-Object Org.BouncyCastle.X509.X509CertificateParser
+            $cert = $certParser.ReadCertificate($certBytes)
         }
+        return $cert
 
     } else {
         throw "Unsupported PEM type"

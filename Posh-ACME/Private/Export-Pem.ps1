@@ -64,6 +64,11 @@ function Export-Pem {
         }
         $pem += '-----END NEW CERTIFICATE REQUEST-----'
 
+    } elseif ($InputObject -is [array]) {
+        # this should be a string array output from Split-PemChain that we just
+        # need to write to disk with proper line endings.
+        $pem = $InputObject
+
     } else {
         throw "Unsuppored InputObject type"
     }

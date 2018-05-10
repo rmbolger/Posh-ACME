@@ -7,12 +7,14 @@ function Export-CertPfx {
         [string]$KeyFile,
         [Parameter(Mandatory,Position=2)]
         [string]$OutputFile,
+        [string]$ChainFile,
         [string]$FriendlyName=''
     )
 
     $CertFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($CertFile)
     $KeyFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($KeyFile)
     $OutputFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($OutputFile)
+    $ChainFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($ChainFile)
 
     # read in the files as native BouncyCastle objects
     $key  = Import-Pem $KeyFile     # [Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair]
@@ -23,6 +25,24 @@ function Export-CertPfx {
 
     # add the private key
     $store.SetKeyEntry($FriendlyName, $key.Private, @($cert))
+
+    # add the chain certs if specified
+    if ('ChainFile' -in $PSBoundParameters.Keys) {
+        $pems = @(Split-PemChain $ChainFile)
+
+        foreach ($pem in $pems) {
+            $ca = Import-Pem -InputString ($pem -join '')
+
+            # try to parse the subject to use as the alias
+            if ($ca.SubjectDN -match "CN=([^,]+)") {
+                $caName = $matches[1]
+            } else {
+                $caName = $ca.SerialNumber
+            }
+
+            $store.SetCertificateEntry($caName, $ca)
+        }
+    }
 
     # save it
     $sRandom = New-Object Org.BouncyCastle.Security.SecureRandom
