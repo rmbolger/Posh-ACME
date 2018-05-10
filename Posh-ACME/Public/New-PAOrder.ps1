@@ -10,6 +10,7 @@ function New-PAOrder {
         [switch]$OCSPMustStaple,
         [Alias('NewCertKey')]
         [switch]$NewKey,
+        [string]$FriendlyName='',
         [switch]$Install,
         [switch]$Force
     )
@@ -95,6 +96,7 @@ function New-PAOrder {
     $order | Add-Member -MemberType NoteProperty -Name 'DnsAlias' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'DnsSleep' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'ValidationTimeout' -Value $null
+    $order | Add-Member -MemberType NoteProperty -Name 'FriendlyName' -Value $FriendlyName
     $order | Add-Member -MemberType NoteProperty -Name 'Install' -Value $Install.IsPresent
 
     # make sure there's a certificate field for later
@@ -152,6 +154,9 @@ function New-PAOrder {
 
     .PARAMETER OCSPMustStaple
         If specified, the certificate generated for this order will have the OCSP Must-Staple flag set.
+
+    .PARAMETER FriendlyName
+        Set a friendly name for the certificate. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Defaults to an empty string.
 
     .PARAMETER Install
         If specified, the certificate generated for this order will be imported to the local computer's Personal certificate store.

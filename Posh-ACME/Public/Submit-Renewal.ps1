@@ -81,11 +81,14 @@ function Submit-Renewal {
                 $certParams.DnsSleep = $order.DnsSleep
                 $certParams.ValidationTimeout = $order.ValidationTimeout
 
-                # Add the new (as of 1.2) Install field if it exists.
-                # The property check can be removed once enough time passes
+                # Add the new (as of 1.2) fields if they exist.
+                # The property checks can be removed once enough time passes
                 # to assume the majority of people have done renewals against 1.2.
                 if ('Install' -in $order.PSObject.Properties.name) {
                     $certParams.Install = $order.Install
+                }
+                if ('FriendlyName' -in $order.PSObject.Properties.name) {
+                    $certParams.FriendlyName = $order.FriendlyName
                 }
 
                 # now we just have to request a new cert using all of the old parameters
