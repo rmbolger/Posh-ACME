@@ -90,6 +90,7 @@ function Get-PACertificate {
                 ChainFile     = Join-Path $domainFolder 'chain.cer'
                 FullChainFile = Join-Path $domainFolder 'fullchain.cer'
                 PfxFile       = Join-Path $domainFolder 'cert.pfx'
+                PfxFullChain  = Join-Path $domainFolder 'fullchain.pfx'
 
             }
 
