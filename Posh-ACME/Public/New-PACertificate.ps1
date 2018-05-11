@@ -19,6 +19,7 @@ function New-PACertificate {
         [string[]]$DnsAlias,
         [switch]$OCSPMustStaple,
         [string]$FriendlyName='',
+        [string]$PfxPass='poshacme',
         [switch]$Install,
         [switch]$Force,
         [int]$DNSSleep=120,
@@ -80,6 +81,7 @@ function New-PACertificate {
             NewKey       = $NewCertKey.IsPresent;
             Install      = $Install.IsPresent;
             FriendlyName = $FriendlyName;
+            PfxPass  = $PfxPass;
         }
 
         # and force a new order
@@ -126,7 +128,13 @@ function New-PACertificate {
         }
 
         # Download the cert chain, split it up, and generate a PFX files
-        Export-PACertFiles $order.certificate $script:OrderFolder -FriendlyName $FriendlyName
+        $exportParams = @{
+            CertUrl = $order.certificate;
+            OutputFolder = $script:OrderFolder;
+            FriendlyName = $FriendlyName;
+            PfxPass = $PfxPass;
+        }
+        Export-PACertFiles @exportParams
 
         # check the certificate expiration date so we can update the CertExpires
         # and RenewAfter fields
@@ -142,7 +150,12 @@ function New-PACertificate {
         # install to local computer store if asked
         if ($Install) {
             Write-Verbose "Importing certificate to Windows certificate store."
-            Import-PfxCertInternal (Join-Path $script:OrderFolder 'cert.pfx')
+            if ([string]::IsNullOrEmpty($PfxPass)) {
+                $secPass = New-Object Security.SecureString
+            } else {
+                $secPass = ConvertTo-SecureString $PfxPass -AsPlainText -Force
+            }
+            Import-PfxCertInternal (Join-Path $script:OrderFolder 'fullchain.pfx') -PfxPass $secPass
         }
 
         # output cert details
@@ -198,6 +211,9 @@ function New-PACertificate {
 
     .PARAMETER FriendlyName
         Set a friendly name for the certificate. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Defaults to an empty string.
+
+    .PARAMETER PfxPass
+        Set the export password for generated PFX files. Defaults to 'poshacme'.
 
     .PARAMETER Install
         If specified, the certificate generated for this order will be imported to the local computer's Personal certificate store. Using this switch requires running the command from an elevated PowerShell session.

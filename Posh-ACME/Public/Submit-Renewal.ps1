@@ -90,6 +90,9 @@ function Submit-Renewal {
                 if ('FriendlyName' -in $order.PSObject.Properties.name) {
                     $certParams.FriendlyName = $order.FriendlyName
                 }
+                if ('PfxPass' -in $order.PSObject.Properties.name) {
+                    $certParams.PfxPass = $order.PfxPass
+                }
 
                 # now we just have to request a new cert using all of the old parameters
                 New-PACertificate @certParams

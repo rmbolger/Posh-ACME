@@ -5,7 +5,8 @@ function Export-PACertFiles {
         [string]$CertUrl,
         [Parameter(Mandatory,Position=1)]
         [string]$OutputFolder,
-        [string]$FriendlyName=''
+        [string]$FriendlyName='',
+        [string]$PfxPass=''
     )
 
     # build output paths
@@ -29,10 +30,16 @@ function Export-PACertFiles {
     # write the chain
     Export-Pem ($pems[1..($pems.Count-1)] | ForEach-Object {$_}) $chainFile
 
-    # write the cert-only pfx
-    Export-CertPfx $certFile $keyFile $pfxFile -FriendlyName $FriendlyName
-
-    # write the full chain pfx
-    Export-CertPfx $certFile $keyFile $pfxFullFile -ChainFile $chainFile -FriendlyName $FriendlyName
+    # write the pfx files
+    $pfxParams = @{
+        CertFile     = $certFile;
+        KeyFile      = $keyFile;
+        OutputFile   = $pfxFile;
+        FriendlyName = $FriendlyName;
+        PfxPass      = $PfxPass;
+    }
+    Export-CertPfx @pfxParams
+    $pfxParams.OutputFile = $pfxFullFile
+    Export-CertPfx @pfxParams -ChainFile $chainFile
 
 }

@@ -8,7 +8,8 @@ function Export-CertPfx {
         [Parameter(Mandatory,Position=2)]
         [string]$OutputFile,
         [string]$ChainFile,
-        [string]$FriendlyName=''
+        [string]$FriendlyName='',
+        [string]$PfxPass=''
     )
 
     $CertFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($CertFile)
@@ -48,7 +49,7 @@ function Export-CertPfx {
     $sRandom = New-Object Org.BouncyCastle.Security.SecureRandom
     try {
         $fs = New-Object IO.FileStream($OutputFile,'Create')
-        $store.Save($fs, $null, $sRandom)
+        $store.Save($fs, $PfxPass, $sRandom)
     } finally {
         if ($fs -ne $null) { $fs.Close() }
     }
