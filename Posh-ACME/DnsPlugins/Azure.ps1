@@ -263,7 +263,7 @@ function Get-AZZoneId {
 
     # get the list of available zones
     # https://docs.microsoft.com/en-us/rest/api/dns/zones/list
-    $url = "https://management.azure.com/subscriptions/$($pargs.AZSubscriptionId)/providers/Microsoft.Network/dnszones?api-version=2018-03-01-preview"
+    $url = "https://management.azure.com/subscriptions/$($AZSubscriptionId)/providers/Microsoft.Network/dnszones?api-version=2018-03-01-preview"
     try {
         $zones = Invoke-RestMethod $url -Headers $script:AZToken.AuthHeader
     } catch { throw }
