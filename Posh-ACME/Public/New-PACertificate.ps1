@@ -190,7 +190,6 @@ function New-PACertificate {
         Update-PAOrder -SaveOnly
 
         Write-Verbose "Successfully created certificate."
-        Write-Host "Certificate files saved to $($script:OrderFolder)"
 
         # install to local computer store if asked
         if ($order.Install) {

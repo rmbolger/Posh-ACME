@@ -15,7 +15,7 @@ An [ACME v2](https://tools.ietf.org/html/draft-ietf-acme-acme) client implemente
 - DNS plugins support batch updates
 - Multiple accounts supported per user profile which allows different certs to have different contact emails
 - PEM and PFX output files
-- No elevated Windows privileges required
+- No elevated Windows privileges required *(unless using -Install switch)*
 
 # Not Currently Supported (Yet)
 
@@ -27,7 +27,7 @@ An [ACME v2](https://tools.ietf.org/html/draft-ietf-acme-acme) client implemente
 
 # Install
 
-The [latest release version](https://www.powershellgallery.com/packages/Posh-ACME/1.1) can found in the PowerShell Gallery. Installing from the gallery requires the PowerShellGet module which is installed by default on Windows 10 or later. See [Getting Started with the Gallery](https://www.powershellgallery.com/) for instructions on earlier OSes. Zip/Tar versions can also be downloaded from the [GitHub releases page](https://github.com/rmbolger/Posh-ACME/releases).
+The [latest release version](https://www.powershellgallery.com/packages/Posh-ACME) can found in the PowerShell Gallery. Installing from the gallery requires the PowerShellGet module which is installed by default on Windows 10 or later. See [Getting Started with the Gallery](https://www.powershellgallery.com/) for instructions on earlier OSes. Zip/Tar versions can also be downloaded from the [GitHub releases page](https://github.com/rmbolger/Posh-ACME/releases).
 
 ```powershell
 # install for all users (requires elevated privs)
