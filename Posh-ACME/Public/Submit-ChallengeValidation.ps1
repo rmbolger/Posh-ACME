@@ -153,7 +153,7 @@ function Submit-ChallengeValidation {
 
             # sleep while the DNS changes propagate
             Write-Verbose "Sleeping for $DNSSleep seconds while DNS change(s) propagate"
-            Start-Sleep -Seconds $DNSSleep
+            Start-SleepProgress $DNSSleep -Activity "Waiting for DNS to propagate"
 
             # ask the server to validate the challenges
             Write-Verbose "Requesting challenge validations"
