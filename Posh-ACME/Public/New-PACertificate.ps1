@@ -140,7 +140,11 @@ function New-PACertificate {
         if ($oldOrder) {
             $chalParams.ValidationTimeout = $oldOrder.ValidationTimeout
         }
-
+        
+        if ('PluginArgs' -in $PSBoundParameters.Keys) {
+            $chalParams.PluginArgs = $PluginArgs
+        }
+        
         Submit-ChallengeValidation @chalParams
 
         # refresh the order status
