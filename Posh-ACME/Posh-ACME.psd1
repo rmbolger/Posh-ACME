@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '2.0'
+ModuleVersion = '2.0.1'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -102,28 +102,10 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 2.0 (2018-05-12)
+## 2.0.1 (2018-05-12)
 
-* Potentially Breaking Changes
-  * New-PACertificate now outputs certificate details to the pipeline which should aid automation
-  * New-PACertificate now reuses all previous order params (for the same MainDomain) when not explicitly specified
-  * All generated PFX files now have 'poshacme' as the default password to address compatibility issues with other tools
-* Added optional parameters to New-PACertificate
-  * `-FriendlyName` sets Friendly Name when imported into Windows certificate store
-  * `-PfxPass` overrides the default password for generated PFX files
-  * `-Install` switch imports cert to Windows certificate store. *Requires elevation*
-* Added new DNS plugins
-  * DOcean (Digital Ocean)
-  * Cloudflare. Thanks @rian-hout!
-* Added Get-PACertificate which returns certificate details
-* New-PACertificate now generates fullchain.pfx in addition to cert.pfx
-* Added usage guides for most DNS plugins
-* Added progress bar while waiting for DNS changes to propagate
-* Old csr and chain files are no longer backed up when creating a new order
-* Manual plugin now displays all records to create with one prompt
-* Fixed AcmeDns plugin issue where CNAMEs would display twice user Ctrl-C from prompt
-* Bugfix for Azure plugin (#17). Thanks @juliansiebert!
-* New-PACertificate will no longer redownload certs when run with same arguments (#9)
+* Fix for PluginArgs not being passed to Submit-ChallengeValidation
+* Fix for Azure plugin when multiple zones are in a subscription
 '@
 
     } # End of PSData hashtable

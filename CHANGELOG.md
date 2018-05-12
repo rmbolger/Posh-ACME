@@ -1,3 +1,8 @@
+## 2.0.1 (2018-05-12)
+
+* Fix for PluginArgs not being passed to Submit-ChallengeValidation
+* Fix for Azure plugin when multiple zones are in a subscription
+
 ## 2.0 (2018-05-12)
 
 * Potentially Breaking Changes

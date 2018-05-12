@@ -127,6 +127,9 @@ function New-PACertificate {
         } elseif ($oldOrder) {
             $chalParams.DnsPlugin = $oldOrder.DnsPlugin
         }
+        if ('PluginArgs' -in $PSBoundParameters.Keys) {
+            $chalParams.PluginArgs = $PluginArgs
+        }
         if ('DnsAlias' -in $PSBoundParameters.Keys) {
             $chalParams.DnsAlias = $DnsAlias
         } elseif ($oldOrder) {
@@ -140,11 +143,7 @@ function New-PACertificate {
         if ($oldOrder) {
             $chalParams.ValidationTimeout = $oldOrder.ValidationTimeout
         }
-        
-        if ('PluginArgs' -in $PSBoundParameters.Keys) {
-            $chalParams.PluginArgs = $PluginArgs
-        }
-        
+
         Submit-ChallengeValidation @chalParams
 
         # refresh the order status
