@@ -74,14 +74,35 @@ function New-PACertificate {
         $CertKeyLength -ne $order.KeyLength -or
         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') ) {
 
-        # create a hashtable of parameters to splat
+        # Create a hashtable of order parameters to splat
         $orderParams = @{
-            Domain       = $Domain;
-            KeyLength    = $CertKeyLength;
-            NewKey       = $NewCertKey.IsPresent;
-            Install      = $Install.IsPresent;
-            FriendlyName = $FriendlyName;
-            PfxPass  = $PfxPass;
+            Domain         = $Domain;
+            KeyLength      = $CertKeyLength;
+            OCSPMustStaple = $OCSPMustStaple.IsPresent;
+            NewKey         = $NewCertKey.IsPresent;
+            Install        = $Install.IsPresent;
+            FriendlyName   = $FriendlyName;
+            PfxPass        = $PfxPass;
+        }
+
+        # load values from the old order if they exist and weren't explicitly specified
+        if ($order) {
+            $oldOrder = $order
+            if ('CertKeyLength' -notin $PSBoundParameters.Keys) {
+                $orderParams.KeyLength = $oldOrder.KeyLength
+            }
+            if ('OCSPMustStaple' -notin $PSBoundParameters.Keys) {
+                $orderParams.OCSPMustStaple = $oldOrder.OCSPMustStaple
+            }
+            if ('Install' -notin $PSBoundParameters.Keys -and $oldOrder.Install) {
+                $orderParams.Install = $oldOrder.Install
+            }
+            if ('FriendlyName' -notin $PSBoundParameters.Keys -and $oldOrder.FriendlyName) {
+                $orderParams.FriendlyName = $oldOrder.FriendlyName
+            }
+            if ('PfxPass' -notin $PSBoundParameters.Keys -and $oldOrder.PfxPass) {
+                $orderParams.PfxPass = $oldOrder.PfxPass
+            }
         }
 
         # and force a new order
@@ -90,13 +111,37 @@ function New-PACertificate {
 
     } else {
         # set the existing order as current
+        Write-Verbose "Using existing order for $($order.MainDomain) with status $($order.status)"
+        $oldOrder = $order
         $order | Set-PAOrder
     }
-    Write-Verbose "Using order for $($order.MainDomain) with status $($order.status)"
 
     # deal with "pending" orders that may have authorization challenges to prove
     if ($order.status -eq 'pending') {
-        Submit-ChallengeValidation @PSBoundParameters
+
+        # create a hashtable of validation parameters to splat that uses
+        # explicit params backed up by previous order params
+        $chalParams = @{}
+        if ('DnsPlugin' -in $PSBoundParameters.Keys) {
+            $chalParams.DnsPlugin = $DnsPlugin
+        } elseif ($oldOrder) {
+            $chalParams.DnsPlugin = $oldOrder.DnsPlugin
+        }
+        if ('DnsAlias' -in $PSBoundParameters.Keys) {
+            $chalParams.DnsAlias = $DnsAlias
+        } elseif ($oldOrder) {
+            $chalParams.DnsAlias = $oldOrder.DnsAlias
+        }
+        $chalParams.DnsSleep = $DnsSleep
+        if ($oldOrder) {
+            $chalParams.DnsSleep = $oldOrder.DnsSleep
+        }
+        $chalParams.ValidationTimeout = $ValidationTimeout
+        if ($oldOrder) {
+            $chalParams.ValidationTimeout = $oldOrder.ValidationTimeout
+        }
+
+        Submit-ChallengeValidation @chalParams
 
         # refresh the order status
         $order = Get-PAOrder -Refresh
@@ -113,7 +158,7 @@ function New-PACertificate {
 
         # make the finalize call
         Write-Verbose "Finalizing the order."
-        Submit-OrderFinalize @PSBoundParameters
+        Submit-OrderFinalize
 
         # refresh the order status
         $order = Get-PAOrder -Refresh
@@ -148,7 +193,7 @@ function New-PACertificate {
         Write-Host "Certificate files saved to $($script:OrderFolder)"
 
         # install to local computer store if asked
-        if ($Install) {
+        if ($order.Install) {
             Write-Verbose "Importing certificate to Windows certificate store."
             if ([string]::IsNullOrEmpty($PfxPass)) {
                 $secPass = New-Object Security.SecureString
