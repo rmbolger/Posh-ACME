@@ -277,7 +277,7 @@ function Get-AZZoneId {
     # - sub2.example.com
     # - example.com
 
-    Write-Verbose $zones.value.name
+    Write-Verbose "Found zones: $($zones.value.name -join ', ')"
 
     $pieces = $RecordName.Split('.')
     for ($i=1; $i -lt ($pieces.Count-1); $i++) {
