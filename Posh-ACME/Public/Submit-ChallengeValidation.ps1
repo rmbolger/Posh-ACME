@@ -10,9 +10,7 @@ function Submit-ChallengeValidation {
         [int]$DnsSleep=120,
         [int]$ValidationTimeout=60,
         [PSTypeName('PoshACME.PAAccount')]$Account,
-        [PSTypeName('PoshACME.PAOrder')]$Order,
-        [Parameter(ValueFromRemainingArguments)]
-        $ExtraParams
+        [PSTypeName('PoshACME.PAOrder')]$Order
     )
 
     # For the time being we're only going to support the 'dns-01' challenge because it's the
@@ -221,9 +219,6 @@ function Submit-ChallengeValidation {
 
     .PARAMETER Order
         If specified, switch to and use this order for the validations. It must be associated with the current or specified account or an error will be thrown.
-
-    .PARAMETER ExtraParams
-        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
         Submit-ChallengeValidation

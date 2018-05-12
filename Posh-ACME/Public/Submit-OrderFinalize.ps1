@@ -3,9 +3,7 @@ function Submit-OrderFinalize {
     param(
         [int]$CertIssueTimeout=60,
         [PSTypeName('PoshACME.PAAccount')]$Account,
-        [PSTypeName('PoshACME.PAOrder')]$Order,
-        [Parameter(ValueFromRemainingArguments)]
-        $ExtraParams
+        [PSTypeName('PoshACME.PAOrder')]$Order
     )
 
     # The purpose of this function is to complete the order process by sending our
@@ -108,9 +106,6 @@ function Submit-OrderFinalize {
 
     .PARAMETER Order
         If specified, switch to and use this order for the finalization. It must be associated with the current or specified account or an error will be thrown.
-
-    .PARAMETER ExtraParams
-        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
         Submit-OrderFinalize
