@@ -36,13 +36,17 @@ The output of this will have a warning message that you didn't specify a DNS plu
 
 At this point, you can either `Ctrl-C` to cancel the process and modify your command or go ahead and create the requested TXT record and hit any key to continue. We'll cover DNS plugins next, so for now create the record manually and press a key to continue. If you run into problems creating the TXT record, check out the [Troubleshooting DNS Challenge Validation](https://github.com/rmbolger/Posh-ACME/wiki/Troubleshooting-DNS-Challenge-Validation) wiki page.
 
-The command will sleep for 2 minutes by default to allow the DNS changes to propagate. Then if the ACME server is able to properly validate the TXT record, the command should finish and give you the folder location of your new certificate. Currently, the responsibility for deploying the certificate to your web server or service is up to you. There may be deployment plugins supported eventually. But for now, the idea is that this module is just a piece of your larger PowerShell based deployment strategy. Among other files, the output folder should contain the following:
+The command will sleep for 2 minutes by default to allow the DNS changes to propagate. Then if the ACME server is able to properly validate the TXT record, the final certificate files are generated and the command should output the details of your new certificate. Only a subset of the details are displayed by default. To see them all, run `Get-PACertificate | fl`. The files generated in the output folder should contain the following:
 
 - **cert.cer** (Base64 encoded PEM certificate)
 - **cert.key** (Base64 encoded PEM private key)
-- **cert.pfx** (PKCS12 container with cert+key, importable into Windows cert store with no password)
+- **cert.pfx** (PKCS12 container with cert+key)
 - **chain.cer** (Base64 encoded PEM with the issuing CA certificate chain)
-- **fullchain.cer** (Base64 encoded PEM that is basically cert.cer + chain.cer)
+- **fullchain.cer** (Base64 encoded PEM with cert+chain)
+- **fullchain.pfx** (PKCS12 container with cert+key+chain)
+
+Currently, the responsibility for deploying the certificate to your web server or service is up to you. There may be deployment plugins supported eventually. But for now, the idea is that this module is just a piece of your larger PowerShell based deployment strategy. The certificate details are written to the pipeline so you can either save them to a variable or pipe the output to another command.
+The password set for the PFX files is `poshacme` because we didn't override the default with `-PfxPass`. If you're running PowerShell with elevated privileges, you can also add the `-Install` switch to automatically import the certificate into the local computer's certificate store.
 
 So now you've got a certificate and that's great! But Let's Encrypt certificates expire relatively quickly (3 months). And you won't be able to renew this certificate without going through the manual DNS TXT record hassle again. So let's add a DNS plugin to the process.
 
@@ -96,7 +100,7 @@ REMARKS
 
 From the `SYNTAX` section, we can see there are two different ways to call the function. Regardless of the plugin, you can always ignore `RecordName`, `TxtValue`, and `ExtraParams` as those are handled by the module. 
 
-The first option requires `[-R53AccessKey] <String>` and `[-R53SecretKey] <SecureString>`. These are API credentials for AWS and presumably as an AWS user, you already know how to generate them. The access key is just a normal string variable. But the secret key is a `SecureString` which takes a bit more effort to setup. So let's create the hashtable we need.
+The first option requires `[-R53AccessKey] <String>` and `[-R53SecretKey] <SecureString>`. These are API credentials for AWS and presumably as an AWS user, you already know how to generate them. If not, most plugins should have an associated usage guide called `<Plugin>-Readme.md` that can provide more in-depth help. The access key is just a normal string variable. But the secret key is a `SecureString` which takes a bit more effort to setup. So let's create the hashtable we need.
 
 ```powershell
 $r53Secret = Read-Host Secret -AsSecureString
