@@ -29,26 +29,26 @@ function Add-DnsTxtCloudflare {
 
     #Select Zone
     $Domain = $AllDomains.result | Where-Object {$_.name -eq "$Zone"}
-    $Domain
+    #$Domain
 
     #GET DNS Records for Zone
     $allrecords=invoke-restmethod  -method get -uri "https://api.cloudflare.com/client/v4/zones/$($domain.id)/dns_records?per_page=1000&order=type&direction=asc&match=all" -Headers $Headers
-    
+
     #Check for existing record
     $rec = $allrecords.result | Where-Object {$_.content -eq "$TxtValue"}
 
     # add (if necessary) the new TXT value to the list
     if (!$rec)
-        {
+    {
         $Body = @{
             type = "TXT"
             name = "$RecordName"
             content = "$TxtValue"
-            }
-        $JSONData = $Body | ConvertTo-Json
-    
-        $JSONResult = invoke-restmethod  -method Post -uri "https://api.cloudflare.com/client/v4/zones/$($domain.id)/dns_records"  -ContentType "application/json"  -Headers $Headers -Body $jsondata
         }
+        $JSONData = $Body | ConvertTo-Json
+
+        $JSONResult = invoke-restmethod  -method Post -uri "https://api.cloudflare.com/client/v4/zones/$($domain.id)/dns_records"  -ContentType "application/json"  -Headers $Headers -Body $jsondata
+    }
 
 
     <#
@@ -74,7 +74,7 @@ function Add-DnsTxtCloudflare {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxtExample '_acme-challenge.site1.example.com' 'asdfqwer12345678'
+        Add-DnsTxtExample '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'admin@example.com' 'xxxxxxxxxxxx'
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -111,19 +111,19 @@ function Remove-DnsTxtCloudflare {
 
     #Select Zone
     $Domain = $AllDomains.result | Where-Object {$_.name -eq "$Zone"}
-    $Domain
+    #$Domain
 
     #GET DNS Records for Zone
     $allrecords=invoke-restmethod  -method get -uri "https://api.cloudflare.com/client/v4/zones/$($domain.id)/dns_records?per_page=1000&order=type&direction=asc&match=all" -Headers $Headers
-    
+
     #Check for existing record
     $rec = $allrecords.result | Where-Object {$_.content -eq "$TxtValue"}
 
     # remove (if necessary) the new TXT value to the list
     if ($rec)
-        {
-        $JSONResult = invoke-restmethod  -method  Delete "https://api.cloudflare.com/client/v4/zones/$($domain.id)/dns_records/$($rec.id)"   -ContentType "application/json"  -Headers $Headers 
-        }
+    {
+        $JSONResult = invoke-restmethod  -method  Delete "https://api.cloudflare.com/client/v4/zones/$($domain.id)/dns_records/$($rec.id)"   -ContentType "application/json"  -Headers $Headers
+    }
 
 
     <#
@@ -138,7 +138,7 @@ function Remove-DnsTxtCloudflare {
 
     .PARAMETER TxtValue
         The value of the TXT record.
-    
+
     .PARAMETER CFAuthEmail
         The email address of the account used to connect to Cloudflare API
 
@@ -149,7 +149,7 @@ function Remove-DnsTxtCloudflare {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxtExample '_acme-challenge.site1.example.com' 'asdfqwer12345678'
+        Remove-DnsTxtExample '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'admin@example.com' 'xxxxxxxxxxxx'
 
         Removes a TXT record for the specified site with the specified value.
     #>
