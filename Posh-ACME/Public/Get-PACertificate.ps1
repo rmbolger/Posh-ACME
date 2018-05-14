@@ -1,5 +1,6 @@
 function Get-PACertificate {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText','')]
     param(
         [Parameter(ParameterSetName='Specific',Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$MainDomain,
@@ -91,6 +92,8 @@ function Get-PACertificate {
                 FullChainFile = Join-Path $domainFolder 'fullchain.cer'
                 PfxFile       = Join-Path $domainFolder 'cert.pfx'
                 PfxFullChain  = Join-Path $domainFolder 'fullchain.pfx'
+
+                PfxPass = ConvertTo-SecureString $order.PfxPass -AsPlainText -Force
 
             }
 

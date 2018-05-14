@@ -1,5 +1,6 @@
 function New-PACertificate {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText','')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string[]]$Domain,
