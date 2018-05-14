@@ -18,13 +18,13 @@ function Import-PfxCertInternal {
 
     if (Get-Command 'Import-PfxCertificate' -ErrorAction SilentlyContinue) {
         # Win 8/2012 and above
-        Write-Debug "Using native Import-PfxCertificate"
+        Write-Verbose "Importing PFX via native Import-PfxCertificate"
 
-        Import-PfxCertificate $PfxFile Cert:\LocalMachine\My -Exportable -Password $PfxPass | Out-Null
+        Import-PfxCertificate $PfxFile Cert:\$StoreName\$StoreLoc -Exportable -Password $PfxPass | Out-Null
 
     } else {
         # Win 7/2008R2 and below
-        Write-Debug "Using downlevel pfx import code"
+        Write-Verbose "Importing PFX via downlevel pfx import code"
 
         try {
 
