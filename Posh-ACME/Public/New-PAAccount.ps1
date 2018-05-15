@@ -50,9 +50,7 @@ function New-PAAccount {
     # https://tools.ietf.org/html/rfc7518#section-3.1
     # and what we know LetsEncrypt supports today which includes
     # RS256 for all RSA keys
-    # ES256 for P-256 keys
-    # ES384 for P-384 keys
-    # ES512 for P-521 keys (not a typo, 521 is the curve, 512 is the SHA512 hash algorithm)
+    # ES256 for P-256 keys, ES384 for P-384 keys, ES512 for P-521 keys
     $alg = 'RS256'
     if     ($KeyLength -eq 'ec-256') { $alg = 'ES256' }
     elseif ($KeyLength -eq 'ec-384') { $alg = 'ES384' }
