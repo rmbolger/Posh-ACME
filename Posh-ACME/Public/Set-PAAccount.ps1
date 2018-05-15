@@ -3,11 +3,19 @@ function Set-PAAccount {
     param(
         [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$ID,
-        [Parameter(Position=1)]
+        [Parameter(ParameterSetName='Normal',Position=1)]
         [string[]]$Contact,
+        [Parameter(ParameterSetName='Normal')]
         [switch]$Deactivate,
-        [switch]$NoSwitch,
-        [switch]$Force
+        [Parameter(ParameterSetName='Normal')]
+        [switch]$Force,
+        [Parameter(ParameterSetName='Rollover',Mandatory)]
+        [switch]$KeyRollover,
+        [Parameter(ParameterSetName='Rollover')]
+        [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
+        [Alias('AccountKeyLength')]
+        [string]$KeyLength='ec-256',
+        [switch]$NoSwitch
     )
 
     Begin {
@@ -130,6 +138,71 @@ function Set-PAAccount {
             # save it to disk
             $acctFolder = Join-Path $script:DirFolder $acct.id
             $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force
+
+        } elseif ($KeyRollover) {
+
+            # We've been asked to rollover the account key which effectively means replace it
+            # with a new one. The spec describes the process in the following link.
+            # https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-7.3.6
+
+            # hydrate the existing account key
+            $acctKey = $acct.key | ConvertFrom-Jwk
+
+            # build the standard outer header
+            $header = @{
+                alg   = $acct.alg;
+                kid   = $acct.location;
+                nonce = $script:Dir.nonce;
+                url   = $script:Dir.keyChange;
+            }
+
+            # create the new account key
+            $newKey = New-PAKey $KeyLength
+
+            # create the algorithm identifier as described by
+            # https://tools.ietf.org/html/rfc7518#section-3.1
+            # and what we know LetsEncrypt supports today which includes
+            # RS256 for all RSA keys
+            # ES256 for P-256 keys, ES384 for P-384 keys, ES512 for P-521 keys
+            $alg = 'RS256'
+            if     ($KeyLength -eq 'ec-256') { $alg = 'ES256' }
+            elseif ($KeyLength -eq 'ec-384') { $alg = 'ES384' }
+            elseif ($KeyLength -eq 'ec-521') { $alg = 'ES512' }
+
+            # build the inner header
+            $innerHead = @{
+                alg  = $alg;
+                jwk  = ($newKey | ConvertTo-Jwk -PublicOnly);
+                url  = $script:Dir.keyChange;
+            }
+
+            # build the inner payload
+            $innerPayloadJson = @{
+                account = $acct.location;
+                newKey  = $innerHead.jwk;
+            } | ConvertTo-Json -Compress
+
+            # build the outer payload by creating a signed JWS from
+            # the inner header/payload and new key
+            $payloadJson = New-Jws $newKey $innerHead $innerPayloadJson -NoHeaderValidation
+
+            # send the request
+            try {
+                $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
+            } catch { throw }
+            Write-Debug "Response: $($response.Content)"
+
+            $respObj = ($response.Content | ConvertFrom-Json)
+            if ($respObj.status -eq 'valid') {
+                # update the account with the new key
+                $acct.key = $newKey | ConvertTo-Jwk
+                $acct.alg = $alg
+                $acct.KeyLength = $KeyLength
+
+                # save it to disk
+                $acctFolder = Join-Path $script:DirFolder $acct.id
+                $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force
+            }
         }
 
     }
@@ -143,7 +216,7 @@ function Set-PAAccount {
         Set the current ACME account and/or update account details.
 
     .DESCRIPTION
-        This function allows you to switch between ACME accounts for a particular server. It also allows you to update the contact information associated with an account or deactivate the account.
+        This function allows you to switch between ACME accounts for a particular server. It also allows you to update the contact information associated with an account, deactivate the account, or replace the account key with a new one.
 
     .PARAMETER ID
         The account id value as returned by the ACME server. If not specified, the function will attempt to use the currently active account.
@@ -154,11 +227,17 @@ function Set-PAAccount {
     .PARAMETER Deactivate
         If specified, a request will be sent to the associated ACME server to deactivate the account. Clients may wish to do this if the account key is compromised or decommissioned.
 
-    .PARAMETER NoSwitch
-        If specified, the currently active account will not change. Useful primarily for bulk updating contact information across accounts. This switch is ignored if no ID is specified.
-
     .PARAMETER Force
         If specified, confirmation prompts for account deactivation will be skipped.
+
+    .PARAMETER KeyRollover
+        If specified, generate a new account key and replace the current one with it. Clients may choose to do this to recover from a key compromise or proactively mitigate the impact of an unnoticed key compromise.
+
+    .PARAMETER KeyLength
+        The type and size of private key to use. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to 'ec-256'.
+
+    .PARAMETER NoSwitch
+        If specified, the currently active account will not change. Useful primarily for bulk updating contact information across accounts. This switch is ignored if no ID is specified.
 
     .EXAMPLE
         Set-PAAccount -ID 1234567
@@ -184,6 +263,11 @@ function Set-PAAccount {
         Set-PAAccount -Deactivate
 
         Deactivate the current account.
+
+    .EXAMPLE
+        Set-PAAccount -KeyRollover -KeyLength ec-384
+
+        Replace the current account key with a new ECC key using P-384 curve.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME
