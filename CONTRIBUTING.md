@@ -8,7 +8,7 @@ I'm the first to admit that I don't test nearly as much as I should. If you run 
 
 ### Regarding DNS Plugin Requests
 
-The hardest part about writing new DNS plugins so far is getting an account with the provider to test with. If you want your provider supported but can't write the plugin yourself, I'm happy to give it a try. I just need temporary access to an existing account **or** a donation to cover the cost of setting up a new account with the provider.
+If you want your provider supported but can't write the plugin yourself, submit an issue with the request and I'm happy to give it a try. But the hardest part about writing new DNS plugins so far is getting an account with the provider to test with. Providers with free trials or sandbox/test environments are great. Otherwise, I just need temporary access to an existing account **or** a [donation](https://paypal.me/rmbolger) to cover the cost of setting up a new account with the provider.
 
 ## Write Tests
 
@@ -30,4 +30,4 @@ I'm not super strict about code formatting as long as it seems readable. I'm a b
 
 ## Say Hi and Tell Your Friends
 
-There's nothing that makes me want to work on this project more than knowing people use it other than myself. Drop me a line on Twitter ([@rmbolger](https://twitter.com/rmbolger)). Tell your friends about it. I'm a huge introvert and terrible at self-promotion.
+There's nothing that makes me want to work on this project more than knowing people use it other than myself. Drop me a line on Twitter ([@rmbolger](https://twitter.com/rmbolger)) and tell your friends about it.
