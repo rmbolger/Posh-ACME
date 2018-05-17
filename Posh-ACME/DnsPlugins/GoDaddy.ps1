@@ -76,6 +76,9 @@ function Add-DnsTxtGoDaddy {
     .PARAMETER GDSecret
         The GoDaddy API Secret
 
+    .PARAMETER GDUseOTE
+        If specified, use the GoDaddy OTE test environment rather than the production environment.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -109,7 +112,7 @@ function Remove-DnsTxtGoDaddy {
     else {
         $apiRoot = "https://api.godaddy.com/v1/domains"
     }
-    
+
     $headers = @{
         Authorization = "sso-key $($GDKey):$($GDSecret)"
     }
@@ -161,6 +164,9 @@ function Remove-DnsTxtGoDaddy {
 
     .PARAMETER GDSecret
         The GoDaddy API Secret
+
+    .PARAMETER GDUseOTE
+        If specified, use the GoDaddy OTE test environment rather than the production environment.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -216,7 +222,7 @@ function Find-GDZone {
     else {
         $apiRoot = "https://api.godaddy.com/v1/domains"
     }
-    
+
     $headers = @{
         Authorization = "sso-key $($GDKey):$($GDSecret)"
     }
@@ -266,6 +272,9 @@ function Find-GDZone {
 
     .PARAMETER GDSecret
         The GoDaddy API Secret
+
+    .PARAMETER GDUseOTE
+        If specified, use the GoDaddy OTE test environment rather than the production environment.
 
     .EXAMPLE
         Find-GDZone -RecordName '_acme-challenge.site1.example.com' -GDKey 'asdfqwer12345678' -GDSecret 'dfasdasf3j42f'
