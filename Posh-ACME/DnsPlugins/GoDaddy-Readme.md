@@ -8,7 +8,7 @@ We need to [generate an API key](https://developer.godaddy.com/keys) for the pro
 
 - Click `Create New API Key`
 - Name: **Posh-ACME**
-- Environment: Production
+- Environment: **Production**
 - Click `Next`
 - Copy the resulting key and secret strings somewhere safe. There's no way to retrieve the secret once you leave this page. You would have to delete the old one and create a new one.
 
