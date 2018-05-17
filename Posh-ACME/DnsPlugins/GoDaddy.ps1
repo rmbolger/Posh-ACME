@@ -125,14 +125,14 @@ function Remove-DnsTxtGoDaddy {
         -ContentType "application/json" `
         -UseBasicParsing
 
-    Write-Debug ($response | ConvertTo-Json -Depth 5)   
+    Write-Debug ($response | ConvertTo-Json -Depth 5)
 
     <#
     .SYNOPSIS
-        Remove a DNS TXT record to GoDaddy
+        Remove a DNS TXT record from GoDaddy
 
     .DESCRIPTION
-        Remove a DNS TXT record to GoDaddy
+        Remove a DNS TXT record from GoDaddy
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -152,7 +152,7 @@ function Remove-DnsTxtGoDaddy {
     .EXAMPLE
         Remove-DnsTxtGoDaddy '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'dfasdasf3j42f' 'adsfj834sadfda'
 
-        Adds a TXT record for the specified site with the specified value.
+        Removes a TXT record for the specified site with the specified value.
     #>
 }
 
@@ -162,7 +162,7 @@ function Save-DnsTxtGoDaddy {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-  
+
     # Nothing to do. GoDaddy doesn't require a save step
 
     <#
@@ -186,8 +186,9 @@ function Find-GDZone {
     param(
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
+        [Parameter(Mandatory, Position = 1)]
         [string]$GDKey,
-        [Parameter(Mandatory, Position = 3)]
+        [Parameter(Mandatory, Position = 2)]
         [string]$GDSecret
     )
 
@@ -235,9 +236,6 @@ function Find-GDZone {
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
-
-    .PARAMETER TxtValue
-        The value of the TXT record.
 
     .PARAMETER GDKey
         The GoDaddy API Key
