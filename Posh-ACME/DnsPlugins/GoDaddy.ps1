@@ -9,11 +9,19 @@ function Add-DnsTxtGoDaddy {
         [string]$GDKey,
         [Parameter(Mandatory, Position = 3)]
         [string]$GDSecret,
+        [Parameter(Mandatory = $false)]
+        [switch]$GDUseOTE,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $apiRoot = "https://api.godaddy.com/v1/domains"
+    if ($GDUseOTE) {
+        $apiRoot = "https://api.ote-godaddy.com/v1/domains"
+    }
+    else {
+        $apiRoot = "https://api.godaddy.com/v1/domains"
+    }
+
     $headers = @{
         Authorization = "sso-key $($GDKey):$($GDSecret)"
     }
@@ -89,11 +97,19 @@ function Remove-DnsTxtGoDaddy {
         [string]$GDKey,
         [Parameter(Mandatory, Position = 3)]
         [string]$GDSecret,
+        [Parameter(Mandatory = $false)]
+        [switch]$GDUseOTE,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $apiRoot = "https://api.godaddy.com/v1/domains"
+    if ($GDUseOTE) {
+        $apiRoot = "https://api.ote-godaddy.com/v1/domains"
+    }
+    else {
+        $apiRoot = "https://api.godaddy.com/v1/domains"
+    }
+    
     $headers = @{
         Authorization = "sso-key $($GDKey):$($GDSecret)"
     }
@@ -189,10 +205,18 @@ function Find-GDZone {
         [Parameter(Mandatory, Position = 1)]
         [string]$GDKey,
         [Parameter(Mandatory, Position = 2)]
-        [string]$GDSecret
+        [string]$GDSecret,
+        [Parameter(Mandatory = $false)]
+        [switch]$GDUseOTE
     )
 
-    $apiRoot = "https://api.godaddy.com/v1/domains"
+    if ($GDUseOTE) {
+        $apiRoot = "https://api.ote-godaddy.com/v1/domains"
+    }
+    else {
+        $apiRoot = "https://api.godaddy.com/v1/domains"
+    }
+    
     $headers = @{
         Authorization = "sso-key $($GDKey):$($GDSecret)"
     }
