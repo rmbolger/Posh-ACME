@@ -44,7 +44,7 @@ function Update-PAServer {
             # make the request
             Write-Debug "Updating directory info from $DirectoryUrl"
             try {
-                $response = Invoke-WebRequest $DirectoryUrl -Verbose:$false -ErrorAction Stop
+                $response = Invoke-WebRequest $DirectoryUrl -EA Stop -Verbose:$false @script:UseBasic
             } catch { throw }
             $dirObj = $response.Content | ConvertFrom-Json
 

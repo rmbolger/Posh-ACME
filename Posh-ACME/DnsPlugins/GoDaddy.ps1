@@ -30,25 +30,20 @@ function Add-DnsTxtGoDaddy {
     $zone = Find-GDZone -RecordName $RecordName -GDKey $GDKey -GDSecret $GDSecret
     $body = "[$(@{name= "$Name";type = 'TXT';ttl = 600; data = "$TxtValue"} | Convertto-Json)]"
 
-    #Get a list of existing records
+    # Get a list of existing records
     try {
         $existingRecords = Invoke-RestMethod -Uri "$apiRoot/$zone/records" `
-            -Method GET `
-            -headers $headers `
-            -UseBasicParsing
+            -Method Get -Headers $headers @script:UseBasic
     }
     catch {
         throw "Unable to find zone $zone"
     }
 
-    #Create the record if it doesn't exist or doesn't have the same value
+    # Create the record if it doesn't exist or doesn't have the same value
     if (-not ($existingRecords | Where-Object {$_.type -eq "txt" -and $_.name -eq "$name" -and $_.data -eq "$TxtValue"})) {
         $response = Invoke-RestMethod -Uri "$apiRoot/$zone/records" `
-            -Method PATCH `
-            -Headers $headers `
-            -Body $body `
-            -ContentType "application/json" `
-            -UseBasicParsing
+            -Method Patch -Headers $headers -Body $body `
+            -ContentType "application/json" @script:UseBasic
 
         Write-Debug ($response | ConvertTo-Json -Depth 5)
     }
@@ -120,29 +115,24 @@ function Remove-DnsTxtGoDaddy {
     $name = ($RecordName -split "\.")[0]
     $zone = Find-GDZone -RecordName $RecordName -GDKey $GDKey -GDSecret $GDSecret
 
-    #Get a list of existing records
+    # Get a list of existing records
     try {
         $existingRecords = Invoke-RestMethod -Uri "$apiRoot/$zone/records" `
-            -Method GET `
-            -headers $headers `
-            -UseBasicParsing
+            -Method Get -Headers $headers  @script:UseBasic
     }
     catch {
         throw
     }
 
-    #Remove the txt record we want to delete
+    # Remove the txt record we want to delete
     $replaceRecords = $existingRecords `
         | Where-Object {-not ($_.type -eq "TXT" -and $_.name -eq "$name" -and $_.data -eq "$TxtValue")} `
         | ConvertTo-Json
 
-    #Post the records we want to keep back to the API
+    # Post the records we want to keep back to the API
     $response = Invoke-RestMethod -Uri "$apiRoot/$zone/records" `
-        -Method PUT `
-        -Headers $headers `
-        -Body $replaceRecords `
-        -ContentType "application/json" `
-        -UseBasicParsing
+        -Method Put -Headers $headers -Body $replaceRecords `
+        -ContentType "application/json" @script:UseBasic
 
     Write-Debug ($response | ConvertTo-Json -Depth 5)
 
@@ -229,7 +219,7 @@ function Find-GDZone {
 
     # get the list of available zones
     try {
-        $zones = (Invoke-RestMethod -Uri $apiRoot -Headers $headers) `
+        $zones = (Invoke-RestMethod -Uri $apiRoot -Headers $headers @script:UseBasic) `
             | Where-Object {$_.status -eq "ACTIVE"} `
             | Select-Object -ExpandProperty domain
     }

@@ -50,7 +50,8 @@ function Add-DnsTxtAcmeDns {
     # send the update
     try {
         Write-Verbose "Updating $($regVals[3]) with $TxtValue"
-        $response = Invoke-RestMethod "https://$ACMEServer/update" -Method Post -Headers $authHead -Body $updateBody
+        $response = Invoke-RestMethod "https://$ACMEServer/update" -Method Post `
+            -Headers $authHead -Body $updateBody @script:UseBasic
         Write-Debug ($response | ConvertTo-Json)
     } catch { throw }
 
@@ -191,7 +192,8 @@ function New-AcmeDnsRegistration {
     # do the registration
     try {
         Write-Verbose "Registering new subdomain on $ACMEServer"
-        $reg = Invoke-RestMethod "https://$ACMEServer/register" -Method POST -Body $regBody -ContentType 'application/json'
+        $reg = Invoke-RestMethod "https://$ACMEServer/register" -Method POST -Body $regBody `
+            -ContentType 'application/json' @script:UseBasic
         Write-Debug ($reg | ConvertTo-Json)
     } catch { throw }
 

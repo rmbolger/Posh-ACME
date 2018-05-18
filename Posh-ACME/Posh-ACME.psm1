@@ -25,7 +25,22 @@ $script:WellKnownDirs = @{
 $script:HEADER_NONCE = 'Replay-Nonce'
 $script:USER_AGENT = "Posh-ACME/2.0.1 PowerShell/$($PSVersionTable.PSVersion)"
 $script:COMMON_HEADERS = @{'Accept-Language'='en-us,en;q=0.5'}
-$script:CONTENT_TYPE = 'application/jose+json'
+
+# Invoke-WebRequest and Invoke-RestMethod on PowerShell 5.1 both use
+# IE's DOM parser by default which gives you some nice things that we
+# don't use like html/form parsing. The problem is that it can generate
+# errors if IE is not installed or hasn't gone through the first-run
+# sequence in a new profile. Fortunately, there's a -UseBasicParsing switch
+# on both functions that uses a PowerShell native parser instead and avoids
+# those problems. In PowerShell Core 6, the parameter has been deprecated
+# because there is no IE DOM parser to use and all requests use the native
+# parser by default. In order to future proof ourselves for the switch's
+# eventual removal, we'll set it only if it actually exists in this
+# environment.
+$script:UseBasic = @{}
+if ('UseBasicParsing' -in (Get-Command Invoke-WebRequest).Parameters.Keys) {
+    $script:UseBasic.UseBasicParsing = $true
+}
 
 # setup the DnsPlugin argument completer
 # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/register-argumentcompleter?view=powershell-5.1

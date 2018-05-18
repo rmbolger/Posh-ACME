@@ -39,7 +39,7 @@ function Update-PAOrder {
 
             # we can request the order info via an anonymous GET request
             try {
-                $response = Invoke-WebRequest $order.location -Verbose:$false -ErrorAction Stop
+                $response = Invoke-WebRequest $order.location -EA Stop -Verbose:$false @script:UseBasic
             } catch { throw }
             Write-Debug "Response: $($response.Content)"
 

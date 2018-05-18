@@ -75,6 +75,13 @@ When testing your module, use `-Verbose` to see your verbose messages. And run `
 
 Do not output any objects to the pipeline from your plugin. This will interfere with scripts and workflows that use the normal output of public functions. You can use `Out-Null` on functions that may generate pipeline output but you may not be using the output from.
 
+### -UseBasicParsing
+
+Any time you call `Invoke-WebRequest` or `Invoke-RestMethod`, you should always add `@script:UseBasic` to the end.
+
+By default in PowerShell 5.1, those two functions use Internet Explorer's DOM parser to process the response body which can cause errors in cases where IE is not installed or hasn't gone through its first-run sequence yet. Both functions have a `-UseBasicParsing` that switches the parser to a PowerShell native parser and is the new default functionality in PowerShell Core 6. The parameter is also deprecated because they don't plan on bringing back IE DOM parsing in future PowerShell versions. So the module creates a variable when it's first loaded that checks whether `-UseBasicParsing` is still available or not and adds it to the `$script:UseBasic` hashtable. That way, you can just splat it on all your calls to those two functions which
+will future proof your plugin.
+
 ## Testing Plugins
 
 Plugins can be tested using `Publish-DnsChallenge`, `Unpublish-DnsChallenge`, and `Save-DnsChallenge`. They call the Add, Remove, and Save functions respectively. Use `Get-Help` on those functions for more information on how to use them.

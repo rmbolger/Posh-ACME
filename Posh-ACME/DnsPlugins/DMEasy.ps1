@@ -32,7 +32,8 @@ function Add-DnsTxtDMEasy {
     # query the existing record(s)
     try {
         $auth = Get-DMEAuthHeader $DMEKey $DMESecret
-        $response = Invoke-RestMethod "$($recRoot)?recordName=$recShort&type=TXT" -Headers $auth -ContentType 'application/json'
+        $response = Invoke-RestMethod "$($recRoot)?recordName=$recShort&type=TXT" `
+            -Headers $auth -ContentType 'application/json' @script:UseBasic
     } catch { throw }
 
     # check if our value is already in there
@@ -48,7 +49,8 @@ function Add-DnsTxtDMEasy {
         $auth = Get-DMEAuthHeader $DMEKey $DMESecret
         $bodyJson = @{name=$recShort;value="`"$TxtValue`"";type='TXT';ttl=10} | ConvertTo-Json -Compress
         Write-Verbose "Creating $RecordName with value $TxtValue"
-        Invoke-RestMethod $recRoot -Method Post -Body $bodyJson -Headers $auth -ContentType 'application/json' | Out-Null
+        Invoke-RestMethod $recRoot -Method Post -Body $bodyJson -Headers $auth `
+            -ContentType 'application/json' @script:UseBasic | Out-Null
     } catch { throw }
 
     <#
@@ -118,7 +120,8 @@ function Remove-DnsTxtDMEasy {
     # query the existing record(s)
     try {
         $auth = Get-DMEAuthHeader $DMEKey $DMESecret
-        $response = Invoke-RestMethod "$($recRoot)?recordName=$recShort&type=TXT" -Headers $auth -ContentType 'application/json'
+        $response = Invoke-RestMethod "$($recRoot)?recordName=$recShort&type=TXT" `
+            -Headers $auth -ContentType 'application/json' @script:UseBasic
     } catch { throw }
 
     # check for the value to delete
@@ -135,7 +138,8 @@ function Remove-DnsTxtDMEasy {
         try {
             $auth = $auth = Get-DMEAuthHeader $DMEKey $DMESecret
             Write-Verbose "Deleting record $RecordName with value $TxtValue."
-            Invoke-RestMethod "$recRoot/$recID" -Method Delete -Headers $auth -ContentType 'application/json' | Out-Null
+            Invoke-RestMethod "$recRoot/$recID" -Method Delete -Headers $auth `
+                -ContentType 'application/json' @script:UseBasic | Out-Null
         } catch { throw }
     }
 
@@ -258,7 +262,7 @@ function Find-DMEZone {
     # customers find differently, feel free to submit an issue.
     try {
         $auth = Get-DMEAuthHeader $DMEKey $DMESecret
-        $response = Invoke-RestMethod $ApiBase -Headers $auth -ContentType 'application/json'
+        $response = Invoke-RestMethod $ApiBase -Headers $auth -ContentType 'application/json' @script:UseBasic
         $zones = $response.data
     } catch { throw }
 

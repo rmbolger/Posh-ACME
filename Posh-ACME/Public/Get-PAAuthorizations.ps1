@@ -21,7 +21,7 @@ function Get-PAAuthorizations {
         foreach ($AuthUrl in $AuthUrls) {
 
             # request the object and inject the type name
-            $auth = Invoke-RestMethod $AuthUrl -Verbose:$false
+            $auth = Invoke-RestMethod $AuthUrl -Verbose:$false @script:UseBasic
             $auth.PSObject.TypeNames.Insert(0,'PoshACME.PAAuthorization')
             Write-Debug "Response: $($auth | ConvertTo-Json)"
 
