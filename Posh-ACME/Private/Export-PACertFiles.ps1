@@ -19,7 +19,7 @@ function Export-PACertFiles {
 
     # download the cert+chain which is what ACMEv2 delivers by default
     # https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-7.4.2
-    Invoke-WebRequest $CertUrl -OutFile $fullchainFile
+    Invoke-WebRequest $CertUrl -OutFile $fullchainFile @script:UseBasic
 
     # split it into individual PEMs
     $pems = Split-PemChain $fullchainFile

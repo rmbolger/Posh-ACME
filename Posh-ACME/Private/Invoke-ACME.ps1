@@ -29,18 +29,13 @@ function Invoke-ACME {
     # like badNonce which requires modifying the Header and re-signing a new JWS.
     $Jws = New-Jws $Key $Header $PayloadJson
 
-    $CommonParams = @{
-        Method = 'Post';
-        ContentType = $script:CONTENT_TYPE;
-        UserAgent = $script:USER_AGENT;
-        Headers = $script:COMMON_HEADERS;
-    }
-
     # since HTTP error codes make Invoke-WebRequest throw an exception,
     # we need to wrap it in a try/catch. But we can still get the response
     # object via the exception.
     try {
-        $response = Invoke-WebRequest -Uri $Uri -Body $Jws @CommonParams -ErrorAction Stop
+        $response = Invoke-WebRequest -Uri $Uri -Body $Jws -Method Post `
+            -ContentType 'application/jose+json' -UserAgent $script:USER_AGENT `
+            -Headers $script:COMMON_HEADERS -EA Stop @script:UseBasic
 
         # update the next nonce if it was sent
         if ($response.Headers.ContainsKey($script:HEADER_NONCE)) {

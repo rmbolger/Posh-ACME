@@ -22,7 +22,7 @@ function Add-DnsTxtInfoblox {
         if ($IBIgnoreCert) { [CertValidation]::Ignore() }
 
         # send the POST
-        $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Credential $IBCred
+        $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Credential $IBCred @script:UseBasic
 
         Write-Verbose "TXT Record created: $response"
 
@@ -111,13 +111,13 @@ function Remove-DnsTxtInfoblox {
 
         # query the _ref for the txt record object we want to delete
         $checkUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&view=$IBView"
-        $response = Invoke-RestMethod -Uri $checkUrl -Method Get -Credential $IBCred
+        $response = Invoke-RestMethod -Uri $checkUrl -Method Get -Credential $IBCred @script:UseBasic
 
         if ($response -and $response.'_ref') {
 
             # delete the record
             $delUrl = "https://$IBServer/wapi/v1.0/$($response.'_ref')"
-            $response = Invoke-RestMethod -Uri $delUrl -Method Delete -Credential $IBCred
+            $response = Invoke-RestMethod -Uri $delUrl -Method Delete -Credential $IBCred @script:UseBasic
             Write-Verbose "TXT Record deleted: $response"
         }
 

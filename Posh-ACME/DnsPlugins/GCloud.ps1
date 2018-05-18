@@ -27,7 +27,8 @@ function Add-DnsTxtGCloud {
 
     # query the current txt record set
     try {
-        $response = Invoke-RestMethod "$recRoot/rrsets?type=TXT&name=$RecordName." -Headers $script:GCToken.AuthHeader
+        $response = Invoke-RestMethod "$recRoot/rrsets?type=TXT&name=$RecordName." `
+            -Headers $script:GCToken.AuthHeader @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
     } catch { throw }
     $rrsets = $response.rrsets
@@ -62,7 +63,10 @@ function Add-DnsTxtGCloud {
     Write-Verbose "Sending update for $RecordName"
     Write-Debug ($changeBody | ConvertTo-Json -Depth 5)
     try {
-        $response = Invoke-RestMethod "$recRoot/changes" -Method Post -Body ($changeBody | ConvertTo-Json -Depth 5) -Headers $script:GCToken.AuthHeader -ContentType 'application/json'
+        $response = Invoke-RestMethod "$recRoot/changes" -Method Post `
+            -Body ($changeBody | ConvertTo-Json -Depth 5) `
+            -Headers $script:GCToken.AuthHeader `
+            -ContentType 'application/json' @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
     } catch { throw }
 
@@ -124,7 +128,8 @@ function Remove-DnsTxtGCloud {
 
     # query the current txt record set
     try {
-        $response = Invoke-RestMethod "$recRoot/rrsets?type=TXT&name=$RecordName." -Headers $script:GCToken.AuthHeader
+        $response = Invoke-RestMethod "$recRoot/rrsets?type=TXT&name=$RecordName." `
+            -Headers $script:GCToken.AuthHeader @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
     } catch { throw }
     $rrsets = $response.rrsets
@@ -154,7 +159,10 @@ function Remove-DnsTxtGCloud {
     Write-Verbose "Sending update for $RecordName"
     Write-Debug ($changeBody | ConvertTo-Json -Depth 5)
     try {
-        $response = Invoke-RestMethod "$recRoot/changes" -Method Post -Body ($changeBody | ConvertTo-Json -Depth 5) -Headers $script:GCToken.AuthHeader -ContentType 'application/json'
+        $response = Invoke-RestMethod "$recRoot/changes" -Method Post `
+            -Body ($changeBody | ConvertTo-Json -Depth 5) `
+            -Headers $script:GCToken.AuthHeader `
+            -ContentType 'application/json' @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
     } catch { throw }
 
@@ -273,7 +281,7 @@ function Connect-GCloudDns {
     # attempt to sign in
     try {
         Write-Debug "Sending OAuth2 login"
-        $response = Invoke-RestMethod $GCKeyObj.token_uri -Method Post -Body $authBody
+        $response = Invoke-RestMethod $GCKeyObj.token_uri -Method Post -Body $authBody @script:UseBasic
         Write-Debug ($response | ConvertTo-Json)
     } catch { throw }
 
@@ -307,7 +315,8 @@ function Find-GCZone {
 
     # get the list of available zones
     try {
-        $zones = (Invoke-RestMethod "$projRoot/managedZones" -Headers $script:GCToken.AuthHeader).managedZones
+        $zones = (Invoke-RestMethod "$projRoot/managedZones" `
+            -Headers $script:GCToken.AuthHeader).managedZones @script:UseBasic
     } catch { throw }
 
     # Since Google could be hosting both apex and sub-zones, we need to find the closest/deepest
