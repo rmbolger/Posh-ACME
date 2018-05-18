@@ -1,3 +1,14 @@
+## 2.1.0 (2018-05-18)
+
+* Added account key rollover support. Use -KeyRollover switch in Set-PAAccount.
+* Added PfxPass (SecureString) to Get-PACertificate output
+* Added new DNS plugins
+  * DMEasy (DNS Made Easy)
+  * GoDaddy. Thanks @Rukas!
+* All calls to Invoke-WebRequest and Invoke-RestMethod now use -UseBasicParsing to avoid issues with PowerShell using Internet Explorer's DOM parser. Thanks @Rukas!
+* Fixed hard coded cert store paths in Import-PfxCertInternal
+* Fixed tests for New-Jws
+
 ## 2.0.1 (2018-05-12)
 
 * Fix for PluginArgs not being passed to Submit-ChallengeValidation. Thanks @juliansiebert!
