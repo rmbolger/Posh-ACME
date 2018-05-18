@@ -42,7 +42,8 @@ function Add-DnsTxtAzure {
     Write-Debug $recBody
     try {
         $response = Invoke-RestMethod "https://management.azure.com$($rec.id)?api-version=2018-03-01-preview" `
-                        -Method Put -Body $recBody -Headers $script:AZToken.AuthHeader -ContentType 'application/json'
+            -Method Put -Body $recBody -Headers $script:AZToken.AuthHeader `
+            -ContentType 'application/json' @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
     } catch { throw }
 
@@ -133,7 +134,7 @@ function Remove-DnsTxtAzure {
         Write-Verbose "Deleting $($rec.name). No values left."
         try {
             Invoke-RestMethod "https://management.azure.com$($rec.id)?api-version=2018-03-01-preview" `
-                    -Method Delete -Headers $script:AZToken.AuthHeader | Out-Null
+                -Method Delete -Headers $script:AZToken.AuthHeader  @script:UseBasic | Out-Null
             return
         } catch { throw }
     }
@@ -145,7 +146,8 @@ function Remove-DnsTxtAzure {
     Write-Debug $recBody
     try {
         $response = Invoke-RestMethod "https://management.azure.com$($rec.id)?api-version=2018-03-01-preview" `
-                        -Method Put -Body $recBody -Headers $script:AZToken.AuthHeader -ContentType 'application/json'
+            -Method Put -Body $recBody -Headers $script:AZToken.AuthHeader `
+            -ContentType 'application/json' @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
     } catch { throw }
 
@@ -232,7 +234,8 @@ function Connect-AZTenant {
 
     # login
     try {
-        $token = Invoke-RestMethod "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token" -Method Post -Body $authBody
+        $token = Invoke-RestMethod "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token" `
+            -Method Post -Body $authBody @script:UseBasic
     } catch { throw }
 
     # add an "Expires" [datetime] parameter converted from expires_on with a 5 min buffer
@@ -265,7 +268,7 @@ function Get-AZZoneId {
     # https://docs.microsoft.com/en-us/rest/api/dns/zones/list
     $url = "https://management.azure.com/subscriptions/$($AZSubscriptionId)/providers/Microsoft.Network/dnszones?api-version=2018-03-01-preview"
     try {
-        $zones = Invoke-RestMethod $url -Headers $script:AZToken.AuthHeader
+        $zones = Invoke-RestMethod $url -Headers $script:AZToken.AuthHeader @script:UseBasic
     } catch { throw }
 
     # Since Azure could be hosting both apex and sub-zones, we need to find the closest/deepest
@@ -312,7 +315,8 @@ function Get-AZTxtRecord {
     # query the specific record we're looking to modify
     Write-Verbose "Querying $RecordName"
     try {
-        $rec = Invoke-RestMethod "https://management.azure.com$($recID)?api-version=2018-03-01-preview" -Headers $script:AZToken.AuthHeader
+        $rec = Invoke-RestMethod "https://management.azure.com$($recID)?api-version=2018-03-01-preview" `
+            -Headers $script:AZToken.AuthHeader @script:UseBasic
     } catch {}
 
     if ($rec) {

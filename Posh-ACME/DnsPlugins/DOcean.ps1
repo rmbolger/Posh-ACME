@@ -26,7 +26,7 @@ function Add-DnsTxtDOcean {
 
     # query the current text record
     try {
-        $rec = (Invoke-RestMethod $recRoot @restParams).domain_records |
+        $rec = (Invoke-RestMethod $recRoot @restParams @script:UseBasic).domain_records |
                 Where-Object { $_.type -eq 'TXT' -and $_.name -eq $recShort -and $_.data -eq $TxtValue }
     } catch { throw }
 
@@ -39,7 +39,7 @@ function Add-DnsTxtDOcean {
             ttl  = 10;
         } | ConvertTo-Json
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
-        Invoke-RestMethod $recRoot -Method Post @restParams -Body $recBody -EA Stop | Out-Null
+        Invoke-RestMethod $recRoot -Method Post @restParams -Body $recBody -EA Stop @script:UseBasic | Out-Null
     } else {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
     }
@@ -98,14 +98,14 @@ function Remove-DnsTxtDOcean {
 
     # query the current text record
     try {
-        $rec = (Invoke-RestMethod $recRoot @restParams).domain_records |
+        $rec = (Invoke-RestMethod $recRoot @restParams @script:UseBasic).domain_records |
                 Where-Object { $_.type -eq 'TXT' -and $_.name -eq $recShort -and $_.data -eq $TxtValue }
     } catch { throw }
 
     if ($rec) {
         # delete it
         Write-Verbose "Deleting $RecordName with value $TxtValue"
-        Invoke-RestMethod "$recRoot/$($rec.id)" -Method Delete @restParams -EA Stop | Out-Null
+        Invoke-RestMethod "$recRoot/$($rec.id)" -Method Delete @restParams -EA Stop @script:UseBasic | Out-Null
     } else {
         # nothing to do
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
@@ -181,7 +181,7 @@ function Find-DOZone {
     }
 
     try {
-        $zones = (Invoke-RestMethod "$ApiRoot" @RestParams).domains
+        $zones = (Invoke-RestMethod "$ApiRoot" @RestParams @script:UseBasic).domains
     } catch { throw }
 
     # Since Digital Ocean could be hosting both apex and sub-zones, we need to find the closest/deepest
