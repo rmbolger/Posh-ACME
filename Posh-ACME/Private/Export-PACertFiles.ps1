@@ -17,7 +17,7 @@ function Export-PACertFiles {
     $pfxFile       = Join-Path $OutputFolder 'cert.pfx'
     $pfxFullFile   = Join-Path $OutputFolder 'fullchain.pfx'
 
-    # download the cert+chain which is was ACMEv2 delivers by default
+    # download the cert+chain which is what ACMEv2 delivers by default
     # https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-7.4.2
     Invoke-WebRequest $CertUrl -OutFile $fullchainFile
 
