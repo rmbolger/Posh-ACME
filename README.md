@@ -8,6 +8,7 @@ An [ACME v2](https://tools.ietf.org/html/draft-ietf-acme-acme) client implemente
 - Single command for new certs, `New-PACertificate`
 - Easy renewals via `Submit-Renewal`
 - RSA and ECC private keys supported for accounts and certificates
+- Account key rollover support
 - [OCSP Must-Staple](https://scotthelme.co.uk/ocsp-must-staple/) support
 - DNS challenge plugins for [various DNS providers](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) (pull requests welcome)
 - DNS challenge [CNAME support](https://github.com/rmbolger/Posh-ACME/blob/master/Tutorial.md#advanced-dns-challenge-aliases)
@@ -20,14 +21,12 @@ An [ACME v2](https://tools.ietf.org/html/draft-ietf-acme-acme) client implemente
 # Not Currently Supported (Yet)
 
 - HTTP challenge support
-- Pre/Post hooks to aid with certificate deployment and automation
-- Account key rollover
 - PowerShell Core support
 
 
 # Install
 
-The [latest release version](https://www.powershellgallery.com/packages/Posh-ACME/2.0.1) can found in the PowerShell Gallery. Installing from the gallery requires the PowerShellGet module which is installed by default on Windows 10 or later. See [Getting Started with the Gallery](https://www.powershellgallery.com/) for instructions on earlier OSes. Zip/Tar versions can also be downloaded from the [GitHub releases page](https://github.com/rmbolger/Posh-ACME/releases).
+The [latest release version](https://www.powershellgallery.com/packages/Posh-ACME/2.1.0) can found in the PowerShell Gallery. Installing from the gallery requires the PowerShellGet module which is installed by default on Windows 10 or later. See [Getting Started with the Gallery](https://www.powershellgallery.com/) for instructions on earlier OSes. Zip/Tar versions can also be downloaded from the [GitHub releases page](https://github.com/rmbolger/Posh-ACME/releases).
 
 ```powershell
 # install for all users (requires elevated privs)
