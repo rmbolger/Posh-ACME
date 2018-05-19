@@ -21,11 +21,19 @@ function Import-PAConfig {
 
     # Each leve of the config is dependent on its parent. So if the user changes the server,
     # they need to reload the server and all of the child accounts and orders. But if they only
-    # change the account, they only need to reload the accounts and orders. And so on.
+    # change the account, they only need to reload it and orders. And so on.
 
     # make sure we have the root config folder
     if ([string]::IsNullOrWhiteSpace($script:ConfigRoot)) {
-        $script:ConfigRoot = Join-Path $env:LOCALAPPDATA 'Posh-ACME'
+        if ('PSEdition' -notin $PSVersionTable.Keys -or $PSVersionTable.PSEdition -eq 'Desktop' -or $IsWindows) {
+            $script:ConfigRoot = Join-Path $env:LOCALAPPDATA 'Posh-ACME'
+        } elseif ($IsLinux) {
+            $script:ConfigRoot = Join-Path $env:HOME '.config/Posh-ACME'
+        } elseif ($IsMacOs) {
+            $script:ConfigRoot = Join-Path $env:HOME 'Library/Preferences/Posh-ACME'
+        } else {
+            throw "Unrecognized PowerShell platform"
+        }
         if (!(Test-Path $script:ConfigRoot -PathType Container)) {
             New-Item -ItemType Directory -Path $script:ConfigRoot -Force | Out-Null
         }
