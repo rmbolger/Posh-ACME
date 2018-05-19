@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '2.1.0'
+ModuleVersion = '2.1.1'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -102,16 +102,9 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 2.1.0 (2018-05-18)
+## 2.1.1 (2018-05-19)
 
-* Added account key rollover support. Use -KeyRollover switch in Set-PAAccount.
-* Added PfxPass (SecureString) to Get-PACertificate output
-* Added new DNS plugins
-  * DMEasy (DNS Made Easy)
-  * GoDaddy. Thanks @Rukas!
-* All calls to Invoke-WebRequest and Invoke-RestMethod now use -UseBasicParsing to avoid issues with PowerShell using Internet Explorer's DOM parser. Thanks @Rukas!
-* Fixed hard coded cert store paths in Import-PfxCertInternal
-* Fixed tests for New-Jws
+* Fix for GCloud plugin syntax error
 '@
 
     } # End of PSData hashtable
