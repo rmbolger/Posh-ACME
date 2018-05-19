@@ -1,3 +1,7 @@
+## 2.1.1 (2018-05-19)
+
+* Fix for GCloud plugin syntax error
+
 ## 2.1.0 (2018-05-18)
 
 * Added account key rollover support. Use -KeyRollover switch in Set-PAAccount.
