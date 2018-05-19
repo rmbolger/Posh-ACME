@@ -1,15 +1,11 @@
 function New-PAKey {
     [CmdletBinding()]
+    [OutputType('System.Security.Cryptography.AsymmetricAlgorithm')]
     param(
         [Parameter(Position=0)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
-        [string]$KeyLength='2048',
-        [switch]$AsJwk,
-        [switch]$AsPrettyJwk
+        [string]$KeyLength='2048'
     )
-
-    # RFC Note: 'kty' is case-sensitive
-    # https://tools.ietf.org/html/rfc7517#section-4.1
 
     # KeyLength should have already been validated which means it should be a parseable
     # [int] that may have an "ec-" prefix
@@ -44,11 +40,5 @@ function New-PAKey {
         default { throw "Unsupported key type" }
     }
 
-    if ($AsPrettyJwk) {
-        return ($Key | ConvertTo-Jwk -AsPrettyJson)
-    } elseif ($AsJson) {
-        return ($Key | ConvertTo-Jwk -AsJson)
-    } else {
-        return $Key
-    }
+    return $Key
 }
