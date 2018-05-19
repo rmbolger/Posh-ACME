@@ -63,7 +63,7 @@ function Update-PAServer {
 
                 # update the nonce value
                 if ($response.Headers.ContainsKey($script:HEADER_NONCE)) {
-                    $dirObj.nonce = $response.Headers.$script:HEADER_NONCE
+                    $dirObj.nonce = $response.Headers[$script:HEADER_NONCE] | Select-Object -First 1
                 } else {
                     $dirObj.nonce = Get-Nonce $dirObj.newNonce
                 }

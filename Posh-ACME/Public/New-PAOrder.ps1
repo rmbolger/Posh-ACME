@@ -108,8 +108,9 @@ function New-PAOrder {
 
     # add the location from the header
     if ($response.Headers.ContainsKey('Location')) {
-        Write-Debug "Adding location $($response.Headers['Location'])"
-        $order | Add-Member -MemberType NoteProperty -Name 'location' -Value $response.Headers['Location']
+        $location = $response.Headers['Location'] | Select-Object -First 1
+        Write-Debug "Adding location $location"
+        $order | Add-Member -MemberType NoteProperty -Name 'location' -Value $location
     } else {
         throw 'No Location header found in newOrder output'
     }

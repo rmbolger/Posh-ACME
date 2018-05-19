@@ -84,7 +84,7 @@ function New-PAAccount {
 
     # grab the Location header
     if ($response.Headers.ContainsKey('Location')) {
-        $location = $response.Headers['Location']
+        $location = $response.Headers['Location'] | Select-Object -First 1
     } else {
         throw 'No Location header found in newAccount output'
     }

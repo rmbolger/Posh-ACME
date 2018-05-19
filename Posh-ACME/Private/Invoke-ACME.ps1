@@ -39,8 +39,8 @@ function Invoke-ACME {
 
         # update the next nonce if it was sent
         if ($response.Headers.ContainsKey($script:HEADER_NONCE)) {
-            Write-Debug "Updating nonce: $($response.Headers[$script:HEADER_NONCE])"
-            $script:Dir.nonce = $response.Headers[$script:HEADER_NONCE]
+            $script:Dir.nonce = $response.Headers[$script:HEADER_NONCE] | Select-Object -First 1
+            Write-Debug "Updating nonce: $($script:Dir.nonce)"
         }
 
         return $response
@@ -52,8 +52,8 @@ function Invoke-ACME {
 
         # update the next nonce if it was sent
         if ($script:HEADER_NONCE -in $response.Headers) {
-            Write-Debug "Updating nonce from error response: $($response.Headers[$script:HEADER_NONCE])"
-            $script:Dir.nonce = $response.GetResponseHeader($script:HEADER_NONCE)
+            Write-Debug "Updating nonce from error response: $($response.GetResponseHeader($script:HEADER_NONCE) | Select-Object -First 1)"
+            $script:Dir.nonce = $response.GetResponseHeader($script:HEADER_NONCE) | Select-Object -First 1
             $freshNonce = $true
         }
 
