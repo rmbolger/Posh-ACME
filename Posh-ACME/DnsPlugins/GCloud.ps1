@@ -316,7 +316,7 @@ function Find-GCZone {
     # get the list of available zones
     try {
         $zones = (Invoke-RestMethod "$projRoot/managedZones" `
-            -Headers $script:GCToken.AuthHeader).managedZones @script:UseBasic
+            -Headers $script:GCToken.AuthHeader @script:UseBasic).managedZones
     } catch { throw }
 
     # Since Google could be hosting both apex and sub-zones, we need to find the closest/deepest
