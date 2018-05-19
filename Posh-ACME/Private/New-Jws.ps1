@@ -18,7 +18,7 @@ function New-Jws {
 
     # This is not a general JWS implementation. It will specifically
     # cater to making JWS messages for the ACME v2 protocol.
-    # https://tools.ietf.org/html/draft-ietf-acme-acme-10
+    # https://tools.ietf.org/html/draft-ietf-acme-acme-12
 
     # validate the key type
     if ($Key -is [Security.Cryptography.RSA]) {
@@ -47,17 +47,14 @@ function New-Jws {
         # make sure we have a private key to sign with
         # since there's no PublicOnly property, we have to fake it by trying to export
         # the private parameters and catching the error
-        try {
-            $Key.ExportParameters($true) | Out-Null
-        } catch {
-            throw "Supplied Key has no private key portion."
-        }
+        try { $Key.ExportParameters($true) | Out-Null }
+        catch { throw "Supplied Key has no private key portion." }
 
     } else {
         throw "Unsupported Key type. Must be RSA or ECDsa"
     }
 
-    if (!$NoHeaderValidation) {
+    if (-not $NoHeaderValidation) {
         # validate the header
         if ('alg' -notin $Header.Keys -or $Header.alg -notin 'RS256','ES256','ES384') {
             throw "Missing or invalid 'alg' in supplied Header"
@@ -104,21 +101,24 @@ function New-Jws {
         $SignedBytes = $Key.SignData($MessageBytes, $HashAlgo, $PaddingType)
     } else {
         # Make sure header 'alg' matches key type. EC keys depend on the curve
-        # being used.
         # ES256 = P-256 and SHA256 hash
         # ES384 = P-384 and SHA384 hash
         # ES521 = P-521 and SHA512 hash (note 521 vs 512, very confusing)
-        $size = $Key.KeySize
-        $hashAlgo = $Key.HashAlgorithm.Algorithm
         if (($Header.alg -notin 'ES256','ES384','ES512') -or
-            ($Header.alg -eq 'ES256' -and ($size -ne 256 -or $hashAlgo -ne 'SHA256')) -or
-            ($Header.alg -eq 'ES384' -and ($size -ne 384 -or $hashAlgo -ne 'SHA384')) -or
-            ($Header.alg -eq 'ES512' -and ($size -ne 521 -or $hashAlgo -ne 'SHA512'))) {
-            throw "Supplied EC Key (P-$size/$hashAlgo) does not match 'alg' ($($Header.alg)) in supplied Header."
+            ($Header.alg -eq 'ES256' -and $Key.KeySize -ne 256) -or
+            ($Header.alg -eq 'ES384' -and $Key.KeySize -ne 384) -or
+            ($Header.alg -eq 'ES512' -and $Key.KeySize -ne 521)) {
+            throw "Supplied EC Key (P-$($Key.KeySize)) does not match 'alg' ($($Header.alg)) in supplied header or alg is not supported."
+        }
+
+        $HashAlgo = switch ($Key.KeySize) {
+            256 { [Security.Cryptography.HashAlgorithmName]::SHA256; break }
+            384 { [Security.Cryptography.HashAlgorithmName]::SHA384; break }
+            521 { [Security.Cryptography.HashAlgorithmName]::SHA512; break }
         }
 
         # create the signature
-        $SignedBytes = $Key.SignData($MessageBytes)
+        $SignedBytes = $Key.SignData($MessageBytes, $HashAlgo)
     }
 
     # now put everything together into the final JWS format
