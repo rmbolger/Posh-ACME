@@ -1,5 +1,5 @@
 function Invoke-ACME {
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
         [string]$Uri,
@@ -32,6 +32,7 @@ function Invoke-ACME {
     # since HTTP error codes make Invoke-WebRequest throw an exception,
     # we need to wrap it in a try/catch. But we can still get the response
     # object via the exception.
+
     try {
         $response = Invoke-WebRequest -Uri $Uri -Body $Jws -Method Post `
             -ContentType 'application/jose+json' -UserAgent $script:USER_AGENT `
@@ -45,30 +46,66 @@ function Invoke-ACME {
 
         return $response
 
-    } catch [Net.WebException] {
+    } catch {
+        # Since we can't catch explicit exception types between PowerShell editions
+        # without errors for non-existent types, we need to string match the type names
+        # and re-throw anything we don't care about.
+        $exType = $_.Exception.GetType().FullName
+        if ('System.Net.WebException' -eq $exType) {
 
-        $ex = $_.Exception
-        $response = $ex.Response
+            # This is the exception that gets thrown in PowerShell Desktop edition
 
-        # update the next nonce if it was sent
-        if ($script:HEADER_NONCE -in $response.Headers) {
-            Write-Debug "Updating nonce from error response: $($response.GetResponseHeader($script:HEADER_NONCE) | Select-Object -First 1)"
-            $script:Dir.nonce = $response.GetResponseHeader($script:HEADER_NONCE) | Select-Object -First 1
-            $freshNonce = $true
-        }
+            # get the response object: System.Net.HttpWebResponse
+            $ex = $_.Exception
+            $response = $ex.Response
+
+            # update the next nonce if it was sent
+            if ($script:HEADER_NONCE -in $response.Headers) {
+                $script:Dir.nonce = $response.GetResponseHeader($script:HEADER_NONCE) | Select-Object -First 1
+                Write-Debug "Updating nonce from error response: $($script:Dir.nonce)"
+                $freshNonce = $true
+            }
+
+            # grab the raw response body
+            $sr = New-Object IO.StreamReader($response.GetResponseStream())
+            $sr.BaseStream.Position = 0
+            $sr.DiscardBufferedData()
+            $body = $sr.ReadToEnd()
+            Write-Debug "Error Body: $body"
+
+        } elseif ('Microsoft.PowerShell.Commands.HttpResponseException' -eq $exType) {
+
+            # This is the exception that gets thrown in PowerShell Core edition
+
+            # get the response object
+            # Linux type: System.Net.Http.CurlHandler+CurlResponseMessage
+            #   Mac type: ???
+            #   Win type: System.Net.Http.HttpResponseMessage
+            $ex = $_.Exception
+            $response = $ex.Response
+
+            # update the next nonce if it was sent
+            if ($script:HEADER_NONCE -in $response.Headers.Key) {
+                $script:Dir.nonce = ($response.Headers | Where-Object { $_.Key -eq $script:HEADER_NONCE }).Value | Select -First 1
+                Write-Debug "Updating nonce from error response: $($script:Dir.nonce)"
+                $freshNonce = $true
+            }
+
+            # Currently in PowerShell 6, there's no way to get the raw response body from an
+            # HttpResponseException because they dispose the response stream.
+            # https://github.com/PowerShell/PowerShell/issues/5555
+            # However, a "processed" version of the body is available via ErrorDetails.Message
+            # which *should* work for us. The processing they're doing should only be removing HTML
+            # tags. And since our body should be JSON, there shouldn't be any tags to remove.
+            # So we'll just go with it for now until someone reports a problem.
+            $body = $_.ErrorDetails.Message
+            Write-Debug "Error Body: $body"
+
+        } else { throw }
 
         # ACME uses RFC7807, Problem Details for HTTP APIs
         # https://tools.ietf.org/html/rfc7807
         # So a JSON parseable error object should be in the response body.
-        # We just have to pull it out and parse it.
-
-        $sr = New-Object IO.StreamReader($response.GetResponseStream())
-        $sr.BaseStream.Position = 0
-        $sr.DiscardBufferedData()
-        $body = $sr.ReadToEnd()
-        Write-Debug "Error Body: $body"
-
-        # try parsing the body
         try { $acmeError = $body | ConvertFrom-Json }
         catch {
             Write-Warning "Response body was not JSON parseable"
