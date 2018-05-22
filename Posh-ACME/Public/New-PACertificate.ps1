@@ -28,6 +28,12 @@ function New-PACertificate {
         [int]$CertIssueTimeout=60
     )
 
+    # Make sure -Install is only used on Windows because it currently has no meaning on
+    # other platforms and will just generate errors.
+    if ($Install -and !($IsWindows) -and $PSVersionTable.PSEdition -ne 'Desktop') {
+        throw "The Install parameter is not supported on non-Windows platforms."
+    }
+
     # Make sure we have a server set. But don't override the current
     # one unless explicitly specified.
     if (!(Get-PAServer) -or ('DirectoryUrl' -in $PSBoundParameters.Keys)) {

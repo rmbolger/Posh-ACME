@@ -25,7 +25,7 @@ function Import-PAConfig {
 
     # make sure we have the root config folder
     if ([string]::IsNullOrWhiteSpace($script:ConfigRoot)) {
-        if ('PSEdition' -notin $PSVersionTable.Keys -or $PSVersionTable.PSEdition -eq 'Desktop' -or $IsWindows) {
+        if ($IsWindows -or $PSVersionTable.PSEdition -eq 'Desktop') {
             $script:ConfigRoot = Join-Path $env:LOCALAPPDATA 'Posh-ACME'
         } elseif ($IsLinux) {
             $script:ConfigRoot = Join-Path $env:HOME '.config/Posh-ACME'
