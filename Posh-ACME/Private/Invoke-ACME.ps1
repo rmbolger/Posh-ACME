@@ -86,7 +86,7 @@ function Invoke-ACME {
 
             # update the next nonce if it was sent
             if ($script:HEADER_NONCE -in $response.Headers.Key) {
-                $script:Dir.nonce = ($response.Headers | Where-Object { $_.Key -eq $script:HEADER_NONCE }).Value | Select -First 1
+                $script:Dir.nonce = ($response.Headers | Where-Object { $_.Key -eq $script:HEADER_NONCE }).Value | Select-Object -First 1
                 Write-Debug "Updating nonce from error response: $($script:Dir.nonce)"
                 $freshNonce = $true
             }
@@ -94,6 +94,7 @@ function Invoke-ACME {
             # Currently in PowerShell 6, there's no way to get the raw response body from an
             # HttpResponseException because they dispose the response stream.
             # https://github.com/PowerShell/PowerShell/issues/5555
+            # https://get-powershellblog.blogspot.com/2017/11/powershell-core-web-cmdlets-in-depth.html
             # However, a "processed" version of the body is available via ErrorDetails.Message
             # which *should* work for us. The processing they're doing should only be removing HTML
             # tags. And since our body should be JSON, there shouldn't be any tags to remove.
