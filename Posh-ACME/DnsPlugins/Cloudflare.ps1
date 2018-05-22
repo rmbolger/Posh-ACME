@@ -13,41 +13,28 @@ function Add-DnsTxtCloudflare {
         $ExtraParams
     )
 
-    $Split = $RecordName.Split("{.}")
-    #$Split
+    $apiRoot = 'https://api.cloudflare.com/client/v4/zones'
+    $authHeader = @{'X-Auth-Email'=$CFAuthEmail;'X-Auth-Key'=$CFAuthKey}
 
-    $Zone = "$($Split[-2]).$($Split[-1])"
-    #$Zone
+    Write-Verbose "Attempting to find hosted zone for $RecordName"
+    if (!($zoneID = Find-CFZone $RecordName $CFAuthEmail $CFAuthKey)) {
+        throw "Unable to find Cloudflare hosted zone for $RecordName"
+    }
 
-    $Headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-    $Headers.Add("X-Auth-Email", "$CFAuthEmail")
-    $Headers.Add("X-Auth-Key", "$CFAuthKey")
+    # check for an existing record
+    $response = Invoke-RestMethod "$apiRoot/$zoneID/dns_records?type=TXT&name=$RecordName&content=$TxtValue" `
+        -Headers $authHeader -ContentType 'application/json' @script:UseBasic
 
-    #Get All Domains
-    $AllDomains=invoke-restmethod  -method get -uri "https://api.cloudflare.com/client/v4/zones/?per_page=1000&order=type&direction=asc" -Headers $Headers
-    #$AllDomains.result.name
+    # add the new TXT record if necessary
+    if ($response.result.Count -eq 0) {
 
-    #Select Zone
-    $Domain = $AllDomains.result | Where-Object {$_.name -eq "$Zone"}
-    #$Domain
+        $bodyJson = @{ type="TXT"; name=$RecordName; content=$TxtValue } | ConvertTo-Json
+        Write-Verbose "Adding $RecordName with value $TxtValue"
+        Invoke-RestMethod "$apiRoot/$zoneID/dns_records" -Method Post -Body $bodyJson `
+            -ContentType 'application/json' -Headers $authHeader @script:UseBasic | Out-Null
 
-    #GET DNS Records for Zone
-    $allrecords=invoke-restmethod  -method get -uri "https://api.cloudflare.com/client/v4/zones/$($domain.id)/dns_records?per_page=1000&order=type&direction=asc&match=all" -Headers $Headers
-
-    #Check for existing record
-    $rec = $allrecords.result | Where-Object {$_.content -eq "$TxtValue"}
-
-    # add (if necessary) the new TXT value to the list
-    if (!$rec)
-    {
-        $Body = @{
-            type = "TXT"
-            name = "$RecordName"
-            content = "$TxtValue"
-        }
-        $JSONData = $Body | ConvertTo-Json
-
-        $JSONResult = invoke-restmethod  -method Post -uri "https://api.cloudflare.com/client/v4/zones/$($domain.id)/dns_records"  -ContentType "application/json"  -Headers $Headers -Body $jsondata
+    } else {
+        Write-Debug "Record $RecordName with value $TxtValue already exists. Nothing to do."
     }
 
 
@@ -95,34 +82,28 @@ function Remove-DnsTxtCloudflare {
         $ExtraParams
     )
 
-    $Split = $RecordName.Split("{.}")
-    #$Split
+    $apiRoot = 'https://api.cloudflare.com/client/v4/zones'
+    $authHeader = @{'X-Auth-Email'=$CFAuthEmail;'X-Auth-Key'=$CFAuthKey}
 
-    $Zone = "$($Split[-2]).$($Split[-1])"
-    #$Zone
+    Write-Verbose "Attempting to find hosted zone for $RecordName"
+    if (!($zoneID = Find-CFZone $RecordName $CFAuthEmail $CFAuthKey)) {
+        throw "Unable to find Cloudflare hosted zone for $RecordName"
+    }
 
-    $Headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-    $Headers.Add("X-Auth-Email", "$CFAuthEmail")
-    $Headers.Add("X-Auth-Key", "$CFAuthKey")
+    # check for an existing record
+    $response = Invoke-RestMethod "$apiRoot/$zoneID/dns_records?type=TXT&name=$RecordName&content=$TxtValue" `
+        -Headers $authHeader -ContentType 'application/json' @script:UseBasic
 
-    #Get All Domains
-    $AllDomains=invoke-restmethod  -method get -uri "https://api.cloudflare.com/client/v4/zones/?per_page=1000&order=type&direction=asc" -Headers $Headers
-    #$AllDomains.result.name
+    # remove the txt record if it exists
+    if ($response.result.Count -gt 0) {
 
-    #Select Zone
-    $Domain = $AllDomains.result | Where-Object {$_.name -eq "$Zone"}
-    #$Domain
+        $recID = $response.result[0].id
+        Write-Verbose "Removing $RecordName with value $TxtValue"
+        Invoke-RestMethod "$apiRoot/$zoneID/dns_records/$recID" -Method Delete `
+            -ContentType 'application/json' -Headers $authHeader @script:UseBasic | Out-Null
 
-    #GET DNS Records for Zone
-    $allrecords=invoke-restmethod  -method get -uri "https://api.cloudflare.com/client/v4/zones/$($domain.id)/dns_records?per_page=1000&order=type&direction=asc&match=all" -Headers $Headers
-
-    #Check for existing record
-    $rec = $allrecords.result | Where-Object {$_.content -eq "$TxtValue"}
-
-    # remove (if necessary) the new TXT value to the list
-    if ($rec)
-    {
-        $JSONResult = invoke-restmethod  -method  Delete "https://api.cloudflare.com/client/v4/zones/$($domain.id)/dns_records/$($rec.id)"   -ContentType "application/json"  -Headers $Headers
+    } else {
+        Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     }
 
 
@@ -183,4 +164,52 @@ function Save-DnsTxtCloudflare {
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     #>
+}
+
+############################
+# Helper Functions
+############################
+
+function Find-CFZone {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [string]$RecordName,
+        [Parameter(Mandatory,Position=1)]
+        [string]$CFAuthEmail,
+        [Parameter(Mandatory,Position=2)]
+        [string]$CFAuthKey
+    )
+
+    # setup a module variable to cache the record to zone mapping
+    # so it's quicker to find later
+    if (!$script:CFRecordZones) { $script:CFRecordZones = @{} }
+
+    # check for the record in the cache
+    if ($script:CFRecordZones.ContainsKey($RecordName)) {
+        return $script:CFRecordZones.$RecordName
+    }
+
+    $apiRoot = 'https://api.cloudflare.com/client/v4/zones'
+    $authHeader = @{'X-Auth-Email'=$CFAuthEmail;'X-Auth-Key'=$CFAuthKey}
+
+    # We need to find the zone ID for the closest/deepest sub-zone that would
+    # contain the record.
+    $pieces = $RecordName.Split('.')
+    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
+
+        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+        Write-Debug "Checking $zoneTest"
+        $response = Invoke-RestMethod "$apiRoot/?name=$zoneTest" -Headers $authHeader @script:UseBasic
+
+        # The response object always contains a "result" array even if empty
+        if ($response.result.Count -gt 0) {
+            Write-Debug ($response | ConvertTo-Json -Depth 5)
+            $zoneID = $response.result[0].id
+            $script:CFRecordZones.$RecordName = $zoneID
+            return $zoneID
+        }
+    }
+
+    return $null
 }
