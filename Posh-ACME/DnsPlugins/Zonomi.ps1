@@ -20,7 +20,7 @@
         "name" = $RecordName;
         "type" = "TXT"
     }
-    [xml]$XmlData = (Invoke-WebRequest $ApiUri -Headers $AuthHeader -Body $ApiParams).Content
+    [xml]$XmlData = (Invoke-WebRequest $ApiUri -Headers $AuthHeader -Body $ApiParams @Script:UseBasic).Content
 
     # Add any existing TXT records to the API command
     $ApiParams.Clear()
@@ -39,7 +39,7 @@
     $ApiParams.Add("type[$i]", "TXT")
 
     # Run the API command
-    Invoke-WebRequest $ApiUri -Headers $AuthHeader -Body $ApiParams | Out-Null
+    Invoke-WebRequest $ApiUri -Headers $AuthHeader -Body $ApiParams @Script:UseBasic | Out-Null
 
     <#
     .SYNOPSIS
@@ -92,8 +92,8 @@ function Remove-DnsTxtZonomi {
         "type" = "TXT"
     }
 	
-	# Run the API command
-    Invoke-WebRequest $ApiUri -Headers $AuthHeader -Body $ApiParams | Out-Null
+    # Run the API command
+    Invoke-WebRequest $ApiUri -Headers $AuthHeader -Body $ApiParams @Script:UseBasic | Out-Null
 
     <#
     .SYNOPSIS
