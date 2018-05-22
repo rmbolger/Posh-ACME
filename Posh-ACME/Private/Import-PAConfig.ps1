@@ -50,6 +50,23 @@ function Import-PAConfig {
             $script:DirFolder = Join-Path $script:ConfigRoot $dirFolder.Substring(0,$dirFolder.IndexOf('/'))
             $script:Dir = Get-PAServer $dirUrl
 
+            # deal with cert validation options between PS editions
+            if ($script:Dir.SkipCertificateCheck) {
+                Write-Debug "skipping cert validation"
+                if ($script:SkipCertSupported) {
+                    $script:UseBasic.SkipCertificateCheck = $true
+                } else {
+                    [CertValidation]::Ignore()
+                }
+            } else {
+                Write-Debug "restoring cert validation"
+                if ($script:SkipCertSupported) {
+                    $script:UseBasic.SkipCertificateCheck = $false
+                } else {
+                    [CertValidation]::Restore()
+                }
+            }
+
             $ImportAccount = $true
         }
     }

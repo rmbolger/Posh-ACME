@@ -19,10 +19,10 @@ if ('SkipCertificateCheck' -notin (Get-Command Invoke-RestMethod).Parameters.Key
                     return true;
                 }
                 public static void Ignore() {
-                    ServicePointManager.ServerCertificateValidationCallback = IgnoreValidation;
+                    ServicePointManager.ServerCertificateValidationCallback += IgnoreValidation;
                 }
                 public static void Restore() {
-                    ServicePointManager.ServerCertificateValidationCallback = null;
+                    ServicePointManager.ServerCertificateValidationCallback -= IgnoreValidation;
                 }
             }
 "@

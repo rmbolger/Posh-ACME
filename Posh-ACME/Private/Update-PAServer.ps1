@@ -5,7 +5,8 @@ function Update-PAServer {
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
         [Alias('location')]
         [string]$DirectoryUrl,
-        [switch]$NonceOnly
+        [switch]$NonceOnly,
+        [switch]$SkipCertificateCheck
     )
 
     Process {
@@ -59,6 +60,7 @@ function Update-PAServer {
                 # add location, nonce, and type to the returned directory object
                 $dirObj | Add-Member -MemberType NoteProperty -Name 'location' -value $DirectoryUrl
                 $dirObj | Add-Member -MemberType NoteProperty -Name 'nonce' -value $null
+                $dirObj | Add-Member -MemberType NoteProperty -Name 'SkipCertificateCheck' -value $SkipCertificateCheck.IsPresent
                 $dirObj.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
 
                 # update the nonce value
