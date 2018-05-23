@@ -19,6 +19,14 @@ function Add-DnsTxtRoute53 {
     # But my hope is to eventually remove the AwsPowershell module dependency (which is
     # currently 75 MB by itself) for people who use the Access/Secret key pair.
 
+    # make sure the correct module is available for the PS edition
+    if ($PSEdition -eq 'Core') { $modName = 'AwsPowershell.NetCore' } else { $modName = 'AwsPowershell' }
+    if (!(Get-Module -ListAvailable $modName -Verbose:$false)) {
+        throw "The $modName module is required to use this plugin."
+    } else {
+        Import-Module $modName -Verbose:$false
+    }
+
     if ('Keys' -eq $PSCmdlet.ParameterSetName) {
         $credParam = @{AccessKey=$R53AccessKey; SecretKey=((New-Object PSCredential "user",$R53SecretKey).GetNetworkCredential().Password)}
     } else {

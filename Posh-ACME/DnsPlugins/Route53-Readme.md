@@ -1,6 +1,6 @@
 # How To Use the Azure DNS Plugin
 
-This plugin works against the [AWS Route53](https://aws.amazon.com/route53/) DNS provider. It is assumed that you already have an AWS account with at least one DNS zone, and access to create IAM users/roles. The commands used in this guide will also make use of the [AwsPowershell](https://www.powershellgallery.com/packages/AWSPowerShell) module. Currently, it is also required in order to use the plugin.
+This plugin works against the [AWS Route53](https://aws.amazon.com/route53/) DNS provider. It is assumed that you already have an AWS account with at least one DNS zone, and access to create IAM users/roles. The commands used in this guide will also make use of the [AwsPowershell](https://www.powershellgallery.com/packages/AWSPowerShell) or [AwsPowershell.NetCore](https://www.powershellgallery.com/packages/AWSPowerShell.NetCore) module depending on your environment. Currently, they are also required in order to use the plugin.
 
 ## Setup
 
@@ -67,9 +67,24 @@ The `$key` variable output should contains `AccessKeyId` and `SecretAccessKey` w
 
 ## Using the Plugin
 
-The only parameters requires for the plugin are `R53AccessKey` and `R53SecretKey` for the service account which you should have from the previous setup section. If you lost them, you can re-generate them from the AWS IAM console. But there's no way to retrieve an existing secret key value.
+There are currently two different ways to use the plugin. The first requires supplying access and secret key to the `R53AccessKey` and `R53SecretKey` parameters. The secret key is a secure string though and takes a bit of extra work to setup. If you lost them, you can re-generate them from the AWS IAM console. But there's no way to retrieve an existing secret key value.
 
 ```powershell
-$r53Params = @{R53AccessKey='xxxxxxxx';R53SecretKey='xxxxxxxx'}
+# store the secret key as a SecureString
+$sec = Read-Host "Secret Key" -AsSecureString
+
+# set the params and generate the cert
+$r53Params = @{R53AccessKey='xxxxxxxx';R53SecretKey=$sec}
+New-PACertificate test.example.com -DnsPlugin Route53 -PluginArgs $r53Params
+```
+
+The second method uses the `R53ProfileName` parameter to specify the profile name of an existing credential stored with `Set-AwsCredential` from the AWS powershell module. **This is also the only method that currently works with PowerShell Core on non-Windows OSes for this plugin.**
+
+```powershell
+# store the access/secret key in a profile called 'poshacme'
+Set-AWSCredential -StoreAs 'poshacme' -AccessKey 'xxxxxxxx' -SecretKey 'xxxxxxxx'
+
+# set the params and generate the cert
+$r53Params = @{R53ProfileName='poshacme'}
 New-PACertificate test.example.com -DnsPlugin Route53 -PluginArgs $r53Params
 ```
