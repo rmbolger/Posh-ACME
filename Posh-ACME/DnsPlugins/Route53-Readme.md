@@ -1,4 +1,4 @@
-# How To Use the Azure DNS Plugin
+# How To Use the Route53 DNS Plugin
 
 This plugin works against the [AWS Route53](https://aws.amazon.com/route53/) DNS provider. It is assumed that you already have an AWS account with at least one DNS zone, and access to create IAM users/roles. The commands used in this guide will also make use of the [AwsPowershell](https://www.powershellgallery.com/packages/AWSPowerShell) or [AwsPowershell.NetCore](https://www.powershellgallery.com/packages/AWSPowerShell.NetCore) module depending on your environment. Currently, they are also required in order to use the plugin.
 
