@@ -2,6 +2,8 @@
 
 This plugin works against the Microsoft Windows DNS server. It doesn't matter whether it's hosted on-premises or in the cloud, physical or virtual, domain joined or standalone. As long as it can be managed via the standard [DnsServer PowerShell module](https://docs.microsoft.com/en-us/powershell/module/dnsserver), it should be supported. This does **not** work against [Azure DNS](https://azure.microsoft.com/en-us/services/dns/). Use the Azure plugin for that.
 
+**This plugin currently does not work on non-Windows OSes in PowerShell Core. [Click here](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) for details.**
+
 ## Setup
 
 ### DnsServer module
