@@ -22,14 +22,14 @@ function Add-DnsTxtInfoblox {
         if ($IBIgnoreCert) { Set-IBCertIgnoreOn }
 
         # check if the record already exists
-        $response = Invoke-RestMethod -Uri $recUrl -Method Get -Credential $IBCred -EA Stop @script:UseBasic
+        $response = Invoke-RestMethod -Uri $recUrl -Method Get -Credential $IBCred @script:UseBasic
 
         if ($response -and $response.'_ref') {
             Write-Debug "Record $RecordName with value $TxtValue already exists. Nothing to do."
         } else {
             # add the record
             Write-Verbose "Adding $RecordName with value $TxtValue"
-            Invoke-RestMethod -Uri $recUrl -Method Post -Credential $IBCred -EA Stop @script:UseBasic | Out-Null
+            Invoke-RestMethod -Uri $recUrl -Method Post -Credential $IBCred @script:UseBasic | Out-Null
         }
 
     } finally {
@@ -97,13 +97,13 @@ function Remove-DnsTxtInfoblox {
 
         # query the _ref for the txt record object we want to delete
         $recUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&view=$IBView"
-        $response = Invoke-RestMethod -Uri $recUrl -Method Get -Credential $IBCred -EA Stop @script:UseBasic
+        $response = Invoke-RestMethod -Uri $recUrl -Method Get -Credential $IBCred @script:UseBasic
 
         if ($response -and $response.'_ref') {
             # delete the record
             $delUrl = "https://$IBServer/wapi/v1.0/$($response.'_ref')"
             Write-Verbose "Removing $RecordName with value $TxtValue"
-            Invoke-RestMethod -Uri $delUrl -Method Delete -Credential $IBCred -EA Stop @script:UseBasic | Out-Null
+            Invoke-RestMethod -Uri $delUrl -Method Delete -Credential $IBCred @script:UseBasic | Out-Null
         } else {
             Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
         }

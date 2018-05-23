@@ -1,5 +1,3 @@
-#Requires -Modules AwsPowershell
-
 function Add-DnsTxtRoute53 {
     [CmdletBinding()]
     param(
