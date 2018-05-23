@@ -6,7 +6,7 @@ GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
 Description = 'ACMEv2 protocol client for generating certificates using Let''s Encrypt (or other ACMEv2 compliant CA)'
-CompatiblePSEditions = 'Desktop'
+CompatiblePSEditions = @('Desktop','Core')
 PowerShellVersion = '5.1'
 DotNetFrameworkVersion = '4.7.1'
 
