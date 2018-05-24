@@ -4,6 +4,7 @@
 - [Your First Certificate](#your-first-certificate)
 - [DNS Plugins](#dns-plugins)
 - [Renewing A Certificate](#renewing-a-certificate)
+- [Going Into Production](#going-into-production)
 - [(Advanced) DNS Challenge Aliases](#advanced-dns-challenge-aliases)
 
 ## Picking a Server
@@ -16,7 +17,7 @@ Set-PAServer LE_STAGE
 
 `LE_STAGE` is a shortcut for the Let's Encrypt Staging server's directory URL. You could do the same thing by specifying the actual URL which is https://acme-staging-v02.api.letsencrypt.org/directory. The other currently supported server shortcut is `LE_PROD` for the Let's Encrypt Production server. Any ACMEv2 compliant directory URL will work though.
 
-Once you set a server, the module will continue to perform future actions against that server until you change it with another call to `Set-PAServer` or using the `-DirectoryUrl` parameter in a command that supports it. The first time you connect to a server, a link to its Terms of Service will be displayed. You should review it before continuing.
+Once you set a server, the module will continue to perform future actions against that server until you change it with another call to `Set-PAServer`. The first time you connect to a server, a link to its Terms of Service will be displayed. You should review it before continuing.
 
 ## Your First Certificate
 
@@ -46,7 +47,7 @@ The command will sleep for 2 minutes by default to allow the DNS changes to prop
 - **fullchain.pfx** (PKCS12 container with cert+key+chain)
 
 Currently, the responsibility for deploying the certificate to your web server or service is up to you. There may be deployment plugins supported eventually. But for now, the idea is that this module is just a piece of your larger PowerShell based deployment strategy. The certificate details are written to the pipeline so you can either save them to a variable or pipe the output to another command.
-The password set for the PFX files is `poshacme` because we didn't override the default with `-PfxPass`. If you're running PowerShell with elevated privileges, you can also add the `-Install` switch to automatically import the certificate into the local computer's certificate store.
+The password set for the PFX files is `poshacme` because we didn't override the default with `-PfxPass`. If you're running PowerShell with elevated privileges on Windows, you can also add the `-Install` switch to automatically import the certificate into the local computer's certificate store.
 
 So now you've got a certificate and that's great! But Let's Encrypt certificates expire relatively quickly (3 months). And you won't be able to renew this certificate without going through the manual DNS TXT record hassle again. So let's add a DNS plugin to the process.
 
@@ -160,6 +161,17 @@ Submit-Renewal -AllAccounts
 ```
 
 These are designed to be used in a daily scheduled task. **Make sure to have it run as the same user you're currently logged in as** because the module config is all stored in your local profile. Each day, it will check the existing certs for ones that have reached the renewal window and renew them. It will just ignore the ones that aren't ready yet.
+
+## Going Into Production
+
+Now that you've got everything working against the Let's Encrypt staging server, all you have to do is switch over to the production server and re-run your `New-PACertificate` command to get your shiny new publicly trusted certificate.
+
+```powershell
+Set-PAServer LE_PROD
+
+New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@example.com -DnsPlugin Route53 `
+    -PluginArgs $r53Params -Verbose
+```
 
 ## (Advanced) DNS Challenge Aliases
 
