@@ -15,40 +15,26 @@ function Add-DnsTxtInfoblox {
         $ExtraParams
     )
 
-    $apiUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&ttl=0&view=$IBView"
+    $recUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&ttl=0&view=$IBView"
 
     try {
         # ignore cert validation for the duration of the call
-        if ($IBIgnoreCert) { [CertValidation]::Ignore() }
+        if ($IBIgnoreCert) { Set-IBCertIgnoreOn }
 
-        # send the POST
-        $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Credential $IBCred @script:UseBasic
+        # check if the record already exists
+        $response = Invoke-RestMethod -Uri $recUrl -Method Get -Credential $IBCred @script:UseBasic
 
-        Write-Verbose "TXT Record created: $response"
-
-    } catch {
-        $response = $_.Exception.Response
-
-        if ($response.StatusCode -eq [System.Net.HttpStatusCode]::BadRequest) {
-
-            # get the response body so we can pull out the WAPI's error message
-            $stream = $response.GetResponseStream()
-            $reader = New-Object System.IO.StreamReader($stream)
-            $reader.BaseStream.Position = 0
-            $reader.DiscardBufferedData()
-            $responseBody = $reader.ReadToEnd();
-            Write-Debug $responseBody
-
-            $wapiErr = ConvertFrom-Json $responseBody
-            throw [Exception] "$($wapiErr.Error)"
-
+        if ($response -and $response.'_ref') {
+            Write-Debug "Record $RecordName with value $TxtValue already exists. Nothing to do."
         } else {
-            # just re-throw everything else
-            throw
+            # add the record
+            Write-Verbose "Adding $RecordName with value $TxtValue"
+            Invoke-RestMethod -Uri $recUrl -Method Post -Credential $IBCred @script:UseBasic | Out-Null
         }
+
     } finally {
         # return cert validation back to normal
-        if ($IBIgnoreCert) { [CertValidation]::Restore() }
+        if ($IBIgnoreCert) { Set-IBCertIgnoreOff }
     }
 
     <#
@@ -107,43 +93,24 @@ function Remove-DnsTxtInfoblox {
 
     try {
         # ignore cert validation for the duration of the call
-        if ($IBIgnoreCert) { [CertValidation]::Ignore() }
+        if ($IBIgnoreCert) { Set-IBCertIgnoreOn }
 
         # query the _ref for the txt record object we want to delete
-        $checkUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&view=$IBView"
-        $response = Invoke-RestMethod -Uri $checkUrl -Method Get -Credential $IBCred @script:UseBasic
+        $recUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&view=$IBView"
+        $response = Invoke-RestMethod -Uri $recUrl -Method Get -Credential $IBCred @script:UseBasic
 
         if ($response -and $response.'_ref') {
-
             # delete the record
             $delUrl = "https://$IBServer/wapi/v1.0/$($response.'_ref')"
-            $response = Invoke-RestMethod -Uri $delUrl -Method Delete -Credential $IBCred @script:UseBasic
-            Write-Verbose "TXT Record deleted: $response"
-        }
-
-    } catch {
-        $response = $_.Exception.Response
-
-        if ($response.StatusCode -eq [System.Net.HttpStatusCode]::BadRequest) {
-
-            # get the response body so we can pull out the WAPI's error message
-            $stream = $response.GetResponseStream()
-            $reader = New-Object System.IO.StreamReader($stream)
-            $reader.BaseStream.Position = 0
-            $reader.DiscardBufferedData()
-            $responseBody = $reader.ReadToEnd();
-            Write-Debug $responseBody
-
-            $wapiErr = ConvertFrom-Json $responseBody
-            throw [Exception] "$($wapiErr.Error)"
-
+            Write-Verbose "Removing $RecordName with value $TxtValue"
+            Invoke-RestMethod -Uri $delUrl -Method Delete -Credential $IBCred @script:UseBasic | Out-Null
         } else {
-            # just re-throw everything else
-            throw
+            Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
         }
+
     } finally {
         # return cert validation back to normal
-        if ($IBIgnoreCert) { [CertValidation]::Restore() }
+        if ($IBIgnoreCert) { Set-IBCertIgnoreOff }
     }
 
     <#
@@ -208,24 +175,38 @@ function Save-DnsTxtInfoblox {
 # Helper Functions
 ############################
 
-# Enable the ability to ignore cert validation
-if (-not ([System.Management.Automation.PSTypeName]'CertValidation').Type)
-{
-    Add-Type @"
-        using System.Net;
-        using System.Net.Security;
-        using System.Security.Cryptography.X509Certificates;
-        public class CertValidation
-        {
-            static bool IgnoreValidation(object o, X509Certificate c, X509Chain ch, SslPolicyErrors e) {
-                return true;
-            }
-            public static void Ignore() {
-                ServicePointManager.ServerCertificateValidationCallback = IgnoreValidation;
-            }
-            public static void Restore() {
-                ServicePointManager.ServerCertificateValidationCallback = null;
-            }
+function Set-IBCertIgnoreOn {
+    [CmdletBinding()]
+    param()
+
+    if ($script:SkipCertSupported) {
+        # Core edition
+        if (-not $script:UseBasic.SkipCertificateCheck) {
+            # temporarily set skip to true
+            $script:UseBasic.SkipCertificateCheck = $true
+            # remember that we did
+            $script:IBUnsetIgnoreAfter = $true
         }
-"@
+
+    } else {
+        # Desktop edition
+        [CertValidation]::Ignore()
+    }
+}
+
+function Set-IBCertIgnoreOff {
+    [CmdletBinding()]
+    param()
+
+    if ($script:SkipCertSupported) {
+        # Core edition
+        if ($script:IBUnsetIgnoreAfter) {
+            $script:UseBasic.SkipCertificateCheck = $false
+            Remove-Variable IBUnsetIgnoreAfter -Scope Script
+        }
+
+    } else {
+        # Desktop edition
+        [CertValidation]::Restore()
+    }
 }

@@ -6,7 +6,7 @@ Describe "New-Jws" {
 
         # generate some valid parameters
         $rsaKey = New-Object Security.Cryptography.RSACryptoServiceProvider 2048
-        $ecKey = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve]::CreateFromValue('1.2.840.10045.3.1.7'))
+        $ecKey = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve+NamedCurves]::nistP256)
         $rsaHeader = @{alg='RS256';jwk=($rsaKey | ConvertTo-Jwk -PublicOnly);nonce='fakenonce';url='https://example.com'}
         $ecHeader = @{alg='ES256';jwk=($ecKey | ConvertTo-Jwk -PublicOnly);nonce='fakenonce';url='https://example.com'}
         $payload = '{"mykey":"myvalue"}'
@@ -17,7 +17,7 @@ Describe "New-Jws" {
                 { New-Jws -Key 'blah' -Header $rsaHeader -Payload $payload } | Should -Throw
             }
             It "invalid Key type #2" {
-                { New-Jws -Key (new-object Security.Cryptography.DSACng) -Header $rsaHeader -Payload $payload } | Should -Throw
+                { New-Jws -Key (New-Object Security.Cryptography.DSACng) -Header $rsaHeader -Payload $payload } | Should -Throw
             }
             It "invalid Header type" {
                 { New-Jws -Key $rsaKey -Header 'blah' -Payload $payload } | Should -Throw
@@ -180,9 +180,10 @@ Describe "New-Jws" {
             }
             $sigBytes = $jws.signature | ConvertFrom-Base64Url -AsByteArray
             $dataBytes = [Text.Encoding]::ASCII.GetBytes("$($jws.protected).$($jws.payload)")
+            $HashAlgo = [Security.Cryptography.HashAlgorithmName]::SHA256
             $pubKey = ConvertFrom-Jwk ($header.jwk | ConvertTo-Json)
             It "decoded 'signature' verifies properly" {
-                $pubKey.VerifyData($dataBytes,$sigBytes) | Should -Be $true
+                $pubKey.VerifyData($dataBytes,$sigBytes,$HashAlgo) | Should -Be $true
             }
 
         }

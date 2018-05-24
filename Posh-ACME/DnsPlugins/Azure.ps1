@@ -134,7 +134,7 @@ function Remove-DnsTxtAzure {
         Write-Verbose "Deleting $($rec.name). No values left."
         try {
             Invoke-RestMethod "https://management.azure.com$($rec.id)?api-version=2018-03-01-preview" `
-                -Method Delete -Headers $script:AZToken.AuthHeader  @script:UseBasic | Out-Null
+                -Method Delete -Headers $script:AZToken.AuthHeader @script:UseBasic | Out-Null
             return
         } catch { throw }
     }

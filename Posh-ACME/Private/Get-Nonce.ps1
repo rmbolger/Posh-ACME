@@ -7,7 +7,7 @@ function Get-Nonce {
         [string]$NewNonceUrl
     )
 
-    # https://tools.ietf.org/html/draft-ietf-acme-acme-10#section-7.2
+    # https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-7.2
 
     Process {
 
@@ -30,7 +30,7 @@ function Get-Nonce {
 
         # return the value from the response
         if ($response.Headers.ContainsKey($script:HEADER_NONCE)) {
-            return $response.Headers.$script:HEADER_NONCE
+            return $response.Headers[$script:HEADER_NONCE] | Select-Object -First 1
         } else {
             throw "$($script:HEADER_NONCE) not found in response headers."
         }

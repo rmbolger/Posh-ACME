@@ -9,27 +9,34 @@ function Import-PfxCertInternal {
     )
 
     # The PowerShell native Import-PfxCertificate function only exists on
-    # Windows 8/2012 and beyond. So we need a shim that has an alternative
-    # for earlier OSes.
+    # Windows 8/2012 and beyond for PowerShell Desktop edition. So we need a
+    # shim that has an alternative for Core edition and earlier Desktop
+    # edition OSes.
 
     if (!$PfxPass) {
+        # create an empty secure string
         $PfxPass = New-Object Security.SecureString
     }
 
     if (Get-Command 'Import-PfxCertificate' -ErrorAction SilentlyContinue) {
-        # Win 8/2012 and above
+        # Win 8/2012 and above (Windows PowerShell only)
         Write-Verbose "Importing PFX via native Import-PfxCertificate"
 
         Import-PfxCertificate $PfxFile Cert:\$StoreName\$StoreLoc -Exportable -Password $PfxPass | Out-Null
 
+    } elseif ($PSVersionTable.PSEdition -eq 'Core' -and !$IsWindows) {
+        # This is a non-Windows version of PowerShell Core
+        throw "Certificate import is not currently supported on non-Windows OSes"
+
     } else {
-        # Win 7/2008R2 and below
+        # Win 7/2008R2 and below and PowerShell Core on Windows
         Write-Verbose "Importing PFX via downlevel pfx import code"
 
         try {
 
-            $pfx = New-Object Security.Cryptography.X509Certificates.X509Certificate2
-            $pfx.import($PfxFile,$PfxPass,'Exportable,PersistKeySet')
+            $pfxBytes = [IO.File]::ReadAllBytes($PfxFile)
+
+            $pfx = New-Object Security.Cryptography.X509Certificates.X509Certificate2($pfxBytes,$PfxPass,'Exportable,PersistKeySet')
 
             $store = New-Object Security.Cryptography.X509Certificates.X509Store($StoreLoc,$StoreName)
             $store.Open("MaxAllowed")

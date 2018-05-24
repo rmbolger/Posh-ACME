@@ -20,7 +20,11 @@
         "name" = $RecordName;
         "type" = "TXT"
     }
-    [xml]$XmlData = (Invoke-WebRequest $ApiUri -Headers $AuthHeader -Body $ApiParams @Script:UseBasic).Content
+    try {
+        [xml]$XmlData = (Invoke-WebRequest $ApiUri -Headers $AuthHeader -Body $ApiParams `
+            @script:UseBasic).Content
+    } catch { throw }
+
 
     # Add any existing TXT records to the API command
     $ApiParams.Clear()
@@ -31,8 +35,8 @@
         $ApiParams.Add("type[$i]", "TXT")
         $i++
     }
-    
-    # Add the new TXT record to the API command    
+
+    # Add the new TXT record to the API command
     $ApiParams.Add("action[$i]", "SET")
     $ApiParams.Add("name[$i]", $RecordName)
     $ApiParams.Add("value[$i]", $TxtValue)
@@ -53,9 +57,9 @@
 
     .PARAMETER TxtValue
         The value of the TXT record.
-		
+
     .PARAMETER ZonomiApiKey
-        Your Zonomi DNS API key.		
+        Your Zonomi DNS API key.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -83,7 +87,7 @@ function Remove-DnsTxtZonomi {
 
     $ApiUri = "https://zonomi.com/app/dns/dyndns.jsp"
     $AuthHeader = @{"Authorization" = "redrata apikey=$ZonomiApiKey"}
-    
+
 	# Add the TXT record to the API command
 	$ApiParams = @{
         "action" = "DELETE";
@@ -91,7 +95,7 @@ function Remove-DnsTxtZonomi {
         "value" = $TxtValue;
         "type" = "TXT"
     }
-	
+
     # Run the API command
     Invoke-WebRequest $ApiUri -Headers $AuthHeader -Body $ApiParams @Script:UseBasic | Out-Null
 
@@ -107,9 +111,9 @@ function Remove-DnsTxtZonomi {
 
     .PARAMETER TxtValue
         The value of the TXT record.
-		
+
     .PARAMETER ZonomiApiKey
-        Your Zonomi DNS API key.		
+        Your Zonomi DNS API key.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

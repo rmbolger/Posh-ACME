@@ -13,7 +13,7 @@ function ConvertFrom-Jwk {
 
     # Support enough of a subset of RFC 7515 to implement the ACME v2
     # protocol.
-    # https://tools.ietf.org/html/draft-ietf-acme-acme-10
+    # https://tools.ietf.org/html/draft-ietf-acme-acme-12
 
     # This basically includes RSA keys 2048-4096 bits and EC keys utilizing
     # P-256, P-384, or P-521 curves.
@@ -81,28 +81,11 @@ function ConvertFrom-Jwk {
                 if ('crv' -notin $Jwk.PSObject.Properties.Name) {
                     throw "Invalid JWK. No 'crv' found for key type EC."
                 }
-                switch ($Jwk.crv) {
-                    'P-256' {
-                        # nistP256 / ECDSA_P256 / secP256r1 / x962P256v1
-                        $Curve = [Security.Cryptography.ECCurve]::CreateFromValue('1.2.840.10045.3.1.7')
-                        $HashAlgo = [Security.Cryptography.CngAlgorithm]::SHA256
-                        break;
-                    }
-                    'P-384' {
-                        # nistP384 / ECDSA_P384 / secP384r1
-                        $Curve = [Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.34')
-                        $HashAlgo = [Security.Cryptography.CngAlgorithm]::SHA384
-                        break;
-                    }
-                    'P-521' {
-                        # nistP521 / ECDSA_P521
-                        $Curve = [Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.35')
-                        $HashAlgo = [Security.Cryptography.CngAlgorithm]::SHA512
-                        break;
-                    }
-                    default {
-                        throw "Unsupported JWK curve (crv) found."
-                    }
+                $Curve = switch ($jwk.crv) {
+                    'P-256' { [Security.Cryptography.ECCurve+NamedCurves]::nistP256; break }
+                    'P-384' { [Security.Cryptography.ECCurve+NamedCurves]::nistP384; break }
+                    'P-521' { [Security.Cryptography.ECCurve+NamedCurves]::nistP521; break }
+                    default { throw "Unsupported JWK curve (crv) found." }
                 }
 
                 # make sure we have the required public key parameters per
@@ -128,7 +111,6 @@ function ConvertFrom-Jwk {
                 # create the key
                 $key = [Security.Cryptography.ECDsa]::Create()
                 $key.ImportParameters($keyParams)
-                $key.HashAlgorithm = $HashAlgo
                 break;
             }
             default {

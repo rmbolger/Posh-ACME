@@ -21,6 +21,7 @@ function New-PACertificate {
         [switch]$OCSPMustStaple,
         [string]$FriendlyName='',
         [string]$PfxPass='poshacme',
+        [ValidateScript({Test-WinOnly -ThrowOnFail})]
         [switch]$Install,
         [switch]$Force,
         [int]$DNSSleep=120,

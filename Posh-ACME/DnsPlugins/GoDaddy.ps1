@@ -118,7 +118,7 @@ function Remove-DnsTxtGoDaddy {
     # Get a list of existing records
     try {
         $existingRecords = Invoke-RestMethod -Uri "$apiRoot/$zone/records" `
-            -Method Get -Headers $headers  @script:UseBasic
+            -Method Get -Headers $headers @script:UseBasic
     }
     catch {
         throw

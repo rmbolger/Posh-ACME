@@ -39,7 +39,7 @@ function Add-DnsTxtDOcean {
             ttl  = 10;
         } | ConvertTo-Json
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
-        Invoke-RestMethod $recRoot -Method Post @restParams -Body $recBody -EA Stop @script:UseBasic | Out-Null
+        Invoke-RestMethod $recRoot -Method Post @restParams -Body $recBody @script:UseBasic | Out-Null
     } else {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
     }
@@ -105,7 +105,7 @@ function Remove-DnsTxtDOcean {
     if ($rec) {
         # delete it
         Write-Verbose "Deleting $RecordName with value $TxtValue"
-        Invoke-RestMethod "$recRoot/$($rec.id)" -Method Delete @restParams -EA Stop @script:UseBasic | Out-Null
+        Invoke-RestMethod "$recRoot/$($rec.id)" -Method Delete @restParams @script:UseBasic | Out-Null
     } else {
         # nothing to do
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."

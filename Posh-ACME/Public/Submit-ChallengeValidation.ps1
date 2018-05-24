@@ -68,7 +68,7 @@ function Submit-ChallengeValidation {
 
     # The only order status left is 'pending'. This is supposed to mean
     # that at least one authorization hasn't been validated yet according
-    # to https://tools.ietf.org/html/draft-ietf-acme-acme-11#section-7.1.6
+    # to https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-7.1.6
     # However because the 'ready' status was added to the spec recently,
     # not all server implementations are using it yet. So we're going to
     # check all of the authorization statuses, but there might still end up

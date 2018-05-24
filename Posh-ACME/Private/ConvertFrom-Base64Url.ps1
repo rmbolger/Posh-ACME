@@ -1,9 +1,13 @@
 function ConvertFrom-Base64Url {
     [CmdletBinding()]
+    [OutputType('System.String', ParameterSetName='String')]
+    [OutputType('System.Byte[]', ParameterSetName='Bytes')]
     param(
-        [Parameter(Mandatory,Position=0,ValueFromPipeline)]
+        [Parameter(ParameterSetName='Bytes',Mandatory,Position=0,ValueFromPipeline)]
+        [Parameter(ParameterSetName='String',Mandatory,Position=0,ValueFromPipeline)]
         [AllowEmptyString()]
         [string]$Base64Url,
+        [Parameter(ParameterSetName='Bytes',Mandatory)]
         [switch]$AsByteArray
     )
 
@@ -31,7 +35,7 @@ function ConvertFrom-Base64Url {
         } else {
             return [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($s))
         }
-        
+
     }
-    
+
 }

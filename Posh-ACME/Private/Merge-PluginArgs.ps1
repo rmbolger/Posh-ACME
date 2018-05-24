@@ -7,6 +7,12 @@ function Merge-PluginArgs {
         [PSTypeName('PoshACME.PAAccount')]$Account
     )
 
+    # IMPORTANT: This function does not yet work on non-Windows OSes unless there is no
+    # "secure" data in the hashtable. This is a known bug related to the SecureString
+    # implementation (or lack thereof) on non-Windows. I'm tracking the issue via this
+    # PowerShell issue:
+    # https://github.com/PowerShell/PowerShell/issues/1654
+
     # Each time someone creates a new cert with a particular set of plugin args,
     # we're saving them to the account so they can be used automatically on additional
     # certs and renewals. Passed in args take priority. So if there are conflicts,

@@ -4,13 +4,15 @@ function Set-PAServer {
         [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
         [Alias('location')]
-        [string]$DirectoryUrl
+        [string]$DirectoryUrl,
+        [switch]$SkipCertificateCheck
     )
 
     # convert WellKnown names to their associated Url
     if ($DirectoryUrl -notlike 'https://*') {
         $DirectoryUrl = $script:WellKnownDirs.$DirectoryUrl
     }
+    Write-Debug "Using DirectoryUrl $DirectoryUrl"
 
     # make sure we're actually changing servers before doing anything else
     if (!$script:Dir -or !$script:Dir.location -or $DirectoryUrl -ne $script:Dir.location) {
@@ -21,7 +23,24 @@ function Set-PAServer {
         $script:Order = $null
         $script:OrderFolder = $null
 
-        Update-PAServer $DirectoryUrl
+        # deal with cert validation options between PS editions
+        if ($SkipCertificateCheck) {
+            Write-Debug "skipping cert validation"
+            if ($script:SkipCertSupported) {
+                $script:UseBasic.SkipCertificateCheck = $true
+            } else {
+                [CertValidation]::Ignore()
+            }
+        } else {
+            Write-Debug "restoring cert validation"
+            if ($script:SkipCertSupported) {
+                $script:UseBasic.SkipCertificateCheck = $false
+            } else {
+                [CertValidation]::Restore()
+            }
+        }
+
+        Update-PAServer $DirectoryUrl -SkipCertificateCheck:$SkipCertificateCheck.IsPresent
 
         # save to disk
         $DirectoryUrl | Out-File (Join-Path $script:ConfigRoot 'current-server.txt') -Force
@@ -48,6 +67,9 @@ function Set-PAServer {
 
     .PARAMETER DirectoryUrl
         Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production v2) and LE_STAGE (LetsEncrypt Staging v2).
+
+    .PARAMETER SkipCertificateCheck
+        If specified, disable certificate validation while using this server. This should not be necessary except in development environments where you are connecting to a self-hosted ACME server.
 
     .EXAMPLE
         Set-PAServer LE_PROD

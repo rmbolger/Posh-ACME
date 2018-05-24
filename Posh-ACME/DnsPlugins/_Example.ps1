@@ -14,7 +14,8 @@ function Add-DnsTxtExample {
     # existing plugins. But make sure common ones across this
     # plugin are the same.
 
-    # Do work here to add the TXT record
+    # Do work here to add the TXT record. Remember to add @script:UseBasic
+    # to all calls to Invoke-RestMethod or Invoke-WebRequest.
 
     <#
     .SYNOPSIS
@@ -55,7 +56,8 @@ function Remove-DnsTxtExample {
     # existing plugins. But make sure common ones across this
     # plugin are the same.
 
-    # Do work here to remove the TXT record
+    # Do work here to remove the TXT record. Remember to add @script:UseBasic
+    # to all calls to Invoke-RestMethod or Invoke-WebRequest.
 
     <#
     .SYNOPSIS
@@ -113,3 +115,12 @@ function Save-DnsTxtExample {
 
     #>
 }
+
+############################
+# Helper Functions
+############################
+
+# Add additional functions here if necessary.
+# Make sure they're uniquely named and try to follow
+# verb-noun naming guidelines.
+# https://msdn.microsoft.com/en-us/library/ms714428

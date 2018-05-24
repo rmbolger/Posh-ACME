@@ -8,8 +8,32 @@ function ConvertFrom-BCKey {
 
     if ($BCKeyPair.Private -is [Org.BouncyCastle.Crypto.Parameters.ECPrivateKeyParameters]) {
 
-        # TODO: Implement this
-        throw "Unsupported key type."
+        $pKey = $BCKeyPair.Private
+
+        # convert the curve
+        $Curve = switch ($pKey.Parameters.Curve.GetType().Name) {
+            'SecP256R1Curve' { [Security.Cryptography.ECCurve+NamedCurves]::nistP256; break }
+            'SecP384R1Curve' { [Security.Cryptography.ECCurve+NamedCurves]::nistP384; break }
+            'SecP521R1Curve' { [Security.Cryptography.ECCurve+NamedCurves]::nistP521; break }
+            default { throw "Unsupported curve found." }
+        }
+
+        # add public params
+        $Q = New-Object Security.Cryptography.ECPoint
+        $Q.X = $BCKeyPair.Public.Q.X.ToBigInteger().ToByteArrayUnsigned()
+        $Q.Y = $BCKeyPair.Public.Q.Y.ToBigInteger().ToByteArrayUnsigned()
+        $keyParams = New-Object Security.Cryptography.ECParameters
+        $keyParams.Q = $Q
+        $keyParams.Curve = $Curve
+
+        # add private param
+        $keyParams.D = $pKey.D.ToByteArrayUnsigned()
+
+        # create the key
+        $key = [Security.Cryptography.ECDsa]::Create()
+        $key.ImportParameters($keyParams)
+
+        return $key
 
     } elseif ($BCKeyPair.Private -is [Org.BouncyCastle.Crypto.Parameters.RsaPrivateCrtKeyParameters]) {
 

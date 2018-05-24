@@ -2,6 +2,8 @@
 
 This plugin works against the [Azure DNS](https://azure.microsoft.com/en-us/services/dns/) provider. It is assumed that you already have an active subscription with at least one DNS zone, associated Resource Group, and an account with access to create roles and app registrations. The commands used in this guide will also make use of the [AzureRM.Profile](https://www.powershellgallery.com/packages/AzureRM.profile/5.0.1), [AzureRM.Resources](https://www.powershellgallery.com/packages/AzureRM.Resources/6.0.0), and [AzureRM.Dns](https://www.powershellgallery.com/packages/AzureRM.Dns/5.0.0) modules. But they are not required to use the plugin normally.
 
+**This plugin currently does not work on non-Windows OSes in PowerShell Core. [Click here](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) for details.**
+
 ## Setup
 
 We need to create an "App registration" which is basically a service account in Azure AD and give it permission to modify TXT records for the zones we'll be issuing certificates in.
