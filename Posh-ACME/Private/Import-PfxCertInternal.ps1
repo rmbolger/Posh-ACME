@@ -20,7 +20,7 @@ function Import-PfxCertInternal {
 
     if (Get-Command 'Import-PfxCertificate' -ErrorAction SilentlyContinue) {
         # Win 8/2012 and above (Windows PowerShell only)
-        Write-Verbose "Importing PFX via native Import-PfxCertificate"
+        Write-Debug "Importing PFX via native Import-PfxCertificate"
 
         Import-PfxCertificate $PfxFile Cert:\$StoreName\$StoreLoc -Exportable -Password $PfxPass | Out-Null
 
@@ -30,7 +30,7 @@ function Import-PfxCertInternal {
 
     } else {
         # Win 7/2008R2 and below and PowerShell Core on Windows
-        Write-Verbose "Importing PFX via downlevel pfx import code"
+        Write-Debug "Importing PFX via downlevel pfx import code"
 
         try {
 
