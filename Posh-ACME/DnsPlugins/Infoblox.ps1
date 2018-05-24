@@ -15,7 +15,7 @@ function Add-DnsTxtInfoblox {
         $ExtraParams
     )
 
-    $recUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&ttl=0&view=$IBView"
+    $recUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&view=$IBView"
 
     try {
         # ignore cert validation for the duration of the call
@@ -29,7 +29,7 @@ function Add-DnsTxtInfoblox {
         } else {
             # add the record
             Write-Verbose "Adding $RecordName with value $TxtValue"
-            Invoke-RestMethod -Uri $recUrl -Method Post -Credential $IBCred @script:UseBasic | Out-Null
+            Invoke-RestMethod -Uri "$recUrl&ttl=0" -Method Post -Credential $IBCred @script:UseBasic | Out-Null
         }
 
     } finally {
