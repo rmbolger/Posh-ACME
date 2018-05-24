@@ -84,7 +84,7 @@ function Submit-Renewal {
                 # Add the new (as of 1.2) fields if they exist.
                 # The property checks can be removed once enough time passes
                 # to assume the majority of people have done renewals against 1.2.
-                if ('Install' -in $order.PSObject.Properties.name) {
+                if ('Install' -in $order.PSObject.Properties.name -and (Test-WinOnly)) {
                     $certParams.Install = $order.Install
                 }
                 if ('FriendlyName' -in $order.PSObject.Properties.name) {
