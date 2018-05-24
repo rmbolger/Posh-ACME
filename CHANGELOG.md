@@ -1,3 +1,11 @@
+## 2.2.0 (2018-05-24)
+
+* Added cross platform PowerShell Core support!
+  * Some DNS plugins don't work yet on non-Windows due to known issue handling SecureString PowerShell Core 6.0. Check details on the project wiki.
+  * `-Install` param on `New-PACertificate` throws error on non-Windows because there's no certificate store to install to.
+  * `Windows` plugin doesn't work in Core at all yet due to lack of Core compatible DnsServer module.
+* Added new DNS plugin Zonomi. Thanks @Zippy79!
+
 ## 2.1.1 (2018-05-19)
 
 * Fix for GCloud plugin syntax error

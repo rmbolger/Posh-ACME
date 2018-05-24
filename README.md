@@ -17,16 +17,18 @@ An [ACME v2](https://tools.ietf.org/html/draft-ietf-acme-acme) client implemente
 - Multiple accounts supported per user profile which allows different certs to have different contact emails
 - PEM and PFX output files
 - No elevated Windows privileges required *(unless using -Install switch)*
+- Cross platform PowerShell Core support! [(FAQ)](https://github.com/rmbolger/Posh-ACME/wiki/Frequently-Asked-Questions-(FAQ)#does-posh-acme-work-cross-platform-on-powershell-core)
 
 # Not Currently Supported (Yet)
 
 - HTTP challenge support
-- PowerShell Core support
 
 
 # Install
 
-The [latest release version](https://www.powershellgallery.com/packages/Posh-ACME) can found in the PowerShell Gallery. Installing from the gallery requires the PowerShellGet module which is installed by default on Windows 10 or later. See [Getting Started with the Gallery](https://www.powershellgallery.com/) for instructions on earlier OSes. Zip/Tar versions can also be downloaded from the [GitHub releases page](https://github.com/rmbolger/Posh-ACME/releases).
+## Release
+
+The [latest release version](https://www.powershellgallery.com/packages/Posh-ACME) can found in the PowerShell Gallery. Installing from the gallery requires the PowerShellGet module which is installed by default on Windows 10 or later and all versions of PowerShell Core. See [Getting Started with the Gallery](https://www.powershellgallery.com/) for instructions on earlier OSes. Zip/Tar versions can also be downloaded from the [GitHub releases page](https://github.com/rmbolger/Posh-ACME/releases).
 
 ```powershell
 # install for all users (requires elevated privs)
@@ -36,16 +38,18 @@ Install-Module -Name Posh-ACME
 Install-Module -Name Posh-ACME -Scope CurrentUser
 ```
 
-To install the latest *development* version from the git master branch, use the following command in PowerShell v3 or later. This method assumes a default Windows PowerShell environment that includes the [`PSModulePath`](https://msdn.microsoft.com/en-us/library/dd878326.aspx) environment variable which contains a reference to `$HOME\Documents\WindowsPowerShell\Modules`. You must also make sure `Get-ExecutionPolicy` is not set to `Restricted` or `AllSigned`.
+## Development
+
+To install the latest *development* version from the git master branch, use the following PowerShell command. This method assumes a default PowerShell environment that includes the [`PSModulePath`](https://msdn.microsoft.com/en-us/library/dd878326.aspx) environment variable. You must also make sure `Get-ExecutionPolicy` does not return `Restricted` or `AllSigned`.
 
 ```powershell
-# (optional) set less restrictive execution policy
+# If necessary, set less restrictive execution policy.
+# Not needed on non-Windows
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 
 # install latest dev version
 iex (invoke-restmethod https://raw.githubusercontent.com/rmbolger/Posh-ACME/master/instdev.ps1)
 ```
-
 
 # Quick Start
 
@@ -67,8 +71,8 @@ To learn how to use the supported DNS plugins, check out `Get-DnsPlugins` and `G
 
 # Requirements and Platform Support
 
-* Requires Windows PowerShell 5.1 or later (a.k.a. Desktop edition).
-* Requires .NET Framework 4.7.1 or later
+* Supports Windows PowerShell 5.1 or later (Desktop edition) with .NET Framework 4.7.1 or later
+* Supports [PowerShell Core](https://docs.microsoft.com/en-us/powershell/scripting/powershell-scriptin) 6.0 or later (Core edition) on all supported OS platforms.
 
 # Changelog
 

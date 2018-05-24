@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '2.1.1'
+ModuleVersion = '2.2.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -89,7 +89,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = 'LetsEncrypt','ssl','tls','certificates','acme','powershell'
+        Tags = 'LetsEncrypt','ssl','tls','certificates','acme','Linux','Mac'
 
         # A URL to the license for this module.
         LicenseUri = 'https://github.com/rmbolger/Posh-ACME/blob/master/LICENSE'
@@ -102,9 +102,13 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 2.1.1 (2018-05-19)
+## 2.2.0 (2018-05-24)
 
-* Fix for GCloud plugin syntax error
+* Added cross platform PowerShell Core support!
+  * Some DNS plugins don't work yet on non-Windows due to known issue handling SecureString PowerShell Core 6.0. Check details on the project wiki.
+  * `-Install` param on `New-PACertificate` throws error on non-Windows because there's no certificate store to install to.
+  * `Windows` plugin doesn't work in Core at all yet due to lack of Core compatible DnsServer module.
+* Added new DNS plugin Zonomi. Thanks @Zippy79!
 '@
 
     } # End of PSData hashtable
