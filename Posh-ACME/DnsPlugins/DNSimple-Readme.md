@@ -1,4 +1,4 @@
-# How To Use the Cloudflare DNS Plugin
+# How To Use the DNSimple DNS Plugin
 
 This plugin works against the [DNSimple](https://dnsimple.com) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
 
