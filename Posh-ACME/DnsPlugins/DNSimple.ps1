@@ -127,7 +127,7 @@ function Remove-DnsTxtDNSimple {
         # delete record
         try {
             Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
-            $recID = ($recs | ?{ $_.content -eq $TxtValue }).id
+            $recID = ($recs | Where-Object { $_.content -eq $TxtValue }).id
             Invoke-RestMethod "$apiRoot/$acctID/zones/$zoneName/records/$recID" -Method Delete `
                 @restParams @script:UseBasic | Out-Null
         } catch { throw }
