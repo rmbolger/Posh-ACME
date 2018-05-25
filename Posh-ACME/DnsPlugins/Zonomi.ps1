@@ -47,10 +47,10 @@
 
     <#
     .SYNOPSIS
-        Add a DNS TXT record to Zonomi
+        Add a DNS TXT record to Zonomi.
 
     .DESCRIPTION
-        Uses the Zonomi DNS API (https://zonomi.com/app/dns/dyndns.jsp) to add a DNS TXT record
+        Uses the Zonomi DNS API to add a DNS TXT record.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -101,10 +101,10 @@ function Remove-DnsTxtZonomi {
 
     <#
     .SYNOPSIS
-        Remove a DNS TXT record from Zonomi
+        Remove a DNS TXT record from Zonomi.
 
     .DESCRIPTION
-        Uses the Zonomi DNS API (https://zonomi.com/app/dns/dyndns.jsp) to remove a DNS TXT record
+        Uses the Zonomi DNS API to remove a DNS TXT record.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -131,23 +131,14 @@ function Save-DnsTxtZonomi {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Nothing to do
-
     <#
     .SYNOPSIS
-        Not required for Zonomi
+        Not required.
 
     .DESCRIPTION
-        Not required for Zonomi
+        This provider does not require calling this function to commit changes to DNS records.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
-
-    .EXAMPLE
-        Save-DnsTxtExample
-
-        Commits changes for pending DNS TXT record modifications.
-
     #>
 }

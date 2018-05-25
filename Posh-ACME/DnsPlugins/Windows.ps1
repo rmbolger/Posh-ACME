@@ -43,7 +43,7 @@ function Add-DnsTxtWindows {
 
     <#
     .SYNOPSIS
-        Add a DNS TXT record to a Windows DNS server
+        Add a DNS TXT record to a Windows DNS server.
 
     .DESCRIPTION
         This plugin requires the "DnsServer" PowerShell module to be installed. On Windows Server OSes, you can install it with "Install-WindowsFeature RSAT-DNS-Server". On Windows client OSes, you will need to download and install the RSAT tools for your OS.
@@ -122,7 +122,7 @@ function Remove-DnsTxtWindows {
 
     <#
     .SYNOPSIS
-        Remove a DNS TXT record from a Windows DNS server
+        Remove a DNS TXT record from a Windows DNS server.
 
     .DESCRIPTION
         This plugin requires the "DnsServer" PowerShell module to be installed. On Windows Server OSes, you can install it with "Install-WindowsFeature RSAT-DNS-Server". On Windows client OSes, you will need to download and install the RSAT tools for your OS.
@@ -163,15 +163,12 @@ function Save-DnsTxtWindows {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Nothing to do. Windows doesn't require a save step
-
     <#
     .SYNOPSIS
-        Not required for Windows.
+        Not required.
 
     .DESCRIPTION
-        Windows does not require calling this function to commit changes to DNS records.
+        This provider does not require calling this function to commit changes to DNS records.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

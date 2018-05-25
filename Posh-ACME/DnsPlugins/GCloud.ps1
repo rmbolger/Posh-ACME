@@ -72,10 +72,10 @@ function Add-DnsTxtGCloud {
 
     <#
     .SYNOPSIS
-        Add a DNS TXT record to Google Cloud DNS
+        Add a DNS TXT record to Google Cloud DNS.
 
     .DESCRIPTION
-        Add a DNS TXT record to Google Cloud DNS
+        Add a DNS TXT record to Google Cloud DNS.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -168,10 +168,10 @@ function Remove-DnsTxtGCloud {
 
     <#
     .SYNOPSIS
-        Remove a DNS TXT record from Google Cloud DNS
+        Remove a DNS TXT record from Google Cloud DNS.
 
     .DESCRIPTION
-        Remove a DNS TXT record from Google Cloud DNS
+        Remove a DNS TXT record from Google Cloud DNS.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -201,15 +201,12 @@ function Save-DnsTxtGCloud {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Nothing to do. Google Cloud DNS doesn't require a save step
-
     <#
     .SYNOPSIS
-        Not required for Google Cloud DNS.
+        Not required.
 
     .DESCRIPTION
-        Google Cloud DNS does not require calling this function to commit changes to DNS records.
+        This provider does not require calling this function to commit changes to DNS records.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

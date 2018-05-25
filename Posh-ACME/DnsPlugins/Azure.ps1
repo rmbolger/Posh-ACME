@@ -196,15 +196,12 @@ function Save-DnsTxtAzure {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Nothing to do. Azure doesn't require a save step
-
     <#
     .SYNOPSIS
-        Not required for Azure.
+        Not required.
 
     .DESCRIPTION
-        Azure does not require calling this function to commit changes to DNS records.
+        This provider does not require calling this function to commit changes to DNS records.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

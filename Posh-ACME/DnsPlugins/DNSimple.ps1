@@ -54,10 +54,10 @@ function Add-DnsTxtDNSimple {
 
     <#
     .SYNOPSIS
-        Add a DNS TXT record to <My DNS Server/Provider>
+        Add a DNS TXT record to DNSimple.
 
     .DESCRIPTION
-        Description for <My DNS Server/Provider>
+        Add a DNS TXT record to DNSimple.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -73,7 +73,7 @@ function Add-DnsTxtDNSimple {
 
     .EXAMPLE
         $token = Read-Host "DNSimple Token" -AsSecureString
-        PS C:\>Add-DnsTxtDNSimple '_acme-challenge.site1.DNSimple.com' 'asdfqwer12345678' $token
+        PS C:\>Add-DnsTxtDNSimple '_acme-challenge.site1.example.com' 'asdfqwer12345678' $token
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -135,10 +135,10 @@ function Remove-DnsTxtDNSimple {
 
     <#
     .SYNOPSIS
-        Remove a DNS TXT record from <My DNS Server/Provider>
+        Remove a DNS TXT record from DNSimple.
 
     .DESCRIPTION
-        Description for <My DNS Server/Provider>
+        Remove a DNS TXT record from DNSimple.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -154,7 +154,7 @@ function Remove-DnsTxtDNSimple {
 
     .EXAMPLE
         $token = Read-Host "DNSimple Token" -AsSecureString
-        PS C:\>Remove-DnsTxtDNSimple '_acme-challenge.site1.DNSimple.com' 'asdfqwer12345678' $token
+        PS C:\>Remove-DnsTxtDNSimple '_acme-challenge.site1.example.com' 'asdfqwer12345678' $token
 
         Removes a TXT record for the specified site with the specified value.
     #>
@@ -166,14 +166,12 @@ function Save-DnsTxtDNSimple {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-    # Nothing to do. Infoblox doesn't require a save step
-
     <#
     .SYNOPSIS
-        Not required for Infoblox.
+        Not required.
 
     .DESCRIPTION
-        Infoblox does not require calling this function to commit changes to DNS records.
+        This provider does not require calling this function to commit changes to DNS records.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

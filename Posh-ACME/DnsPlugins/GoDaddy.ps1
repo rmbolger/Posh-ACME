@@ -15,16 +15,12 @@ function Add-DnsTxtGoDaddy {
         $ExtraParams
     )
 
+    $apiRoot = "https://api.godaddy.com/v1/domains"
     if ($GDUseOTE) {
         $apiRoot = "https://api.ote-godaddy.com/v1/domains"
     }
-    else {
-        $apiRoot = "https://api.godaddy.com/v1/domains"
-    }
 
-    $headers = @{
-        Authorization = "sso-key $($GDKey):$($GDSecret)"
-    }
+    $headers = @{Authorization = "sso-key $($GDKey):$($GDSecret)"}
 
     $name = ($RecordName -split "\.")[0]
     $zone = Find-GDZone -RecordName $RecordName -GDKey $GDKey -GDSecret $GDSecret
@@ -54,10 +50,10 @@ function Add-DnsTxtGoDaddy {
 
     <#
     .SYNOPSIS
-        Add a DNS TXT record to GoDaddy
+        Add a DNS TXT record to GoDaddy.
 
     .DESCRIPTION
-        Add a DNS TXT record to GoDaddy
+        Add a DNS TXT record to GoDaddy.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -66,10 +62,10 @@ function Add-DnsTxtGoDaddy {
         The value of the TXT record.
 
     .PARAMETER GDKey
-        The GoDaddy API Key
+        The GoDaddy API Key.
 
     .PARAMETER GDSecret
-        The GoDaddy API Secret
+        The GoDaddy API Secret.
 
     .PARAMETER GDUseOTE
         If specified, use the GoDaddy OTE test environment rather than the production environment.
@@ -101,16 +97,12 @@ function Remove-DnsTxtGoDaddy {
         $ExtraParams
     )
 
+    $apiRoot = "https://api.godaddy.com/v1/domains"
     if ($GDUseOTE) {
         $apiRoot = "https://api.ote-godaddy.com/v1/domains"
     }
-    else {
-        $apiRoot = "https://api.godaddy.com/v1/domains"
-    }
 
-    $headers = @{
-        Authorization = "sso-key $($GDKey):$($GDSecret)"
-    }
+    $headers = @{Authorization = "sso-key $($GDKey):$($GDSecret)"}
 
     $name = ($RecordName -split "\.")[0]
     $zone = Find-GDZone -RecordName $RecordName -GDKey $GDKey -GDSecret $GDSecret
@@ -138,10 +130,10 @@ function Remove-DnsTxtGoDaddy {
 
     <#
     .SYNOPSIS
-        Remove a DNS TXT record from GoDaddy
+        Remove a DNS TXT record from GoDaddy.
 
     .DESCRIPTION
-        Remove a DNS TXT record from GoDaddy
+        Remove a DNS TXT record from GoDaddy.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -150,10 +142,10 @@ function Remove-DnsTxtGoDaddy {
         The value of the TXT record.
 
     .PARAMETER GDKey
-        The GoDaddy API Key
+        The GoDaddy API Key.
 
     .PARAMETER GDSecret
-        The GoDaddy API Secret
+        The GoDaddy API Secret.
 
     .PARAMETER GDUseOTE
         If specified, use the GoDaddy OTE test environment rather than the production environment.
@@ -174,15 +166,12 @@ function Save-DnsTxtGoDaddy {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Nothing to do. GoDaddy doesn't require a save step
-
     <#
     .SYNOPSIS
-        Not required for GoDaddy
+        Not required.
 
     .DESCRIPTION
-        GoDaddy does not require calling this function to commit changes to DNS records.
+        This provider does not require calling this function to commit changes to DNS records.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -206,16 +195,12 @@ function Find-GDZone {
         [switch]$GDUseOTE
     )
 
+    $apiRoot = "https://api.godaddy.com/v1/domains"
     if ($GDUseOTE) {
         $apiRoot = "https://api.ote-godaddy.com/v1/domains"
     }
-    else {
-        $apiRoot = "https://api.godaddy.com/v1/domains"
-    }
 
-    $headers = @{
-        Authorization = "sso-key $($GDKey):$($GDSecret)"
-    }
+    $headers = @{Authorization = "sso-key $($GDKey):$($GDSecret)"}
 
     # get the list of available zones
     try {
@@ -258,10 +243,10 @@ function Find-GDZone {
         The fully qualified name of the TXT record.
 
     .PARAMETER GDKey
-        The GoDaddy API Key
+        The GoDaddy API Key.
 
     .PARAMETER GDSecret
-        The GoDaddy API Secret
+        The GoDaddy API Secret.
 
     .PARAMETER GDUseOTE
         If specified, use the GoDaddy OTE test environment rather than the production environment.

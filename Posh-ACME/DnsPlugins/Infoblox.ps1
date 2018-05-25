@@ -39,10 +39,10 @@ function Add-DnsTxtInfoblox {
 
     <#
     .SYNOPSIS
-        Add a DNS TXT record to Infoblox
+        Add a DNS TXT record to Infoblox.
 
     .DESCRIPTION
-        Add a DNS TXT record to Infoblox
+        Add a DNS TXT record to Infoblox.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -115,10 +115,10 @@ function Remove-DnsTxtInfoblox {
 
     <#
     .SYNOPSIS
-        Remove a DNS TXT record from Infoblox
+        Remove a DNS TXT record from Infoblox.
 
     .DESCRIPTION
-        Remove a DNS TXT record from Infoblox
+        Remove a DNS TXT record from Infoblox.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -156,15 +156,12 @@ function Save-DnsTxtInfoblox {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Nothing to do. Infoblox doesn't require a save step
-
     <#
     .SYNOPSIS
-        Not required for Infoblox.
+        Not required.
 
     .DESCRIPTION
-        Infoblox does not require calling this function to commit changes to DNS records.
+        This provider does not require calling this function to commit changes to DNS records.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

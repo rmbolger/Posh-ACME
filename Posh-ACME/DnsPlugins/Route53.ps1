@@ -187,15 +187,12 @@ function Save-DnsTxtRoute53 {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Nothing to do. Route53 doesn't require a save step
-
     <#
     .SYNOPSIS
-        Not required for Route53.
+        Not required.
 
     .DESCRIPTION
-        Route53 does not require calling this function to commit changes to DNS records.
+        This provider does not require calling this function to commit changes to DNS records.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

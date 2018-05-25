@@ -40,7 +40,7 @@ function Add-DnsTxtCloudflare {
 
     <#
     .SYNOPSIS
-        Add a DNS TXT record to Cloudflare
+        Add a DNS TXT record to Cloudflare.
 
     .DESCRIPTION
         Use Cloudflare V4 api to add a TXT record to a Cloudflare DNS zone.
@@ -109,7 +109,7 @@ function Remove-DnsTxtCloudflare {
 
     <#
     .SYNOPSIS
-        Remove a DNS TXT record from Cloudflare
+        Remove a DNS TXT record from Cloudflare.
 
     .DESCRIPTION
         Use Cloudflare V4 api to remove a TXT record to a Cloudflare DNS zone.
@@ -121,7 +121,7 @@ function Remove-DnsTxtCloudflare {
         The value of the TXT record.
 
     .PARAMETER CFAuthEmail
-        The email address of the account used to connect to Cloudflare API
+        The email address of the account used to connect to Cloudflare API.
 
     .PARAMETER CFAuthKey
         The auth key of the account associated to the email address entered in the CFAuthEmail parameter.
@@ -142,24 +142,12 @@ function Save-DnsTxtCloudflare {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Nothing to do.  Cloudflare doesn't require a save step
-
-    # Add DNS provider specific parameters before $ExtraParams. Make sure
-    # their names are unique across all existing plugins. But make
-    # sure common ones across this plugin are the same.
-
-    # If necessary, do work here to save or finalize changes performed by
-    # Add/Remove functions. It is not uncommon for this function to have
-    # no work to do depending on the DNS provider. In that case, remove
-    # the $MyAPIVar parameters and just leave the body empty.
-
     <#
     .SYNOPSIS
-        Not required for Cloudflare.
+        Not required.
 
     .DESCRIPTION
-        Cloudflare does not require calling this function to commit changes to DNS records.
+        This provider does not require calling this function to commit changes to DNS records.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

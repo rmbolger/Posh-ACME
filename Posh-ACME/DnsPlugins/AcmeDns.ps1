@@ -57,7 +57,7 @@ function Add-DnsTxtAcmeDns {
 
     <#
     .SYNOPSIS
-        Add a DNS TXT record to acme-dns
+        Add a DNS TXT record to acme-dns.
 
     .DESCRIPTION
         This plugin requires using the -DnsAlias option. The value for DnsAlias is the "fulldomain" returned by the acme-dns register endpoint.
@@ -102,15 +102,12 @@ function Remove-DnsTxtAcmeDns {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Nothing to do. acme-dns doesn't have a remove method
-
     <#
     .SYNOPSIS
-        Not required for acme-dns.
+        Not required.
 
     .DESCRIPTION
-        acme-dns does not have a remove method. So this function does nothing.
+        This provider does not require calling this function to remove DNS TXT records.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -120,11 +117,6 @@ function Remove-DnsTxtAcmeDns {
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
-
-    .EXAMPLE
-        Remove-DnsTxtAcmeDns '_acme-challenge.site1.example.com' 'asdfqwer12345678'
-
-        Removes a TXT record for the specified site with the specified value.
     #>
 }
 

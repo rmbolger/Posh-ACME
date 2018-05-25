@@ -58,7 +58,7 @@ function Add-DnsTxtDMEasy {
         Add a DNS TXT record to DNS Made Easy.
 
     .DESCRIPTION
-        Description for <My DNS Server/Provider>
+        Add a DNS TXT record to DNS Made Easy.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -80,7 +80,7 @@ function Add-DnsTxtDMEasy {
 
     .EXAMPLE
         $dmeSecret = Read-Host "DME Secret" -AsSecureString
-        PS C:\>Add-DnsTxtDMEasy '_acme-challenge.site1.DMEasy.com' 'asdfqwer12345678' 'xxxxxxxxxxxx' $dmeSecret
+        PS C:\>Add-DnsTxtDMEasy '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'xxxxxxxxxxxx' $dmeSecret
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -145,19 +145,16 @@ function Remove-DnsTxtDMEasy {
 
     <#
     .SYNOPSIS
-        Remove a DNS TXT record from <My DNS Server/Provider>
+        Remove a DNS TXT record from DNS Made Easy.
 
     .DESCRIPTION
-        Description for <My DNS Server/Provider>
+        Remove a DNS TXT record from DNS Made Easy.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
 
     .PARAMETER TxtValue
         The value of the TXT record.
-
-    .PARAMETER ExtraParams
-        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .PARAMETER DMEKey
         The DNS Made Easy API key for your account.
@@ -168,9 +165,12 @@ function Remove-DnsTxtDMEasy {
     .PARAMETER DMEUseSandbox
         If specified, all commands will run against the DNS Made Easy sandbox API endpoint. This is generally only used for testing the plugin.
 
+    .PARAMETER ExtraParams
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+
     .EXAMPLE
         $dmeSecret = Read-Host "DME Secret" -AsSecureString
-        PS C:\>Remove-DnsTxtDMEasy '_acme-challenge.site1.DMEasy.com' 'asdfqwer12345678' 'xxxxxxxxxxxx' $dmeSecret
+        PS C:\>Remove-DnsTxtDMEasy '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'xxxxxxxxxxxx' $dmeSecret
 
         Removes a TXT record for the specified site with the specified value.
     #>
@@ -182,15 +182,12 @@ function Save-DnsTxtDMEasy {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Nothing to do. DNS Made Easy doesn't require a save step
-
     <#
     .SYNOPSIS
-        Not required for DNS Made Easy.
+        Not required.
 
     .DESCRIPTION
-        DNS Made Easy does not require calling this function to commit changes to DNS records.
+        This provider does not require calling this function to commit changes to DNS records.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
