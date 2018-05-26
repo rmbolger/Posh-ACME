@@ -27,7 +27,7 @@ The bare minimum you need to request a certificate is just the domain name.
 New-PACertificate site1.example.com
 ```
 
-Since you haven't created an ACME account on this server yet, the command will attempt to create one for you using default settings and you'll get an error about having not agreed to the Terms of Service. Assuming you've reviewed the TOS link from before, add `-AcceptTOS` to the original command to proceed. You only need to do this once when creating a new account. You also probably want to associate an email address with this account so you can receive certificate expiration notifications. So let's do that even though it's not required.
+Since you haven't created an ACME account on this server yet, the command will attempt to create one for you using default settings and you'll get an error about having not agreed to the Terms of Service. Assuming you've reviewed the TOS link from before, add `-AcceptTOS` to the original command to proceed. You only need to do this once when creating a new account. You also probably want to associate an email address with this account so you can receive certificate expiration notifications. So let's do that even though it's not required. *Note: Multiple email addresses per account are supported. Just pass it an array of addresses.*
 
 ```powershell
 New-PACertificate site1.example.com -AcceptTOS -Contact admin@example.com
