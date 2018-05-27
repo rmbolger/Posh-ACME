@@ -20,8 +20,16 @@ function Get-PAAuthorizations {
     Process {
         foreach ($AuthUrl in $AuthUrls) {
 
-            # request the object and inject the type name
-            $auth = Invoke-RestMethod $AuthUrl -Verbose:$false @script:UseBasic
+            # request the object
+            try {
+                $auth = Invoke-RestMethod $AuthUrl -Verbose:$false @script:UseBasic
+            } catch {
+                if ($_.ErrorDetails.Message -like '*Expired authorization*') {
+                    Write-Warning "Authorization has expired. Unable to retrieve details."
+                    continue
+                } else { throw }
+            }
+            # inject the type name
             $auth.PSObject.TypeNames.Insert(0,'PoshACME.PAAuthorization')
             Write-Debug "Response: $($auth | ConvertTo-Json)"
 
