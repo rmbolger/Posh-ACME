@@ -93,7 +93,9 @@ function Get-PACertificate {
                 PfxFile       = Join-Path $domainFolder 'cert.pfx'
                 PfxFullChain  = Join-Path $domainFolder 'fullchain.pfx'
 
-                PfxPass = ConvertTo-SecureString $order.PfxPass -AsPlainText -Force
+                PfxPass = $( if ($order.PfxPass) {
+                                ConvertTo-SecureString $order.PfxPass -AsPlainText -Force
+                            } else { New-Object Security.SecureString } )
 
             }
 
