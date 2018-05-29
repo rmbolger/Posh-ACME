@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '2.2.0'
+ModuleVersion = '2.3.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -102,13 +102,17 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 2.2.0 (2018-05-24)
+## 2.3.0 (2018-05-29)
 
-* Added cross platform PowerShell Core support!
-  * Some DNS plugins don't work yet on non-Windows due to known issue handling SecureString PowerShell Core 6.0. Check details on the project wiki.
-  * `-Install` param on `New-PACertificate` throws error on non-Windows because there's no certificate store to install to.
-  * `Windows` plugin doesn't work in Core at all yet due to lack of Core compatible DnsServer module.
-* Added new DNS plugin Zonomi. Thanks @Zippy79!
+* Added new DNS plugins
+  * DNSimple
+  * LuaDns
+  * NS1
+* Challenge validation errors will now show the detailed error message provided by the ACME server
+* Get-PAAuthorization will now throw a warning instead of errors for expired authorizations
+* Fixed bug with Infoblox plugin
+* Fixed error with Get-PACertificate on orders created prior to 2.0
+* Misc fixes for plugin help details
 '@
 
     } # End of PSData hashtable

@@ -1,3 +1,15 @@
+## 2.3.0 (2018-05-29)
+
+* Added new DNS plugins
+  * DNSimple
+  * LuaDns
+  * NS1
+* Challenge validation errors will now show the detailed error message provided by the ACME server
+* Get-PAAuthorization will now throw a warning instead of errors for expired authorizations
+* Fixed bug with Infoblox plugin
+* Fixed error with Get-PACertificate on orders created prior to 2.0
+* Misc fixes for plugin help details
+
 ## 2.2.0 (2018-05-24)
 
 * Added cross platform PowerShell Core support!
