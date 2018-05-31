@@ -48,15 +48,8 @@ function Submit-Renewal {
                     }
                 }
 
-                # skip if the order isn't already valid because renewals presume you've successfully
-                # completed the order already
-                if ($order.status -ne 'valid') {
-                    Write-Warning "Order for $($order.MainDomain) is either invalid or was never completed and can't currently be renewed."
-                    return
-                }
-
                 # skip if the renewal window hasn't been reached and no -Force
-                if (!$Force -and (Get-Date) -lt (Get-Date $order.RenewAfter)) {
+                if (!$Force -and $order.RenewAfter -and (Get-Date) -lt (Get-Date $order.RenewAfter)) {
                     Write-Warning "Order for $($order.MainDomain) is not recommended for renewal yet. Use -Force to override."
                     return
                 }
