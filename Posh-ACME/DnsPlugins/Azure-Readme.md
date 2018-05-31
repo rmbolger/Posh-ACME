@@ -6,7 +6,9 @@ This plugin works against the [Azure DNS](https://azure.microsoft.com/en-us/serv
 
 ## Setup
 
-We need to create an "App registration" which is basically a service account in Azure AD and give it permission to modify TXT records for the zones we'll be issuing certificates in.
+There are two ways to set up required authorization for modifying the DNS records.
+You can either create an "App registration" which is basically a service account in Azure AD and give it permission to modify TXT records for the zones we'll be issuing certificates in
+or you can send in an authorization token that you can generate in several ways (see **Provided Authorization Token** below)
 
 ### Connect to Azure
 
@@ -20,9 +22,28 @@ $profile
 
 The `$profile` variable output will contain some fields we'll need later such as `SubscriptionId` and `TenantId`.
 
+### Provided Authorization Token
+
+You can use an existing user or application principal, e.g. a [Managed Service Identity](https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/overview) and assign it the role of managing DNS TXT records.
+
+To use the account you are currently logged in to with Azure CLI 2.0, use the following command to generate a token. Remember to use the correct subscription.
+```powershell
+az account list # shows all subscriptions - the one marked as "isDefault": true will be used to create the token
+$token = (az account get-access-token --resource 'https://management.core.windows.net/' | ConvertFrom-Json).accessToken
+```
+
+To get a token for the MSI when running in a VM, Azure Function or App Service - please refer to the following documentation. Remember to pass in the correct resource uri: **https://management.core.windows.net/**
+
+* [Getting a token for an MSI-enabled VM](https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/how-to-use-vm-token)
+* [Getting a token for an MSI-enabled App Service or Function](https://docs.microsoft.com/en-us/azure/app-service/app-service-managed-service-identity)
+
+If you use MSI then you must also assign the role to the Service Principal assigned so you need to ObjectID (Active Directory ID) of that Principal and follow the role assignment step below.
+Refer to the MSI documentation above on how to find it through the Azure portal or scripting tools.
+
 ### Create a Service Account
 
-Create a new service account to use with Posh-ACME. Ideally, the password should be long and randomized. The account will show up in the "App registrations" section of your Azure Active Directory.
+The other option is to create a new service account to use with Posh-ACME. Ideally, the password should be long and randomized. The account will show up in the "App registrations" section of your Azure Active Directory.
+As an alternative you can use
 
 ```powershell
 $svcPass = Read-Host Pass -AsSecureString
@@ -30,7 +51,7 @@ $svcAcct = New-AzureRmADServicePrincipal -DisplayName PoshACME -Password $svcPas
 $svcAcct
 ```
 
-The `ApplicationId` field in the variable output will be used later when assigning permissions and creating the credential object needed for the plugin.
+The `ApplicationId` field in the variable output will be used later when assigning permissions and creating the credential object needed for the plugin-
 
 ### Create a Custom Role
 
@@ -72,14 +93,26 @@ New-AzureRmRoleAssignment -ApplicationId $appID -ResourceGroupName $resName -Rol
 
 ## Using the Plugin
 
-There are three required parameters for the plugin, `AZSubscriptionId`, `AZTenantId`, and `AZAppCred`. The subscription and tentant IDs you should have from earlier. But you can also look them up in the portal on the Properties page of a DNS zone and Azure AD instance respectively. The app credential is just a standard `PSCredential` object with the service account's `ApplicationId` guid as the username. The password is whatever you originally set for it.
+There are two or three required parameters for the plugin, `AZSubscriptionId` and either `AZProvidedToken` or both `AZTenantId` and `AZAppCred`.
+The subscription and tentant IDs you should have from earlier, but you can also look them up in the portal on the Properties page of a DNS zone and Azure AD instance respectively. The app credential is just a standard `PSCredential` object with the service account's `ApplicationId` guid as the username. The password is whatever you originally set for it.
 
 ```powershell
-# build the parameter hashtable
+# build the parameter hashtable for tenant id and credentials
 $azParams = @{
   AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
   AZTenantId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
   AZAppCred=(Get-Credential)
+}
+
+# issue a cert
+New-PACertificate test.example.com -DnsPlugin Azure -PluginArgs $azParams
+```
+
+```powershell
+# build the parameter hashtable for a provided token
+$azParams = @{
+  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
+  AZProvidedToken='<token>'
 }
 
 # issue a cert

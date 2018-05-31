@@ -7,15 +7,17 @@ function Add-DnsTxtAzure {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$AZSubscriptionId,
-        [Parameter(Mandatory,Position=3)]
+        [Parameter(Mandatory=$false,Position=3)]
         [string]$AZTenantId,
-        [Parameter(Mandatory,Position=4)]
+        [Parameter(Mandatory=$false,Position=4)]
         [pscredential]$AZAppCred,
+        [Parameter(Mandatory=$false,Position=5)]
+        [string]$AZProvidedToken,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    Connect-AZTenant $AZTenantId $AZAppCred
+    Connect-AZTenant $AZTenantId $AZAppCred $AZProvidedToken
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
     if (!($zoneID = Get-AZZoneId $RecordName $AZSubscriptionId)) {
@@ -96,15 +98,17 @@ function Remove-DnsTxtAzure {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$AZSubscriptionId,
-        [Parameter(Mandatory,Position=3)]
+        [Parameter(Mandatory=$false,Position=3)]
         [string]$AZTenantId,
-        [Parameter(Mandatory,Position=4)]
+        [Parameter(Mandatory=$false,Position=4)]
         [pscredential]$AZAppCred,
+        [Parameter(Mandatory=$false,Position=5)]
+        [string]$AZProvidedToken,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    Connect-AZTenant $AZTenantId $AZAppCred
+    Connect-AZTenant $AZTenantId $AZAppCred $AZProvidedToken
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
     if (!($zoneID = Get-AZZoneId $RecordName $AZSubscriptionId)) {
@@ -212,34 +216,108 @@ function Save-DnsTxtAzure {
 # Helper Functions
 ############################
 
+# Powershell port of Azure AccessToken parsing from  
+# https://github.com/Azure/azure-sdk-for-net/blob/psSdkJson6/src/SdkCommon/AppAuthentication/Azure.Services.AppAuthentication/AccessToken.cs
+function DecodeBytes([string]$arg)
+{
+    [string]$Base64PadCharacter = '='
+    [string]$Base64Character62 = '+';
+    [string]$Base64Character63 = '/';
+    [string]$Base64UrlCharacter62 = '-';
+    [string]$Base64UrlCharacter63 = '_';
+    [string]$DoubleBase64PadCharacter = "=="
+
+    [string]$s = $arg.Replace($Base64UrlCharacter62,$Base64Character62).Replace($Base64UrlCharacter63,$Base64Character63)
+
+    [int]$pad = $s.Length % 4
+    if ($pad -eq 2) {
+        $s += $DoubleBase64PadCharacter # Two pad chars
+    }
+    elseif ($pad -eq 3) {
+        $s += $Base64PadCharacter # One pad char        
+    }
+    elseif ($pad -eq 1) {
+        throw "Illegal base64url string!"
+    }
+
+    $bytes = [System.Convert]::FromBase64String($s) # byte[]
+    $enc = [System.Text.Encoding]::UTF8
+
+    return $enc.GetString($bytes)
+}
+
+function ConvertFrom-Provided-Token {
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [string]$AZProvidedToken
+    )    
+    [string]$expectedApplication = 'https://management.core.windows.net/'
+    $claims = DecodeBytes ($AZProvidedToken -split '\.')[1] | ConvertFrom-Json
+    if ($claims.aud -ne $expectedApplication) {
+        throw "The provided token is not for the correct Azure application - expected $expectedApplication but the token is for $($claims.aud)"
+    }
+    [datetime]$expiresDT = ([datetime]'1/1/1970').AddSeconds($claims.exp)
+    if ($expiresDT -lt [datetime]::UtcNow) {
+        throw "The provided token has expired - it expired on $("{0:yyyy-MM-ddTHH:mm:ssZ}" -f $expiresDT)"
+    }
+    return New-Object psobject -Property @{
+        expires_on = $claims.exp
+        access_token = $AZProvidedToken
+    }
+}
+
 function Connect-AZTenant {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory=$false,Position=0)]
         [string]$AZTenantId,
-        [Parameter(Mandatory,Position=1)]
-        [pscredential]$AZAppCred
+        [Parameter(Mandatory=$false,Position=1)]
+        [pscredential]$AZAppCred,
+        [Parameter(Mandatory=$false,Position=2)]
+        [string]$AZProvidedToken
     )
+
+    [bool]$validArgs = $true
+    if ($AZProvidedToken) {
+        if ($AZTenantId -or $AZAppCred) {
+            $validArgs = $false
+        }
+    }
+    else {
+        if (!$AZTenantId -or !$AZAppCred) {
+            $validArgs = $false
+        }
+    }
+
+    if (!$validArgs) {
+        throw "You must pass either AZProvidedToken or both AZTenantId and AZAppCred to the Azure provider"
+    }
 
     # just return if we already have a valid Bearer token
     if ($script:AZToken -and (Get-Date) -lt $script:AZToken.Expires) {
         return
     }
 
-    # build the oAuth2 body
-    $authBody = "grant_type=client_credentials&client_id=$($AZAppCred.Username)&client_secret=$($AZAppCred.GetNetworkCredential().Password)&resource=$([uri]::EscapeDataString('https://management.core.windows.net/'))"
+    if ($AZProvidedToken) {
+        $token = ConvertFrom-Provided-Token $AZProvidedToken
+    }
+    else {
+        # build the oAuth2 body
+        $authBody = "grant_type=client_credentials&client_id=$($AZAppCred.Username)&client_secret=$($AZAppCred.GetNetworkCredential().Password)&resource=$([uri]::EscapeDataString('https://management.core.windows.net/'))"
 
-    # login
-    try {
-        $token = Invoke-RestMethod "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token" `
-            -Method Post -Body $authBody @script:UseBasic
-    } catch { throw }
+        # login
+        try {
+            $token = Invoke-RestMethod "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token" `
+                -Method Post -Body $authBody @script:UseBasic
+        } catch { throw }
+
+    }
 
     # add an "Expires" [datetime] parameter converted from expires_on with a 5 min buffer
     $token | Add-Member -MemberType NoteProperty -Name 'Expires' -Value ([datetime]'1/1/1970').AddSeconds($token.expires_on-300)
 
     $script:AZToken = $token | Select-Object `
-        @{L='Expires';E={([datetime]'1/1/1970').AddSeconds($_.expires_on-300)}}, `
+        @{L='Expires';E={($_.Expires)}}, `
         @{L='AuthHeader';E={@{Authorization="Bearer $($_.access_token)"}}}
 }
 
