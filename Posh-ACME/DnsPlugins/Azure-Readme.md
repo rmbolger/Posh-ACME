@@ -41,7 +41,7 @@ $roleDef = Get-AzureRmRoleDefinition -Name "DNS Zone Contributor"
 $roleDef.Id = $null
 $roleDef.Name = "DNS TXT Contributor"
 $roleDef.Description = "Manage DNS TXT records only."
-$roleDef.Actions.RemoveRange(0,$role.Actions.Count)
+$roleDef.Actions.RemoveRange(0,$roleDef.Actions.Count)
 $roleDef.Actions.Add("Microsoft.Network/dnsZones/TXT/*")
 $roleDef.Actions.Add("Microsoft.Network/dnsZones/read")
 $roleDef.Actions.Add("Microsoft.Authorization/*/read")
