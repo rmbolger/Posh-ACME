@@ -1,3 +1,10 @@
+## 2.4.0 (2018-06-01)
+
+* Added new DNS plugin Linode
+* Added tab completion for `Plugin` param on `Publish`/`Unpublish`/`Save-DnsChallenge`
+* Fixed bug renewing orders with status invalid (which happens when the order expires even if the cert is still valid)
+* Fixed bug in `New-PACertificate` that wasn't using explicit `DnsSleep` and `ValidationTimeout` parameters when an old order existed for the same primary name.
+
 ## 2.3.0 (2018-05-29)
 
 * Added new DNS plugins

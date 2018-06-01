@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '2.3.0'
+ModuleVersion = '2.4.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -102,17 +102,12 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 2.3.0 (2018-05-29)
+## 2.4.0 (2018-06-01)
 
-* Added new DNS plugins
-  * DNSimple
-  * LuaDns
-  * NS1
-* Challenge validation errors will now show the detailed error message provided by the ACME server
-* Get-PAAuthorization will now throw a warning instead of errors for expired authorizations
-* Fixed bug with Infoblox plugin
-* Fixed error with Get-PACertificate on orders created prior to 2.0
-* Misc fixes for plugin help details
+* Added new DNS plugin Linode
+* Added tab completion for `Plugin` param on `Publish`/`Unpublish`/`Save-DnsChallenge`
+* Fixed bug renewing orders with status invalid (which happens when the order expires even if the cert is still valid)
+* Fixed bug in `New-PACertificate` that wasn't using explicit `DnsSleep` and `ValidationTimeout` parameters when an old order existed for the same primary name.
 '@
 
     } # End of PSData hashtable
