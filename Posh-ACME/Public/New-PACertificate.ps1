@@ -138,11 +138,11 @@ function New-PACertificate {
             $chalParams.DnsAlias = $oldOrder.DnsAlias
         }
         $chalParams.DnsSleep = $DnsSleep
-        if ($oldOrder) {
+        if ($oldOrder -and 'DnsSleep' -notin $PSBoundParameters.Keys) {
             $chalParams.DnsSleep = $oldOrder.DnsSleep
         }
         $chalParams.ValidationTimeout = $ValidationTimeout
-        if ($oldOrder) {
+        if ($oldOrder -and 'ValidationTimeout' -notin $PSBoundParameters.Keys) {
             $chalParams.ValidationTimeout = $oldOrder.ValidationTimeout
         }
 
