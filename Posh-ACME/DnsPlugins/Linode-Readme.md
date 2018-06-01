@@ -10,9 +10,9 @@ Login to your account and go to the [API Tokens](https://cloud.linode.com/profil
 
 ## Using the Plugin
 
-All you have to do is read in the token value as a secure string and then use it with the `LItoken` parameter. Linode also seems to have an unusually long DNS propagation delay. There's a note at the bottom of the DNS Manager web GUI that reads, "Changes made to a master zone will take effect in our nameservers every quarter hour." So you likely need to override the default `DnsSleep` parameter to 15 minutes (900 seconds) in order to ensure the TXT record changes have propagated.
+The only required plugin parameter is `LItoken` which you need to configure as a secure string value. However, Linode has an unusually long delay between when a record is set and when it propagates to their public name servers. There's a note at the bottom of the DNS Manager web GUI that reads, "Changes made to a master zone will take effect in our nameservers every quarter hour." So you need to set `DnsSleep` parameter in `New-PACertificate` to at least 15 minutes. But in testing, 17 minutes (1020 seconds) seemed to be the minimum to reliably satisfy the challenges.
 
 ```powershell
 $token = Read-Host "Token" -AsSecureString
-New-PACertificate test.example.com -DnsPlugin Linode -PluginArgs @{LIToken=$token} -DnsSleep 900
+New-PACertificate test.example.com -DnsPlugin Linode -PluginArgs @{LIToken=$token} -DnsSleep 1020
 ```
