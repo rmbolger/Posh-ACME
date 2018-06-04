@@ -72,6 +72,9 @@ function Add-DnsTxtAzure {
     .PARAMETER AZAppCred
         The username and password for an Azure AD App Registration that has permissions to write TXT records on specified zone. The username is the Application ID of the App Registration which can be found on its Properties page. The password is whatever was set at creation time.
 
+    .PARAMETER AZProvidedToken
+        An Azure (jwt) token to use for authorization when modifying TXT records.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -177,6 +180,9 @@ function Remove-DnsTxtAzure {
     .PARAMETER AZAppCred
         The username and password for an Azure AD App Registration that has permissions to write TXT records on specified zone. The username is the Application ID of the App Registration which can be found on its Properties page. The password is whatever was set at creation time.
 
+    .PARAMETER AZProvidedToken
+        An Azure (jwt) token to use for authorization when modifying TXT records.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -216,7 +222,7 @@ function Save-DnsTxtAzure {
 # Helper Functions
 ############################
 
-# Powershell port of Azure AccessToken parsing from  
+# Powershell port of Azure AccessToken (jwt) parsing from  
 # https://github.com/Azure/azure-sdk-for-net/blob/psSdkJson6/src/SdkCommon/AppAuthentication/Azure.Services.AppAuthentication/AccessToken.cs
 function DecodeBytes([string]$arg)
 {
@@ -237,7 +243,7 @@ function DecodeBytes([string]$arg)
         $s += $Base64PadCharacter # One pad char        
     }
     elseif ($pad -eq 1) {
-        throw "Illegal base64url string!"
+        throw "Illegal base64url string in token!"
     }
 
     $bytes = [System.Convert]::FromBase64String($s) # byte[]
@@ -246,16 +252,34 @@ function DecodeBytes([string]$arg)
     return $enc.GetString($bytes)
 }
 
+function ValidateJWTToken {
+    param(
+        [Parameter(Mandatory)]
+        [string]$fullToken,
+        [Parameter(Mandatory)]
+        [string]$expectedApplication
+    )
+    # https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-token-and-claims
+    $parts = $fullToken  -split '\.'
+    if ($parts.Length -ne 3) {
+        throw "The provided token is not in the correct JWT format - consists of $($parts.Length) part(s) instead of the expected three"
+    }
+    $claims = DecodeBytes $parts[1] | ConvertFrom-Json -ErrorAction Stop
+    if (!$claims.aud) {
+        throw "Missing 'aud' value in the claims part of the provided token"
+    }
+    if ($claims.aud -ne $expectedApplication) {
+        throw "The provided token is not for the correct Azure application - expected '$expectedApplication' but the token is for '$($claims.aud)'"
+    }
+    return $claims
+}
+
 function ConvertFrom-Provided-Token {
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$AZProvidedToken
     )    
-    [string]$expectedApplication = 'https://management.core.windows.net/'
-    $claims = DecodeBytes ($AZProvidedToken -split '\.')[1] | ConvertFrom-Json
-    if ($claims.aud -ne $expectedApplication) {
-        throw "The provided token is not for the correct Azure application - expected $expectedApplication but the token is for $($claims.aud)"
-    }
+    $claims = ValidateJWTToken $AZProvidedToken 'https://management.core.windows.net/'
     [datetime]$expiresDT = ([datetime]'1/1/1970').AddSeconds($claims.exp)
     if ($expiresDT -lt [datetime]::UtcNow) {
         throw "The provided token has expired - it expired on $("{0:yyyy-MM-ddTHH:mm:ssZ}" -f $expiresDT)"
