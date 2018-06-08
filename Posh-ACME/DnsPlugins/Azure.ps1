@@ -222,36 +222,6 @@ function Save-DnsTxtAzure {
 # Helper Functions
 ############################
 
-# Powershell port of Azure AccessToken (jwt) parsing from  
-# https://github.com/Azure/azure-sdk-for-net/blob/psSdkJson6/src/SdkCommon/AppAuthentication/Azure.Services.AppAuthentication/AccessToken.cs
-function DecodeBytes([string]$arg)
-{
-    [string]$Base64PadCharacter = '='
-    [string]$Base64Character62 = '+';
-    [string]$Base64Character63 = '/';
-    [string]$Base64UrlCharacter62 = '-';
-    [string]$Base64UrlCharacter63 = '_';
-    [string]$DoubleBase64PadCharacter = "=="
-
-    [string]$s = $arg.Replace($Base64UrlCharacter62,$Base64Character62).Replace($Base64UrlCharacter63,$Base64Character63)
-
-    [int]$pad = $s.Length % 4
-    if ($pad -eq 2) {
-        $s += $DoubleBase64PadCharacter # Two pad chars
-    }
-    elseif ($pad -eq 3) {
-        $s += $Base64PadCharacter # One pad char        
-    }
-    elseif ($pad -eq 1) {
-        throw "Illegal base64url string in token!"
-    }
-
-    $bytes = [System.Convert]::FromBase64String($s) # byte[]
-    $enc = [System.Text.Encoding]::UTF8
-
-    return $enc.GetString($bytes)
-}
-
 function ValidateJWTToken {
     param(
         [Parameter(Mandatory)]
@@ -264,7 +234,7 @@ function ValidateJWTToken {
     if ($parts.Length -ne 3) {
         throw "The provided token is not in the correct JWT format - consists of $($parts.Length) part(s) instead of the expected three"
     }
-    $claims = DecodeBytes $parts[1] | ConvertFrom-Json -ErrorAction Stop
+    $claims = $parts[1] | ConvertFrom-Base64Url | ConvertFrom-Json -ErrorAction Stop
     if (!$claims.aud) {
         throw "Missing 'aud' value in the claims part of the provided token"
     }
@@ -278,7 +248,7 @@ function ConvertFrom-Provided-Token {
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$AZProvidedToken
-    )    
+    )
     $claims = ValidateJWTToken $AZProvidedToken 'https://management.core.windows.net/'
     [datetime]$expiresDT = ([datetime]'1/1/1970').AddSeconds($claims.exp)
     if ($expiresDT -lt [datetime]::UtcNow) {
