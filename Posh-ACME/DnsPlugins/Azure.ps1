@@ -1,5 +1,5 @@
 function Add-DnsTxtAzure {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Credential')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -7,15 +7,19 @@ function Add-DnsTxtAzure {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$AZSubscriptionId,
-        [Parameter(Mandatory,Position=3)]
+        [Parameter(ParameterSetName='Credential',Mandatory,Position=3)]
         [string]$AZTenantId,
-        [Parameter(Mandatory,Position=4)]
+        [Parameter(ParameterSetName='Credential',Mandatory,Position=4)]
         [pscredential]$AZAppCred,
+        [Parameter(ParameterSetName='Token',Mandatory,Position=3)]
+        [string]$AZAccessToken,
+        [Parameter(ParameterSetName='IMDS',Mandatory)]
+        [switch]$AZUseIMDS,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    Connect-AZTenant $AZTenantId $AZAppCred
+    Connect-AZTenant @PSBoundParameters
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
     if (!($zoneID = Get-AZZoneId $RecordName $AZSubscriptionId)) {
@@ -70,6 +74,12 @@ function Add-DnsTxtAzure {
     .PARAMETER AZAppCred
         The username and password for an Azure AD App Registration that has permissions to write TXT records on specified zone. The username is the Application ID of the App Registration which can be found on its Properties page. The password is whatever was set at creation time.
 
+    .PARAMETER AZAccessToken
+        An existing Azure access token (JWT) to use for authorization when modifying TXT records. This is useful only for short lived instances or when the Azure authentication logic lives outside the module because access tokens are only valid for 1 hour.
+
+    .PARAMETER AZUseIMDS
+        If specified, the module will attempt to authenticate using the Azure Instance Metadata Service (IMDS). This will only work if the system is running within Azure and has been assigned a Managed Service Identity (MSI).
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -77,18 +87,32 @@ function Add-DnsTxtAzure {
         $azcred = Get-Credential
         PS C:\>Add-DnsTxtAzure '_acme-challenge.site1.example.com' 'asdfqwer12345678' -AZSubscriptionId '11111111-1111-1111-1111-111111111111' -AZTenantId '22222222-2222-2222-2222-222222222222' -AZAppCred $azcred
 
-        Adds a TXT record for the specified site with the specified value.
+        Adds a TXT record using expicit Azure tenant and credentials.
+
+    .EXAMPLE
+        $token = MyCustomLogin # external Azure auth
+        PS C:\>Add-DnsTxtAzure '_acme-challenge.site1.example.com' 'asdfqwer12345678' -AZSubscriptionId '11111111-1111-1111-1111-111111111111' -AZAccessToken $token
+
+        Adds a TXT record using an existing Azure access token.
+
+    .EXAMPLE
+        Add-DnsTxtAzure '_acme-challenge.site1.example.com' 'asdfqwer12345678' -AZSubscriptionId '11111111-1111-1111-1111-111111111111' -AZUseIMDS
+
+        Adds a TXT record from within Azure using a token from Azure Instance Metadata Service.
 
     .LINK
         https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/new-azurermadserviceprincipal
 
     .LINK
         https://docs.microsoft.com/en-us/azure/dns/dns-protect-zones-recordsets
+
+    .LINK
+        https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/overview
     #>
 }
 
 function Remove-DnsTxtAzure {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Credential')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -96,15 +120,19 @@ function Remove-DnsTxtAzure {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$AZSubscriptionId,
-        [Parameter(Mandatory,Position=3)]
+        [Parameter(ParameterSetName='Credential',Mandatory,Position=3)]
         [string]$AZTenantId,
-        [Parameter(Mandatory,Position=4)]
+        [Parameter(ParameterSetName='Credential',Mandatory,Position=4)]
         [pscredential]$AZAppCred,
+        [Parameter(ParameterSetName='Token',Mandatory,Position=3)]
+        [string]$AZAccessToken,
+        [Parameter(ParameterSetName='IMDS',Mandatory)]
+        [switch]$AZUseIMDS,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    Connect-AZTenant $AZTenantId $AZAppCred
+    Connect-AZTenant @PSBoundParameters
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
     if (!($zoneID = Get-AZZoneId $RecordName $AZSubscriptionId)) {
@@ -173,6 +201,12 @@ function Remove-DnsTxtAzure {
     .PARAMETER AZAppCred
         The username and password for an Azure AD App Registration that has permissions to write TXT records on specified zone. The username is the Application ID of the App Registration which can be found on its Properties page. The password is whatever was set at creation time.
 
+    .PARAMETER AZAccessToken
+        An existing Azure access token (JWT) to use for authorization when modifying TXT records. This is useful only for short lived instances or when the Azure authentication logic lives outside the module because access tokens are only valid for 1 hour.
+
+    .PARAMETER AZUseIMDS
+        If specified, the module will attempt to authenticate using the Azure Instance Metadata Service (IMDS). This will only work if the system is running within Azure and has been assigned a Managed Service Identity (MSI).
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -182,11 +216,25 @@ function Remove-DnsTxtAzure {
 
         Removes a TXT record for the specified site with the specified value.
 
+    .EXAMPLE
+        $token = MyCustomLogin # external Azure auth
+        PS C:\>Remove-DnsTxtAzure '_acme-challenge.site1.example.com' 'asdfqwer12345678' -AZSubscriptionId '11111111-1111-1111-1111-111111111111' -AZAccessToken $token
+
+        Removes a TXT record using an existing Azure access token.
+
+    .EXAMPLE
+        Remove-DnsTxtAzure '_acme-challenge.site1.example.com' 'asdfqwer12345678' -AZSubscriptionId '11111111-1111-1111-1111-111111111111' -AZUseIMDS
+
+        Removes a TXT record from within Azure using a token from Azure Instance Metadata Service.
+
     .LINK
         https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/new-azurermadserviceprincipal
 
     .LINK
         https://docs.microsoft.com/en-us/azure/dns/dns-protect-zones-recordsets
+
+    .LINK
+        https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/overview
     #>
 }
 
@@ -212,13 +260,54 @@ function Save-DnsTxtAzure {
 # Helper Functions
 ############################
 
-function Connect-AZTenant {
+function ConvertFrom-AccessToken {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
+        [string]$AZAccessToken
+    )
+
+    # Anatomy of an access token
+    # https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-token-and-claims
+
+    # grab the payload section of the JWT
+    $null,$payload,$null = $AZAccessToken.Split('.')
+
+    # decode the claims
+    $claims = $payload | ConvertFrom-Base64Url | ConvertFrom-Json -EA Stop
+
+    # make sure the audience claim is correct
+    if (-not $claims.aud -or $claims.aud -ne 'https://management.core.windows.net/') {
+        throw "The provided access token has missing or incorrect audience claim. Expected: https://management.core.windows.net/"
+    }
+
+    # make sure the token hasn't expired
+    $expiresDT = [DateTime](Get-Date '1/1/1970').AddSeconds($claims.exp)
+    if ($expiresDT -lt [DateTime]::UtcNow) {
+        throw "The provided access token has expired as of $("{0:yyyy-MM-ddTHH:mm:ssZ}" -f $expiresDT)"
+    }
+
+    # return an object that contains the 'expires_on' property along with the token
+    # which is what we care about from the other normal logon methods
+    return [pscustomobject]@{
+        expires_on = $claims.exp
+        access_token = $AZAccessToken
+    }
+}
+
+function Connect-AZTenant {
+    [CmdletBinding(DefaultParameterSetName='Credential')]
+    param(
+        [Parameter(ParameterSetName='Credential',Mandatory,Position=0)]
         [string]$AZTenantId,
-        [Parameter(Mandatory,Position=1)]
-        [pscredential]$AZAppCred
+        [Parameter(ParameterSetName='Credential',Mandatory,Position=1)]
+        [pscredential]$AZAppCred,
+        [Parameter(ParameterSetName='Token',Mandatory,Position=0)]
+        [string]$AZAccessToken,
+        [Parameter(ParameterSetName='IMDS',Mandatory)]
+        [switch]$AZUseIMDS,
+        [Parameter(ValueFromRemainingArguments)]
+        $ExtraParams
     )
 
     # just return if we already have a valid Bearer token
@@ -226,21 +315,42 @@ function Connect-AZTenant {
         return
     }
 
-    # build the oAuth2 body
-    $authBody = "grant_type=client_credentials&client_id=$($AZAppCred.Username)&client_secret=$($AZAppCred.GetNetworkCredential().Password)&resource=$([uri]::EscapeDataString('https://management.core.windows.net/'))"
+    switch ($PSCmdlet.ParameterSetName) {
+        'Credential' {
+            # login
+            try {
+                Write-Debug "Authenticating with explicit credentials"
+                $authBody = "grant_type=client_credentials&client_id=$($AZAppCred.Username)&client_secret=$($AZAppCred.GetNetworkCredential().Password)&resource=$([uri]::EscapeDataString('https://management.core.windows.net/'))"
+                $token = Invoke-RestMethod "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token" `
+                    -Method Post -Body $authBody @script:UseBasic
+            } catch { throw }
+            break
+        }
+        'Token' {
+            # decode the token payload so we can get ultimately get its expiration
+            Write-Debug "Authenticating with provided access token"
+            $token = ConvertFrom-AccessToken $AZAccessToken
+            break
+        }
+        'IMDS' {
+            # If the module is running from an Azure resource utilizing Managed Service Identity (MSI),
+            # we can get an access token via the Instance Metadata Service (IMDS):
+            # https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/how-to-use-vm-token#get-a-token-using-azure-powershell
+            try {
+                Write-Debug "Authenticating with Instance Metadata Service (IMDS)"
+                $queryString = "api-version=2018-02-01&resource=$([uri]::EscapeDataString('https://management.core.windows.net/'))"
+                $token = Invoke-RestMethod "http://169.254.169.254/metadata/identity/oauth2/token?$queryString" `
+                    -Headers @{Metadata='true'} @script:UseBasic
+            } catch { throw }
+            break
+        }
+    }
 
-    # login
-    try {
-        $token = Invoke-RestMethod "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token" `
-            -Method Post -Body $authBody @script:UseBasic
-    } catch { throw }
-
-    # add an "Expires" [datetime] parameter converted from expires_on with a 5 min buffer
-    $token | Add-Member -MemberType NoteProperty -Name 'Expires' -Value ([datetime]'1/1/1970').AddSeconds($token.expires_on-300)
-
-    $script:AZToken = $token | Select-Object `
-        @{L='Expires';E={([datetime]'1/1/1970').AddSeconds($_.expires_on-300)}}, `
-        @{L='AuthHeader';E={@{Authorization="Bearer $($_.access_token)"}}}
+    # create a token object that we can use for subsequence calls with a 5 min buffer on the expiration
+    $script:AZToken = [pscustomobject]@{
+        Expires = (Get-Date '1/1/1970').AddSeconds($token.expires_on - 300)
+        AuthHeader = @{ Authorization = "Bearer $($token.access_token)" }
+    }
 }
 
 function Get-AZZoneId {
