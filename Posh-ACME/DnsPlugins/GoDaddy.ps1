@@ -22,8 +22,9 @@ function Add-DnsTxtGoDaddy {
 
     $headers = @{Authorization = "sso-key $($GDKey):$($GDSecret)"}
 
-    $name = ($RecordName -split "\.")[0]
     $zone = Find-GDZone -RecordName $RecordName -GDKey $GDKey -GDSecret $GDSecret
+    $name = ($RecordName -split ".$zone")[0]
+    
     $body = "[$(@{name= "$Name";type = 'TXT';ttl = 600; data = "$TxtValue"} | Convertto-Json)]"
 
     # Get a list of existing records
@@ -104,8 +105,8 @@ function Remove-DnsTxtGoDaddy {
 
     $headers = @{Authorization = "sso-key $($GDKey):$($GDSecret)"}
 
-    $name = ($RecordName -split "\.")[0]
     $zone = Find-GDZone -RecordName $RecordName -GDKey $GDKey -GDSecret $GDSecret
+    $name = ($RecordName -split ".$zone")[0]
 
     # Get a list of existing records
     try {
