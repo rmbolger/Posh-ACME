@@ -16,7 +16,7 @@ function Add-DnsTxtDynu {
     $RecordName = $RecordName.ToLower()
 
     $token = Get-DynuAccessToken -DynuClientID $DynuClientID -DynuSecret $DynuSecret
-    $zone = Find-DynuZone $RecordName
+    $zone = Find-DynuZone $RecordName -DynuAccessToken $token
     if (-not $zone) {
         throw "Could not find Dynu zone that matches ${RecordName}"
     }
@@ -26,7 +26,7 @@ function Add-DnsTxtDynu {
         $RecordName = $RecordName.Substring(0, $RecordName.LastIndexOf(".$($zone.name)"))
     }
 
-    $existing = Find-DynuExistingRecord $zone.name $RecordName $TxtValue
+    $existing = Find-DynuExistingRecord $zone.name $RecordName $TxtValue -DynuAccessToken $token
     if ($existing) {
         Write-Debug "Record already exists, doing nothing: ${existing}"
         return
@@ -93,7 +93,7 @@ function Remove-DnsTxtDynu {
     $RecordName = $RecordName.ToLower()
 
     $token = Get-DynuAccessToken -DynuClientID $DynuClientID -DynuSecret $DynuSecret
-    $zone = Find-DynuZone $RecordName
+    $zone = Find-DynuZone $RecordName -DynuAccessToken $token
     if (-not $zone) {
         throw "Could not find Dynu zone that matches ${RecordName}"
     }
@@ -103,7 +103,7 @@ function Remove-DnsTxtDynu {
         $RecordName = $RecordName.Substring(0, $RecordName.LastIndexOf(".$($zone.name)"))
     }
 
-    $record = Find-DynuExistingRecord $zone.name $RecordName $TxtValue
+    $record = Find-DynuExistingRecord $zone.name $RecordName $TxtValue -DynuAccessToken $token
     if (-not $record) {
         Write-Debug "Record ${RecordName}/${TxtValue} doesn't exist, doing nothing"
         return
@@ -176,9 +176,9 @@ function Get-DynuAccessToken {
         [Parameter(Mandatory, Position = 1)]
         [string]$DynuSecret
     )
-    
-    if ($script:AccessToken) {
-        return $script:AccessToken
+
+    if ($script:DynuAccessToken -and ($script:DynuAccessToken.Expiry -lt [DateTime]::UtcNow)) {
+        return $script:DynuAccessToken.AccessToken
     }
 
     $encodedCreds = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("${DynuClientID}:${DynuSecret}"))
@@ -199,8 +199,12 @@ function Get-DynuAccessToken {
         throw "Could not get an access token for Dynu"
     }
 
-    $script:AccessToken = $response.accessToken
-    return $response.accessToken
+    $script:DynuAccessToken = @{
+        AccessToken = $response.accessToken
+        Expiry = [DateTime]::UtcNow.AddSeconds($response.expiresIn)
+    }
+
+    return $script:DynuAccessToken.AccessToken
 }
 
 function Find-DynuZone {
@@ -208,14 +212,9 @@ function Find-DynuZone {
     param(
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
-        [Parameter(Position = 1)]
+        [Parameter(Mandatory, Position = 1)]
         [string]$DynuAccessToken
     )
-
-    $DynuAccessToken = if ($DynuAccessToken) { $DynuAccessToken } else { $script:AccessToken }
-    if (-not $DynuAccessToken) {
-        throw "No access token provided for Dynu"
-    }
 
     try {
         $zones = Invoke-RestMethod -Method "Get" -Uri "https://api.dynu.com/v1/dns/domains" `
@@ -245,18 +244,13 @@ function Find-DynuExistingRecord {
         [string]$RecordName,
         [Parameter(Mandatory, Position = 2)]
         [string]$RecordValue,
-        [Parameter(Position = 3)]
+        [Parameter(Mandatory, Position = 3)]
         [string]$DynuAccessToken
     )
 
-    $DynuAccessToken = if ($DynuAccessToken) { $DynuAccessToken } else { $script:AccessToken }
-    if (-not $DynuAccessToken) {
-        throw "No access token provided for Dynu"
-    }
-
     try {
         $records = Invoke-RestMethod -Method "Get" -Uri "https://api.dynu.com/v1/dns/records/${ZoneName}" `
-            -Headers @{Authorization = "Bearer ${token}"} @script:UseBasic
+            -Headers @{Authorization = "Bearer ${DynuAccessToken}"} @script:UseBasic
     } catch {
         throw
     }
