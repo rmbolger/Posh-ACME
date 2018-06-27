@@ -43,6 +43,9 @@ function Add-DnsTxtDynu {
         $response = Invoke-RestMethod -Method "Post" -Uri "https://api.dynu.com/v1/dns/record/add" `
             -Headers @{Authorization = "Bearer ${token}"} -ContentType "application/json" `
             -Body $body @script:UseBasic
+        if (-not $response.id) {
+            throw "Record creation failed: ${response}"
+        }
     } catch {
         throw
     }
@@ -113,6 +116,9 @@ function Remove-DnsTxtDynu {
     try {
         $response = Invoke-RestMethod -Method "Get" -Uri "https://api.dynu.com/v1/dns/record/delete/$($record.id)" `
             -Headers @{Authorization = "Bearer ${token}"} @script:UseBasic
+        if ($response -ne $true) {
+            throw "Record deletion failed: ${response}"
+        }
     } catch {
         throw
     }
