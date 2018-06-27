@@ -1,6 +1,6 @@
-# How To Use the Dyunu DNS Plugin
+# How To Use the Dynu DNS Plugin
 
-This plugin works against the [Dyunu](https://www.dynu.com) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
+This plugin works against the [Dynu](https://www.dynu.com) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
 
 **Please note**: You must bring your own domain. It is not possible to set TXT records on the domains provided by Dynu.
 
@@ -10,7 +10,7 @@ You will need to retrieve the Client ID and Secret that will be used to update D
 
 ## Using the Plugin
 
-You will need the account's Client ID and Secret to be set as `DyunuClientID` and `DynuSecret`.
+You will need the account's Client ID and Secret to be set as `DynuClientID` and `DynuSecret`.
 
 ```powershell
 $DynuParams = @{DynuClientID='xxxxxxxx'; DynuSecret='xxxxxxxx'}
