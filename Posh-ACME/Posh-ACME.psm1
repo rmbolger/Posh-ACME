@@ -1,5 +1,18 @@
 #Requires -Version 5.1
 
+# Before we do anything else, make sure we have a sufficient .NET version that can load
+# the .NET Standard 2.0 version of Bouncy Castle we're using. It's supposed to be compatible
+# with .NET 4.6.1, but only if the app is compiled to support it (which PowerShell is not).
+# So it only loads properly on .NET 4.7.1 or later which is also the minimum version we need
+# to fully support ECC based certs. Any version of .NET Core should already work.
+if ($PSVersionTable.PSEdition -eq 'Desktop') {
+    # https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-check-for-a-minimum-required-net-framework-version-by-querying-the-registry-in-powershell-net-framework-45-and-later
+    $netBuild = (Get-ItemProperty "HKLM:SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full").Release
+    if ($netBuild -lt 461308) {
+            throw "Insufficient .NET version found (build $netBuild). Please install .NET 4.7.1 or later."
+    }
+}
+
 # Get public and private function definition files.
 $Public  = @( Get-ChildItem -Path $PSScriptRoot\Public\*.ps1 -ErrorAction SilentlyContinue )
 $Private = @( Get-ChildItem -Path $PSScriptRoot\Private\*.ps1 -ErrorAction SilentlyContinue )
