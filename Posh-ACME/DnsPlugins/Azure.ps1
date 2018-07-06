@@ -311,9 +311,11 @@ function Connect-AZTenant {
     )
 
     # just return if we already have a valid Bearer token
-    if ($script:AZToken -and (Get-Date) -lt $script:AZToken.Expires) {
+    if ($script:AZToken -and (Get-Date).ToUniversalTime() -lt $script:AZToken.Expires) {
+        Write-Debug "Existing token has not expired."
         return
     }
+    Write-Debug "Token Expires: $($script:AZToken.Expires)"
 
     switch ($PSCmdlet.ParameterSetName) {
         'Credential' {
