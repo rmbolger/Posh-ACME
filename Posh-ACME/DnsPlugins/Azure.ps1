@@ -311,7 +311,7 @@ function Connect-AZTenant {
     )
 
     # just return if we already have a valid Bearer token
-    if ($script:AZToken -and (Get-Date).ToUniversalTime() -lt $script:AZToken.Expires) {
+    if ($script:AZToken -and (Get-Date) -lt $script:AZToken.Expires) {
         Write-Debug "Existing token has not expired."
         return
     }
@@ -350,7 +350,7 @@ function Connect-AZTenant {
 
     # create a token object that we can use for subsequence calls with a 5 min buffer on the expiration
     $script:AZToken = [pscustomobject]@{
-        Expires = (Get-Date '1/1/1970').AddSeconds($token.expires_on - 300)
+        Expires = (Get-Date '1970-01-01T00:00:00Z').AddSeconds($token.expires_on - 300)
         AuthHeader = @{ Authorization = "Bearer $($token.access_token)" }
     }
 }
