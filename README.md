@@ -68,6 +68,8 @@ New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@exampl
 
 To learn how to use the supported DNS plugins, check out `Get-DnsPlugins` and `Get-DnsPluginHelp`. There's also a [tutorial](/Tutorial.md) for a more in-depth guide to using the module.
 
+The output of `New-PACertificate` is an object that contains various properties about the certificate you generated. Only a subset of the properties are displayed by default. To see the full list including the filesystem paths to any certificate files that were generated, pipe the original output to `Format-List` or use `Get-PACertificate | Format-List`. The root config folder for all data saved by the module is either `%LOCALAPPDATA%\Posh-ACME` on Windows, `~/.config/Posh-ACME` on Linux, or `~/Library/Preferences/Posh-ACME` on Mac OS.
+
 
 # Requirements and Platform Support
 
