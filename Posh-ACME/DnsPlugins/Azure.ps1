@@ -1,19 +1,19 @@
 function Add-DnsTxtAzure {
-    [CmdletBinding(DefaultParameterSetName='Credential')]
+    [CmdletBinding(DefaultParameterSetName = 'Credential')]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
-        [Parameter(Mandatory,Position=1)]
+        [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(Mandatory, Position = 2)]
         [string]$AZSubscriptionId,
-        [Parameter(ParameterSetName='Credential',Mandatory,Position=3)]
+        [Parameter(ParameterSetName = 'Credential', Mandatory, Position = 3)]
         [string]$AZTenantId,
-        [Parameter(ParameterSetName='Credential',Mandatory,Position=4)]
+        [Parameter(ParameterSetName = 'Credential', Mandatory, Position = 4)]
         [pscredential]$AZAppCred,
-        [Parameter(ParameterSetName='Token',Mandatory,Position=3)]
+        [Parameter(ParameterSetName = 'Token', Mandatory, Position = 3)]
         [string]$AZAccessToken,
-        [Parameter(ParameterSetName='IMDS',Mandatory)]
+        [Parameter(ParameterSetName = 'IMDS', Mandatory)]
         [switch]$AZUseIMDS,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -33,14 +33,15 @@ function Add-DnsTxtAzure {
     if ($rec.etag) {
         $txtVals = $rec.properties.TXTRecords
         if ($TxtValue -notin $txtVals.value) {
-            $txtVals += @{value=@($TxtValue)}
+            $txtVals += @{value = @($TxtValue)}
         }
-    } else {
-        $txtVals = @(@{value=@($TxtValue)})
+    }
+    else {
+        $txtVals = @(@{value = @($TxtValue)})
     }
 
     # build the record update json
-    $recBody = @{properties=@{TTL=10;TXTRecords=$txtVals}} | ConvertTo-Json -Compress -Depth 5
+    $recBody = @{properties = @{TTL = 10; TXTRecords = $txtVals}} | ConvertTo-Json -Compress -Depth 5
 
     Write-Verbose "Sending updated $($rec.name)"
     Write-Debug $recBody
@@ -49,7 +50,8 @@ function Add-DnsTxtAzure {
             -Method Put -Body $recBody -Headers $script:AZToken.AuthHeader `
             -ContentType 'application/json' @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
-    } catch { throw }
+    }
+    catch { throw }
 
 
     <#
@@ -112,21 +114,21 @@ function Add-DnsTxtAzure {
 }
 
 function Remove-DnsTxtAzure {
-    [CmdletBinding(DefaultParameterSetName='Credential')]
+    [CmdletBinding(DefaultParameterSetName = 'Credential')]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
-        [Parameter(Mandatory,Position=1)]
+        [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(Mandatory, Position = 2)]
         [string]$AZSubscriptionId,
-        [Parameter(ParameterSetName='Credential',Mandatory,Position=3)]
+        [Parameter(ParameterSetName = 'Credential', Mandatory, Position = 3)]
         [string]$AZTenantId,
-        [Parameter(ParameterSetName='Credential',Mandatory,Position=4)]
+        [Parameter(ParameterSetName = 'Credential', Mandatory, Position = 4)]
         [pscredential]$AZAppCred,
-        [Parameter(ParameterSetName='Token',Mandatory,Position=3)]
+        [Parameter(ParameterSetName = 'Token', Mandatory, Position = 3)]
         [string]$AZAccessToken,
-        [Parameter(ParameterSetName='IMDS',Mandatory)]
+        [Parameter(ParameterSetName = 'IMDS', Mandatory)]
         [switch]$AZUseIMDS,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -164,11 +166,12 @@ function Remove-DnsTxtAzure {
             Invoke-RestMethod "https://management.azure.com$($rec.id)?api-version=2018-03-01-preview" `
                 -Method Delete -Headers $script:AZToken.AuthHeader @script:UseBasic | Out-Null
             return
-        } catch { throw }
+        }
+        catch { throw }
     }
 
     # build the record update json
-    $recBody = @{properties=@{TTL=10;TXTRecords=$txtVals}} | ConvertTo-Json -Compress -Depth 5
+    $recBody = @{properties = @{TTL = 10; TXTRecords = $txtVals}} | ConvertTo-Json -Compress -Depth 5
 
     Write-Verbose "Sending updated $($rec.name)"
     Write-Debug $recBody
@@ -177,7 +180,8 @@ function Remove-DnsTxtAzure {
             -Method Put -Body $recBody -Headers $script:AZToken.AuthHeader `
             -ContentType 'application/json' @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
-    } catch { throw }
+    }
+    catch { throw }
 
     <#
     .SYNOPSIS
@@ -263,7 +267,7 @@ function Save-DnsTxtAzure {
 function ConvertFrom-AccessToken {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [string]$AZAccessToken
     )
 
@@ -271,7 +275,7 @@ function ConvertFrom-AccessToken {
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-token-and-claims
 
     # grab the payload section of the JWT
-    $null,$payload,$null = $AZAccessToken.Split('.')
+    $null, $payload, $null = $AZAccessToken.Split('.')
 
     # decode the claims
     $claims = $payload | ConvertFrom-Base64Url | ConvertFrom-Json -EA Stop
@@ -282,7 +286,7 @@ function ConvertFrom-AccessToken {
     }
 
     # make sure the token hasn't expired
-    $expiresDT = [DateTime](Get-Date '1/1/1970').AddSeconds($claims.exp)
+    $expiresDT = ( Get-Epoch ).AddSeconds($claims.exp)
     if ($expiresDT -lt [DateTime]::UtcNow) {
         throw "The provided access token has expired as of $("{0:yyyy-MM-ddTHH:mm:ssZ}" -f $expiresDT)"
     }
@@ -290,32 +294,34 @@ function ConvertFrom-AccessToken {
     # return an object that contains the 'expires_on' property along with the token
     # which is what we care about from the other normal logon methods
     return [pscustomobject]@{
-        expires_on = $claims.exp
+        expires_on   = $claims.exp
         access_token = $AZAccessToken
     }
 }
 
 function Connect-AZTenant {
-    [CmdletBinding(DefaultParameterSetName='Credential')]
+    [CmdletBinding(DefaultParameterSetName = 'Credential')]
     param(
-        [Parameter(ParameterSetName='Credential',Mandatory,Position=0)]
+        [Parameter(ParameterSetName = 'Credential', Mandatory, Position = 0)]
         [string]$AZTenantId,
-        [Parameter(ParameterSetName='Credential',Mandatory,Position=1)]
+        [Parameter(ParameterSetName = 'Credential', Mandatory, Position = 1)]
         [pscredential]$AZAppCred,
-        [Parameter(ParameterSetName='Token',Mandatory,Position=0)]
+        [Parameter(ParameterSetName = 'Token', Mandatory, Position = 0)]
         [string]$AZAccessToken,
-        [Parameter(ParameterSetName='IMDS',Mandatory)]
+        [Parameter(ParameterSetName = 'IMDS', Mandatory)]
         [switch]$AZUseIMDS,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # just return if we already have a valid Bearer token
-    if ($script:AZToken -and (Get-Date) -lt $script:AZToken.Expires) {
-        Write-Debug "Existing token has not expired."
-        return
+    if ($script:AZToken ) {
+        Write-Debug "Token Expires: $($script:AZToken.Expires)"
+        if ( ( Get-UtcDate ) -lt $script:AZToken.Expires) {
+            Write-Debug "Existing token has not expired."
+            return
+        }
     }
-    Write-Debug "Token Expires: $($script:AZToken.Expires)"
 
     switch ($PSCmdlet.ParameterSetName) {
         'Credential' {
@@ -325,7 +331,8 @@ function Connect-AZTenant {
                 $authBody = "grant_type=client_credentials&client_id=$($AZAppCred.Username)&client_secret=$($AZAppCred.GetNetworkCredential().Password)&resource=$([uri]::EscapeDataString('https://management.core.windows.net/'))"
                 $token = Invoke-RestMethod "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token" `
                     -Method Post -Body $authBody @script:UseBasic
-            } catch { throw }
+            }
+            catch { throw }
             break
         }
         'Token' {
@@ -342,15 +349,18 @@ function Connect-AZTenant {
                 Write-Debug "Authenticating with Instance Metadata Service (IMDS)"
                 $queryString = "api-version=2018-02-01&resource=$([uri]::EscapeDataString('https://management.core.windows.net/'))"
                 $token = Invoke-RestMethod "http://169.254.169.254/metadata/identity/oauth2/token?$queryString" `
-                    -Headers @{Metadata='true'} @script:UseBasic
-            } catch { throw }
+                    -Headers @{Metadata = 'true'} @script:UseBasic
+            }
+            catch { throw }
             break
         }
     }
 
+    Write-Debug "Retrieved token expiration: $token.expires_on"
+
     # create a token object that we can use for subsequence calls with a 5 min buffer on the expiration
     $script:AZToken = [pscustomobject]@{
-        Expires = (Get-Date '1970-01-01T00:00:00Z').AddSeconds($token.expires_on - 300)
+        Expires    = ( Get-Epoch ).AddSeconds($token.expires_on - 300)
         AuthHeader = @{ Authorization = "Bearer $($token.access_token)" }
     }
 }
@@ -358,15 +368,16 @@ function Connect-AZTenant {
 function Get-AZZoneId {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
-        [Parameter(Mandatory,Position=1)]
+        [Parameter(Mandatory, Position = 1)]
         [string]$AZSubscriptionId
     )
 
     # setup a module variable to cache the record to zone ID mapping
     # so it's quicker to find later
-    if (!$script:AZRecordZones) { $script:AZRecordZones = @{} }
+    if (!$script:AZRecordZones) { $script:AZRecordZones = @{} 
+    }
 
     # check for the record in the cache
     if ($script:AZRecordZones.ContainsKey($RecordName)) {
@@ -378,7 +389,8 @@ function Get-AZZoneId {
     $url = "https://management.azure.com/subscriptions/$($AZSubscriptionId)/providers/Microsoft.Network/dnszones?api-version=2018-03-01-preview"
     try {
         $zones = Invoke-RestMethod $url -Headers $script:AZToken.AuthHeader @script:UseBasic
-    } catch { throw }
+    }
+    catch { throw }
 
     # Since Azure could be hosting both apex and sub-zones, we need to find the closest/deepest
     # sub-zone that would hold the record rather than just adding it to the apex. So for something
@@ -392,7 +404,7 @@ function Get-AZZoneId {
     Write-Verbose "Found zones: $($zones.value.name -join ', ')"
 
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
+    for ($i = 1; $i -lt ($pieces.Count - 1); $i++) {
         $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
         Write-Verbose "Checking $zoneTest"
 
@@ -409,16 +421,16 @@ function Get-AZZoneId {
 function Get-AZTxtRecord {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
-        [Parameter(Mandatory,Position=1)]
+        [Parameter(Mandatory, Position = 1)]
         [string]$ZoneId
     )
 
     # parse the zone name from the zone id and strip it from $RecordName
     # to get the relativeRecordSetName
-    $zoneName = $ZoneID.Substring($ZoneID.LastIndexOf('/')+1)
-    $relName = $RecordName.Replace(".$zoneName",'')
+    $zoneName = $ZoneID.Substring($ZoneID.LastIndexOf('/') + 1)
+    $relName = $RecordName.Replace(".$zoneName", '')
     $recID = "$ZoneID/TXT/$($relName)"
 
     # query the specific record we're looking to modify
@@ -426,13 +438,30 @@ function Get-AZTxtRecord {
     try {
         $rec = Invoke-RestMethod "https://management.azure.com$($recID)?api-version=2018-03-01-preview" `
             -Headers $script:AZToken.AuthHeader @script:UseBasic
-    } catch {}
+    }
+    catch {}
 
     if ($rec) {
         return $rec
-    } else {
+    }
+    else {
         # build a fake (no etag) empty record to send back
-        $rec = @{id=$recID; name=$relName; properties=@{fqdn="$RecordName."; TXTRecords=@()}}
+        $rec = @{id = $recID; name = $relName; properties = @{fqdn = "$RecordName."; TXTRecords = @()}}
         return $rec
     }
+}
+
+
+function Get-UtcDate {
+    [CmdletBinding()]
+    [OutputType([DateTime])]
+    Param( [DateTime]$Date )
+    Write-Output ( Get-Date @PSBoundParameters ).ToUniversalTime()
+}
+
+function Get-Epoch {
+    [CmdletBinding()]
+    [OutputType([DateTime])]
+    Param()
+    Write-Output ( Get-UtcDate -Date '1/1/1970 00:00:00 GMT' )
 }
