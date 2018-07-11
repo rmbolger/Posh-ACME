@@ -1,4 +1,5 @@
 . $PSScriptRoot\..\Posh-ACME\DnsPlugins\Azure.ps1
+. $PSScriptRoot\..\Posh-ACME\Private\Get-DateTimeOffsetNow.ps1
 
 Describe "Connect-AZTenant" {
 
@@ -11,20 +12,19 @@ Describe "Connect-AZTenant" {
 
     Mock -CommandName Invoke-RestMethod -MockWith { return $fakeTokenResponse }
     Mock -CommandName ConvertFrom-AccessToken -MockWith { return $fakeTokenResponse }
-    Mock -CommandName Get-Date -ParameterFilter { -not $Date } -MockWith {
-        return (Get-Date '2018-07-04T09:00:00Z') # 2018-07-04 09:00 UTC
+    Mock -CommandName Get-DateTimeOffsetNow -MockWith {
+        return [DateTimeOffset]::Parse('2018-07-04T09:00:00Z')
     }
 
     $fakeGoodToken = [pscustomobject]@{
-        Expires    = (Get-UtcDate '2018-07-04T09:05:00Z') # just after mocked Get-Date
+        Expires    = [DateTimeOffset]::Parse('2018-07-04T09:05:00Z') # just after mocked "Now"
         AuthHeader = @{ Authorization = 'Bearer fakegoodtoken' }
     }
 
     $fakeExpiredToken = [pscustomobject]@{
-        Expires    = (Get-UtcDate '2018-07-04T08:55:00Z') # just before mocked Get-Date
+        Expires    = [DateTimeOffset]::Parse('2018-07-04T08:55:00Z') # just before mocked "Now"
         AuthHeader = @{ Authorization = 'Bearer fakeexpiredtoken' }
     }
-
 
     Context "Credential param set" {
 
@@ -48,7 +48,7 @@ Describe "Connect-AZTenant" {
             $script:AZToken | Should -Not -BeNullOrEmpty
             $script:AZToken.AuthHeader | Should -Not -BeNullOrEmpty
             $script:AZToken.AuthHeader.Authorization | Should -BeExactly 'Bearer faketoken'
-            $script:AZToken.Expires | Should -Be (Get-UtcDate '2018-07-04T07:55:00Z')
+            $script:AZToken.Expires | Should -Be ([DateTimeOffset]::Parse('2018-07-04T07:55:00Z'))
         }
         It "calls nothing if current token is valid" {
             $script:AZToken = $fakeGoodToken
@@ -59,8 +59,8 @@ Describe "Connect-AZTenant" {
         It "does not overwrite existing token if current token is valid" {
             $script:AZToken | Should -Not -BeNullOrEmpty
             $script:AZToken.AuthHeader | Should -Not -BeNullOrEmpty
-            $script:AZToken.AuthHeader.Authorization | Should -BeExactly 'Bearer fakegoodtoken'
-            $script:AZToken.Expires | Should -Be (Get-UtcDate '2018-07-04T09:05:00Z')
+            $script:AZToken.AuthHeader.Authorization | Should -BeExactly $fakeGoodToken.AuthHeader.Authorization
+            $script:AZToken.Expires | Should -Be $fakeGoodToken.Expires
         }
 
     }
@@ -85,7 +85,7 @@ Describe "Connect-AZTenant" {
             $script:AZToken | Should -Not -BeNullOrEmpty
             $script:AZToken.AuthHeader | Should -Not -BeNullOrEmpty
             $script:AZToken.AuthHeader.Authorization | Should -BeExactly 'Bearer faketoken'
-            $script:AZToken.Expires | Should -Be (Get-UtcDate '2018-07-04T07:55:00Z')
+            $script:AZToken.Expires | Should -Be ([DateTimeOffset]::Parse('2018-07-04T07:55:00Z'))
         }
         It "calls nothing if current token is valid" {
             $script:AZToken = $fakeGoodToken
@@ -96,8 +96,8 @@ Describe "Connect-AZTenant" {
         It "does not overwrite existing token if current token is valid" {
             $script:AZToken | Should -Not -BeNullOrEmpty
             $script:AZToken.AuthHeader | Should -Not -BeNullOrEmpty
-            $script:AZToken.AuthHeader.Authorization | Should -BeExactly 'Bearer fakegoodtoken'
-            $script:AZToken.Expires | Should -Be (Get-UtcDate '2018-07-04T09:05:00Z')
+            $script:AZToken.AuthHeader.Authorization | Should -BeExactly $fakeGoodToken.AuthHeader.Authorization
+            $script:AZToken.Expires | Should -Be $fakeGoodToken.Expires
         }
 
     }
@@ -120,7 +120,7 @@ Describe "Connect-AZTenant" {
             $script:AZToken | Should -Not -BeNullOrEmpty
             $script:AZToken.AuthHeader | Should -Not -BeNullOrEmpty
             $script:AZToken.AuthHeader.Authorization | Should -BeExactly 'Bearer faketoken'
-            $script:AZToken.Expires | Should -Be (Get-UtcDate '2018-07-04T07:55:00Z')
+            $script:AZToken.Expires | Should -Be ([DateTimeOffset]::Parse('2018-07-04T07:55:00Z'))
         }
         It "calls nothing if current token is valid" {
             $script:AZToken = $fakeGoodToken
@@ -131,47 +131,10 @@ Describe "Connect-AZTenant" {
         It "does not overwrite existing token if current token is valid" {
             $script:AZToken | Should -Not -BeNullOrEmpty
             $script:AZToken.AuthHeader | Should -Not -BeNullOrEmpty
-            $script:AZToken.AuthHeader.Authorization | Should -BeExactly 'Bearer fakegoodtoken'
-            $script:AZToken.Expires | Should -Be (Get-UtcDate '2018-07-04T09:05:00Z')
+            $script:AZToken.AuthHeader.Authorization | Should -BeExactly $fakeGoodToken.AuthHeader.Authorization
+            $script:AZToken.Expires | Should -Be $fakeGoodToken.Expires
         }
 
     }
 
-}
-
-
-Describe "Get-UtcDate" {
-    $testDate = "January 1, 1970 4:45:00 GMT"
-    $stringResult = 'Thursday, January 1, 1970 4:45:00 AM'
-
-    $testResult = Get-UtcDate -Date $testDate
-
-    it "returns a DateTime object" {
-        $testResult | Should -BeOfType [DateTime]
-    }
-
-    it "returns an object with the Kind property of 'UTC'" {
-        $testResult.Kind | Should -Be 'UTC'
-    }
-
-    it "returns an object with a Date property of '$stringResult'" {
-        $testResult.DateTime | Should -Be $stringResult
-    }
-}
-
-Describe "Get-Epoch" {
-    $stringResult = "Thursday, January 1, 1970 12:00:00 AM"
-    $testResult = Get-Epoch
-
-    it "returns a DateTime object" {
-        $testResult | Should -BeOfType [DateTime]
-    }
-
-    it "returns an object with the Kind property of 'Unspecified'" {
-        $testResult.Kind | Should -Be 'Unspecified'
-    }
-
-    it "returns an object with a Date property of '$stringResult'" {
-        $testResult.DateTime | Should -Be $stringResult
-    }
 }

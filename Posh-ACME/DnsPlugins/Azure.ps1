@@ -286,9 +286,9 @@ function ConvertFrom-AccessToken {
     }
 
     # make sure the token hasn't expired
-    $expiresDT = ( Get-Epoch ).AddSeconds($claims.exp)
-    if ($expiresDT -lt [DateTime]::UtcNow) {
-        throw "The provided access token has expired as of $("{0:yyyy-MM-ddTHH:mm:ssZ}" -f $expiresDT)"
+    $expires = [DateTimeOffset]::FromUnixTimeSeconds($claims.exp)
+    if ((Get-DateTimeOffsetNow) -gt $expires) {
+        throw "The provided access token has expired as of $($expires.ToString('u'))"
     }
 
     # return an object that contains the 'expires_on' property along with the token
@@ -317,7 +317,7 @@ function Connect-AZTenant {
     # just return if we already have a valid Bearer token
     if ($script:AZToken ) {
         Write-Debug "Token Expires: $($script:AZToken.Expires)"
-        if ( ( Get-UtcDate ) -lt $script:AZToken.Expires) {
+        if ((Get-DateTimeOffsetNow) -lt $script:AZToken.Expires) {
             Write-Debug "Existing token has not expired."
             return
         }
@@ -360,7 +360,7 @@ function Connect-AZTenant {
 
     # create a token object that we can use for subsequence calls with a 5 min buffer on the expiration
     $script:AZToken = [pscustomobject]@{
-        Expires    = ( Get-Epoch ).AddSeconds($token.expires_on - 300)
+        Expires    = [DateTimeOffset]::FromUnixTimeSeconds($token.expires_on).AddMinutes(-5)
         AuthHeader = @{ Authorization = "Bearer $($token.access_token)" }
     }
 }
@@ -449,19 +449,4 @@ function Get-AZTxtRecord {
         $rec = @{id = $recID; name = $relName; properties = @{fqdn = "$RecordName."; TXTRecords = @()}}
         return $rec
     }
-}
-
-
-function Get-UtcDate {
-    [CmdletBinding()]
-    [OutputType([DateTime])]
-    Param( [DateTime]$Date )
-    Write-Output ( Get-Date @PSBoundParameters ).ToUniversalTime()
-}
-
-function Get-Epoch {
-    [CmdletBinding()]
-    [OutputType([DateTime])]
-    Param()
-    Write-Output ( Get-Date '1/1/1970' )
 }
