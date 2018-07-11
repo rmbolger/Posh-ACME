@@ -463,5 +463,5 @@ function Get-Epoch {
     [CmdletBinding()]
     [OutputType([DateTime])]
     Param()
-    Write-Output ( Get-UtcDate -Date '1/1/1970 00:00:00 GMT' )
+    Write-Output ( Get-Date '1/1/1970' )
 }

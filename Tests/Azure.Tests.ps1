@@ -167,8 +167,8 @@ Describe "Get-Epoch" {
         $testResult | Should -BeOfType [DateTime]
     }
 
-    it "returns an object with the Kind property of 'UTC'" {
-        $testResult.Kind | Should -Be 'UTC'
+    it "returns an object with the Kind property of 'Unspecified'" {
+        $testResult.Kind | Should -Be 'Unspecified'
     }
 
     it "returns an object with a Date property of '$stringResult'" {
