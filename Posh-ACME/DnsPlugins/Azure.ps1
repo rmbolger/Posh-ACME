@@ -40,7 +40,7 @@ function Add-DnsTxtAzure {
     }
 
     # build the record update json
-    $recBody = @{properties=@{TTL=10; TXTRecords=$txtVals}} | ConvertTo-Json -Compress -Depth 5
+    $recBody = @{properties=@{TTL=10;TXTRecords=$txtVals}} | ConvertTo-Json -Compress -Depth 5
 
     Write-Verbose "Sending updated $($rec.name)"
     Write-Debug $recBody
@@ -168,7 +168,7 @@ function Remove-DnsTxtAzure {
     }
 
     # build the record update json
-    $recBody = @{properties=@{TTL=10; TXTRecords=$txtVals}} | ConvertTo-Json -Compress -Depth 5
+    $recBody = @{properties=@{TTL=10;TXTRecords=$txtVals}} | ConvertTo-Json -Compress -Depth 5
 
     Write-Verbose "Sending updated $($rec.name)"
     Write-Debug $recBody
@@ -290,7 +290,7 @@ function ConvertFrom-AccessToken {
     # return an object that contains the 'expires_on' property along with the token
     # which is what we care about from the other normal logon methods
     return [pscustomobject]@{
-        expires_on   = $claims.exp
+        expires_on = $claims.exp
         access_token = $AZAccessToken
     }
 }
@@ -344,7 +344,7 @@ function Connect-AZTenant {
                 Write-Debug "Authenticating with Instance Metadata Service (IMDS)"
                 $queryString = "api-version=2018-02-01&resource=$([uri]::EscapeDataString('https://management.core.windows.net/'))"
                 $token = Invoke-RestMethod "http://169.254.169.254/metadata/identity/oauth2/token?$queryString" `
-                    -Headers @{Metadata = 'true'} @script:UseBasic
+                    -Headers @{Metadata='true'} @script:UseBasic
             } catch { throw }
             break
         }
