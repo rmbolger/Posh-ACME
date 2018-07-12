@@ -36,7 +36,7 @@ $script:WellKnownDirs = @{
     LE_STAGE = 'https://acme-staging-v02.api.letsencrypt.org/directory';
 }
 $script:HEADER_NONCE = 'Replay-Nonce'
-$script:USER_AGENT = "Posh-ACME/2.4.0 PowerShell/$($PSVersionTable.PSVersion)"
+$script:USER_AGENT = "Posh-ACME/2.5.0 PowerShell/$($PSVersionTable.PSVersion)"
 $script:COMMON_HEADERS = @{'Accept-Language'='en-us,en;q=0.5'}
 
 # Invoke-WebRequest and Invoke-RestMethod on PowerShell 5.1 both use
