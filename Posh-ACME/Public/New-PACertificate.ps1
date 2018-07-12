@@ -118,32 +118,42 @@ function New-PACertificate {
         $order | Set-PAOrder
     }
 
+    # add validation parameters to the order object using explicit params
+    # backed up by previous order params
+    if ('DnsPlugin' -in $PSBoundParameters.Keys) {
+        $order.DnsPlugin = $DnsPlugin
+    } elseif ($oldOrder) {
+        $order.DnsPlugin = $oldOrder.DnsPlugin
+    }
+    if ('DnsAlias' -in $PSBoundParameters.Keys) {
+        $order.DnsAlias = $DnsAlias
+    } elseif ($oldOrder) {
+        $order.DnsAlias = $oldOrder.DnsAlias
+    }
+    $order.DnsSleep = $DnsSleep
+    if ($oldOrder -and 'DnsSleep' -notin $PSBoundParameters.Keys) {
+        $order.DnsSleep = $oldOrder.DnsSleep
+    }
+    $order.ValidationTimeout = $ValidationTimeout
+    if ($oldOrder -and 'ValidationTimeout' -notin $PSBoundParameters.Keys) {
+        $order.ValidationTimeout = $oldOrder.ValidationTimeout
+    }
+    Write-Debug "Saving validation params to order"
+    $order | Update-PAOrder -SaveOnly
+
     # deal with "pending" orders that may have authorization challenges to prove
     if ($order.status -eq 'pending') {
 
         # create a hashtable of validation parameters to splat that uses
         # explicit params backed up by previous order params
-        $chalParams = @{}
-        if ('DnsPlugin' -in $PSBoundParameters.Keys) {
-            $chalParams.DnsPlugin = $DnsPlugin
-        } elseif ($oldOrder) {
-            $chalParams.DnsPlugin = $oldOrder.DnsPlugin
+        $chalParams = @{
+            DnsPlugin = $order.DnsPlugin
+            DnsAlias = $order.DnsAlias
+            DnsSleep = $order.DnsSleep
+            ValidationTimeout = $order.ValidationTimeout
         }
         if ('PluginArgs' -in $PSBoundParameters.Keys) {
             $chalParams.PluginArgs = $PluginArgs
-        }
-        if ('DnsAlias' -in $PSBoundParameters.Keys) {
-            $chalParams.DnsAlias = $DnsAlias
-        } elseif ($oldOrder) {
-            $chalParams.DnsAlias = $oldOrder.DnsAlias
-        }
-        $chalParams.DnsSleep = $DnsSleep
-        if ($oldOrder -and 'DnsSleep' -notin $PSBoundParameters.Keys) {
-            $chalParams.DnsSleep = $oldOrder.DnsSleep
-        }
-        $chalParams.ValidationTimeout = $ValidationTimeout
-        if ($oldOrder -and 'ValidationTimeout' -notin $PSBoundParameters.Keys) {
-            $chalParams.ValidationTimeout = $oldOrder.ValidationTimeout
         }
 
         Submit-ChallengeValidation @chalParams
