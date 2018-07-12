@@ -99,13 +99,6 @@ function Submit-ChallengeValidation {
     }
     Write-Debug "DnsAlias: $($DnsAlias -join ',')"
 
-    # save order specific parameters to order object so we can renew later
-    $order.DnsPlugin = $DnsPlugin
-    $order.DnsAlias = $DnsAlias
-    $order.DnsSleep = $DnsSleep
-    $order.ValidationTimeout = $ValidationTimeout
-    $order | Update-PAOrder -SaveOnly
-
     # merge passed in plugin args with saved args (which also saves the merged copy)
     $PluginArgs = Merge-PluginArgs $PluginArgs $Account
 
