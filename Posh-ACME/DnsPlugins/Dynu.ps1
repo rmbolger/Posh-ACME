@@ -183,11 +183,14 @@ function Get-DynuAccessToken {
         [string]$DynuSecret
     )
 
-    if ($script:DynuAccessToken -and ($script:DynuAccessToken.Expiry -lt [DateTime]::UtcNow)) {
+    if ($script:DynuAccessToken -and ($script:DynuAccessToken.Expiry -lt (Get-DateTimeOffsetNow))) {
         return $script:DynuAccessToken.AccessToken
     }
 
-    $encodedCreds = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("${DynuClientID}:${DynuSecret}"))
+    # Dynu's web server requires the credentials to be passed on the first call, so we can't just
+    # use the -Credential parameter because it only adds credentials after passing nothing and getting
+    # an auth challenge response.
+    $encodedCreds = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("${DynuClientID}:${DynuSecret}"))
     $headers = @{
         Accept = "application/json"
         "Content-Type" = "application/x-www-form-urlencoded"
@@ -207,7 +210,7 @@ function Get-DynuAccessToken {
 
     $script:DynuAccessToken = @{
         AccessToken = $response.accessToken
-        Expiry = [DateTime]::UtcNow.AddSeconds($response.expiresIn)
+        Expiry = (Get-DateTimeOffsetNow).AddSeconds($response.expiresIn - 300)
     }
 
     return $script:DynuAccessToken.AccessToken
