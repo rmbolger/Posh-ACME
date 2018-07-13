@@ -230,7 +230,7 @@ function Connect-GCloudDns {
     # https://developers.google.com/identity/protocols/OAuth2ServiceAccount
 
     # just return if we've already got a valid non-expired token
-    if ($script:GCToken -and [DateTimeOffset]::Now -lt $script:GCToken.Expires) {
+    if ($script:GCToken -and (Get-DateTimeOffsetNow) -lt $script:GCToken.Expires) {
         return
     }
 
@@ -256,7 +256,7 @@ function Connect-GCloudDns {
     Write-Debug "Loading private key for $($GCKeyObj.client_email)"
     $key = Import-Pem -InputString $GCKeyObj.private_key | ConvertFrom-BCKey
 
-    $unixNow = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+    $unixNow = (Get-DateTimeOffsetNow).ToUnixTimeSeconds()
 
     # build the claim set for DNS read/write
     $jwtClaim = @{
@@ -285,7 +285,7 @@ function Connect-GCloudDns {
     # save a custom token to memory
     $script:GCToken = @{
         AuthHeader = @{Authorization="$($response.token_type) $($response.access_token)"};
-        Expires    = [DateTimeOffset]::Now.AddSeconds(3300);
+        Expires    = (Get-DateTimeOffsetNow).AddSeconds($response.expires_in - 300);
         ProjectID  = $GCKeyObj.project_id;
     }
 
