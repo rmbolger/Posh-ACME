@@ -216,7 +216,7 @@ function Get-DMEAuthHeader {
     # We need to hash a timestamp in "HTTP format", aka RFC 1123
     # https://api-docs.dnsmadeeasy.com/#1bf6d47c-61b1-0cf3-4f04-0ed4772561fe
     # https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings#RFC1123
-    $reqDate = (Get-Date).ToUniversalTime().ToString('r')
+    $reqDate = (Get-DateTimeOffsetNow).ToString('r')
     $dateBytes = [Text.Encoding]::UTF8.GetBytes($reqDate)
     $dateHash = [BitConverter]::ToString($hmac.ComputeHash($dateBytes)).Replace('-','').ToLower()
 

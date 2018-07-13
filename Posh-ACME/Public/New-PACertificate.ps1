@@ -71,8 +71,8 @@ function New-PACertificate {
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
     if ($Force -or !$order -or
         $order.status -eq 'invalid' -or
-        ($order.status -eq 'valid' -and $order.RenewAfter -and (Get-Date) -ge (Get-Date $order.RenewAfter)) -or
-        ($order.status -eq 'pending' -and (Get-Date) -gt (Get-Date $order.expires)) -or
+        ($order.status -eq 'valid' -and $order.RenewAfter -and (Get-DateTimeOffsetNow) -ge ([DateTimeOffset]::Parse($order.RenewAfter))) -or
+        ($order.status -eq 'pending' -and (Get-DateTimeOffsetNow) -gt ([DateTimeOffset]::Parse($order.expires))) -or
         $CertKeyLength -ne $order.KeyLength -or
         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') ) {
 
