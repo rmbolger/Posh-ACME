@@ -51,6 +51,19 @@ function Get-PAAuthorizations {
                 $auth.DNS01Token  = $dnsChallenge.token
             }
 
+            # add members that expose the details of the 'http-01' challenge
+            # in the root of the object
+            $auth | Add-Member -MemberType NoteProperty -Name 'HTTP01Status' -Value $null
+            $auth | Add-Member -MemberType NoteProperty -Name 'HTTP01Url' -Value $null
+            $auth | Add-Member -MemberType NoteProperty -Name 'HTTP01Token' -Value $null
+
+            $httpChallenge = $auth.challenges | Where-Object { $_.type -eq 'http-01' }
+            if ($httpChallenge) {
+                $auth.HTTP01Status = $httpChallenge.status
+                $auth.HTTP01Url    = $httpChallenge.url
+                $auth.HTTP01Token  = $httpChallenge.token
+            }
+
             Write-Output $auth
 
         }
