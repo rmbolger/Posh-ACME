@@ -35,9 +35,6 @@ function Update-PAAccount {
 
         Write-Debug "Refreshing account $($acct.id)"
 
-        # hydrate the account key
-        $acctKey = $acct.key | ConvertFrom-Jwk
-
         # build the header
         $header = @{
             alg   = $acct.alg;
@@ -51,7 +48,7 @@ function Update-PAAccount {
 
         # send the request
         try {
-            $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
+            $response = Invoke-ACME $header $payloadJson $acct -EA Stop
         } catch { throw }
         Write-Debug "Response: $($response.Content)"
 

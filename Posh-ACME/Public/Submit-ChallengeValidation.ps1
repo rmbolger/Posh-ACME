@@ -154,7 +154,7 @@ function Submit-ChallengeValidation {
             foreach ($chalUrl in $allAuths[$toValidate].DNS01Url) {
                 $header.nonce = $script:Dir.nonce
                 $header.url   = $chalUrl
-                try { $response = Invoke-ACME $header.url ($Account.key | ConvertFrom-Jwk) $header '{}' -EA Stop } catch {}
+                try { $response = Invoke-ACME $header '{}' $Account -EA Stop } catch {}
                 Write-Debug "Response: $($response.Content)"
             }
 

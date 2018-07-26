@@ -1,14 +1,15 @@
 function Invoke-ACME {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Account')]
     param(
-        [Parameter(Mandatory)]
-        [string]$Uri,
-        [Parameter(Mandatory)]
-        [Security.Cryptography.AsymmetricAlgorithm]$Key,
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory,Position=0)]
         [hashtable]$Header,
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory,Position=1)]
         [string]$PayloadJson,
+        [Parameter(ParameterSetName='Account',Mandatory,Position=2)]
+        [PSTypeName('PoshACME.PAAccount')]$Account,
+        [Parameter(ParameterSetName='RawKey',Mandatory,Position=2)]
+        [ValidateScript({Test-ValidKey $_ -ThrowOnFail})]
+        [Security.Cryptography.AsymmetricAlgorithm]$Key,
         [switch]$NoRetry
     )
 
@@ -23,18 +24,27 @@ function Invoke-ACME {
         $Header.nonce = Get-Nonce
     }
 
+    # set the account key based on the parameter set
+    if ($PSCmdlet.ParameterSetName -eq 'Account') {
+        # hydrate the account key
+        $acctKey = $Account.key | ConvertFrom-Jwk
+    } else {
+        # use the one passed in
+        $acctKey = $Key
+    }
+
     # Validation on the rest of the header will be taken care of by New-Jws. And
     # the only reason we aren't just simplifying by changing the input param to a
     # completed JWS string is because we want to be able to auto-retry on errors
     # like badNonce which requires modifying the Header and re-signing a new JWS.
-    $Jws = New-Jws $Key $Header $PayloadJson
+    $Jws = New-Jws $acctKey $Header $PayloadJson
 
     # since HTTP error codes make Invoke-WebRequest throw an exception,
     # we need to wrap it in a try/catch. But we can still get the response
     # object via the exception.
 
     try {
-        $response = Invoke-WebRequest -Uri $Uri -Body $Jws -Method Post `
+        $response = Invoke-WebRequest -Uri $Header.url -Body $Jws -Method Post `
             -ContentType 'application/jose+json' -UserAgent $script:USER_AGENT `
             -Headers $script:COMMON_HEADERS -EA Stop @script:UseBasic
 
@@ -118,7 +128,7 @@ function Invoke-ACME {
         if (!$NoRetry -and $freshNonce -and $acmeError.type -and $acmeError.type -like '*:badNonce') {
             $Header.nonce = $script:Dir.nonce
             Write-Debug "Retrying with updated nonce"
-            return (Invoke-ACME $Uri $Key $Header $PayloadJson -NoRetry)
+            return (Invoke-ACME $Header $PayloadJson -Key $acctKey -NoRetry)
         }
 
         # throw the converted AcmeException

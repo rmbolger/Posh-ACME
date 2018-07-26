@@ -52,7 +52,7 @@ function Submit-OrderFinalize {
 
     # send the request
     try {
-        $response = Invoke-ACME $header.url ($Account.key | ConvertFrom-Jwk) $header "{`"csr`":`"$csr`"}" -EA Stop
+        $response = Invoke-ACME $header "{`"csr`":`"$csr`"}" $Account -EA Stop
     } catch { throw }
     Write-Debug "Response: $($response.Content)"
 
