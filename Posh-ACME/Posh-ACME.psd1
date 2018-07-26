@@ -58,6 +58,7 @@ FunctionsToExport = @(
     'Remove-PAAccount',
     'Remove-PAOrder',
     'Save-DnsChallenge',
+    'Send-ChallengeAck',
     'Set-PAAccount',
     'Set-PAOrder',
     'Set-PAServer',
