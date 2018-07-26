@@ -20,7 +20,7 @@ function Unpublish-DnsChallenge {
         $recordName = "_acme-challenge.$Domain"
     }
 
-    $keyAuth = Get-KeyAuthorization $Account $Token
+    $keyAuth = Get-KeyAuthorization $Token $Account
 
     # hash and encode the key authorization value
     $keyAuthBytes = [Text.Encoding]::UTF8.GetBytes($keyAuth)
