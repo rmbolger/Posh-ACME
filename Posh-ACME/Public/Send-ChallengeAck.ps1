@@ -3,6 +3,7 @@ function Send-ChallengeAck {
     param(
         [Parameter(Mandatory,Position=0,ValueFromPipeline)]
         [string]$ChallengeUrl,
+        [Parameter(Position=1)]
         [PSTypeName('PoshACME.PAAccount')]$Account
     )
 
@@ -51,6 +52,9 @@ function Send-ChallengeAck {
 
     .DESCRIPTION
         Use this after publishing the required resource for one of the challenges from an authorization object. It lets the ACME server know that it should proceed validating that challenge.
+
+    .PARAMETER ChallengeUrl
+        The URL of the challenge to be validated.
 
     .PARAMETER Account
         The ACME account associated with the challenge.

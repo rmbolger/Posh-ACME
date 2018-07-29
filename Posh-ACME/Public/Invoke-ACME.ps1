@@ -135,4 +135,45 @@ function Invoke-ACME {
         throw [AcmeException]::new($acmeError.detail,$acmeError)
     }
 
+
+
+
+
+    <#
+    .SYNOPSIS
+        Send an authenticated ACME protocol message.
+
+    .DESCRIPTION
+        This is an advanced function used to send custom commands to an ACME server. You must provide a proper header hashtable and JSON body. Then the function will sign the data with an account or raw key and send it.
+
+    .PARAMETER Header
+        A hashtable containing the appropriate fields for an ACME message header such as 'alg', 'jwk', 'kid', 'nonce', and 'url'. The url field is also used as the destination for the message.
+
+    .PARAMETER PayloadJson
+        A JSON formatted string with the ACME message body.
+
+    .PARAMETER Account
+        An existing ACME account object such as the output from Get-PAAccount.
+
+    .PARAMETER Key
+        A raw RSA or EC key object. This is usually only necessary when creating a new ACME account.
+
+    .PARAMETER NoRetry
+        If specified, don't retry on bad nonce errors. Occasionally, the nonce provided in an ACME message will be rejected. By default, this function requests a new nonce once and tries to send the message again before giving up.
+
+    .EXAMPLE
+        $acct = Get-PAAccount
+        PS C:\>$header = @{ alg=$acct.alg; kid=$acct.location; nonce='xxxxxxxxxxxxxx'; url='https://acme.example.com/acme/challenge/xxxxxxxxxxxxx' }
+        PS C:\>$payloadJson = '{}'
+        PS C:\>Invoke-ACME $header $payloadJson $acct
+
+        Send an ACME message using the current account.
+
+    .LINK
+        Project: https://github.com/rmbolger/Posh-ACME
+
+    .LINK
+        New-PACertificate
+
+    #>
 }
