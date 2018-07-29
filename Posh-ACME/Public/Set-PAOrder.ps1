@@ -103,9 +103,6 @@ function Set-PAOrder {
             }
             $certStr = $certLines[$certStart..$certEnd] -join '' | ConvertTo-Base64Url -FromBase64
 
-            # hydrate the account key
-            $acctKey = $acct.key | ConvertFrom-Jwk
-
             # build the header
             $header = @{
                 alg   = $acct.alg;
@@ -118,7 +115,7 @@ function Set-PAOrder {
 
             # send the request
             try {
-                $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
+                $response = Invoke-ACME $header $payloadJson $acct -EA Stop
             } catch { throw }
             Write-Debug "Response: $($response.Content)"
 

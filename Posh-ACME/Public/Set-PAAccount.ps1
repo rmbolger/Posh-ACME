@@ -87,9 +87,6 @@ function Set-PAAccount {
         # check if there's anything to change
         if ('Contact' -in $PSBoundParameters.Keys -or $Deactivate) {
 
-            # hydrate the account key
-            $acctKey = $acct.key | ConvertFrom-Jwk
-
             # build the header
             $header = @{
                 alg   = $acct.alg;
@@ -125,7 +122,7 @@ function Set-PAAccount {
 
             # send the request
             try {
-                $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
+                $response = Invoke-ACME $header $payloadJson $acct -EA Stop
             } catch { throw }
             Write-Debug "Response: $($response.Content)"
 
@@ -144,9 +141,6 @@ function Set-PAAccount {
             # We've been asked to rollover the account key which effectively means replace it
             # with a new one. The spec describes the process in the following link.
             # https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-7.3.6
-
-            # hydrate the existing account key
-            $acctKey = $acct.key | ConvertFrom-Jwk
 
             # build the standard outer header
             $header = @{
@@ -188,7 +182,7 @@ function Set-PAAccount {
 
             # send the request
             try {
-                $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
+                $response = Invoke-ACME $header $payloadJson $acct -EA Stop
             } catch { throw }
             Write-Debug "Response: $($response.Content)"
 

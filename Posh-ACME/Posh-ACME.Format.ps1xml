@@ -128,6 +128,7 @@
                     <TableColumnHeader/>
                     <TableColumnHeader><Label>Expires</Label></TableColumnHeader>
                     <TableColumnHeader/>
+                    <TableColumnHeader/>
                 </TableHeaders>
                 <TableRowEntries>
                     <TableRowEntry>
@@ -140,6 +141,7 @@
                                 </ScriptBlock>
                             </TableColumnItem>
                             <TableColumnItem><PropertyName>DNS01Status</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>HTTP01Status</PropertyName></TableColumnItem>
                         </TableColumnItems>
                     </TableRowEntry>
                 </TableRowEntries>
