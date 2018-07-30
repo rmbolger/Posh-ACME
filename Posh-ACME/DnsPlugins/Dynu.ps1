@@ -264,5 +264,5 @@ function Find-DynuExistingRecord {
         throw
     }
 
-    return $records | Where-Object { ($_.node_name -eq $RecordName -and $_.content -eq $RecordValue )} | Select -First 1  
+    return $records | Where-Object { ($_.node_name -eq $RecordName -and $_.content -eq $RecordValue )} | Select-Object -First 1
 }
