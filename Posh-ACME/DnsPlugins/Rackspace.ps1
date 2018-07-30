@@ -200,7 +200,7 @@ function Save-DnsTxtRackspace {
 ############################
 
 function Connect-RackspaceDns {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RSUsername,
