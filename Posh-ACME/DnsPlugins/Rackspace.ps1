@@ -209,7 +209,7 @@ function Connect-RackspaceDns {
         [Parameter(ParameterSetName='Insecure',Mandatory,Position=1)]
         [string]$RSApiKeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
-        $ExtraParams
+        $ExtraConnectParams
     )
 
     # return if we already have a valid Bearer token
