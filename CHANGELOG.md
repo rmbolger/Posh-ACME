@@ -1,3 +1,15 @@
+## 2.6.0 (2018-08-01)
+
+* Added additional functions that should make it easier to manually respond to challenges. In particular, this should allow people to use the HTTP challenge until a formal HTTP challenge plugin solution is introduced. (Thanks John B. for the idea!)
+  * `Get-KeyAuthorization` calculate a key authorization string for a challenge token.
+  * `Send-ChallengeAck` notifies the ACME server to proceed validating a challenge.
+  * The output object on `Get-PAAuthorizations` now contains top level attributes relating to the HTTP challenge (in addition to the existing DNS challenge).
+* Added new DNS plugins
+  * Namecheap
+  * Rackspace
+* Migrated all internal DateTime handling to use DateTimeOffset which is less finicky across time zones for the types of comparisons generally being performed.
+
+
 ## 2.5.0 (2018-07-12)
 
 * Added new DNS plugin Dynu. (Thanks @alexzorin!)
