@@ -14,7 +14,7 @@ function New-PACertificate {
         [switch]$NewCertKey,
         [switch]$AcceptTOS,
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
-        [string]$AccountKeyLength='ec-256',
+        [string]$AccountKeyLength='2048',
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
         [Alias('location')]
         [string]$DirectoryUrl='LE_PROD',
@@ -302,7 +302,7 @@ function New-PACertificate {
         This switch is required when creating a new account as part of a certificate request. It implies you have read and accepted the Terms of Service for the ACME server you are connected to. The first time you connect to an ACME server, a link to the Terms of Service should have been displayed.
 
     .PARAMETER AccountKeyLength
-        The type and size of private key to use for the account associated with this certificate. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to 'ec-256'.
+        The type and size of private key to use for the account associated with this certificate. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to '2048'.
 
     .PARAMETER DirectoryUrl
         Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production v2) and LE_STAGE (LetsEncrypt Staging v2). Defaults to 'LE_PROD'.

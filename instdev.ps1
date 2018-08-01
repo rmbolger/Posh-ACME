@@ -55,11 +55,11 @@ if ([String]::IsNullOrWhiteSpace($PSScriptRoot)) {
     Import-Module -Name Posh-ACME -Force
 } else {
     # running locally
-    Remove-Item "$installpath\Posh-ACME" -Recurse -Force -EA Ignore
-    Copy-Item "$PSScriptRoot\Posh-ACME" $installpath -Recurse -Force -EA Continue
+    Remove-Item "$installpath\Posh-ACME.net46" -Recurse -Force -EA Ignore
+    Copy-Item "$PSScriptRoot\Posh-ACME.net46" $installpath -Recurse -Force -EA Continue
     # force re-load the module (assuming you're editing locally and want to see changes)
-    Import-Module -Name Posh-ACME -Force
+    Import-Module -Name Posh-ACME.net46 -Force
 }
 Write-Host 'Module has been installed' -ForegroundColor Green
 
-Get-Command -Module Posh-ACME
+Get-Command -Module Posh-ACME.net46

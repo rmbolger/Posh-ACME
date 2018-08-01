@@ -15,7 +15,7 @@ function Set-PAAccount {
         [Parameter(ParameterSetName='Rollover')]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [Alias('AccountKeyLength')]
-        [string]$KeyLength='ec-256',
+        [string]$KeyLength='2048',
         [Parameter(ParameterSetName='RolloverImportKey',Mandatory)]
         [string]$KeyFile,
         [switch]$NoSwitch
@@ -247,7 +247,7 @@ function Set-PAAccount {
         If specified, generate a new account key and replace the current one with it. Clients may choose to do this to recover from a key compromise or proactively mitigate the impact of an unnoticed key compromise.
 
     .PARAMETER KeyLength
-        The type and size of private key to use. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to 'ec-256'.
+        The type and size of private key to use. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to '2048'.
 
     .PARAMETER KeyFile
         The path to an existing EC or RSA private key file. This will attempt to use the specified key as the new ACME account key.
