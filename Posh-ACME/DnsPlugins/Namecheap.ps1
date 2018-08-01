@@ -219,6 +219,9 @@ function Save-DnsTxtNamecheap {
 # Helper Functions
 ############################
 
+# API Docs
+# https://www.namecheap.com/support/api/intro.aspx
+
 function Get-NCCommonBody {
     [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
