@@ -8,8 +8,18 @@
 if ($PSVersionTable.PSEdition -eq 'Desktop') {
     # https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-check-for-a-minimum-required-net-framework-version-by-querying-the-registry-in-powershell-net-framework-45-and-later
     $netBuild = (Get-ItemProperty "HKLM:SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full").Release
-    if ($netBuild -lt 461308) {
-            throw "Insufficient .NET version found (build $netBuild). Please install .NET 4.7.1 or later."
+    if ($netBuild -ge 461308) { <# 4.7.1+ - all good #> }
+    else {
+        if     ($netBuild -ge 460798) { $netVer = '4.7' }
+        elseif ($netBuild -ge 394802) { $netVer = '4.6.2' }
+        elseif ($netBuild -ge 394254) { $netVer = '4.6.1' }
+        elseif ($netBuild -ge 393295) { $netVer = '4.6' }
+        elseif ($netBuild -ge 379893) { $netVer = '4.5.2' }
+        elseif ($netBuild -ge 378675) { $netVer = '4.5.1' }
+        Write-Warning "**********************************************************************"
+        Write-Warning "Insufficient .NET version. Found .NET $netVer (build $netBuild)."
+        Write-Warning ".NET 4.7.1 or later is required to ensure proper functionality."
+        Write-Warning "**********************************************************************"
     }
 }
 
