@@ -17,12 +17,12 @@ There are two parameter sets you can use with this plugin. One is intended for W
 ```powershell
 $ncKey = Read-Host "API Key" -AsSecureString
 $ncParams = @{NCUsername='myusername';NCApiKey=$ncKey}
-New-PACertificate test.example.com -DnsPlugin Rackspace -PluginArgs $ncParams
+New-PACertificate test.example.com -DnsPlugin Namecheap -PluginArgs $ncParams
 ```
 
 ### Non-Windows
 
 ```powershell
 $ncParams = @{NCUsername='myusername';NCApiKeyInsecure='xxxxxxxx'}
-New-PACertificate test.example.com -DnsPlugin Rackspace -PluginArgs $ncParams
+New-PACertificate test.example.com -DnsPlugin Namecheap -PluginArgs $ncParams
 ```
