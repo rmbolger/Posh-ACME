@@ -160,7 +160,7 @@ function Remove-DnsTxtClouDNS {
     #>
 }
 
-function Save-DnsTxtRackspace {
+function Save-DnsTxtClouDNS {
     [CmdletBinding()]
     param(
         [Parameter(ValueFromRemainingArguments)]
