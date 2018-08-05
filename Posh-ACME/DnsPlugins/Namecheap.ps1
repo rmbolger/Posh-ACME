@@ -89,12 +89,12 @@ function Add-DnsTxtNamecheap {
 
     .EXAMPLE
         $key = Read-Host "API Key" -AsSecureString
-        PS C:\>Add-DnsTxtRackspace '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'myusername' $key
+        PS C:\>Add-DnsTxtNamecheap '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'myusername' $key
 
         Adds a TXT record using a securestring object for NCApiKey. (Only works on Windows)
 
     .EXAMPLE
-        Add-DnsTxtRackspace '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'myusername' 'xxxxxxxx'
+        Add-DnsTxtNamecheap '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'myusername' 'xxxxxxxx'
 
         Adds a TXT record using a standard string object for NCApiKeyInsecure. (Use this on non-Windows)
     #>
@@ -185,13 +185,13 @@ function Remove-DnsTxtNamecheap {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $key = Read-Host "Rackspace API Key" -AsSecureString
-        PS C:\>Remove-DnsTxtRackspace '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'myusername' $key
+        $key = Read-Host "API Key" -AsSecureString
+        PS C:\>Remove-DnsTxtNamecheap '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'myusername' $key
 
         Removes a TXT record using a securestring object for NCApiKey. (Only works on Windows)
 
     .EXAMPLE
-        Remove-DnsTxtRackspace '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'myusername' 'xxxxxxxx'
+        Remove-DnsTxtNamecheap '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'myusername' 'xxxxxxxx'
 
         Removes a TXT record using a standard string object for NCApiKeyInsecure. (Use this on non-Windows)
     #>
@@ -387,10 +387,10 @@ function Invoke-NCAPI {
 
         for ($i=1; $i -le 5; $i++) {
 
-            $resp = Invoke-RestMethod $apiBase -Body $body -Method $Method @script:UseBasic -EA Stop
+            $response = Invoke-RestMethod $apiBase -Body $body -Method $Method @script:UseBasic -EA Stop
 
             # return the response if no errors
-            if ($response.ApiResponse.Status -eq 'OK') { return $resp }
+            if ($response.ApiResponse.Status -eq 'OK') { return $response }
 
             # loop/retry on the 3050750 error
             if (3050750 -eq $response.ApiResponse.Errors.Error.Number) {
