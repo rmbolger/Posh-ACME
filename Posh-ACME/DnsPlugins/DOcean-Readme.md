@@ -1,6 +1,8 @@
 # How To Use the DOcean DNS Plugin
 
-This plugin works against the [Digital Ocean](https://www.digitalocean.com/) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
+This plugin works against the [Digital Ocean](https://m.do.co/c/d515942ef761) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
+
+*NOTE: The link above is an affiliate link which reduces my out of pocket cost to maintain this plugin. I'd be most grateful if you use it when signing up for a new account.*
 
 ## Setup
 
