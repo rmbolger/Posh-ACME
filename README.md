@@ -18,11 +18,7 @@ An [ACME v2](https://tools.ietf.org/html/draft-ietf-acme-acme) client implemente
 - PEM and PFX output files
 - No elevated Windows privileges required *(unless using -Install switch)*
 - Cross platform PowerShell Core support! [(FAQ)](https://github.com/rmbolger/Posh-ACME/wiki/Frequently-Asked-Questions-(FAQ)#does-posh-acme-work-cross-platform-on-powershell-core)
-
-# Not Currently Supported (Yet)
-
-- HTTP challenge support
-
+- Manual HTTP challenge support ([Guide](https://github.com/rmbolger/Posh-ACME/wiki/%28Advanced%29-Manual-HTTP-Challenge-Validation))
 
 # Install
 
