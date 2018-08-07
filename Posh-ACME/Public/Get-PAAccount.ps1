@@ -71,9 +71,9 @@ function Get-PAAccount {
             # filter by Contact if specified
             if ('Contact' -in $PSBoundParameters.Keys) {
                 if (!$Contact) {
-                    $accts = $accts | Where-Object { $_.contact -eq $null }
+                    $accts = $accts | Where-Object { $_.contact.count -eq 0 }
                 } else {
-                    $accts = $accts | Where-Object { $_.contact -and (Compare-Object $Contact $_.contact) -eq $null }
+                    $accts = $accts | Where-Object { $_.contact.count -gt 0 -and $null -eq (Compare-Object $Contact $_.contact) }
                 }
             }
 
