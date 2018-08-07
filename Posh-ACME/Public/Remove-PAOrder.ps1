@@ -16,8 +16,11 @@ function Remove-PAOrder {
 
     Process {
 
-        # grab a copy of the order which also verifies its existence
-        $order = Get-PAOrder $MainDomain
+        # grab a copy of the order
+        if (!($order = Get-PAOrder $MainDomain)) {
+            Write-Warning "Specified order for $MainDomain was not found."
+            return
+        }
 
         # revoke first, if asked
         if ($RevokeCert -and $order.status -eq 'valid') {

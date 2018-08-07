@@ -17,7 +17,8 @@ function Update-PAAccount {
         # grab the account from explicit parameters or the current memory copy
         if (!$ID) {
             if (!$script:Acct -or !$script:Acct.id) {
-                throw "No ACME account configured. Run Set-PAAccount or specify an ID."
+                Write-Warning "No ACME account configured. Run Set-PAAccount or specify an ID."
+                return
             }
             $acct = $script:Acct
             $UpdatingCurrent = $true
@@ -30,6 +31,11 @@ function Update-PAAccount {
             } else {
                 $UpdatingCurrent = $false
                 $acct = Get-PAAccount $ID
+                if ($null -eq $acct) {
+                    Write-Warning "Specified account id ($ID) not found. Nothing to update."
+                    return
+                }
+
             }
         }
 

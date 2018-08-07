@@ -15,8 +15,11 @@ function Remove-PAAccount {
     }
 
     Process {
-        # grab a copy of the account which also verifies its existence
-        $acct = Get-PAAccount $ID
+        # grab a copy of the account
+        if (!($acct = Get-PAAccount $ID)) {
+            Write-Warning "Specified account ID ($ID) was not found."
+            return
+        }
 
         # deactivate first, if asked
         if ($Deactivate -and $acct.status -eq 'valid') {

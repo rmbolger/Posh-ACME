@@ -57,6 +57,11 @@ function Set-PAAccount {
             # account specified
             $acct = Get-PAAccount $ID
 
+            if ($null -eq $acct) {
+                Write-Warning "Specified account ID ($ID) was not found. No changes made."
+                return
+            }
+
         } elseif (!$script:Acct -or ($ID -and ($ID -ne $script:Acct.id))) {
             # This is a definite account switch
 

@@ -37,6 +37,11 @@ function Set-PAOrder {
             # order specified
             $order = Get-PAOrder $MainDomain
 
+            if ($null -eq $order) {
+                Write-Warning "Specified order for $MainDomain was not found. No changes made."
+                return
+            }
+
         } elseif (!$script:Order -or ($MainDomain -and ($MainDomain -ne $script:Order.MainDomain))) {
             # This is a definite order switch
 

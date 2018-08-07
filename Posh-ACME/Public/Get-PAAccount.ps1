@@ -94,7 +94,7 @@ function Get-PAAccount {
                     $acct = Get-ChildItem $acctFile | Get-Content -Raw | ConvertFrom-Json
                     $acct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
                 } else {
-                    throw "Unable to find cached PAAccount info for ID $ID."
+                    return $null
                 }
 
             } else {
