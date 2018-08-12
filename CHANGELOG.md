@@ -5,7 +5,7 @@
 * .NET version check now throws a warning instead of error on module load
 * Fixed Get-PAAccount not filtering contacts correctly
 * Minor fix and help correction in Namecheap plugin
-* Get-PAAccount and Get-PAOrder now return null instead of an error if an invalid account or order was specified
+* Get-PAAccount and Get-PAOrder now return null instead of an error if an invalid account or order was specified. (Thanks for the idea @maybe-hello-world)
 
 ## 2.6.0 (2018-08-01)
 
