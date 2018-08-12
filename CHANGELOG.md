@@ -1,3 +1,12 @@
+## 2.7.0 (2018-08-12)
+
+* Added new DNS plugin ClouDNS
+* Added ACMEv2 draft-13 support for account key rollover. This is an interim fix that should still work with draft-12 as well. Once Let's Encrypt goes into production with draft-13, the draft-12 support will be removed.
+* .NET version check now throws a warning instead of error on module load
+* Fixed Get-PAAccount not filtering contacts correctly
+* Minor fix and help correction in Namecheap plugin
+* Get-PAAccount and Get-PAOrder now return null instead of an error if an invalid account or order was specified
+
 ## 2.6.0 (2018-08-01)
 
 * Added additional functions that should make it easier to manually respond to challenges. In particular, this should allow people to use the HTTP challenge until a formal HTTP challenge plugin solution is introduced. (Thanks John B. for the idea!)

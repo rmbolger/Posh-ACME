@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '2.6.0'
+ModuleVersion = '2.7.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -104,16 +104,14 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 2.6.0 (2018-08-01)
+## 2.7.0 (2018-08-12)
 
-* Added additional functions that should make it easier to manually respond to non-DNS challenges. In particular, this should allow people to use the HTTP challenge until a formal HTTP challenge plugin solution is introduced. (Thanks &lt;anonymous&gt; for the idea!)
-  * `Get-KeyAuthorization` calculate a key authorization string for a challenge token.
-  * `Send-ChallengeAck` notifies the ACME server to proceed validating a challenge.
-  * The output object on `Get-PAAuthorizations` now contains top level attributes relating to the HTTP challenge (in addition to the existing DNS challenge).
-* Added new DNS plugins
-  * Namecheap
-  * Rackspace
-* Migrated all internal DateTime handling to use DateTimeOffset which is less finicky across time zones for the types of comparisons generally being performed.
+* Added new DNS plugin ClouDNS
+* Added ACMEv2 draft-13 support for account key rollover. This is an interim fix that should still work with draft-12 as well. Once Let's Encrypt goes into production with draft-13, the draft-12 support will be removed.
+* .NET version check now throws a warning instead of error on module load
+* Fixed Get-PAAccount not filtering contacts correctly
+* Minor fix and help correction in Namecheap plugin
+* Get-PAAccount and Get-PAOrder now return null instead of an error if an invalid account or order was specified
 '@
 
     } # End of PSData hashtable
