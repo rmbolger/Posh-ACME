@@ -7,10 +7,10 @@ function Start-SleepProgress {
         [string]$Status='Sleeping...'
     )
 
-    $end = (Get-Date).AddSeconds($Seconds)
+    $end = (Get-DateTimeOffsetNow).AddSeconds($Seconds)
 
-    while ($end -gt (Get-Date)) {
-        $secLeft = ($end - (Get-Date)).TotalSeconds
+    while ($end -gt (Get-DateTimeOffsetNow)) {
+        $secLeft = ($end - (Get-DateTimeOffsetNow)).TotalSeconds
         $percent = ($Seconds - $secLeft) / $Seconds * 100
         Write-Progress $Activity $Status -SecondsRemaining $secLeft -PercentComplete $percent
         Start-Sleep -Milliseconds 500

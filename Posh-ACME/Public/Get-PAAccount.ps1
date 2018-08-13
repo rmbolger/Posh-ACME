@@ -71,9 +71,9 @@ function Get-PAAccount {
             # filter by Contact if specified
             if ('Contact' -in $PSBoundParameters.Keys) {
                 if (!$Contact) {
-                    $accts = $accts | Where-Object { $_.contact -eq $null }
+                    $accts = $accts | Where-Object { $_.contact.count -eq 0 }
                 } else {
-                    $accts = $accts | Where-Object { $_.contact -and (Compare-Object $Contact $_.contact) -eq $null }
+                    $accts = $accts | Where-Object { $_.contact.count -gt 0 -and $null -eq (Compare-Object $Contact $_.contact) }
                 }
             }
 
@@ -94,7 +94,7 @@ function Get-PAAccount {
                     $acct = Get-ChildItem $acctFile | Get-Content -Raw | ConvertFrom-Json
                     $acct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
                 } else {
-                    throw "Unable to find cached PAAccount info for ID $ID."
+                    return $null
                 }
 
             } else {

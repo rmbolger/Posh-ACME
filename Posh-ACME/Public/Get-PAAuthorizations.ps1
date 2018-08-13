@@ -2,7 +2,7 @@ function Get-PAAuthorizations {
     [CmdletBinding()]
     [OutputType('PoshACME.PAAuthorization')]
     param(
-        [Parameter(ParameterSetName='URLs',Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [Alias('authorizations')]
         [string[]]$AuthURLs
     )
@@ -12,10 +12,9 @@ function Get-PAAuthorizations {
     # return to the caller. However, most of what a caller would care about is
     # the state of the associated challenges for that authorization.
 
-    # To make processing easier and because this module only currently cares about
-    # the dns-01 challenges, we're going to flatten the challenge data so you don't
-    # have to loop into a sub-array. This may get unwieldy if we end up supporting
-    # additional challenge types later or they create a dns-02 (or beyond) type.
+    # To make processing easier, we're going to flatten the challenge data so you don't
+    # have to loop into a sub-array. This may get unwieldy if too many additional
+    # challenge types are added in the future.
 
     Process {
         foreach ($AuthUrl in $AuthUrls) {
@@ -49,6 +48,19 @@ function Get-PAAuthorizations {
                 $auth.DNS01Status = $dnsChallenge.status
                 $auth.DNS01Url    = $dnsChallenge.url
                 $auth.DNS01Token  = $dnsChallenge.token
+            }
+
+            # add members that expose the details of the 'http-01' challenge
+            # in the root of the object
+            $auth | Add-Member -MemberType NoteProperty -Name 'HTTP01Status' -Value $null
+            $auth | Add-Member -MemberType NoteProperty -Name 'HTTP01Url' -Value $null
+            $auth | Add-Member -MemberType NoteProperty -Name 'HTTP01Token' -Value $null
+
+            $httpChallenge = $auth.challenges | Where-Object { $_.type -eq 'http-01' }
+            if ($httpChallenge) {
+                $auth.HTTP01Status = $httpChallenge.status
+                $auth.HTTP01Url    = $httpChallenge.url
+                $auth.HTTP01Token  = $httpChallenge.token
             }
 
             Write-Output $auth

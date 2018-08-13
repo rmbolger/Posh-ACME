@@ -57,6 +57,11 @@ function Set-PAAccount {
             # account specified
             $acct = Get-PAAccount $ID
 
+            if ($null -eq $acct) {
+                Write-Warning "Specified account ID ($ID) was not found. No changes made."
+                return
+            }
+
         } elseif (!$script:Acct -or ($ID -and ($ID -ne $script:Acct.id))) {
             # This is a definite account switch
 
@@ -86,9 +91,6 @@ function Set-PAAccount {
 
         # check if there's anything to change
         if ('Contact' -in $PSBoundParameters.Keys -or $Deactivate) {
-
-            # hydrate the account key
-            $acctKey = $acct.key | ConvertFrom-Jwk
 
             # build the header
             $header = @{
@@ -125,7 +127,7 @@ function Set-PAAccount {
 
             # send the request
             try {
-                $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
+                $response = Invoke-ACME $header $payloadJson $acct -EA Stop
             } catch { throw }
             Write-Debug "Response: $($response.Content)"
 
@@ -143,10 +145,7 @@ function Set-PAAccount {
 
             # We've been asked to rollover the account key which effectively means replace it
             # with a new one. The spec describes the process in the following link.
-            # https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-7.3.6
-
-            # hydrate the existing account key
-            $acctKey = $acct.key | ConvertFrom-Jwk
+            # https://tools.ietf.org/html/draft-ietf-acme-acme-13#section-7.3.6
 
             # build the standard outer header
             $header = @{
@@ -179,7 +178,12 @@ function Set-PAAccount {
             # build the inner payload
             $innerPayloadJson = @{
                 account = $acct.location;
+                # This is the draft-12 required field that should be removed once
+                # Let's Encrypt pushes their draft-13 implementation live
                 newKey  = $innerHead.jwk;
+                # This is the draft-13 required field that will be ignored by Boulder
+                # until they push their draft-13 implementation.
+                oldKey  = $acct.Key | ConvertFrom-Jwk | ConvertTo-Jwk -PublicOnly
             } | ConvertTo-Json -Compress
 
             # build the outer payload by creating a signed JWS from
@@ -188,7 +192,7 @@ function Set-PAAccount {
 
             # send the request
             try {
-                $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
+                $response = Invoke-ACME $header $payloadJson $acct -EA Stop
             } catch { throw }
             Write-Debug "Response: $($response.Content)"
 

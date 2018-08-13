@@ -93,6 +93,22 @@ New-AzureRmRoleAssignment -ObjectId $spID -ResourceGroupName $resName -RoleDefin
 
 Any existing user, application, or managed service principal should work as long as it has been assigned permissions to managed DNS TXT records.
 
+To use the context you are currently using with Powershell, use this function to retrieve the token.
+```powershell
+Function Get-AccessToken() {
+    $tenantId = (Get-AzureRmContext).Tenant.Id
+
+    $cache = (Get-AzureRmContext).tokencache
+    $cacheItem = $cache.ReadItems() | Where-Object { $_.TenantId -eq $tenantId } | Select-Object -First 1
+    return $cacheItem.AccessToken
+}
+
+$subId = (Get-AzureRmContext).Subscription.Id
+$token = Get-AccessToken
+$azParams = @{AZSubscriptionId=$subId;AZAccessToken=$token;}
+
+```
+
 To use the account you are currently logged in to with Azure CLI 2.0, use the following command to generate a token. Remember to use the correct subscription.
 ```powershell
 # show all subscriptions - the one marked as "isDefault": true will be used to create the token

@@ -1,6 +1,8 @@
 # How To Use the DNSimple DNS Plugin
 
-This plugin works against the [DNSimple](https://dnsimple.com) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
+This plugin works against the [DNSimple](https://dnsimple.com/r/c9b80a2f227e49) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
+
+*NOTE: The link above is an affiliate link which reduces my out of pocket cost to maintain this plugin. I'd be most grateful if you use it when signing up for a new account.*
 
 ## Setup
 

@@ -1,14 +1,15 @@
 function Invoke-ACME {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Account')]
     param(
-        [Parameter(Mandatory)]
-        [string]$Uri,
-        [Parameter(Mandatory)]
-        [Security.Cryptography.AsymmetricAlgorithm]$Key,
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory,Position=0)]
         [hashtable]$Header,
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory,Position=1)]
         [string]$PayloadJson,
+        [Parameter(ParameterSetName='Account',Mandatory,Position=2)]
+        [PSTypeName('PoshACME.PAAccount')]$Account,
+        [Parameter(ParameterSetName='RawKey',Mandatory,Position=2)]
+        [ValidateScript({Test-ValidKey $_ -ThrowOnFail})]
+        [Security.Cryptography.AsymmetricAlgorithm]$Key,
         [switch]$NoRetry
     )
 
@@ -23,18 +24,27 @@ function Invoke-ACME {
         $Header.nonce = Get-Nonce
     }
 
+    # set the account key based on the parameter set
+    if ($PSCmdlet.ParameterSetName -eq 'Account') {
+        # hydrate the account key
+        $acctKey = $Account.key | ConvertFrom-Jwk
+    } else {
+        # use the one passed in
+        $acctKey = $Key
+    }
+
     # Validation on the rest of the header will be taken care of by New-Jws. And
     # the only reason we aren't just simplifying by changing the input param to a
     # completed JWS string is because we want to be able to auto-retry on errors
     # like badNonce which requires modifying the Header and re-signing a new JWS.
-    $Jws = New-Jws $Key $Header $PayloadJson
+    $Jws = New-Jws $acctKey $Header $PayloadJson
 
     # since HTTP error codes make Invoke-WebRequest throw an exception,
     # we need to wrap it in a try/catch. But we can still get the response
     # object via the exception.
 
     try {
-        $response = Invoke-WebRequest -Uri $Uri -Body $Jws -Method Post `
+        $response = Invoke-WebRequest -Uri $Header.url -Body $Jws -Method Post `
             -ContentType 'application/jose+json' -UserAgent $script:USER_AGENT `
             -Headers $script:COMMON_HEADERS -EA Stop @script:UseBasic
 
@@ -118,11 +128,52 @@ function Invoke-ACME {
         if (!$NoRetry -and $freshNonce -and $acmeError.type -and $acmeError.type -like '*:badNonce') {
             $Header.nonce = $script:Dir.nonce
             Write-Debug "Retrying with updated nonce"
-            return (Invoke-ACME $Uri $Key $Header $PayloadJson -NoRetry)
+            return (Invoke-ACME $Header $PayloadJson -Key $acctKey -NoRetry)
         }
 
         # throw the converted AcmeException
         throw [AcmeException]::new($acmeError.detail,$acmeError)
     }
 
+
+
+
+
+    <#
+    .SYNOPSIS
+        Send an authenticated ACME protocol message.
+
+    .DESCRIPTION
+        This is an advanced function used to send custom commands to an ACME server. You must provide a proper header hashtable and JSON body. Then the function will sign the data with an account or raw key and send it.
+
+    .PARAMETER Header
+        A hashtable containing the appropriate fields for an ACME message header such as 'alg', 'jwk', 'kid', 'nonce', and 'url'. The url field is also used as the destination for the message.
+
+    .PARAMETER PayloadJson
+        A JSON formatted string with the ACME message body.
+
+    .PARAMETER Account
+        An existing ACME account object such as the output from Get-PAAccount.
+
+    .PARAMETER Key
+        A raw RSA or EC key object. This is usually only necessary when creating a new ACME account.
+
+    .PARAMETER NoRetry
+        If specified, don't retry on bad nonce errors. Occasionally, the nonce provided in an ACME message will be rejected. By default, this function requests a new nonce once and tries to send the message again before giving up.
+
+    .EXAMPLE
+        $acct = Get-PAAccount
+        PS C:\>$header = @{ alg=$acct.alg; kid=$acct.location; nonce='xxxxxxxxxxxxxx'; url='https://acme.example.com/acme/challenge/xxxxxxxxxxxxx' }
+        PS C:\>$payloadJson = '{}'
+        PS C:\>Invoke-ACME $header $payloadJson $acct
+
+        Send an ACME message using the current account.
+
+    .LINK
+        Project: https://github.com/rmbolger/Posh-ACME
+
+    .LINK
+        New-PACertificate
+
+    #>
 }

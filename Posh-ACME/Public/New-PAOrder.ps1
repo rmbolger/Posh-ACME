@@ -37,7 +37,7 @@ function New-PAOrder {
         # or if the order is pending but expired
         if ( ($order -and ($KeyLength -ne $order.KeyLength -or
              ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') -or
-             ($order.status -eq 'pending' -and (Get-Date) -gt (Get-Date $order.expires)) ))) {
+             ($order.status -eq 'pending' -and (Get-DateTimeOffsetNow) -gt ([DateTimeOffset]::Parse($order.expires))) ))) {
             # do nothing
 
         # confirm if previous order is still in progress
@@ -47,7 +47,8 @@ function New-PAOrder {
                 "Existing order with status $($order.status).")) { return }
 
         # confirm if previous order not up for renewal
-        } elseif ($order -and $order.status -eq 'valid' -and (Get-Date) -lt (Get-Date $order.RenewAfter)) {
+        } elseif ($order -and $order.status -eq 'valid' -and
+                    (Get-DateTimeOffsetNow) -lt ([DateTimeOffset]::Parse($order.RenewAfter))) {
 
             if (!$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
                 "Existing order has not reached suggested renewal window.")) { return }
@@ -59,9 +60,6 @@ function New-PAOrder {
     # Determine whether to remove the old private key. This is necessary if explicitly
     # requested or the new KeyLength doesn't match the old one.
     $removeOldKey = ($NewKey -or ($order -and $KeyLength -ne $order.KeyLength))
-
-    # hydrate the account key
-    $acctKey = $acct.key | ConvertFrom-Jwk
 
     # build the protected header for the request
     $header = @{
@@ -80,7 +78,7 @@ function New-PAOrder {
 
     # send the request
     try {
-        $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
+        $response = Invoke-ACME $header $payloadJson $acct -EA Stop
     } catch { throw }
     Write-Debug "Response: $($response.Content)"
 

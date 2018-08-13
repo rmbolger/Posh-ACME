@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '2.4.0'
+ModuleVersion = '2.7.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -44,6 +44,7 @@ FormatsToProcess = 'Posh-ACME.Format.ps1xml'
 FunctionsToExport = @(
     'Get-DnsPluginHelp',
     'Get-DnsPlugins',
+    'Get-KeyAuthorization',
     'Get-PAAccount',
     'Get-PAAuthorizations',
     'Get-PACertificate',
@@ -56,6 +57,7 @@ FunctionsToExport = @(
     'Remove-PAAccount',
     'Remove-PAOrder',
     'Save-DnsChallenge',
+    'Send-ChallengeAck',
     'Set-PAAccount',
     'Set-PAOrder',
     'Set-PAServer',
@@ -102,12 +104,14 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 2.4.0 (2018-06-01)
+## 2.7.0 (2018-08-12)
 
-* Added new DNS plugin Linode
-* Added tab completion for `Plugin` param on `Publish`/`Unpublish`/`Save-DnsChallenge`
-* Fixed bug renewing orders with status invalid (which happens when the order expires even if the cert is still valid)
-* Fixed bug in `New-PACertificate` that wasn't using explicit `DnsSleep` and `ValidationTimeout` parameters when an old order existed for the same primary name.
+* Added new DNS plugin ClouDNS
+* Added ACMEv2 draft-13 support for account key rollover. This is an interim fix that should still work with draft-12 as well. Once Let's Encrypt goes into production with draft-13, the draft-12 support will be removed.
+* .NET version check now throws a warning instead of error on module load
+* Fixed Get-PAAccount not filtering contacts correctly
+* Minor fix and help correction in Namecheap plugin
+* Get-PAAccount and Get-PAOrder now return null instead of an error if an invalid account or order was specified. (Thanks for the idea @maybe-hello-world)
 '@
 
     } # End of PSData hashtable

@@ -54,7 +54,7 @@ function Get-PAOrder {
                     $order = Get-ChildItem $orderFile | Get-Content -Raw | ConvertFrom-Json
                     $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
                 } else {
-                    throw "Unable to find cached PAOrder info for $MainDomain."
+                    return $null
                 }
 
             } else {

@@ -99,13 +99,6 @@ function Submit-ChallengeValidation {
     }
     Write-Debug "DnsAlias: $($DnsAlias -join ',')"
 
-    # save order specific parameters to order object so we can renew later
-    $order.DnsPlugin = $DnsPlugin
-    $order.DnsAlias = $DnsAlias
-    $order.DnsSleep = $DnsSleep
-    $order.ValidationTimeout = $ValidationTimeout
-    $order | Update-PAOrder -SaveOnly
-
     # merge passed in plugin args with saved args (which also saves the merged copy)
     $PluginArgs = Merge-PluginArgs $PluginArgs $Account
 
@@ -157,13 +150,7 @@ function Submit-ChallengeValidation {
 
             # ask the server to validate the challenges
             Write-Verbose "Requesting challenge validations"
-            $header = @{ alg=$Account.alg; kid=$Account.location; nonce=''; url='' }
-            foreach ($chalUrl in $allAuths[$toValidate].DNS01Url) {
-                $header.nonce = $script:Dir.nonce
-                $header.url   = $chalUrl
-                try { $response = Invoke-ACME $header.url ($Account.key | ConvertFrom-Jwk) $header '{}' -EA Stop } catch {}
-                Write-Debug "Response: $($response.Content)"
-            }
+            $allAuths[$toValidate].DNS01Url | Send-ChallengeAck -Account $Account
 
             # and wait for them to succeed or fail
             Wait-AuthValidation @($allAuths[$toValidate].location) $ValidationTimeout

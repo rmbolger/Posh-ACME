@@ -18,7 +18,8 @@ function Update-PAOrder {
         # grab the order from explicit parameters or the current memory copy
         if (!$MainDomain) {
             if (!$script:Order -or !$script:Order.MainDomain) {
-                throw "No ACME order configured. Run Set-PAOrder or specify a MainDomain."
+                Write-Warning "No ACME order configured. Run Set-PAOrder or specify a MainDomain."
+                return
             }
             $order = $script:Order
             $UpdatingCurrent = $true
@@ -31,6 +32,10 @@ function Update-PAOrder {
             } else {
                 $UpdatingCurrent = $false
                 $order = Get-PAOrder $MainDomain
+                if ($null -eq $order) {
+                    Write-Warning "Specified order for $MainDomain was not found. Nothing to update."
+                    return
+                }
             }
         }
 

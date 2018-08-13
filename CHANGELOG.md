@@ -1,3 +1,34 @@
+## 2.7.0 (2018-08-12)
+
+* Added new DNS plugin ClouDNS
+* Added ACMEv2 draft-13 support for account key rollover. This is an interim fix that should still work with draft-12 as well. Once Let's Encrypt goes into production with draft-13, the draft-12 support will be removed.
+* .NET version check now throws a warning instead of error on module load
+* Fixed Get-PAAccount not filtering contacts correctly
+* Minor fix and help correction in Namecheap plugin
+* Get-PAAccount and Get-PAOrder now return null instead of an error if an invalid account or order was specified. (Thanks for the idea @maybe-hello-world)
+
+## 2.6.0 (2018-08-01)
+
+* Added additional functions that should make it easier to manually respond to challenges. In particular, this should allow people to use the HTTP challenge until a formal HTTP challenge plugin solution is introduced. (Thanks John B. for the idea!)
+  * `Get-KeyAuthorization` calculate a key authorization string for a challenge token.
+  * `Send-ChallengeAck` notifies the ACME server to proceed validating a challenge.
+  * The output object on `Get-PAAuthorizations` now contains top level attributes relating to the HTTP challenge (in addition to the existing DNS challenge).
+* Added new DNS plugins
+  * Namecheap
+  * Rackspace
+* Migrated all internal DateTime handling to use DateTimeOffset which is less finicky across time zones for the types of comparisons generally being performed.
+
+
+## 2.5.0 (2018-07-12)
+
+* Added new DNS plugin Dynu. (Thanks @alexzorin!)
+* Added additional Azure plugin authentication options including explicit access token and Instance Metadata Service support. See plugin readme for details. (Thanks @perbergland!)
+* Added an explicit .NET 4.7.1 version check on module load when running Windows PowerShell (Desktop edition) since the module manifest didn't seem to be enforcing it. This will throw an error if you try to import the module without at least .NET 4.7.1 installed and hopefully prevent bug reports due to insufficient .NET versions.
+* Fixed bug with GoDaddy plugin (#50) that prevented using names in sub-domains. (Thanks @davehope!)
+* Fixed bug with Azure plugin (#57) incorrectly evaluating token expiration. (Thanks @Cavorter!)
+* Fixed bug (#60) that would cause some order parameters to appear to get wiped when renewing or creating a new order whose names had already been validated. (Thanks for the tip @hutch120!)
+* Various readme tweaks
+
 ## 2.4.0 (2018-06-01)
 
 * Added new DNS plugin Linode

@@ -78,7 +78,7 @@ function New-PAAccount {
 
     # send the request
     try {
-        $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
+        $response = Invoke-ACME $header $payloadJson -Key $acctKey -EA Stop
     } catch { throw }
     Write-Debug "Response: $($response.Content)"
 
