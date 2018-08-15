@@ -130,7 +130,7 @@ function Remove-DnsTxtGoDaddy {
         Write-Debug ($response | ConvertTo-Json -Depth 5)
     }
     else {
-        Write-Debug "Record $RecordName already contains $TxtValue. Replaced with white space."
+        Write-Debug "Record $RecordName does not match either name, type or contains different value"
         return
     }
 
