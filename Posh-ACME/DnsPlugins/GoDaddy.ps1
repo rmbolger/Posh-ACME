@@ -97,7 +97,7 @@ function Remove-DnsTxtGoDaddy {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
+   
     $apiRoot = "https://api.godaddy.com/v1/domains"
     if ($GDUseOTE) {
         $apiRoot = "https://api.ote-godaddy.com/v1/domains"
@@ -107,6 +107,8 @@ function Remove-DnsTxtGoDaddy {
 
     $zone = Find-GDZone -RecordName $RecordName -GDKey $GDKey -GDSecret $GDSecret
     $name = ($RecordName -split ".$zone")[0]
+    
+    $body = "[$(@{data = "$TxtValue"} | Convertto-Json)]"
 
     # Get a list of existing records
     try {
@@ -114,20 +116,24 @@ function Remove-DnsTxtGoDaddy {
             -Method Get -Headers $headers @script:UseBasic
     }
     catch {
-        throw
+        throw "Unable to find zone $zone"
     }
 
-    # Remove the txt record we want to delete
-    $replaceRecords = $existingRecords `
-        | Where-Object {-not ($_.type -eq "TXT" -and $_.name -eq "$name" -and $_.data -eq "$TxtValue")} `
-        | ConvertTo-Json
+    # Delete the record if it exists and has the same value
+    if ($existingRecords | Where-Object {$_.type -eq "txt" -and $_.name -eq "$name" -and $_.data -eq "$TxtValue"}) {
 
-    # Post the records we want to keep back to the API
-    $response = Invoke-RestMethod -Uri "$apiRoot/$zone/records" `
-        -Method Put -Headers $headers -Body $replaceRecords `
-        -ContentType "application/json" @script:UseBasic
+        $body = "[$(@{data = " "} | Convertto-Json)]"
+        $response = Invoke-RestMethod -Uri "$apiRoot/$zone/records/TXT/$name" `
+            -Method Put -Headers $headers -Body $body `
+            -ContentType "application/json" @script:UseBasic
 
-    Write-Debug ($response | ConvertTo-Json -Depth 5)
+        Write-Debug ($response | ConvertTo-Json -Depth 5)
+    }
+    else {
+        Write-Debug "Record $RecordName already contains $TxtValue. Replaced with white space."
+        return
+    }
+
 
     <#
     .SYNOPSIS
