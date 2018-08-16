@@ -221,6 +221,15 @@ function Find-GDZone {
         [switch]$GDUseOTE
     )
 
+    # setup a module variable to cache the record to zone mapping
+    # so it's quicker to find later
+    if (!$script:GDRecordZones) { $script:GDRecordZones = @{} }
+
+    # check for the record in the cache
+    if ($script:GDRecordZones.ContainsKey($RecordName)) {
+        return $script:GDRecordZones.$RecordName
+    }
+
     $apiRoot = "https://api.godaddy.com/v1/domains"
     if ($GDUseOTE) {
         $apiRoot = "https://api.ote-godaddy.com/v1/domains"
@@ -251,6 +260,7 @@ function Find-GDZone {
 
         if ($zoneTest -in $zones) {
             $zoneName = $zones | Where-Object { $_ -eq $zoneTest }
+            $script:GDRecordZones.$RecordName = $zoneName
             return $zoneName
         }
     }
