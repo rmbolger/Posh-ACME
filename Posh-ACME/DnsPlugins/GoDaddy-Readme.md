@@ -1,6 +1,6 @@
 # How To Use the GoDaddy DNS Plugin
 
-This plugin works against the [GoDaddy DNS](https://developer.godaddy.com/) provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
+This plugin works against the [GoDaddy DNS](https://www.godaddy.com) provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
 
 ## Setup
 
@@ -17,5 +17,6 @@ We need to [generate an API key](https://developer.godaddy.com/keys) for the pro
 The only plugin arguments you need are the API key and API secret created earlier.
 
 ```powershell
-New-PACertificate test.example.com -DnsPlugin GoDaddy -PluginArgs @{GDKey='xxxxxxxxxxxxxxxx'; GDSecret='xxxxxxxxxxxxxxxx'}
+$pArgs = @{GDKey='xxxxxxxxxxxxxxxx';GDSecret='xxxxxxxxxxxxxxxx'}
+New-PACertificate example.com -DnsPlugin GoDaddy -PluginArgs $pArgs
 ```

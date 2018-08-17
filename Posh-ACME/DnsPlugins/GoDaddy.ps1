@@ -23,31 +23,43 @@ function Add-DnsTxtGoDaddy {
     $headers = @{Authorization = "sso-key $($GDKey):$($GDSecret)"}
 
     $zone = Find-GDZone -RecordName $RecordName -GDKey $GDKey -GDSecret $GDSecret
-    $name = ($RecordName -split ".$zone")[0]
-    
-    $body = "[$(@{name= "$Name";type = 'TXT';ttl = 600; data = "$TxtValue"} | Convertto-Json)]"
+    $recShort = ($RecordName -split ".$zone")[0]
 
-    # Get a list of existing records
+    # Get a list of existing TXT records for this record name
     try {
-        $existingRecords = Invoke-RestMethod -Uri "$apiRoot/$zone/records" `
-            -Method Get -Headers $headers @script:UseBasic
-    }
-    catch {
-        throw "Unable to find zone $zone"
-    }
+        $recs = Invoke-RestMethod "$apiRoot/$zone/records/TXT/$recShort" `
+            -Headers $headers @script:UseBasic -EA Stop
+    } catch { throw }
 
-    # Create the record if it doesn't exist or doesn't have the same value
-    if (-not ($existingRecords | Where-Object {$_.type -eq "txt" -and $_.name -eq "$name" -and $_.data -eq "$TxtValue"})) {
-        $response = Invoke-RestMethod -Uri "$apiRoot/$zone/records" `
-            -Method Patch -Headers $headers -Body $body `
-            -ContentType "application/json" @script:UseBasic
+    if (-not $recs -or $TxtValue -notin $recs.data) {
+        # For some odd reason, the GoDaddy API doesn't have a method to add a single
+        # record. The closest we can get is re-setting the set of records that match
+        # a particular Type and Name. So we need to add our new record to the current
+        # set of results and send that.
 
-        Write-Debug ($response | ConvertTo-Json -Depth 5)
-    }
-    else {
+        # filter out the empty record that may be leftover from a previous removal
+        $recs = @($recs | Where-Object { $_.data -ne '' })
+
+        if (!$recs -or $recs.Count -eq 0) {
+            # Build the new record set from scratch
+            $bodyJson = "[{`"data`":`"$TxtValue`",`"ttl`":600}]"
+        } else {
+            # add the new record and build the body
+            $recsNew = $recs + ([pscustomobject]@{data=$TxtValue;ttl=600})
+            $bodyJson = ConvertTo-Json @($recsNew) -Compress
+        }
+
+        try {
+            Write-Debug "Sending $bodyJson"
+            Invoke-RestMethod "$apiRoot/$zone/records/TXT/$recShort" `
+                -Method Put -Headers $headers -Body $bodyJson `
+                -ContentType 'application/json' @script:UseBasic -EA Stop | Out-Null
+        } catch { throw }
+
+    } else {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
-        return
     }
+
 
     <#
     .SYNOPSIS
@@ -106,28 +118,41 @@ function Remove-DnsTxtGoDaddy {
     $headers = @{Authorization = "sso-key $($GDKey):$($GDSecret)"}
 
     $zone = Find-GDZone -RecordName $RecordName -GDKey $GDKey -GDSecret $GDSecret
-    $name = ($RecordName -split ".$zone")[0]
+    $recShort = ($RecordName -split ".$zone")[0]
 
-    # Get a list of existing records
+    # Get a list of existing TXT records for this record name
     try {
-        $existingRecords = Invoke-RestMethod -Uri "$apiRoot/$zone/records" `
-            -Method Get -Headers $headers @script:UseBasic
+        $recs = Invoke-RestMethod "$apiRoot/$zone/records/TXT/$recShort" `
+            -Headers $headers @script:UseBasic -EA Stop
+    } catch { throw }
+
+    if (-not $recs -or $TxtValue -notin $recs.data) {
+        Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
+    } else {
+        # For some odd reason, the GoDaddy API doesn't have a method to delete a
+        # particular record. The closest we can get is re-setting the set of records that
+        # match a particular Type and Name. So we need to remove the record from our
+        # set of results (which it may be the only one) and then send whatever's left.
+
+        if ($recs.Count -le 1) {
+            # It's the last one, but there doesn't seem to be a way to actually remove it,
+            # so just clear the value from the record instead.
+            $bodyJson = '[{"data":"","ttl":600}]'
+        } else {
+            # filter the record we want to delete and build the body
+            $recsNew = $recs | Where-Object { $_.data -ne $TxtValue }
+            $bodyJson = ConvertTo-Json @($recsNew) -Compress
+        }
+
+        try {
+            Write-Debug "Sending $bodyJson"
+            Invoke-RestMethod "$apiRoot/$zone/records/TXT/$recShort" `
+                -Method Put -Headers $headers -Body $bodyJson `
+                -ContentType 'application/json' @script:UseBasic -EA Stop | Out-Null
+        } catch { throw }
+
     }
-    catch {
-        throw
-    }
 
-    # Remove the txt record we want to delete
-    $replaceRecords = $existingRecords `
-        | Where-Object {-not ($_.type -eq "TXT" -and $_.name -eq "$name" -and $_.data -eq "$TxtValue")} `
-        | ConvertTo-Json
-
-    # Post the records we want to keep back to the API
-    $response = Invoke-RestMethod -Uri "$apiRoot/$zone/records" `
-        -Method Put -Headers $headers -Body $replaceRecords `
-        -ContentType "application/json" @script:UseBasic
-
-    Write-Debug ($response | ConvertTo-Json -Depth 5)
 
     <#
     .SYNOPSIS
@@ -196,6 +221,15 @@ function Find-GDZone {
         [switch]$GDUseOTE
     )
 
+    # setup a module variable to cache the record to zone mapping
+    # so it's quicker to find later
+    if (!$script:GDRecordZones) { $script:GDRecordZones = @{} }
+
+    # check for the record in the cache
+    if ($script:GDRecordZones.ContainsKey($RecordName)) {
+        return $script:GDRecordZones.$RecordName
+    }
+
     $apiRoot = "https://api.godaddy.com/v1/domains"
     if ($GDUseOTE) {
         $apiRoot = "https://api.ote-godaddy.com/v1/domains"
@@ -205,11 +239,10 @@ function Find-GDZone {
 
     # get the list of available zones
     try {
-        $zones = (Invoke-RestMethod -Uri $apiRoot -Headers $headers @script:UseBasic) `
+        $zones = (Invoke-RestMethod $apiRoot -Headers $headers @script:UseBasic -EA Stop) `
             | Where-Object {$_.status -eq "ACTIVE"} `
             | Select-Object -ExpandProperty domain
-    }
-    catch { throw }
+    } catch { throw }
 
     # We need to find the closest/deepest
     # sub-zone that would hold the record rather than just adding it to the apex. So for something
@@ -227,6 +260,7 @@ function Find-GDZone {
 
         if ($zoneTest -in $zones) {
             $zoneName = $zones | Where-Object { $_ -eq $zoneTest }
+            $script:GDRecordZones.$RecordName = $zoneName
             return $zoneName
         }
     }
