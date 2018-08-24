@@ -21,7 +21,7 @@ function Get-PACertificate {
         if ('List' -eq $PSCmdlet.ParameterSetName) {
 
             # get the list of orders
-            $orders = Get-PAOrder -List | Where-Object { $_.status -eq 'valid' -and $_.CertExpires }
+            $orders = Get-PAOrder -List | Where-Object { $_.CertExpires }
 
             # recurse for each complete order
             $orders | Get-PACertificate
