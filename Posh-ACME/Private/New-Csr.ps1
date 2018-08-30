@@ -103,7 +103,7 @@ function New-Csr {
     if ($Order.OCSPMustStaple) {
         Write-Debug "Adding OCSP Must-Staple"
         $mustStaple = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(@(,[byte[]](0x30,0x03,0x02,0x01,0x05)))))
-        $extDict.Add((New-Object DerObjectIdentifier('1.3.6.1.5.5.7.1.24')), $mustStaple)
+        $extDict.Add((New-Object Org.BouncyCastle.Asn1.DerObjectIdentifier('1.3.6.1.5.5.7.1.24')), $mustStaple)
     }
 
     # build the extensions DerSet
