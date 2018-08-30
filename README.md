@@ -44,7 +44,7 @@ To install the latest *development* version from the git master branch, use the 
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 
 # install latest dev version
-iex (invoke-restmethod https://raw.githubusercontent.com/rmbolger/Posh-ACME/master/instdev.ps1)
+iex (irm https://raw.githubusercontent.com/rmbolger/Posh-ACME/master/instdev.ps1)
 ```
 
 # Quick Start
@@ -69,7 +69,7 @@ The output of `New-PACertificate` is an object that contains various properties 
 
 # Requirements and Platform Support
 
-* Supports Windows PowerShell 5.1 or later (Desktop edition) with .NET Framework 4.7.1 or later
+* Supports Windows PowerShell 5.1 or later (Desktop edition) **with .NET Framework 4.7.1** or later
 * Supports [PowerShell Core](https://docs.microsoft.com/en-us/powershell/scripting/powershell-scriptin) 6.0 or later (Core edition) on all supported OS platforms.
 
 # Changelog
