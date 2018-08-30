@@ -1,3 +1,10 @@
+## 2.7.1 (2018-08-30)
+
+* Removed ACMEv2 draft-12 support for account key rollover. No known CAs are still implementing draft-12.
+* Fix for issue #53 with GoDaddy plugin not being able to remove TXT records in some cases. Thanks @davehope!
+* Performance and efficiency improvements with GoDaddy plugin
+* Fixed Get-PACertificate -List only showing certs from 'valid' orders.
+
 ## 2.7.0 (2018-08-12)
 
 * Added new DNS plugin ClouDNS

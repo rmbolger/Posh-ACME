@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '2.7.0'
+ModuleVersion = '2.7.1'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -104,14 +104,12 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 2.7.0 (2018-08-12)
+## 2.7.1 (2018-08-30)
 
-* Added new DNS plugin ClouDNS
-* Added ACMEv2 draft-13 support for account key rollover. This is an interim fix that should still work with draft-12 as well. Once Let's Encrypt goes into production with draft-13, the draft-12 support will be removed.
-* .NET version check now throws a warning instead of error on module load
-* Fixed Get-PAAccount not filtering contacts correctly
-* Minor fix and help correction in Namecheap plugin
-* Get-PAAccount and Get-PAOrder now return null instead of an error if an invalid account or order was specified. (Thanks for the idea @maybe-hello-world)
+* Removed ACMEv2 draft-12 support for account key rollover. No known CAs are still implementing draft-12.
+* Fix for issue #53 with GoDaddy plugin not being able to remove TXT records in some cases. Thanks @davehope!
+* Performance and efficiency improvements with GoDaddy plugin
+* Fixed Get-PACertificate -List only showing certs from 'valid' orders.
 '@
 
     } # End of PSData hashtable
