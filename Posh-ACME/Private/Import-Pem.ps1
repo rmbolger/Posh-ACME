@@ -122,7 +122,7 @@ function Import-Pem {
                 $reader = New-Object Org.BouncyCastle.OpenSsl.PemReader($sr)
                 $cert = $reader.ReadObject()
             } finally {
-                if ($sr -ne $null) { $sr.Close() }
+                if ($null -ne $sr) { $sr.Close() }
             }
         } else {
             # get the byte array from the pem string

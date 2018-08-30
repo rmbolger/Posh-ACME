@@ -51,7 +51,7 @@ function Export-CertPfx {
         $fs = New-Object IO.FileStream($OutputFile,'Create')
         $store.Save($fs, $PfxPass, $sRandom)
     } finally {
-        if ($fs -ne $null) { $fs.Close() }
+        if ($null -ne $fs) { $fs.Close() }
     }
 
 }

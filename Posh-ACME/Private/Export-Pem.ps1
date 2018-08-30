@@ -85,6 +85,6 @@ function Export-Pem {
         foreach ($line in $pem) {
             $sw.WriteLine($line)
         }
-    } finally { if ($sw -ne $null) { $sw.Close() } }
+    } finally { if ($null -ne $sw) { $sw.Close() } }
 
 }
