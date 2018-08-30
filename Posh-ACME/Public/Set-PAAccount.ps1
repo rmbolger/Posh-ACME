@@ -178,11 +178,6 @@ function Set-PAAccount {
             # build the inner payload
             $innerPayloadJson = @{
                 account = $acct.location;
-                # This is the draft-12 required field that should be removed once
-                # Let's Encrypt pushes their draft-13 implementation live
-                newKey  = $innerHead.jwk;
-                # This is the draft-13 required field that will be ignored by Boulder
-                # until they push their draft-13 implementation.
                 oldKey  = $acct.Key | ConvertFrom-Jwk | ConvertTo-Jwk -PublicOnly
             } | ConvertTo-Json -Compress
 
