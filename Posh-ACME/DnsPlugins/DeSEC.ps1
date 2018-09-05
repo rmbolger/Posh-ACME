@@ -44,7 +44,7 @@ function Add-DnsTxtDeSec {
                 records = @("`"$TxtValue`"")
                 ttl = $DSTTL
             } | ConvertTo-Json
-            
+
             Write-Verbose "Creating new RRset for record $RecordName with value $TxtValue."
             Invoke-RestMethod "https://desec.io/api/v1/domains/$($domain)/rrsets/" -Method Post -Body $data `
                 -Headers $auth -ContentType 'application/json' @script:UseBasic | Out-Null
@@ -135,10 +135,10 @@ function Remove-DnsTxtDeSec {
 
     <#
     .SYNOPSIS
-        Remove a DNS TXT record from <My DNS Server/Provider>
+        Remove a DNS TXT record from deSEC.
 
     .DESCRIPTION
-        Description for <My DNS Server/Provider>
+        Remove a DNS TXT record from deSEC.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
