@@ -1,22 +1,29 @@
 function Add-DnsTxtDeSec {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
-        [pscredential]$DSToken,
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
+        [securestring]$DSToken,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [string]$DSTokenInsecure,
         [Parameter()]
-        [int]$DSTTL,
+        [int]$DSTTL = 300,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    try {
-        $rrset, $recordUri, $domain, $subname = Find-DeSECRRset $RecordName $DSToken
+    # convert the secure token to a normal string
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $DSTokenInsecure = (New-Object PSCredential ("user", $DSToken)).GetNetworkCredential().Password
+    }
 
-        $auth = Get-DeSECAuthHeader $DSToken
+    try {
+        $rrset, $recordUri, $domain, $subname = Find-DeSECRRset $RecordName $DSTokenInsecure
+
+        $auth = Get-DeSECAuthHeader $DSTokenInsecure
         if ($rrset) {
             if ("`"$TxtValue`"" -in $rrset.records) {
                 Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
@@ -35,7 +42,7 @@ function Add-DnsTxtDeSec {
                 subname = $subname
                 "type" = "TXT"
                 records = @("`"$TxtValue`"")
-                ttl = if ($DSTTL) { $DSTTL } else { 300 }
+                ttl = $DSTTL
             } | ConvertTo-Json
             
             Write-Verbose "Creating new RRset for record $RecordName with value $TxtValue."
@@ -62,8 +69,11 @@ function Add-DnsTxtDeSec {
     .PARAMETER DSToken
         The deSEC API authentication token for your account.
 
+    .PARAMETER DSTokenInsecure
+        The deSEC API authentication token for your account.
+
     .PARAMETER DSTTL
-        The TTL of new TXT record.
+        The TTL of new TXT record (default 300).
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -77,21 +87,28 @@ function Add-DnsTxtDeSec {
 }
 
 function Remove-DnsTxtDeSec {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
-        [pscredential]$DSToken,
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
+        [securestring]$DSToken,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [string]$DSTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
+    # convert the secure token to a normal string
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $DSTokenInsecure = (New-Object PSCredential ("user", $DSToken)).GetNetworkCredential().Password
+    }
+
     # get existing record
     try {
-        $rrset, $recordUri, $domain, $subname = Find-DeSECRRset $RecordName $DSToken
+        $rrset, $recordUri, $domain, $subname = Find-DeSECRRset $RecordName $DSTokenInsecure
         if (!$rrset) {
             Write-Debug "Record $RecordName doesn't exist. Nothing to do."
             return
@@ -106,7 +123,7 @@ function Remove-DnsTxtDeSec {
     }
 
     try {
-        $auth = Get-DeSECAuthHeader $DSToken
+        $auth = Get-DeSECAuthHeader $DSTokenInsecure
 
         $data = @{
             records = $rrset.records.where( { $_ -ne "`"$TxtValue`"" } )
@@ -130,6 +147,9 @@ function Remove-DnsTxtDeSec {
         The value of the TXT record.
 
     .PARAMETER DSToken
+        The deSEC API authentication token for your account.
+
+    .PARAMETER DSTokenInsecure
         The deSEC API authentication token for your account.
 
     .PARAMETER ExtraParams
@@ -172,23 +192,23 @@ function Find-DeSECRRset {
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [pscredential]$DSToken
+        [string]$DSTokenInsecure
     )
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (!($domain = Find-DeSECZone $RecordName $DSToken)) {
+    if (!($domain = Find-DeSECZone $RecordName $DSTokenInsecure)) {
         throw "Unable to find deSEC hosted zone for $RecordName"
     }
 
     $subname = $RecordName.Replace(".$domain",'')
 
-	# .NET thinks all URLS are Windows filenames (no trailing dot)
-	# replace trailing ... with escaped %2e%2e%2e
-	# https://stackoverflow.com/questions/856885/httpwebrequest-to-url-with-dot-at-the-end
+    # .NET thinks all URLS are Windows filenames (no trailing dot)
+    # replace trailing ... with escaped %2e%2e%2e
+    # https://stackoverflow.com/questions/856885/httpwebrequest-to-url-with-dot-at-the-end
     $recordUri = "https://desec.io/api/v1/domains/$($domain)/rrsets/$($subname)%2e%2e%2e/TXT/"
-	Write-Debug "$RecordName has URI: $recordUri"
+    Write-Debug "$RecordName has URI: $recordUri"
 
-    $auth = Get-DeSECAuthHeader $DSToken
+    $auth = Get-DeSECAuthHeader $DSTokenInsecure
 
     # get existing record
     try {
@@ -209,7 +229,7 @@ function Find-DeSECZone {
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [pscredential]$DSToken
+        [string]$DSTokenInsecure
     )
 
     # setup a module variable to cache the record to zone mapping
@@ -223,7 +243,7 @@ function Find-DeSECZone {
 
     # get the list of available zones
     try {
-        $auth = Get-DeSECAuthHeader $DSToken
+        $auth = Get-DeSECAuthHeader $DSTokenInsecure
         $zones = (Invoke-RestMethod "https://desec.io/api/v1/domains/" -Headers $auth @script:UseBasic).name
     } catch { throw }
 
@@ -254,14 +274,12 @@ function Get-DeSECAuthHeader {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [pscredential]$DSToken
+        [string]$DSTokenInsecure
     )
-
-    $token = $DSToken.GetNetworkCredential().Password;
 
     # now build the header hashtable
     $header = @{
-       Authorization = "Token $($token)"
+       Authorization = "Token $($DSTokenInsecure)"
     }
 
     return $header

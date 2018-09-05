@@ -12,5 +12,9 @@ The API token will be used with the `DSToken` parameter. We just have to create 
 `DSTTL` is the TTL of new `TXT` record (optional, defaults to 300 if not provided).
 
 ```powershell
-New-PACertificate test.example.com -DnsPlugin DeSEC -PluginArgs @{DSToken=(Get-Credential); DSTTL=3600}
+# if on Windows
+$token = Read-Host "API token" -AsSecureString
+New-PACertificate test.example.com -DnsPlugin DeSEC -PluginArgs @{DSToken=$token; DSTTL=3600}
+# otherwise
+New-PACertificate test.example.com -DnsPlugin DeSEC -PluginArgs @{DSTokenInsecure='yourdesectoken'; DSTTL=3600}
 ```
