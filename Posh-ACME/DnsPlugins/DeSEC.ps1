@@ -6,8 +6,8 @@ function Add-DnsTxtDeSec {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
-        [securestring]$DSToken,
-        [Parameter(Mandatory,Position=3)]
+        [pscredential]$DSToken,
+        [Parameter()]
         [int]$DSTTL,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -35,7 +35,7 @@ function Add-DnsTxtDeSec {
                 subname = $subname
                 "type" = "TXT"
                 records = @("`"$TxtValue`"")
-                ttl = $DSTTL
+                ttl = if ($DSTTL) { $DSTTL } else { 300 }
             } | ConvertTo-Json
             
             Write-Verbose "Creating new RRset for record $RecordName with value $TxtValue."
@@ -84,7 +84,7 @@ function Remove-DnsTxtDeSec {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
-        [securestring]$DSToken,
+        [pscredential]$DSToken,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -101,7 +101,7 @@ function Remove-DnsTxtDeSec {
     }
 
     if ("`"$TxtValue`"" -notin $rrset.records) {
-        Write-Debug "Record $RecordName doesn't exist. Nothing to do."
+        Write-Debug "Record $RecordName doesn't contain $TxtValue. Nothing to do."
         return
     }
 
@@ -172,7 +172,7 @@ function Find-DeSECRRset {
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [securestring]$DSToken
+        [pscredential]$DSToken
     )
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
@@ -181,7 +181,12 @@ function Find-DeSECRRset {
     }
 
     $subname = $RecordName.Replace(".$domain",'')
-    $recordUri = "https://desec.io/api/v1/domains/$($domain)/rrsets/$($subname).../TXT/"
+
+	# .NET thinks all URLS are Windows filenames (no trailing dot)
+	# replace trailing ... with escaped %2e%2e%2e
+	# https://stackoverflow.com/questions/856885/httpwebrequest-to-url-with-dot-at-the-end
+    $recordUri = "https://desec.io/api/v1/domains/$($domain)/rrsets/$($subname)%2e%2e%2e/TXT/"
+	Write-Debug "$RecordName has URI: $recordUri"
 
     $auth = Get-DeSECAuthHeader $DSToken
 
@@ -204,7 +209,7 @@ function Find-DeSECZone {
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [securestring]$DSToken
+        [pscredential]$DSToken
     )
 
     # setup a module variable to cache the record to zone mapping
@@ -249,10 +254,10 @@ function Get-DeSECAuthHeader {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [securestring]$DSToken
+        [pscredential]$DSToken
     )
 
-    $token = (New-Object PSCredential ("user", $DSToken)).GetNetworkCredential().Password;
+    $token = $DSToken.GetNetworkCredential().Password;
 
     # now build the header hashtable
     $header = @{

@@ -9,9 +9,8 @@ No setup required, just use the the API token from registration email.
 ## Using the Plugin
 
 The API token will be used with the `DSToken` parameter. We just have to create it as a SecureString first.
-`DSTTL` is the TTL of new `TXT` record.
+`DSTTL` is the TTL of new `TXT` record (optional, defaults to 300 if not provided).
 
 ```powershell
-$dsToken = Read-Host "API token" -AsSecureString
-New-PACertificate test.example.com -DnsPlugin DeSEC -PluginArgs @{DSToken=$dsToken; DSTTL=3600}
+New-PACertificate test.example.com -DnsPlugin DeSEC -PluginArgs @{DSToken=(Get-Credential); DSTTL=3600}
 ```
