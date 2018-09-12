@@ -188,7 +188,7 @@ function Connect-WinDns {
         [pscredential]$WinCred,
         [switch]$WinUseSSL,
         [Parameter(ValueFromRemainingArguments)]
-        $ExtraParams
+        $ExtraConnectParams
     )
 
     # create a new CimSession if necessary
