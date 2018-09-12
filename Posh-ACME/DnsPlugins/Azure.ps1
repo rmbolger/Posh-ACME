@@ -307,7 +307,7 @@ function Connect-AZTenant {
         [Parameter(ParameterSetName='IMDS',Mandatory)]
         [switch]$AZUseIMDS,
         [Parameter(ValueFromRemainingArguments)]
-        $ExtraParams
+        $ExtraConnectParams
     )
 
     # just return if we already have a valid Bearer token
