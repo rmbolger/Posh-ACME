@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '2.7.1'
+ModuleVersion = '2.8.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -104,12 +104,13 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 2.7.1 (2018-08-30)
+## 2.8.0 (2018-09-12)
 
-* Removed ACMEv2 draft-12 support for account key rollover. No known CAs are still implementing draft-12.
-* Fix for issue #53 with GoDaddy plugin not being able to remove TXT records in some cases. Thanks @davehope!
-* Performance and efficiency improvements with GoDaddy plugin
-* Fixed Get-PACertificate -List only showing certs from 'valid' orders.
+* Added new DNS plugins
+  * Aliyun (Alibaba Cloud)
+  * DeSEC (Thanks @nazar554)
+* Fix for type error when using OCSP Must-Staple (Thanks @casselc)
+* Parameter binding bug fixes for Azure and Windows plugins (Thanks @mithrandyr)
 '@
 
     } # End of PSData hashtable

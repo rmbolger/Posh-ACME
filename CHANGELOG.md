@@ -1,3 +1,11 @@
+## 2.8.0 (2018-09-12)
+
+* Added new DNS plugins
+  * Aliyun (Alibaba Cloud)
+  * DeSEC (Thanks @nazar554)
+* Fix for type error when using OCSP Must-Staple (Thanks @casselc)
+* Parameter binding bug fixes for Azure and Windows plugins (Thanks @mithrandyr)
+
 ## 2.7.1 (2018-08-30)
 
 * Removed ACMEv2 draft-12 support for account key rollover. No known CAs are still implementing draft-12.
