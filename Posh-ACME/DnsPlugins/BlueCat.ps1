@@ -49,6 +49,9 @@ function Add-DnsTxtBlueCat {
     .PARAMETER BlueCatView
         BlueCat DNS View name.
 
+    .PARAMETER BlueCatDeployTargets
+        List of BlueCat servers to deploy.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -57,7 +60,7 @@ function Add-DnsTxtBlueCat {
         -BlueCatUsername 'xxxxxxxx' -BlueCatPassword 'xxxxxxxx' -BlueCatUri 'https://FQDN//Services/API' `
         -BlueCatConfig 'foobar' -BlueCatView 'foobaz' -BlueCatDeployTargets @('FQDN1', 'FQDN2', 'FQDN3')
     #>
-
+    CheckPSVersion
     $proxy = Get-BlueCatWsdlProxy -Username $BlueCatUsername -Password $BlueCatPassword -Uri $BlueCatUri
     $view = Get-View -ConfigurationName $BlueCatConfig -ViewName $BlueCatView -BlueCatProxy $proxy
     $parentZone = Get-ParentZone -AbsoluteName $RecordName -ViewId $view.id -BlueCatProxy $proxy
@@ -115,6 +118,9 @@ function Remove-DnsTxtBlueCat {
 
     .PARAMETER BlueCatView
         BlueCat DNS View name.
+    
+    .PARAMETER BlueCatDeployTargets
+        List of BlueCat servers to deploy.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -124,16 +130,16 @@ function Remove-DnsTxtBlueCat {
         -BlueCatUsername 'xxxxxxxx' -BlueCatPassword 'xxxxxxxx' -BlueCatUri 'https://FQDN//Services/API' `
         -BlueCatConfig 'foobar' -BlueCatView 'foobaz' -BlueCatDeployTargets @('FQDN1', 'FQDN2', 'FQDN3')
     #>
-
+    CheckPSVersion
     $proxy = Get-BlueCatWsdlProxy -Username $BlueCatUsername -Password $BlueCatPassword -Uri $BlueCatUri
     $view = Get-View -ConfigurationName $BlueCatConfig -ViewName $BlueCatView -BlueCatProxy $proxy
     $parentZone = Get-ParentZone -AbsoluteName $RecordName -ViewId $view.id -BlueCatProxy $proxy
     $txtRecordName = $RecordName.Replace(".$($parentZone.absoluteName)", "")
-    $txtRecords = $proxy.getEntitiesByName($parentZone.id, $txtRecordName, 'TXTRecord', 0, [int16]::MaxValue)
+    $txtRecords = $proxy.getEntitiesByName($parentZone.id, $txtRecordName, "TXTRecord", 0, [int16]::MaxValue)
     $txtRecords = $txtRecords | ForEach-Object { (ConvertPSObjectToHashtable -InputObject $_) + (StringToHashtable -String $_.properties) }
     $txtRecord = $txtRecords | Where-Object { $_.txt -eq $TxtValue }
     if (!$txtRecord.name) {
-        throw ('No text record found!')
+        throw ("No text record found!")
     }
     $proxy.delete($txtRecord.id)
 }
@@ -189,6 +195,9 @@ function Save-DnsTxtBlueCat {
     .PARAMETER BlueCatView
         BlueCat DNS View name.
 
+    .PARAMETER BlueCatDeployTargets
+        List of BlueCat servers to deploy.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -197,7 +206,7 @@ function Save-DnsTxtBlueCat {
         -BlueCatUsername 'xxxxxxxx' -BlueCatPassword 'xxxxxxxx' -BlueCatUri 'https://FQDN//Services/API' `
         -BlueCatConfig 'foobar' -BlueCatView 'foobaz' -BlueCatDeployTargets @('FQDN1', 'FQDN2', 'FQDN3')
     #>
-
+    CheckPSVersion
     $proxy = Get-BlueCatWsdlProxy -Username $BlueCatUsername -Password $BlueCatPassword -Uri $BlueCatUri
     $config = $proxy.getEntityByName(0, $BlueCatConfig, "Configuration")
     Foreach ($ServerFQDN in $BlueCatDeployTargets) {
@@ -210,6 +219,12 @@ function Save-DnsTxtBlueCat {
 ############################
 # Helper Functions
 ############################
+
+function CheckPSVersion {
+    if ($PSVersionTable.PSEdition -ne "Desktop") {
+        throw "This DNS plugin requires Windows PowerShell and is not supported on PowerShell Core."
+    }
+}
 
 function Get-BlueCatWsdlProxy {
     param(
@@ -300,7 +315,7 @@ function Get-ParentZone {
     }
 
     if (!$parentZone.name) {
-        throw ('No parent zone found!')
+        throw ("No parent zone found!")
     }
     return $parentZone
 }
