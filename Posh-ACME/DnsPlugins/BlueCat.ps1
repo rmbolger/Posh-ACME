@@ -21,6 +21,13 @@ function Add-DnsTxtBlueCat {
         $ExtraParams
     )
 
+    CheckPSVersion
+    $proxy = Get-BlueCatWsdlProxy -Username $BlueCatUsername -Password $BlueCatPassword -Uri $BlueCatUri
+    $view = Get-View -ConfigurationName $BlueCatConfig -ViewName $BlueCatView -BlueCatProxy $proxy
+    $parentZone = Get-ParentZone -AbsoluteName $RecordName -ViewId $view.id -BlueCatProxy $proxy
+    $props = HashtableToString -Hashtable @{parentZoneName = $parentZone.absoluteName}
+    $proxy.addTxtRecord($view.id, $RecordName, $TxtValue, -1, $props)
+
     <#
     .SYNOPSIS
         Add a DNS TXT record to BlueCat.
@@ -60,12 +67,6 @@ function Add-DnsTxtBlueCat {
         -BlueCatUsername 'xxxxxxxx' -BlueCatPassword 'xxxxxxxx' -BlueCatUri 'https://FQDN//Services/API' `
         -BlueCatConfig 'foobar' -BlueCatView 'foobaz' -BlueCatDeployTargets @('FQDN1', 'FQDN2', 'FQDN3')
     #>
-    CheckPSVersion
-    $proxy = Get-BlueCatWsdlProxy -Username $BlueCatUsername -Password $BlueCatPassword -Uri $BlueCatUri
-    $view = Get-View -ConfigurationName $BlueCatConfig -ViewName $BlueCatView -BlueCatProxy $proxy
-    $parentZone = Get-ParentZone -AbsoluteName $RecordName -ViewId $view.id -BlueCatProxy $proxy
-    $props = HashtableToString -Hashtable @{parentZoneName = $parentZone.absoluteName}
-    $proxy.addTxtRecord($view.id, $RecordName, $TxtValue, -1, $props)
 }
 
 function Remove-DnsTxtBlueCat {
@@ -90,6 +91,19 @@ function Remove-DnsTxtBlueCat {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    CheckPSVersion
+    $proxy = Get-BlueCatWsdlProxy -Username $BlueCatUsername -Password $BlueCatPassword -Uri $BlueCatUri
+    $view = Get-View -ConfigurationName $BlueCatConfig -ViewName $BlueCatView -BlueCatProxy $proxy
+    $parentZone = Get-ParentZone -AbsoluteName $RecordName -ViewId $view.id -BlueCatProxy $proxy
+    $txtRecordName = $RecordName.Replace(".$($parentZone.absoluteName)", "")
+    $txtRecords = $proxy.getEntitiesByName($parentZone.id, $txtRecordName, "TXTRecord", 0, [int16]::MaxValue)
+    $txtRecords = $txtRecords | ForEach-Object { (ConvertPSObjectToHashtable -InputObject $_) + (StringToHashtable -String $_.properties) }
+    $txtRecord = $txtRecords | Where-Object { $_.txt -eq $TxtValue }
+    if (!$txtRecord.name) {
+        throw ("No text record found!")
+    }
+    $proxy.delete($txtRecord.id)
 
     <#
     .SYNOPSIS
@@ -130,18 +144,6 @@ function Remove-DnsTxtBlueCat {
         -BlueCatUsername 'xxxxxxxx' -BlueCatPassword 'xxxxxxxx' -BlueCatUri 'https://FQDN//Services/API' `
         -BlueCatConfig 'foobar' -BlueCatView 'foobaz' -BlueCatDeployTargets @('FQDN1', 'FQDN2', 'FQDN3')
     #>
-    CheckPSVersion
-    $proxy = Get-BlueCatWsdlProxy -Username $BlueCatUsername -Password $BlueCatPassword -Uri $BlueCatUri
-    $view = Get-View -ConfigurationName $BlueCatConfig -ViewName $BlueCatView -BlueCatProxy $proxy
-    $parentZone = Get-ParentZone -AbsoluteName $RecordName -ViewId $view.id -BlueCatProxy $proxy
-    $txtRecordName = $RecordName.Replace(".$($parentZone.absoluteName)", "")
-    $txtRecords = $proxy.getEntitiesByName($parentZone.id, $txtRecordName, "TXTRecord", 0, [int16]::MaxValue)
-    $txtRecords = $txtRecords | ForEach-Object { (ConvertPSObjectToHashtable -InputObject $_) + (StringToHashtable -String $_.properties) }
-    $txtRecord = $txtRecords | Where-Object { $_.txt -eq $TxtValue }
-    if (!$txtRecord.name) {
-        throw ("No text record found!")
-    }
-    $proxy.delete($txtRecord.id)
 }
 
 function Save-DnsTxtBlueCat {
@@ -166,6 +168,15 @@ function Save-DnsTxtBlueCat {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    CheckPSVersion
+    $proxy = Get-BlueCatWsdlProxy -Username $BlueCatUsername -Password $BlueCatPassword -Uri $BlueCatUri
+    $config = $proxy.getEntityByName(0, $BlueCatConfig, "Configuration")
+    Foreach ($ServerFQDN in $BlueCatDeployTargets) {
+        $server = $proxy.getEntityByName($config.id, $ServerFQDN, "Server")
+        $props = HashtableToString -Hashtable @{"services" = "DNS"}
+        $proxy.deployServerConfig($server.id, $props)
+    }
 
     <#
     .SYNOPSIS
@@ -206,14 +217,6 @@ function Save-DnsTxtBlueCat {
         -BlueCatUsername 'xxxxxxxx' -BlueCatPassword 'xxxxxxxx' -BlueCatUri 'https://FQDN//Services/API' `
         -BlueCatConfig 'foobar' -BlueCatView 'foobaz' -BlueCatDeployTargets @('FQDN1', 'FQDN2', 'FQDN3')
     #>
-    CheckPSVersion
-    $proxy = Get-BlueCatWsdlProxy -Username $BlueCatUsername -Password $BlueCatPassword -Uri $BlueCatUri
-    $config = $proxy.getEntityByName(0, $BlueCatConfig, "Configuration")
-    Foreach ($ServerFQDN in $BlueCatDeployTargets) {
-        $server = $proxy.getEntityByName($config.id, $ServerFQDN, "Server")
-        $props = HashtableToString -Hashtable @{"services" = "DNS"}
-        $proxy.deployServerConfig($server.id, $props)
-    }
 }
 
 ############################
