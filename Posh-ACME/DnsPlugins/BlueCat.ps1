@@ -15,8 +15,6 @@ function Add-DnsTxtBlueCat {
         [string]$BlueCatConfig,
         [Parameter(Mandatory, Position = 6)]
         [string]$BlueCatView,
-        [Parameter(Mandatory, Position = 7)]
-        [string[]]$BlueCatDeployTargets,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -56,16 +54,13 @@ function Add-DnsTxtBlueCat {
     .PARAMETER BlueCatView
         BlueCat DNS View name.
 
-    .PARAMETER BlueCatDeployTargets
-        List of BlueCat servers to deploy.
-
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
         Add-DnsTxtBlueCat -RecordName '_acme-challenge.site1.example.com' -TxtValue 'asdfqwer12345678' `
         -BlueCatUsername 'xxxxxxxx' -BlueCatPassword 'xxxxxxxx' -BlueCatUri 'https://FQDN//Services/API' `
-        -BlueCatConfig 'foobar' -BlueCatView 'foobaz' -BlueCatDeployTargets @('FQDN1', 'FQDN2', 'FQDN3')
+        -BlueCatConfig 'foobar' -BlueCatView 'foobaz'
     #>
 }
 
@@ -86,8 +81,6 @@ function Remove-DnsTxtBlueCat {
         [string]$BlueCatConfig,
         [Parameter(Mandatory, Position = 6)]
         [string]$BlueCatView,
-        [Parameter(Mandatory, Position = 7)]
-        [string[]]$BlueCatDeployTargets,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -132,9 +125,6 @@ function Remove-DnsTxtBlueCat {
 
     .PARAMETER BlueCatView
         BlueCat DNS View name.
-    
-    .PARAMETER BlueCatDeployTargets
-        List of BlueCat servers to deploy.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -142,7 +132,7 @@ function Remove-DnsTxtBlueCat {
     .EXAMPLE
         Remove-DnsTxtBlueCat -RecordName '_acme-challenge.site1.example.com' -TxtValue 'asdfqwer12345678' `
         -BlueCatUsername 'xxxxxxxx' -BlueCatPassword 'xxxxxxxx' -BlueCatUri 'https://FQDN//Services/API' `
-        -BlueCatConfig 'foobar' -BlueCatView 'foobaz' -BlueCatDeployTargets @('FQDN1', 'FQDN2', 'FQDN3')
+        -BlueCatConfig 'foobar' -BlueCatView 'foobaz'
     #>
 }
 
@@ -150,20 +140,14 @@ function Save-DnsTxtBlueCat {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory, Position = 0)]
-        [string]$RecordName,
-        [Parameter(Mandatory, Position = 1)]
-        [string]$TxtValue,
-        [Parameter(Mandatory, Position = 2)]
         [string]$BlueCatUsername,
-        [Parameter(Mandatory, Position = 3)]
+        [Parameter(Mandatory, Position = 1)]
         [string]$BlueCatPassword,
-        [Parameter(Mandatory, Position = 4)]
+        [Parameter(Mandatory, Position = 2)]
         [string]$BlueCatUri,
-        [Parameter(Mandatory, Position = 5)]
+        [Parameter(Mandatory, Position = 3)]
         [string]$BlueCatConfig,
-        [Parameter(Mandatory, Position = 6)]
-        [string]$BlueCatView,
-        [Parameter(Mandatory, Position = 7)]
+        [Parameter(Mandatory, Position = 4)]
         [string[]]$BlueCatDeployTargets,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -185,12 +169,6 @@ function Save-DnsTxtBlueCat {
     .DESCRIPTION
         Use the BAM API to deploy DNS changes.
 
-    .PARAMETER RecordName
-        The fully qualified name of the TXT record.
-
-    .PARAMETER TxtValue
-        The value of the TXT record.
-
     .PARAMETER BlueCatUsername
         BlueCat Username.
 
@@ -203,9 +181,6 @@ function Save-DnsTxtBlueCat {
     .PARAMETER BlueCatConfig
         BlueCat Configuration name.
 
-    .PARAMETER BlueCatView
-        BlueCat DNS View name.
-
     .PARAMETER BlueCatDeployTargets
         List of BlueCat servers to deploy.
 
@@ -213,9 +188,8 @@ function Save-DnsTxtBlueCat {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Save-DnsTxtBlueCat -RecordName '_acme-challenge.site1.example.com' -TxtValue 'asdfqwer12345678' `
-        -BlueCatUsername 'xxxxxxxx' -BlueCatPassword 'xxxxxxxx' -BlueCatUri 'https://FQDN//Services/API' `
-        -BlueCatConfig 'foobar' -BlueCatView 'foobaz' -BlueCatDeployTargets @('FQDN1', 'FQDN2', 'FQDN3')
+        Save-DnsTxtBlueCat -BlueCatUsername 'xxxxxxxx' -BlueCatPassword 'xxxxxxxx' `
+        -BlueCatUri 'https://FQDN//Services/API' -BlueCatConfig 'foobar' -BlueCatDeployTargets @('FQDN1', 'FQDN2', 'FQDN3')
     #>
 }
 
