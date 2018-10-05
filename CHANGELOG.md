@@ -1,3 +1,10 @@
+## 2.9.0 (2018-10-05)
+
+* Added new DNS plugins
+  * BlueCat (Thanks @marshallford)
+  * Gandi
+* Updated DMEasy plugin to support non-Windows
+
 ## 2.8.0 (2018-09-12)
 
 * Added new DNS plugins

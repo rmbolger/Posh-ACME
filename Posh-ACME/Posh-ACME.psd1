@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '2.8.0'
+ModuleVersion = '2.9.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -104,13 +104,12 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 2.8.0 (2018-09-12)
+## 2.9.0 (2018-10-05)
 
 * Added new DNS plugins
-  * Aliyun (Alibaba Cloud)
-  * DeSEC (Thanks @nazar554)
-* Fix for type error when using OCSP Must-Staple (Thanks @casselc)
-* Parameter binding bug fixes for Azure and Windows plugins (Thanks @mithrandyr)
+  * BlueCat (Thanks @marshallford)
+  * Gandi
+* Updated DMEasy plugin to support non-Windows
 '@
 
     } # End of PSData hashtable
