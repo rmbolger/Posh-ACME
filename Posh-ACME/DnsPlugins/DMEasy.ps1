@@ -1,5 +1,5 @@
 function Add-DnsTxtDMEasy {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -7,12 +7,19 @@ function Add-DnsTxtDMEasy {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$DMEKey,
-        [Parameter(Mandatory,Position=3)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$DMESecret,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [string]$DMESecretInsecure,
         [switch]$DMEUseSandbox,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    # convert the secure secret to a normal string
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $DMESecretInsecure = (New-Object PSCredential ("user", $DMESecret)).GetNetworkCredential().Password
+    }
 
     $apiBase = 'https://api.dnsmadeeasy.com/V2.0/dns/managed'
     if ($DMEUseSandbox) {
@@ -20,7 +27,7 @@ function Add-DnsTxtDMEasy {
     }
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (!($zoneID,$zoneName = Find-DMEZone $RecordName $DMEKey $DMESecret $apiBase)) {
+    if (!($zoneID,$zoneName = Find-DMEZone $RecordName $DMEKey $DMESecretInsecure $apiBase)) {
         throw "Unable to find DME hosted zone for $RecordName"
     }
 
@@ -31,7 +38,7 @@ function Add-DnsTxtDMEasy {
 
     # query the existing record(s)
     try {
-        $auth = Get-DMEAuthHeader $DMEKey $DMESecret
+        $auth = Get-DMEAuthHeader $DMEKey $DMESecretInsecure
         $response = Invoke-RestMethod "$($recRoot)?recordName=$recShort&type=TXT" `
             -Headers $auth -ContentType 'application/json' @script:UseBasic
     } catch { throw }
@@ -46,7 +53,7 @@ function Add-DnsTxtDMEasy {
 
     # create a new record
     try {
-        $auth = Get-DMEAuthHeader $DMEKey $DMESecret
+        $auth = Get-DMEAuthHeader $DMEKey $DMESecretInsecure
         $bodyJson = @{name=$recShort;value="`"$TxtValue`"";type='TXT';ttl=10} | ConvertTo-Json -Compress
         Write-Verbose "Creating $RecordName with value $TxtValue"
         Invoke-RestMethod $recRoot -Method Post -Body $bodyJson -Headers $auth `
@@ -70,7 +77,10 @@ function Add-DnsTxtDMEasy {
         The DNS Made Easy API key for your account.
 
     .PARAMETER DMESecret
-        The DNS Made Easy API secret key for your account.
+        The DNS Made Easy API secret key for your account. This SecureString version should only be used on Windows.
+
+    .PARAMETER DMESecretInsecure
+        The DNS Made Easy API secret key for your account. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER DMEUseSandbox
         If specified, all commands will run against the DNS Made Easy sandbox API endpoint. This is generally only used for testing the plugin.
@@ -87,7 +97,7 @@ function Add-DnsTxtDMEasy {
 }
 
 function Remove-DnsTxtDMEasy {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -95,12 +105,19 @@ function Remove-DnsTxtDMEasy {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$DMEKey,
-        [Parameter(Mandatory,Position=3)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$DMESecret,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [string]$DMESecretInsecure,
         [switch]$DMEUseSandbox,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    # convert the secure secret to a normal string
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $DMESecretInsecure = (New-Object PSCredential ("user", $DMESecret)).GetNetworkCredential().Password
+    }
 
     $apiBase = 'https://api.dnsmadeeasy.com/V2.0/dns/managed'
     if ($DMEUseSandbox) {
@@ -108,7 +125,7 @@ function Remove-DnsTxtDMEasy {
     }
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (!($zoneID,$zoneName = Find-DMEZone $RecordName $DMEKey $DMESecret $apiBase)) {
+    if (!($zoneID,$zoneName = Find-DMEZone $RecordName $DMEKey $DMESecretInsecure $apiBase)) {
         throw "Unable to find DME hosted zone for $RecordName"
     }
 
@@ -119,7 +136,7 @@ function Remove-DnsTxtDMEasy {
 
     # query the existing record(s)
     try {
-        $auth = Get-DMEAuthHeader $DMEKey $DMESecret
+        $auth = Get-DMEAuthHeader $DMEKey $DMESecretInsecure
         $response = Invoke-RestMethod "$($recRoot)?recordName=$recShort&type=TXT" `
             -Headers $auth -ContentType 'application/json' @script:UseBasic
     } catch { throw }
@@ -136,7 +153,7 @@ function Remove-DnsTxtDMEasy {
         # grab the ID and delete the record
         $recID = ($response.data | Where-Object { $_.value -eq "`"$TxtValue`"" }).id
         try {
-            $auth = $auth = Get-DMEAuthHeader $DMEKey $DMESecret
+            $auth = $auth = Get-DMEAuthHeader $DMEKey $DMESecretInsecure
             Write-Verbose "Deleting record $RecordName with value $TxtValue."
             Invoke-RestMethod "$recRoot/$recID" -Method Delete -Headers $auth `
                 -ContentType 'application/json' @script:UseBasic | Out-Null
@@ -160,7 +177,10 @@ function Remove-DnsTxtDMEasy {
         The DNS Made Easy API key for your account.
 
     .PARAMETER DMESecret
-        The DNS Made Easy API secret key for your account.
+        The DNS Made Easy API secret key for your account. This SecureString version should only be used on Windows.
+
+    .PARAMETER DMESecretInsecure
+        The DNS Made Easy API secret key for your account. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER DMEUseSandbox
         If specified, all commands will run against the DNS Made Easy sandbox API endpoint. This is generally only used for testing the plugin.
@@ -204,13 +224,13 @@ function Get-DMEAuthHeader {
         [Parameter(Mandatory,Position=0)]
         [string]$DMEKey,
         [Parameter(Mandatory,Position=1)]
-        [securestring]$DMESecret
+        [string]$DMESecretInsecure
     )
 
     # We need to initialize an HMACSHA1 instance with the secret key as a byte array.
     # I know there's probably a safer way to do this that doesn't leave the plaintext
     # secret around in memory for as long, but it's beyond me at the moment.
-    $secBytes = [Text.Encoding]::UTF8.GetBytes((New-Object PSCredential "user",$DMESecret).GetNetworkCredential().Password)
+    $secBytes = [Text.Encoding]::UTF8.GetBytes($DMESecretInsecure)
     $hmac = New-Object Security.Cryptography.HMACSHA1($secBytes,$true)
 
     # We need to hash a timestamp in "HTTP format", aka RFC 1123
@@ -238,7 +258,7 @@ function Find-DMEZone {
         [Parameter(Mandatory,Position=1)]
         [string]$DMEKey,
         [Parameter(Mandatory,Position=2)]
-        [securestring]$DMESecret,
+        [string]$DMESecretInsecure,
         [Parameter(Mandatory,Position=3)]
         [string]$ApiBase
     )
@@ -258,7 +278,7 @@ function Find-DMEZone {
     # So for now, we'll just assume all results get returned in one page. If any large
     # customers find differently, feel free to submit an issue.
     try {
-        $auth = Get-DMEAuthHeader $DMEKey $DMESecret
+        $auth = Get-DMEAuthHeader $DMEKey $DMESecretInsecure
         $response = Invoke-RestMethod $ApiBase -Headers $auth -ContentType 'application/json' @script:UseBasic
         $zones = $response.data
     } catch { throw }
