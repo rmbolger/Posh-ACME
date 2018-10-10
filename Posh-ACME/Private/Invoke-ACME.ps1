@@ -4,6 +4,7 @@ function Invoke-ACME {
         [Parameter(Mandatory,Position=0)]
         [hashtable]$Header,
         [Parameter(Mandatory,Position=1)]
+        [AllowEmptyString()]
         [string]$PayloadJson,
         [Parameter(ParameterSetName='Account',Mandatory,Position=2)]
         [PSTypeName('PoshACME.PAAccount')]$Account,

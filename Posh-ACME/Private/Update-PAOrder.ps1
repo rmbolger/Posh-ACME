@@ -8,7 +8,7 @@ function Update-PAOrder {
 
     Begin {
         # make sure we have an account configured
-        if (!(Get-PAAccount)) {
+        if (!($acct = Get-PAAccount)) {
             throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
         }
     }
@@ -42,9 +42,17 @@ function Update-PAOrder {
         if (!$SaveOnly) {
             Write-Debug "Refreshing order $($order.MainDomain)"
 
-            # we can request the order info via an anonymous GET request
+            # build the header
+            $header = @{
+                alg   = $acct.alg;
+                kid   = $acct.location;
+                nonce = $script:Dir.nonce;
+                url   = $order.location;
+            }
+
+            # send the request
             try {
-                $response = Invoke-WebRequest $order.location -EA Stop -Verbose:$false @script:UseBasic
+                $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
             } catch { throw }
             Write-Debug "Response: $($response.Content)"
 

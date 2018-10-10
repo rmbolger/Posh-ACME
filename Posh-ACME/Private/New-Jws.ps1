@@ -7,6 +7,7 @@ function New-Jws {
         [Parameter(Mandatory)]
         [hashtable]$Header,
         [Parameter(Mandatory)]
+        [AllowEmptyString()]
         [string]$PayloadJson,
         [switch]$Compact,
         [switch]$NoHeaderValidation
