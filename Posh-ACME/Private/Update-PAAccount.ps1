@@ -51,9 +51,7 @@ function Update-PAAccount {
 
         # send the request
         try {
-            $response = Invoke-ACME $header '{}' $acct -EA Stop
-            # POST-AS-GET support pending https://github.com/letsencrypt/pebble/pull/171
-            #$response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
+            $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
         } catch { throw }
         Write-Debug "Response: $($response.Content)"
 
