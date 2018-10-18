@@ -21,9 +21,7 @@ function New-PAOrder {
         throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
     }
 
-    # null the local instance of $order so it's not confused with the script-scoped version
-    $order = $null
-    try { $order = Get-PAOrder $Domain[0] -Refresh } catch {}
+    $order = Get-PAOrder $Domain[0] -Refresh
 
     # separate the SANs
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
