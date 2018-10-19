@@ -31,7 +31,7 @@ Function Add-DnsTxtEasyDNS{
     }
     if (!$domain) {throw "Could not find domain"}
 
-    $hostname = $Bits[0..$($i-1)] -join '.'
+    $hostname = $Bits[0..$(($Bits.Count-1)-$i)] -join '.'
 
     Write-Verbose "Check for duplicate"
     foreach ($zRecord in $($Records.data | ? {$_.host -eq $hostname -and $_.rData -eq $TxtValue})) {
@@ -111,7 +111,7 @@ Function Remove-DnsTxtEasyDNS{
     }
     if (!$domain) {throw "Could not find domain"}
 
-    $hostname = $Bits[0..$($i-1)] -join '.'
+    $hostname = $Bits[0..$(($Bits.Count-1)-$i)] -join '.'
 
     Write-Verbose "Check for matching record $hostname | $domain | $TxtValue"
     foreach ($zRecord in $($Records.data | ? {$_.host -eq $hostname -and $_.rData -eq $TxtValue})) {
