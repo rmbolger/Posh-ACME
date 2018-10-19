@@ -159,12 +159,14 @@ function Submit-ChallengeValidation {
     } finally {
         # always cleanup the TXT records if they were added
         for ($i=0; $i -lt $toValidate.Count; $i++) {
-            if ([string]::IsNullOrWhiteSpace($DnsAlias[$i])) {
+            $index = $toValidate[$i]
+
+            if ([string]::IsNullOrWhiteSpace($DnsAlias[$index])) {
                 # unpublish normally
-                Unpublish-DnsChallenge $allAuths[$i].DNSId $Account $allAuths[$i].DNS01Token $DnsPlugin[$i] $PluginArgs
+                Unpublish-DnsChallenge $allAuths[$index].DNSId $Account $allAuths[$index].DNS01Token $DnsPlugin[$index] $PluginArgs
             } else {
                 # unpublish from alias
-                Unpublish-DnsChallenge $DnsAlias[$i] $Account $allAuths[$i].DNS01Token $DnsPlugin[$i] $PluginArgs -NoPrefix
+                Unpublish-DnsChallenge $DnsAlias[$index] $Account $allAuths[$index].DNS01Token $DnsPlugin[$index] $PluginArgs -NoPrefix
             }
         }
         $DnsPlugin[$toValidate] | Select-Object -Unique | ForEach-Object {
