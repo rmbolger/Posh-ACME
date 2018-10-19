@@ -1,0 +1,14 @@
+# Setup
+
+This plugin works against the [EasyDNS](https://www.easydns.com) provider. It is assumed that you have already setup an account with a domain registered.
+
+At the time of writing, the EasyDNS API environment is still in BETA (Q4-2018). Documentation, including signup instructions, are available at http://docs.sandbox.rest.easydns.net/. At this time, when you first receive an API token and key, they will be for the sandbox environment, not the live environment. While testing the publishing/unpublishing of a challenge will work - the challenge will not be part of the public DNS records.
+
+## Using the Plugin
+
+The only plugin arguments you need are the API key and API secret created earlier.
+
+```powershell
+$pArgs = @{edToken='xxxxxxxxxxxxxxxx';edKey='xxxxxxxxxxxxxxxx'}
+New-PACertificate example.com -DnsPlugin EasyDNS -PluginArgs $pArgs
+```
