@@ -324,7 +324,10 @@ function Connect-AZTenant {
             # login
             try {
                 Write-Debug "Authenticating with explicit credentials"
-                $authBody = "grant_type=client_credentials&client_id=$($AZAppCred.Username)&client_secret=$($AZAppCred.GetNetworkCredential().Password)&resource=$([uri]::EscapeDataString('https://management.core.windows.net/'))"
+                $clientId = [uri]::EscapeDataString($AZAppCred.Username)
+                $clientSecret = [uri]::EscapeDataString($AZAppCred.GetNetworkCredential().Password)
+                $resource = [uri]::EscapeDataString('https://management.core.windows.net/')
+                $authBody = "grant_type=client_credentials&client_id=$clientId&client_secret=$clientSecret&resource=$resource"
                 $token = Invoke-RestMethod "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token" `
                     -Method Post -Body $authBody @script:UseBasic
             } catch { throw }

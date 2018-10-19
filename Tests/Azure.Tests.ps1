@@ -29,13 +29,15 @@ Describe "Connect-AZTenant" {
     Context "Credential param set" {
 
         $fakeTenant = '00000000-0000-0000-0000-000000000000'
-        $fakePass = "fakepass" | ConvertTo-SecureString -AsPlainText -Force
-        $fakeCred = New-Object System.Management.Automation.PSCredential('fakeuser', $fakePass)
+        $fakePass = "fake+p&ss" | ConvertTo-SecureString -AsPlainText -Force
+        $fakeCred = New-Object System.Management.Automation.PSCredential('fake user', $fakePass)
 
         It "calls Invoke-RestMethod if no existing token" {
             $script:AZToken = $null
             Connect-AZTenant $fakeTenant $fakeCred
-            Assert-MockCalled -CommandName Invoke-RestMethod -Times 1 -Exactly -Scope It
+            Assert-MockCalled -CommandName Invoke-RestMethod -Times 1 -Exactly -Scope It -ParameterFilter {
+                $Body -match "[&?]client_id=fake%20user(&|$)" -and $Body -match "[&?]client_secret=fake%2[Bb]p%26ss(&|$)"
+            }
             Assert-MockCalled -CommandName ConvertFrom-AccessToken -Times 0 -Exactly -Scope It
         }
         It "calls Invoke-RestMethod if token expired" {
