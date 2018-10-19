@@ -13,7 +13,7 @@ Function Add-DnsTxtEasyDNS{
     )
 
     #Basic Setup - set use live REST URL for easyDNS and manually encode token/key pair into header
-    $URI = "https://sandbox.rest.easydns.net"
+    $URI = "https://rest.easydns.net"
     $pair = "$($edToken):$($edKey)"
 
     $encodedCreds = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($pair))
@@ -93,7 +93,7 @@ Function Remove-DnsTxtEasyDNS{
     )
 
     #Basic Setup - set use live REST URL for easyDNS and manually encode token/key pair into header
-    $URI = "https://sandbox.rest.easydns.net"
+    $URI = "https://rest.easydns.net"
     $pair = "$($edToken):$($edKey)"
 
     $encodedCreds = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($pair))
