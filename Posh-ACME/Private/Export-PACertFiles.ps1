@@ -30,16 +30,20 @@ function Export-PACertFiles {
     # write the chain
     Export-Pem ($pems[1..($pems.Count-1)] | ForEach-Object {$_}) $chainFile
 
-    # write the pfx files
-    $pfxParams = @{
-        CertFile     = $certFile;
-        KeyFile      = $keyFile;
-        OutputFile   = $pfxFile;
-        FriendlyName = $FriendlyName;
-        PfxPass      = $PfxPass;
+    # If we created the Cert from CSR there is no key, so no key to export.
+    if ($order.csr -eq $Null) {
+
+        # write the pfx files
+        $pfxParams = @{
+            CertFile     = $certFile;
+            KeyFile      = $keyFile;
+            OutputFile   = $pfxFile;
+            FriendlyName = $FriendlyName;
+            PfxPass      = $PfxPass;
+        }
+        Export-CertPfx @pfxParams
+        $pfxParams.OutputFile = $pfxFullFile
+        Export-CertPfx @pfxParams -ChainFile $chainFile
     }
-    Export-CertPfx @pfxParams
-    $pfxParams.OutputFile = $pfxFullFile
-    Export-CertPfx @pfxParams -ChainFile $chainFile
 
 }

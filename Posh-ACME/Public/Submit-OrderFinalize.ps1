@@ -38,9 +38,15 @@ function Submit-OrderFinalize {
         }
     }
 
-    # generate the CSR
-    Write-Verbose "Creating new certificate request with key length $($Order.KeyLength)$(if ($Order.OCSPMustStaple){' and OCSP Must-Staple'})."
-    $csr = New-Csr $Order
+    # check if CSR was provided for us
+    # in that case us that one or else generate CSR
+    if ($order.csr -eq $Null) {
+        Write-Verbose "Creating new certificate request with key length $($Order.KeyLength)$(if ($Order.OCSPMustStaple){' and OCSP Must-Staple'})."
+        $csr = New-Csr $Order
+    } else {
+        Write-Verbose "Using the CSR provided$(if ($Order.OCSPMustStaple){' and OCSP Must-Staple'})."
+        $csr = ConvertTo-Base64Url -FromBase64 $Order.CSR
+    }
 
     # build the protected header
     $header = @{

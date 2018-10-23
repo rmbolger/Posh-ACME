@@ -24,6 +24,7 @@ function New-PACertificate {
         [ValidateScript({Test-WinOnly -ThrowOnFail})]
         [switch]$Install,
         [switch]$Force,
+	[string]$CSR,
         [int]$DNSSleep=120,
         [int]$ValidationTimeout=60,
         [int]$CertIssueTimeout=60
@@ -66,7 +67,8 @@ function New-PACertificate {
     # - is pending, but expired
     # - has different KeyLength
     # - has different SANs
-    $order = Get-PAOrder $Domain[0] -Refresh
+    $order = $null
+    try { $order = Get-PAOrder $Domain[0] -Refresh } catch {}
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
     if ($Force -or !$order -or
         $order.status -eq 'invalid' -or
@@ -84,6 +86,9 @@ function New-PACertificate {
             Install        = $Install.IsPresent;
             FriendlyName   = $FriendlyName;
             PfxPass        = $PfxPass;
+        }
+        if ('CSR' -in $PSBoundParameters.Keys) {
+            $OrderParams['CSR'] = $CSR -replace '\n','' -replace '-----BEGIN CERTIFICATE REQUEST-----' -replace '-----END CERTIFICATE REQUEST-----';
         }
 
         # load values from the old order if they exist and weren't explicitly specified
