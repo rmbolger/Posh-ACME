@@ -67,8 +67,7 @@ function New-PACertificate {
     # - is pending, but expired
     # - has different KeyLength
     # - has different SANs
-    $order = $null
-    try { $order = Get-PAOrder $Domain[0] -Refresh } catch {}
+    $order = Get-PAOrder $Domain[0] -Refresh
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
     if ($Force -or !$order -or
         $order.status -eq 'invalid' -or
