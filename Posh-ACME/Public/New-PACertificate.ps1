@@ -293,6 +293,9 @@ function New-PACertificate {
     .PARAMETER CertIssueTimeout
         Number of seconds to wait for the server to finish the order before giving up and throwing an error.
 
+    .PARAMETER CSR
+        Use the CSR data instead of creating certificate from scratch.
+
     .EXAMPLE
         New-PACertificate site1.example.com -AcceptTOS
 
