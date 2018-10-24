@@ -2,7 +2,8 @@ function New-PACertificate {
     [CmdletBinding()]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText','')]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(ParameterSetName=’CreateKey’,Mandatory,Position=0)]
+        [Parameter(ParameterSetName=’FromCSR’,Mandatory=$False)]
         [string[]]$Domain,
         [string[]]$Contact,
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
@@ -24,6 +25,9 @@ function New-PACertificate {
         [ValidateScript({Test-WinOnly -ThrowOnFail})]
         [switch]$Install,
         [switch]$Force,
+        [ValidateScript({if(Test-Path $_){$true}else{Throw "Invalid path to CSR given: $_"}})]
+        [Parameter(ParameterSetName=’FromCSR’,Mandatory)]
+	[string]$CSRPath,
         [int]$DNSSleep=120,
         [int]$ValidationTimeout=60,
         [int]$CertIssueTimeout=60
@@ -66,6 +70,10 @@ function New-PACertificate {
     # - is pending, but expired
     # - has different KeyLength
     # - has different SANs
+    if ($PsCmdlet.ParameterSetName -eq 'FromCSR') {
+      $Domain = Extract-DomainsFromCSR -CSRPath $CSRPath
+    }
+
     $order = Get-PAOrder $Domain[0] -Refresh
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
     if ($Force -or !$order -or
@@ -84,6 +92,9 @@ function New-PACertificate {
             Install        = $Install.IsPresent;
             FriendlyName   = $FriendlyName;
             PfxPass        = $PfxPass;
+        }
+        if ('CSRPath' -in $PSBoundParameters.Keys) {
+          $orderParams += @{'CSRPath'=$CSRPath}
         }
 
         # load values from the old order if they exist and weren't explicitly specified
@@ -193,6 +204,10 @@ function New-PACertificate {
             FriendlyName = $FriendlyName;
             PfxPass = $PfxPass;
         }
+
+        if ($order.csrpath -ne $Null) {
+          $exportParams += @{'NoKey'=$True}
+        }
         Export-PACertFiles @exportParams
 
         # check the certificate expiration date so we can update the CertExpires
@@ -287,6 +302,9 @@ function New-PACertificate {
 
     .PARAMETER CertIssueTimeout
         Number of seconds to wait for the server to finish the order before giving up and throwing an error.
+
+    .PARAMETER CSRPath
+        Use a CSR file instead of creating certificate from scratch.
 
     .EXAMPLE
         New-PACertificate site1.example.com -AcceptTOS

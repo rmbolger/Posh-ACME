@@ -2,7 +2,8 @@ function New-PAOrder {
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType('PoshACME.PAOrder')]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(ParameterSetName=’CreateKey’,Mandatory,Position=0)]
+        [Parameter(ParameterSetName=’FromCSR’,Mandatory=$False)]
         [string[]]$Domain,
         [Parameter(Position=1)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
@@ -13,12 +14,20 @@ function New-PAOrder {
         [string]$FriendlyName='',
         [string]$PfxPass='poshacme',
         [switch]$Install,
-        [switch]$Force
+        [switch]$Force,
+        [ValidateScript({if(Test-Path $_){$true}else{Throw "Invalid path to CSR given: $_"}})]
+        [Parameter(ParameterSetName=’FromCSR’,Mandatory)]
+	[string]$CSRPath
     )
 
     # Make sure we have an account configured
     if (!($acct = Get-PAAccount)) {
         throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+    }
+
+    # Read domain from CSR if using CSR and overwrite submitted domains.
+    if ($PsCmdlet.ParameterSetName -eq 'FromCSR') {
+      $Domain = Extract-DomainsFromCSR -CSRPath $CSRPath
     }
 
     $order = Get-PAOrder $Domain[0] -Refresh
@@ -118,19 +127,29 @@ function New-PAOrder {
     if (!(Test-Path $script:OrderFolder -PathType Container)) {
         New-Item -ItemType Directory -Path $script:OrderFolder -Force | Out-Null
     }
-    $order | ConvertTo-Json | Out-File (Join-Path $script:OrderFolder 'order.json') -Force
 
-    # backup the old private key if necessary, otherwise keep it around for re-use
-    if ($removeOldKey) {
+
+    # Create folder to save older certificates and keys
+    $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include *.cer,*.pfx,*.csr
+    if ($oldFiles -ne $Null -or $removeOldKey) {
+      $oldFilesFolder = New-Item -ItemType Directory -Path ("$($script:OrderFolder)\$(Get-Date -Format "yyyyMMdd HHmmss")")
+      # backup any old certs/requests that might exist
+      $oldFiles | Move-Item -Destination $oldFilesFolder
+      # backup the old private key if necessary, otherwise keep it around for re-use
+      if ($removeOldKey) {
         Write-Verbose "Preparing for new private key"
         $oldKey = Get-ChildItem (Join-Path $script:OrderFolder 'cert.key')
         $oldKey | Move-Item -Destination { "$($_.FullName).bak" } -Force
+      }
     }
 
-    # backup any old certs/requests that might exist
-    $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include cert.cer,cert.pfx,fullchain.pfx
-    $oldFiles | Move-Item -Destination { "$($_.FullName).bak" } -Force
+    if ($PsCmdlet.ParameterSetName -eq 'FromCSR') {
+      copy-item -Path $CSRPath -Destination "$($script:OrderFolder)\request.csr"
+      $order | Add-Member -MemberType NoteProperty -Name 'CSRPath' -Value "$($script:OrderFolder)\request.csr"
+    }
 
+
+    $order | ConvertTo-Json | Out-File (Join-Path $script:OrderFolder 'order.json') -Force
     return $order
 
 
