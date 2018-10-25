@@ -221,8 +221,8 @@ function Get-R53ZoneId {
         return $script:R53RecordZones.$RecordName
     }
 
-    # get the list of available zones
-    $zones = Get-R53HostedZoneList @CredParam
+    # get the list of available public zones
+    $zones = Get-R53HostedZoneList @CredParam | Where-Object { -not $_.Config.PrivateZone }
 
     # Since Route53 could be hosting both apex and sub-zones, we need to find the closest/deepest
     # sub-zone that would hold the record rather than just adding it to the apex. So for something
