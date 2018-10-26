@@ -6,6 +6,7 @@
     [string]$CSRPath
   )
   Process {
+    Write-Verbose "Extracting domains from CSR ($($CSRPath))"
     Try {
       $CSRSteamReader = [System.IO.StreamReader]::new($CSRPath)
       $CSRReqPem = [Org.BouncyCastle.OpenSsl.PEMReader]::new($CSRSteamReader)
