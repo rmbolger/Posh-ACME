@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '2.9.0'
+ModuleVersion = '2.9.1'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -104,12 +104,12 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 2.9.0 (2018-10-05)
+## 2.9.1 (2018-10-26)
 
-* Added new DNS plugins
-  * BlueCat (Thanks @marshallford)
-  * Gandi
-* Updated DMEasy plugin to support non-Windows
+* Fix (#94) for TXT record cleanup bug when some domains were already validated (Thanks @philr!)
+* Fix (#95) error handling in New-PACertificate and New-PAOrder that would mistakenly cause new orders to be created if there were problems checking old orders. (Thanks @philr!)
+* Azure fix (#96) to allow special characters in credentials. (Thanks @philr!)
+* Route53 fix for errors caused by public/private zones with same name (#100) (Thanks @spaceygithub!)
 '@
 
     } # End of PSData hashtable

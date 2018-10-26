@@ -1,3 +1,10 @@
+## 2.9.1 (2018-10-26)
+
+* Fix (#94) for TXT record cleanup bug when some domains were already validated (Thanks @philr!)
+* Fix (#95) error handling in New-PACertificate and New-PAOrder that would mistakenly cause new orders to be created if there were problems checking old orders. (Thanks @philr!)
+* Azure fix (#96) to allow special characters in credentials. (Thanks @philr!)
+* Route53 fix for errors caused by public/private zones with same name (#100) (Thanks @spaceygithub!)
+
 ## 2.9.0 (2018-10-05)
 
 * Added new DNS plugins
