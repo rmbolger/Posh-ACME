@@ -6,10 +6,13 @@ function New-PACertificate {
         [Parameter(ParameterSetName=’FromCSR’,Mandatory=$False)]
         [string[]]$Domain,
         [string[]]$Contact,
+        [Parameter(ParameterSetName=’CreateKey’)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$CertKeyLength='2048',
+        [Parameter(ParameterSetName=’CreateKey’)]
         [switch]$NewCertKey,
         [switch]$AcceptTOS,
+        [Parameter(ParameterSetName=’CreateKey’)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$AccountKeyLength='ec-256',
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
@@ -19,8 +22,11 @@ function New-PACertificate {
         [string[]]$DnsPlugin,
         [hashtable]$PluginArgs,
         [string[]]$DnsAlias,
+        [Parameter(ParameterSetName=’CreateKey’)]
         [switch]$OCSPMustStaple,
+        [Parameter(ParameterSetName=’CreateKey’)]
         [string]$FriendlyName='',
+        [Parameter(ParameterSetName=’CreateKey’)]
         [string]$PfxPass='poshacme',
         [ValidateScript({Test-WinOnly -ThrowOnFail})]
         [switch]$Install,
