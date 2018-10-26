@@ -1,18 +1,18 @@
 function New-PACertificate {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='FromScratch')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText','')]
     param(
-        [Parameter(ParameterSetName=’CreateKey’,Mandatory,Position=0)]
-        [Parameter(ParameterSetName=’FromCSR’,Mandatory=$False)]
+        [Parameter(ParameterSetName='FromScratch',Mandatory,Position=0)]
         [string[]]$Domain,
+        [Parameter(ParameterSetName='FromCSR',Mandatory,Position=0)]
+        [string]$CSRPath,
         [string[]]$Contact,
-        [Parameter(ParameterSetName=’CreateKey’)]
+        [Parameter(ParameterSetName='FromScratch')]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$CertKeyLength='2048',
-        [Parameter(ParameterSetName=’CreateKey’)]
+        [Parameter(ParameterSetName='FromScratch')]
         [switch]$NewCertKey,
         [switch]$AcceptTOS,
-        [Parameter(ParameterSetName=’CreateKey’)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$AccountKeyLength='ec-256',
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
@@ -22,18 +22,16 @@ function New-PACertificate {
         [string[]]$DnsPlugin,
         [hashtable]$PluginArgs,
         [string[]]$DnsAlias,
-        [Parameter(ParameterSetName=’CreateKey’)]
+        [Parameter(ParameterSetName='FromScratch')]
         [switch]$OCSPMustStaple,
-        [Parameter(ParameterSetName=’CreateKey’)]
+        [Parameter(ParameterSetName='FromScratch')]
         [string]$FriendlyName='',
-        [Parameter(ParameterSetName=’CreateKey’)]
+        [Parameter(ParameterSetName='FromScratch')]
         [string]$PfxPass='poshacme',
+        [Parameter(ParameterSetName='FromScratch')]
         [ValidateScript({Test-WinOnly -ThrowOnFail})]
         [switch]$Install,
         [switch]$Force,
-        [ValidateScript({if(Test-Path $_){$true}else{Throw "Invalid path to CSR given: $_"}})]
-        [Parameter(ParameterSetName=’FromCSR’,Mandatory)]
-	[string]$CSRPath,
         [int]$DNSSleep=120,
         [int]$ValidationTimeout=60,
         [int]$CertIssueTimeout=60
@@ -67,6 +65,15 @@ function New-PACertificate {
     }
     Write-Verbose "Using account $($acct.id)"
 
+    # If using a pre-generated CSR, extract the details so we can generate expected parameters
+    if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
+        $csrDetails = Get-CsrDetails $CSRPath
+
+        $Domain = $csrDetails.Domain
+        $CertKeyLength = $csrDetails.KeyLength
+        $OCSPMustStaple = New-Object Management.Automation.SwitchParameter($csrDetails.OCSPMustStaple)
+    }
+
     # Check for an existing order from the MainDomain for this call and create a new
     # one if:
     # - -Force was used
@@ -76,10 +83,7 @@ function New-PACertificate {
     # - is pending, but expired
     # - has different KeyLength
     # - has different SANs
-    if ($PsCmdlet.ParameterSetName -eq 'FromCSR') {
-      $Domain = Extract-DomainsFromCSR -CSRPath $CSRPath
-    }
-
+    # - has different CSR
     $order = Get-PAOrder $Domain[0] -Refresh
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
     if ($Force -or !$order -or
@@ -87,39 +91,41 @@ function New-PACertificate {
         ($order.status -eq 'valid' -and $order.RenewAfter -and (Get-DateTimeOffsetNow) -ge ([DateTimeOffset]::Parse($order.RenewAfter))) -or
         ($order.status -eq 'pending' -and (Get-DateTimeOffsetNow) -gt ([DateTimeOffset]::Parse($order.expires))) -or
         $CertKeyLength -ne $order.KeyLength -or
-        ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') ) {
+        ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') -or
+        ($csrDetails -and $csrDetails.Base64Url -ne $order.CSRBase64Url ) ) {
 
         # Create a hashtable of order parameters to splat
-        $orderParams = @{
-            Domain         = $Domain;
-            KeyLength      = $CertKeyLength;
-            OCSPMustStaple = $OCSPMustStaple.IsPresent;
-            NewKey         = $NewCertKey.IsPresent;
-            Install        = $Install.IsPresent;
-            FriendlyName   = $FriendlyName;
-            PfxPass        = $PfxPass;
-        }
-        if ('CSRPath' -in $PSBoundParameters.Keys) {
-          $orderParams += @{'CSRPath'=$CSRPath}
-        }
+        if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
+            $orderParams = @{ CSRPath = $CSRPath }
+        } else {
+            $orderParams = @{
+                Domain         = $Domain;
+                KeyLength      = $CertKeyLength;
+                OCSPMustStaple = $OCSPMustStaple.IsPresent;
+                NewKey         = $NewCertKey.IsPresent;
+                Install        = $Install.IsPresent;
+                FriendlyName   = $FriendlyName;
+                PfxPass        = $PfxPass;
+            }
 
-        # load values from the old order if they exist and weren't explicitly specified
-        if ($order) {
-            $oldOrder = $order
-            if ('CertKeyLength' -notin $PSBoundParameters.Keys) {
-                $orderParams.KeyLength = $oldOrder.KeyLength
-            }
-            if ('OCSPMustStaple' -notin $PSBoundParameters.Keys) {
-                $orderParams.OCSPMustStaple = $oldOrder.OCSPMustStaple
-            }
-            if ('Install' -notin $PSBoundParameters.Keys -and $oldOrder.Install) {
-                $orderParams.Install = $oldOrder.Install
-            }
-            if ('FriendlyName' -notin $PSBoundParameters.Keys -and $oldOrder.FriendlyName) {
-                $orderParams.FriendlyName = $oldOrder.FriendlyName
-            }
-            if ('PfxPass' -notin $PSBoundParameters.Keys -and $oldOrder.PfxPass) {
-                $orderParams.PfxPass = $oldOrder.PfxPass
+            # load values from the old order if they exist and weren't explicitly specified
+            if ($order) {
+                $oldOrder = $order
+                if ('CertKeyLength' -notin $PSBoundParameters.Keys) {
+                    $orderParams.KeyLength = $oldOrder.KeyLength
+                }
+                if ('OCSPMustStaple' -notin $PSBoundParameters.Keys) {
+                    $orderParams.OCSPMustStaple = $oldOrder.OCSPMustStaple
+                }
+                if ('Install' -notin $PSBoundParameters.Keys -and $oldOrder.Install) {
+                    $orderParams.Install = $oldOrder.Install
+                }
+                if ('FriendlyName' -notin $PSBoundParameters.Keys -and $oldOrder.FriendlyName) {
+                    $orderParams.FriendlyName = $oldOrder.FriendlyName
+                }
+                if ('PfxPass' -notin $PSBoundParameters.Keys -and $oldOrder.PfxPass) {
+                    $orderParams.PfxPass = $oldOrder.PfxPass
+                }
             }
         }
 
@@ -258,6 +264,9 @@ function New-PACertificate {
     .PARAMETER Domain
         One or more domain names to include in this order/certificate. The first one in the list will be considered the "MainDomain" and be set as the subject of the finalized certificate.
 
+    .PARAMETER CSRPath
+        The path to a pre-made certificate request file in PEM (Base64) format. This is useful for appliances that need to generate their own keys and cert requests.
+
     .PARAMETER Contact
         One or more email addresses to associate with this certificate. These addresses will be used by the ACME server to send certificate expiration notifications or other important account notices.
 
@@ -308,9 +317,6 @@ function New-PACertificate {
 
     .PARAMETER CertIssueTimeout
         Number of seconds to wait for the server to finish the order before giving up and throwing an error.
-
-    .PARAMETER CSRPath
-        Use a CSR file instead of creating certificate from scratch.
 
     .EXAMPLE
         New-PACertificate site1.example.com -AcceptTOS

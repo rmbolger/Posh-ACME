@@ -1,23 +1,26 @@
 function New-PAOrder {
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding(SupportsShouldProcess,DefaultParameterSetName='FromScratch')]
     [OutputType('PoshACME.PAOrder')]
     param(
-        [Parameter(ParameterSetName=’CreateKey’,Mandatory,Position=0)]
-        [Parameter(ParameterSetName=’FromCSR’,Mandatory=$False)]
+        [Parameter(ParameterSetName='FromScratch',Mandatory,Position=0)]
         [string[]]$Domain,
-        [Parameter(Position=1)]
+        [Parameter(ParameterSetName='FromCSR',Mandatory,Position=0)]
+        [string]$CSRPath,
+        [Parameter(ParameterSetName='FromScratch',Position=1)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$KeyLength='2048',
+        [Parameter(ParameterSetName='FromScratch')]
         [switch]$OCSPMustStaple,
+        [Parameter(ParameterSetName='FromScratch')]
         [Alias('NewCertKey')]
         [switch]$NewKey,
+        [Parameter(ParameterSetName='FromScratch')]
         [string]$FriendlyName='',
+        [Parameter(ParameterSetName='FromScratch')]
         [string]$PfxPass='poshacme',
+        [Parameter(ParameterSetName='FromScratch')]
         [switch]$Install,
-        [switch]$Force,
-        [ValidateScript({if(Test-Path $_){$true}else{Throw "Invalid path to CSR given: $_"}})]
-        [Parameter(ParameterSetName=’FromCSR’,Mandatory)]
-	[string]$CSRPath
+        [switch]$Force
     )
 
     # Make sure we have an account configured
@@ -25,11 +28,16 @@ function New-PAOrder {
         throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
     }
 
-    # Read domain from CSR if using CSR and overwrite submitted domains.
-    if ($PsCmdlet.ParameterSetName -eq 'FromCSR') {
-      $Domain = Extract-DomainsFromCSR -CSRPath $CSRPath
+    # If using a pre-generated CSR, extract the details so we can generate expected parameters
+    if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
+        $csrDetails = Get-CsrDetails $CSRPath
+
+        $Domain = $csrDetails.Domain
+        $KeyLength = $csrDetails.KeyLength
+        $OCSPMustStaple = New-Object Management.Automation.SwitchParameter($csrDetails.OCSPMustStaple)
     }
 
+    # check for an existing order
     $order = Get-PAOrder $Domain[0] -Refresh
 
     # separate the SANs
@@ -66,7 +74,8 @@ function New-PAOrder {
 
     # Determine whether to remove the old private key. This is necessary if explicitly
     # requested or the new KeyLength doesn't match the old one.
-    $removeOldKey = ($NewKey -or ($order -and $KeyLength -ne $order.KeyLength))
+    $removeOldKey = ( ('FromScratch' -eq $PSCmdlet.ParameterSetName) -and
+                      ($NewKey -or ($order -and $KeyLength -ne $order.KeyLength)) )
 
     # build the protected header for the request
     $header = @{
@@ -111,6 +120,11 @@ function New-PAOrder {
         $order | Add-Member -MemberType NoteProperty -Name 'certificate' -Value $null
     }
 
+    # add the CSR data if we have it
+    if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
+        $order | Add-Member -MemberType NoteProperty -Name 'CSRBase64Url' -Value $csrDetails.Base64Url
+    }
+
     # add the location from the header
     if ($response.Headers.ContainsKey('Location')) {
         $location = $response.Headers['Location'] | Select-Object -First 1
@@ -128,26 +142,24 @@ function New-PAOrder {
         New-Item -ItemType Directory -Path $script:OrderFolder -Force | Out-Null
     }
 
-
     # Create folder to save older certificates and keys
     $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include *.cer,*.pfx,*.csr
-    if ($oldFiles -ne $Null -or $removeOldKey) {
-      $oldFilesFolder = New-Item -ItemType Directory -Path ("$($script:OrderFolder)\$(Get-Date -Format "yyyyMMdd HHmmss")")
-      # backup any old certs/requests that might exist
-      $oldFiles | Move-Item -Destination $oldFilesFolder
-      # backup the old private key if necessary, otherwise keep it around for re-use
-      if ($removeOldKey) {
-        Write-Verbose "Preparing for new private key"
-        $oldKey = Get-ChildItem (Join-Path $script:OrderFolder 'cert.key')
-        $oldKey | Move-Item -Destination { "$($_.FullName).bak" } -Force
-      }
+    if ($null -ne $oldFiles -or $removeOldKey) {
+        $oldFilesFolder = New-Item -ItemType Directory -Path ("$($script:OrderFolder)\$(Get-Date -Format "yyyyMMdd HHmmss")")
+        # backup any old certs/requests that might exist
+        $oldFiles | Move-Item -Destination $oldFilesFolder
+        # backup the old private key if necessary, otherwise keep it around for re-use
+        if ($removeOldKey) {
+            Write-Verbose "Preparing for new private key"
+            $oldKey = Get-ChildItem (Join-Path $script:OrderFolder 'cert.key')
+            $oldKey | Move-Item -Destination { "$($_.FullName).bak" } -Force
+        }
     }
 
-    if ($PsCmdlet.ParameterSetName -eq 'FromCSR') {
-      copy-item -Path $CSRPath -Destination "$($script:OrderFolder)\request.csr"
-      $order | Add-Member -MemberType NoteProperty -Name 'CSRPath' -Value "$($script:OrderFolder)\request.csr"
+    # Make a local copy of the specified CSR file
+    if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
+        Copy-Item -Path $CSRPath -Destination "$($script:OrderFolder)\request.csr"
     }
-
 
     $order | ConvertTo-Json | Out-File (Join-Path $script:OrderFolder 'order.json') -Force
     return $order
@@ -166,6 +178,9 @@ function New-PAOrder {
 
     .PARAMETER Domain
         One or more domain names to include in this order/certificate. The first one in the list will be considered the "MainDomain" and be set as the subject of the finalized certificate.
+
+    .PARAMETER CSRPath
+        The path to a pre-made certificate request file in PEM (Base64) format. This is useful for appliances that need to generate their own keys and cert requests.
 
     .PARAMETER KeyLength
         The type and size of private key to use. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to '2048'.

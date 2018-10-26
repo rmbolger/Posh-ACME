@@ -38,14 +38,14 @@ function Submit-OrderFinalize {
         }
     }
 
-    # check if CSR was provided for us
-    # in that case us that one or else generate CSR
-    if ($order.CSRPath -eq $Null) {
+    # Use the provided CSR if it exists
+    # or generate one if necessary.
+    if ([String]::IsNullOrWhiteSpace($order.CSRBase64Url)) {
         Write-Verbose "Creating new certificate request with key length $($Order.KeyLength)$(if ($Order.OCSPMustStaple){' and OCSP Must-Staple'})."
         $csr = New-Csr $Order
     } else {
-        Write-Verbose "Using the CSR provided$(if ($Order.OCSPMustStaple){' and OCSP Must-Staple'})."
-        $csr = ConvertTo-Base64Url -FromBase64 ((Get-Content -Raw $order.CSRPath) -replace '-----BEGIN CERTIFICATE REQUEST-----' -replace '-----END CERTIFICATE REQUEST-----')
+        Write-Verbose "Using the provided certificate request."
+        $csr = $order.CSRBase64Url
     }
 
     # build the protected header
