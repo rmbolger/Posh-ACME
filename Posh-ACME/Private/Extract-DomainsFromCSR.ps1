@@ -6,9 +6,16 @@
     [string]$CSRPath
   )
   Process {
-    $CSRSteamReader = [System.IO.StreamReader]::new($CSRPath)
-    $CSRReqPem = [Org.BouncyCastle.OpenSsl.PEMReader]::new($CSRSteamReader)
-    $CSRReq = $CSRReqPem.ReadObject()
+    Try {
+      $CSRSteamReader = [System.IO.StreamReader]::new($CSRPath)
+      $CSRReqPem = [Org.BouncyCastle.OpenSsl.PEMReader]::new($CSRSteamReader)
+      $CSRReq = $CSRReqPem.ReadObject()
+    }
+    Catch
+    {
+      $CSRSteamReader.Dispose()
+      Throw 'CSR is not in correct format'
+    }
     $CSRInfo = $CSRReq.GetCertificationRequestInfo()
     $CSRSteamReader.Dispose()
     $Domain = $CSRInfo.Subject -replace ".*?CN=([^,]*)(,.*|$)",'$1'
