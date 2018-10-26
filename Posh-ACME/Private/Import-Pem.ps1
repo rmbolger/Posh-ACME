@@ -137,7 +137,7 @@ function Import-Pem {
         return $cert
 
     # certificate requests
-    } elseif ($pemStr -like '*-----BEGIN NEW CERTIFICATE REQUEST-----*' -and $pemStr -like '*-----END NEW CERTIFICATE REQUEST-----*') {
+    } elseif ($pemStr -like '*-----BEGIN CERTIFICATE REQUEST-----*' -and $pemStr -like '*-----END CERTIFICATE REQUEST-----*') {
 
         # we can use the native PemReader for cert requests as well
         if ('File' -eq $PSCmdlet.ParameterSetName) {
