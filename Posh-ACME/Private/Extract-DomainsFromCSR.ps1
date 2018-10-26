@@ -1,22 +1,19 @@
 ﻿function Extract-DomainsFromCSR {
   [CmdletBinding()]
   param (
-    [ValidateScript({if(Test-Path $_){$true}else{Throw "Invalid path to CSR given: $_"}})]
-    [Parameter(ParameterSetName=’FromCSR’,Mandatory)]
+    [Parameter(Mandatory)]
     [string]$CSRPath
   )
   Process {
+
+    # normalize the CSR path and make sure it exists
+    $CSRPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($CSRPath)
+    if (-not (Test-Path $CSRPath -PathType Leaf)) {
+        throw "CSR file not found at $CSRPath"
+    }
+
     Write-Verbose "Extracting domains from CSR ($($CSRPath))"
-    Try {
-      $CSRSteamReader = [System.IO.StreamReader]::new($CSRPath)
-      $CSRReqPem = [Org.BouncyCastle.OpenSsl.PEMReader]::new($CSRSteamReader)
-      $CSRReq = $CSRReqPem.ReadObject()
-    }
-    Catch
-    {
-      $CSRSteamReader.Dispose()
-      Throw 'CSR is not in correct format'
-    }
+    $CSRReq = Import-Pem $CSRPath
     $CSRInfo = $CSRReq.GetCertificationRequestInfo()
     $CSRSteamReader.Dispose()
     $Domain = $CSRInfo.Subject -replace ".*?CN=([^,]*)(,.*|$)",'$1'
