@@ -136,6 +136,29 @@ function Import-Pem {
         }
         return $cert
 
+    # certificate requests
+    } elseif ($pemStr -like '*-----BEGIN NEW CERTIFICATE REQUEST-----*' -and $pemStr -like '*-----END NEW CERTIFICATE REQUEST-----*') {
+
+        # we can use the native PemReader for cert requests as well
+        if ('File' -eq $PSCmdlet.ParameterSetName) {
+            try {
+                $sr = New-Object IO.StreamReader($InputFile)
+                $reader = New-Object Org.BouncyCastle.OpenSsl.PemReader($sr)
+                $csr = $reader.ReadObject()
+            } finally {
+                if ($null -ne $sr) { $sr.Close() }
+            }
+        } else {
+            # get the byte aray from the pem string
+            $base64 = $pemStr.Substring($pemStr.IndexOf('REQUEST-----')+12)
+            $base64 = $base64.Substring(0,$base64.IndexOf('-'))
+            $csrBytes = [Convert]::FromBase64String($base64)
+
+            # let BC parse it
+            $csr = New-Object Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest(@(,$csrBytes))
+        }
+        return $csr
+
     } else {
         throw "Unsupported PEM type"
     }
