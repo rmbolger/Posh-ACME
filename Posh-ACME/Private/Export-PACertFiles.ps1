@@ -6,8 +6,7 @@ function Export-PACertFiles {
         [Parameter(Mandatory,Position=1)]
         [string]$OutputFolder,
         [string]$FriendlyName='',
-        [string]$PfxPass='',
-	[switch]$NoKey
+        [string]$PfxPass=''
     )
 
     # build output paths
@@ -31,9 +30,10 @@ function Export-PACertFiles {
     # write the chain
     Export-Pem ($pems[1..($pems.Count-1)] | ForEach-Object {$_}) $chainFile
 
-    # If we created the Cert from CSR there is no key, so no key to export.
-    if ('NoKey' -notin $PSBoundParameters.Keys) {
-        # write the pfx files
+    # When using an pre-generated CSR file, there may be no private key.
+    # So make sure we have a one before we try to generate PFX files.
+    if (Test-Path $keyFile -PathType Leaf) {
+
         $pfxParams = @{
             CertFile     = $certFile;
             KeyFile      = $keyFile;

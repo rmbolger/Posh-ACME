@@ -216,10 +216,6 @@ function New-PACertificate {
             FriendlyName = $FriendlyName;
             PfxPass = $PfxPass;
         }
-
-        if ($order.csrpath -ne $Null) {
-          $exportParams += @{'NoKey'=$True}
-        }
         Export-PACertFiles @exportParams
 
         # check the certificate expiration date so we can update the CertExpires
