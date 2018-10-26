@@ -45,7 +45,7 @@ function Submit-OrderFinalize {
         $csr = New-Csr $Order
     } else {
         Write-Verbose "Using the CSR provided$(if ($Order.OCSPMustStaple){' and OCSP Must-Staple'})."
-        $csr = ConvertTo-Base64Url -FromBase64 ((Get-Content -Raw $order.CSRPath) -replace '\n','' -replace '-----BEGIN CERTIFICATE REQUEST-----' -replace '-----END CERTIFICATE REQUEST-----')
+        $csr = ConvertTo-Base64Url -FromBase64 ((Get-Content -Raw $order.CSRPath) -replace '-----BEGIN CERTIFICATE REQUEST-----' -replace '-----END CERTIFICATE REQUEST-----')
     }
 
     # build the protected header
