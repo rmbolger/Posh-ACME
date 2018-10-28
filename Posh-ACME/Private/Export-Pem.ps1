@@ -58,11 +58,13 @@ function Export-Pem {
         $reqStr = [Convert]::ToBase64String($InputObject.GetEncoded())
 
         # build an array with the header/footer
-        $pem = @('-----BEGIN NEW CERTIFICATE REQUEST-----')
+        # https://stackoverflow.com/questions/28628744/is-there-a-spec-for-csr-begin-headers
+        # Apparently including "NEW" is the old way
+        $pem = @('-----BEGIN CERTIFICATE REQUEST-----')
         for ($i=0; $i -lt $reqStr.Length; $i += 64) {
             $pem += $reqStr.Substring($i,[Math]::Min(64,($reqStr.Length-$i)))
         }
-        $pem += '-----END NEW CERTIFICATE REQUEST-----'
+        $pem += '-----END CERTIFICATE REQUEST-----'
 
     } elseif ($InputObject -is [array]) {
         # this should be a string array output from Split-PemChain that we just
