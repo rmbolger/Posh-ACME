@@ -120,25 +120,26 @@ function New-PACertificate {
     # add validation parameters to the order object using explicit params
     # backed up by previous order params
     if ('DnsPlugin' -in $PSBoundParameters.Keys) {
-        $order.DnsPlugin = $DnsPlugin
+        $script:Order.DnsPlugin = $DnsPlugin
     } elseif ($oldOrder) {
-        $order.DnsPlugin = $oldOrder.DnsPlugin
+        $script:Order.DnsPlugin = $oldOrder.DnsPlugin
     }
     if ('DnsAlias' -in $PSBoundParameters.Keys) {
-        $order.DnsAlias = $DnsAlias
+        $script:Order.DnsAlias = $DnsAlias
     } elseif ($oldOrder) {
-        $order.DnsAlias = $oldOrder.DnsAlias
+        $script:Order.DnsAlias = $oldOrder.DnsAlias
     }
-    $order.DnsSleep = $DnsSleep
+    $script:Order.DnsSleep = $DnsSleep
     if ($oldOrder -and 'DnsSleep' -notin $PSBoundParameters.Keys) {
-        $order.DnsSleep = $oldOrder.DnsSleep
+        $script:Order.DnsSleep = $oldOrder.DnsSleep
     }
-    $order.ValidationTimeout = $ValidationTimeout
+    $script:Order.ValidationTimeout = $ValidationTimeout
     if ($oldOrder -and 'ValidationTimeout' -notin $PSBoundParameters.Keys) {
-        $order.ValidationTimeout = $oldOrder.ValidationTimeout
+        $script:Order.ValidationTimeout = $oldOrder.ValidationTimeout
     }
     Write-Debug "Saving validation params to order"
-    $order | Update-PAOrder -SaveOnly
+    Update-PAOrder -SaveOnly
+    $order = $script:Order
 
     # deal with "pending" orders that may have authorization challenges to prove
     if ($order.status -eq 'pending') {
