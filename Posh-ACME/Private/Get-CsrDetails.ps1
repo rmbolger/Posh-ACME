@@ -49,7 +49,8 @@ function Get-CsrDetails {
     # grab the CN value
     $cn = ($csrInfo.Subject.GetValueList([Org.BouncyCastle.Asn1.X509.X509Name]::CN))[0]
     Write-Debug "CN = $cn"
-    $details.Domain = @($cn)
+    if ($cn) { $details.Domain = @($cn) }
+    else { $details.Domain = @() }
 
     # grab the rest of the attributes [Org.BouncyCastle.Asn1.Asn1Set]
     # The Asn1Set is basically a nested collection of DerSequence objects
@@ -60,6 +61,9 @@ function Get-CsrDetails {
     # [1][0] should be the only DerSequence within the Ans1Set that contains additional nested DerSequence objects
     $extensions = ($attr | Where-Object { $_.Id -eq '1.2.840.113549.1.9.14'})[1][0]
     if (-not $extensions) {
+        # throw if we have no names
+        if ($details.Domain.Count -eq 0) { throw "No Common Name (CN) or Subject Alternative Name (SAN) extensions found in certificate request." }
+
         Write-Warning "No Certificate Extensions sequence found in CSR."
         $details.OCSPMustStaple = $false
         return $details
@@ -73,8 +77,13 @@ function Get-CsrDetails {
         # and grab just the DNS names
         $SANs = ($genNames.GetNames() | Where-Object { $_.TagNo -eq 2 }).Name
     }
-    Write-Debug "SANs = $(($SANs -join ','))"
-    $details.Domain += $SANs | Where-Object { $_ -ne $details.Domain[0] }
+    if ($SANs) {
+        Write-Debug "SANs = $(($SANs -join ','))"
+        $details.Domain += $SANs | Where-Object { $_ -notin $details.Domain }
+    }
+
+    # throw if we have no names
+    if ($details.Domain.Count -eq 0) { throw "No Common Name (CN) or Subject Alternative Name (SAN) extensions found in certificate request." }
 
     # Find the sequence for OCSP Must-Staple (oid 1.3.6.1.5.5.7.1.24)
     # and determine whether it's set
