@@ -161,14 +161,9 @@ function New-PACertificate {
         $order = Get-PAOrder -Refresh
     }
 
-    # if we've reached this point, it should mean that we're ready to finalize the
-    # order. The order status is supposed to be 'ready', but that ready status is a
-    # recent addition to the ACME spec and LetsEncrypt hasn't implemented it yet.
-    # So for now, we have to check the status of the order's authorizations to make
-    # sure it's ready for finalization.
-    $auths = $order | Get-PAAuthorizations
-    if ($order.status -eq 'ready' -or
-        ($order.status -eq 'pending' -and !($auths | Where-Object { $_.status -ne 'valid' })) ) {
+    # if we've reached this point, it should mean the order status is 'ready' and
+    # we're ready to finalize the order.
+    if ($order.status -eq 'ready') {
 
         # make the finalize call
         Write-Verbose "Finalizing the order."
