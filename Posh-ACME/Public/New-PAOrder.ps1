@@ -72,11 +72,6 @@ function New-PAOrder {
 
     Write-Debug "Creating new $KeyLength order with domains: $($Domain -join ', ')"
 
-    # Determine whether to remove the old private key. This is necessary if explicitly
-    # requested or the new KeyLength doesn't match the old one.
-    $removeOldKey = ( ('FromScratch' -eq $PSCmdlet.ParameterSetName) -and
-                      ($NewKey -or ($order -and $KeyLength -ne $order.KeyLength)) )
-
     # build the protected header for the request
     $header = @{
         alg   = $acct.alg;
@@ -142,6 +137,13 @@ function New-PAOrder {
         New-Item -ItemType Directory -Path $script:OrderFolder -Force | Out-Null
     }
 
+    # Determine whether to remove the old private key. This is necessary if it exists
+    # and is explicitly requested or the new KeyLength doesn't match the old one.
+    $keyPath = Join-Path $script:OrderFolder 'cert.key'
+    $removeOldKey = ( ('FromScratch' -eq $PSCmdlet.ParameterSetName) -and
+                      ($NewKey -or ($order -and $KeyLength -ne $order.KeyLength)) -and
+                      (Test-Path $keyPath -PathType Leaf) )
+
     # Create folder to save older certificates and keys
     $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include *.cer,*.pfx,*.csr
     if ($null -ne $oldFiles -or $removeOldKey) {
@@ -151,7 +153,7 @@ function New-PAOrder {
         # backup the old private key if necessary, otherwise keep it around for re-use
         if ($removeOldKey) {
             Write-Verbose "Preparing for new private key"
-            $oldKey = Get-ChildItem (Join-Path $script:OrderFolder 'cert.key')
+            $oldKey = Get-ChildItem $keyPath
             $oldKey | Move-Item -Destination { "$($_.FullName).bak" } -Force
         }
     }
