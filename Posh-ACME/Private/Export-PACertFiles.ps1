@@ -30,16 +30,19 @@ function Export-PACertFiles {
     # write the chain
     Export-Pem ($pems[1..($pems.Count-1)] | ForEach-Object {$_}) $chainFile
 
-    # write the pfx files
-    $pfxParams = @{
-        CertFile     = $certFile;
-        KeyFile      = $keyFile;
-        OutputFile   = $pfxFile;
-        FriendlyName = $FriendlyName;
-        PfxPass      = $PfxPass;
-    }
-    Export-CertPfx @pfxParams
-    $pfxParams.OutputFile = $pfxFullFile
-    Export-CertPfx @pfxParams -ChainFile $chainFile
+    # When using an pre-generated CSR file, there may be no private key.
+    # So make sure we have a one before we try to generate PFX files.
+    if (Test-Path $keyFile -PathType Leaf) {
 
+        $pfxParams = @{
+            CertFile     = $certFile;
+            KeyFile      = $keyFile;
+            OutputFile   = $pfxFile;
+            FriendlyName = $FriendlyName;
+            PfxPass      = $PfxPass;
+        }
+        Export-CertPfx @pfxParams
+        $pfxParams.OutputFile = $pfxFullFile
+        Export-CertPfx @pfxParams -ChainFile $chainFile
+    }
 }

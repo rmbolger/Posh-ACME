@@ -64,28 +64,24 @@ function Submit-Renewal {
 
                 # Build the parameter list we're going to send to New-PACertificate
                 $certParams = @{}
-                $certParams.Domain = @($order.MainDomain);
-                if ($order.SANs.Count -gt 0) { $certParams.Domain += @($order.SANs) }
-                $certParams.NewCertKey = $NewKey.IsPresent
+                if ([String]::IsNullOrWhiteSpace($order.CSRBase64Url)) {
+                    $certParams.Domain = @($order.MainDomain);
+                    if ($order.SANs.Count -gt 0) { $certParams.Domain += @($order.SANs) }
+                    $certParams.NewCertKey = $NewKey.IsPresent
+                    $certParams.OCSPMustStaple = $order.OCSPMustStaple
+                    $certParams.FriendlyName = $order.FriendlyName
+                    $certParams.PfxPass = $order.PfxPass
+                    if (Test-WinOnly) { $certParams.Install = $order.Install }
+                } else {
+                    $reqPath = Join-Path (Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')) "request.csr"
+                    $certParams.CSRPath = $reqPath
+                }
                 $certParams.DnsPlugin = $order.DnsPlugin
                 $certParams.PluginArgs = $pluginArgs
-                $certParams.OCSPMustStaple = $order.OCSPMustStaple
+                $certParams.DnsAlias = $order.DnsAlias
                 $certParams.Force = $Force.IsPresent
                 $certParams.DnsSleep = $order.DnsSleep
                 $certParams.ValidationTimeout = $order.ValidationTimeout
-
-                # Add the new (as of 1.2) fields if they exist.
-                # The property checks can be removed once enough time passes
-                # to assume the majority of people have done renewals against 1.2.
-                if ('Install' -in $order.PSObject.Properties.name -and (Test-WinOnly)) {
-                    $certParams.Install = $order.Install
-                }
-                if ('FriendlyName' -in $order.PSObject.Properties.name) {
-                    $certParams.FriendlyName = $order.FriendlyName
-                }
-                if ('PfxPass' -in $order.PSObject.Properties.name) {
-                    $certParams.PfxPass = $order.PfxPass
-                }
 
                 # now we just have to request a new cert using all of the old parameters
                 New-PACertificate @certParams
