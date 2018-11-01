@@ -1,7 +1,6 @@
 function Submit-OrderFinalize {
     [CmdletBinding()]
     param(
-        [int]$CertIssueTimeout=60,
         [PSTypeName('PoshACME.PAAccount')]$Account,
         [PSTypeName('PoshACME.PAOrder')]$Order
     )
@@ -74,7 +73,7 @@ function Submit-OrderFinalize {
     # status and a certificate URL to return.
 
     # now we poll
-    for ($tries=1; $tries -le ($CertIssueTimeout/2); $tries++) {
+    for ($tries=1; $tries -le 30; $tries++) {
 
         $Order = Get-PAOrder $Order.MainDomain -Refresh
 
@@ -91,7 +90,7 @@ function Submit-OrderFinalize {
     }
 
     # If we're here, it means our poll timed out because we didn't return already. So throw.
-    throw "Timed out waiting $CertIssueTimeout seconds for order to become valid."
+    throw "Timed out waiting for order to become valid."
 
 
 
@@ -103,9 +102,6 @@ function Submit-OrderFinalize {
 
     .DESCRIPTION
         Finalizing a certificate order will send a new certificate request to the server and then wait for it to become valid or invalid.
-
-    .PARAMETER CertIssueTimeout
-        Number of seconds to wait for the ACME server to finish the order before giving up and throwing an error.
 
     .PARAMETER Account
         If specified, switch to and use this account for the finalization. It must be associated with the current server or an error will be thrown.

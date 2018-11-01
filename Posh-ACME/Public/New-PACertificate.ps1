@@ -33,8 +33,7 @@ function New-PACertificate {
         [switch]$Install,
         [switch]$Force,
         [int]$DNSSleep=120,
-        [int]$ValidationTimeout=60,
-        [int]$CertIssueTimeout=60
+        [int]$ValidationTimeout=60
     )
 
     # Make sure we have a server set. But don't override the current
@@ -313,9 +312,6 @@ function New-PACertificate {
 
     .PARAMETER ValidationTimeout
         Number of seconds to wait for the ACME server to validate the challenges after asking it to do so. Default is 60. If the timeout is exceeded, an error will be thrown.
-
-    .PARAMETER CertIssueTimeout
-        Number of seconds to wait for the server to finish the order before giving up and throwing an error.
 
     .EXAMPLE
         New-PACertificate site1.example.com -AcceptTOS
