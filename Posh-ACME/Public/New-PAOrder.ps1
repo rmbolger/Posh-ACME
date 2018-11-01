@@ -136,34 +136,32 @@ function New-PAOrder {
     if (!(Test-Path $script:OrderFolder -PathType Container)) {
         New-Item -ItemType Directory -Path $script:OrderFolder -Force | Out-Null
     }
-
-    # Determine whether to remove the old private key. This is necessary if it exists
-    # and is explicitly requested or the new KeyLength doesn't match the old one.
-    $keyPath = Join-Path $script:OrderFolder 'cert.key'
-    $removeOldKey = ( ('FromScratch' -eq $PSCmdlet.ParameterSetName) -and
-                      ($NewKey -or ($order -and $KeyLength -ne $order.KeyLength)) -and
-                      (Test-Path $keyPath -PathType Leaf) )
-
-    # Create folder to save older certificates and keys
-    $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include *.cer,*.pfx,*.csr
-    if ($null -ne $oldFiles -or $removeOldKey) {
-        $oldFilesFolder = New-Item -ItemType Directory -Path ("$($script:OrderFolder)\$(Get-Date -Format "yyyyMMdd HHmmss")")
-        # backup any old certs/requests that might exist
-        $oldFiles | Move-Item -Destination $oldFilesFolder
-        # backup the old private key if necessary, otherwise keep it around for re-use
-        if ($removeOldKey) {
-            Write-Verbose "Preparing for new private key"
-            $oldKey = Get-ChildItem $keyPath
-            $oldKey | Move-Item -Destination { "$($_.FullName).bak" } -Force
-        }
-    }
+    $order | ConvertTo-Json | Out-File (Join-Path $script:OrderFolder 'order.json') -Force
 
     # Make a local copy of the specified CSR file
     if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
         Copy-Item -Path $CSRPath -Destination "$($script:OrderFolder)\request.csr"
     }
 
-    $order | ConvertTo-Json | Out-File (Join-Path $script:OrderFolder 'order.json') -Force
+    # Determine whether to remove the old private key. This is necessary if it exists
+    # and we're using a CSR or it's explicitly requested or the new KeyLength doesn't match the old one.
+    $keyPath = Join-Path $script:OrderFolder 'cert.key'
+    $removeOldKey = ( (Test-Path $keyPath -PathType Leaf) -and
+                      ('FromCSR' -eq $PSCmdlet.ParameterSetName -or
+                       $NewKey -or
+                       $KeyLength -ne $order.KeyLength) )
+
+    # backup the old private key if necessary
+    if ($removeOldKey) {
+        Write-Verbose "Removing old private key"
+        $oldKey = Get-ChildItem $keyPath
+        $oldKey | Move-Item -Destination { "$($_.FullName).bak" } -Force
+    }
+
+    # backup any old certs/requests that might exist
+    $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include cert.cer,cert.pfx,fullchain.pfx
+    $oldFiles | Move-Item -Destination { "$($_.FullName).bak" } -Force
+
     return $order
 
 
