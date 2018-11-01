@@ -30,6 +30,7 @@ function New-PAOrder {
 
     # If using a pre-generated CSR, extract the details so we can generate expected parameters
     if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
+        $CSRPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($CSRPath)
         $csrDetails = Get-CsrDetails $CSRPath
 
         $Domain = $csrDetails.Domain
@@ -140,7 +141,10 @@ function New-PAOrder {
 
     # Make a local copy of the specified CSR file
     if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
-        Copy-Item -Path $CSRPath -Destination "$($script:OrderFolder)\request.csr"
+        $csrDest = Join-Path $script:OrderFolder 'request.csr'
+        if ($CSRPath -ne $csrDest) {
+            Copy-Item -Path $CSRPath -Destination "$($script:OrderFolder)\request.csr"
+        }
     }
 
     # Determine whether to remove the old private key. This is necessary if it exists
