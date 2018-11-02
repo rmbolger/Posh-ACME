@@ -1,25 +1,42 @@
 function Export-PACertFiles {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
-        [string]$CertUrl,
-        [Parameter(Mandatory,Position=1)]
-        [string]$OutputFolder,
-        [string]$FriendlyName='',
-        [string]$PfxPass=''
+        [Parameter(Position=0)]
+        [PSTypeName('PoshACME.PAOrder')]$Order
     )
 
+    # Make sure we have an account configured
+    if (!($acct = Get-PAAccount)) {
+        throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+    }
+
+    # Make sure we have an order
+    if (-not $Order -and !($Order = Get-PAOrder)) {
+        throw "No ACME order specified and no current order selected. Run Set-PAOrder or specify an existing order object."
+    }
+    $orderFolder = Join-Path $script:AcctFolder $Order.MainDomain.Replace('*','!')
+
     # build output paths
-    $certFile      = Join-Path $OutputFolder 'cert.cer'
-    $keyFile       = Join-Path $OutputFolder 'cert.key'
-    $chainFile     = Join-Path $OutputFolder 'chain.cer'
-    $fullchainFile = Join-Path $OutputFolder 'fullchain.cer'
-    $pfxFile       = Join-Path $OutputFolder 'cert.pfx'
-    $pfxFullFile   = Join-Path $OutputFolder 'fullchain.pfx'
+    $certFile      = Join-Path $orderFolder 'cert.cer'
+    $keyFile       = Join-Path $orderFolder 'cert.key'
+    $chainFile     = Join-Path $orderFolder 'chain.cer'
+    $fullchainFile = Join-Path $orderFolder 'fullchain.cer'
+    $pfxFile       = Join-Path $orderFolder 'cert.pfx'
+    $pfxFullFile   = Join-Path $orderFolder 'fullchain.pfx'
+
+    # build the header for the Post-As-Get request
+    $header = @{
+        alg   = $acct.alg;
+        kid   = $acct.location;
+        nonce = $script:Dir.nonce;
+        url   = $order.certificate;
+    }
 
     # download the cert+chain which is what ACMEv2 delivers by default
     # https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-7.4.2
-    Invoke-WebRequest $CertUrl -OutFile $fullchainFile @script:UseBasic
+    try {
+        Invoke-ACME $header ([String]::Empty) $acct -OutFile $fullchainFile -EA Stop
+    } catch { throw }
 
     # split it into individual PEMs
     $pems = Split-PemChain $fullchainFile
