@@ -4,13 +4,15 @@ function Invoke-ACME {
         [Parameter(Mandatory,Position=0)]
         [hashtable]$Header,
         [Parameter(Mandatory,Position=1)]
+        [AllowEmptyString()]
         [string]$PayloadJson,
         [Parameter(ParameterSetName='Account',Mandatory,Position=2)]
         [PSTypeName('PoshACME.PAAccount')]$Account,
         [Parameter(ParameterSetName='RawKey',Mandatory,Position=2)]
         [ValidateScript({Test-ValidKey $_ -ThrowOnFail})]
         [Security.Cryptography.AsymmetricAlgorithm]$Key,
-        [switch]$NoRetry
+        [switch]$NoRetry,
+        [string]$OutFile
     )
 
     # make sure we have a server configured
@@ -44,12 +46,23 @@ function Invoke-ACME {
     # object via the exception.
 
     try {
-        $response = Invoke-WebRequest -Uri $Header.url -Body $Jws -Method Post `
-            -ContentType 'application/jose+json' -UserAgent $script:USER_AGENT `
-            -Headers $script:COMMON_HEADERS -EA Stop @script:UseBasic
+        $iwrSplat = @{
+            Uri = $Header.url
+            Body = $Jws
+            Method = 'Post'
+            ContentType = 'application/jose+json'
+            UserAgent = $script:USER_AGENT
+            Headers = $script:COMMON_HEADERS
+            ErrorAction = 'Stop'
+        }
+        if (-not [String]::IsNullOrWhiteSpace($OutFile)) {
+            $iwrSplat.OutFile = $OutFile
+        }
+
+        $response = Invoke-WebRequest @iwrSplat @script:UseBasic
 
         # update the next nonce if it was sent
-        if ($response.Headers.ContainsKey($script:HEADER_NONCE)) {
+        if ($response -and $response.Headers.ContainsKey($script:HEADER_NONCE)) {
             $script:Dir.nonce = $response.Headers[$script:HEADER_NONCE] | Select-Object -First 1
             Write-Debug "Updating nonce: $($script:Dir.nonce)"
         }
@@ -160,6 +173,9 @@ function Invoke-ACME {
 
     .PARAMETER NoRetry
         If specified, don't retry on bad nonce errors. Occasionally, the nonce provided in an ACME message will be rejected. By default, this function requests a new nonce once and tries to send the message again before giving up.
+
+    .PARAMETER OutFile
+        Specifies the output file for which this function saves the response body. Enter a path and file name. If you omit the path, the default is the current location.
 
     .EXAMPLE
         $acct = Get-PAAccount

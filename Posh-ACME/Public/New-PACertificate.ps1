@@ -207,13 +207,7 @@ function New-PACertificate {
         }
 
         # Download the cert chain, split it up, and generate a PFX files
-        $exportParams = @{
-            CertUrl = $order.certificate;
-            OutputFolder = $script:OrderFolder;
-            FriendlyName = $FriendlyName;
-            PfxPass = $PfxPass;
-        }
-        Export-PACertFiles @exportParams
+        Export-PACertFiles $order
 
         # check the certificate expiration date so we can update the CertExpires
         # and RenewAfter fields

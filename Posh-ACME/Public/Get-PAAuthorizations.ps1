@@ -7,7 +7,7 @@ function Get-PAAuthorizations {
         [string[]]$AuthURLs
     )
 
-    # Every order has an array of authorization URLs. GET'ing that URL will
+    # Every order has an array of authorization URLs that can be used to
     # retrieve the current state of the authorization object which we want to
     # return to the caller. However, most of what a caller would care about is
     # the state of the associated challenges for that authorization.
@@ -16,12 +16,21 @@ function Get-PAAuthorizations {
     # have to loop into a sub-array. This may get unwieldy if too many additional
     # challenge types are added in the future.
 
+    Begin {
+        # Make sure we have an account configured
+        if (!($acct = Get-PAAccount)) {
+            throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+        }
+    }
+
     Process {
         foreach ($AuthUrl in $AuthUrls) {
 
             # request the object
             try {
-                $auth = Invoke-RestMethod $AuthUrl -Verbose:$false @script:UseBasic
+                $header = @{alg=$acct.alg; kid=$acct.location;nonce=$script:Dir.nonce;url=$AuthUrl}
+                $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
+                $auth = $response.Content | ConvertFrom-Json
             } catch {
                 if ($_.ErrorDetails.Message -like '*Expired authorization*') {
                     Write-Warning "Authorization has expired. Unable to retrieve details."

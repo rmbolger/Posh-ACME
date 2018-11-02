@@ -49,12 +49,9 @@ function Update-PAAccount {
             url   = $acct.location;
         }
 
-        # empty payload to get the current details
-        $payloadJson = '{}'
-
         # send the request
         try {
-            $response = Invoke-ACME $header $payloadJson $acct -EA Stop
+            $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
         } catch { throw }
         Write-Debug "Response: $($response.Content)"
 
