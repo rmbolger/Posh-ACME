@@ -53,7 +53,7 @@ So now you've got a certificate and that's great! But Let's Encrypt certificates
 
 ## DNS Plugins
 
-The ability to use a DNS plugin is obviously going to depend on your DNS provider and the available plugins in the current release of the module. If your DNS provider is not supported by an existing plugin, please [submit an issue](https://github.com/rmbolger/Posh-ACME/issues) requesting support. If you have PowerShell development skills, you might also try writing a plugin yourself. Instructions can be found in the [DnsPlugins README](/Posh-ACME/DnsPlugins/README.md). Pull requests for new plugins are both welcome and appreciated. It's also possible to redirect ACME DNS validations using a [CNAME record](https://support.dnsimple.com/articles/cname-record/) in your primary zone pointing to another DNS server that is supported. More on that later.
+The ability to use a DNS plugin is obviously going to depend on your DNS provider and the [available plugins](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) in the current release of the module. If your DNS provider is not supported by an existing plugin, please [submit an issue](https://github.com/rmbolger/Posh-ACME/issues) requesting support. If you have PowerShell development skills, you might also try writing a plugin yourself. Instructions can be found in the [DnsPlugins README](/Posh-ACME/DnsPlugins/README.md). Pull requests for new plugins are both welcome and appreciated. It's also possible to redirect ACME DNS validations using a [CNAME record](https://support.dnsimple.com/articles/cname-record/) in your primary zone pointing to another DNS server that is supported. More on that later.
 
 The first thing to do is figure out which DNS plugin to use and how to use it. Start by listing the available plugins.
 
@@ -111,6 +111,8 @@ $r53Params = @{R53AccessKey='ABCD1234'; R53SecretKey=$r53Secret}
 This `$r53Params` variable is what we'll ultimately pass to the `-PluginArgs` parameter on functions that use it.
 
 Another thing to notice from the plugin's help output is that the description tells us we need to have the `AwsPowershell` module installed. So make sure you have that installed or install it with `Install-Module AwsPowershell` before moving on. Hopefully, most plugins won't need external dependencies like this. But it's good to double check.
+
+Most plugins also have a Usage Guide that can provide more detailed help using or setting up the plugin. They're all linked from the [List of Supported DNS Providers](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) wiki page, but you can also read them locally from the DnsPlugins folder in the module. They're Markdown formatted and called `<plugin>-Readme.md`.
 
 Now we know what plugin we're using and we have our plugin arguments in a hashtable. If this is the first time using a particular plugin, it's usually wise to test it before actually trying to use it for a new certificate. So let's do that. The command has no output unless we add the `-Verbose` switch to show what's going on under the hood.
 
