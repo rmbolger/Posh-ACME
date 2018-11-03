@@ -5,7 +5,8 @@ function Get-KeyAuthorization {
         [Parameter(Mandatory,Position=0,ValueFromPipeline)]
         [string]$Token,
         [Parameter(Position=1)]
-        [PSTypeName('PoshACME.PAAccount')]$Account
+        [PSTypeName('PoshACME.PAAccount')]$Account,
+        [switch]$ForDNS
     )
 
     # https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-8.1
@@ -57,7 +58,19 @@ function Get-KeyAuthorization {
 
     Process {
         # append the thumbprint to the token to make the key authorization
-        return "$Token.$thumb"
+        $keyAuth = "$Token.$thumb"
+
+        if ($ForDNS) {
+            # do an extra SHA256 hash + Base64Url encode for DNS TXT values
+            $keyAuthBytes = [Text.Encoding]::UTF8.GetBytes($keyAuth)
+            $keyAuthHash = $sha256.ComputeHash($keyAuthBytes)
+            $txtValue = ConvertTo-Base64Url -Bytes $keyAuthHash
+            return $txtValue
+
+        } else {
+            # return it as-is
+            return $keyAuth
+        }
     }
 
 
@@ -75,6 +88,9 @@ function Get-KeyAuthorization {
 
     .PARAMETER Account
         The ACME account associated with the challenge.
+
+    .PARAMETER ForDNS
+        Enable this switch if you're using the key authorization value for the 'dns-01' challenge type. It will do a few additional manipulation steps on the value that are required for a DNS TXT record.
 
     .EXAMPLE
         Get-KeyAuthorization 'XxXxXxXxXxXx'

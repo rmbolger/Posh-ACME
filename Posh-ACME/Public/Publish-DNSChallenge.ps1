@@ -20,13 +20,7 @@ function Publish-DnsChallenge {
         $recordName = "_acme-challenge.$Domain"
     }
 
-    $keyAuth = Get-KeyAuthorization $Token $Account
-
-    # hash and encode the key authorization value
-    $keyAuthBytes = [Text.Encoding]::UTF8.GetBytes($keyAuth)
-    $sha256 = [Security.Cryptography.SHA256]::Create()
-    $keyAuthHash = $sha256.ComputeHash($keyAuthBytes)
-    $txtValue = ConvertTo-Base64Url $keyAuthHash
+    $txtValue = Get-KeyAuthorization $Token $Account -ForDNS
 
     Write-Debug "Calling $Plugin plugin to add $recordName TXT with value $txtValue"
 
