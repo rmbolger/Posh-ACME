@@ -42,7 +42,7 @@ function Add-DnsTxtIBMSoftLayer {
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
 
         try {
-            Invoke-RestMethod "$apiBase/SoftLayer_Dns_Domain/$zoneID/createTxtRecord/$recShort/$TxtValue/900.json" `
+            Invoke-RestMethod "$apiBase/SoftLayer_Dns_Domain/$zoneID/createTxtRecord/$recShort/$TxtValue/60.json" `
                 -Credential $IBMCredential @script:UseBasic | Out-Null
         } catch { throw }
     }
