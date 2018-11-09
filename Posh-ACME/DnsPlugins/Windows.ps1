@@ -30,12 +30,12 @@ function Add-DnsTxtWindows {
     # separate the portion of the name that doesn't contain the zone name
     $recShort = $RecordName.Replace(".$ZoneName",'')
 
-    $recs = @($zone | Get-DnsServerResourceRecord -Name $recShort -RRType Txt -EA SilentlyContinue)
+    $recs = @($zone | Get-DnsServerResourceRecord -Name $recShort -RRType Txt @dnsParams -EA SilentlyContinue)
 
     if ($recs.Count -eq 0 -or $TxtValue -notin $recs.RecordData.DescriptiveText) {
         # create new
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
-        $zone | Add-DnsServerResourceRecord -Txt -Name $recShort -DescriptiveText $TxtValue -TimeToLive 00:00:10
+        $zone | Add-DnsServerResourceRecord -Txt -Name $recShort -DescriptiveText $TxtValue -TimeToLive 00:00:10 @dnsParams
     } else {
         # nothing to do
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
@@ -108,13 +108,13 @@ function Remove-DnsTxtWindows {
     # separate the portion of the name that doesn't contain the zone name
     $recShort = $RecordName.Replace(".$ZoneName",'')
 
-    $recs = @($zone | Get-DnsServerResourceRecord -Name $recShort -RRType Txt -EA SilentlyContinue)
+    $recs = @($zone | Get-DnsServerResourceRecord -Name $recShort -RRType Txt @dnsParams -EA SilentlyContinue)
 
     if ($recs.Count -gt 0 -and $TxtValue -in $recs.RecordData.DescriptiveText) {
         # remove the record that has the right value
         $toDelete = $recs | Where-Object { $_.RecordData.DescriptiveText -eq $TxtValue }
         Write-Verbose "Deleting $RecordName with value $TxtValue"
-        $zone | Remove-DnsServerResourceRecord -InputObject $toDelete -Force
+        $zone | Remove-DnsServerResourceRecord -InputObject $toDelete -Force @dnsParams
     } else {
         # nothing to do
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
