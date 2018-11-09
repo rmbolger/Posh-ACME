@@ -12,7 +12,7 @@ function Add-DnsTxtAutoDNS {
         [securestring]$AutoDNSPassword,
         [Parameter(ParameterSetName='Insecure',Mandatory)]
         [string]$AutoDNSPasswordInsecure,
-        [string]$AutoDNSContext=4,
+        [string]$AutoDNSContext='4',
         [string]$AutoDNSGateway='gateway.autodns.com',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -85,7 +85,7 @@ function Remove-DnsTxtAutoDNS {
         [securestring]$AutoDNSPassword,
         [Parameter(ParameterSetName='Insecure',Mandatory)]
         [string]$AutoDNSPasswordInsecure,
-        [string]$AutoDNSContext=4,
+        [string]$AutoDNSContext='4',
         [string]$AutoDNSGateway='gateway.autodns.com',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
