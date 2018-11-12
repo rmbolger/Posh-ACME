@@ -34,6 +34,7 @@ function Add-DnsTxtAutoDNS {
     $recShort = $RecordName.Replace(".$zoneName",'')
     $updateBody = "<?xml version=`"1.0`" encoding=`"UTF-8`"?><request>$AuthBlock<task><code>0202001</code><default><rr_add><name>$recShort</name><ttl>600</ttl><type>TXT</type><value>$TxtValue</value></rr_add></default><zone><name>$zoneName</name><system_ns>$zoneNS</system_ns></zone></task></request>"
     try {
+        Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
         $result = (Invoke-RestMethod $apiBase -Method Post -Body $updateBody @script:UseBasic).response.result
         # check for errors
         if ($result.status.type -eq 'error') {
@@ -118,6 +119,7 @@ function Remove-DnsTxtAutoDNS {
     $recShort = $RecordName.Replace(".$zoneName",'')
     $updateBody = "<?xml version=`"1.0`" encoding=`"UTF-8`"?><request>$AuthBlock<task><code>0202001</code><default><rr_rem><name>$recShort</name><ttl>600</ttl><type>TXT</type><value>$TxtValue</value></rr_rem></default><zone><name>$zoneName</name><system_ns>$zoneNS</system_ns></zone></task></request>"
     try {
+        Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
         $result = (Invoke-RestMethod $apiBase -Method Post -Body $updateBody @script:UseBasic).response.result
         # check for errors
         if ($result.status.type -eq 'error') {
