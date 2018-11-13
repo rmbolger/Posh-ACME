@@ -1,3 +1,19 @@
+## 3.0.0 (2018-11-13)
+
+* Potentially breaking changes
+  * Many ACME protocol messages that previously used GET requests have been changed to POST-as-GET to comply with the latest ACME draft-16. Let's Encrypt already supports the new draft, but other ACME servers may not yet.
+  * `CertIssueTimeout` param was removed from `New-PACertificate` and `Submit-OrderFinalize` because it wasn't actually being used properly in the former and doesn't seem necessary anymore.
+* New Feature: Generate certs from an existing certificate request which can be useful for appliances that generate their own keys and CSRs. (Thanks @virot)
+  * New `CSRPath` parameter on `New-PACertificate` and `New-PAOrder` that removes the need for `Domain`, `CertKeyLength`, `NewCertKey`, `OCSPMustStaple`, `FriendlyName`, `PfxPass`, and `Install` parameters when used. Most values will be extracted from the CSR.
+  * Certs generated using this method will not have PFX files created because there is no private key.
+  * Certs generated using this method can not be automatically installed to the Windows cert store because there are no PFX files.
+* `Get-KeyAuthorization` now has `ForDNS` parameter which returns the actual TXT value necessary for the dns-01 challenge. (Thanks @chandan1001)
+* Added new DNS plugins
+  * IBMSoftLayer (IBM Cloud DNS)
+  * AutoDNS (InternetX XML Gateway)
+* Fix for some validation params not getting set properly on new instances of old orders
+* Fix for Windows plugin not using `$dnsParams` appropriately (Thanks @B4dM4n)
+
 ## 2.9.1 (2018-10-26)
 
 * Fix (#94) for TXT record cleanup bug when some domains were already validated (Thanks @philr!)
