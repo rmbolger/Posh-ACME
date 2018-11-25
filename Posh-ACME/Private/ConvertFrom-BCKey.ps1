@@ -20,14 +20,28 @@ function ConvertFrom-BCKey {
 
         # add public params
         $Q = New-Object Security.Cryptography.ECPoint
-        $Q.X = $BCKeyPair.Public.Q.X.ToBigInteger().ToByteArrayUnsigned()
-        $Q.Y = $BCKeyPair.Public.Q.Y.ToBigInteger().ToByteArrayUnsigned()
+        $Q.X = $BCKeyPair.Public.Q.AffineXCoord.GetEncoded()
+        $Q.Y = $BCKeyPair.Public.Q.AffineYCoord.GetEncoded()
         $keyParams = New-Object Security.Cryptography.ECParameters
         $keyParams.Q = $Q
         $keyParams.Curve = $Curve
 
         # add private param
-        $keyParams.D = $pKey.D.ToByteArrayUnsigned()
+        # For named curves (which is all we're currently using), D must have the same
+        # length as X/Y params. But D doesn't have a GetEncoded() method which takes care
+        # of padding the byte array like X/Y. So we have to check for proper padding and do
+        # it manually.
+        $dBytes = $pKey.D.ToByteArrayUnsigned()
+        if ($dBytes.Length -ne $Q.X.Length) {
+            $paddedD = New-Object byte[] $Q.X.Length
+            $startAt = $paddedD.Length - $dBytes.Length
+            [Array]::Copy($dBytes, 0, $paddedD, $startAt, $dBytes.Length)
+            # set the padded D value
+            $keyParams.D = $paddedD
+        } else {
+            # set the D value as-is because it doesn't need padding
+            $keyParams.D = $dBytes
+        }
 
         # create the key
         $key = [Security.Cryptography.ECDsa]::Create()
