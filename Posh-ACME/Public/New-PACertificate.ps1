@@ -171,10 +171,14 @@ function New-PACertificate {
         # create a hashtable of validation parameters to splat that uses
         # explicit params backed up by previous order params
         $chalParams = @{
-            DnsPlugin = $order.DnsPlugin
-            DnsAlias = $order.DnsAlias
             DnsSleep = $order.DnsSleep
             ValidationTimeout = $order.ValidationTimeout
+        }
+        if ($order.DnsPlugin) {
+            $chalParams.DnsPlugin = $order.DnsPlugin
+        }
+        if ($order.DnsAlias) {
+            $chalParams.DnsAlias = $order.DnsAlias
         }
         if ('PluginArgs' -in $PSBoundParameters.Keys) {
             $chalParams.PluginArgs = $PluginArgs
