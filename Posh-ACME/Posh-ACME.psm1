@@ -37,9 +37,6 @@ Foreach($import in @($Public + $Private))
     }
 }
 
-# Export everything in the public folder
-Export-ModuleMember -Function $Public.Basename
-
 # setup some module wide variables
 $script:WellKnownDirs = @{
     LE_PROD = 'https://acme-v02.api.letsencrypt.org/directory';
