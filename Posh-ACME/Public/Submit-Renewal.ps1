@@ -49,7 +49,7 @@ function Submit-Renewal {
                 }
 
                 # skip if the renewal window hasn't been reached and no -Force
-                if (!$Force -and $order.RenewAfter -and (Get-DateTimeOffsetNow) -lt ([DateTimeOffset]::Parse($order.RenewAfter))) {
+                if (!$Force -and $null -ne $order.RenewAfter -and (Get-DateTimeOffsetNow) -lt ([DateTimeOffset]::Parse($order.RenewAfter))) {
                     Write-Warning "Order for $($order.MainDomain) is not recommended for renewal yet. Use -Force to override."
                     return
                 }
@@ -91,10 +91,10 @@ function Submit-Renewal {
 
             'AllOrders' {
 
-                # get the list of all completed (valid) orders
-                $orders = @(Get-PAOrder -List -Refresh | Where-Object { $_.status -eq 'valid' })
+                # get the list of all completed orders which should have a non-null RenewAfter property
+                $orders = @(Get-PAOrder -List -Refresh | Where-Object { $null -ne $_.RenewAfter })
 
-                # remove the ones that are ready for renewal unless -Force was used
+                # remove the ones that aren't ready for renewal unless -Force was used
                 if (!$Force) {
                     $orders = @($orders | Where-Object { (Get-DateTimeOffsetNow) -ge ([DateTimeOffset]::Parse($_.RenewAfter)) })
                 }
