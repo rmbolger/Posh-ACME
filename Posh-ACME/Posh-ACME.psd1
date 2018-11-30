@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '3.0.0'
+ModuleVersion = '3.0.1'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -104,21 +104,11 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 3.0.0 (2018-11-13)
+## 3.0.1 (2018-11-30)
 
-* Potentially breaking changes
-  * Many ACME protocol messages that previously used GET requests have been changed to POST-as-GET to comply with the latest ACME draft-16. Let's Encrypt already supports the new draft, but other ACME servers may not yet.
-  * `CertIssueTimeout` param was removed from `New-PACertificate` and `Submit-OrderFinalize` because it wasn't actually being used properly in the former and doesn't seem necessary anymore.
-* New Feature: Generate certs from an existing certificate request which can be useful for appliances that generate their own keys and CSRs. (Thanks @virot)
-  * New `CSRPath` parameter on `New-PACertificate` and `New-PAOrder` that removes the need for `Domain`, `CertKeyLength`, `NewCertKey`, `OCSPMustStaple`, `FriendlyName`, `PfxPass`, and `Install` parameters when used. Most values will be extracted from the CSR.
-  * Certs generated using this method will not have PFX files created because there is no private key.
-  * Certs generated using this method can not be automatically installed to the Windows cert store because there are no PFX files.
-* `Get-KeyAuthorization` now has `ForDNS` parameter which returns the actual TXT value necessary for the dns-01 challenge. (Thanks @chandan1001)
-* Added new DNS plugins
-  * IBMSoftLayer (IBM Cloud DNS)
-  * AutoDNS (InternetX XML Gateway)
-* Fix for some validation params not getting set properly on new instances of old orders
-* Fix for Windows plugin not using `$dnsParams` appropriately (Thanks @B4dM4n)
+* Fix for #110 `Submit-Renewal` with -AllOrders or -AllAccounts fails to renew orders with invalid status. (Thanks @jeffmnall!)
+* Fix for #109 `New-PACertificate` throws an error if -DnsPlugin is not specified rather than defaulting to Manual. (Thanks @TiloGit!)
+* Fix internal BouncyCastle to .NET private key conversions where key parameters may need padding. (Thanks @alexzorin and @webprofusion-chrisc!)
 '@
 
     } # End of PSData hashtable

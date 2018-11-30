@@ -1,3 +1,9 @@
+## 3.0.1 (2018-11-30)
+
+* Fix for #110 `Submit-Renewal` with -AllOrders or -AllAccounts fails to renew orders with invalid status. (Thanks @jeffmnall!)
+* Fix for #109 `New-PACertificate` throws an error if -DnsPlugin is not specified rather than defaulting to Manual. (Thanks @TiloGit!)
+* Fix internal BouncyCastle to .NET private key conversions where key parameters may need padding. (Thanks @alexzorin and @webprofusion-chrisc!)
+
 ## 3.0.0 (2018-11-13)
 
 * Potentially breaking changes
