@@ -25,7 +25,7 @@ An [ACME v2](https://tools.ietf.org/html/draft-ietf-acme-acme) client implemente
 
 ## Release
 
-The [latest release version](https://www.powershellgallery.com/packages/Posh-ACME/3.0.0) can found in the PowerShell Gallery. Installing from the gallery requires the PowerShellGet module which is installed by default on Windows 10 or later and all versions of PowerShell Core. See [Getting Started with the Gallery](https://www.powershellgallery.com/) for instructions on earlier OSes. Zip/Tar versions can also be downloaded from the [GitHub releases page](https://github.com/rmbolger/Posh-ACME/releases).
+The [latest release version](https://www.powershellgallery.com/packages/Posh-ACME) can found in the PowerShell Gallery. Installing from the gallery requires the PowerShellGet module which is installed by default on Windows 10 or later and all versions of PowerShell Core. See [Getting Started with the Gallery](https://www.powershellgallery.com/) for instructions on earlier OSes. Zip/Tar versions can also be downloaded from the [GitHub releases page](https://github.com/rmbolger/Posh-ACME/releases).
 
 ```powershell
 # install for all users (requires elevated privs)
