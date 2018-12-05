@@ -353,7 +353,7 @@ function Connect-AZTenant {
         }
     }
 
-    Write-Debug "Retrieved token expiration: $token.expires_on"
+    Write-Debug "Retrieved token expiration: $($token.expires_on)"
 
     # create a token object that we can use for subsequence calls with a 5 min buffer on the expiration
     $script:AZToken = [pscustomobject]@{
@@ -380,12 +380,24 @@ function Get-AZZoneId {
         return $script:AZRecordZones.$RecordName
     }
 
-    # get the list of available zones
     # https://docs.microsoft.com/en-us/rest/api/dns/zones/list
+    # Since there's currently no way to check a specific zone exists without knowing its
+    # associated resource group, we need to get the list of all zones associated with the
+    # subscription. There's also no way to filter the list server side and the maximum results
+    # per query is 100. So we basically have to keep querying until there's no 'nextLink' in
+    # the response.
     $url = "https://management.azure.com/subscriptions/$($AZSubscriptionId)/providers/Microsoft.Network/dnszones?api-version=2018-03-01-preview"
-    try {
-        $zones = Invoke-RestMethod $url -Headers $script:AZToken.AuthHeader @script:UseBasic
-    } catch { throw }
+    $zones = @()
+    do {
+        Write-Debug "Querying zones list page"
+        try {
+            $response = Invoke-RestMethod $url -Headers $script:AZToken.AuthHeader @script:UseBasic
+        } catch { throw }
+        # grab the public zones from the response
+        $zones += $response.value | Where-Object { $_.properties.zoneType -eq 'Public' }
+        $url = $response.nextLink
+    } while ($null -ne $url)
+    Write-Verbose "$($zones.Count) zone(s) found"
 
     # Since Azure could be hosting both apex and sub-zones, we need to find the closest/deepest
     # sub-zone that would hold the record rather than just adding it to the apex. So for something
@@ -396,15 +408,13 @@ function Get-AZZoneId {
     # - sub2.example.com
     # - example.com
 
-    Write-Verbose "Found zones: $($zones.value.name -join ', ')"
-
     $pieces = $RecordName.Split('.')
     for ($i=1; $i -lt ($pieces.Count-1); $i++) {
         $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
         Write-Verbose "Checking $zoneTest"
 
-        if ($zoneTest -in $zones.value.name) {
-            $zoneID = ($zones.value | Where-Object { $_.name -eq $zoneTest }).id
+        if ($zoneTest -in $zones.name) {
+            $zoneID = ($zones | Where-Object { $_.name -eq $zoneTest }).id
             $script:AZRecordZones.$RecordName = $zoneID
             return $zoneID
         }
