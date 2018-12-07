@@ -1,5 +1,6 @@
 function Add-DnsTxtAzure {
     [CmdletBinding(DefaultParameterSetName='Credential')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -8,9 +9,14 @@ function Add-DnsTxtAzure {
         [Parameter(Mandatory,Position=2)]
         [string]$AZSubscriptionId,
         [Parameter(ParameterSetName='Credential',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=3)]
         [string]$AZTenantId,
         [Parameter(ParameterSetName='Credential',Mandatory,Position=4)]
         [pscredential]$AZAppCred,
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=4)]
+        [string]$AZAppUsername,
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=5)]
+        [string]$AZAppPasswordInsecure,
         [Parameter(ParameterSetName='Token',Mandatory,Position=3)]
         [string]$AZAccessToken,
         [Parameter(ParameterSetName='IMDS',Mandatory)]
@@ -34,6 +40,9 @@ function Add-DnsTxtAzure {
         $txtVals = $rec.properties.TXTRecords
         if ($TxtValue -notin $txtVals.value) {
             $txtVals += @{value=@($TxtValue)}
+        } else {
+            Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
+            return
         }
     } else {
         $txtVals = @(@{value=@($TxtValue)})
@@ -113,6 +122,7 @@ function Add-DnsTxtAzure {
 
 function Remove-DnsTxtAzure {
     [CmdletBinding(DefaultParameterSetName='Credential')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -121,9 +131,14 @@ function Remove-DnsTxtAzure {
         [Parameter(Mandatory,Position=2)]
         [string]$AZSubscriptionId,
         [Parameter(ParameterSetName='Credential',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=3)]
         [string]$AZTenantId,
         [Parameter(ParameterSetName='Credential',Mandatory,Position=4)]
         [pscredential]$AZAppCred,
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=4)]
+        [string]$AZAppUsername,
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=5)]
+        [string]$AZAppPasswordInsecure,
         [Parameter(ParameterSetName='Token',Mandatory,Position=3)]
         [string]$AZAccessToken,
         [Parameter(ParameterSetName='IMDS',Mandatory)]
@@ -297,11 +312,17 @@ function ConvertFrom-AccessToken {
 
 function Connect-AZTenant {
     [CmdletBinding(DefaultParameterSetName='Credential')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(ParameterSetName='Credential',Mandatory,Position=0)]
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=0)]
         [string]$AZTenantId,
         [Parameter(ParameterSetName='Credential',Mandatory,Position=1)]
         [pscredential]$AZAppCred,
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=1)]
+        [string]$AZAppUsername,
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=2)]
+        [string]$AZAppPasswordInsecure,
         [Parameter(ParameterSetName='Token',Mandatory,Position=0)]
         [string]$AZAccessToken,
         [Parameter(ParameterSetName='IMDS',Mandatory)]
@@ -319,38 +340,39 @@ function Connect-AZTenant {
         }
     }
 
-    switch ($PSCmdlet.ParameterSetName) {
-        'Credential' {
-            # login
-            try {
-                Write-Debug "Authenticating with explicit credentials"
-                $clientId = [uri]::EscapeDataString($AZAppCred.Username)
-                $clientSecret = [uri]::EscapeDataString($AZAppCred.GetNetworkCredential().Password)
-                $resource = [uri]::EscapeDataString('https://management.core.windows.net/')
-                $authBody = "grant_type=client_credentials&client_id=$clientId&client_secret=$clientSecret&resource=$resource"
-                $token = Invoke-RestMethod "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token" `
-                    -Method Post -Body $authBody @script:UseBasic
-            } catch { throw }
-            break
+    if ('Token' -eq $PSCmdlet.ParameterSetName) {
+        # decode the token payload so we can get ultimately get its expiration
+        Write-Debug "Authenticating with provided access token"
+        $token = ConvertFrom-AccessToken $AZAccessToken
+
+    } elseif ('IMDS' -eq $PSCmdlet.ParameterSetName) {
+        # If the module is running from an Azure resource utilizing Managed Service Identity (MSI),
+        # we can get an access token via the Instance Metadata Service (IMDS):
+        # https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/how-to-use-vm-token#get-a-token-using-azure-powershell
+        try {
+            Write-Debug "Authenticating with Instance Metadata Service (IMDS)"
+            $queryString = "api-version=2018-02-01&resource=$([uri]::EscapeDataString('https://management.core.windows.net/'))"
+            $token = Invoke-RestMethod "http://169.254.169.254/metadata/identity/oauth2/token?$queryString" `
+                -Headers @{Metadata='true'} @script:UseBasic
+        } catch { throw }
+
+    } else {
+        # Credential and CredentialInsecure are the only ones left and we need the plaintext version to
+        # authenticate with.
+        if ('Credential' -eq $PSCmdlet.ParameterSetName) {
+            $AZAppUsername = $AZAppCred.UserName
+            $AZAppPasswordInsecure = $AZAppCred.GetNetworkCredential().Password
         }
-        'Token' {
-            # decode the token payload so we can get ultimately get its expiration
-            Write-Debug "Authenticating with provided access token"
-            $token = ConvertFrom-AccessToken $AZAccessToken
-            break
-        }
-        'IMDS' {
-            # If the module is running from an Azure resource utilizing Managed Service Identity (MSI),
-            # we can get an access token via the Instance Metadata Service (IMDS):
-            # https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/how-to-use-vm-token#get-a-token-using-azure-powershell
-            try {
-                Write-Debug "Authenticating with Instance Metadata Service (IMDS)"
-                $queryString = "api-version=2018-02-01&resource=$([uri]::EscapeDataString('https://management.core.windows.net/'))"
-                $token = Invoke-RestMethod "http://169.254.169.254/metadata/identity/oauth2/token?$queryString" `
-                    -Headers @{Metadata='true'} @script:UseBasic
-            } catch { throw }
-            break
-        }
+
+        try {
+            Write-Debug "Authenticating with explicit credentials"
+            $clientId = [uri]::EscapeDataString($AZAppUsername)
+            $clientSecret = [uri]::EscapeDataString($AZAppPasswordInsecure)
+            $resource = [uri]::EscapeDataString('https://management.core.windows.net/')
+            $authBody = "grant_type=client_credentials&client_id=$clientId&client_secret=$clientSecret&resource=$resource"
+            $token = Invoke-RestMethod "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token" `
+                -Method Post -Body $authBody @script:UseBasic
+        } catch { throw }
     }
 
     Write-Debug "Retrieved token expiration: $($token.expires_on)"

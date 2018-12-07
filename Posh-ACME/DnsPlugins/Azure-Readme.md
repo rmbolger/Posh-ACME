@@ -6,8 +6,6 @@ This plugin works against the [Azure DNS](https://azure.microsoft.com/en-us/serv
 
 This plugin has three distinct methods for authentication against Azure. The first involves specifying a Tenant ID and credentials for an account or app registration. The second requires an existing [OAuth 2.0 access token](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-protocols-oauth-code) which would generally be used for short lived services or environments where Azure authentication is being handled externally to the Posh-ACME module. The last is for systems running within Azure that have a [Managed Service Identity (MSI)](https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/overview) and utilizes the [Instance Metadata Service (IMDS)](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service) to request an access token.
 
-**The explicit credential method does not currently work on non-Windows OSes in PowerShell Core. [Click here](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) for details.**
-
 All methods require that the identity being used to authenticate has been given access to modify TXT records in the specified Azure subscription. If you have already done that, you can skip most of the following setup.
 
 ### Connect to Azure
@@ -127,13 +125,33 @@ All methods require specifying `AZSubscriptionId` which is the subscription that
 
 ### Explicit Credentials
 
-Specify `AZTentantId` and `AZAppCred` which is the Azure AD tenant guid and user/app credentials. For an app registration, the username is the service account's `ApplicationId` guid and the password is whatever you originally set for it.
+#### From Windows
+
+Specify `AZTenantId` and `AZAppCred` which is the Azure AD tenant guid and user/app credentials. For an app registration, the username is the service account's `ApplicationId` guid and the password is whatever you originally set for it.
 
 ```powershell
 $azParams = @{
   AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
   AZTenantId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
   AZAppCred=(Get-Credential)
+}
+
+# issue a cert
+New-PACertificate test.example.com -DnsPlugin Azure -PluginArgs $azParams
+```
+
+#### Non-Windows
+
+Specify `AZTenantId` which is the Azure AD tenant guid. For user/app credentials, specify `AZAppUsername` and `AZAppPasswordInsecure`. For an app registration, the username is the service account's `ApplicationId` guid and the password is whatever you originally set for it.
+
+*Note: Specifying the username/password in plain text is required on non-Windows OSes due to [this bug](https://github.com/PowerShell/PowerShell/issues/1654) in PowerShell Core.*
+
+```powershell
+$azParams = @{
+  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
+  AZTenantId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
+  AZAppUsername='myuser'
+  AZAppPasswordInsecure='xxxxxxxxxxxxxxxxxx';
 }
 
 # issue a cert
