@@ -1,21 +1,26 @@
 function Add-DnsTxtDNSimple {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$DSToken,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [string]$DSTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # API Docs
-    # https://developer.dnsimple.com/v2/
+    # get the plaintext version of the token
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $DSTokenInsecure = (New-Object PSCredential "user",$DSToken).GetNetworkCredential().Password
+    }
+
     $apiRoot = 'https://api.dnsimple.com/v2'
     $restParams = @{
-        Headers = @{Authorization="Bearer $((New-Object PSCredential "user",$DSToken).GetNetworkCredential().Password)"}
+        Headers = @{Authorization="Bearer $DSTokenInsecure"}
         ContentType = 'application/json'
     }
 
@@ -31,6 +36,9 @@ function Add-DnsTxtDNSimple {
 
     # get the zone name for our record
     $zoneName = Find-DSZone $RecordName $acctID $restParams
+    if ([String]::IsNullOrWhiteSpace($zoneName)) {
+        throw "Unable to find zone for $RecordName in account $acctID"
+    }
     Write-Debug "Found zone $zoneName"
 
     # get all the instances of the record
@@ -80,23 +88,28 @@ function Add-DnsTxtDNSimple {
 }
 
 function Remove-DnsTxtDNSimple {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$DSToken,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [string]$DSTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # API Docs
-    # https://developer.dnsimple.com/v2/
+    # get the plaintext version of the token
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $DSTokenInsecure = (New-Object PSCredential "user",$DSToken).GetNetworkCredential().Password
+    }
+
     $apiRoot = 'https://api.dnsimple.com/v2'
     $restParams = @{
-        Headers = @{Authorization="Bearer $((New-Object PSCredential "user",$DSToken).GetNetworkCredential().Password)"}
+        Headers = @{Authorization="Bearer $DSTokenInsecure"}
         ContentType = 'application/json'
     }
 
@@ -112,6 +125,9 @@ function Remove-DnsTxtDNSimple {
 
     # get the zone name for our record
     $zoneName = Find-DSZone $RecordName $acctID $restParams
+    if ([String]::IsNullOrWhiteSpace($zoneName)) {
+        throw "Unable to find zone for $RecordName in account $acctID"
+    }
     Write-Debug "Found zone $zoneName"
 
     # get all the instances of the record
@@ -182,6 +198,9 @@ function Save-DnsTxtDNSimple {
 # Helper Functions
 ############################
 
+# API Docs
+# https://developer.dnsimple.com/v2/
+
 function Find-DSZone {
     [CmdletBinding()]
     param(
@@ -218,10 +237,13 @@ function Find-DSZone {
         $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
         Write-Debug "Checking $zoneTest"
         try {
-            Invoke-RestMethod "$apiRoot/$AcctID/zones/$zoneTest" @RestParams @script:UseBasic | Out-Null
+            # if the call succeeds, the zone exists, so we don't care about the actualy response
+            $null = Invoke-RestMethod "$apiRoot/$AcctID/zones/$zoneTest" @RestParams @script:UseBasic
             $script:DSRecordZones.$RecordName = $zoneTest
             return $zoneTest
-        } catch {}
+        } catch {
+            Write-Debug ($_.ToString())
+        }
     }
 
     return $null

@@ -10,9 +10,17 @@ First, [login](https://dnsimple.com/login) to your account and then go to `Accou
 
 ## Using the Plugin
 
-All you have to do is read in the token value as a secure string and then use it with the `DSToken` parameter.
+With your token value, you'll need to set either the `DSToken` or `DSTokenInsecure` parameter. `DSToken` is a [SecureString](https://docs.microsoft.com/en-us/dotnet/api/system.security.securestring) but only currently works properly on Windows. For non-Windows, use `DSTokenInsecure`.
+
+### Windows
 
 ```powershell
 $token = Read-Host "DNSimple Token" -AsSecureString
 New-PACertificate test.example.com -DnsPlugin DNSimple -PluginArgs @{DSToken=$token}
+```
+
+### Non-Windows
+
+```powershell
+New-PACertificate test.example.com -DnsPlugin DNSimple -PluginArgs @{DSTokenInsecure='xxxxxxxxxxxx'}
 ```
