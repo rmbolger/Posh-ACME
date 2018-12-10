@@ -73,7 +73,7 @@ Register-ArgumentCompleter -CommandName 'New-PACertificate','Submit-ChallengeVal
         [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
     }
 }
-Register-ArgumentCompleter -CommandName 'Publish-DnsChallenge','Unpublish-DnsChallenge','Save-DnsChallenge' `
+Register-ArgumentCompleter -CommandName 'Publish-DnsChallenge','Unpublish-DnsChallenge','Save-DnsChallenge','Get-DnsPluginHelp' `
     -ParameterName 'Plugin' -ScriptBlock {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
