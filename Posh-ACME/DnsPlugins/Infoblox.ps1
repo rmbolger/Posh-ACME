@@ -1,5 +1,6 @@
 function Add-DnsTxtInfoblox {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -7,13 +8,23 @@ function Add-DnsTxtInfoblox {
         [string]$TxtValue,
         [Parameter(Mandatory)]
         [string]$IBServer,
-        [Parameter(Mandatory)]
+        [Parameter(ParameterSetName='Secure',Mandatory)]
         [pscredential]$IBCred,
+        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [string]$IBUsername,
+        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [string]$IBPassword,
         [string]$IBView='default',
         [switch]$IBIgnoreCert,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    # create a pscredential from insecure args if necessary
+    if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
+        $secpass = ConvertTo-SecureString $IBPassword -AsPlainText -Force
+        $IBCred = New-Object PSCredential ($IBUsername,$secpass)
+    }
 
     $recUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&view=$IBView"
 
@@ -75,7 +86,8 @@ function Add-DnsTxtInfoblox {
 }
 
 function Remove-DnsTxtInfoblox {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -83,13 +95,23 @@ function Remove-DnsTxtInfoblox {
         [string]$TxtValue,
         [Parameter(Mandatory)]
         [string]$IBServer,
-        [Parameter(Mandatory)]
+        [Parameter(ParameterSetName='Secure',Mandatory)]
         [pscredential]$IBCred,
+        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [string]$IBUsername,
+        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [string]$IBPassword,
         [string]$IBView='default',
         [switch]$IBIgnoreCert,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    # create a pscredential from insecure args if necessary
+    if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
+        $secpass = ConvertTo-SecureString $IBPassword -AsPlainText -Force
+        $IBCred = New-Object PSCredential ($IBUsername,$secpass)
+    }
 
     try {
         # ignore cert validation for the duration of the call
