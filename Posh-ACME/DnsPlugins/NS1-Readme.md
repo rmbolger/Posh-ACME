@@ -8,9 +8,17 @@ First, go to the [API Keys](https://my.nsone.net/#/account/settings) page and cl
 
 ## Using the Plugin
 
-The API key will be used with the `NS1Key` parameter. We just have to create it as a SecureString first.
+The API key will be used with the `NS1Key` or `NS1KeyInsecure` parameter. The "Insecure" version must be used on non-Windows OSes due to a bug in PowerShell Core relating to SecureString variables.
+
+### Windows
 
 ```powershell
-$ns1Key = Read-Host "API Key" -AsSecureString
+$ns1Key = Read-Host -Prompt "API Key" -AsSecureString
 New-PACertificate test.example.com -DnsPlugin NS1 -PluginArgs @{NS1Key=$ns1Key}
+```
+
+### Non-Windows
+
+```powershell
+New-PACertificate test.example.com -DnsPlugin NS1 -PluginArgs @{NS1Key='xxxxxxxxxxxx'}
 ```

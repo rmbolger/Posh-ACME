@@ -1,23 +1,28 @@
 function Add-DnsTxtNS1 {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$NS1Key,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [string]$NS1KeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # API Docs
-    # https://ns1.com/api
+    # grab the cleartext key if the secure version was used
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $NS1KeyInsecure = (New-Object PSCredential "user",$NS1Key).GetNetworkCredential().Password
+    }
+
     $apiRoot = 'https://api.nsone.net/v1'
     $restParams = @{
         Headers = @{
             Accept = 'application/json'
-            'X-NSONE-Key'=((New-Object PSCredential 'user',$NS1Key).GetNetworkCredential().Password)
+            'X-NSONE-Key'=$NS1KeyInsecure
         }
         ContentType = 'application/json'
     }
@@ -67,39 +72,52 @@ function Add-DnsTxtNS1 {
         The value of the TXT record.
 
     .PARAMETER NS1Key
-        A SecureString object containing the API key with DNS permissions on your NS1 account.
+        The API key with DNS permissions on your NS1 account. This SecureString version should only be used on Windows.
+
+    .PARAMETER NS1KeyInsecure
+        The API key with DNS permissions on your NS1 account. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $key = Read-Host "NS1 Key" -AsSecureString
+        $key = Read-Host -Prompt "NS1 Key" -AsSecureString
         PS C:\>Add-DnsTxtNS1 '_acme-challenge.site1.example.com' 'asdfqwer12345678' $key
 
-        Adds a TXT record for the specified site with the specified value.
+        Adds a TXT record for the specified site with the specified value from Windows.
+
+    .EXAMPLE
+        Add-DnsTxtNS1 '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'xxxxxxxxxxxx'
+
+        Adds a TXT record for the specified site with the specified value from non-Windows.
     #>
 }
 
 function Remove-DnsTxtNS1 {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$NS1Key,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [string]$NS1KeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # API Docs
-    # https://ns1.com/api
+    # grab the cleartext key if the secure version was used
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $NS1KeyInsecure = (New-Object PSCredential "user",$NS1Key).GetNetworkCredential().Password
+    }
+
     $apiRoot = 'https://api.nsone.net/v1'
     $restParams = @{
         Headers = @{
             Accept = 'application/json'
-            'X-NSONE-Key'=((New-Object PSCredential 'user',$NS1Key).GetNetworkCredential().Password)
+            'X-NSONE-Key'=$NS1KeyInsecure
         }
         ContentType = 'application/json'
     }
@@ -151,7 +169,10 @@ function Remove-DnsTxtNS1 {
         The value of the TXT record.
 
     .PARAMETER NS1Key
-        A SecureString object containing the API key with DNS permissions on your NS1 account.
+        The API key with DNS permissions on your NS1 account. This SecureString version should only be used on Windows.
+
+    .PARAMETER NS1KeyInsecure
+        The API key with DNS permissions on your NS1 account. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -160,7 +181,12 @@ function Remove-DnsTxtNS1 {
         $key = Read-Host "NS1 Key" -AsSecureString
         PS C:\>Remove-DnsTxtNS1 '_acme-challenge.site1.example.com' 'asdfqwer12345678' $key
 
-        Removes a TXT record for the specified site with the specified value.
+        Removes a TXT record for the specified site with the specified value from Windows.
+
+    .EXAMPLE
+        Remove-DnsTxtNS1 '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'xxxxxxxxxxxx'
+
+        Remove a TXT record for the specified site with the specified value from non-Windows.
     #>
 }
 
@@ -185,6 +211,9 @@ function Save-DnsTxtNS1 {
 ############################
 # Helper Functions
 ############################
+
+# API Docs
+# https://ns1.com/api
 
 function Find-NS1Zone {
     [CmdletBinding()]
