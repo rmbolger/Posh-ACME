@@ -1,22 +1,27 @@
 function Add-DnsTxtLinode {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$LIToken,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [string]$LITokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # API Docs
-    # https://developers.linode.com/api/v4
+    # grab the cleartext token if the secure version was used
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $LITokenInsecure = (New-Object PSCredential "user",$LIToken).GetNetworkCredential().Password
+    }
+
     $apiRoot = 'https://api.linode.com/v4'
     $restParams = @{
         Headers = @{
-            Authorization="Bearer $((New-Object PSCredential "user",$LIToken).GetNetworkCredential().Password)"
+            Authorization="Bearer $LITokenInsecure"
             'X-Filter' = '{}'
         }
         ContentType = 'application/json'
@@ -60,7 +65,10 @@ function Add-DnsTxtLinode {
         The value of the TXT record.
 
     .PARAMETER LIToken
-        A Personal Access Token associated with the Linode account that has Read/Write permissions on Domains.
+        A Personal Access Token associated with the Linode account that has Read/Write permissions on Domains. This SecureString version should only be used on Windows.
+
+    .PARAMETER LITokenInsecure
+        A Personal Access Token associated with the Linode account that has Read/Write permissions on Domains. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -69,29 +77,39 @@ function Add-DnsTxtLinode {
         $token = Read-Host "Token" -AsSecureString
         PS C:\>Add-DnsTxtLinode '_acme-challenge.site1.example.com' 'asdfqwer12345678' $token
 
-        Adds a TXT record for the specified site with the specified value.
+        Adds a TXT record for the specified site with the specified value on Windows.
+
+    .EXAMPLE
+        Add-DnsTxtLinode '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'xxxxxxxxxxxx'
+
+        Adds a TXT record for the specified site with the specified value on non-Windows.
     #>
 }
 
 function Remove-DnsTxtLinode {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$LIToken,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [string]$LITokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # API Docs
-    # https://developers.linode.com/api/v4
+    # grab the cleartext token if the secure version was used
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $LITokenInsecure = (New-Object PSCredential "user",$LIToken).GetNetworkCredential().Password
+    }
+
     $apiRoot = 'https://api.linode.com/v4'
     $restParams = @{
         Headers = @{
-            Authorization="Bearer $((New-Object PSCredential "user",$LIToken).GetNetworkCredential().Password)"
+            Authorization="Bearer $LITokenInsecure"
             'X-Filter' = '{}'
         }
         ContentType = 'application/json'
@@ -135,7 +153,10 @@ function Remove-DnsTxtLinode {
         The value of the TXT record.
 
     .PARAMETER LIToken
-        A Personal Access Token associated with the Linode account that has Read/Write permissions on Domains.
+        A Personal Access Token associated with the Linode account that has Read/Write permissions on Domains. This SecureString version should only be used on Windows.
+
+    .PARAMETER LITokenInsecure
+        A Personal Access Token associated with the Linode account that has Read/Write permissions on Domains. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -144,7 +165,12 @@ function Remove-DnsTxtLinode {
         $token = Read-Host "Token" -AsSecureString
         PS C:\>Remove-DnsTxtLinode '_acme-challenge.site1.example.com' 'asdfqwer12345678' $token
 
-        Removes a TXT record for the specified site with the specified value.
+        Removes a TXT record for the specified site with the specified value on Windows.
+
+    .EXAMPLE
+        Remove-DnsTxtLinode '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'xxxxxxxxxxxx'
+
+        Removes a TXT record for the specified site with the specified value on non-Windows.
     #>
 }
 
@@ -169,6 +195,9 @@ function Save-DnsTxtLinode {
 ############################
 # Helper Functions
 ############################
+
+# API Docs
+# https://developers.linode.com/api/v4
 
 function Find-LIZone {
     [CmdletBinding()]
