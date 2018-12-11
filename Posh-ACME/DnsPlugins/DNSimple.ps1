@@ -74,7 +74,10 @@ function Add-DnsTxtDNSimple {
         The value of the TXT record.
 
     .PARAMETER DSToken
-        The Account API token for DNSimple.
+        The Account API token for DNSimple. This SecureString version should only be used on Windows.
+
+    .PARAMETER DSTokenInsecure
+        The Account API token for DNSimple. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -83,7 +86,12 @@ function Add-DnsTxtDNSimple {
         $token = Read-Host "DNSimple Token" -AsSecureString
         PS C:\>Add-DnsTxtDNSimple '_acme-challenge.site1.example.com' 'asdfqwer12345678' $token
 
-        Adds a TXT record for the specified site with the specified value.
+        Adds a TXT record for the specified site with the specified value on Windows.
+
+    .EXAMPLE
+        Add-DnsTxtDNSimple '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'xxxxxxxxxxxx'
+
+        Adds a TXT record for the specified site with the specified value on non-Windows.
     #>
 }
 
@@ -163,7 +171,10 @@ function Remove-DnsTxtDNSimple {
         The value of the TXT record.
 
     .PARAMETER DSToken
-        The Account API token for DNSimple.
+        The Account API token for DNSimple. This SecureString version should only be used on Windows.
+
+    .PARAMETER DSTokenInsecure
+        The Account API token for DNSimple. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -172,7 +183,12 @@ function Remove-DnsTxtDNSimple {
         $token = Read-Host "DNSimple Token" -AsSecureString
         PS C:\>Remove-DnsTxtDNSimple '_acme-challenge.site1.example.com' 'asdfqwer12345678' $token
 
-        Removes a TXT record for the specified site with the specified value.
+        Removes a TXT record for the specified site with the specified value on Windows.
+
+    .EXAMPLE
+        Remove-DnsTxtDNSimple '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'xxxxxxxxxxxx'
+
+        Remove a TXT record for the specified site with the specified value on non-Windows.
     #>
 }
 

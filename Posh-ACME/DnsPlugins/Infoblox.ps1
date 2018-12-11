@@ -65,7 +65,13 @@ function Add-DnsTxtInfoblox {
         The IP or hostname of the Infoblox server.
 
     .PARAMETER IBCred
-        Credentials for Infoblox that have permission to write TXT records to the specified zone.
+        Credentials for Infoblox that have permission to write TXT records to the specified zone. This PSCredential option should only be used from Windows.
+
+    .PARAMETER IBUsername
+        The Infoblox username that has permission to write TXT records to the specified zone. This should be used from non-Windows.
+
+    .PARAMETER IBPassword
+        The password for the IBUsername parameter. This should be used from non-Windows.
 
     .PARAMETER IBView
         The name of the DNS View for the specified zone. Defaults to 'default'.
@@ -81,7 +87,13 @@ function Add-DnsTxtInfoblox {
         PS C:\>$pluginArgs = @{IBServer='gridmaster.example.com'; IBCred=$cred; IBView='External'; IBIgnoreCert=$true}
         PS C:\>Add-DnsTxtInfoblox '_acme-challenge.site1.example.com' 'asdfqwer12345678' @pluginArgs
 
-        Adds a TXT record for the specified site/value using a hashtable to pass plugin specific parameters.
+        Adds a TXT record for the specified site/value on Windows.
+
+    .EXAMPLE
+        $pluginArgs = @{IBServer='gridmaster.example.com'; IBUsername='myuser'; IBPassword='xxxxxxxx'; IBView='External'; IBIgnoreCert=$true}
+        PS C:\>Add-DnsTxtInfoblox '_acme-challenge.site1.example.com' 'asdfqwer12345678' @pluginArgs
+
+        Adds a TXT record for the specified site/value on non-Windows.
     #>
 }
 
@@ -152,7 +164,13 @@ function Remove-DnsTxtInfoblox {
         The IP or hostname of the Infoblox server.
 
     .PARAMETER IBCred
-        Credentials for Infoblox that have permission to write TXT records to the specified zone.
+        Credentials for Infoblox that have permission to write TXT records to the specified zone. This PSCredential option should only be used from Windows.
+
+    .PARAMETER IBUsername
+        The Infoblox username that has permission to write TXT records to the specified zone. This should be used from non-Windows.
+
+    .PARAMETER IBPassword
+        The password for the IBUsername parameter. This should be used from non-Windows.
 
     .PARAMETER IBView
         The name of the DNS View for the specified zone. Defaults to 'default'.
@@ -168,7 +186,13 @@ function Remove-DnsTxtInfoblox {
         PS C:\>$pluginArgs = @{IBServer='gridmaster.example.com'; IBCred=$cred; IBView='External'; IBIgnoreCert=$true}
         PS C:\>Remove-DnsTxtInfoblox '_acme-challenge.site1.example.com' 'asdfqwer12345678' @pluginArgs
 
-        Removes a TXT record for the specified site/value using a hashtable to pass plugin specific parameters.
+        Removes a TXT record for the specified site/value on Windows.
+
+    .EXAMPLE
+        $pluginArgs = @{IBServer='gridmaster.example.com'; IBUsername='myuser'; IBPassword='xxxxxxxx'; IBView='External'; IBIgnoreCert=$true}
+        PS C:\>Remove-DnsTxtInfoblox '_acme-challenge.site1.example.com' 'asdfqwer12345678' @pluginArgs
+
+        Removes a TXT record for the specified site/value on non-Windows.
     #>
 }
 
