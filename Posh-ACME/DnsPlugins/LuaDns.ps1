@@ -1,18 +1,27 @@
 function Add-DnsTxtLuaDns {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [pscredential]$LuaCredential,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [string]$LuaUsername,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [string]$LuaPassword,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # API Docs
-    # http://www.luadns.com/api.html
+    # create a pscredential from insecure args if necessary
+    if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
+        $secpass = ConvertTo-SecureString $LuaPassword -AsPlainText -Force
+        $LuaCredential = New-Object PSCredential ($LuaUsername,$secpass)
+    }
+
     $apiRoot = 'https://api.luadns.com/v1'
     $restParams = @{
         Headers = @{Accept='application/json'}
@@ -56,7 +65,13 @@ function Add-DnsTxtLuaDns {
         The value of the TXT record.
 
     .PARAMETER LuaCredential
-        A PSCredential object containing the account email address as the username and API token as the password.
+        A PSCredential object containing the account email address as the username and API token as the password. This PSCredential option should only be used from Windows.
+
+    .PARAMETER LuaUsername
+        The account email address. This should be used from non-Windows.
+
+    .PARAMETER LuaPassword
+        The account API token. This should be used from non-Windows.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -64,25 +79,39 @@ function Add-DnsTxtLuaDns {
     .EXAMPLE
         Add-DnsTxtLuaDns '_acme-challenge.site1.example.com' 'asdfqwer12345678' (Get-Credential)
 
-        Adds a TXT record for the specified site with the specified value.
+        Adds a TXT record for the specified site with the specified value from Windows.
+
+    .EXAMPLE
+        Add-DnsTxtLuaDns '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'user@example.com' 'xxxxxxxxxxxx'
+
+        Adds a TXT record for the specified site with the specified value from non-Windows.
     #>
 }
 
 function Remove-DnsTxtLuaDns {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [pscredential]$LuaCredential,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [string]$LuaUsername,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [string]$LuaPassword,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # API Docs
-    # http://www.luadns.com/api.html
+    # create a pscredential from insecure args if necessary
+    if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
+        $secpass = ConvertTo-SecureString $LuaPassword -AsPlainText -Force
+        $LuaCredential = New-Object PSCredential ($LuaUsername,$secpass)
+    }
+
     $apiRoot = 'https://api.luadns.com/v1'
     $restParams = @{
         Headers = @{Accept='application/json'}
@@ -125,7 +154,13 @@ function Remove-DnsTxtLuaDns {
         The value of the TXT record.
 
     .PARAMETER LuaCredential
-        A PSCredential object containing the account email address as the username and API token as the password.
+        A PSCredential object containing the account email address as the username and API token as the password. This PSCredential option should only be used from Windows.
+
+    .PARAMETER LuaUsername
+        The account email address. This should be used from non-Windows.
+
+    .PARAMETER LuaPassword
+        The account API token. This should be used from non-Windows.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -133,7 +168,12 @@ function Remove-DnsTxtLuaDns {
     .EXAMPLE
         Remove-DnsTxtLuaDns '_acme-challenge.site1.example.com' 'asdfqwer12345678' (Get-Credential)
 
-        Removes a TXT record for the specified site with the specified value.
+        Removes a TXT record for the specified site with the specified value from Windows.
+
+    .EXAMPLE
+        Remove-DnsTxtLuaDns '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'user@example.com' 'xxxxxxxxxxxx'
+
+        Remove a TXT record for the specified site with the specified value from non-Windows.
     #>
 }
 
@@ -158,6 +198,9 @@ function Save-DnsTxtLuaDns {
 ############################
 # Helper Functions
 ############################
+
+# API Docs
+# http://www.luadns.com/api.html
 
 function Find-LuaZone {
     [CmdletBinding()]
