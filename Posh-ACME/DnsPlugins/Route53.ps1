@@ -1,14 +1,17 @@
 function Add-DnsTxtRoute53 {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Keys')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Keys',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='KeysInsecure',Mandatory,Position=2)]
         [string]$R53AccessKey,
         [Parameter(ParameterSetName='Keys',Mandatory,Position=3)]
         [securestring]$R53SecretKey,
+        [Parameter(ParameterSetName='KeysInsecure',Mandatory,Position=3)]
+        [string]$R53SecretKeyInsecure,
         [Parameter(ParameterSetName='Profile',Mandatory)]
         [string]$R53ProfileName,
         [Parameter(ValueFromRemainingArguments)]
@@ -27,10 +30,19 @@ function Add-DnsTxtRoute53 {
         Import-Module $modName -Verbose:$false
     }
 
-    if ('Keys' -eq $PSCmdlet.ParameterSetName) {
-        $credParam = @{AccessKey=$R53AccessKey; SecretKey=((New-Object PSCredential "user",$R53SecretKey).GetNetworkCredential().Password)}
-    } else {
-        $credParam = @{ProfileName=$R53ProfileName}
+    switch ($PSCmdlet.ParameterSetName) {
+        'Keys' {
+            $keyPlain = (New-Object PSCredential "user",$R53SecretKey).GetNetworkCredential().Password
+            $credParam = @{AccessKey=$R53AccessKey; SecretKey=$keyPlain}
+            break
+        }
+        'KeysInsecure' {
+            $credParam = @{AccessKey=$R53AccessKey; SecretKey=$R53SecretKeyInsecure}
+            break
+        }
+        default {
+            $credParam = @{ProfileName=$R53ProfileName}
+        }
     }
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
@@ -78,7 +90,10 @@ function Add-DnsTxtRoute53 {
         The Access Key ID for the IAM account with permissions to write to the specified hosted zone.
 
     .PARAMETER R53SecretKey
-        The Secret Key for the IAM account specified by -R53AccessKey.
+        The Secret Key for the IAM account specified by -R53AccessKey. This SecureString version should only be used on Windows.
+
+    .PARAMETER R53SecretKeyInsecure
+        The Secret Key for the IAM account specified by -R53AccessKey. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER R53ProfileName
         The profile name of a previously stored credential using Set-AWSCredential from the AwsPowershell module. This only works if the AwsPowershell module is installed.
@@ -87,23 +102,37 @@ function Add-DnsTxtRoute53 {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxtRoute53 '_acme-challenge.site1.example.com' 'asdfqwer12345678'
+        Add-DnsTxtRoute53 '_acme-challenge.site1.example.com' 'asdfqwer12345678' -R53ProfileName 'myprofile'
 
-        Adds a TXT record for the specified site with the specified value.
+        Add a TXT record using a profile name saved in the AwsPowershell module.
+
+    .EXAMPLE
+        $seckey = Read-Host -Prompt 'Secret Key:' -AsSecureString
+        PS C:\>Add-DnsTxtRoute53 '_acme-challenge.site1.example.com' 'asdfqwer12345678' -R53AccessKey 'xxxxxxxx' -R53SecretKey $seckey
+
+        Add a TXT record using an explicit Access Key and Secret key from Windows.
+
+    .EXAMPLE
+        Add-DnsTxtRoute53 '_acme-challenge.site1.example.com' 'asdfqwer12345678' -R53AccessKey 'xxxxxxxx' -R53SecretKeyInsecure 'yyyyyyyy'
+
+        Add a TXT record using an explicit Access Key and Secret key from a non-Windows OS.
     #>
 }
 
 function Remove-DnsTxtRoute53 {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Keys')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Keys',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='KeysInsecure',Mandatory,Position=2)]
         [string]$R53AccessKey,
         [Parameter(ParameterSetName='Keys',Mandatory,Position=3)]
         [securestring]$R53SecretKey,
+        [Parameter(ParameterSetName='KeysInsecure',Mandatory,Position=3)]
+        [string]$R53SecretKeyInsecure,
         [Parameter(ParameterSetName='Profile',Mandatory)]
         [string]$R53ProfileName,
         [Parameter(ValueFromRemainingArguments)]
@@ -114,11 +143,21 @@ function Remove-DnsTxtRoute53 {
     # But my hope is to eventually remove the AwsPowershell module dependency (which is
     # currently 75 MB by itself) for people who use the Access/Secret key pair.
 
-    if ('Keys' -eq $PSCmdlet.ParameterSetName) {
-        $credParam = @{AccessKey=$R53AccessKey; SecretKey=((New-Object PSCredential "user",$R53SecretKey).GetNetworkCredential().Password)}
-    } else {
-        $credParam = @{ProfileName=$R53ProfileName}
+    switch ($PSCmdlet.ParameterSetName) {
+        'Keys' {
+            $keyPlain = (New-Object PSCredential "user",$R53SecretKey).GetNetworkCredential().Password
+            $credParam = @{AccessKey=$R53AccessKey; SecretKey=$keyPlain}
+            break
+        }
+        'KeysInsecure' {
+            $credParam = @{AccessKey=$R53AccessKey; SecretKey=$R53SecretKeyInsecure}
+            break
+        }
+        default {
+            $credParam = @{ProfileName=$R53ProfileName}
+        }
     }
+
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
     if (!($zoneID = Get-R53ZoneId $RecordName $credParam)) {
@@ -166,7 +205,10 @@ function Remove-DnsTxtRoute53 {
         The Access Key ID for the IAM account with permissions to write to the specified hosted zone.
 
     .PARAMETER R53SecretKey
-        The Secret Key for the IAM account specified by -R53AccessKey.
+        The Secret Key for the IAM account specified by -R53AccessKey. This SecureString version should only be used on Windows.
+
+    .PARAMETER R53SecretKeyInsecure
+        The Secret Key for the IAM account specified by -R53AccessKey. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER R53ProfileName
         The profile name of a previously stored credential using Set-AWSCredential from the AwsPowershell module. This only works if the AwsPowershell module is installed.
@@ -175,9 +217,20 @@ function Remove-DnsTxtRoute53 {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxtRoute53 '_acme-challenge.site1.example.com' 'asdfqwer12345678'
+        Remove-DnsTxtRoute53 '_acme-challenge.site1.example.com' 'asdfqwer12345678' -R53ProfileName 'myprofile'
 
-        Removes a TXT record for the specified site with the specified value.
+        Remove a TXT record using a profile name saved in the AwsPowershell module.
+
+    .EXAMPLE
+        $seckey = Read-Host -Prompt 'Secret Key:' -AsSecureString
+        PS C:\>Remove-DnsTxtRoute53 '_acme-challenge.site1.example.com' 'asdfqwer12345678' -R53AccessKey 'xxxxxxxx' -R53SecretKey $seckey
+
+        Remove a TXT record using an explicit Access Key and Secret key from Windows.
+
+    .EXAMPLE
+        Remove-DnsTxtRoute53 '_acme-challenge.site1.example.com' 'asdfqwer12345678' -R53AccessKey 'xxxxxxxx' -R53SecretKeyInsecure 'yyyyyyyy'
+
+        Remove a TXT record using an explicit Access Key and Secret key from a non-Windows OS.
     #>
 }
 

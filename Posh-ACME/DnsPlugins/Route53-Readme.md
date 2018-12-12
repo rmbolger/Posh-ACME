@@ -67,22 +67,34 @@ The `$key` variable output should contains `AccessKeyId` and `SecretAccessKey` w
 
 ## Using the Plugin
 
-There are currently two different ways to use the plugin. The first requires supplying access and secret key to the `R53AccessKey` and `R53SecretKey` parameters. The secret key is a secure string though and takes a bit of extra work to setup. If you lost them, you can re-generate them from the AWS IAM console. But there's no way to retrieve an existing secret key value.
+There are currently two different ways to use the plugin. The first requires supplying access and secret key to the `R53AccessKey` and `R53SecretKey`/`R53SecretKeyInsecure` parameters. The "insecure" version of the secret parameter is for non-Windows OSes that can't currently use the SecureString version. If you lost the keys, you can re-generate them from the AWS IAM console. But there's no way to retrieve an existing secret key value.
+
+### Windows
 
 ```powershell
 # store the secret key as a SecureString
-$sec = Read-Host "Secret Key" -AsSecureString
+$sec = Read-Host -Prompt "Secret Key" -AsSecureString
 
 # set the params and generate the cert
 $r53Params = @{R53AccessKey='xxxxxxxx';R53SecretKey=$sec}
 New-PACertificate test.example.com -DnsPlugin Route53 -PluginArgs $r53Params
 ```
 
-The second method uses the `R53ProfileName` parameter to specify the profile name of an existing credential stored with `Set-AwsCredential` from the AWS powershell module. **This is also the only method that currently works with PowerShell Core on non-Windows OSes for this plugin.**
+### Non-Windows
+
+```powershell
+# set the params and generate the cert
+$r53Params = @{R53AccessKey='xxxxxxxx';R53SecretKeyInsecure='yyyyyyyy'}
+New-PACertificate test.example.com -DnsPlugin Route53 -PluginArgs $r53Params
+```
+
+### AwsPowershell Profile (any OS)
+
+The other method uses the `R53ProfileName` parameter to specify the profile name of an existing credential stored with `Set-AwsCredential` from the AWS powershell module.
 
 ```powershell
 # store the access/secret key in a profile called 'poshacme'
-Set-AWSCredential -StoreAs 'poshacme' -AccessKey 'xxxxxxxx' -SecretKey 'xxxxxxxx'
+Set-AWSCredential -StoreAs 'poshacme' -AccessKey 'xxxxxxxx' -SecretKey 'yyyyyyyy'
 
 # set the params and generate the cert
 $r53Params = @{R53ProfileName='poshacme'}
