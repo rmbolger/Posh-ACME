@@ -256,6 +256,110 @@ function Save-DnsTxtRoute53 {
 # Helper Functions
 ############################
 
+function Get-AwsHash {
+    [CmdletBinding()]
+    param (
+        [Parameter(Position=0)]
+        [string]$Data
+    )
+    # Need a SHA256 hash in lowercase hex with no dashes
+    $sha256 = [Security.Cryptography.SHA256]::Create()
+    $hash = $sha256.ComputeHash([Text.Encoding]::UTF8.GetBytes($Data))
+    return ([BitConverter]::ToString($hash) -replace '-','').ToLower()
+}
+
+function Invoke-R53RestMethod {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [string]$AccessKey,
+        [Parameter(Mandatory,Position=1)]
+        [string]$SecretKey,
+        [Parameter(Position=2)]
+        [string]$Method='GET',
+        [Parameter(Position=3)]
+        [string]$Endpoint='/',                  # e.g. CanonicalUri like "/2013-04-01/hostedzone"
+        [Parameter(Position=4)]
+        [string]$QueryString=[String]::Empty,   # e.g. CanonicalQueryString like "name=example.com&type=TXT"
+        [Parameter(Position=5)]
+        [string]$Data=[String]::Empty
+    )
+
+    # The convoluted process that is authenticating against AWS using Signature Version 4
+    # https://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
+
+    # Since we're only ever using Route53, we can hard code a few things
+    $awsHost = 'route53.amazonaws.com'
+    $region = 'us-east-1'
+    $service = 'route53'
+    $terminator = 'aws4_request'
+
+
+    # For some reason we need two differently formatted date strings
+    $now = [DateTimeOffset]::UtcNow
+    $nowDate = $now.ToString("yyyyMMdd")
+    $nowDateTime = $now.ToString("yyyyMMddTHHmmssZ")
+
+    # https://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
+    $CanonicalHeaders = "host:$awsHost`nx-amz-date:$nowDateTime`n"
+    Write-Debug "CanonicalHeaders:`n$CanonicalHeaders"
+    $SignedHeaders = "host;x-amz-date"
+
+    $CanonicalRequest = "$Method`n$Endpoint`n$QueryString`n$CanonicalHeaders`n$SignedHeaders`n$((Get-AwsHash $Data))"
+    Write-Debug "CanonicalRequest:`n$CanonicalRequest"
+    $CanonicalRequestHash = Get-AwsHash $CanonicalRequest
+
+    # https://docs.aws.amazon.com/general/latest/gr/sigv4-create-string-to-sign.html
+    $CredentialScope = "$nowDate/$region/$service/$terminator"
+
+    $StringToSign = "AWS4-HMAC-SHA256`n$nowDateTime`n$CredentialScope`n$CanonicalRequestHash"
+    Write-Debug "StringToSign:`n$StringToSign"
+
+    # https://docs.aws.amazon.com/general/latest/gr/sigv4-calculate-signature.html
+    $hmac = New-Object System.Security.Cryptography.HMACSHA256
+    $hmac.Key = [Text.Encoding]::UTF8.GetBytes("AWS4$SecretKey")
+    $kDate = $hmac.ComputeHash([Text.Encoding]::UTF8.GetBytes($nowDate))
+
+    $hmac.Key = $kDate
+    $kRegion = $hmac.ComputeHash([Text.Encoding]::UTF8.GetBytes($region))
+
+    $hmac.Key = $kRegion
+    $kService = $hmac.ComputeHash([Text.Encoding]::UTF8.GetBytes($service))
+
+    $hmac.Key = $kService
+    $kSigning = $hmac.ComputeHash([Text.Encoding]::UTF8.GetBytes($terminator))
+
+    $hmac.Key = $kSigning
+    $signature = $hmac.ComputeHash([Text.Encoding]::UTF8.GetBytes($StringToSign))
+    $sigHex = ([BitConverter]::ToString($signature) -replace '-','').ToLower()
+    Write-Debug "Signature:`n$sigHex"
+
+    # https://docs.aws.amazon.com/general/latest/gr/sigv4-add-signature-to-request.html
+    $Authorization = "AWS4-HMAC-SHA256 Credential=$AccessKey/$CredentialScope, SignedHeaders=$SignedHeaders, Signature=$sigHex"
+    Write-Debug "Auth:`n$Authorization"
+
+    # build the request params header hashtable
+    $headers = @{
+        'x-amz-date' = $nowDateTime
+        Authorization = $Authorization
+    }
+    $uri = "https://$awsHost$($Endpoint)"
+    if ([String]::Empty -ne $QueryString) {
+        $uri += "?$QueryString"
+    }
+    Write-Debug "Uri: $uri"
+
+    try {
+        if ('Get' -eq $Method) {
+            $response = Invoke-RestMethod $uri -Headers $headers @script:UseBasic
+        } else {
+            $response = Invoke-RestMethod $uri -Headers $headers -Method Post @script:UseBasic
+        }
+        return $response
+
+    } catch { throw }
+}
+
 function Get-R53ZoneId {
     [CmdletBinding()]
     param(
