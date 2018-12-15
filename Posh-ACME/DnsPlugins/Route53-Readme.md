@@ -1,6 +1,8 @@
 # How To Use the Route53 DNS Plugin
 
-This plugin works against the [AWS Route53](https://aws.amazon.com/route53/) DNS provider. It is assumed that you already have an AWS account with at least one DNS zone, and access to create IAM users/roles. The commands used in this guide will also make use of the [AwsPowershell](https://www.powershellgallery.com/packages/AWSPowerShell) or [AwsPowershell.NetCore](https://www.powershellgallery.com/packages/AWSPowerShell.NetCore) module depending on your environment. Currently, they are also required in order to use the plugin.
+This plugin works against the [AWS Route53](https://aws.amazon.com/route53/) DNS provider. It is assumed that you already have an AWS account with at least one DNS zone, and access to create IAM users/roles. The commands used in this guide will also make use of the [AwsPowershell](https://www.powershellgallery.com/packages/AWSPowerShell) or [AwsPowershell.NetCore](https://www.powershellgallery.com/packages/AWSPowerShell.NetCore) module depending on your environment.
+
+The `AwsPowershell` module is *not required* in order to use the plugin normally as long as you use the keys method of authentication. But it will use the module if it's installed.
 
 ## Setup
 
@@ -90,7 +92,7 @@ New-PACertificate test.example.com -DnsPlugin Route53 -PluginArgs $r53Params
 
 ### AwsPowershell Profile (any OS)
 
-The other method uses the `R53ProfileName` parameter to specify the profile name of an existing credential stored with `Set-AwsCredential` from the AWS powershell module.
+The other method uses the `R53ProfileName` parameter to specify the profile name of an existing credential stored with `Set-AwsCredential` from the AWS powershell module. Remember that the `AwsPowershell` module must remain installed for renewals when using this method.
 
 ```powershell
 # store the access/secret key in a profile called 'poshacme'
