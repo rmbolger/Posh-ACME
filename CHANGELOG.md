@@ -1,3 +1,17 @@
+## 3.1.0 (2018-12-16)
+
+* The following plugins have added non-Windows OS support or extended their existing support. Check the plugin guides for details.
+  * Azure
+  * DNSimple
+  * Infoblox
+  * Linode
+  * LuaDns
+  * NS1
+  * Route53
+* Route53 plugin no longer requires AwsPowershell module when used with explicit keys. It will still use the module if it's installed.
+* Added tab completion for plugin names with `Get-DnsPluginHelp`
+* Fix #112 for Azure and errors with private zones and subscriptions with more than 100 zones
+
 ## 3.0.1 (2018-11-30)
 
 * Fix for #110 `Submit-Renewal` with -AllOrders or -AllAccounts fails to renew orders with invalid status. (Thanks @jeffmnall!)
