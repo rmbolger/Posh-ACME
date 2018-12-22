@@ -316,7 +316,7 @@ function Initialize-R53Config {
     # as installing an updated version of the AwsPowerhell module.
 
     # check for AwsPowershell module availability
-    if ($PSEdition -eq 'Core') { $modName = 'AwsPowershell.NetCore' } else { $modName = 'AwsPowershell2' }
+    if ($PSEdition -eq 'Core') { $modName = 'AwsPowershell.NetCore' } else { $modName = 'AwsPowershell' }
     $modAvailable = $null -ne (Get-Module -ListAvailable $modName -Verbose:$false)
     if ($modAvailable) {
         Import-Module $modName -Verbose:$false
