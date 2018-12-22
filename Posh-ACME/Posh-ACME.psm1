@@ -79,5 +79,18 @@ Register-ArgumentCompleter -CommandName $DnsPluginCommands -ParameterName 'DnsPl
 $PluginCommands = 'Publish-DnsChallenge','Unpublish-DnsChallenge','Save-DnsChallenge','Get-DnsPluginHelp'
 Register-ArgumentCompleter -CommandName $PluginCommands -ParameterName 'Plugin' -ScriptBlock $PluginNameCompleter
 
+$IDCommands = 'Get-PAAccount','Set-PAAccount','Remove-PAAccount'
+Register-ArgumentCompleter -CommandName $IDCommands -ParameterName 'ID' -ScriptBlock {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+
+    # nothing to auto complete if we don't have a server selected
+    if ([String]::IsNullOrWhiteSpace($script:DirFolder)) { return }
+
+    $ids = (Get-ChildItem -Path $script:DirFolder | Where-Object { $_ -is [IO.DirectoryInfo] }).BaseName
+    $ids | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
+        [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+    }
+}
+
 
 Import-PAConfig
