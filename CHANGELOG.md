@@ -1,3 +1,7 @@
+## 3.1.1 (2018-12-22)
+
+* Fixed typo in Route53 plugin that prevented finding the AwsPowershell module
+
 ## 3.1.0 (2018-12-16)
 
 * The following plugins have added non-Windows OS support or extended their existing support. Check the plugin guides for details.
