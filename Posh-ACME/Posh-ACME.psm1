@@ -62,10 +62,9 @@ if ('UseBasicParsing' -in (Get-Command Invoke-WebRequest).Parameters.Keys) {
     $script:UseBasic.UseBasicParsing = $true
 }
 
-# setup the DnsPlugin argument completers
+# setup the argument completers
 # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/register-argumentcompleter?view=powershell-5.1
-Register-ArgumentCompleter -CommandName 'New-PACertificate','Submit-ChallengeValidation' `
-    -ParameterName 'DnsPlugin' -ScriptBlock {
+$PluginNameCompleter = {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
     $names = (Get-ChildItem -Path $PSScriptRoot\DnsPlugins\*.ps1 -Exclude '_Example.ps1').BaseName
@@ -73,15 +72,12 @@ Register-ArgumentCompleter -CommandName 'New-PACertificate','Submit-ChallengeVal
         [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
     }
 }
-Register-ArgumentCompleter -CommandName 'Publish-DnsChallenge','Unpublish-DnsChallenge','Save-DnsChallenge','Get-DnsPluginHelp' `
-    -ParameterName 'Plugin' -ScriptBlock {
-    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
-    $names = (Get-ChildItem -Path $PSScriptRoot\DnsPlugins\*.ps1 -Exclude '_Example.ps1').BaseName
-    $names | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
-        [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
-    }
-}
+$DnsPluginCommands = 'New-PACertificate','Submit-ChallengeValidation'
+Register-ArgumentCompleter -CommandName $DnsPluginCommands -ParameterName 'DnsPlugin' -ScriptBlock $PluginNameCompleter
+
+$PluginCommands = 'Publish-DnsChallenge','Unpublish-DnsChallenge','Save-DnsChallenge','Get-DnsPluginHelp'
+Register-ArgumentCompleter -CommandName $PluginCommands -ParameterName 'Plugin' -ScriptBlock $PluginNameCompleter
 
 
 Import-PAConfig
