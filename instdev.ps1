@@ -5,7 +5,7 @@ if ('PSEdition' -notin $PSVersionTable.Keys -or $PSVersionTable.PSEdition -eq 'D
     $installpath = "$($env:USERPROFILE)\Documents\WindowsPowerShell\Modules"
 } else {
     if ($IsWindows) {
-        $installpath = "$($env:HOME)\Documents\PowerShell\Modules"
+        $installpath = "$($env:USERPROFILE)\Documents\PowerShell\Modules"
     } else {
         $installpath = "$($env:HOME)/.local/share/powershell/Modules"
     }
