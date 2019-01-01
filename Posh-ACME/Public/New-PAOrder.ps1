@@ -97,6 +97,11 @@ function New-PAOrder {
     # process the response
     $order = $response.Content | ConvertFrom-Json
     $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
+
+    # fix any dates that may have been parsed by PSCore's JSON serializer
+    $order.expires = Repair-ISODate $order.expires
+
+    # add additional members we'll need for later
     $order | Add-Member -MemberType NoteProperty -Name 'MainDomain' -Value $Domain[0]
     $order | Add-Member -MemberType NoteProperty -Name 'SANs' -Value $SANs
     $order | Add-Member -MemberType NoteProperty -Name 'KeyLength' -Value $KeyLength

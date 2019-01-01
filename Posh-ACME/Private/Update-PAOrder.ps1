@@ -60,7 +60,7 @@ function Update-PAOrder {
 
             # update the things that could have changed
             $order.status = $respObj.status
-            $order.expires = $respObj.expires
+            $order.expires = Repair-ISODate $respObj.expires
             if ($respObj.certificate) {
                 $order.certificate = $respObj.certificate
             }

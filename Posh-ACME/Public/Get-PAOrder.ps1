@@ -32,6 +32,11 @@ function Get-PAOrder {
             $rawOrders = Get-ChildItem "$($script:AcctFolder)\*\order.json" | Get-Content -Raw
             $orders = $rawOrders | ConvertFrom-Json | Sort-Object MainDomain | ForEach-Object {
 
+                # fix any dates that may have been parsed by PSCore's JSON serializer
+                $_.expires = Repair-ISODate $_.expires
+                $_.CertExpires = Repair-ISODate $_.CertExpires
+                $_.RenewAfter = Repair-ISODate $_.RenewAfter
+
                 # insert the type name and send the results to the pipeline
                 $_.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
                 $_
@@ -50,9 +55,16 @@ function Get-PAOrder {
 
                 # check for an order.json
                 if (Test-Path $orderFile -PathType Leaf) {
+
                     Write-Debug "Loading PAOrder from disk"
                     $order = Get-ChildItem $orderFile | Get-Content -Raw | ConvertFrom-Json
                     $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
+
+                    # fix any dates that may have been parsed by PSCore's JSON serializer
+                    $order.expires = Repair-ISODate $order.expires
+                    $order.CertExpires = Repair-ISODate $order.CertExpires
+                    $order.RenewAfter = Repair-ISODate $order.RenewAfter
+
                 } else {
                     return $null
                 }
