@@ -30,24 +30,15 @@ function Get-PACertificate {
         } else {
 
             if ($MainDomain) {
-
-                # build the path to order.json
-                $domainFolder = Join-Path $script:AcctFolder $MainDomain.Replace('*','!')
-                $orderFile =  Join-Path $domainFolder 'order.json'
-
-                # check for an order.json
-                if (Test-Path $orderFile -PathType Leaf) {
-                    Write-Debug "Loading PAOrder from disk"
-                    $order = Get-ChildItem $orderFile | Get-Content -Raw | ConvertFrom-Json
-                    $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
-                } else {
-                    throw "Unable to find cached PAOrder info for $MainDomain."
-                }
-
+                # query the specified order
+                $order = Get-PAOrder $MainDomain
             } else {
                 # just use the current one
                 $order = $script:Order
             }
+
+            # return early if there's no order
+            if ($null -eq $order) { return $null }
 
             # build the path to cert.cer
             $domainFolder = Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')
@@ -55,7 +46,7 @@ function Get-PACertificate {
 
             # double check the cert exists
             if (!(Test-Path $certFile -PathType Leaf)) {
-                throw "Certificate file missing: $certFile"
+                return $null
             }
 
             # import the cert
