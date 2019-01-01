@@ -68,9 +68,13 @@ function Set-PAOrder {
         # revoke if necessary
         if ($RevokeCert) {
 
-            # make sure the order is valid
-            if ($order.status -ne 'valid') {
-                Write-Warning "Unable to revoke certificate. Order for $($order.MainDomain) is not valid."
+            # make sure the order has a cert to revoke and that it's not already expired
+            if (-not $order.CertExpires) {
+                Write-Warning "Unable to revoke certificate for $($order.MainDomain). No cert found to revoke."
+                return
+            }
+            if ((Get-DateTimeOffsetNow) -ge ([DateTimeOffset]::Parse($order.CertExpires))) {
+                Write-Warning "Unable to revoke certificate for $($order.MainDomain). Cert already expired."
                 return
             }
 
