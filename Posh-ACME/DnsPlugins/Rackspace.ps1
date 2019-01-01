@@ -240,6 +240,7 @@ function Connect-RackspaceDns {
 
     # save what we care about to a script variable
     if ($response.access) {
+        $response.access.token.expires = Repair-ISODate $response.access.token.expires
         $script:RSAuth = @{
             token = $response.access.token.id
             dnsBase = ($response.access.serviceCatalog | ?{ $_.name -eq 'cloudDNS' })[0].endpoints.publicURL
