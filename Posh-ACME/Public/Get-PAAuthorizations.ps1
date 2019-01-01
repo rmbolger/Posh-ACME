@@ -41,6 +41,9 @@ function Get-PAAuthorizations {
             $auth.PSObject.TypeNames.Insert(0,'PoshACME.PAAuthorization')
             Write-Debug "Response: $($auth | ConvertTo-Json)"
 
+            # fix any dates that may have been parsed by PSCore's JSON serializer
+            $auth.expires = Repair-ISODate $auth.expires
+
             # add "nice to have" members to the auth object
             $auth | Add-Member -MemberType NoteProperty -Name 'DNSId' -Value $auth.identifier.value
             $auth | Add-Member -MemberType NoteProperty -Name 'fqdn' -Value "$(if ($auth.wildcard) {'*.'})$($auth.DNSId)"
