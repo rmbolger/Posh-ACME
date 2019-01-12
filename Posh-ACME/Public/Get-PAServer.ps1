@@ -23,7 +23,7 @@ function Get-PAServer {
 
             # read the contents of each server's dir.json
             Write-Debug "Loading PAServer list from disk"
-            $rawFiles = Get-ChildItem "$($script:ConfigRoot)\*\dir.json" | Get-Content -Raw
+            $rawFiles = Get-ChildItem (Join-Path $script:ConfigRoot '\*\dir.json') | Get-Content -Raw
             $rawFiles | ConvertFrom-Json | Sort-Object location | ForEach-Object {
 
                     # insert the type name so it displays properly

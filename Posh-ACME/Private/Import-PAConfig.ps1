@@ -19,7 +19,7 @@ function Import-PAConfig {
     # - order.json
     # - cert.cer/key/pfx/etc
 
-    # Each leve of the config is dependent on its parent. So if the user changes the server,
+    # Each level of the config is dependent on its parent. So if the user changes the server,
     # they need to reload the server and all of the child accounts and orders. But if they only
     # change the account, they only need to reload it and orders. And so on.
 
@@ -34,7 +34,19 @@ function Import-PAConfig {
         } else {
             throw "Unrecognized PowerShell platform"
         }
-        if (!(Test-Path $script:ConfigRoot -PathType Container)) {
+
+        # allow overriding the default config location with a custom path
+        # based on an the POSHACME_HOME environment variable
+        if (-not [string]::IsNullOrWhiteSpace($env:POSHACME_HOME)) {
+            if (Test-Path $env:POSHACME_HOME -PathType Container) {
+                $script:ConfigRoot = $env:POSHACME_HOME
+            } else {
+                Write-Warning "The POSHACME_HOME environment variable exists but the path it points to, $($env:POSHACME_HOME), does not. Using default config location."
+            }
+        }
+
+        # create the config folder if it doesn't already exist.
+        if (-not (Test-Path $script:ConfigRoot -PathType Container)) {
             New-Item -ItemType Directory -Path $script:ConfigRoot -Force | Out-Null
         }
     }
