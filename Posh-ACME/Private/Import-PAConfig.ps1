@@ -47,7 +47,7 @@ function Import-PAConfig {
 
         # create the config folder if it doesn't already exist.
         if (-not (Test-Path $script:ConfigRoot -PathType Container)) {
-            New-Item -ItemType Directory -Path $script:ConfigRoot -Force | Out-Null
+            New-Item -ItemType Directory -Path $script:ConfigRoot -Force -EA Stop | Out-Null
         }
     }
 

@@ -54,7 +54,7 @@ function Update-PAServer {
 
                 # create the directory folder if necessary
                 if (!(Test-Path $dirFolder -PathType Container)) {
-                    New-Item -ItemType Directory -Path $dirFolder -Force | Out-Null
+                    New-Item -ItemType Directory -Path $dirFolder -Force -EA Stop | Out-Null
                 }
 
                 # add location, nonce, and type to the returned directory object
@@ -72,7 +72,7 @@ function Update-PAServer {
 
                 # save to disk
                 Write-Debug "Saving PAServer to disk"
-                $dirObj | ConvertTo-Json | Out-File $dirFile -Force
+                $dirObj | ConvertTo-Json | Out-File $dirFile -Force -EA Stop
 
                 # overwrite the in-memory copy if we're actually updating the current one
                 if ($UpdatingCurrent) { $script:Dir = $dirObj }
@@ -97,7 +97,7 @@ function Update-PAServer {
 
             # save to disk
             Write-Debug "Saving PAServer to disk"
-            $dirObj | ConvertTo-Json | Out-File $dirFile -Force
+            $dirObj | ConvertTo-Json | Out-File $dirFile -Force -EA Stop
 
         }
 

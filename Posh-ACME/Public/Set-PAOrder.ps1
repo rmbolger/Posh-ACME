@@ -51,7 +51,7 @@ function Set-PAOrder {
             Write-Debug "Switching to order $MainDomain"
 
             # save it as current
-            $MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force
+            $MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force -EA Stop
 
             # reload the cache from disk
             Import-PAConfig 'Order'

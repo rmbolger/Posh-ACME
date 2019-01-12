@@ -56,7 +56,7 @@ function Merge-PluginArgs {
     }
 
     # export the merged object
-    $merged | Export-Clixml $pFile -Force
+    $merged | Export-Clixml $pFile -Force -EA Stop
 
     # return the merged object
     return $merged

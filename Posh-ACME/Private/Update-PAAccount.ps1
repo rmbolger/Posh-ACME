@@ -63,7 +63,7 @@ function Update-PAAccount {
 
         # save it to disk
         $acctFolder = Join-Path $script:DirFolder $acct.id
-        $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force
+        $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force -EA Stop
     }
 
 }

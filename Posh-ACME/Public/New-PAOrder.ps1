@@ -136,11 +136,11 @@ function New-PAOrder {
     }
 
     # save it to memory and disk
-    $order.MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force
+    $order.MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force -EA Stop
     $script:Order = $order
     $script:OrderFolder = Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')
     if (!(Test-Path $script:OrderFolder -PathType Container)) {
-        New-Item -ItemType Directory -Path $script:OrderFolder -Force | Out-Null
+        New-Item -ItemType Directory -Path $script:OrderFolder -Force -EA Stop | Out-Null
     }
     $order | ConvertTo-Json | Out-File (Join-Path $script:OrderFolder 'order.json') -Force
 

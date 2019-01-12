@@ -43,7 +43,7 @@ function Set-PAServer {
         Update-PAServer $DirectoryUrl -SkipCertificateCheck:$SkipCertificateCheck.IsPresent
 
         # save to disk
-        $DirectoryUrl | Out-File (Join-Path $script:ConfigRoot 'current-server.txt') -Force
+        $DirectoryUrl | Out-File (Join-Path $script:ConfigRoot 'current-server.txt') -Force -EA Stop
 
         # reload config from disk
         Import-PAConfig 'Server'
