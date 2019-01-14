@@ -1,5 +1,6 @@
 function Get-PACertificate {
     [CmdletBinding()]
+    [OutputType('PoshACME.PACertificate')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText','')]
     param(
         [Parameter(ParameterSetName='Specific',Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
