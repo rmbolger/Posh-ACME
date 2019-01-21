@@ -9,44 +9,38 @@
         [string]$NameComUsername,
         [Parameter(Mandatory,Position=3)]
         [string]$NameComToken,
+        [switch]$NameComUseTestEnv,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $namecomApiRootUrl = "https://api.name.com/v4"
+    $apiRoot = 'https://api.name.com/v4'
+    if ($NameComUseTestEnv) { $apiRoot = 'https://api.dev.name.com/v4' }
 
-    Write-Verbose "name.com: Adding DNS TXT Record for $RecordName"
+    $restParams = Get-RestHeaders $NameComUsername $NameComToken
 
-    Write-Debug "RecordName: $RecordName"
-    Write-Debug "TxtValue: $TxtValue"
+    # check for an existing record
+    $domainName,$rec = Get-NameComTxtRecord $RecordName $TxtValue $restParams $apiRoot
 
-    $restParams = Get-RestHeaders -NameComUsername $NameComUsername -NameComUserToken $NameComToken
-
-    # Lets make sure this domain exists and get the details (all of the records)
-    $records = Find-NameComZone -RecordName $RecordName -RecordType $null -RestParams $restParams
-
-    # Did we find a valid domain?
-    if ($null -ne $records -and $records.Length -gt 0)
-    {
-        # Lets use the domain name that name.com indicates is the "root"
-        $domainName = $records[0].domainName
-        $RecordName = $RecordName.Replace(".$domainName","")
-
-        Write-Verbose "Valid Domain Found.  Adding a TXT record for $RecordName with value $TxtValue"
-
-        # add new record
-        try {
-            $ApiUrl = "$namecomApiRootUrl/domains/$domainName/records"
-            Write-Debug "Domain Create API URL: $ApiUrl"
-
-            $bodyJson = @{host="$RecordName";type="TXT";answer="$TxtValue";ttl=300} | ConvertTo-Json -Compress
-            Write-Debug "Domain Create API JSON: $bodyJson"
-
-            Invoke-RestMethod $ApiUrl -Method Post -Body $bodyJson @restParams @script:UseBasic | Out-Null
-        } catch { throw }
+    if ($rec) {
+        Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
+        return
     } else {
-        throw "Unknown Domain"
+        # build the body
+        $hostShort = $RecordName.Replace(".$domainName",'')
+        $bodyJson = @{host=$hostShort; type='TXT'; answer=$TxtValue; ttl=300} | ConvertTo-Json -Compress
+        Write-Debug "Add JSON: $bodyJson"
+
+        # add the new record
+        try {
+            Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
+            $url = "$apiRoot/domains/$($domainName)/records"
+            Invoke-RestMethod $url -Method Post -Body $bodyJson @restParams @script:UseBasic -EA Stop | Out-Null
+        } catch { throw }
     }
+
+
+
 
     <#
     .SYNOPSIS
@@ -88,45 +82,33 @@ function Remove-DnsTxtNameComDns {
         [string]$NameComUsername,
         [Parameter(Mandatory,Position=3)]
         [string]$NameComToken,
+        [switch]$NameComUseTestEnv,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $namecomApiRootUrl = "https://api.name.com/v4"
+    $apiRoot = 'https://api.name.com/v4'
+    if ($NameComUseTestEnv) { $apiRoot = 'https://api.dev.name.com/v4' }
 
-    Write-Verbose "name.com: Removing DNS TXT Record for $RecordName"
+    $restParams = Get-RestHeaders $NameComUsername $NameComToken
 
-    Write-Debug "RecordName: $RecordName"
-    Write-Debug "TxtValue: $TxtValue"
+    # check for an existing record
+    $domainName,$rec = Get-NameComTxtRecord $RecordName $TxtValue $restParams $apiRoot
 
-    $restParams = Get-RestHeaders -NameComUsername $NameComUsername -NameComUserToken $NameComToken
-
-    # Lets make sure this domain exists and get the details (all of the records)
-    $records = Find-NameComZone -RecordName $RecordName -RecordType "TXT" -RestParams $restParams
-
-    # Search for the record we care about
-    $srvRecord = $records | Where-Object { $_.answer -eq $TxtValue }
-
-    if ($null -eq $srvRecord -or $srvRecord.Length -eq 0) {
-        Write-Verbose "Unknown Domain TXT Record"
-
+    if ($rec) {
+        # remove the record
+        try {
+            Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
+            $url = "$apiRoot/domains/$($domainName)/records/$($rec.id)"
+            Invoke-RestMethod $url -Method Delete @restParams @script:UseBasic -EA Stop | Out-Null
+        } catch { throw }
+    } else {
+        Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
         return
     }
 
-    $srvRecord | ForEach-Object {
-        # remove record
-        try {
-            $id = $_.id
-            $domainName = $_.domainName
 
-            Write-Verbose "Existing Record Found. Removing TXT record $id for $RecordName with value $TxtValue"
 
-            $ApiUrl = "$namecomApiRootUrl/domains/$domainName/records/$id"
-            Write-Debug "Domain Delete API URL: $ApiUrl"
-
-            Invoke-RestMethod $ApiUrl -Method Delete @restParams @script:UseBasic | Out-Null
-        } catch { throw }
-    }
 
     <#
     .SYNOPSIS
@@ -187,41 +169,75 @@ function Find-NameComZone {
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
-        [Parameter(Position=1)]
-        [string]$RecordType = $null,
+        [Parameter(Mandatory,Position=1)]
+        [hashtable]$RestParams,
         [Parameter(Mandatory,Position=2)]
-        [hashtable]$RestParams
+        [string]$ApiRoot
     )
 
-    $namecomApiRootUrl = "https://api.name.com/v4"
+    # This provider doesn't appear to host sub-zones. But their API is nice enough to return the apex
+    # domain automatically when using their GetDomain method even if you pass it a record within that
+    # domain.
+    # https://www.name.com/api-docs/Domains#GetDomain
 
-    # Since the provider could be hosting both apex and sub-zones, we need to find the closest/deepest
-    # sub-zone that would hold the record rather than just adding it to the apex. So for something
-    # like _acme-challenge.site1.sub1.sub2.example.com, we'd look for zone matches in the following
-    # order:
-    # - site1.sub1.sub2.example.com
-    # - sub1.sub2.example.com
-    # - sub2.example.com
-    # - example.com
-
-    # get the list of zones
+    # So we just have to call it once and assuming they have a domain for that record, it'll return
+    # the apex that we care about for later calls.
     try {
-        $url = "$namecomApiRootUrl/domains/$RecordName/records"
+        $url = "$ApiRoot/domains/$RecordName"
+        $domain = Invoke-RestMethod $url @RestParams @script:UseBasic -EA Stop
 
-        Write-Debug "Domain Get API URL: $url"
-
-        $entries = (Invoke-RestMethod $url @RestParams @script:UseBasic).records
-
-        Write-Debug "Domain Get API Results: $entries"
-
-        if ($RecordType -ne $null -and $RecordType.Length -gt 0) {
-            return $entries | Where-Object { $_.type -eq $RecordType }
+        if ($domain -and $domain.domainName) {
+            return $domain.domainName
         }
-
-        return $entries
-    } catch { throw }
+    } catch {
+        # if domain doesn't exist in their account, they throw a 404 which we'll catch
+        # here and just ignore.
+    }
 
     return $null
+}
+
+function Get-NameComTxtRecord {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [string]$RecordName,
+        [Parameter(Mandatory,Position=1)]
+        [string]$TxtValue,
+        [Parameter(Mandatory,Position=2)]
+        [hashtable]$RestParams,
+        [Parameter(Mandatory,Position=3)]
+        [string]$ApiRoot
+    )
+
+    # Find the zone apex based on the record name
+    $zoneName = Find-NameComZone $RecordName $RestParams $ApiRoot
+    if (-not $zoneName) {
+        throw "Domain not found for $RecordName"
+    }
+
+    # Unfortunately, there's no way to get a specific record without knowing it's ID. So we have to list (and
+    # potentially page through) all of them and filter the results on our side.
+    # https://www.name.com/api-docs/DNS#ListRecords
+
+    $recs = @()
+    $nextPage = ''
+    do {
+        $url = "$ApiRoot/domains/$zoneName/records$nextPage"
+        Write-Debug "Fetching records page"
+        $response = Invoke-RestMethod $url @RestParams @script:UseBasic -EA Stop
+        if ($response.records) {
+            $recs += $response.records
+        }
+
+        # check for paging
+        if ([String]::IsNullOrWhiteSpace($response.nextPage)) { break }
+        $nextPage = "?page=$($response.nextPage)"
+    } while ($true)
+
+    # Return the zone in case the record doesn't exist and the record that matches the specified $RecordName
+    $rec = ($recs | Where-Object { $_.fqdn -eq "$RecordName." -and $_.answer -eq $TxtValue -and $_.type -eq 'TXT' })
+    return $zoneName,$rec
 }
 
 function Get-RestHeaders {
@@ -232,9 +248,6 @@ function Get-RestHeaders {
         [Parameter(Mandatory,Position=1)]
         [string]$NameComUserToken
     )
-
-    #Write-Debug "UserName: $NameComUsername"
-    #Write-Debug "Token: $NameComUserToken"
 
     $restParams = @{
         Headers = @{
