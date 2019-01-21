@@ -61,6 +61,9 @@
     .PARAMETER NameComToken
         The account API token.
 
+    .PARAMETER NameComUseTestEnv
+        If specified, use the name.com testing environment.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -128,6 +131,9 @@ function Remove-DnsTxtNameComDns {
 
     .PARAMETER NameComToken
         The account API token.
+
+    .PARAMETER NameComUseTestEnv
+        If specified, use the name.com testing environment.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
