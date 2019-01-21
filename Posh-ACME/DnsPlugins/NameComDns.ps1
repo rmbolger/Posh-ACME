@@ -1,6 +1,5 @@
-﻿[string]$namecomApiRootUrl = "https://api.name.com/v4"
-
-function Add-DnsTxtNameComDns {
+﻿function Add-DnsTxtNameComDns {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -14,10 +13,12 @@ function Add-DnsTxtNameComDns {
         $ExtraParams
     )
 
-    Write-VerboseLogEntry "name.com: Adding DNS TXT Record for $RecordName"
+    $namecomApiRootUrl = "https://api.name.com/v4"
 
-    Write-DebugLogEntry "RecordName: " $RecordName
-    Write-DebugLogEntry "TxtValue: " $TxtValue
+    Write-Verbose "name.com: Adding DNS TXT Record for $RecordName"
+
+    Write-Debug "RecordName: $RecordName"
+    Write-Debug "TxtValue: $TxtValue"
 
     $restParams = Get-RestHeaders -NameComUsername $NameComUsername -NameComUserToken $NameComToken
 
@@ -25,26 +26,26 @@ function Add-DnsTxtNameComDns {
     $records = Find-NameComZone -RecordName $RecordName -RecordType $null -RestParams $restParams
 
     # Did we find a valid domain?
-    if ($records -ne $null -and $records.Length -gt 0)
+    if ($null -ne $records -and $records.Length -gt 0)
     {
         # Lets use the domain name that name.com indicates is the "root"
         $domainName = $records[0].domainName
-        $RecordName = $RecordName.Replace(".$domainName","");
+        $RecordName = $RecordName.Replace(".$domainName","")
 
-        Write-VerboseLogEntry "Valid Domain Found.  Adding a TXT record for $RecordName with value $TxtValue"
+        Write-Verbose "Valid Domain Found.  Adding a TXT record for $RecordName with value $TxtValue"
 
         # add new record
         try {
             $ApiUrl = "$namecomApiRootUrl/domains/$domainName/records"
-            Write-DebugLogEntry "Domain Create API URL: " $ApiUrl
+            Write-Debug "Domain Create API URL: $ApiUrl"
 
             $bodyJson = @{host="$RecordName";type="TXT";answer="$TxtValue";ttl=300} | ConvertTo-Json -Compress
-            Write-DebugLogEntry "Domain Create API JSON: " $bodyJson
+            Write-Debug "Domain Create API JSON: $bodyJson"
 
             Invoke-RestMethod $ApiUrl -Method Post -Body $bodyJson @restParams @script:UseBasic | Out-Null
         } catch { throw }
     } else {
-        Write-Host "Unknown Domain"
+        throw "Unknown Domain"
     }
 
     <#
@@ -61,11 +62,11 @@ function Add-DnsTxtNameComDns {
         The value of the TXT record.
 
     .PARAMETER NameComUsername
-        The account API username. 
+        The account API username.
 
     .PARAMETER NameComToken
-        The account API token. 
-		
+        The account API token.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -77,6 +78,7 @@ function Add-DnsTxtNameComDns {
 }
 
 function Remove-DnsTxtNameComDns {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -90,35 +92,37 @@ function Remove-DnsTxtNameComDns {
         $ExtraParams
     )
 
-    Write-VerboseLogEntry "name.com: Removing DNS TXT Record for $RecordName"
+    $namecomApiRootUrl = "https://api.name.com/v4"
 
-    Write-DebugLogEntry "RecordName: " $RecordName
-    Write-DebugLogEntry "TxtValue: " $TxtValue
-    
+    Write-Verbose "name.com: Removing DNS TXT Record for $RecordName"
+
+    Write-Debug "RecordName: $RecordName"
+    Write-Debug "TxtValue: $TxtValue"
+
     $restParams = Get-RestHeaders -NameComUsername $NameComUsername -NameComUserToken $NameComToken
 
     # Lets make sure this domain exists and get the details (all of the records)
     $records = Find-NameComZone -RecordName $RecordName -RecordType "TXT" -RestParams $restParams
 
     # Search for the record we care about
-    $srvRecord = $records | ? { $_.answer -eq $TxtValue }
+    $srvRecord = $records | Where-Object { $_.answer -eq $TxtValue }
 
-    if ($srvRecord -eq $null -or $srvRecord.Length -eq 0) {
-        Write-VerboseLogEntry "Unknown Domain TXT Record"
+    if ($null -eq $srvRecord -or $srvRecord.Length -eq 0) {
+        Write-Verbose "Unknown Domain TXT Record"
 
-        return;
+        return
     }
 
-    $srvRecord | % {
+    $srvRecord | ForEach-Object {
         # remove record
         try {
             $id = $_.id
             $domainName = $_.domainName
 
-            Write-VerboseLogEntry "Existing Record Found. Removing TXT record $id for $RecordName with value $TxtValue"
+            Write-Verbose "Existing Record Found. Removing TXT record $id for $RecordName with value $TxtValue"
 
             $ApiUrl = "$namecomApiRootUrl/domains/$domainName/records/$id"
-            Write-DebugLogEntry "Domain Delete API URL: " $ApiUrl
+            Write-Debug "Domain Delete API URL: $ApiUrl"
 
             Invoke-RestMethod $ApiUrl -Method Delete @restParams @script:UseBasic | Out-Null
         } catch { throw }
@@ -138,10 +142,10 @@ function Remove-DnsTxtNameComDns {
         The value of the TXT record.
 
     .PARAMETER NameComUsername
-        The account API username. 
+        The account API username.
 
     .PARAMETER NameComToken
-        The account API token. 
+        The account API token.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -189,6 +193,8 @@ function Find-NameComZone {
         [hashtable]$RestParams
     )
 
+    $namecomApiRootUrl = "https://api.name.com/v4"
+
     # Since the provider could be hosting both apex and sub-zones, we need to find the closest/deepest
     # sub-zone that would hold the record rather than just adding it to the apex. So for something
     # like _acme-challenge.site1.sub1.sub2.example.com, we'd look for zone matches in the following
@@ -200,27 +206,26 @@ function Find-NameComZone {
 
     # get the list of zones
     try {
-        #$url = Get-RootDomain -Domain $url
-
         $url = "$namecomApiRootUrl/domains/$RecordName/records"
-        
-        Write-DebugLogEntry "Domain Get API URL: " $url
+
+        Write-Debug "Domain Get API URL: $url"
 
         $entries = (Invoke-RestMethod $url @RestParams @script:UseBasic).records
 
-        Write-DebugLogEntry "Domain Get API Results: " $entries
+        Write-Debug "Domain Get API Results: $entries"
 
         if ($RecordType -ne $null -and $RecordType.Length -gt 0) {
-            return $entries | ? { $_.type -eq $RecordType }
-        }  
-        
-        return $entries 
+            return $entries | Where-Object { $_.type -eq $RecordType }
+        }
+
+        return $entries
     } catch { throw }
 
     return $null
 }
 
 function Get-RestHeaders {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$NameComUsername,
@@ -228,8 +233,8 @@ function Get-RestHeaders {
         [string]$NameComUserToken
     )
 
-    #Write-DebugLogEntry "UserName: " $NameComUsername
-    #Write-DebugLogEntry "Token: " $NameComUserToken
+    #Write-Debug "UserName: $NameComUsername"
+    #Write-Debug "Token: $NameComUserToken"
 
     $restParams = @{
         Headers = @{
@@ -241,35 +246,3 @@ function Get-RestHeaders {
 
     return $restParams
 }
-
-function Get-RootDomain {
-    param(
-        [Parameter(Mandatory,Position=0)]
-        [string]$domain
-    )
-
-    $result = $domain.Substring($domain.IndexOf(".") + 1)
-    # A hack to check to see if we got a TLD instead of the root domain
-    if (!$result.Contains(".")) { $result = $domain }
-
-    return $result
-}
-
-function Write-DebugLogEntry {
-    param(
-        [Parameter(ValueFromRemainingArguments)]
-        $ExtraParams
-    )
-
-    #Write-Host $ExtraParams
-}
-
-function Write-VerboseLogEntry {
-    param(
-        [Parameter(ValueFromRemainingArguments)]
-        $ExtraParams
-    )
-
-    #Write-Host $ExtraParams -ForegroundColor Yellow
-}
-
