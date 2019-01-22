@@ -92,5 +92,20 @@ Register-ArgumentCompleter -CommandName $IDCommands -ParameterName 'ID' -ScriptB
     }
 }
 
+$KeyLengthCompleter = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+
+    $commonLengths = '2048','4096','ec-256','ec-384'
+    $commonLengths | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
+        [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+    }
+}
+
+$KeyLengthCommands = 'Get-PAAccount','New-PAAccount','New-PAOrder','Set-PAAccount'
+Register-ArgumentCompleter -CommandName $KeyLengthCommands -ParameterName 'KeyLength' -ScriptBlock $KeyLengthCompleter
+Register-ArgumentCompleter -CommandName 'New-PACertificate' -ParameterName 'AccountKeyLength' -ScriptBlock $KeyLengthCompleter
+Register-ArgumentCompleter -CommandName 'New-PACertificate' -ParameterName 'CertKeyLength' -ScriptBlock $KeyLengthCompleter
+
+
 
 Import-PAConfig
