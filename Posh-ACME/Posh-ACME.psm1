@@ -62,50 +62,6 @@ if ('UseBasicParsing' -in (Get-Command Invoke-WebRequest).Parameters.Keys) {
     $script:UseBasic.UseBasicParsing = $true
 }
 
-# setup the argument completers
-# https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/register-argumentcompleter?view=powershell-5.1
-$PluginNameCompleter = {
-    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
-
-    $names = (Get-ChildItem -Path $PSScriptRoot\DnsPlugins\*.ps1 -Exclude '_Example.ps1').BaseName
-    $names | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
-        [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
-    }
-}
-
-$DnsPluginCommands = 'New-PACertificate','Submit-ChallengeValidation'
-Register-ArgumentCompleter -CommandName $DnsPluginCommands -ParameterName 'DnsPlugin' -ScriptBlock $PluginNameCompleter
-
-$PluginCommands = 'Publish-DnsChallenge','Unpublish-DnsChallenge','Save-DnsChallenge','Get-DnsPluginHelp'
-Register-ArgumentCompleter -CommandName $PluginCommands -ParameterName 'Plugin' -ScriptBlock $PluginNameCompleter
-
-$IDCommands = 'Get-PAAccount','Set-PAAccount','Remove-PAAccount'
-Register-ArgumentCompleter -CommandName $IDCommands -ParameterName 'ID' -ScriptBlock {
-    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
-
-    # nothing to auto complete if we don't have a server selected
-    if ([String]::IsNullOrWhiteSpace($script:DirFolder)) { return }
-
-    $ids = (Get-ChildItem -Path $script:DirFolder | Where-Object { $_ -is [IO.DirectoryInfo] }).BaseName
-    $ids | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
-        [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
-    }
-}
-
-$KeyLengthCompleter = {
-    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
-
-    $commonLengths = '2048','4096','ec-256','ec-384'
-    $commonLengths | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
-        [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
-    }
-}
-
-$KeyLengthCommands = 'Get-PAAccount','New-PAAccount','New-PAOrder','Set-PAAccount'
-Register-ArgumentCompleter -CommandName $KeyLengthCommands -ParameterName 'KeyLength' -ScriptBlock $KeyLengthCompleter
-Register-ArgumentCompleter -CommandName 'New-PACertificate' -ParameterName 'AccountKeyLength' -ScriptBlock $KeyLengthCompleter
-Register-ArgumentCompleter -CommandName 'New-PACertificate' -ParameterName 'CertKeyLength' -ScriptBlock $KeyLengthCompleter
-
-
+Register-ArgCompleters
 
 Import-PAConfig
