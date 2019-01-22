@@ -1,4 +1,4 @@
-# How To Use the NameComDns DNS Plugin
+# How To Use the NameCom DNS Plugin
 
 This plugin works against the [name.com](https://www.name.com/) domain registrar and DNS provider. It is assumed that you have already setup an account and purchased domain you will be working against. You must also be using name.com's own DNS hosting.
 
@@ -12,12 +12,12 @@ With the username and token values from earlier, set the `NameComUsername` and `
 
 ```powershell
 $pargs = @{NameComUserName='username'; NameComToken='XXXXXXXXXX'}
-New-PACertificate test.example.com -DnsPlugin NameComDns -PluginArgs $pargs
+New-PACertificate test.example.com -DnsPlugin NameCom -PluginArgs $pargs
 ```
 
 If you are using name.com's API testing environment, you'll also need to include the `NameComUseTestEnv` switch in your plugin arguments like this:
 
 ```powershell
 $pargs = @{NameComUserName='username'; NameComToken='XXXXXXXXXX'; NameComUseTestEnv=$true}
-New-PACertificate test.example.com -DnsPlugin NameComDns -PluginArgs $pargs
+New-PACertificate test.example.com -DnsPlugin NameCom -PluginArgs $pargs
 ```

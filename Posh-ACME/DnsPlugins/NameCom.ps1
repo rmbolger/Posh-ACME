@@ -1,4 +1,4 @@
-﻿function Add-DnsTxtNameComDns {
+﻿function Add-DnsTxtNameCom {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
@@ -44,10 +44,10 @@
 
     <#
     .SYNOPSIS
-        Add a DNS TXT record to NameComDns.
+        Add a DNS TXT record to Name.com DNS.
 
     .DESCRIPTION
-        Add a DNS TXT record to NameComDns.
+        Add a DNS TXT record to Name.com DNS.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -68,13 +68,13 @@
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxtNameComDns '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'username' 'xxxxxxxxxxxx'
+        Add-DnsTxtNameCom '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'username' 'xxxxxxxxxxxx'
 
         Adds a TXT record for the specified site with the specified value.
     #>
 }
 
-function Remove-DnsTxtNameComDns {
+function Remove-DnsTxtNameCom {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
@@ -115,10 +115,10 @@ function Remove-DnsTxtNameComDns {
 
     <#
     .SYNOPSIS
-        Remove a DNS TXT record from NameComDns.
+        Remove a DNS TXT record from Name.com DNS.
 
     .DESCRIPTION
-        Remove a DNS TXT record from NameComDns.
+        Remove a DNS TXT record from Name.com DNS.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -139,13 +139,13 @@ function Remove-DnsTxtNameComDns {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxtNameComDns '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'username' 'xxxxxxxxxxxx'
+        Remove-DnsTxtNameCom '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'username' 'xxxxxxxxxxxx'
 
         Remove a TXT record for the specified site with the specified value.
     #>
 }
 
-function Save-DnsTxtNameComDns {
+function Save-DnsTxtNameCom {
     [CmdletBinding()]
     param(
         [Parameter(ValueFromRemainingArguments)]
