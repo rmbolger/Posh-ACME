@@ -1,3 +1,14 @@
+## 3.2.0 (2019-01-22)
+
+* Added new DNS plugin for name.com registrar (Thanks @ravensorb)
+* Added additional argument completers for Account IDs, MainDomain, and KeyLength parameters
+* The Posh-ACME config location can now be set by creating a `POSHACME_HOME` environment variable. The directory must exist and be accessible prior to importing the module. If you change the value of the environment variable, you need to re-import the module with `-Force` or open a new PowerShell session for the change to take effect.
+* Added better error handling for cases where the config location is not writable.
+* Get-PACertificate now returns null instead of throwing an error if the cert or associated order doesn't exist
+* Fixed the ability to revoke a certificate after the associated order has expired
+* Fix for #117 involving broken renewal processing on PowerShell Core in non-US locales
+* Fixes for additional DateTime handling on PowerShell Core
+
 ## 3.1.1 (2018-12-22)
 
 * Fixed typo in Route53 plugin that prevented finding the AwsPowershell module
