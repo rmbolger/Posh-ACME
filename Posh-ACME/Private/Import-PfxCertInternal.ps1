@@ -44,8 +44,8 @@ function Import-PfxCertInternal {
             $store.Close()
 
         } finally {
-            if ($store -ne $null) { $store.Dispose() }
-            if ($pfx -ne $null) { $pfx.Dispose() }
+            if ($null -ne $store) { $store.Dispose() }
+            if ($null -ne $pfx) { $pfx.Dispose() }
         }
 
     }
