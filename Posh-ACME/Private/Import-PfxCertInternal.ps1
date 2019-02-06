@@ -9,34 +9,33 @@ function Import-PfxCertInternal {
     )
 
     # The PowerShell native Import-PfxCertificate function only exists on
-    # Windows 8/2012 and beyond for PowerShell Desktop edition. So we need a
-    # shim that has an alternative for Core edition and earlier Desktop
-    # edition OSes.
+    # Windows 8/2012 and beyond for PowerShell Desktop edition. It also seems
+    # to have some weird limitations in how it stores the private key rendering
+    # the resulting cert unusable in some circumstances.
+    # https://github.com/MicrosoftDocs/windows-powershell-docs/issues/295
+
+    # So we're going to use the raw .NET cert libraries to do what we need to do.
+    # and should work "everywhere" we care about.
 
     if (!$PfxPass) {
         # create an empty secure string
         $PfxPass = New-Object Security.SecureString
     }
 
-    if (Get-Command 'Import-PfxCertificate' -ErrorAction SilentlyContinue) {
-        # Win 8/2012 and above (Windows PowerShell only)
-        Write-Debug "Importing PFX via native Import-PfxCertificate"
-
-        Import-PfxCertificate $PfxFile Cert:\$StoreName\$StoreLoc -Exportable -Password $PfxPass | Out-Null
-
-    } elseif ($PSVersionTable.PSEdition -eq 'Core' -and !$IsWindows) {
+    if ($PSVersionTable.PSEdition -eq 'Core' -and !$IsWindows) {
         # This is a non-Windows version of PowerShell Core
         throw "Certificate import is not currently supported on non-Windows OSes"
 
     } else {
-        # Win 7/2008R2 and below and PowerShell Core on Windows
-        Write-Debug "Importing PFX via downlevel pfx import code"
+        Write-Debug "Importing PFX"
 
         try {
 
+            $PfxFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($PfxFile)
+
             $pfxBytes = [IO.File]::ReadAllBytes($PfxFile)
 
-            $pfx = New-Object Security.Cryptography.X509Certificates.X509Certificate2($pfxBytes,$PfxPass,'Exportable,PersistKeySet')
+            $pfx = New-Object Security.Cryptography.X509Certificates.X509Certificate2($pfxBytes,$PfxPass,'Exportable,PersistKeySet,MachineKeySet')
 
             $store = New-Object Security.Cryptography.X509Certificates.X509Store($StoreLoc,$StoreName)
             $store.Open("MaxAllowed")
