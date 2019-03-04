@@ -440,10 +440,23 @@ function Get-AZZoneId {
             # check for duplicate zones
             $zoneMatches = @($zones | Where-Object { $_.name -eq $zoneTest })
             if ($zoneMatches.Count -gt 1) {
-                throw "Multiple public copies of $zoneTest zone found. Unable to determine which is correct."
+                Write-Verbose "$($zoneMatches.Count) public copies of $zoneTest zone found: `n$(($zoneMatches.id -join "`n"))"
+
+                # check for a 'poshacme' tag
+                $taggedMatches = @($zoneMatches | Where-Object { $_.tags.poshacme })
+                if ($taggedMatches.Count -eq 1) {
+                    Write-Verbose "Using 'poshacme' tagged copy of the zone."
+                    $zoneID = $taggedMatches[0].id
+                } elseif ($taggedMatches.Count -eq 0) {
+                    throw "$($zoneMatches.Count) public copies of $zoneTest zone found. Please use 'poshacme' tag on the live copy. See plugin usage guide for details."
+                } else {
+                    throw "$($taggedMatches.Count) public copies of $zoneTest are tagged with 'poshacme'. Please remove all but one to indicate which copy is live. See plugin usage guide for details."
+                }
+            } else {
+                # no dupes, first match is the winner
+                $zoneID = $zoneMatches[0].id
             }
 
-            $zoneID = $zoneMatches[0].id
             $script:AZRecordZones.$RecordName = $zoneID
             return $zoneID
         }
