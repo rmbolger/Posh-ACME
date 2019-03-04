@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '3.2.0'
+ModuleVersion = '3.2.1'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -104,16 +104,11 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 3.2.0 (2019-01-22)
+## 3.2.1 (2019-03-04)
 
-* Added new DNS plugin for name.com registrar (Thanks @ravensorb)
-* Added additional argument completers for Account IDs, MainDomain, and KeyLength parameters
-* The Posh-ACME config location can now be set by creating a `POSHACME_HOME` environment variable. The directory must exist and be accessible prior to importing the module. If you change the value of the environment variable, you need to re-import the module with `-Force` or open a new PowerShell session for the change to take effect.
-* Added better error handling for cases where the config location is not writable.
-* Get-PACertificate now returns null instead of throwing an error if the cert or associated order doesn't exist
-* Fixed the ability to revoke a certificate after the associated order has expired
-* Fix for #117 involving broken renewal processing on PowerShell Core in non-US locales
-* Fixes for additional DateTime handling on PowerShell Core
+* Fix #122 to make sure private keys are imported properly when using `-Install`
+* Improve error handling for duplicate public zones in Azure. (#125)
+* Add tag based workaround for duplicate public zones in Azure. (#125)
 '@
 
     } # End of PSData hashtable

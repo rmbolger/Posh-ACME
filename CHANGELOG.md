@@ -1,3 +1,9 @@
+## 3.2.1 (2019-03-04)
+
+* Fix #122 to make sure private keys are imported properly when using `-Install`
+* Improve error handling for duplicate public zones in Azure. (#125)
+* Add tag based workaround for duplicate public zones in Azure. (#125)
+
 ## 3.2.0 (2019-01-22)
 
 * Added new DNS plugin for name.com registrar (Thanks @ravensorb)
