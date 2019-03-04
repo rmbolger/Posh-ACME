@@ -193,6 +193,6 @@ In rare cases, a subscription may have two or more public copies of the same zon
 
 > 2 public copies of example.com zone found. Please use 'poshacme' tag on the live copy.
 
-To workaround this problem, there are two main options. The easiest is to add an [Azure Tag](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-using-tags) called `poshacme` on the live copy of the zone. The tag value doesn't matter as long as the name is `poshacme`. The plugin will recognize this tag and ignore the other copies of the zone.
+To workaround this problem, there are two main options. The easiest is to add an [Azure Tag](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-using-tags) called `poshacme` on the live copy of the zone. The tag value doesn't matter as long as the name is `poshacme`. The plugin will recognize this tag and ignore the other copies of the zone. (Note: This requires version 3.2.1 of the module or later)
 
 The other solution is to remove permissions from the Azure account being used with Posh-ACME so it can only see the resource group that contains the live copy of the zone. But this may not be feasible depending on what else is in the resource group and what else the Azure account is being used for.
