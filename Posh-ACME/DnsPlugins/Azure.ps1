@@ -436,7 +436,14 @@ function Get-AZZoneId {
         Write-Verbose "Checking $zoneTest"
 
         if ($zoneTest -in $zones.name) {
-            $zoneID = ($zones | Where-Object { $_.name -eq $zoneTest }).id
+
+            # check for duplicate zones
+            $zoneMatches = @($zones | Where-Object { $_.name -eq $zoneTest })
+            if ($zoneMatches.Count -gt 1) {
+                throw "Multiple public copies of $zoneTest zone found. Unable to determine which is correct."
+            }
+
+            $zoneID = $zoneMatches[0].id
             $script:AZRecordZones.$RecordName = $zoneID
             return $zoneID
         }
