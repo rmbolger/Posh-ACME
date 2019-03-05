@@ -13,41 +13,59 @@ function Add-DnsTxtDynu {
         $ExtraParams
     )
 
+    $apiBase = 'https://api.dynu.com/v2'
     $RecordName = $RecordName.ToLower()
 
-    $token = Get-DynuAccessToken -DynuClientID $DynuClientID -DynuSecret $DynuSecret
-    $zone = Find-DynuZone $RecordName -DynuAccessToken $token
-    if (-not $zone) {
-        throw "Could not find Dynu zone that matches ${RecordName}"
+    # authenticate
+    $token = Get-DynuAccessToken $DynuClientID $DynuSecret
+    $headers = @{
+        Accept = 'application/json'
+        Authorization = "Bearer $token"
     }
 
-    # Strip the domain if it is on the suffix
-    if ($RecordName.EndsWith(".$($zone.name)")) {
-        $RecordName = $RecordName.Substring(0, $RecordName.LastIndexOf(".$($zone.name)"))
-    }
-
-    $existing = Find-DynuExistingRecord $zone.name $RecordName $TxtValue -DynuAccessToken $token
-    if ($existing) {
-        Write-Debug "Record already exists, doing nothing: ${existing}"
-        return
-    }
-
-    $body = ConvertTo-Json @{
-        domain_name = $zone.name
-        node_name = $RecordName
-        record_type = "TXT"
-        text_data = $TxtValue
-        state = "true"
-    }
+    # The v2 API has a super convenient method for querying a record entirely based on hostname
+    # so we don't have to deal with the typical find zone id rigamarole.
     try {
-        $response = Invoke-RestMethod -Method "Post" -Uri "https://api.dynu.com/v1/dns/record/add" `
-            -Headers @{Authorization = "Bearer ${token}"} -ContentType "application/json" `
-            -Body $body @script:UseBasic
-        if (-not $response.id) {
-            throw "Record creation failed: ${response}"
+        $response = Invoke-RestMethod "$apiBase/dns/record/$($RecordName)?recordType=TXT" `
+            -Headers $headers @script:UseBasic
+    } catch { throw }
+
+    if ($response.dnsRecords -and $TxtValue -in $response.dnsRecords.textData) {
+        # nothing to do
+        Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
+    } else {
+        # if there's at least one record in the response, we can get the zone ID from it, otherwise
+        # we need to query for the zone ID in before we can add the new record
+        if ($response.dnsRecords.Count -gt 0) {
+            $zoneID = $response.dnsRecords[0].domainId
+            $recNode = $response.dnsRecords[0].nodeName
+        } else {
+            # query the zone info
+            try {
+                $zoneResp = Invoke-RestMethod "$apiBase/dns/getroot/$RecordName" `
+                    -Headers $headers @script:UseBasic
+            } catch { throw }
+
+            if ($zoneResp -and $zoneResp.id) {
+                $zoneID = $zoneResp.id
+                $recNode = $zoneResp.node
+            } else {
+                throw "No zone info returned for $RecordName from Dynu"
+            }
         }
-    } catch {
-        throw
+
+        # now that we have the zone ID, we can add the new record
+        $bodyJson = @{
+            nodeName = $recNode
+            recordType = 'TXT'
+            textData = $TxtValue
+            state = $true
+        } | ConvertTo-Json -Compress
+        try {
+            Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
+            Invoke-RestMethod "$apiBase/dns/$zoneID/record" -Method Post -Body $bodyJson `
+                -Headers $headers -ContentType 'application/json' @script:UseBasic | Out-Null
+        } catch { throw }
     }
 
     <#
@@ -93,34 +111,35 @@ function Remove-DnsTxtDynu {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    $apiBase = 'https://api.dynu.com/v2'
     $RecordName = $RecordName.ToLower()
 
-    $token = Get-DynuAccessToken -DynuClientID $DynuClientID -DynuSecret $DynuSecret
-    $zone = Find-DynuZone $RecordName -DynuAccessToken $token
-    if (-not $zone) {
-        throw "Could not find Dynu zone that matches ${RecordName}"
+    # authenticate
+    $token = Get-DynuAccessToken $DynuClientID $DynuSecret
+    $headers = @{
+        Accept = 'application/json'
+        Authorization = "Bearer $token"
     }
 
-    # Strip the domain if it is on the suffix
-    if ($RecordName.EndsWith(".$($zone.name)")) {
-        $RecordName = $RecordName.Substring(0, $RecordName.LastIndexOf(".$($zone.name)"))
-    }
-
-    $record = Find-DynuExistingRecord $zone.name $RecordName $TxtValue -DynuAccessToken $token
-    if (-not $record) {
-        Write-Debug "Record ${RecordName}/${TxtValue} doesn't exist, doing nothing"
-        return
-    }
-
-    Write-Debug "Removing ${record}"
+    # The v2 API has a super convenient method for querying a record entirely based on hostname
+    # so we don't have to deal with the typical find zone id rigamarole.
     try {
-        $response = Invoke-RestMethod -Method "Get" -Uri "https://api.dynu.com/v1/dns/record/delete/$($record.id)" `
-            -Headers @{Authorization = "Bearer ${token}"} @script:UseBasic
-        if ($response -ne $true) {
-            throw "Record deletion failed: ${response}"
-        }
-    } catch {
-        throw
+        $response = Invoke-RestMethod "$apiBase/dns/record/$($RecordName)?recordType=TXT" `
+            -Headers $headers @script:UseBasic
+    } catch { throw }
+
+    if ($response.dnsRecords -and $TxtValue -in $response.dnsRecords.textData) {
+        # grab the record and delete it
+        $rec = $response.dnsRecords | Where-Object { $_.textData -eq $TxtValue }
+        try {
+            Write-Verbose "Deleting $RecordName with value $TxtValue"
+            Invoke-RestMethod "$apiBase/dns/$($rec.domainId)/record/$($rec.id)" -Method Delete `
+                -Headers $headers @script:UseBasic | Out-Null
+        } catch { throw }
+    } else {
+        # nothing to do
+        Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     }
 
     <#
@@ -174,6 +193,9 @@ function Save-DnsTxtDynu {
 # Helper Functions
 ############################
 
+# API Docs
+# https://www.dynu.com/en-US/Resources/API
+
 function Get-DynuAccessToken {
     [CmdletBinding()]
     param(
@@ -192,77 +214,25 @@ function Get-DynuAccessToken {
     # an auth challenge response.
     $encodedCreds = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("${DynuClientID}:${DynuSecret}"))
     $headers = @{
-        Accept = "application/json"
-        "Content-Type" = "application/x-www-form-urlencoded"
-        "Authorization" = "Basic ${encodedCreds}"
+        Accept = 'application/json'
+        Authorization = "Basic $encodedCreds"
     }
 
     try {
-        $response = Invoke-RestMethod -Method 'Post' -Uri "https://api.dynu.com/v1/oauth2/token" `
-            -Body "grant_type=client_credentials" -Headers $headers @script:UseBasic
+        $response = Invoke-RestMethod -Uri "https://api.dynu.com/v2/oauth2/token" -Headers $headers @script:UseBasic
     } catch {
         throw
     }
 
-    if (-not $response.accessToken) {
-        throw "Could not get an access token for Dynu"
+    if (-not $response.access_token) {
+        Write-Debug ($response | ConvertTo-Json)
+        throw "Access token not found in OAuth2 response from Dynu"
     }
 
     $script:DynuAccessToken = @{
-        AccessToken = $response.accessToken
-        Expiry = (Get-DateTimeOffsetNow).AddSeconds($response.expiresIn - 300)
+        AccessToken = $response.access_token
+        Expiry = (Get-DateTimeOffsetNow).AddSeconds($response.expires_in - 300)
     }
 
     return $script:DynuAccessToken.AccessToken
-}
-
-function Find-DynuZone {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory, Position = 0)]
-        [string]$RecordName,
-        [Parameter(Mandatory, Position = 1)]
-        [string]$DynuAccessToken
-    )
-
-    try {
-        $zones = Invoke-RestMethod -Method "Get" -Uri "https://api.dynu.com/v1/dns/domains" `
-            -Headers @{Accept = "application/json"; Authorization = "Bearer ${DynuAccessToken}"} `
-            @script:UseBasic
-    } catch {
-        throw
-    }
-
-    $pieces = $RecordName.Split('.')
-    for ($i = 1; $i -lt ($pieces.Count - 1); $i++) {
-        $zone = $zones | Where-Object { $_.name -eq "$( $pieces[$i..($pieces.Count-1)] -join '.' )" }
-        if ($zone) {
-            return $zone
-        }
-    }
-
-    return $null
-}
-
-function Find-DynuExistingRecord {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory, Position = 0)]
-        [string]$ZoneName,
-        [Parameter(Mandatory, Position = 1)]
-        [string]$RecordName,
-        [Parameter(Mandatory, Position = 2)]
-        [string]$RecordValue,
-        [Parameter(Mandatory, Position = 3)]
-        [string]$DynuAccessToken
-    )
-
-    try {
-        $records = Invoke-RestMethod -Method "Get" -Uri "https://api.dynu.com/v1/dns/records/${ZoneName}" `
-            -Headers @{Authorization = "Bearer ${DynuAccessToken}"} @script:UseBasic
-    } catch {
-        throw
-    }
-
-    return $records | Where-Object { ($_.node_name -eq $RecordName -and $_.content -eq $RecordValue )} | Select-Object -First 1
 }
