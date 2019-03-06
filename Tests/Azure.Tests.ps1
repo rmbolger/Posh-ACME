@@ -1,5 +1,5 @@
 . $PSScriptRoot\..\Posh-ACME\DnsPlugins\Azure.ps1
-. $PSScriptRoot\..\Posh-ACME\Private\Get-DateTimeOffsetNow.ps1
+. $PSScriptRoot\..\Posh-ACME\Private\MockWrappers.ps1
 
 Describe "Connect-AZTenant" {
 

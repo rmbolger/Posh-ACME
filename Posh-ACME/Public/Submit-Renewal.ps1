@@ -13,15 +13,11 @@ function Submit-Renewal {
     )
 
     Begin {
-        # import existing plugin args if we're only dealing with the current account
+        # make sure we have an account if renewing all or a specific order
         if ($PSCmdlet.ParameterSetName -in 'Specific','AllOrders') {
-
-            # Make sure we have an account configured
-            if (!(Get-PAAccount)) {
+            if (-not (Get-PAAccount)) {
                 throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
             }
-
-            $pluginArgs = Merge-PluginArgs
         }
     }
 
@@ -77,7 +73,7 @@ function Submit-Renewal {
                     $certParams.CSRPath = $reqPath
                 }
                 $certParams.DnsPlugin = $order.DnsPlugin
-                $certParams.PluginArgs = $pluginArgs
+                $certParams.PluginArgs = Import-PluginArgs $order.DnsPlugin
                 $certParams.DnsAlias = $order.DnsAlias
                 $certParams.Force = $Force.IsPresent
                 $certParams.DnsSleep = $order.DnsSleep

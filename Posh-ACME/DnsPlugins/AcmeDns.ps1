@@ -19,7 +19,7 @@ function Add-DnsTxtAcmeDns {
     # to Publish-DnsChallenge. Since we know there might be updated values, we need
     # to explicitly re-import PluginArgs here to get the most up to date version and
     # basically ignore the passed in $ACMEReg object.
-    $pargs = Merge-PluginArgs
+    $pargs = Import-PluginArgs AcmeDns
 
     # If an existing ACMEReg wasn't passed in, create a new one to store new registrations
     if (!$pargs.ACMEReg) { $pargs.ACMEReg = @{} }
@@ -34,8 +34,8 @@ function Add-DnsTxtAcmeDns {
         if (!$script:ACMECNAMES) { $script:ACMECNAMES = @() }
         $script:ACMECNAMES += [pscustomobject]@{Record=$RecordName;CNAME=$reg.fulldomain}
 
-        # merge and save the updated PluginArgs
-        Merge-PluginArgs $pargs | Out-Null
+        # export the updated PluginArgs
+        Export-PluginArgs $pargs AcmeDns
     }
 
     # grab a reference to this record's registration values
