@@ -35,7 +35,7 @@ function Export-PluginArgs {
     }
 
     # build the path to the existing plugin data file and import it
-    $pDataFile = Join-Path (Join-Path $script:DirFolder $Account.id) 'plugindata.xml'
+    $pDataFile = Join-Path (Join-Path (Get-DirFolder) $Account.id) 'plugindata.xml'
     if (Test-Path -Path $pDataFile -PathType Leaf) {
         # import the existing file
         Write-Debug "Loading saved plugin data"
