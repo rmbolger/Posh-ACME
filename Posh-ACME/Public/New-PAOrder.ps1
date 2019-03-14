@@ -42,7 +42,7 @@ function New-PAOrder {
     $order = Get-PAOrder $Domain[0] -Refresh
 
     # separate the SANs
-    $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
+    $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] })
 
     # There's a chance we may be overwriting an existing order here. So check for
     # confirmation if certain conditions are true
@@ -52,7 +52,7 @@ function New-PAOrder {
         # regardless of the original order status
         # or if the order is pending but expired
         if ( ($order -and ($KeyLength -ne $order.KeyLength -or
-             ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') -or
+             (($SANs | Sort-Object) -join ',') -ne (($order.SANs | Sort-Object) -join ',') -or
              ($order.status -eq 'pending' -and (Get-DateTimeOffsetNow) -gt ([DateTimeOffset]::Parse($order.expires))) ))) {
             # do nothing
 
@@ -100,6 +100,30 @@ function New-PAOrder {
 
     # fix any dates that may have been parsed by PSCore's JSON serializer
     $order.expires = Repair-ISODate $order.expires
+
+    # Per https://tools.ietf.org/html/rfc8555#section-7.1.3
+    # In the returned order object, there is no guarantee that the list of identifiers
+    # match the sequence they were submitted in. The list of authorizations may not match
+    # either. And the identifiers and authorizations may not even match each other's
+    # sequence.
+    #
+    # Unfortunately, things like DNS plugins and challenge aliases currently depend on
+    # the assumption that the sequence of identifiers and the sequence of authorizations
+    # all match the original sequence of the submitted domains. So we need to make sure
+    # that it's true until we refactor things so those assumptions aren't necessary anymore.
+
+    # set the order's identifiers to the original payload's identifiers since that was
+    # correct already
+    $order.identifiers = $payload.identifiers
+
+    # unfortunately, there's no way to know which authorization URL is for which identifier
+    # just by parsing it. So we need to query the details for each one in order to put them
+    # in the right order
+    $auths = Get-PAAuthorizations $order.authorizations
+    for ($i=0; $i -lt $order.identifiers.Count; $i++) {
+        $auth = $auths | Where-Object { $_.fqdn -eq $order.identifiers[$i].value }
+        $order.authorizations[$i] = $auth.location
+    }
 
     # add additional members we'll need for later
     $order | Add-Member -MemberType NoteProperty -Name 'MainDomain' -Value $Domain[0]
