@@ -66,13 +66,11 @@ function Submit-ChallengeValidation {
         return
     }
 
-    # The only order status left is 'pending'. This is supposed to mean
-    # that at least one authorization hasn't been validated yet according
-    # to https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-7.1.6
-    # However because the 'ready' status was added to the spec recently,
-    # not all server implementations are using it yet. So we're going to
-    # check all of the authorization statuses, but there might still end up
-    # being nothing to do.
+    # The only order status left is 'pending'. This means that at least one
+    # authorization hasn't been validated yet according to
+    # https://tools.ietf.org/html/rfc8555#section-7.1.6
+    # So we're going to check all of the authorization statuses and publish
+    # records for any that are still pending.
 
     $allAuths = @($Order | Get-PAAuthorizations)
     $toValidate = @()
@@ -80,22 +78,22 @@ function Submit-ChallengeValidation {
     # fill out the DnsPlugin attribute so there's a value for each authorization in the order
     if (!$DnsPlugin) {
         Write-Warning "DnsPlugin not specified. Defaulting to Manual."
-        $DnsPlugin = @('Manual') * $Domain.Count
-    } elseif ($DnsPlugin.Count -lt $Domain.Count) {
+        $DnsPlugin = @('Manual') * $allAuths.Count
+    } elseif ($DnsPlugin.Count -lt $allAuths.Count) {
         $lastPlugin = $DnsPlugin[-1]
-        Write-Warning "Fewer DnsPlugin values than Domain values supplied. Using $lastPlugin for the rest."
-        $DnsPlugin += @($lastPlugin) * ($Domain.Count-$DnsPlugin.Count)
+        Write-Warning "Fewer DnsPlugin values than names in the order. Using $lastPlugin for the rest."
+        $DnsPlugin += @($lastPlugin) * ($allAuths.Count-$DnsPlugin.Count)
     }
     Write-Debug "DnsPlugin: $($DnsPlugin -join ',')"
 
     # fill out the DnsAlias attribute so there's a value for each authorization in the order
     if (!$DnsAlias) {
         # no alias means they should all just be empty
-        $DnsAlias = @('') * $Domain.Count
-    } elseif ($DnsAlias.Count -lt $Domain.Count) {
+        $DnsAlias = @('') * $allAuths.Count
+    } elseif ($DnsAlias.Count -lt $allAuths.Count) {
         $lastAlias = $DnsAlias[-1]
-        Write-Warning "Fewer DnsAlias values that Domain values supplied. Using $lastAlias for the rest."
-        $DnsAlias += @($lastAlias) * ($Domain.Count-$DnsAlias.Count)
+        Write-Warning "Fewer DnsAlias values than names in the order. Using $lastAlias for the rest."
+        $DnsAlias += @($lastAlias) * ($allAuths.Count-$DnsAlias.Count)
     }
     Write-Debug "DnsAlias: $($DnsAlias -join ',')"
 
