@@ -14,6 +14,8 @@ function Add-DnsTxtRoute53 {
         [string]$R53SecretKeyInsecure,
         [Parameter(ParameterSetName='Profile',Mandatory)]
         [string]$R53ProfileName,
+        [Parameter(ParameterSetName='IAMRole',Mandatory)]
+        [switch]$R53UseIAMRole,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -110,6 +112,9 @@ function Add-DnsTxtRoute53 {
     .PARAMETER R53ProfileName
         The profile name of a previously stored credential using Set-AWSCredential from the AwsPowershell module. This only works if the AwsPowershell module is installed.
 
+    .PARAMETER R53UseIAMRole
+        If specified, the module will attempt to authenticate using the AWS metadata service via an associated IAM Role. This will only work if the system is running within AWS and has been assigned an IAM Role with the proper permissions.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -128,6 +133,11 @@ function Add-DnsTxtRoute53 {
         Add-DnsTxtRoute53 '_acme-challenge.site1.example.com' 'asdfqwer12345678' -R53AccessKey 'xxxxxxxx' -R53SecretKeyInsecure 'yyyyyyyy'
 
         Add a TXT record using an explicit Access Key and Secret key from a non-Windows OS.
+
+    .EXAMPLE
+        Add-DnsTxtRoute53 '_acme-challenge.site1.example.com' 'asdfqwer12345678' -R53UseIAMRole
+
+        Add a TXT record using implicit credential from an associated IAM Role.
     #>
 }
 
@@ -147,6 +157,8 @@ function Remove-DnsTxtRoute53 {
         [string]$R53SecretKeyInsecure,
         [Parameter(ParameterSetName='Profile',Mandatory)]
         [string]$R53ProfileName,
+        [Parameter(ParameterSetName='IAMRole',Mandatory)]
+        [switch]$R53UseIAMRole,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -250,6 +262,9 @@ function Remove-DnsTxtRoute53 {
     .PARAMETER R53ProfileName
         The profile name of a previously stored credential using Set-AWSCredential from the AwsPowershell module. This only works if the AwsPowershell module is installed.
 
+    .PARAMETER R53UseIAMRole
+        If specified, the module will attempt to authenticate using the AWS metadata service via an associated IAM Role. This will only work if the system is running within AWS and has been assigned an IAM Role with the proper permissions.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -268,6 +283,11 @@ function Remove-DnsTxtRoute53 {
         Remove-DnsTxtRoute53 '_acme-challenge.site1.example.com' 'asdfqwer12345678' -R53AccessKey 'xxxxxxxx' -R53SecretKeyInsecure 'yyyyyyyy'
 
         Remove a TXT record using an explicit Access Key and Secret key from a non-Windows OS.
+
+    .EXAMPLE
+        Remove-DnsTxtRoute53 '_acme-challenge.site1.example.com' 'asdfqwer12345678' -R53UseIAMRole
+
+        Remove a TXT record using implicit credential from an associated IAM Role.
     #>
 }
 
@@ -305,6 +325,8 @@ function Initialize-R53Config {
         [string]$R53SecretKeyInsecure,
         [Parameter(ParameterSetName='Profile',Mandatory)]
         [string]$R53ProfileName,
+        [Parameter(ParameterSetName='IAMRole',Mandatory)]
+        [switch]$R53UseIAMRole,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParamsConfig
     )
@@ -337,6 +359,26 @@ function Initialize-R53Config {
             $script:AwsCredParam = @{AccessKey=$R53AccessKey; SecretKey=$R53SecretKeyInsecure}
             break
         }
+        'IAMRole' {
+            if ($modAvailable) {
+                # the module will use the IAMRole by default if nothing else is specified
+                $script:AwsCredParam = @{}
+            } else {
+                # retrieve keys+token from the metadata service for the IAMRole
+                $credBase = "http://169.254.169.254/latest/meta-data/iam/security-credentials"
+                try { $role = Invoke-RestMethod "$credBase" @script:UseBasic } catch {}
+                if (-not $role) {
+                    throw "No IAM Role found in the metadata service."
+                }
+                $cred = Invoke-RestMethod "$credBase/$role" @script:UseBasic
+
+                $script:AwsCredParam = @{
+                    AccessKey = $cred.AccessKeyId
+                    SecretKey = $cred.SecretAccessKey
+                    Token = $cred.Token
+                }
+            }
+        }
         default {
             # the only thing left is profile name which requires the module
             # so error if we didn't find it
@@ -368,6 +410,7 @@ function Invoke-R53RestMethod {
         [string]$AccessKey,
         [Parameter(Mandatory)]
         [string]$SecretKey,
+        [string]$Token,
         [switch]$UsePost,                       # default to GET unless this is used
         [string]$Endpoint='/',                  # e.g. CanonicalUri like "/2013-04-01/hostedzone"
         [string]$QueryString=[String]::Empty,   # e.g. CanonicalQueryString like "name=example.com&type=TXT"
@@ -431,6 +474,14 @@ function Invoke-R53RestMethod {
         'x-amz-date' = $nowDateTime
         Authorization = $Authorization
     }
+
+    # X-Amz-Security-Token
+    # add the security/session token header if it was specified
+    # https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_use-resources.html
+    if ($Token) {
+        $headers.'x-amz-security-token' = $Token
+    }
+
     $uri = "https://$awsHost$($Endpoint)"
     if ([String]::Empty -ne $QueryString) {
         $uri += "?$QueryString"
