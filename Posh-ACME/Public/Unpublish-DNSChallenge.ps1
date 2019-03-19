@@ -35,7 +35,7 @@ function Unpublish-DnsChallenge {
     }
 
     # call the function with the required parameters and splatting the rest
-    &$delCommand $recordName $txtValue @PluginArgs
+    &$delCommand -RecordName $recordName -TxtValue $txtValue @PluginArgs
 
 
 
