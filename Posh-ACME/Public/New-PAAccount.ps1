@@ -101,7 +101,7 @@ function New-PAAccount {
         alg = $alg;
         KeyLength = $KeyLength;
         # The orders field is supposed to exist according to
-        # https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-7.1.2
+        # https://tools.ietf.org/html/rfc8555#section-7.1.2
         # But it's not currently implemented in Boulder. Tracking issue is here:
         # https://github.com/letsencrypt/boulder/issues/3335
         orders = $respObj.orders;

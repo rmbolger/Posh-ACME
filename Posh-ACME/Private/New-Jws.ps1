@@ -19,7 +19,7 @@ function New-Jws {
 
     # This is not a general JWS implementation. It will specifically
     # cater to making JWS messages for the ACME v2 protocol.
-    # https://tools.ietf.org/html/draft-ietf-acme-acme-12
+    # https://tools.ietf.org/html/rfc8555
 
     # validate the key type
     if ($Key -is [Security.Cryptography.RSA]) {

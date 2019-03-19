@@ -1,6 +1,6 @@
 # Posh-ACME
 
-An [ACME v2](https://tools.ietf.org/html/draft-ietf-acme-acme) client implemented as a Windows PowerShell module that enables you to generate publicly trusted SSL/TLS certificates from an ACME capable certificate authority such as [Let's Encrypt](https://letsencrypt.org/).
+An [ACME v2 (RFC 8555)](https://tools.ietf.org/html/rfc8555) client implemented as a Windows PowerShell module that enables you to generate publicly trusted SSL/TLS certificates from an ACME capable certificate authority such as [Let's Encrypt](https://letsencrypt.org/).
 
 # Notable Features
 

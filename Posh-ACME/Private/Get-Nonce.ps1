@@ -7,7 +7,7 @@ function Get-Nonce {
         [string]$NewNonceUrl
     )
 
-    # https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-7.2
+    # https://tools.ietf.org/html/rfc8555#section-7.2
 
     Process {
 

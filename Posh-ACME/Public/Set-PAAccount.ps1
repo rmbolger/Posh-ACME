@@ -145,7 +145,7 @@ function Set-PAAccount {
 
             # We've been asked to rollover the account key which effectively means replace it
             # with a new one. The spec describes the process in the following link.
-            # https://tools.ietf.org/html/draft-ietf-acme-acme-13#section-7.3.6
+            # https://tools.ietf.org/html/rfc8555#section-7.3.5
 
             # build the standard outer header
             $header = @{

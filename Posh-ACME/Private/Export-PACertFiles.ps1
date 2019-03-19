@@ -33,7 +33,7 @@ function Export-PACertFiles {
     }
 
     # download the cert+chain which is what ACMEv2 delivers by default
-    # https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-7.4.2
+    # https://tools.ietf.org/html/rfc8555#section-7.4.2
     try {
         Invoke-ACME $header ([String]::Empty) $acct -OutFile $fullchainFile -EA Stop
     } catch { throw }

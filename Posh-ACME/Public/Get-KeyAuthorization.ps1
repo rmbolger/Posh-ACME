@@ -9,7 +9,7 @@ function Get-KeyAuthorization {
         [switch]$ForDNS
     )
 
-    # https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-8.1
+    # https://tools.ietf.org/html/rfc8555#section-8.1
 
     # A key authorization is a string that expresses
     # a domain holder's authorization for a specified key to satisfy a
