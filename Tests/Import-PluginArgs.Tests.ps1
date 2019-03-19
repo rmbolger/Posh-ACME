@@ -1,6 +1,10 @@
 Get-Module Posh-ACME | Remove-Module -Force
 Import-Module Posh-ACME -Force
 
+# Note: These tests depend on knowing the paramters associated with some of the actual
+# DNS plugins. So if the parameters in the plugins change, the tests will need updating
+# as well.
+
 Describe "Import-PluginArgs" {
 
     InModuleScope Posh-ACME {
