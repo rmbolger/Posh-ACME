@@ -35,7 +35,7 @@ function Publish-DnsChallenge {
     }
 
     # call the function with the required parameters and splatting the rest
-    &$addCommand $recordName $txtValue @PluginArgs
+    &$addCommand -RecordName $recordName -TxtValue $txtValue @PluginArgs
 
 
 

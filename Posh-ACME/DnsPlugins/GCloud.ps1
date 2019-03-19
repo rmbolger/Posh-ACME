@@ -246,7 +246,9 @@ function Connect-GCloudDns {
         $GCKeyObj = Get-Content $GCKeyFile | ConvertFrom-Json
 
         # merge and save updated plugin args
-        Merge-PluginArgs @{GCKeyObj=$GCKeyObj} | Out-Null
+        $pargs = Import-PluginArgs GCloud
+        $pargs.GCKeyObj = $GCKeyObj
+        Export-PluginArgs $pargs GCloud
     } elseif (!$GCKeyObj) {
         throw "Key file $GCKeyFile not found and no cached data exists."
     } else {

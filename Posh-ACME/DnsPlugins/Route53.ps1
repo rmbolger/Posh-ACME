@@ -328,7 +328,7 @@ function Initialize-R53Config {
         [Parameter(ParameterSetName='IAMRole',Mandatory)]
         [switch]$R53UseIAMRole,
         [Parameter(ValueFromRemainingArguments)]
-        $ExtraParamsConfig
+        $ExtraConnectParams
     )
 
     # We now have the ability to do direct REST calls against AWS without the AwsPowerShell dependency
