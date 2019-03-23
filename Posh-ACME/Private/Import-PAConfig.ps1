@@ -9,6 +9,7 @@ function Import-PAConfig {
     # The config structure looks like this:
     # %LOCALAPPDATA%\Posh-ACME
     # - current-server.txt
+    # - enc-key.txt
     # %LOCALAPPDATA%\Posh-ACME\(server)
     # - dir.json
     # - current-account.txt
@@ -49,6 +50,12 @@ function Import-PAConfig {
         if (-not (Test-Path (Get-ConfigRoot) -PathType Container)) {
             New-Item -ItemType Directory -Path (Get-ConfigRoot) -Force -EA Stop | Out-Null
         }
+    }
+
+    # make sure we have an encryption key to use to (de)serialize secure strings and
+    # PSCredential objects across platforms
+    if (-not $Level -and -not (Get-EncKey)) {
+        New-EncKey
     }
 
     # start at the server level if nothing was specified or specifically requested
