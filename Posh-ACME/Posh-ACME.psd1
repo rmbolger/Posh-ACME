@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '3.2.1'
+ModuleVersion = '3.3.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -104,11 +104,11 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 3.2.1 (2019-03-04)
-
-* Fix #122 to make sure private keys are imported properly when using `-Install`
-* Improve error handling for duplicate public zones in Azure. (#125)
-* Add tag based workaround for duplicate public zones in Azure. (#125)
+* Route53 plugin now has IAM Role support if you're running Posh-ACME from within AWS. See plugin usage guide for details (#128)
+* Dynu plugin migrated to v2 of the Dynu API
+* Fixed DNSPlugin and DNSAlias arrays not getting expanded properly when the number of names in the cert didn't match the values in those arrays.
+* Fixed validation bugs when using SAN certs with challenge aliases or multiple different plugins (#127) (Thanks @whbingham)
+* Revamped serialization/deserialization for plugin arguments which should prevent accidentally creating parameter binding conflicts when switching between parameter sets for a particular plugin (#129).
 '@
 
     } # End of PSData hashtable
