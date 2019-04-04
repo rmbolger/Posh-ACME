@@ -12,6 +12,7 @@ function Add-DnsTxtWindows {
         [Parameter(Position=3)]
         [pscredential]$WinCred,
         [switch]$WinUseSSL,
+        [string]$WinZoneScope,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -30,12 +31,22 @@ function Add-DnsTxtWindows {
     # separate the portion of the name that doesn't contain the zone name
     $recShort = $RecordName.Replace(".$ZoneName",'')
 
-    $recs = @($zone | Get-DnsServerResourceRecord -Name $recShort -RRType Txt @dnsParams -EA SilentlyContinue)
+    # check for zone scope usage
+    $zoneScope = @{}
+    if (-not [String]::IsNullOrWhiteSpace($WinZoneScope)) {
+        if ('ZoneScope' -notin (Get-Command Get-DnsServerResourceRecord).Parameters.Keys) {
+            throw "ZoneScope is not supported in the version of the DnsServer module currently installed."
+        } else {
+            $zoneScope.ZoneScope = $WinZoneScope
+        }
+    }
+
+    $recs = @($zone | Get-DnsServerResourceRecord -Name $recShort -RRType Txt @dnsParams @zoneScope -EA SilentlyContinue)
 
     if ($recs.Count -eq 0 -or $TxtValue -notin $recs.RecordData.DescriptiveText) {
         # create new
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
-        $zone | Add-DnsServerResourceRecord -Txt -Name $recShort -DescriptiveText $TxtValue -TimeToLive 00:00:10 @dnsParams
+        $zone | Add-DnsServerResourceRecord -Txt -Name $recShort -DescriptiveText $TxtValue -TimeToLive 00:00:10 @dnsParams @zoneScope
     } else {
         # nothing to do
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
@@ -62,6 +73,9 @@ function Add-DnsTxtWindows {
 
     .PARAMETER WinUseSSL
         Forces the PowerShell remoting session to run over HTTPS. Requires the server have a valid certificate that is installed and trusted by the client or added to the client's TrustedHosts list. This is primarily used when connecting to a non-domain joined DNS server.
+
+    .PARAMETER WinZoneScope
+        The name of the zone scope to modify. This is generally only necessary in split-brain DNS configurations where the default scope is not external facing.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -90,6 +104,7 @@ function Remove-DnsTxtWindows {
         [Parameter(Position=3)]
         [pscredential]$WinCred,
         [switch]$WinUseSSL,
+        [string]$WinZoneScope,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -108,13 +123,23 @@ function Remove-DnsTxtWindows {
     # separate the portion of the name that doesn't contain the zone name
     $recShort = $RecordName.Replace(".$ZoneName",'')
 
-    $recs = @($zone | Get-DnsServerResourceRecord -Name $recShort -RRType Txt @dnsParams -EA SilentlyContinue)
+    # check for zone scope usage
+    $zoneScope = @{}
+    if (-not [String]::IsNullOrWhiteSpace($WinZoneScope)) {
+        if ('ZoneScope' -notin (Get-Command Get-DnsServerResourceRecord).Parameters.Keys) {
+            throw "ZoneScope is not supported in the version of the DnsServer module currently installed."
+        } else {
+            $zoneScope.ZoneScope = $WinZoneScope
+        }
+    }
+
+    $recs = @($zone | Get-DnsServerResourceRecord -Name $recShort -RRType Txt @dnsParams @zoneScope -EA SilentlyContinue)
 
     if ($recs.Count -gt 0 -and $TxtValue -in $recs.RecordData.DescriptiveText) {
         # remove the record that has the right value
         $toDelete = $recs | Where-Object { $_.RecordData.DescriptiveText -eq $TxtValue }
         Write-Verbose "Deleting $RecordName with value $TxtValue"
-        $zone | Remove-DnsServerResourceRecord -InputObject $toDelete -Force @dnsParams
+        $zone | Remove-DnsServerResourceRecord -InputObject $toDelete -Force @dnsParams @zoneScope
     } else {
         # nothing to do
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
@@ -141,6 +166,9 @@ function Remove-DnsTxtWindows {
 
     .PARAMETER WinUseSSL
         Forces the PowerShell remoting session to run over HTTPS. Requires the server have a valid certificate that is installed and trusted by the client or added to the client's TrustedHosts list. This is primarily used when connecting to a non-domain joined DNS server.
+
+    .PARAMETER WinZoneScope
+        The name of the zone scope to modify. This is generally only necessary in split-brain DNS configurations where the default scope is not external facing.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
