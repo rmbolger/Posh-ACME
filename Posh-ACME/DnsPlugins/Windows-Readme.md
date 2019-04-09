@@ -2,7 +2,7 @@
 
 This plugin works against the Microsoft Windows DNS server. It doesn't matter whether it's hosted on-premises or in the cloud, physical or virtual, domain joined or standalone. As long as it can be managed via the standard [DnsServer PowerShell module](https://docs.microsoft.com/en-us/powershell/module/dnsserver), it should be supported. This does **not** work against [Azure DNS](https://azure.microsoft.com/en-us/services/dns/). Use the Azure plugin for that.
 
-**The DnsServer module is not available on Windows versions prior to Windows 8 and Windows Server 2012. So this plugin will only work on those OSes or newer.**
+**The DnsServer module is not available on Windows versions prior to Windows 8 and Windows Server 2012. So this plugin will only work on those OSes or newer. Using Zone Scopes requires the Windows 10 or Windows Server 2016 version of the module or newer.**
 
 **This plugin currently does not work on non-Windows OSes in PowerShell Core. [Click here](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) for details.**
 
@@ -62,4 +62,12 @@ New-PACertificate test.example.com -DnsPlugin Windows -PluginArgs $pArgs
 
 ## Advanced Features
 
-Some of the newer features of Windows DNS such as DNS Scopes and VirtualizationInstances are not currently supported in this plugin. If you use those features and need them supported, please submit an [issue](https://github.com/rmbolger/Posh-ACME/issues) describing your environment.
+Zone Scopes were added in the Windows Server 2016 version of the DNS server and are now supported in the plugin with the `WinZoneScope` parameter. This is useful if you have a split-brain DNS setup and your external zone is in the non-default scope. Using the parameter requires that your client be running the Windows 10/2016 version of the DnsServer module.
+
+```powershell
+# using zone scope in domain joined environment
+$pArgs = @{WinServer='dns1.example.com'; WinZoneScope='external'}
+New-PACertificate test.example.com -DnsPlugin Windows -PluginArgs $pArgs
+```
+
+VirtualizationInstances are not currently supported. If you use that features and need it supported, please submit an [issue](https://github.com/rmbolger/Posh-ACME/issues) describing your environment.
