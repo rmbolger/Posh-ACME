@@ -7,7 +7,6 @@ function Add-DnsTxtGCloud {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$GCKeyFile,
-        [pscustomobject]$GCKeyObj,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -15,7 +14,7 @@ function Add-DnsTxtGCloud {
     # Cloud DNS API Reference
     # https://cloud.google.com/dns/api/v1beta2/
 
-    Connect-GCloudDns $GCKeyFile $GCKeyObj
+    Connect-GCloudDns $GCKeyFile
     $token = $script:GCToken
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
@@ -86,9 +85,6 @@ function Add-DnsTxtGCloud {
     .PARAMETER GCKeyFile
         Path to a service account JSON file that contains the account's private key and other metadata. This should have been downloaded when originally creating the service account.
 
-    .PARAMETER GCKeyObj
-        A cached copy of the service account JSON object. This parameter is managed by the plugin and you shouldn't ever need to specify it manually.
-
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -108,7 +104,6 @@ function Remove-DnsTxtGCloud {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$GCKeyFile,
-        [pscustomobject]$GCKeyObj,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -116,7 +111,7 @@ function Remove-DnsTxtGCloud {
     # Cloud DNS API Reference
     # https://cloud.google.com/dns/api/v1beta2/
 
-    Connect-GCloudDns $GCKeyFile $GCKeyObj
+    Connect-GCloudDns $GCKeyFile
     $token = $script:GCToken
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
@@ -182,9 +177,6 @@ function Remove-DnsTxtGCloud {
     .PARAMETER GCKeyFile
         Path to a service account JSON file that contains the account's private key and other metadata. This should have been downloaded when originally creating the service account.
 
-    .PARAMETER GCKeyObj
-        A cached copy of the service account JSON object. This parameter is managed by the plugin and you shouldn't ever need to specify it manually.
-
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -221,9 +213,7 @@ function Connect-GCloudDns {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [string]$GCKeyFile,
-        [Parameter(Position=1)]
-        [pscustomobject]$GCKeyObj
+        [string]$GCKeyFile
     )
 
     # Using OAuth 2.0 for Server to Server Applications
@@ -237,22 +227,35 @@ function Connect-GCloudDns {
     Write-Verbose "Signing into GCloud DNS"
 
     # We want to save the contents of GCKeyFile so the user isn't necessarily stuck
-    # keeping it wherever it originally was when they ran the command. But we're always
-    # going to use it rather than the cached version as long as in continues to exist
-    # so they can update it as necessary.
-    $GCKeyFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($GCKeyFile)
-    if (Test-Path $GCKeyFile -PathType Leaf) {
+    # keeping it wherever it originally was when they ran the command. But we still want
+    # to use the file by default in case they've updated it as long as it still exists.
+
+    # So we're going to sort of mangle the value of the parameter to concatenate a Base64Url
+    # encoded version of the file and then re-export it for renewals later. The concatenated
+    # version will look like this:
+    #     <file path><tab character><base64url file contents>
+
+    # split the path from the contents
+    # (this should always return a path but may or may not return contents)
+    $filePath,$fileContents = $GCKeyFile.Split("`t")
+
+    $filePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($filePath)
+    if (Test-Path $filePath -PathType Leaf) {
         Write-Debug "Using key file"
         $GCKeyObj = Get-Content $GCKeyFile | ConvertFrom-Json
 
-        # merge and save updated plugin args
-        $pargs = Import-PluginArgs GCloud
-        $pargs.GCKeyObj = $GCKeyObj
-        Export-PluginArgs $pargs GCloud
-    } elseif (!$GCKeyObj) {
+        # concatenate the file contents and re-export the pluginargs
+        $b64Contents = $GCKeyObj | ConvertTo-Json -Compress | ConvertTo-Base64Url
+        $merged = "$($GCKeyFile)`t$($b64Contents)"
+        Export-PluginArgs @{ GCKeyFile = $merged } GCloud
+
+    } elseif ([string]::IsNullOrWhiteSpace($fileContents)) {
         throw "Key file $GCKeyFile not found and no cached data exists."
     } else {
-        Write-Debug "Using cached key data"
+        Write-Warning "GCKeyFile not found at `"$filePath`". Attempting to use cached key data."
+        try {
+            $GCKeyObj = $fileContents | ConvertFrom-Base64Url | ConvertFrom-Json
+        } catch { throw }
     }
 
     Write-Debug "Loading private key for $($GCKeyObj.client_email)"
