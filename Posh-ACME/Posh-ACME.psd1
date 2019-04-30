@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '3.3.0'
+ModuleVersion = '3.4.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -104,11 +104,10 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-* Route53 plugin now has IAM Role support if you're running Posh-ACME from within AWS. See plugin usage guide for details (#128)
-* Dynu plugin migrated to v2 of the Dynu API
-* Fixed DNSPlugin and DNSAlias arrays not getting expanded properly when the number of names in the cert didn't match the values in those arrays.
-* Fixed validation bugs when using SAN certs with challenge aliases or multiple different plugins (#127) (Thanks @whbingham)
-* Revamped serialization/deserialization for plugin arguments which should prevent accidentally creating parameter binding conflicts when switching between parameter sets for a particular plugin (#129).
+* Added new DNS plugin for OVH (#79)
+* Added ZoneScope support to Windows plugin (#134) (Thanks @dawe78)
+* Fixed issue #139 with GCloud plugin prompting for GCKeyFile after upgrading to 3.3.0. Users affected by this issue will need to submit a new cert request to re-establish the GCloud plugin config.
+* Fixed issue #140 with AcmeDns plugin losing registration data after upgrading to 3.3.0. Users affected by this issue will need to submit a new cert request to re-establish the AcmeDns plugin config and it will likely involve updating any CNAME records currently in use.
 '@
 
     } # End of PSData hashtable

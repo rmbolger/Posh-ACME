@@ -1,3 +1,10 @@
+## 3.4.0 (2019-04-30)
+
+* Added new DNS plugin for OVH (#79)
+* Added ZoneScope support to Windows plugin (#134) (Thanks @dawe78)
+* Fixed issue #139 with GCloud plugin prompting for GCKeyFile after upgrading to 3.3.0. Users affected by this issue will need to submit a new cert request to re-establish the GCloud plugin config.
+* Fixed issue #140 with AcmeDns plugin losing registration data after upgrading to 3.3.0. Users affected by this issue will need to submit a new cert request to re-establish the AcmeDns plugin config and it will likely involve updating any CNAME records currently in use.
+
 ## 3.3.0 (2019-03-24)
 
 * Route53 plugin now has IAM Role support if you're running Posh-ACME from within AWS. See plugin usage guide for details (#128)
