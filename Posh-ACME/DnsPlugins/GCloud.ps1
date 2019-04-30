@@ -230,32 +230,26 @@ function Connect-GCloudDns {
     # keeping it wherever it originally was when they ran the command. But we still want
     # to use the file by default in case they've updated it as long as it still exists.
 
-    # So we're going to sort of mangle the value of the parameter to concatenate a Base64Url
-    # encoded version of the file and then re-export it for renewals later. The concatenated
-    # version will look like this:
-    #     <file path><tab character><base64url file contents>
-
-    # split the path from the contents
-    # (this should always return a path but may or may not return contents)
-    $filePath,$fileContents = $GCKeyFile.Split("`t")
-
-    $filePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($filePath)
-    if (Test-Path $filePath -PathType Leaf) {
+    $GCKeyFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($GCKeyFile)
+    if (Test-Path $GCKeyFile -PathType Leaf) {
         Write-Debug "Using key file"
         $GCKeyObj = Get-Content $GCKeyFile | ConvertFrom-Json
 
-        # concatenate the file contents and re-export the pluginargs
+        # export the contents as a plugin var
         $b64Contents = $GCKeyObj | ConvertTo-Json -Compress | ConvertTo-Base64Url
-        $merged = "$($GCKeyFile)`t$($b64Contents)"
-        Export-PluginArgs @{ GCKeyFile = $merged } GCloud
+        Export-PluginVar GCKeyObj $b64Contents
 
-    } elseif ([string]::IsNullOrWhiteSpace($fileContents)) {
-        throw "Key file $GCKeyFile not found and no cached data exists."
     } else {
-        Write-Warning "GCKeyFile not found at `"$filePath`". Attempting to use cached key data."
-        try {
-            $GCKeyObj = $fileContents | ConvertFrom-Base64Url | ConvertFrom-Json
-        } catch { throw }
+        $b64Contents = Import-PluginVar GCKeyObj
+
+        if (-not $b64Contents) {
+            throw "Key file $GCKeyFile not found at `"$GCKeyFile`" and no cached data exists."
+        } else {
+            Write-Warning "Key file not found at `"$GCKeyFile`". Attempting to use cached key data."
+            try {
+                $GCKeyObj = $b64Contents | ConvertFrom-Base64Url | ConvertFrom-Json
+            } catch { throw }
+        }
     }
 
     Write-Debug "Loading private key for $($GCKeyObj.client_email)"
