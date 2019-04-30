@@ -49,11 +49,11 @@ The command will sleep for 2 minutes by default to allow the DNS changes to prop
 Currently, the responsibility for deploying the certificate to your web server or service is up to you. There may be deployment plugins supported eventually. But for now, the idea is that this module is just a piece of your larger PowerShell based deployment strategy. The certificate details are written to the pipeline so you can either save them to a variable or pipe the output to another command.
 The password set for the PFX files is `poshacme` because we didn't override the default with `-PfxPass`. If you're running PowerShell with elevated privileges on Windows, you can also add the `-Install` switch to automatically import the certificate into the local computer's certificate store.
 
-So now you've got a certificate and that's great! But Let's Encrypt certificates expire relatively quickly (3 months). And you won't be able to renew this certificate without going through the manual DNS TXT record hassle again. So let's add a DNS plugin to the process.
+So now you've got a certificate and that's great! But Let's Encrypt certificates expire relatively quickly (90 days). And you won't be able to renew this certificate without going through the manual DNS TXT record hassle again. So let's add a DNS plugin to the process.
 
 ## DNS Plugins
 
-The ability to use a DNS plugin is obviously going to depend on your DNS provider and the [available plugins](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) in the current release of the module. If your DNS provider is not supported by an existing plugin, please [submit an issue](https://github.com/rmbolger/Posh-ACME/issues) requesting support. If you have PowerShell development skills, you might also try writing a plugin yourself. Instructions can be found in the [DnsPlugins README](/Posh-ACME/DnsPlugins/README.md). Pull requests for new plugins are both welcome and appreciated. It's also possible to redirect ACME DNS validations using a [CNAME record](https://support.dnsimple.com/articles/cname-record/) in your primary zone pointing to another DNS server that is supported. More on that later.
+The ability to use a DNS plugin is going to depend on your DNS provider and the [available plugins](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) in the current version of the module. If your DNS provider is not supported by an existing plugin, please [submit an issue](https://github.com/rmbolger/Posh-ACME/issues) requesting support. If you have PowerShell development skills, you might also try writing a plugin yourself. Instructions can be found in the [DnsPlugins README](/Posh-ACME/DnsPlugins/README.md). Pull requests for new plugins are both welcome and appreciated. It's also possible to redirect ACME DNS validations using a [CNAME record](https://support.dnsimple.com/articles/cname-record/) in your primary zone pointing to another DNS server that is supported. More on that later.
 
 The first thing to do is figure out which DNS plugin to use and how to use it. Start by listing the available plugins.
 
@@ -108,9 +108,7 @@ $r53Secret = Read-Host Secret -AsSecureString
 $r53Params = @{R53AccessKey='ABCD1234'; R53SecretKey=$r53Secret}
 ```
 
-This `$r53Params` variable is what we'll ultimately pass to the `-PluginArgs` parameter on functions that use it.
-
-Another thing to notice from the plugin's help output is that the description tells us we need to have the `AwsPowershell` module installed. So make sure you have that installed or install it with `Install-Module AwsPowershell` before moving on. Hopefully, most plugins won't need external dependencies like this. But it's good to double check.
+This `$r53Params` variable is what we'll pass to the `-PluginArgs` parameter on functions that use it.
 
 Most plugins also have a Usage Guide that can provide more detailed help using or setting up the plugin. They're all linked from the [List of Supported DNS Providers](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) wiki page, but you can also read them locally from the DnsPlugins folder in the module. They're Markdown formatted and called `<plugin>-Readme.md`.
 
@@ -133,7 +131,7 @@ Unpublish-DnsChallenge site1.example.com -Account $acct -Token faketoken -Plugin
 
 All we have left to do is add the necessary plugin parameters to our original certificate request command. But let's get crazy and change it up a bit by making the cert a wildcard cert with the root domain as a subject alternative name (SAN).
 
-*Note: According to current Let's Encrypt [rate limits](https://letsencrypt.org/docs/rate-limits/), a single certificate can have up to 100 names. However, they've recently started enforcing a requirement that wildcard certs may not contain any SANs that would overlap with the wildcard entry. So you'll get an error if you try to put `*.example.com` and `site1.example.com` in the same cert. But `*.example.com` and `example.com` or `site1.sub1.example.com` are just fine.*
+*Note: According to current Let's Encrypt [rate limits](https://letsencrypt.org/docs/rate-limits/), a single certificate can have up to 100 names. The only caveat is that wildcard certs may not contain any SANs that would overlap with the wildcard entry. So you'll get an error if you try to put `*.example.com` and `site1.example.com` in the same cert. But `*.example.com` and `example.com` or `site1.sub1.example.com` are just fine.*
 
 ```powershell
 New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@example.com -DnsPlugin Route53 `
