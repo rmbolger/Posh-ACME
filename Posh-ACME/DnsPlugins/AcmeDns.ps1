@@ -8,38 +8,51 @@ function Add-DnsTxtAcmeDns {
         [Parameter(Mandatory,Position=2)]
         [string]$ACMEServer,
         [string[]]$ACMEAllowFrom,
-        [hashtable]$ACMEReg,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # Because we're doing acme-dns registrations on demand for new names, even if
-    # the $ACMEReg variable was passed in, it may not reflect the true current state
-    # because Submit-ChallengeValidation doesn't re-import PluginArgs between calls
-    # to Publish-DnsChallenge. Since we know there might be updated values, we need
-    # to explicitly re-import PluginArgs here to get the most up to date version and
-    # basically ignore the passed in $ACMEReg object.
-    $pargs = Import-PluginArgs AcmeDns
+    # Each name used with AcmeDns must be dynamically registered with the acme-dns
+    # server and a CNAME record created by the user based on the registration before
+    # proceeding. Each registration needs to be saved so it can be re-used later without
+    # the user needing to explicitly pass it in.
 
-    # If an existing ACMEReg wasn't passed in, create a new one to store new registrations
-    if (!$pargs.ACMEReg) { $pargs.ACMEReg = @{} }
+    # So we're going to use the new Import/Export-PluginVar functions but we also need to
+    # allow for importing the legacy ACMEReg value from plugindata.xml that will no longer
+    # be passed in.
+    if (-not ($ACMEReg = Import-PluginVar ACMEReg)) {
+        # check for legacy registration data by getting all saved pluginargs on this account
+        # which should include AcmeReg if it still exists
+        $pargs = Import-PluginArgs
+        if ($pargs.ACMEReg) {
+            # Convert the hashtable to JSON and back to basically make it PSCustomObject
+            # which the rest of the plugin is now expecting
+            Write-Verbose "Migrating legacy acme-dns registrations"
+            $ACMEReg = $pargs.ACMEReg | ConvertTo-Json | ConvertFrom-Json
+        } else {
+            # no existing data, so create an empty object to use
+            Write-Verbose "No existing acme-dns registrations found"
+            $ACMEReg = [pscustomobject]@{}
+        }
+    }
 
     # create a new subdomain registration if necessary
-    if ($RecordName -notin $pargs.ACMEReg.Keys) {
+    if ($RecordName -notin $ACMEReg.PSObject.Properties.Name) {
         $reg = New-AcmeDnsRegistration $ACMEServer $ACMEAllowFrom
-        $pargs.ACMEReg.$RecordName = @($reg.subdomain,$reg.username,$reg.password,$reg.fulldomain)
+
+        $ACMEReg | Add-Member $RecordName @($reg.subdomain,$reg.username,$reg.password,$reg.fulldomain)
 
         # we need to notify the user to create a CNAME for this registration
         # so save it to memory to display later during Save-DnsTxtAcmeDns
         if (!$script:ACMECNAMES) { $script:ACMECNAMES = @() }
         $script:ACMECNAMES += [pscustomobject]@{Record=$RecordName;CNAME=$reg.fulldomain}
 
-        # export the updated PluginArgs
-        Export-PluginArgs $pargs AcmeDns
+        # save the new registration
+        Export-PluginVar ACMEReg $ACMEReg
     }
 
     # grab a reference to this record's registration values
-    $regVals = $pargs.ACMEReg.$RecordName
+    $regVals = $ACMEReg.$RecordName
 
     # create the auth header object
     $authHead = @{'X-Api-User'=$regVals[1];'X-Api-Key'=$regVals[2]}
@@ -73,9 +86,6 @@ function Add-DnsTxtAcmeDns {
 
     .PARAMETER ACMEAllowFrom
         A list of networks in CIDR notation that the acme-dns server should allow updates from. If not specified, the acme-dns server will not block any updates based on IP address.
-
-    .PARAMETER ACMEReg
-        A hashtable of existing acme-dns registrations. This parameter is managed by the plugin and you shouldn't ever need to specify it manually.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
