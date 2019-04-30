@@ -86,7 +86,7 @@ will future proof your plugin.
 
 Plugins can be tested using `Publish-DnsChallenge`, `Unpublish-DnsChallenge`, and `Save-DnsChallenge`. They call the Add, Remove, and Save functions respectively. Use `Get-Help` on those functions for more information on how to use them.
 
-You can also [dot source](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_scripts?view=powershell-5.1#script-scope-and-dot-sourcing) the plugin file and call the functions directly. Just remember to dot source again each time you make a change to the plugin.
+You can also [dot source](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_scripts?view=powershell-5.1#script-scope-and-dot-sourcing) the plugin file and call the functions directly. But this can be troublesome if the functions depend on module-scoped variables like `$script:UseBasic`. Also, remember to dot source again each time you make a change to the plugin.
 
 
 ## Plugin Readme
