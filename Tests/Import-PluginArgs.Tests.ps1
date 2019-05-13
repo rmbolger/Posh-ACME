@@ -13,7 +13,7 @@ Describe "Import-PluginArgs" {
         $fakeAcct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
 
         Mock Get-DirFolder { return 'TestDrive:\' }
-        New-Item "TestDrive:\$($fakeAcct.id)" -ItemType Directory -ErrorAction SilentlyContinue
+        New-Item "TestDrive:\$($fakeAcct.id)" -ItemType Directory -ErrorAction Ignore
 
         Context "No active account" {
 

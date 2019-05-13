@@ -37,14 +37,14 @@ if ([String]::IsNullOrWhiteSpace($PSScriptRoot)) {
     Expand-Archive $file -DestinationPath $installpath
 
     Write-Host "Removing any old copy" -ForegroundColor Cyan
-    Remove-Item "$installpath\Posh-ACME" -Recurse -Force -EA SilentlyContinue
+    Remove-Item "$installpath\Posh-ACME" -Recurse -Force -EA Ignore
     Write-Host "Renaming folder" -ForegroundColor Cyan
     Copy-Item "$installpath\Posh-ACME-master\Posh-ACME" $installpath -Recurse -Force
     Remove-Item "$installpath\Posh-ACME-master" -recurse -confirm:$false
     Import-Module -Name Posh-ACME -Force
 } else {
     # running locally
-    Remove-Item "$installpath\Posh-ACME" -Recurse -Force -EA SilentlyContinue
+    Remove-Item "$installpath\Posh-ACME" -Recurse -Force -EA Ignore
     Copy-Item "$PSScriptRoot\Posh-ACME" $installpath -Recurse -Force
     # force re-load the module (assuming you're editing locally and want to see changes)
     Import-Module -Name Posh-ACME -Force

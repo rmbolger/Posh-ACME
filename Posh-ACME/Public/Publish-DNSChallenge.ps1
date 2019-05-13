@@ -30,7 +30,7 @@ function Publish-DnsChallenge {
 
     # check for the command that should exist now based on plugin name
     $addCommand = "Add-DnsTxt$Plugin"
-    if (!(Get-Command $addCommand -ErrorAction SilentlyContinue)) {
+    if (!(Get-Command $addCommand -ErrorAction Ignore)) {
         throw "Expected plugin command $addCommand not found."
     }
 

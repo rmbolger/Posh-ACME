@@ -41,7 +41,7 @@ function Add-DnsTxtWindows {
         }
     }
 
-    $recs = @($zone | Get-DnsServerResourceRecord -Name $recShort -RRType Txt @dnsParams @zoneScope -EA SilentlyContinue)
+    $recs = @($zone | Get-DnsServerResourceRecord -Name $recShort -RRType Txt @dnsParams @zoneScope -EA Ignore)
 
     if ($recs.Count -eq 0 -or $TxtValue -notin $recs.RecordData.DescriptiveText) {
         # create new
@@ -133,7 +133,7 @@ function Remove-DnsTxtWindows {
         }
     }
 
-    $recs = @($zone | Get-DnsServerResourceRecord -Name $recShort -RRType Txt @dnsParams @zoneScope -EA SilentlyContinue)
+    $recs = @($zone | Get-DnsServerResourceRecord -Name $recShort -RRType Txt @dnsParams @zoneScope -EA Ignore)
 
     if ($recs.Count -gt 0 -and $TxtValue -in $recs.RecordData.DescriptiveText) {
         # remove the record that has the right value
@@ -220,7 +220,7 @@ function Connect-WinDns {
     )
 
     # create a new CimSession if necessary
-    if (Get-CimSession -ComputerName $WinServer -EA SilentlyContinue) {
+    if (Get-CimSession -ComputerName $WinServer -EA Ignore) {
         Write-Debug "Using existing CimSession for $WinServer"
         return ((Get-CimSession -ComputerName $WinServer)[0])
     } else {

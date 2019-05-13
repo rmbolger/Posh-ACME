@@ -30,7 +30,7 @@ function Unpublish-DnsChallenge {
 
     # check for the command that should exist now based on plugin name
     $delCommand = "Remove-DnsTxt$Plugin"
-    if (!(Get-Command $delCommand -ErrorAction SilentlyContinue)) {
+    if (!(Get-Command $delCommand -ErrorAction Ignore)) {
         throw "Expected plugin command $delCommand not found."
     }
 

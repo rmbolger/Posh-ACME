@@ -15,7 +15,7 @@ function Save-DnsChallenge {
 
     # check for the command that should exist now based on plugin name
     $saveCommand = "Save-DnsTxt$Plugin"
-    if (!(Get-Command $saveCommand -ErrorAction SilentlyContinue)) {
+    if (!(Get-Command $saveCommand -ErrorAction Ignore)) {
         throw "Expected plugin command $saveCommand not found."
     }
 

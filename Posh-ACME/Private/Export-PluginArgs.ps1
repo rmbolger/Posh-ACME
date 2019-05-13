@@ -62,7 +62,7 @@ function Export-PluginArgs {
 
         # check for the add command that should exist now
         $addCmdName = "Add-DnsTxt$Plugin"
-        if (-not ($cmd = Get-Command $addCmdName -ErrorAction SilentlyContinue)) {
+        if (-not ($cmd = Get-Command $addCmdName -ErrorAction Ignore)) {
             throw "Expected plugin command $addCmdName not found."
         }
 

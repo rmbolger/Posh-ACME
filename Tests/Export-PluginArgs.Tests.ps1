@@ -13,7 +13,7 @@ Describe "Export-PluginArgs" {
         $fakeAcct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
 
         Mock Get-DirFolder { return 'TestDrive:\' }
-        New-Item "TestDrive:\$($fakeAcct.id)" -ItemType Directory -ErrorAction SilentlyContinue
+        New-Item "TestDrive:\$($fakeAcct.id)" -ItemType Directory -ErrorAction Ignore
         $pDataFile = "TestDrive:\$($fakeAcct.id)\plugindata.xml"
 
         Context "No active account" {
@@ -45,11 +45,11 @@ Describe "Export-PluginArgs" {
             }
 
             It "Does not throw" {
-                Remove-Item $pDataFile -Force -EA SilentlyContinue
+                Remove-Item $pDataFile -Force -EA Ignore
                 { Export-PluginArgs $pargs Route53 } | Should -Not -Throw
             }
             It "Saves all args with 1 plugin" {
-                Remove-Item $pDataFile -Force -EA SilentlyContinue
+                Remove-Item $pDataFile -Force -EA Ignore
                 Export-PluginArgs $pargs Route53
                 $result = Import-Clixml $pDataFile
                 $result | Should -BeOfType [hashtable]
@@ -57,7 +57,7 @@ Describe "Export-PluginArgs" {
                 $result.R53ProfileName | Should -BeExactly 'fake-profile'
             }
             It "Saves all args with multiple plugins" {
-                Remove-Item $pDataFile -Force -EA SilentlyContinue
+                Remove-Item $pDataFile -Force -EA Ignore
                 Export-PluginArgs $pargs Route53,Infoblox
                 $result = Import-Clixml $pDataFile
                 $result | Should -BeOfType [hashtable]
