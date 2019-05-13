@@ -55,7 +55,7 @@ function Import-PAConfig {
     if (!$Level -or $Level -eq 'Server') {
 
         # load the current ACME directory into memory if it exists on disk
-        $dirUrl = [string](Get-Content (Join-Path $script:ConfigRoot 'current-server.txt') -EA SilentlyContinue)
+        $dirUrl = [string](Get-Content (Join-Path $script:ConfigRoot 'current-server.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($dirUrl)) {
 
             $dirFolder = $dirUrl.Replace('https://','').Replace(':','_')
@@ -86,7 +86,7 @@ function Import-PAConfig {
     if ($ImportAccount -or $Level -eq 'Account') {
 
         # load the current account into memory if it exists on disk
-        $acctID = [string](Get-Content (Join-Path $script:DirFolder 'current-account.txt') -EA SilentlyContinue)
+        $acctID = [string](Get-Content (Join-Path $script:DirFolder 'current-account.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($acctID)) {
 
             $script:AcctFolder = Join-Path $script:DirFolder $acctID
@@ -99,7 +99,7 @@ function Import-PAConfig {
     if ($ImportOrder -or $Level -eq 'Order') {
 
         # load the current order into memory if it exists on disk
-        $domain = [string](Get-Content (Join-Path $script:AcctFolder 'current-order.txt') -EA SilentlyContinue)
+        $domain = [string](Get-Content (Join-Path $script:AcctFolder 'current-order.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($domain)) {
 
             $script:OrderFolder = Join-Path $script:AcctFolder $domain.Replace('*','!')
