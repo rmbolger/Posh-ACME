@@ -487,14 +487,22 @@ function Invoke-R53RestMethod {
         $uri += "?$QueryString"
     }
 
-    try {
-        if ($UsePost) {
-            $response = Invoke-RestMethod $uri -Headers $headers -Method Post -Body $Data @script:UseBasic
-        } else {
-            $response = Invoke-RestMethod $uri -Headers $headers @script:UseBasic
-        }
-        return $response
+    $irmArgs = @{
+        Uri = $uri
+        Headers = $headers
+    }
+    if ($UsePost) {
+        $irmArgs.Method = 'Post'
+        $irmArgs.Body = $Data
+    }
+    if ('SkipHeaderValidation' -in (Get-Command Invoke-RestMethod).Parameters.Keys) {
+        # PS Core doesn't like the way AWS's Authorization header looks for some
+        # reason. So we need to disable its built-in validation.
+        $irmArgs.SkipHeaderValidation = $true
+    }
 
+    try {
+        return (Invoke-RestMethod @irmArgs @script:UseBasic)
     } catch { throw }
 }
 
