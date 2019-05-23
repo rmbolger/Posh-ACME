@@ -13,6 +13,7 @@ function Add-DnsTxtWindows {
         [pscredential]$WinCred,
         [switch]$WinUseSSL,
         [string]$WinZoneScope,
+        [string]$WinZone,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -21,16 +22,16 @@ function Add-DnsTxtWindows {
     Write-Verbose "Connected to $WinServer"
 
     $dnsParams = @{ ComputerName=$WinServer; CimSession=$cim }
-
+    
+    $zoneName = $WinZone
     Write-Debug "Attempting to find zone for $RecordName"
     if (!($zoneName = Find-WinZone $RecordName $dnsParams)) {
         throw "Unable to find zone for $RecordName"
     }
     $zone = Get-DnsServerZone $zoneName @dnsParams -EA Stop
-
+    $ZoneName =  $ZoneName.ToLower()
     # separate the portion of the name that doesn't contain the zone name
     $recShort = $RecordName.Replace(".$ZoneName",'')
-
     # check for zone scope usage
     $zoneScope = @{}
     if (-not [String]::IsNullOrWhiteSpace($WinZoneScope)) {
@@ -113,13 +114,13 @@ function Remove-DnsTxtWindows {
     Write-Verbose "Connected to $WinServer"
 
     $dnsParams = @{ ComputerName=$WinServer; CimSession=$cim }
-
+    $zoneName = $WinZone
     Write-Debug "Attempting to find zone for $RecordName"
     if (!($zoneName = Find-WinZone $RecordName $dnsParams)) {
         throw "Unable to find zone for $RecordName"
     }
     $zone = Get-DnsServerZone $zoneName @dnsParams -EA Stop
-
+    $ZoneName =  $ZoneName.ToLower()
     # separate the portion of the name that doesn't contain the zone name
     $recShort = $RecordName.Replace(".$ZoneName",'')
 
