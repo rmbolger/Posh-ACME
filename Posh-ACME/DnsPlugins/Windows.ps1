@@ -26,10 +26,12 @@ function Add-DnsTxtWindows {
     if (!($zoneName = Find-WinZone $RecordName $dnsParams)) {
         throw "Unable to find zone for $RecordName"
     }
+    Write-Verbose "Found $zoneName"
     $zone = Get-DnsServerZone $zoneName @dnsParams -EA Stop
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName.Replace(".$ZoneName",'')
+    $recShort = $RecordName.Replace(".$zoneName",'')
+    Write-Verbose "Record short name: $recShort"
 
     # check for zone scope usage
     $zoneScope = @{}
@@ -121,7 +123,7 @@ function Remove-DnsTxtWindows {
     $zone = Get-DnsServerZone $zoneName @dnsParams -EA Stop
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName.Replace(".$ZoneName",'')
+    $recShort = $RecordName.Replace(".$zoneName",'')
 
     # check for zone scope usage
     $zoneScope = @{}
@@ -269,9 +271,8 @@ function Find-WinZone {
         Write-Debug "Checking $zoneTest"
 
         if ($zoneTest -in $zones.ZoneName) {
-            $zoneName = ($zones | Where-Object { $_.ZoneName -eq $zoneTest }).ZoneName
-            $script:WinRecordZones.$RecordName = $zoneName
-            return $zoneName
+            $script:WinRecordZones.$RecordName = $zoneTest
+            return $zoneTest
         }
     }
 
