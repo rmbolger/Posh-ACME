@@ -25,7 +25,7 @@ function Add-DnsTxtClouDNS {
     try { $zoneName = Find-CDZone $RecordName $body } catch { throw }
     Write-Debug "Found zone $zoneName"
 
-    $recShort = $RecordName.Replace(".$zoneName",'')
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
 
     # search for an existing record
     try { $rec = Get-CDTxtRecord $recShort $TxtValue $zoneName $body } catch { throw }
@@ -106,7 +106,7 @@ function Remove-DnsTxtClouDNS {
     try { $zoneName = Find-CDZone $RecordName $body } catch { throw }
     Write-Debug "Found zone $zoneName"
 
-    $recShort = $RecordName.Replace(".$zoneName",'')
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
 
     # search for an existing record
     try { $rec = Get-CDTxtRecord $recShort $TxtValue $zoneName $body } catch { throw }

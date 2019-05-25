@@ -43,7 +43,7 @@ function Add-DnsTxtDNSimple {
 
     # get all the instances of the record
     try {
-        $recShort = $RecordName.Replace(".$zoneName",'')
+        $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
         $recs = (Invoke-RestMethod "$apiRoot/$acctID/zones/$zoneName/records?name=$recShort&type=TXT&per_page=100" `
             @restParams @script:UseBasic).data
     } catch { throw }
@@ -140,7 +140,7 @@ function Remove-DnsTxtDNSimple {
 
     # get all the instances of the record
     try {
-        $recShort = $RecordName.Replace(".$zoneName",'')
+        $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
         $recs = (Invoke-RestMethod "$apiRoot/$acctID/zones/$zoneName/records?name=$recShort&type=TXT&per_page=100" `
             @restParams @script:UseBasic).data
     } catch { throw }

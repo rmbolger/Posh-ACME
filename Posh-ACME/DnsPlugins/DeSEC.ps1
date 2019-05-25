@@ -200,7 +200,8 @@ function Find-DeSECRRset {
         throw "Unable to find deSEC hosted zone for $RecordName"
     }
 
-    $subname = $RecordName.Replace(".$domain",'')
+    $subname = $RecordName -ireplace [regex]::Escape(".$domain"), [string]::Empty
+
 
     # .NET thinks all URLS are Windows filenames (no trailing dot)
     # replace trailing ... with escaped %2e%2e%2e

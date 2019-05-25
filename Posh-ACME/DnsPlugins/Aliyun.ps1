@@ -25,7 +25,7 @@ function Add-DnsTxtAliyun {
     Write-Debug "Found zone $zoneName"
 
     # grab the relative portion of the fqdn
-    $recShort = $RecordName.Replace(".$zoneName",'')
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
     if ($recShort -eq $RecordName) { $recShort = '@' }
 
     # query for an existing record
@@ -109,7 +109,7 @@ function Remove-DnsTxtAliyun {
     Write-Debug "Found zone $zoneName"
 
     # grab the relative portion of the fqdn
-    $recShort = $RecordName.Replace(".$zoneName",'')
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
     if ($recShort -eq $RecordName) { $recShort = '@' }
 
     # query for an existing record
@@ -279,7 +279,7 @@ function Find-AliZone {
             # check for results
             if ($response.TotalCount -gt 0) {
                 $script:AliRecordZones.$RecordName = $response.Domains.Domain[0].DomainName # or PunyCode?
-                return $response.Domains.Domain[0].DomainName # or PunyCode?
+                return $script:AliRecordZones.$RecordName
             }
         } catch { throw }
     }

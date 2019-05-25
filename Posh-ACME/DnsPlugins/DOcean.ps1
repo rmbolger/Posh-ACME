@@ -20,7 +20,7 @@ function Add-DnsTxtDOcean {
     }
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName.Replace(".$ZoneName",'')
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
 
     $recRoot = "$apiRoot/$zoneName/records"
 
@@ -92,7 +92,7 @@ function Remove-DnsTxtDOcean {
     }
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName.Replace(".$ZoneName",'')
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
 
     $recRoot = "$apiRoot/$zoneName/records"
 

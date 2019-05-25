@@ -27,7 +27,7 @@
         return
     } else {
         # build the body
-        $hostShort = $RecordName.Replace(".$domainName",'')
+        $hostShort = $RecordName -ireplace [regex]::Escape(".$domainName"), [string]::Empty
         $bodyJson = @{host=$hostShort; type='TXT'; answer=$TxtValue; ttl=300} | ConvertTo-Json -Compress
         Write-Debug "Add JSON: $bodyJson"
 

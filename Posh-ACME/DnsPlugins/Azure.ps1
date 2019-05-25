@@ -477,7 +477,8 @@ function Get-AZTxtRecord {
     # parse the zone name from the zone id and strip it from $RecordName
     # to get the relativeRecordSetName
     $zoneName = $ZoneID.Substring($ZoneID.LastIndexOf('/')+1)
-    $relName = $RecordName.Replace(".$zoneName",'')
+    $relName = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+
     $recID = "$ZoneID/TXT/$($relName)"
 
     # query the specific record we're looking to modify

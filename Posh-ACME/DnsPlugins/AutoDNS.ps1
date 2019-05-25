@@ -32,7 +32,7 @@ function Add-DnsTxtAutoDNS {
     # record to the zone now without checking to see if it already exists. During
     # testing, AutoDNS detects the duplicate record and just ignores it. So this is
     # probably fine.
-    $recShort = $RecordName.Replace(".$zoneName",'')
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
     $updateBody = "<?xml version=`"1.0`" encoding=`"UTF-8`"?><request>$AuthBlock<task><code>0202001</code><default><rr_add><name>$recShort</name><ttl>600</ttl><type>TXT</type><value>$TxtValue</value></rr_add></default><zone><name>$zoneName</name><system_ns>$zoneNS</system_ns></zone></task></request>"
     try {
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
@@ -118,7 +118,7 @@ function Remove-DnsTxtAutoDNS {
     # record from the zone now without checking to see if it already exists. During
     # testing, it doesn't seem to care if you try and remove a record that's already
     # gone. So this is fine.
-    $recShort = $RecordName.Replace(".$zoneName",'')
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
     $updateBody = "<?xml version=`"1.0`" encoding=`"UTF-8`"?><request>$AuthBlock<task><code>0202001</code><default><rr_rem><name>$recShort</name><ttl>600</ttl><type>TXT</type><value>$TxtValue</value></rr_rem></default><zone><name>$zoneName</name><system_ns>$zoneNS</system_ns></zone></task></request>"
     try {
         Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"

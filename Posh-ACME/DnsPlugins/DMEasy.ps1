@@ -32,7 +32,8 @@ function Add-DnsTxtDMEasy {
     }
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName.Replace(".$zoneName",'')
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+
 
     $recRoot = "$apiBase/$zoneID/records"
 
@@ -130,7 +131,7 @@ function Remove-DnsTxtDMEasy {
     }
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName.Replace(".$zoneName",'')
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
 
     $recRoot = "$apiBase/$zoneID/records"
 

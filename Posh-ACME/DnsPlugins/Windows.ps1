@@ -30,7 +30,7 @@ function Add-DnsTxtWindows {
     $zone = Get-DnsServerZone $zoneName @dnsParams -EA Stop
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName.Replace(".$zoneName",'')
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
     Write-Verbose "Record short name: $recShort"
 
     # check for zone scope usage
@@ -123,7 +123,7 @@ function Remove-DnsTxtWindows {
     $zone = Get-DnsServerZone $zoneName @dnsParams -EA Stop
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName.Replace(".$zoneName",'')
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
 
     # check for zone scope usage
     $zoneScope = @{}
