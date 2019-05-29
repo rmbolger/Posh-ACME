@@ -89,22 +89,37 @@ function New-PAAccount {
         throw 'No Location header found in newAccount output'
     }
 
-    # build the return value
     $respObj = $response.Content | ConvertFrom-Json
+
+    # So historically, LE/Boulder returns the raw account ID value as a property in the JSON
+    # output for new account requests. But the finalized RFC 8555 does not require this
+    # and Boulder will be removing it. But it's still a useful value to have for referencing
+    # accounts. So if it's not returned, we're going to try and parse it from the location
+    # header. This may come back to haunt us if other ACME providers use different location
+    # schemes in the future.
+    if (-not $respObj.ID) {
+        # https://acme-staging-v02.api.letsencrypt.org/acme/acct/xxxxxxxx
+        # https://acme-v02.api.letsencrypt.org/acme/acct/xxxxxxxx
+        $acctID = $location.Substring($location.LastIndexOf('/')+1)
+    } else {
+        $acctID = $respObj.ID.ToString()
+    }
+
+    # build the return value
     $acct = [pscustomobject]@{
-        PSTypeName = 'PoshACME.PAAccount';
-        id = $respObj.ID.ToString();    # Boulder currently returns ID as an integer
-        status = $respObj.status;
-        contact = $respObj.contact;
-        location = $location;
-        key = ($acctKey | ConvertTo-Jwk);
-        alg = $alg;
-        KeyLength = $KeyLength;
+        PSTypeName = 'PoshACME.PAAccount'
+        id = $acctID
+        status = $respObj.status
+        contact = $respObj.contact
+        location = $location
+        key = ($acctKey | ConvertTo-Jwk)
+        alg = $alg
+        KeyLength = $KeyLength
         # The orders field is supposed to exist according to
         # https://tools.ietf.org/html/rfc8555#section-7.1.2
         # But it's not currently implemented in Boulder. Tracking issue is here:
         # https://github.com/letsencrypt/boulder/issues/3335
-        orders = $respObj.orders;
+        orders = $respObj.orders
     }
 
     # save it to memory and disk
