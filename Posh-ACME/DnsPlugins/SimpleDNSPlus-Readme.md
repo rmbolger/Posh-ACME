@@ -4,9 +4,8 @@ This plugin works against the Simple DNS Plus Servers [Simple DNS Plus](https://
 The assumption is that you have your own DNS Servers using this server software set up. 
 
 ## Setup
-You need to ensure HTTP API is enabled in Simple DNS Plus
+We need to ensure HTTP API is enabled in Simple DNS Plus
 
-We need to [generate an API key](https://developer.godaddy.com/keys) for the production GoDaddy environment.
 - In the main window
 - Click `Tools`
 - Click `Options`
