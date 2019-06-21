@@ -1,3 +1,12 @@
+## 3.5.0 (2019-06-21)
+
+* Added new DNS plugin for Simple DNS Plus (#149) (Thanks @alphaz18)
+* Changed a bunch of "-ErrorAction SilentlyContinue" references to "Ignore" so we're not filling the $Error collection with junk.
+* Fix for Boulder removing ID field from new account output.
+* Fixed an issue in a number of plugins that could cause errors if the case of the requested record didn't match the server's zone case. (Thanks @Makr91)
+* Fixed a bug with the Route53 plugin when used on PowerShell Core without the AwsPowerShell module installed.
+* Fixed some typos in the OVH plugin usage guide examples (#147)
+
 ## 3.4.0 (2019-04-30)
 
 * Added new DNS plugin for OVH (#79)
