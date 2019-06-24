@@ -7,7 +7,7 @@ function Add-DnsTxtFreeDNS {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [pscredential]$FDCred,
+        [pscredential]$FDCredential,
         [Parameter(ParameterSetName='Insecure',Mandatory)]
         [string]$FDUsername,
         [Parameter(ParameterSetName='Insecure',Mandatory)]
@@ -73,13 +73,27 @@ function Add-DnsTxtFreeDNS {
     .PARAMETER TxtValue
         The value of the TXT record.
 
+    .PARAMETER FDCredential
+        Username and password for FreeDNS. This PSCredential option can only be used from Windows or any OS running PowerShell 6.2 or later.
+
+    .PARAMETER FDUsername
+        Username for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+
+    .PARAMETER FDPassword
+        Password for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxtFreeDNS '_acme-challenge.site1.example.com' 'asdfqwer12345678'
+        Add-DnsTxtFreeDNS '_acme-challenge.example.com' 'txtvalue' -FDCredential (Get-Credential)
 
-        Adds a TXT record for the specified site with the specified value.
+        Adds a TXT record using after providing credentials in a prompt.
+
+    .EXAMPLE
+        Add-DnsTxtFreeDNS '_acme-challenge.example.com' 'txtvalue' -FDUsername 'myusername' -FDPassword 'mypassword'
+
+        Adds a TXT record using plain text credentials.
     #>
 }
 
@@ -92,7 +106,7 @@ function Remove-DnsTxtFreeDNS {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [pscredential]$FDCred,
+        [pscredential]$FDCredential,
         [Parameter(ParameterSetName='Insecure',Mandatory)]
         [string]$FDUsername,
         [Parameter(ParameterSetName='Insecure',Mandatory)]
@@ -119,11 +133,9 @@ function Remove-DnsTxtFreeDNS {
             ErrorAction = 'Stop'
         }
 
-        $response = Invoke-WebRequest @iwrArgs @script:UseBasic
-
-        $response.Content | Out-File .\del-output.html
-
-
+        Invoke-WebRequest @iwrArgs @script:UseBasic | Out-Null
+        # No error is generated when trying to delete a record that doesn't exist.
+        # No error is generated when trying to delete a record that is not yours.
 
     } else {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
@@ -142,13 +154,27 @@ function Remove-DnsTxtFreeDNS {
     .PARAMETER TxtValue
         The value of the TXT record.
 
+    .PARAMETER FDCredential
+        Username and password for FreeDNS. This PSCredential option can only be used from Windows or any OS running PowerShell 6.2 or later.
+
+    .PARAMETER FDUsername
+        Username for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+
+    .PARAMETER FDPassword
+        Password for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxtFreeDNS '_acme-challenge.site1.example.com' 'asdfqwer12345678'
+        Remove-DnsTxtFreeDNS '_acme-challenge.example.com' 'txtvalue' -FDCredential (Get-Credential)
 
-        Removes a TXT record for the specified site with the specified value.
+        Removes a TXT record using after providing credentials in a prompt.
+
+    .EXAMPLE
+        Remove-DnsTxtFreeDNS '_acme-challenge.example.com' 'txtvalue' -FDUsername 'myusername' -FDPassword 'mypassword'
+
+        Removes a TXT record using plain text credentials.
     #>
 }
 
@@ -183,7 +209,7 @@ function Connect-FreeDNS {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [pscredential]$FDCred,
+        [pscredential]$FDCredential,
         [Parameter(ParameterSetName='Insecure',Mandatory)]
         [string]$FDUsername,
         [Parameter(ParameterSetName='Insecure',Mandatory)]
@@ -200,8 +226,8 @@ function Connect-FreeDNS {
 
     # get plain text versions of the pscredential we can work with
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $FDUsername = $FDCred.UserName
-        $FDPassword = $FDCred.GetNetworkCredential().Password
+        $FDUsername = $FDCredential.UserName
+        $FDPassword = $FDCredential.GetNetworkCredential().Password
     }
 
     # URI escape the credentials
@@ -334,15 +360,14 @@ function Get-FDTxtRecords {
         $recMatches = $recMatches | Where-Object { $RecordName -eq $_.Groups['name'].value }
     }
 
-    $recMatches | %{ Write-Debug "$($_.Groups['value'].value)" }
+    # The Subdomains page appears to truncate the record values if they are longer than
+    # a certain threshold (~20 characters). It truncates the text and adds a "..." at the end.
+    # Unfortunately, all of our ACME challenge records are going to exceed that length. So in
+    # order to get the full value, we have to fetch the edit page for that record which has
+    # the complete value in a text box.
 
-    # filter by txt value if specified
-    if (-not [string]::IsNullOrWhiteSpace($TxtValue)) {
-        $recMatches = $recMatches | Where-Object { $TxtValue -eq $_.Groups['value'].value.Trim("&quot;") }
-    }
-
-    # return a flat version of whatever's left
-    $recMatches | ForEach-Object {
+    # first flatten the current results so it's easier to modify
+    $recs = $recMatches | ForEach-Object {
         [pscustomobject]@{
             name  = $_.Groups['name'].value
             nameShort = $_.Groups['name'].value.Replace(".$DomainName",'')
@@ -350,6 +375,20 @@ function Get-FDTxtRecords {
             value = $_.Groups['value'].value.Trim("&quot;")
         }
     }
+
+    foreach ($rec in $recs) {
+        # skip anything that hasn't been truncated
+        if (-not $rec.value.EndsWith('...')) { continue }
+        $rec.value = Get-FDTxtRecordValue $rec.id
+        Write-Debug "Updated $($rec.nameshort) value to $($rec.value)"
+    }
+
+    # filter by txt value if specified
+    if (-not [string]::IsNullOrWhiteSpace($TxtValue)) {
+        $recs = $recs | Where-Object { $TxtValue -eq $_.value }
+    }
+
+    $recs
 }
 
 function Find-FDZone {
@@ -383,4 +422,37 @@ function Find-FDZone {
     }
 
     throw "No zone found for $RecordName"
+}
+
+function Get-FDTxtRecordValue {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$RecordID
+    )
+
+    $url = "https://freedns.afraid.org/subdomain/edit.php?data_id=$RecordID"
+    $reTxtValue = [regex]'"&quot;(?<value>.*)&quot;"'
+
+    # On non-premium accounts, FreeDNS occasionally returns a page prompting
+    # to go premium rather than the requested page. This usually happens after
+    # a period of inactivity and immediately requesting the page again returns
+    # the correct response. So check and try again if necessary.
+
+    Write-Debug "Querying Record $RecordID page"
+    $response = Invoke-WebRequest $url -WebSession $script:FDSession @script:UseBasic
+    $valMatches = $reTxtValue.Matches($response.Content)
+
+    # retry once on failure
+    if ($valMatches.Count -eq 0) {
+        $response = Invoke-WebRequest $url -WebSession $script:FDSession @script:UseBasic
+        $valMatches = $reTxtValue.Matches($response.Content)
+    }
+
+    if ($valMatches.Count -eq 0) {
+        throw "Unable to parse the TXT record value."
+    }
+
+    # there should be only one result
+    return $valMatches[0].Groups['value'].value
 }
