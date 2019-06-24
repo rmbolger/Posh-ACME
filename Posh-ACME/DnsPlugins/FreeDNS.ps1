@@ -18,13 +18,45 @@ function Add-DnsTxtFreeDNS {
 
     Connect-FreeDNS @PSBoundParameters
 
-    $domains = Get-FDOwnedDomains
+    $zone = Find-FDZone $RecordName
+    Write-Verbose "Found owned domain $($zone.domain) ($($zone.id))"
 
-    $domains | ForEach-Object {
-        Write-Verbose "$($_.domain) = $($_.id)"
-        $recs = Get-FDTxtRecords $_.id $_.domain
-        $recs | ForEach-Object {
-            Write-Verbose "    $($_.nameShort) = $($_.value)"
+    $rec = Get-FDTxtRecords $zone.id $zone.domain $RecordName $TxtValue
+    $recShort = $RecordName -ireplace [regex]::Escape(".$($zone.domain)"), [string]::Empty
+
+    if ($rec) {
+        Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
+    } else {
+        # add the new record
+        Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
+
+        # type=TXT&domain_id=$domain_id&subdomain=$subdomain&address=%22$value%22&send=Save%21
+        $iwrArgs = @{
+            Uri = 'https://freedns.afraid.org/subdomain/save.php?step=2'
+            Method = 'Post'
+            Body = @{
+                type = 'TXT'
+                domain_id = $zone.id
+                subdomain = $recShort
+                address = "`"$TxtValue`""
+                send = 'Save!'
+            }
+            WebSession = $script:FDSession
+            ErrorAction = 'Stop'
+        }
+
+        $response = Invoke-WebRequest @iwrArgs @script:UseBasic
+
+        # success: Subdomains page with no confirmation, but TxtValue should be in the table now
+        # duplicate: "You already have another already existent <blah> record."
+        # underscore, not owned: "Creation of records beginning with '_' are presently restricted to the domain owner only by default - this is temporary (2016-02-10) please contact me if you need access."
+        # captcha: "The security code was incorrect, please try again."
+
+        # Check for the errors we know about. For now, we'll assume anything else is a success.
+        if ($response.Content -like "*Creation of records beginning with '_' are presently restricted to the domain owner*") {
+            throw "FreeDNS does not allow creating records beginning with '_' unless you are the domain owner."
+        } elseif ($response.Content -like '*security code was incorrect*') {
+            throw "FreeDNS requires solving a CAPTCHA to add records unless you are the domain owner or have a premium account. Upgrade your account to premium or use one of your own domains."
         }
     }
 
@@ -70,6 +102,32 @@ function Remove-DnsTxtFreeDNS {
     )
 
     Connect-FreeDNS @PSBoundParameters
+
+    $zone = Find-FDZone $RecordName
+    Write-Verbose "Found owned domain $($zone.domain) ($($zone.id))"
+
+    $rec = Get-FDTxtRecords $zone.id $zone.domain $RecordName $TxtValue
+
+    if ($rec) {
+        # remove the record
+        Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
+
+        $iwrArgs = @{
+            Uri = "https://freedns.afraid.org/subdomain/delete2.php?data_id%5B%5D=$($rec.id)&submit=delete+selected"
+            Method = 'Get'
+            WebSession = $script:FDSession
+            ErrorAction = 'Stop'
+        }
+
+        $response = Invoke-WebRequest @iwrArgs @script:UseBasic
+
+        $response.Content | Out-File .\del-output.html
+
+
+
+    } else {
+        Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
+    }
 
     <#
     .SYNOPSIS
@@ -117,7 +175,7 @@ function Save-DnsTxtFreeDNS {
 ############################
 
 # http://freedns.afraid.org/faq/#17
-# Inspiration from
+# Adapted from
 # https://github.com/Neilpang/acme.sh/blob/master/dnsapi/dns_freedns.sh
 
 function Connect-FreeDNS {
@@ -150,7 +208,7 @@ function Connect-FreeDNS {
     $userEscaped = [uri]::EscapeDataString($FDUsername)
     $passEscaped = [uri]::EscapeDataString($FDPassword)
 
-    $irmArgs = @{
+    $iwrArgs = @{
         Uri = 'https://freedns.afraid.org/zc.php?step=2'
         Method = 'Post'
         Body = "username=$userEscaped&password=$passEscaped&submit=Login&action=auth"
@@ -158,16 +216,16 @@ function Connect-FreeDNS {
         ErrorAction = 'Stop'
     }
 
-    try { Invoke-WebRequest @irmArgs @script:UseBasic | Out-Null }
+    try { Invoke-WebRequest @iwrArgs @script:UseBasic | Out-Null }
     catch {
-        # So PowerShell Core has an open issue that throws an exception on a 302 redirect
+        # PowerShell Core has an open issue that throws an exception on a 302 redirect
         # when the original location is HTTPS and the new location is HTTP.
         # https://github.com/PowerShell/PowerShell/issues/2896
         # For some reason, afraid.org is redirecting to HTTP after we auth over HTTPS and
         # is triggering this bug.
         # However, a successful login still generates the WebSession with the auth cookie
-        # we care about. So we're just going to swallow the error on Core and go about our
-        # if it looks like the login was successful.
+        # we care about. So we're just going to swallow the error on Core continue if it
+        # looks like the login was successful.
         if ($FDSession.Cookies.Count -gt 0 -and 'Core' -eq $PSEdition) {
             Write-Debug "Got cookies on Core despite exception!"
         } else {
@@ -187,7 +245,7 @@ function Connect-FreeDNS {
 
         # Create a new session object using the dns_cookie we got back
         $script:FDSession = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
-        $FDSession.Cookies.GetCookies($irmArgs.Uri) | ForEach-Object {
+        $FDSession.Cookies.GetCookies($iwrArgs.Uri) | ForEach-Object {
             if ('dns_cookie' -eq $_.name) {
                 Write-Debug "Saving dns_cookie value"
                 $script:FDSession.Cookies.Add([Net.Cookie]::new($_.name, $_.value, '', 'freedns.afraid.org'))
@@ -198,23 +256,25 @@ function Connect-FreeDNS {
     }
 }
 
-function Get-FDOwnedDomains {
+function Get-FDDomains {
     [CmdletBinding()]
     param()
 
-    $url = 'https://freedns.afraid.org/domain/'
-    $reDomains = [regex]'(?smi)"2"><b>(?<domain>[-_.a-z0-9]+).+?(?:href=/subdomain/\?limit=)(?<id>\d+)>'
+    # It's possible to limit these zones to only "owned" domains from the Domains page. But it's possible
+    # people may be adding non-underscore TXT records to unowned domains. So we need to include those as well.
+    # $url = 'https://freedns.afraid.org/domain/'
+    # $reDomains = [regex]'(?smi)"2"><b>(?<domain>[-_.a-z0-9]+).+?(?:href=/subdomain/\?limit=)(?<id>\d+)>'
 
-    # Possible to get this from /subdomain/ as well
-    # $url = 'https://freedns.afraid.org/subdomain/'
-    # $reDomains = [regex]'(?smi)<td>(?<domain>[-_.a-z0-9]+).+?(?:edit_domain_id=)(?<id>\d+)'
+    # It's possible to get this data from /subdomain/ as well
+    $url = 'https://freedns.afraid.org/subdomain/'
+    $reDomains = [regex]'(?smi)<td>(?<domain>[-_.a-z0-9]+).+?(?:edit_domain_id=)(?<id>\d+)'
 
     # On non-premium accounts, FreeDNS occasionally returns a page prompting
     # to go premium rather than the requested page. This usually happens after
     # a period of inactivity and immediately requesting the page again returns
     # the correct response. So check and try again if necessary.
 
-    Write-Debug "Querying Domains page"
+    Write-Debug "Querying Subdomains page"
     $response = Invoke-WebRequest $url -WebSession $script:FDSession @script:UseBasic
     $domains = $reDomains.Matches($response.Content)
 
@@ -225,7 +285,7 @@ function Get-FDOwnedDomains {
     }
 
     if ($domains.Count -eq 0) {
-        throw "Unable to find any owned domains. Please add at least one."
+        throw "Unable to find any domains. You must first add at least one record to the domain you are trying to use."
     } else {
         Write-Debug "$($domains.Count) domain matches found."
     }
@@ -242,11 +302,12 @@ function Get-FDTxtRecords {
         [Parameter(Mandatory)]
         [string]$DomainID,
         [Parameter(Mandatory)]
-        [string]$DomainName
+        [string]$DomainName,
+        [string]$RecordName,
+        [string]$TxtValue
     )
 
     $url = "https://freedns.afraid.org/subdomain/?limit=$DomainID"
-    #$reRecs = [regex]'(?smi)<a href=edit.php\?data_id=(?<id>\d+)>(?<name>[-_.a-z0-9]+)</a>.*?>TXT</td><td bgcolor=#eeeeee>&quot;(?<value>.+?)&quot;</td>'
     $reRecs = [regex]'(?smi)<tr><td bgcolor=#eeeeee.+?(?:data_id=)(?<id>\d+)>(?<name>[-_.a-z0-9]+)</a>.+?(?:<td bgcolor=#eeeeee>)(?<type>\w+)(?:</td><td bgcolor=#eeeeee>)(?<value>.+?)</td>'
 
     # On non-premium accounts, FreeDNS occasionally returns a page prompting
@@ -256,18 +317,32 @@ function Get-FDTxtRecords {
 
     Write-Debug "Querying records for domain $DomainID"
     $response = Invoke-WebRequest $url -WebSession $script:FDSession @script:UseBasic
-    $recs = $reRecs.Matches($response.Content)
+    $recMatches = $reRecs.Matches($response.Content)
 
     # retry once on failure
-    if ($recs.Count -eq 0) {
+    if ($recMatches.Count -eq 0) {
         $response = Invoke-WebRequest $url -WebSession $script:FDSession @script:UseBasic
-        $recs = $reRecs.Matches($response.Content)
+        $recMatches = $reRecs.Matches($response.Content)
     }
 
-    $recs = $recs | Where-Object { 'TXT' -eq $_.Groups['type'].value }
-    Write-Debug "$($recs.Count) TXT records found."
+    # filter out non-TXT records
+    $recMatches = $recMatches | Where-Object { 'TXT' -eq $_.Groups['type'].value }
+    Write-Debug "$($recMatches.Count) TXT records found."
 
-    $recs | ForEach-Object {
+    # filter by record name if specified
+    if (-not [string]::IsNullOrWhiteSpace($RecordName)) {
+        $recMatches = $recMatches | Where-Object { $RecordName -eq $_.Groups['name'].value }
+    }
+
+    $recMatches | %{ Write-Debug "$($_.Groups['value'].value)" }
+
+    # filter by txt value if specified
+    if (-not [string]::IsNullOrWhiteSpace($TxtValue)) {
+        $recMatches = $recMatches | Where-Object { $TxtValue -eq $_.Groups['value'].value.Trim("&quot;") }
+    }
+
+    # return a flat version of whatever's left
+    $recMatches | ForEach-Object {
         [pscustomobject]@{
             name  = $_.Groups['name'].value
             nameShort = $_.Groups['name'].value.Replace(".$DomainName",'')
@@ -275,5 +350,37 @@ function Get-FDTxtRecords {
             value = $_.Groups['value'].value.Trim("&quot;")
         }
     }
+}
 
+function Find-FDZone {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$RecordName
+    )
+
+    # setup a module variable to cache the record to zone ID mapping
+    # so it's quicker to find later
+    if (!$script:FDRecordZones) { $script:FDRecordZones = @{} }
+
+    # check for the record in the cache
+    if ($script:FDRecordZones.ContainsKey($RecordName)) {
+        return $script:FDRecordZones.$RecordName
+    }
+
+    # grab the set of owned domains for this account
+    $domains = Get-FDDomains
+
+    # Search for the zone from longest to shortest set of FQDN pieces.
+    $pieces = $RecordName.Split('.')
+    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
+        Write-Debug "Checking $zoneTest"
+        if ($zoneTest -in $domains.domain) {
+            $script:FDRecordZones.$RecordName = $domains | Where-Object { $zoneTest -eq $_.domain }
+            return $script:FDRecordZones.$RecordName
+        }
+    }
+
+    throw "No zone found for $RecordName"
 }
