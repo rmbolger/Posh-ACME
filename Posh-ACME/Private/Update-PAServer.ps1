@@ -30,7 +30,7 @@ function Update-PAServer {
 
         # determine the directory folder/file
         $dirFolder = $DirectoryUrl.Replace('https://','').Replace(':','_')
-        $dirFolder = Join-Path $script:ConfigRoot $dirFolder.Substring(0,$dirFolder.IndexOf('/'))
+        $dirFolder = Join-Path (Get-ConfigRoot) $dirFolder.Substring(0,$dirFolder.IndexOf('/'))
         $dirFile = Join-Path $dirFolder 'dir.json'
 
         # Full refresh

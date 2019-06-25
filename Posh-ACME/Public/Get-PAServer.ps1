@@ -23,7 +23,7 @@ function Get-PAServer {
 
             # read the contents of each server's dir.json
             Write-Debug "Loading PAServer list from disk"
-            $rawFiles = Get-ChildItem (Join-Path $script:ConfigRoot '\*\dir.json') | Get-Content -Raw
+            $rawFiles = Get-ChildItem (Join-Path (Get-ConfigRoot) '\*\dir.json') | Get-Content -Raw
             $rawFiles | ConvertFrom-Json | Sort-Object location | ForEach-Object {
 
                     # insert the type name so it displays properly
@@ -45,7 +45,7 @@ function Get-PAServer {
 
                 # build the path to dir.json
                 $dirFile = $DirectoryUrl.Replace('https://','').Replace(':','_')
-                $dirFile = Join-Path $script:ConfigRoot $dirFile.Substring(0,$dirFile.IndexOf('/'))
+                $dirFile = Join-Path (Get-ConfigRoot) $dirFile.Substring(0,$dirFile.IndexOf('/'))
                 $dirFile = Join-Path $dirFile 'dir.json'
 
                 # check if it exists
