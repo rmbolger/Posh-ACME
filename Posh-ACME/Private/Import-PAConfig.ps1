@@ -79,6 +79,15 @@ function Import-PAConfig {
             }
 
             $ImportAccount = $true
+
+        } else {
+            # wipe references since we have no current server
+            $script:DirFolder = $null
+            $script:Dir = $null
+            $script:AcctFolder = $null
+            $script:Acct = $null
+            $script:OrderFolder = $null
+            $script:Order = $null
         }
     }
 
@@ -92,6 +101,13 @@ function Import-PAConfig {
             $script:Acct = Get-PAAccount $acctID
 
             $ImportOrder = $true
+
+        } else {
+            # wipe references since we have no current account
+            $script:AcctFolder = $null
+            $script:Acct = $null
+            $script:OrderFolder = $null
+            $script:Order = $null
         }
     }
 
@@ -103,6 +119,11 @@ function Import-PAConfig {
 
             $script:OrderFolder = Join-Path $script:AcctFolder $domain.Replace('*','!')
             $script:Order = Get-PAOrder $domain
+
+        } else {
+            # wipe references since we have no current order
+            $script:OrderFolder = $null
+            $script:Order = $null
         }
     }
 
