@@ -44,9 +44,8 @@ function Get-PAServer {
                 }
 
                 # build the path to dir.json
-                $dirFile = $DirectoryUrl.Replace('https://','').Replace(':','_')
-                $dirFile = Join-Path (Get-ConfigRoot) $dirFile.Substring(0,$dirFile.IndexOf('/'))
-                $dirFile = Join-Path $dirFile 'dir.json'
+                $dirFolder = ConvertTo-DirFolder $DirectoryUrl
+                $dirFile = Join-Path $dirFolder 'dir.json'
 
                 # check if it exists
                 if (Test-Path $dirFile -PathType Leaf) {

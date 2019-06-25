@@ -55,11 +55,10 @@ function Import-PAConfig {
     if (!$Level -or $Level -eq 'Server') {
 
         # load the current ACME directory into memory if it exists on disk
-        $dirUrl = [string](Get-Content (Join-Path $script:ConfigRoot 'current-server.txt') -EA Ignore)
+        $dirUrl = [string](Get-Content (Join-Path (Get-ConfigRoot) 'current-server.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($dirUrl)) {
 
-            $dirFolder = $dirUrl.Replace('https://','').Replace(':','_')
-            $script:DirFolder = Join-Path $script:ConfigRoot $dirFolder.Substring(0,$dirFolder.IndexOf('/'))
+            $script:DirFolder = ConvertTo-DirFolder $dirUrl
             $script:Dir = Get-PAServer $dirUrl
 
             # deal with cert validation options between PS editions
@@ -86,10 +85,10 @@ function Import-PAConfig {
     if ($ImportAccount -or $Level -eq 'Account') {
 
         # load the current account into memory if it exists on disk
-        $acctID = [string](Get-Content (Join-Path $script:DirFolder 'current-account.txt') -EA Ignore)
+        $acctID = [string](Get-Content (Join-Path (Get-DirFolder) 'current-account.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($acctID)) {
 
-            $script:AcctFolder = Join-Path $script:DirFolder $acctID
+            $script:AcctFolder = Join-Path (Get-DirFolder) $acctID
             $script:Acct = Get-PAAccount $acctID
 
             $ImportOrder = $true
