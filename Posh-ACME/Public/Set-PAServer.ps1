@@ -5,6 +5,7 @@ function Set-PAServer {
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
         [Alias('location')]
         [string]$DirectoryUrl,
+        [Parameter(ValueFromPipelineByPropertyName)]
         [switch]$SkipCertificateCheck
     )
 
