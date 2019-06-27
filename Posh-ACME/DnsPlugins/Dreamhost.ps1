@@ -60,7 +60,6 @@ function Remove-DnsTxtDreamhost {
         $ExtraParams
     )
 
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
     $uri = "https://api.dreamhost.com/?cmd=dns-remove_record&type=TXT&format=json&key=$DreamhostApiKey&record=$RecordName&value=$TxtValue"
     $response = Invoke-RestMethod -Method Get -Uri $uri @script:UseBasic
     Write-Verbose "Result: $($response.result), $($response.data)"
