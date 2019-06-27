@@ -4,7 +4,7 @@ This plugin works against the [Dreamhost](https://www.dreamhost.com/) API. It is
 
 ## Setup
 
-We need to generate the API key that will be used to update DNS records. Open the [Web Panel API](https://panel.dreamhost.com/index.cgi) page, and generate a new API key with dns-add_record and dns-remove_record permissions. It is recommended to name this API key something memorable like "Posh-ACME" by entering this in the "Comment for this key" field. Take note of your new API key.
+We need to generate the API key that will be used to update DNS records. Open the [Web Panel API](https://panel.dreamhost.com/index.cgi) page, and generate a new API key with dns-add_record, dns-list_records, and dns-remove_record permissions. It is recommended to name this API key something memorable like "Posh-ACME" by entering this in the "Comment for this key" field. Take note of your new API key.
 
 ## Using the Plugin
 

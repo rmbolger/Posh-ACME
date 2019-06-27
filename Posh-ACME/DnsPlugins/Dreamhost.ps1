@@ -11,11 +11,18 @@ function Add-DnsTxtDreamhost {
         $ExtraParams
     )
 
-    $uri = "https://api.dreamhost.com/?cmd=dns-add_record&type=TXT&format=json&key=$DreamhostApiKey&record=$RecordName&value=$TxtValue"
-    $response = Invoke-RestMethod -Method Get -Uri $uri @script:UseBasic
-    Write-Verbose "Result: $($response.result), $($response.data)"
-    if ($response.result -ne 'success') {
-        Write-Verbose "Dreamhost dns plugin failed to add record: $($response.data)"
+    $recordExists = Test-DnsTxtDreamhost -RecordName $RecordName -TxtValue $TxtValue -DreamhostApiKey $DreamhostApiKey
+    if (!$recordExists) {
+        Write-Verbose "Adding $RecordName with value $TxtValue on Dreamhost"
+        $uri = "https://api.dreamhost.com/?cmd=dns-add_record&type=TXT&format=json&key=$DreamhostApiKey&record=$RecordName&value=$TxtValue"
+        $response = Invoke-RestMethod -Method Get -Uri $uri @script:UseBasic
+        Write-Verbose "Result=$($response.result), Data=$($response.data)"
+        
+        if ($response.result -ne 'success' -and !([string]$response.data).StartsWith('record_already_exists')) {
+            throw "Failed to add Dreamhost DNS record; Result=$($response.result), Data=$($response.data)"
+        }
+    } else {
+        Write-Verbose "Record $RecordName already contains $TxtValue. Nothing to do."
     }
     
     <#
@@ -60,11 +67,18 @@ function Remove-DnsTxtDreamhost {
         $ExtraParams
     )
 
-    $uri = "https://api.dreamhost.com/?cmd=dns-remove_record&type=TXT&format=json&key=$DreamhostApiKey&record=$RecordName&value=$TxtValue"
-    $response = Invoke-RestMethod -Method Get -Uri $uri @script:UseBasic
-    Write-Verbose "Result: $($response.result), $($response.data)"
-    if ($response.result -ne 'success') {
-        Write-Verbose "Dreamhost dns plugin failed to remove record: $($response.data)"
+    $recordExists = Test-DnsTxtDreamhost -RecordName $RecordName -TxtValue $TxtValue -DreamhostApiKey $DreamhostApiKey
+    if ($recordExists) {
+        Write-Verbose "Removing $RecordName with value $TxtValue on Dreamhost"
+        $uri = "https://api.dreamhost.com/?cmd=dns-remove_record&type=TXT&format=json&key=$DreamhostApiKey&record=$RecordName&value=$TxtValue"
+        $response = Invoke-RestMethod -Method Get -Uri $uri @script:UseBasic
+        Write-Verbose "Result=$($response.result), Data=$($response.data)"
+        
+        if ($response.result -ne 'success' -and !([string]$response.data).StartsWith('no_')) {
+            throw "Failed to remove Dreamhost DNS record; Result=$($response.result), Data=$($response.data)"
+        }
+    } else {
+        Write-Verbose "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     }
 
     <#
@@ -109,5 +123,55 @@ function Save-DnsTxtDreamhost {
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+    #>
+}
+
+function Test-DnsTxtDreamhost {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [string]$RecordName,
+        [Parameter(Mandatory,Position=1)]
+        [string]$TxtValue,
+        [Parameter(Mandatory,Position=2)]
+        [string]$DreamhostApiKey
+    )
+
+    Write-Verbose "Searching dns records on Dreamhost for TXT record $RecordName with value $TxtValue"
+    $uri = "https://api.dreamhost.com/?cmd=dns-list_records&format=json&key=$DreamhostApiKey"
+    $response = Invoke-RestMethod -Method Get -Uri $uri @script:UseBasic
+    if ($response.result -ne 'success') {
+        throw "Failed to list Dreamhost DNS records; Result=$($response.result), Data=$($response.data)"
+    }
+
+    $record = $response.data | Where-Object { $_.type -eq 'TXT' -and $_.record -eq $RecordName -and $_.value -eq $TxtValue }
+    if ($null -ne $record) {
+        Write-Verbose "Found matching record"
+    } else {
+        Write-Verbose "No matching record found"
+    }
+
+    $null -ne $record
+
+    <#
+    .SYNOPSIS
+        Test if a given TXT dns record and value exist on a Dreamhost account
+
+    .DESCRIPTION
+        Test if a given TXT dns record and value exist on a Dreamhost account
+
+    .PARAMETER RecordName
+        The fully qualified name of the TXT record.
+
+    .PARAMETER TxtValue
+        The value of the TXT record.
+
+    .PARAMETER ApiKey
+        A Dreamhost API key with minimum function access of dns-add_record and dns-remove_record. See related links for URI to Dreamhost panel for API key generation.
+
+    .EXAMPLE
+        Test-DnsTxtDreamhost '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'ABCDEFGH12345678'
+
+        Returns $true if a TXT record with the name '_acme-challenge.site1.example.com' exists with a value of 'asdfqwer12345678' on the default account associated with the given API key.
     #>
 }
