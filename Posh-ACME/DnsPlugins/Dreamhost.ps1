@@ -15,7 +15,7 @@ function Add-DnsTxtDreamhost {
     $response = Invoke-RestMethod -Method Get -Uri $uri @script:UseBasic
     Write-Verbose "Result: $($response.result), $($response.data)"
     if ($response.result -ne 'success') {
-        throw "Failed to add record: $($response.data)"
+        Write-Verbose "Dreamhost dns plugin failed to add record: $($response.data)"
     }
     
     <#
@@ -64,7 +64,7 @@ function Remove-DnsTxtDreamhost {
     $response = Invoke-RestMethod -Method Get -Uri $uri @script:UseBasic
     Write-Verbose "Result: $($response.result), $($response.data)"
     if ($response.result -ne 'success') {
-        throw "Failed to remove record: $($response.data)"
+        Write-Verbose "Dreamhost dns plugin failed to remove record: $($response.data)"
     }
 
     <#
