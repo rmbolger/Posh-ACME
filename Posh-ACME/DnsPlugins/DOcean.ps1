@@ -36,7 +36,7 @@ function Add-DnsTxtDOcean {
             type = 'TXT';
             name = $recShort;
             data = $TxtValue;
-            ttl  = 10;
+            ttl  = 30;
         } | ConvertTo-Json
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
         Invoke-RestMethod $recRoot -Method Post @restParams -Body $recBody @script:UseBasic | Out-Null
@@ -158,6 +158,9 @@ function Save-DnsTxtDOcean {
 ############################
 # Helper Functions
 ############################
+
+# API Docs
+# https://developers.digitalocean.com/documentation/v2/#introduction
 
 function Find-DOZone {
     [CmdletBinding()]
