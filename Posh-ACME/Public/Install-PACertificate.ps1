@@ -12,6 +12,15 @@ function Install-PACertificate {
             return
         }
 
+        if (-not $PACertificate) {
+            # try to get the certificate associated with the current order
+            $PACertificate = Get-PACertificate
+
+            if (-not $PACertificate) {
+                throw "No certificate found for current order."
+            }
+        }
+
         Write-Verbose "Importing $($PACertificate.Subject) certificate to Windows certificate store."
         Import-PfxCertInternal $PACertificate.PfxFullChain -PfxPass $PACertificate.PfxPass
     }
