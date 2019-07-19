@@ -50,6 +50,7 @@ FunctionsToExport = @(
     'Get-PACertificate',
     'Get-PAOrder',
     'Get-PAServer',
+    'Install-PACertificate',
     'New-PAAccount',
     'New-PACertificate',
     'New-PAOrder',

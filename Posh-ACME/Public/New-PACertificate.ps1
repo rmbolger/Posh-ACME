@@ -223,19 +223,15 @@ function New-PACertificate {
 
         Write-Verbose "Successfully created certificate."
 
+        $cert = Get-PACertificate
+
         # install to local computer store if asked
         if ($order.Install) {
-            Write-Verbose "Importing certificate to Windows certificate store."
-            if ([string]::IsNullOrEmpty($PfxPass)) {
-                $secPass = New-Object Security.SecureString
-            } else {
-                $secPass = ConvertTo-SecureString $PfxPass -AsPlainText -Force
-            }
-            Import-PfxCertInternal (Join-Path $script:OrderFolder 'fullchain.pfx') -PfxPass $secPass
+            $cert | Install-PACertificate
         }
 
         # output cert details
-        Get-PACertificate
+        Write-Output $cert
 
     } elseif ($order.CertExpires) {
         Write-Verbose "This certificate order has already been completed. Use -Force to overwrite the current certificate."
