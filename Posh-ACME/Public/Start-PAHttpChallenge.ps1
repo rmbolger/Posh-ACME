@@ -15,6 +15,10 @@ function Start-PAHttpChallenge {
     )
 
     begin {
+        # if TImeToLive is set to zero, write a warning
+        if($TimeToLive -eq 0) {
+            Write-Warning -Message 'TimeToLive ist set to 0. If domain can''t be validated, listener will run infinitely until manually stopped'
+        }
         # set the prefix for verbose messages with time output
         [string]$logTimeFormat = '[HH:mm:ss]::'
 
