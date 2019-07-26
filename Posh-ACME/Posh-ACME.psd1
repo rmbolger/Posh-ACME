@@ -63,6 +63,7 @@ FunctionsToExport = @(
     'Set-PAAccount',
     'Set-PAOrder',
     'Set-PAServer',
+    'Start-PAHttpChallenge',
     'Submit-ChallengeValidation',
     'Submit-OrderFinalize',
     'Submit-Renewal',
