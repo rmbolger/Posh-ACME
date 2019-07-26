@@ -1,5 +1,6 @@
 function Start-PAHttpChallenge {
     [CmdletBinding()]
+    [OutputType('PoshACME.PAAuthorization')]
     param (
         [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
         [Alias('domain', 'fqdn')]
@@ -14,7 +15,11 @@ function Start-PAHttpChallenge {
     )
 
     begin {
+        # set the prefix for verbose messages with time output
         [string]$logTimeFormat = '[HH:mm:ss]::'
+
+        # write information that verbose output of sub functions is surpassed.
+        # did this because verbose output from api calls are unnecessarily filling the output
         Write-Verbose -Message ('INFO: Verbose messages for sub functions are suppressed.')
         # Make sure we have an account configured
         if (!(Get-PAAccount -Verbose:$false)) {
@@ -43,12 +48,16 @@ function Start-PAHttpChallenge {
             if (Get-PAOrder -MainDOmain $MainDomain) {
             }
             elseif ((Get-PAOrder).SANs -contains $MainDomain) {
-                # get MainDomain
+                # parameter is SAN get MainDomain
                 $trueMainDomain = Get-PAOrder -Verbose:$false |
                     Where-Object -FilterScript {$_.SANs -contains $MainDomain} |
                     Select-Object -ExpandProperty 'MainDomain'
                 Write-Warning -Message ('{0} is a SAN, setting MainDomain to {1} and continue processing all pending requests for MainDomain' -f $MainDomain, $trueMainDomain)
                 $MainDomain = $trueMainDomain
+            }
+            else {
+                # nothing found, throw out, message is handled witch catch
+                throw
             }
 
             # get pending PAOrder for given/fetched MainDomain.
@@ -65,7 +74,7 @@ function Start-PAHttpChallenge {
             }
         }
         Write-verbose -Message ('found {0} authorizations with HTTP01Status pending' -f $openAuthorizations.Count)
-        # loop through array (needed for processing function call without given MainDomain)
+        # loop through array of open authorizations
         :listenerLoop foreach ($openAuthorization in $openAuthorizations) {
             # create variable with all necessary information for http listener
             $httpPublish = $openAuthorization |
@@ -74,7 +83,7 @@ function Start-PAHttpChallenge {
                 , 'HTTP01Url'`
                 , @{L = 'Body'; E = { Get-KeyAuthorization $_.HTTP01Token (Get-PAAccount) -Verbose:$false } }
 
-            # set path to token file
+            # set web path to token file
             [string]$uriPath = ('/.well-known/acme-challenge/{0}' -f $httpPublish.HTTP01Token)
 
             #region initialize and start WebServer
@@ -82,16 +91,16 @@ function Start-PAHttpChallenge {
                 # create http listener
                 $httpListener = [System.Net.HttpListener]::new()
 
-                # set binding of http listener based on NoMainDomainBinding switch - main purpose for testing, may help in some productive environments
+                # set binding of http listener based on NoPrefix switch
+                # main purpose for testing, may help in some productive environments
                 if ($NoPrefix) {
                     [string]$bindingMainDomain = '*'
                 }
                 else {
-                    # set from $httpPublish.MainDomain to * - why ever i get errors since function rework and setting a prefix other than localhost/*
                     [string]$bindingMainDomain = $httpPublish.MainDomain
                 }
 
-                # set binding, if port is 80 do not explicitly set port (more beautiful log/verbose/....)
+                # set binding, if no port is specified do not explicitly set port (more beautiful log/verbose/....)
                 if (!$Port) {
                     $httpListener.Prefixes.Add(('http://{0}/' -f $bindingMainDomain))
                 }
@@ -188,7 +197,7 @@ function Start-PAHttpChallenge {
                 Write-Error -Message ('httpListener failed! ({0})' -f $errorMSG)
             }
             finally {
-                # initial integration to capture CTRL+C and stop listener - may also fetch unexpected behavior
+                # initial integration to capture CTRL+C and stop listener - will also fetch unexpected behavior
                 if ($httpListener.IsListening) {
                     Write-verbose -Message ('script abortion or unexpected behavior, stopping httpListener')
                     $httpListener.Stop()
@@ -197,9 +206,9 @@ function Start-PAHttpChallenge {
         }
     }
     end {
-        # finished, New-PACertificate can be executed. Return PAAuthorizations if output may be used in a variable/pipe
+        # finished, New-PACertificate can be executed. Return PAAuthorizations for MainDomain if output may be used in a variable/pipe
         return {
-            Get-PAOrder -Refresh -Verbose:$false |
+            Get-PAOrder -MainDomain $MainDomain -Refresh -Verbose:$false |
             Get-PAAuthorizations -Verbose:$false
         }
     }
