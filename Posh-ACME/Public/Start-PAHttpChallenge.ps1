@@ -1,21 +1,23 @@
 function Start-PAHttpChallenge {
     [CmdletBinding()]
     param (
-        [Parameter(Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
-        [Alias('domain','fqdn')]
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Alias('domain', 'fqdn')]
         [String]$MainDomain,
         [Parameter()]
         [Alias('TTL')]
-        [int16]$TimeToLive = 30,
+        [int16]$TimeToLive = 120,
         [Parameter()]
-        [int16]$Port = 80,
+        [int16]$Port,
         [Parameter()]
-        [switch]$NoMainDomainBinding
+        [switch]$NoPrefix
     )
 
     begin {
+        [string]$logTimeFormat = '[HH:mm:ss]::'
+        Write-Verbose -Message ('INFO: Verbose messages for sub functions are suppressed.')
         # Make sure we have an account configured
-        if (!(Get-PAAccount)) {
+        if (!(Get-PAAccount -Verbose:$false)) {
             throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
         }
     }
@@ -26,8 +28,10 @@ function Start-PAHttpChallenge {
         # get all open authorizations if no MainDomain is given
         if (!$MainDomain) {
             # get pending PAOrder(s)
-            [array]$openAuthorizations = Get-PAOrder | Get-PAAuthorizations | Where-Object { ($_.DNS01Status -eq 'pending') -and ( $_.HTTP01Status -eq 'pending') }
-
+            [array]$openAuthorizations = Get-PAOrder -Verbose:$false |
+                Get-PAAuthorizations -Verbose:$false |
+                Where-Object { ($_.DNS01Status -eq 'pending') -and ( $_.HTTP01Status -eq 'pending')
+            }
             # throw a terminating error - no authorizations, nothing to do
             if (!($openAuthorizations)) {
                 throw 'No open PAOrder(s) found.'
@@ -35,24 +39,40 @@ function Start-PAHttpChallenge {
         }
         # if MainDomain is given set array
         else {
-            # get pending PAOrder for given MainDomain
-            [array]$openAuthorizations = Get-PAOrder -MainDomain $MainDomain | Get-PAAuthorizations | Where-Object { ($_.DNS01Status -eq 'pending') -and ( $_.HTTP01Status -eq 'pending') }
+            # check if parameter is maindomain or san
+            if (Get-PAOrder -MainDOmain $MainDomain) {
+            }
+            elseif ((Get-PAOrder).SANs -contains $MainDomain) {
+                # get MainDomain
+                $trueMainDomain = Get-PAOrder -Verbose:$false |
+                    Where-Object -FilterScript {$_.SANs -contains $MainDomain} |
+                    Select-Object -ExpandProperty 'MainDomain'
+                Write-Warning -Message ('{0} is a SAN, setting MainDomain to {1} and continue processing all pending requests for MainDomain' -f $MainDomain, $trueMainDomain)
+                $MainDomain = $trueMainDomain
+            }
+
+            # get pending PAOrder for given/fetched MainDomain.
+            [array]$openAuthorizations = Get-PAOrder -MainDomain $MainDomain -Verbose:$false |
+                Get-PAAuthorizations -Verbose:$false |
+                Where-Object {
+                ( $_.HTTP01Status -eq 'pending')
+            }
 
             # if array is empty, write non terminating error and continue with process loop
             if (!($openAuthorizations)) {
-                Write-Error -Message ('no pending challenge found for "{0}"' -f $MainDomain)
+                Write-Error -Message ('no pending challenge found for Domain "{0}"' -f $MainDomain)
                 return
             }
         }
-
+        Write-verbose -Message ('found {0} authorizations with HTTP01Status pending' -f $openAuthorizations.Count)
         # loop through array (needed for processing function call without given MainDomain)
-        foreach ($openAuthorization in $openAuthorizations) {
+        :listenerLoop foreach ($openAuthorization in $openAuthorizations) {
             # create variable with all necessary information for http listener
-            $httpPublish = $openAuthorization | Select-Object `
-                'HTTP01Token'`
+            $httpPublish = $openAuthorization |
+                Select-Object 'HTTP01Token'`
                 , @{L = 'MainDomain'; E = {$_.fqdn}}`
                 , 'HTTP01Url'`
-                , @{L = 'Body'; E = { Get-KeyAuthorization $_.HTTP01Token (Get-PAAccount) } }
+                , @{L = 'Body'; E = { Get-KeyAuthorization $_.HTTP01Token (Get-PAAccount) -Verbose:$false } }
 
             # set path to token file
             [string]$uriPath = ('/.well-known/acme-challenge/{0}' -f $httpPublish.HTTP01Token)
@@ -63,16 +83,16 @@ function Start-PAHttpChallenge {
                 $httpListener = [System.Net.HttpListener]::new()
 
                 # set binding of http listener based on NoMainDomainBinding switch - main purpose for testing, may help in some productive environments
-                if ($NoMainDomainBinding) {
+                if ($NoPrefix) {
                     [string]$bindingMainDomain = '*'
                 }
                 else {
                     # set from $httpPublish.MainDomain to * - why ever i get errors since function rework and setting a prefix other than localhost/*
-                    [string]$bindingMainDomain = '*'
+                    [string]$bindingMainDomain = $httpPublish.MainDomain
                 }
 
                 # set binding, if port is 80 do not explicitly set port (more beautiful log/verbose/....)
-                if ($Port -eq 80) {
+                if (!$Port) {
                     $httpListener.Prefixes.Add(('http://{0}/' -f $bindingMainDomain))
                 }
                 else {
@@ -84,7 +104,7 @@ function Start-PAHttpChallenge {
             catch {
                 $errorMSG = $_
                 Write-Error -Message ('WebServer start failed! ({0})' -f $errorMSG)
-                return $httpPublish
+                continue listenerLoop
             }
             # set listening URL - trim start to avoid double // in listener URI
             [string]$httpListenerUri = ('{0}{1}' -f $($httpListener.Prefixes), $uriPath.TrimStart('/'))
@@ -93,11 +113,12 @@ function Start-PAHttpChallenge {
             [dateTime]$endTime = $startTime.AddSeconds($TimeToLive)
 
             # time to interact with the listener
-            Write-Verbose -Message ('httpListener "{0}" started with {1} seconds timeout' -f $httpListenerUri, $TimeToLive)
+            Write-verbose -Message ('{0}httpListener started with {1} seconds timeout' -f $(Get-Date -Format $logTimeFormat), $TimeToLive)
+            Write-verbose -Message ('{0}' -f $httpListenerUri)
 
             try {
                 # inform ACME server that challenge is ready  - suppress verbose output, it just fills the console
-                Write-Verbose -Message ('{0}Send-ChallengeAck to {1}' -f $(Get-Date -Format '[HH:mm:ss]::'), $httpPublish.HTTP01Url)
+                Write-verbose -Message ('{0}Send-ChallengeAck to {1}' -f $(Get-Date -Format $logTimeFormat), $httpPublish.HTTP01Url)
                 $null = Send-ChallengeAck $httpPublish.HTTP01Url -Verbose:$false
 
                 # enter listening loop - as long as listener is listening this loops run
@@ -110,15 +131,24 @@ function Start-PAHttpChallenge {
                     while (-not $contextTask.AsyncWaitHandle.WaitOne(200)) {
                         # process timeout - if timeout is 0 server runs until challenge is valid
                         if (($TimeToLive -ne 0) -and ($endTime -lt (Get-Date))) {
-                            Write-Verbose -Message ('{0}timeout reached, stopping WebServer' -f $(Get-Date -Format '[HH:mm:ss]::'))
+                            Write-verbose -Message ('{0}timeout reached, stopping WebServer' -f $(Get-Date -Format $logTimeFormat))
                             $httpListener.Stop()
-                            return
+                            # return to foreach loop
+                            continue listenerLoop
                         }
-                        # check challenge state - suppress verbose output, it just fills the console
-                        if ($(Get-PAOrder -MainDomain $httpPublish.MainDomain -Refresh -Verbose:$false | Select-Object -ExpandProperty 'status') -eq 'valid') {
-                            Write-Verbose -Message ('{0}challenge succeeded, stopping WebServer' -f $(Get-Date -Format '[HH:mm:ss]::'))
-                            $httpListener.Stop()
-                            return
+                        # check challenge state ever 5 seconds- suppress verbose output, it just fills the console
+                        if ((($endTime - (Get-Date)).Seconds % 5) -eq $false) {
+                            Write-verbose ('{0}checking HTTP01Status for {1}' -f $(Get-Date -Format $logTimeFormat), $httpPublish.MainDomain)
+                            if ($(Get-PAOrder -Refresh -Verbose:$false |
+                                        Get-PAAuthorizations -Verbose:$false |
+                                        Where-Object -FilterScript {$_.fqdn -eq $httpPublish.MainDomain} |
+                                        Select-Object -ExpandProperty 'HTTP01Status'
+                                ) -eq 'valid') {
+                                Write-verbose -Message ('{0}challenge succeeded, stopping WebServer' -f $(Get-Date -Format $logTimeFormat))
+                                $httpListener.Stop()
+                                # return to foreach loop
+                                continue listenerLoop
+                            }
                         }
                     }
 
@@ -128,7 +158,7 @@ function Start-PAHttpChallenge {
                     # short - if requested url matches answer
                     if ($context.Request.HttpMethod -eq 'GET' -and $context.Request.RawUrl -eq $uriPath) {
                         # verbose out response
-                        Write-Verbose -Message ('{0}challenge sent to {1}' -f $(Get-Date -Format '[HH:mm:ss]::'), $context.Request.UserHostAddress )
+                        Write-verbose -Message ('{0}challenge sent to {1}' -f $(Get-Date -Format $logTimeFormat), $context.Request.UserHostAddress )
 
                         #respond to the request
                         $context.Response.Headers.Add("Content-Type", "text/plain")
@@ -141,7 +171,7 @@ function Start-PAHttpChallenge {
                     # response to invalid path (primarily for verbose output)
                     else {
                         # verbose out response
-                        Write-Verbose -Message ('{0}invalid path request from {1} to {2}' -f $(Get-Date -Format '[HH:mm:ss]::'), $context.Request.UserHostAddress, $context.Request.Url )
+                        Write-verbose -Message ('{0}invalid path request from {1} to {2}' -f $(Get-Date -Format $logTimeFormat), $context.Request.UserHostAddress, $context.Request.Url )
 
                         #respond to the request
                         $context.Response.Headers.Add("Content-Type", "text/plain")
@@ -156,12 +186,11 @@ function Start-PAHttpChallenge {
             catch {
                 $errorMSG = $_
                 Write-Error -Message ('httpListener failed! ({0})' -f $errorMSG)
-                return
             }
             finally {
                 # initial integration to capture CTRL+C and stop listener - may also fetch unexpected behavior
                 if ($httpListener.IsListening) {
-                    Write-Verbose -Message ('script abortion or unexpected behavior, stopping httpListener')
+                    Write-verbose -Message ('script abortion or unexpected behavior, stopping httpListener')
                     $httpListener.Stop()
                 }
             }
@@ -169,7 +198,10 @@ function Start-PAHttpChallenge {
     }
     end {
         # finished, New-PACertificate can be executed. Return PAAuthorizations if output may be used in a variable/pipe
-        return {Get-PAOrder -Refresh | Get-PAAuthorizations}
+        return {
+            Get-PAOrder -Refresh -Verbose:$false |
+            Get-PAAuthorizations -Verbose:$false
+        }
     }
 
 
@@ -178,25 +210,37 @@ function Start-PAHttpChallenge {
 
     <#
         .SYNOPSIS
-        tba
+        Starts a local HTTP Listener for pending HTTP01Status acme challenges.
 
         .DESCRIPTION
-        tba
+        Uses [System.Net.HttpListener] class to open a http listener for pending http challenges.
+        If parameter MainDOmain is not specified, all open Orders are fetched with Get-PAOrder.
+        Is a SAN is given in parameter MainDomain, the actual MainDomain will be fetched and
+        http listener will process MainDOmain and all SAN(s).
 
         .PARAMETER MainDomain
         The primary domain associated with an order.
 
         .PARAMETER TimeToLive
-        tba
+        The TimeOut in Seconds for the Webserver. WHen Timout is reached http listener stops, regardless of HTTP01Status.
 
         .PARAMETER Port
-        tba
+        The Port on which http listener is listening.
 
-        .PARAMETER NoMainDomainBinding
-        tba
+        .PARAMETER NoPrefix
+        If parameter is set, http listener will bind on http://*
 
         .EXAMPLE
-        A sample command that uses the function or script, optionally followed by sample output and a description. Repeat this keyword for each example.
+        Start-PAHttpChallenge
+
+        Start http listener for all orders with HTTP01Status pending
+
+        .EXAMPLE
+        Start-PAHttpChallenge -MainDomain 'test.example.com' -Port 8080 -TimeToLive 30
+
+        Start http listener for domain 'test.example.com' on Port 8080 with a Timeout of 30 seconds.
+        If 'test.example.com' is a SAN, Start-PAHttpChallenge will fetch the MainDomain and process
+        the MainDomain and all SAN(s).
 
         .LINK
         Project: https://github.com/rmbolger/Posh-ACME
