@@ -138,6 +138,12 @@ function Start-PAHttpChallenge {
 
                     # other logic
                     while (-not $contextTask.AsyncWaitHandle.WaitOne(200)) {
+                        # get runtime in seconds
+                        $runTime = $TimeToLive - (New-TimeSpan -Start (Get-Date) -End $endTime).TotalSeconds.ToString("00")
+                        # write progressbar with timout so we don't sit in the dark while listener is running
+                        if ($TimeToLive -ne 0) {
+                            Write-Progress -Activity 'http listener' -Status $httpListenerUri -CurrentOperation 'waiting for validation' -PercentComplete (($runTime / $TimeToLive) * 100)
+                        }
                         # process timeout - if timeout is 0 server runs until challenge is valid
                         if (($TimeToLive -ne 0) -and ($endTime -lt (Get-Date))) {
                             Write-verbose -Message ('{0}timeout reached, stopping WebServer' -f $(Get-Date -Format $logTimeFormat))
@@ -146,7 +152,7 @@ function Start-PAHttpChallenge {
                             continue listenerLoop
                         }
                         # check challenge state ever 5 seconds- suppress verbose output, it just fills the console
-                        if ((($endTime - (Get-Date)).Seconds % 5) -eq $false) {
+                        if (($runTime % 5) -eq $false) {
                             Write-verbose ('{0}checking HTTP01Status for {1}' -f $(Get-Date -Format $logTimeFormat), $httpPublish.MainDomain)
                             if ($(Get-PAOrder -Refresh -Verbose:$false |
                                         Get-PAAuthorizations -Verbose:$false |
@@ -207,10 +213,10 @@ function Start-PAHttpChallenge {
     }
     end {
         # finished, New-PACertificate can be executed. Return PAAuthorizations for MainDomain if output may be used in a variable/pipe
-        return {
+        return (
             Get-PAOrder -MainDomain $MainDomain -Refresh -Verbose:$false |
-            Get-PAAuthorizations -Verbose:$false
-        }
+                Get-PAAuthorizations -Verbose:$false
+        )
     }
 
 
