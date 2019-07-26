@@ -21,6 +21,8 @@ function Start-PAHttpChallenge {
     }
 
     process {
+        # (re)init array for process loop
+        [array]$openAuthorizations = @()
         # get all open authorizations if no MainDomain is given
         if (!$MainDomain) {
             # get pending PAOrder(s)
@@ -94,9 +96,9 @@ function Start-PAHttpChallenge {
             Write-Verbose -Message ('httpListener "{0}" started with {1} seconds timeout' -f $httpListenerUri, $TimeToLive)
 
             try {
-                # inform ACME server that challenge is ready
+                # inform ACME server that challenge is ready  - suppress verbose output, it just fills the console
                 Write-Verbose -Message ('{0}Send-ChallengeAck to {1}' -f $(Get-Date -Format '[HH:mm:ss]::'), $httpPublish.HTTP01Url)
-                $null = Send-ChallengeAck $httpPublish.HTTP01Url
+                $null = Send-ChallengeAck $httpPublish.HTTP01Url -Verbose:$false
 
                 # enter listening loop - as long as listener is listening this loops run
                 while ($httpListener.IsListening) {
@@ -113,7 +115,7 @@ function Start-PAHttpChallenge {
                             return
                         }
                         # check challenge state - suppress verbose output, it just fills the console
-                        if ($(Get-PAOrder -MainDomain $httpPublish.MainDomain -Refresh -Verbose:$false | Select-Object -ExpandProperty 'status') -eq 'ready') {
+                        if ($(Get-PAOrder -MainDomain $httpPublish.MainDomain -Refresh -Verbose:$false | Select-Object -ExpandProperty 'status') -eq 'valid') {
                             Write-Verbose -Message ('{0}challenge succeeded, stopping WebServer' -f $(Get-Date -Format '[HH:mm:ss]::'))
                             $httpListener.Stop()
                             return
