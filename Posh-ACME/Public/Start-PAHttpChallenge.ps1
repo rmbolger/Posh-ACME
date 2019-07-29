@@ -11,17 +11,10 @@ function Start-PAHttpChallenge {
         [Parameter()]
         [int16]$Port,
         [Parameter()]
+        [ALias('NoFqdnBinding')]
         [switch]$NoPrefix
     )
-
     begin {
-        # if TImeToLive is set to zero, write a warning
-        if($TimeToLive -eq 0) {
-            Write-Warning -Message 'TimeToLive ist set to 0. If domain can''t be validated, listener will run infinitely until manually stopped'
-        }
-        # set the prefix for verbose messages with time output
-        [string]$logTimeFormat = '[HH:mm:ss]::'
-
         # write information that verbose output of sub functions is surpassed.
         # did this because verbose output from api calls are unnecessarily filling the output
         Write-Verbose -Message ('INFO: Verbose messages for sub functions are suppressed.')
@@ -29,9 +22,35 @@ function Start-PAHttpChallenge {
         if (!(Get-PAAccount -Verbose:$false)) {
             throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
         }
-    }
+        # account present, lets start
+        # if TimeToLive is set to zero, write a warning
+        if ($TimeToLive -eq 0) {
+            Write-Warning -Message 'TimeToLive ist set to 0. If domain can''t be validated, listener will run infinitely until manually stopped'
+        }
+        # if fqdn binding is skipped, write warning that this may need admin rights
+        if ($NoFqdnBinding) {
+            Write-Warning -Message 'NoFqdnBinding is specified. THis may require Administrator rights.'
+        }
+        # set the prefix for verbose messages with time output
+        [string]$logTimeFormat = '[HH:mm:ss]::'
 
+        # set fqdn suffix for http listener
+        if ($Port) {
+            [string]$fqdnSuffix = (':{0}/' -f $Port)
+        }
+        else {
+            [string]$fqdnSuffix = ('/' -f $Port)
+        }
+
+        # set TTL to at least 6 seconds to be sure at least one validation check can be executed
+        if ($TimeToLive -ne 0 -and $TimeToLive -lt 6) {
+            Write-Warning -Message ('Set TimeToLive from {0} to 6 seconds so validation check will be executed at least once' -f $TimeToLive)
+            $TimeToLive = 6
+        }
+    }
     process {
+        # (re)init prevRuntime
+        [int16]$prevRunTime = 0
         # (re)init array for process loop
         [array]$openAuthorizations = @()
         # get all open authorizations if no MainDomain is given
@@ -78,154 +97,143 @@ function Start-PAHttpChallenge {
             }
         }
         Write-verbose -Message ('found {0} authorizations with HTTP01Status pending' -f $openAuthorizations.Count)
-        # loop through array of open authorizations
-        :listenerLoop foreach ($openAuthorization in $openAuthorizations) {
-            # create variable with all necessary information for http listener
-            $httpPublish = $openAuthorization |
-                Select-Object 'HTTP01Token'`
-                , @{L = 'MainDomain'; E = {$_.fqdn}}`
-                , 'HTTP01Url'`
-                , @{L = 'Body'; E = { Get-KeyAuthorization $_.HTTP01Token (Get-PAAccount) -Verbose:$false } }
+        # create array with all necessary information for http listener
+        [array]$httpPublish = $openAuthorizations |
+            Select-Object `
+        @{L = 'fqdn'; E = {$_.fqdn}}`
+            , 'HTTP01Url'`
+            , 'HTTP01Token'`
+            , @{L = 'subUrl'; E = { ('/.well-known/acme-challenge/{0}' -f $_.HTTP01Token) } }`
+            , @{L = 'Body'; E = { Get-KeyAuthorization $_.HTTP01Token (Get-PAAccount) -Verbose:$false } }
+        #region initialize and start WebServer
+        try {
+            # create http listener
+            $httpListener = [System.Net.HttpListener]::new()
 
-            # set web path to token file
-            [string]$uriPath = ('/.well-known/acme-challenge/{0}' -f $httpPublish.HTTP01Token)
-
-            #region initialize and start WebServer
-            try {
-                # create http listener
-                $httpListener = [System.Net.HttpListener]::new()
-
-                # set binding of http listener based on NoPrefix switch
-                # main purpose for testing, may help in some productive environments
-                if ($NoPrefix) {
-                    [string]$bindingMainDomain = '*'
-                }
-                else {
-                    [string]$bindingMainDomain = $httpPublish.MainDomain
-                }
-
-                # set binding, if no port is specified do not explicitly set port (more beautiful log/verbose/....)
-                if (!$Port) {
-                    $httpListener.Prefixes.Add(('http://{0}/' -f $bindingMainDomain))
-                }
-                else {
-                    $httpListener.Prefixes.Add(('http://{0}:{1}/' -f $bindingMainDomain, $Port))
-                }
-                # start the listener
-                $httpListener.Start()
+            # add listener Prefixes
+            if ($NoPrefix) {
+                $httpListener.Prefixes.Add(('http://*{0}' -f $fqdnSuffix))
             }
-            catch {
-                $errorMSG = $_
-                Write-Error -Message ('WebServer start failed! ({0})' -f $errorMSG)
-                continue listenerLoop
+            else {
+                foreach ($domain in $httpPublish) {
+                    $httpListener.Prefixes.Add(('http://{0}{1}' -f $domain.fqdn, $fqdnSuffix))
+                }
             }
-            # set listening URL - trim start to avoid double // in listener URI
-            [string]$httpListenerUri = ('{0}{1}' -f $($httpListener.Prefixes), $uriPath.TrimStart('/'))
-            # set start and end time based on TTL
-            [dateTime]$startTime = Get-Date
-            [dateTime]$endTime = $startTime.AddSeconds($TimeToLive)
+            # start the listener
+            $httpListener.Start()
+        }
+        catch {
+            $errorMSG = $_
+            Write-Error -Message ('WebServer start failed! ({0})' -f $errorMSG)
+            continue listenerLoop
+        }
+        # set start and end time based on TTL
+        [dateTime]$startTime = Get-Date
+        [dateTime]$endTime = $startTime.AddSeconds($TimeToLive)
 
-            # time to interact with the listener
-            Write-verbose -Message ('{0}httpListener started with {1} seconds timeout' -f $(Get-Date -Format $logTimeFormat), $TimeToLive)
-            Write-verbose -Message ('{0}' -f $httpListenerUri)
+        # generate RegEx from fqdn(s) for matching in listener validation
+        [regex]$regexFqdn = $httpPublish.fqdn -Join '|'
 
-            try {
-                # inform ACME server that challenge is ready  - suppress verbose output, it just fills the console
-                Write-verbose -Message ('{0}Send-ChallengeAck to {1}' -f $(Get-Date -Format $logTimeFormat), $httpPublish.HTTP01Url)
-                $null = Send-ChallengeAck $httpPublish.HTTP01Url -Verbose:$false
+        # generate RegEx from subUrl(s) for matching in listener
+        [regex]$regexSubUrl = $httpPublish.subUrl -Join '|'
 
-                # enter listening loop - as long as listener is listening this loops run
-                while ($httpListener.IsListening) {
+        # time to interact with the listener
+        Write-verbose -Message ('{0}httpListener started with {1} seconds timeout' -f $(Get-Date -Format $logTimeFormat), $TimeToLive)
+        foreach ($preFix in $httpListener.Prefixes) {
+            Write-Verbose -Message ('   {0}' -f $preFix)
+        }
 
-                    # get context async so we can do other logic while listener is running
-                    $contextTask = $httpListener.GetContextAsync()
+        try {
+            # inform ACME server that challenge is ready  - suppress verbose output, it just fills the console
+            Write-verbose -Message ('{0}Send-ChallengeAck to' -f $(Get-Date -Format $logTimeFormat), ($httpPublish.HTTP01Url -join ','))
+            foreach ($HTTP01Url in $httpPublish.HTTP01Url) {
+                Write-Verbose -Message ('   {0}' -f $HTTP01Url)
+            }
+            $null = $httpPublish.HTTP01Url | Send-ChallengeAck -Verbose:$false
 
-                    # other logic
-                    while (-not $contextTask.AsyncWaitHandle.WaitOne(200)) {
-                        # get runtime in seconds
-                        $runTime = $TimeToLive - (New-TimeSpan -Start (Get-Date) -End $endTime).TotalSeconds.ToString("00")
-                        # write progressbar with timout so we don't sit in the dark while listener is running
-                        if ($TimeToLive -ne 0) {
-                            Write-Progress -Activity 'http listener' -Status $httpListenerUri -CurrentOperation 'waiting for validation' -PercentComplete (($runTime / $TimeToLive) * 100)
+            # enter listening loop - as long as listener is listening this loops run
+            while ($httpListener.IsListening) {
+                # get context async so we can do other logic while listener is running
+                $contextTask = $httpListener.GetContextAsync()
+
+                # other logic
+                while (-not $contextTask.AsyncWaitHandle.WaitOne(200)) {
+                    # get runtime in seconds
+                    [int16]$runTime = $TimeToLive - (New-TimeSpan -Start (Get-Date) -End $endTime).TotalSeconds.ToString("00")
+
+                    # process timeout - if timeout is 0 server runs until challenge is valid
+                    if (($TimeToLive -ne 0) -and ($endTime -lt (Get-Date))) {
+                        Write-verbose -Message ('{0}timeout reached, stopping httpListener' -f $(Get-Date -Format $logTimeFormat))
+                        $httpListener.Stop()
+                        return
+                    }
+
+                    # check challenge state every 5 seconds- suppress verbose output, it just fills the console
+                    if ($prevRunTime -ne $runTime -and $runTime % 5 -eq 0) {
+                        # write current Runtime to variable to avoid multi checks
+                        $prevRunTime = $runTime
+                        Write-verbose ('{0}checking HTTP01Status' -f $(Get-Date -Format $logTimeFormat))
+                        [array]$validatedAuthorizations = Get-PAOrder -Refresh -MainDomain $MainDomain -Verbose:$false |
+                            Get-PAAuthorizations -Verbose:$false |
+                            Where-Object -FilterScript {
+                            ($_.fqdn -match $regexFqdn) -and ($_.HTTP01Status -eq 'valid')
                         }
-                        # process timeout - if timeout is 0 server runs until challenge is valid
-                        if (($TimeToLive -ne 0) -and ($endTime -lt (Get-Date))) {
-                            Write-verbose -Message ('{0}timeout reached, stopping WebServer' -f $(Get-Date -Format $logTimeFormat))
+
+                        if ($validatedAuthorizations.Count -eq $httpPublish.Count) {
+                            Write-verbose -Message ('{0}challenge succeeded, stopping httpListener' -f $(Get-Date -Format $logTimeFormat))
                             $httpListener.Stop()
-                            # return to foreach loop
-                            continue listenerLoop
+                            return
                         }
-                        # check challenge state ever 5 seconds- suppress verbose output, it just fills the console
-                        if (($runTime % 5) -eq $false) {
-                            Write-verbose ('{0}checking HTTP01Status for {1}' -f $(Get-Date -Format $logTimeFormat), $httpPublish.MainDomain)
-                            if ($(Get-PAOrder -Refresh -Verbose:$false |
-                                        Get-PAAuthorizations -Verbose:$false |
-                                        Where-Object -FilterScript {$_.fqdn -eq $httpPublish.MainDomain} |
-                                        Select-Object -ExpandProperty 'HTTP01Status'
-                                ) -eq 'valid') {
-                                Write-verbose -Message ('{0}challenge succeeded, stopping WebServer' -f $(Get-Date -Format $logTimeFormat))
-                                $httpListener.Stop()
-                                # return to foreach loop
-                                continue listenerLoop
-                            }
-                        }
-                    }
-
-                    # get actual request context
-                    $context = $contextTask.GetAwaiter().GetResult()
-
-                    # short - if requested url matches answer
-                    if ($context.Request.HttpMethod -eq 'GET' -and $context.Request.RawUrl -eq $uriPath) {
-                        # verbose out response
-                        Write-verbose -Message ('{0}challenge sent to {1}' -f $(Get-Date -Format $logTimeFormat), $context.Request.UserHostAddress )
-
-                        #respond to the request
-                        $context.Response.Headers.Add("Content-Type", "text/plain")
-                        $context.Response.StatusCode = 200
-                        $buffer = [System.Text.Encoding]::UTF8.GetBytes($httpPublish.Body) # convert string to bytes
-                        $context.Response.ContentLength64 = $buffer.Length
-                        $context.Response.OutputStream.Write($buffer, 0, $buffer.Length) #stream to browser
-                        $context.Response.OutputStream.Close() # close the response
-                    }
-                    # response to invalid path (primarily for verbose output)
-                    else {
-                        # verbose out response
-                        Write-verbose -Message ('{0}invalid path request from {1} to {2}' -f $(Get-Date -Format $logTimeFormat), $context.Request.UserHostAddress, $context.Request.Url )
-
-                        #respond to the request
-                        $context.Response.Headers.Add("Content-Type", "text/plain")
-                        $context.Response.StatusCode = 404
-                        $buffer = [System.Text.Encoding]::UTF8.GetBytes('')
-                        $context.Response.ContentLength64 = $buffer.Length
-                        $context.Response.OutputStream.Write($buffer, 0, $buffer.Length) #stream to browser
-                        $context.Response.OutputStream.Close() # close the response
                     }
                 }
-            }
-            catch {
-                $errorMSG = $_
-                Write-Error -Message ('httpListener failed! ({0})' -f $errorMSG)
-            }
-            finally {
-                # initial integration to capture CTRL+C and stop listener - will also fetch unexpected behavior
-                if ($httpListener.IsListening) {
-                    Write-verbose -Message ('script abortion or unexpected behavior, stopping httpListener')
-                    $httpListener.Stop()
+                # get actual request context
+                $context = $contextTask.GetAwaiter().GetResult()
+                # short - if requested url matches answer
+                if ($context.Request.HttpMethod -eq 'GET' -and $context.Request.RawUrl -match $regexSubUrl) {
+                    $responseData = $httpPublish | Where-Object -FilterScript {$_.subUrl -eq $($context.Request.RawUrl)}
+
+                    # verbose out response
+                    Write-verbose -Message ('{0}sending challenge {1} to {2}' -f $(Get-Date -Format $logTimeFormat), $responseData.HTTP01Token, $context.Request.RemoteEndPoint )
+                    #respond to the request
+                    $context.Response.Headers.Add("Content-Type", "text/plain")
+                    $context.Response.StatusCode = 200
+                    $buffer = [System.Text.Encoding]::UTF8.GetBytes($responseData.Body)
+                    $context.Response.ContentLength64 = $buffer.Length
+                    $context.Response.OutputStream.Write($buffer, 0, $buffer.Length)
+                    $context.Response.OutputStream.Close()
+                }
+                # response to invalid path (primarily for verbose output)
+                else {
+                    # verbose out response
+                    Write-verbose -Message ('{0}invalid path request from {1} to {2}' -f $(Get-Date -Format $logTimeFormat), $context.Request.RemoteEndPoint, $context.Request.Url )
+                    #respond to the request
+                    $context.Response.Headers.Add("Content-Type", "text/plain")
+                    $context.Response.StatusCode = 404
+                    $buffer = [System.Text.Encoding]::UTF8.GetBytes('')
+                    $context.Response.ContentLength64 = $buffer.Length
+                    $context.Response.OutputStream.Write($buffer, 0, $buffer.Length)
+                    $context.Response.OutputStream.Close()
                 }
             }
         }
+        catch {
+            $errorMSG = $_
+            Write-Error -Message ('httpListener failed! ({0})' -f $errorMSG)
+        }
+        finally {
+            # initial integration to capture CTRL+C and stop listener - will also fetch unexpected behavior
+            if ($httpListener.IsListening) {
+                Write-verbose -Message ('script abortion or unexpected behavior, stopping httpListener')
+                $httpListener.Stop()
+            }
+            # return PAAuthorizations for MainDomain if output may be used in a variable/pipe
+            Write-Output -InputObject (
+                Get-PAOrder -MainDomain $MainDomain -Refresh -Verbose:$false |
+                    Get-PAAuthorizations -Verbose:$false
+            )
+        }
     }
-    end {
-        # finished, New-PACertificate can be executed. Return PAAuthorizations for MainDomain if output may be used in a variable/pipe
-        return (
-            Get-PAOrder -MainDomain $MainDomain -Refresh -Verbose:$false |
-                Get-PAAuthorizations -Verbose:$false
-        )
-    }
-
-
-
-
+    end {}
 
     <#
         .SYNOPSIS
