@@ -39,7 +39,7 @@ After logging in successfully, you should be redirected to a success page on the
 
 ## Using the Plugin
 
-The App Key value will be used with the `OVHAppKey` parameter. The App Secret and Consumer Key values will either be used with `OVHAppSecret`/`OVHConsumerKey` or `OVHAppSecretInsecure`/`OVHConsumerKeyInsecure` depending on your Operating System and PowerShell version. The "Insecure" versions are intended for non-Windows OSes running PowerShell 6.1 or earlier which are unable to properly handle SecureString values. Windows OSes and other OSes running PowerShell 6.2 or later may you either set.
+The App Key value will be used with the `OVHAppKey` parameter. The App Secret and Consumer Key values will either be used with `OVHAppSecret`/`OVHConsumerKey` or `OVHAppSecretInsecure`/`OVHConsumerKeyInsecure` depending on your Operating System and PowerShell version. The "Insecure" versions are intended for non-Windows OSes running PowerShell 6.1 or earlier which are unable to properly handle SecureString values. Windows OSes and other OSes running PowerShell 6.2 or later may use either set.
 
 ### Windows and/or PS 6.2 and later
 
