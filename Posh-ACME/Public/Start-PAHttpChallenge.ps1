@@ -7,6 +7,7 @@ function Start-PAHttpChallenge {
         [string]$MainDomain,
         [Parameter()]
         [Alias('TTL')]
+        [ValidateRange(0, [int]::MaxValue)]
         [int]$ListenerTimeout = 120,
         [Parameter()]
         [ValidateRange(1,65535)]
