@@ -1,5 +1,5 @@
 function Start-PAHttpChallenge {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     [OutputType('PoshACME.PAAuthorization')]
     param (
         [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
@@ -107,7 +107,9 @@ function Start-PAHttpChallenge {
             foreach ($pub in $httpPublish) {
                 Write-Verbose ('Send-ChallengeAck for {0}' -f $pub.fqdn)
                 Write-Debug ('    {0}' -f $pub.HTTP01Url)
-                Send-ChallengeAck $pub.HTTP01Url -Account $acct -Verbose:$false
+                if ($PSCmdlet.ShouldProcess($pub.fqdn, "Send-ChallengeAck")) {
+                    Send-ChallengeAck $pub.HTTP01Url -Account $acct -Verbose:$false
+                }
             }
 
             # enter listening loop
