@@ -1,4 +1,4 @@
-function Start-PAHttpChallenge {
+function Invoke-HttpChallengeListener {
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType('PoshACME.PAAuthorization')]
     param (
@@ -237,14 +237,20 @@ function Start-PAHttpChallenge {
         Overrides the default wildcard listener prefix with the specified prefixes instead. Be sure to include the port if necessary and a trailing '/' on all included prefixes. See https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistener for details.
 
     .EXAMPLE
-        Start-PAHttpChallenge
+        Invoke-HttpChallengeListener
 
-        Start http listener for pending challenges on the current order.
+        Start listener on default port 80 for pending challenges for the current order.
 
     .EXAMPLE
-        Start-PAHttpChallenge -MainDomain 'test.example.com' -Port 8080 -ListenerTimeout 30
+        Invoke-HttpChallengeListener -MainDomain 'test.example.com' -Port 8080 -ListenerTimeout 30
 
-        Start http listener for domain 'test.example.com' on Port 8080 with a Timeout of 30 seconds.
+        Start listener on port 8080 with a timeout of 30 seconds for the specified order.
+
+    .EXAMPLE
+        $prefixes = 'http://example.com/.well-known/acme-challenge/','http://www.example.com/.well-known/acme-challenge'
+        PS C:\>Invoke-HttpChallengeListener -ListenerPrefixes $prefixes
+
+        Start listener using the specified prefixes for the current order.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME
