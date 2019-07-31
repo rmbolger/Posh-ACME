@@ -7,7 +7,7 @@ function Start-PAHttpChallenge {
         [string]$MainDomain,
         [Parameter()]
         [Alias('TTL')]
-        [int]$TimeToLive = 120,
+        [int]$ListenerTimeout = 120,
         [Parameter()]
         [ValidateRange(1,65535)]
         [int]$Port,
@@ -23,21 +23,18 @@ function Start-PAHttpChallenge {
         }
 
         # account present, lets start
-        # if TimeToLive is set to zero, write a warning
-        if ($TimeToLive -eq 0) {
-            Write-Warning 'TimeToLive is set to 0. If domain can''t be validated, listener will run indefinitely or until manually stopped.'
+        # if ListenerTimeout is set to zero, write a warning
+        if ($ListenerTimeout -eq 0) {
+            Write-Warning 'ListenerTimeout is set to 0. If domain can''t be validated, listener will run indefinitely or until manually stopped.'
         }
 
-        # set the prefix for verbose messages with time output
-        $logTimeFormat = '[HH:mm:ss]::'
-
         # set port suffix for http listener
-        $portSuffix = if ($Port) { ":$Port/" } else { '/' }
+        $portSuffix = if ($Port) { ":$Port" } else { [string]::Empty }
 
         # set TTL to at least 6 seconds to be sure at least one validation check can be executed
-        if ($TimeToLive -ne 0 -and $TimeToLive -lt 6) {
-            Write-Warning ('Set TimeToLive from {0} to 6 seconds so validation check will be executed at least once' -f $TimeToLive)
-            $TimeToLive = 6
+        if ($ListenerTimeout -ne 0 -and $ListenerTimeout -lt 6) {
+            Write-Warning ('Set ListenerTimeout from {0} to 6 seconds so validation check will be executed at least once' -f $ListenerTimeout)
+            $ListenerTimeout = 6
         }
     }
 
@@ -86,7 +83,7 @@ function Start-PAHttpChallenge {
 
             # add listener prefix(es)
             if (-not $ListenerPrefixes) {
-                $prefix = 'http://*{0}' -f $portSuffix
+                $prefix = 'http://+{0}/.well-known/acme-challenge/' -f $portSuffix
                 Write-Verbose "Adding listener prefix $prefix"
                 $httpListener.Prefixes.Add($prefix)
             }
@@ -100,18 +97,18 @@ function Start-PAHttpChallenge {
             # start the listener
             $httpListener.Start()
             $startTime = Get-Date
-            Write-Verbose ('{0}httpListener started with {1} second timeout' -f $(Get-Date -Format $logTimeFormat), $TimeToLive)
+            Write-Verbose ('HttpListener started with {0} second timeout' -f $ListenerTimeout)
         }
         catch { throw }
 
         # time to interact with the listener
         try {
             # inform ACME server that challenge is ready
-            Write-Verbose ('{0}Send-ChallengeAck to' -f $(Get-Date -Format $logTimeFormat), ($httpPublish.HTTP01Url -join ','))
-            foreach ($HTTP01Url in $httpPublish.HTTP01Url) {
-                Write-Verbose ('    {0}' -f $HTTP01Url)
+            foreach ($pub in $httpPublish) {
+                Write-Verbose ('Send-ChallengeAck for {0}' -f $pub.fqdn)
+                Write-Debug ('    {0}' -f $pub.HTTP01Url)
+                Send-ChallengeAck $pub.HTTP01Url -Account $acct -Verbose:$false
             }
-            $null = $httpPublish.HTTP01Url | Send-ChallengeAck -Verbose:$false
 
             # enter listening loop
             while ($httpListener.IsListening) {
@@ -126,8 +123,8 @@ function Start-PAHttpChallenge {
                     $runTime = [Math]::Round( ((Get-Date) - $startTime).TotalSeconds, 0)
 
                     # process timeout - if timeout is 0 server runs until challenge is valid
-                    if ($TimeToLive -ne 0 -and $runTime -ge $TimeToLive) {
-                        Write-Verbose ('{0}timeout reached, stopping httpListener' -f $(Get-Date -Format $logTimeFormat))
+                    if ($ListenerTimeout -ne 0 -and $runTime -ge $ListenerTimeout) {
+                        Write-Verbose 'timeout reached, stopping HttpListener'
                         $httpListener.Stop()
                         return
                     }
@@ -136,7 +133,7 @@ function Start-PAHttpChallenge {
                     if ($prevRunTime -ne $runTime -and $runTime % 5 -eq 0) {
 
                         $prevRunTime = $runTime
-                        Write-Verbose ('{0}checking authorization status' -f $(Get-Date -Format $logTimeFormat))
+                        Write-Verbose 'Checking authorization status'
 
                         # check if the published authorizations are no longer pending
                         # valid or invalid doesn't matter because we can't retry, so there's no need to wait longer
@@ -144,7 +141,7 @@ function Start-PAHttpChallenge {
                             Where-Object { $_.fqdn -in $httpPublish.fqdn -and $_.status -ne 'pending' } )
 
                         if ($completeAuths.Count -eq $httpPublish.Count) {
-                            Write-Verbose ('{0}no pending authorizations remaining, stopping httpListener' -f $(Get-Date -Format $logTimeFormat))
+                            Write-Verbose 'No pending authorizations remaining, stopping HttpListener'
                             $httpListener.Stop()
                             return
                         }
@@ -166,7 +163,7 @@ function Start-PAHttpChallenge {
                     $responseData = $httpPublish | Where-Object { $_.subUrl -eq $context.Request.RawUrl }
 
                     # verbose out response
-                    Write-Verbose ('{0}responding to {1} for {2}' -f $(Get-Date -Format $logTimeFormat), $remoteIP, $responseData.fqdn)
+                    Write-Verbose ('Responding to {0} for {1}' -f $remoteIP, $responseData.fqdn)
                     Write-Debug ('    {0}' -f $responseData.Body )
                     #respond to the request
                     $context.Response.Headers.Add("Content-Type", "text/plain")
@@ -179,7 +176,7 @@ function Start-PAHttpChallenge {
                 # responsd with 404 to anything else
                 else {
                     # verbose out response
-                    Write-Verbose ('{0}unexpected request from {1}' -f $(Get-Date -Format $logTimeFormat), $remoteIP)
+                    Write-Verbose ('Unexpected request from {0}' -f $remoteIP)
                     Write-Debug ('    {0} {1}' -f $context.Request.HttpMethod, $context.Request.RawUrl)
                     #respond to the request
                     $context.Response.Headers.Add("Content-Type", "text/plain")
@@ -193,13 +190,13 @@ function Start-PAHttpChallenge {
         }
         catch {
             $errorMSG = $_
-            Write-Error ('httpListener failed! ({0})' -f $errorMSG)
+            Write-Error ('HttpListener failed! ({0})' -f $errorMSG)
         }
         finally {
 
             # initial integration to capture CTRL+C and stop listener - will also fetch unexpected behavior
             if ($httpListener.IsListening) {
-                Write-Verbose ('script abortion or unexpected behavior, stopping httpListener')
+                Write-Verbose ('Stopping HttpListener')
                 $httpListener.Stop()
             }
 
@@ -218,20 +215,23 @@ function Start-PAHttpChallenge {
         Starts a local web server to answer pending http-01 ACME challenges.
 
     .DESCRIPTION
-        Uses [System.Net.HttpListener] class to answer http-01 ACME challenges for the
-        current or specified order. If MainDomain is not specified, the current Order is used.
+        Uses System.Net.HttpListener to answer http-01 ACME challenges for the current or specified order. If MainDomain is not specified, the current Order is used.
+
+        If running on Windows with non-admin privileges, Access Denied errors may be thrown unless a URL reservation is added using netsh that matches the HttpListener prefix that will be used. The default wildcard prefix is http://+/.well-known/acme-challenge and the netsh command might look something like this:
+
+            netsh http add urlacl url=http://+/.well-known/acme-challenge/ user=Everyone
 
     .PARAMETER MainDomain
         The primary domain associated with an order.
 
-    .PARAMETER TimeToLive
-        The timeout in seconds for the webserver. When reached, the http listener stops regardless of HTTP01Status.
+    .PARAMETER ListenerTimeout
+        The timeout in seconds for the webserver. When reached, the http listener stops regardless of challenge status.
 
     .PARAMETER Port
-        The TCP port on which the http listener is listening. 80 by default.
+        The TCP port on which the http listener is listening. 80 by default. This parameter is ignored when ListenerPrefixes is specified.
 
     .PARAMETER ListenerPrefixes
-        By default, the http listener will use a wildcard prefix that should match all incoming requests. For advanced usage, you can specify a list of prefixes to use instead. Make sure to include a trailing '/' on all of them. See https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistener for details.
+        Overrides the default wildcard listener prefix with the specified prefixes instead. Be sure to include the port if necessary and a trailing '/' on all included prefixes. See https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistener for details.
 
     .EXAMPLE
         Start-PAHttpChallenge
@@ -239,15 +239,12 @@ function Start-PAHttpChallenge {
         Start http listener for pending challenges on the current order.
 
     .EXAMPLE
-        Start-PAHttpChallenge -MainDomain 'test.example.com' -Port 8080 -TimeToLive 30
+        Start-PAHttpChallenge -MainDomain 'test.example.com' -Port 8080 -ListenerTimeout 30
 
         Start http listener for domain 'test.example.com' on Port 8080 with a Timeout of 30 seconds.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME
-
-    .LINK
-        Get-PAAccount
 
     .LINK
         Get-PAOrder
