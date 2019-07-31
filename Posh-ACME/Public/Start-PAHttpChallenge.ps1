@@ -17,11 +17,8 @@ function Start-PAHttpChallenge {
 
     Begin {
 
-        # write information that verbose output of sub functions is surpassed.
-        # did this because verbose output from api calls are unnecessarily filling the output
-        Write-Verbose 'Verbose messages for sub functions are suppressed.'
         # Make sure we have an account configured
-        if (!(Get-PAAccount -Verbose:$false)) {
+        if (-not ($acct = Get-PAAccount)) {
             throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
         }
 
@@ -35,10 +32,7 @@ function Start-PAHttpChallenge {
         $logTimeFormat = '[HH:mm:ss]::'
 
         # set port suffix for http listener
-        $portSuffix = '/'
-        if ($Port) {
-            $portSuffix = ':{0}/' -f $Port
-        }
+        $portSuffix = if ($Port) { ":$Port/" } else { '/' }
 
         # set TTL to at least 6 seconds to be sure at least one validation check can be executed
         if ($TimeToLive -ne 0 -and $TimeToLive -lt 6) {
@@ -55,7 +49,7 @@ function Start-PAHttpChallenge {
         # get a reference to the order we're going to use
         if (-not $MainDomain) {
             # grab the current order and set $MainDomain
-            $order = Get-PAOrder -Verbose:$false
+            $order = Get-PAOrder
             $MainDomain = $order.MainDomain
         }
         else {
@@ -74,15 +68,16 @@ function Start-PAHttpChallenge {
             Write-Warning "No pending authorizations found for Domain `"$MainDomain`""
             return
         }
-        Write-Verbose ('Found {0} authorizations with HTTP01Status pending' -f $openAuthorizations.Count)
+        Write-Verbose ('Authorizations found with HTTP01Status pending: {0}' -f $openAuthorizations.Count)
 
         # create array with all necessary information for http listener
-        [array]$httpPublish = $openAuthorizations | Select-Object `
-            @{L = 'fqdn'; E = {$_.fqdn}},
+        $httpPublish = @( $openAuthorizations | Select-Object `
+            'fqdn',
             'HTTP01Url',
             'HTTP01Token',
             @{L = 'subUrl'; E = { ('/.well-known/acme-challenge/{0}' -f $_.HTTP01Token) } },
-            @{L = 'Body'; E = { Get-KeyAuthorization $_.HTTP01Token (Get-PAAccount) -Verbose:$false } }
+            @{L = 'Body'; E = { Get-KeyAuthorization $_.HTTP01Token $acct } }
+        )
 
         # initialize and start WebServer
         try {
@@ -104,61 +99,52 @@ function Start-PAHttpChallenge {
 
             # start the listener
             $httpListener.Start()
+            $startTime = Get-Date
+            Write-Verbose ('{0}httpListener started with {1} second timeout' -f $(Get-Date -Format $logTimeFormat), $TimeToLive)
         }
         catch { throw }
 
-        # set start and end time based on TTL
-        [dateTime]$startTime = Get-Date
-        [dateTime]$endTime = $startTime.AddSeconds($TimeToLive)
-
-        # generate RegEx from fqdn(s) for matching in listener validation
-        [regex]$regexFqdn = $httpPublish.fqdn -Join '|'
-
-        # generate RegEx from subUrl(s) for matching in listener
-        [regex]$regexSubUrl = $httpPublish.subUrl -Join '|'
-
         # time to interact with the listener
-        Write-Verbose ('{0}httpListener started with {1} seconds timeout' -f $(Get-Date -Format $logTimeFormat), $TimeToLive)
-        foreach ($preFix in $httpListener.Prefixes) {
-            Write-Verbose ('   {0}' -f $preFix)
-        }
-
         try {
-            # inform ACME server that challenge is ready  - suppress verbose output, it just fills the console
+            # inform ACME server that challenge is ready
             Write-Verbose ('{0}Send-ChallengeAck to' -f $(Get-Date -Format $logTimeFormat), ($httpPublish.HTTP01Url -join ','))
             foreach ($HTTP01Url in $httpPublish.HTTP01Url) {
-                Write-Verbose ('   {0}' -f $HTTP01Url)
+                Write-Verbose ('    {0}' -f $HTTP01Url)
             }
             $null = $httpPublish.HTTP01Url | Send-ChallengeAck -Verbose:$false
 
-            # enter listening loop - as long as listener is listening this loops run
+            # enter listening loop
             while ($httpListener.IsListening) {
+
                 # get context async so we can do other logic while listener is running
                 $contextTask = $httpListener.GetContextAsync()
 
                 # other logic
                 while (-not $contextTask.AsyncWaitHandle.WaitOne(200)) {
+
                     # get runtime in seconds
-                    $runTime = $TimeToLive - ([Math]::Round( ((Get-Date) - $endTime).TotalSeconds, 0))
+                    $runTime = [Math]::Round( ((Get-Date) - $startTime).TotalSeconds, 0)
 
                     # process timeout - if timeout is 0 server runs until challenge is valid
-                    if (($TimeToLive -ne 0) -and ($endTime -lt (Get-Date))) {
+                    if ($TimeToLive -ne 0 -and $runTime -ge $TimeToLive) {
                         Write-Verbose ('{0}timeout reached, stopping httpListener' -f $(Get-Date -Format $logTimeFormat))
                         $httpListener.Stop()
                         return
                     }
 
-                    # check challenge state every 5 seconds- suppress verbose output, it just fills the console
+                    # check challenge state every 5 seconds
                     if ($prevRunTime -ne $runTime -and $runTime % 5 -eq 0) {
-                        # write current Runtime to variable to avoid multi checks
-                        $prevRunTime = $runTime
-                        Write-Verbose ('{0}checking HTTP01Status' -f $(Get-Date -Format $logTimeFormat))
-                        [array]$validatedAuthorizations = Get-PAOrder -Refresh -MainDomain $MainDomain -Verbose:$false |
-                            Get-PAAuthorizations -Verbose:$false |
-                            Where-Object { ($_.fqdn -match $regexFqdn) -and ($_.HTTP01Status -eq 'valid') }
 
-                        if ($validatedAuthorizations.Count -eq $httpPublish.Count) {
-                            Write-Verbose ('{0}challenge succeeded, stopping httpListener' -f $(Get-Date -Format $logTimeFormat))
+                        $prevRunTime = $runTime
+                        Write-Verbose ('{0}checking authorization status' -f $(Get-Date -Format $logTimeFormat))
+
+                        # check if the published authorizations are no longer pending
+                        # valid or invalid doesn't matter because we can't retry, so there's no need to wait longer
+                        $completeAuths = @( $order | Get-PAAuthorizations -Verbose:$false |
+                            Where-Object { $_.fqdn -in $httpPublish.fqdn -and $_.status -ne 'pending' } )
+
+                        if ($completeAuths.Count -eq $httpPublish.Count) {
+                            Write-Verbose ('{0}no pending authorizations remaining, stopping httpListener' -f $(Get-Date -Format $logTimeFormat))
                             $httpListener.Stop()
                             return
                         }
@@ -168,12 +154,20 @@ function Start-PAHttpChallenge {
                 # get actual request context
                 $context = $contextTask.GetAwaiter().GetResult()
 
+                # deal with X-Forwarded-For header to get proper remote IP
+                # for servers behind load balancers or reverse proxies
+                $remoteIP = $context.Request.RemoteEndPoint.Address.ToString()
+                if ($context.Request.Headers['X-Forwarded-For']) {
+                    $remoteIP = $context.Request.Headers['X-Forwarded-For']
+                }
+
                 # short - if requested url matches answer
-                if ($context.Request.HttpMethod -eq 'GET' -and $context.Request.RawUrl -match $regexSubUrl) {
-                    $responseData = $httpPublish | Where-Object { $_.subUrl -eq $($context.Request.RawUrl) }
+                if ($context.Request.HttpMethod -eq 'GET' -and $context.Request.RawUrl -in $httpPublish.subUrl) {
+                    $responseData = $httpPublish | Where-Object { $_.subUrl -eq $context.Request.RawUrl }
 
                     # verbose out response
-                    Write-Verbose ('{0}sending challenge {1} to {2}' -f $(Get-Date -Format $logTimeFormat), $responseData.HTTP01Token, $context.Request.RemoteEndPoint )
+                    Write-Verbose ('{0}responding to {1} for {2}' -f $(Get-Date -Format $logTimeFormat), $remoteIP, $responseData.fqdn)
+                    Write-Debug ('    {0}' -f $responseData.Body )
                     #respond to the request
                     $context.Response.Headers.Add("Content-Type", "text/plain")
                     $context.Response.StatusCode = 200
@@ -182,10 +176,11 @@ function Start-PAHttpChallenge {
                     $context.Response.OutputStream.Write($buffer, 0, $buffer.Length)
                     $context.Response.OutputStream.Close()
                 }
-                # response to invalid path (primarily for verbose output)
+                # responsd with 404 to anything else
                 else {
                     # verbose out response
-                    Write-Verbose ('{0}invalid path request from {1} to {2}' -f $(Get-Date -Format $logTimeFormat), $context.Request.RemoteEndPoint, $context.Request.Url )
+                    Write-Verbose ('{0}unexpected request from {1}' -f $(Get-Date -Format $logTimeFormat), $remoteIP)
+                    Write-Debug ('    {0} {1}' -f $context.Request.HttpMethod, $context.Request.RawUrl)
                     #respond to the request
                     $context.Response.Headers.Add("Content-Type", "text/plain")
                     $context.Response.StatusCode = 404
@@ -214,8 +209,7 @@ function Start-PAHttpChallenge {
             }
 
             # return PAAuthorizations for MainDomain if output may be used in a variable/pipe
-            Get-PAOrder -MainDomain $MainDomain -Refresh -Verbose:$false |
-                Get-PAAuthorizations -Verbose:$false
+            $order | Get-PAAuthorizations -Verbose:$false
         }
     }
 
