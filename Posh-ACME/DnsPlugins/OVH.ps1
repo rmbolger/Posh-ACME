@@ -338,7 +338,12 @@ function Find-OVHDomain {
             # save the zone name
             $script:OVHRecordZones.$RecordName = $zoneTest
             return $zoneTest
-        } catch { Write-Debug "OVH Error: $($_.Exception.Message)" } # generally expecting a 404 here
+        } catch {
+            # re-throw anything except a 404 because it just means the zone doesn't exist
+            if (404 -ne $_.Exception.Response.StatusCode.value__) {
+                throw
+            }
+        }
     }
 
     throw "No zone found for $RecordName"
