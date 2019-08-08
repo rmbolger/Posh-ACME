@@ -36,11 +36,11 @@ function Add-DnsTxtDomeneshop {
 
         Write-Verbose "Adding $RecordName with value $TxtValue"
 
-        $response = Invoke-DomeneshopAPI `
+        Invoke-DomeneshopAPI `
             -apiAuthorization $apiAuthorization `
             -QueryAdditions $querystring `
             -Method ([Microsoft.PowerShell.Commands.WebRequestMethod]::Post) `
-            -Body $bodyJson
+            -Body $bodyJson | Out-Null
     }
 
     <#
@@ -48,7 +48,7 @@ function Add-DnsTxtDomeneshop {
         Add a DNS TXT record to Domeneshop
 
     .DESCRIPTION
-        Description for Domeneshop
+        Add a DNS TXT record to Domeneshop
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -60,16 +60,16 @@ function Add-DnsTxtDomeneshop {
         The API-token for the account logging in.
 
     .PARAMETER DomeneshopSecret
-        The API-secret associated with your API-token. This SecureString version should only be used on Windows.
+        The API-secret associated with your API-token. This SecureString version should only be used on Windows or PowerShell 6.2+.
 
     .PARAMETER DomeneshopSecretInsecure
-        The API-secret associated with your API-token. This standard String version should be used on non-Windows OSes.
+        The API-secret associated with your API-token. This standard String version can be used on any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxtExample '_acme-challenge.site1.example.com' 'asdfqwer12345678'
+        Add-DnsTxtDomeneshop '_acme-challenge.example.com' 'txtvalue' 'domen-token' (Read-Host "Secret" -AsSecureString)
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -109,10 +109,10 @@ function Remove-DnsTxtDomeneshop {
         Write-Verbose ("Removing TXT record id {2} for {0} with value {1}" -f $RecordName, $TxtValue, $rec.id)
         $querystring = ("/{0}/dns/{1}" -f $oDomain.id, $rec.id)
 
-        $response = Invoke-DomeneshopAPI `
+        Invoke-DomeneshopAPI `
             -apiAuthorization $apiAuthorization `
             -QueryAdditions $querystring `
-            -Method ([Microsoft.PowerShell.Commands.WebRequestMethod]::Delete)
+            -Method ([Microsoft.PowerShell.Commands.WebRequestMethod]::Delete) | Out-Null
     } else {
         Write-Debug ("Record {0} with value {1} doesn't exist. Nothing to do." -f $RecordName, $TxtValue)
     }
@@ -122,7 +122,7 @@ function Remove-DnsTxtDomeneshop {
         Remove a DNS TXT record from Domeneshop
 
     .DESCRIPTION
-        Description for Domeneshop
+        Remove a DNS TXT record from Domeneshop
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -131,16 +131,16 @@ function Remove-DnsTxtDomeneshop {
         The value of the TXT record.
 
     .PARAMETER DomeneshopSecret
-        The API-secret associated with your API-token. This SecureString version should only be used on Windows.
+        The API-secret associated with your API-token. This SecureString version should only be used on Windows or PowerShell 6.2+.
 
     .PARAMETER DomeneshopSecretInsecure
-        The API-secret associated with your API-token. This standard String version should be used on non-Windows OSes.
+        The API-secret associated with your API-token. This standard String version can be used on any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxtExample '_acme-challenge.site1.example.com' 'asdfqwer12345678'
+        Remove-DnsTxtDomeneshop '_acme-challenge.example.com' 'txtvalue' 'domen-token' (Read-Host "Secret" -AsSecureString)
 
         Removes a TXT record for the specified site with the specified value.
     #>
@@ -152,16 +152,6 @@ function Save-DnsTxtDomeneshop {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Add DNS provider specific parameters before $ExtraParams. Make sure
-    # their names are unique across all existing plugins. But make
-    # sure common ones across this plugin are the same.
-
-    # If necessary, do work here to save or finalize changes performed by
-    # Add/Remove functions. It is not uncommon for this function to have
-    # no work to do depending on the DNS provider. In that case, remove
-    # the $MyAPIVar parameters and just leave the body empty.
-
     <#
     .SYNOPSIS
         Not required.
