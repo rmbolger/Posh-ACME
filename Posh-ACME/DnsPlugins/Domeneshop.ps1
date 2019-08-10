@@ -188,8 +188,8 @@ function Get-DomeneshopAuthorization {
 
     try {
         # decrypt the secure password so we can add it to the querystring
-        $Private:Credential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList $DomeneshopToken, $DomeneshopSecret
         if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+            $Private:Credential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList $DomeneshopToken, $DomeneshopSecret
             $DomeneshopSecretInsecure = $Credential.GetNetworkCredential().Password
         }
 
@@ -197,7 +197,6 @@ function Get-DomeneshopAuthorization {
         $Private:header = @{Authorization = ("Basic {0}" -f $Private:base64AuthInfo) }
         $Private:apiAuthorization =@{
             Headers = $Private:header
-            Credential = $Private:Credential
         }
 
         return $Private:apiAuthorization
@@ -230,7 +229,6 @@ function Invoke-DomeneshopAPI {
             -Method $Method `
             -Uri $apiRoot `
             -Headers $apiAuthorization.Headers `
-            -Credential $apiAuthorization.Credential `
             -ContentType "application/json" `
             -Body $Body `
             @script:UseBasic `
@@ -241,7 +239,6 @@ function Invoke-DomeneshopAPI {
             -Method $Method `
             -Uri $apiRoot `
             -Headers $apiAuthorization.Headers `
-            -Credential $apiAuthorization.Credential `
             -ContentType "application/json" `
             @script:UseBasic `
             -ErrorAction Stop    }
