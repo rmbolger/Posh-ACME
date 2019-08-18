@@ -4,13 +4,49 @@ This plugin works against the [Cloudflare](https://www.cloudflare.com/dns) DNS p
 
 ## Setup
 
-We need to retrieve the Global API Key of the account that will be used to update DNS records. [Login](https://www.cloudflare.com/a/login) to Cloudflare using the account that will be used to update DNS. Go to the account's [Profile](https://dash.cloudflare.com/profile) page and click `View` on for the `Global API Key`. You'll have to re-enter the account password and answer a CAPTCHA.
+There are two choices for authentication against the Cloudflare API. The old way uses your account email address and a "Global API Key" that has complete access to your account. Cloudflare now also supports API Tokens that can be limited to only certain permissions within the account. This is the recommended method to use. Open the [API Tokens](https://dash.cloudflare.com/profile/api-tokens) page to get started.
+
+### API Token
+
+* In the API Tokens section, click `Create Token`
+* Give it a name such as 'posh-acme'
+* Add the following permissions:
+  * Zone - Zone Settings - Read
+  * Zone - Zone - Read
+  * Zone - DNS - Edit
+* Zone Resources can be configured for whatever set of zones you'll be using Posh-ACME with. But if you're unsure, just leave it as `Include - All zones` which is the default.
+* Click `Continue to summary`
+* Click `Create Token`
+* Copy the token value for later. These values can't be retrieved later. You must generate a new value if you forget the old one.
+
+### Global API Key
+
+* In the API Keys section, click `View` for the "Global API Key"
+* You may need to re-enter the account password and answer a CAPTCHA.
+* Copy the key value for later.
 
 ## Using the Plugin
 
-You will need the account's email address and previously retrieved Global API key to set as `CFAuthEmail` and `CFAuthKey`.
+If you're using the newer API Token method, you'll use the previously retrieved token value with either `CFAuthToken` or `CFAuthTokenInsecure`. The former requires a SecureString value which can only be used on Windows OSes or any OS with PowerShell 6.2 or later. If you're using the Global API Key method, you'll need to use the `CFAuthEmail` and `CFAuthKey` parameters with the account's email address and previously retrieved Global API Key.
+
+### API Token Secure (Windows or PS 6.2+)
 
 ```powershell
-$CFParams = @{CFAuthEmail='xxxxxxxx'; CFAuthKey='xxxxxxxx'}
-New-PACertificate test.example.com -DnsPlugin Cloudflare -PluginArgs $CFParams
+$secToken = Read-Host -AsSecureString -Prompt 'API Token'
+$pArgs = @{ CFAuthToken = $secToken }
+New-PACertificate example.com -DnsPlugin Cloudflare -PluginArgs $pArgs
+```
+
+### API Token Insecure (Any OS)
+
+```powershell
+$pArgs = @{ CFAuthTokenInsecure = 'xxxxxxxxxx' }
+New-PACertificate example.com -DnsPlugin Cloudflare -PluginArgs $pArgs
+```
+
+### Global API Key (Any OS)
+
+```powershell
+$pArgs = @{ CFAuthEmail='xxxx@example.com'; CFAuthKey='xxxxxxxx' }
+New-PACertificate example.com -DnsPlugin Cloudflare -PluginArgs $pArgs
 ```

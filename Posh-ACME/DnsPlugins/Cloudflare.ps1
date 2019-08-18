@@ -1,23 +1,27 @@
 function Add-DnsTxtCloudflare {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Email')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Email',Mandatory,Position=2)]
         [string]$CFAuthEmail,
-        [Parameter(Mandatory,Position=3)]
+        [Parameter(ParameterSetName='Email',Mandatory,Position=3)]
         [string]$CFAuthKey,
+        [Parameter(ParameterSetName='Bearer',Mandatory,Position=2)]
+        [securestring]$CFToken,
+        [Parameter(ParameterSetName='BearerInsecure',Mandatory,Position=2)]
+        [string]$CFTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     $apiRoot = 'https://api.cloudflare.com/client/v4/zones'
-    $authHeader = @{'X-Auth-Email'=$CFAuthEmail;'X-Auth-Key'=$CFAuthKey}
+    $authHeader = Get-CFAuthHeader @PSBoundParameters
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (!($zoneID = Find-CFZone $RecordName $CFAuthEmail $CFAuthKey)) {
+    if (!($zoneID = Find-CFZone $RecordName $authHeader)) {
         throw "Unable to find Cloudflare hosted zone for $RecordName"
     }
 
@@ -55,7 +59,13 @@ function Add-DnsTxtCloudflare {
         The email address of the account used to connect to Cloudflare API
 
     .PARAMETER CFAuthKey
-        The auth key of the account associated to the email address entered in the CFAuthEmail parameter.
+        The Global API Key associated with the email address entered in the CFAuthEmail parameter.
+
+    .PARAMETER CFAuthToken
+        The scoped API Token that has been given read/write permissions to the necessary zones. This SecureString version can only be used from Windows or any OS with PowerShell Core 6.2+.
+
+    .PARAMETER CFAuthTokenInsecure
+        The scoped API Token that has been given read/write permissions to the necessary zones. This standard String version may be used with any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -74,19 +84,23 @@ function Remove-DnsTxtCloudflare {
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Email',Mandatory,Position=2)]
         [string]$CFAuthEmail,
-        [Parameter(Mandatory,Position=3)]
+        [Parameter(ParameterSetName='Email',Mandatory,Position=3)]
         [string]$CFAuthKey,
+        [Parameter(ParameterSetName='Bearer',Mandatory,Position=2)]
+        [securestring]$CFToken,
+        [Parameter(ParameterSetName='BearerInsecure',Mandatory,Position=2)]
+        [string]$CFTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     $apiRoot = 'https://api.cloudflare.com/client/v4/zones'
-    $authHeader = @{'X-Auth-Email'=$CFAuthEmail;'X-Auth-Key'=$CFAuthKey}
+    $authHeader = Get-CFAuthHeader @PSBoundParameters
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (!($zoneID = Find-CFZone $RecordName $CFAuthEmail $CFAuthKey)) {
+    if (!($zoneID = Find-CFZone $RecordName $authHeader)) {
         throw "Unable to find Cloudflare hosted zone for $RecordName"
     }
 
@@ -124,7 +138,13 @@ function Remove-DnsTxtCloudflare {
         The email address of the account used to connect to Cloudflare API.
 
     .PARAMETER CFAuthKey
-        The auth key of the account associated to the email address entered in the CFAuthEmail parameter.
+        The Global API Key associated with the email address entered in the CFAuthEmail parameter.
+
+    .PARAMETER CFAuthToken
+        The scoped API Token that has been given read/write permissions to the necessary zones. This SecureString version can only be used from Windows or any OS with PowerShell Core 6.2+.
+
+    .PARAMETER CFAuthTokenInsecure
+        The scoped API Token that has been given read/write permissions to the necessary zones. This standard String version may be used with any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -158,15 +178,49 @@ function Save-DnsTxtCloudflare {
 # Helper Functions
 ############################
 
+function Get-CFAuthHeader {
+    [CmdletBinding(DefaultParameterSetName='Email')]
+    param(
+        [Parameter(ParameterSetName='Email',Mandatory,Position=0)]
+        [string]$CFAuthEmail,
+        [Parameter(ParameterSetName='Email',Mandatory,Position=1)]
+        [string]$CFAuthKey,
+        [Parameter(ParameterSetName='Bearer',Mandatory,Position=0)]
+        [securestring]$CFToken,
+        [Parameter(ParameterSetName='BearerInsecure',Mandatory,Position=0)]
+        [string]$CFTokenInsecure,
+        [Parameter(ValueFromRemainingArguments)]
+        $ExtraConnectParams
+    )
+
+    if ('Email' -eq $PSCmdlet.ParameterSetName) {
+        $authHeader = @{
+            'X-Auth-Email' = $CFAuthEmail
+            'X-Auth-Key'   = $CFAuthKey
+        }
+    } elseif ('Bearer' -eq $PSCmdlet.ParameterSetName) {
+        $CFTokenInsecure = (New-Object PSCredential "user",$CFToken).GetNetworkCredential().Password
+        $authHeader = @{
+            Authorization = "Bearer $CFTokenInsecure"
+        }
+    } elseif ('BearerInsecure' -eq $PSCmdlet.ParameterSetName) {
+        $authHeader = @{
+            Authorization = "Bearer $CFTokenInsecure"
+        }
+    } else {
+        throw "Unable to determine valid auth headers."
+    }
+
+    return $authHeader
+}
+
 function Find-CFZone {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [string]$CFAuthEmail,
-        [Parameter(Mandatory,Position=2)]
-        [string]$CFAuthKey
+        [hashtable]$AuthHeader
     )
 
     # setup a module variable to cache the record to zone mapping
@@ -179,7 +233,6 @@ function Find-CFZone {
     }
 
     $apiRoot = 'https://api.cloudflare.com/client/v4/zones'
-    $authHeader = @{'X-Auth-Email'=$CFAuthEmail;'X-Auth-Key'=$CFAuthKey}
 
     # We need to find the zone ID for the closest/deepest sub-zone that would
     # contain the record.
@@ -188,7 +241,7 @@ function Find-CFZone {
 
         $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
         Write-Debug "Checking $zoneTest"
-        $response = Invoke-RestMethod "$apiRoot/?name=$zoneTest" -Headers $authHeader @script:UseBasic
+        $response = Invoke-RestMethod "$apiRoot/?name=$zoneTest" -Headers $AuthHeader @script:UseBasic
 
         # The response object always contains a "result" array even if empty
         if ($response.result.Count -gt 0) {
