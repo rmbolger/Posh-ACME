@@ -39,7 +39,7 @@
     $recShort = $RecordName -ireplace [regex]::Escape(".$domain"), [string]::Empty
 
     # check for existing record
-    $rec = $Records | Where-Object { $_.type -eq 'TXT' -and $_.host -eq $recShort -and $_.rData -eq $TxtValue }
+    $rec = $Records.data | Where-Object { $_.type -eq 'TXT' -and $_.host -eq $recShort -and $_.rData -eq $TxtValue }
     if ($rec) {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
     } else {
@@ -133,7 +133,7 @@ Function Remove-DnsTxtEasyDNS {
     $recShort = $RecordName -ireplace [regex]::Escape(".$domain"), [string]::Empty
 
     # check for existing record
-    $rec = $Records | Where-Object { $_.type -eq 'TXT' -and $_.host -eq $recShort -and $_.rData -eq $TxtValue }
+    $rec = $Records.data | Where-Object { $_.type -eq 'TXT' -and $_.host -eq $recShort -and $_.rData -eq $TxtValue }
     if ($rec) {
         # remove it
         Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
