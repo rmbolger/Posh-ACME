@@ -1,5 +1,6 @@
 function Add-DnsTxtClouDNS {
     [CmdletBinding(DefaultParameterSetName='Secure')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -14,9 +15,12 @@ function Add-DnsTxtClouDNS {
         [securestring]$CDPassword,
         [Parameter(ParameterSetName='Insecure',Mandatory,Position=4)]
         [string]$CDPasswordInsecure,
+        [switch]$CDPollPropagation,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    if (-not $script:CDZonesToPoll) { $script:CDZonesToPoll = @() }
 
     # get our auth body parameters
     try { $body = Get-CDCommonBody @PSBoundParameters } catch { throw }
@@ -36,6 +40,12 @@ function Add-DnsTxtClouDNS {
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
         $querystring = "/add-record.json?domain-name=$zoneName&host=$recShort&record=$TxtValue&record-type=TXT&ttl=60"
         Invoke-CDAPI $body $querystring -Method Post | Out-Null
+
+        # add the zone to the polling list if necessary
+        if ($CDPollPropagation -and $zoneName -notin $script:CDZonesToPoll) {
+            Write-Debug "Adding $zoneName to polling list"
+            $script:CDZonesToPoll += $zoneName
+        }
     }
 
     <#
@@ -58,29 +68,33 @@ function Add-DnsTxtClouDNS {
         The username or id for the account logging in.
 
     .PARAMETER CDPassword
-        The password associated with your username. This SecureString version should only be used on Windows.
+        The password associated with your username. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER CDPasswordInsecure
-        The password associated with your username. This standard String version should be used on non-Windows OSes.
+        The password associated with your username. This standard String version can be used on any OS.
+
+    .PARAMETER CDPollPropagation
+        If specified, this will cause the Save method to block until each affected zone has updated its nameservers by querying the API for their status.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
         $pass = Read-Host "Password" -AsSecureString
-        PS C:\>Add-DnsTxtClouDNS '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'auth-id' '12345' $pass
+        PS C:\>Add-DnsTxtClouDNS '_acme-challenge.example.com' 'txtvalue' 'auth-id' '12345' $pass
 
-        Adds a TXT record using a securestring object for CDPassword. (Only works on Windows)
+        Adds a TXT record using a securestring object for CDPassword.
 
     .EXAMPLE
-        Add-DnsTxtClouDNS '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'auth-id' '12345' 'xxxxxxxx'
+        Add-DnsTxtClouDNS '_acme-challenge.example.com' 'txtvalue' 'auth-id' '12345' 'xxxxxxxx'
 
-        Adds a TXT record using a standard string object for CDPasswordInsecure. (Use this on non-Windows)
+        Adds a TXT record using a standard string object for CDPasswordInsecure.
     #>
 }
 
 function Remove-DnsTxtClouDNS {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -139,42 +153,114 @@ function Remove-DnsTxtClouDNS {
         The username or id for the account logging in.
 
     .PARAMETER CDPassword
-        The password associated with your username. This SecureString version should only be used on Windows.
+        The password associated with your username. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER CDPasswordInsecure
-        The password associated with your username. This standard String version should be used on non-Windows OSes.
+        The password associated with your username. This standard String version can be used on any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
         $pass = Read-Host "Password" -AsSecureString
-        PS C:\>Remove-DnsTxtClouDNS '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'auth-id' '12345' $pass
+        PS C:\>Remove-DnsTxtClouDNS '_acme-challenge.example.com' 'txtvalue' 'auth-id' '12345' $pass
 
-        Removes a TXT record using a securestring object for CDPassword. (Only works on Windows)
+        Removes a TXT record using a securestring object for CDPassword.
 
     .EXAMPLE
-        Remove-DnsTxtClouDNS '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'auth-id' '12345' 'xxxxxxxx'
+        Remove-DnsTxtClouDNS '_acme-challenge.example.com' 'txtvalue' 'auth-id' '12345' 'xxxxxxxx'
 
-        Removes a TXT record using a standard string object for CDPasswordInsecure. (Use this on non-Windows)
+        Removes a TXT record using a standard string object for CDPasswordInsecure.
     #>
 }
 
 function Save-DnsTxtClouDNS {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
+        [Parameter(Mandatory,Position=0)]
+        [ValidateSet('auth-id','sub-auth-id','sub-auth-user')]
+        [string]$CDUserType,
+        [Parameter(Mandatory,Position=1)]
+        [string]$CDUsername,
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
+        [securestring]$CDPassword,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [string]$CDPasswordInsecure,
+        [switch]$CDPollPropagation,
+        [int]$CDPollTimeout=300,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    $pollZones = $script:CDZonesToPoll
+
+    if ($CDPollPropagation -and $pollZones.Count -gt 0) {
+
+        # get our auth body parameters
+        try { $body = Get-CDCommonBody @PSBoundParameters } catch { throw }
+
+        $startTime = [DateTimeOffset]::Now
+        while ($pollZones.Count -gt 0 -and
+            ([DateTimeOffset]::Now - $startTime).TotalSeconds -lt $CDPollTimeout) {
+
+            Start-Sleep 10
+
+            # reverse through the list so the index doesn't change
+            # if we remove one
+            for ($i = ($pollZones.Count-1); $i -ge 0; $i--) {
+
+                $zone = $pollZones[$i]
+
+                if (Test-CDIsUpdated $zone $body) {
+                    Write-Verbose "$zone is updated"
+                    $pollZones = @($pollZones | Where-Object { $_ -ne $zone })
+                }
+            }
+        }
+        Write-Debug "Polling stopped after $(([DateTimeOffset]::Now - $startTime).TotalSeconds) seconds"
+    }
+
+    $script:CDZonesToPoll = @()
+
     <#
     .SYNOPSIS
-        Not required.
+        Block while polling the API for zones to be updated at their nameservers.
 
     .DESCRIPTION
-        This provider does not require calling this function to commit changes to DNS records.
+        When the CDPollPropagation switch is used, this function will use the is-updated ClouDNS API call wait until each zone has updated their associated nameservers.
+
+    .PARAMETER CDUserType
+        The type of user you're logging in as. This can be 'auth-id', 'sub-auth-id', or 'sub-auth-user'.
+
+    .PARAMETER CDUsername
+        The username or id for the account logging in.
+
+    .PARAMETER CDPassword
+        The password associated with your username. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
+
+    .PARAMETER CDPasswordInsecure
+        The password associated with your username. This standard String version can be used on any OS.
+
+    .PARAMETER CDPollPropagation
+        If specified, this will cause the Save method to block until each affected zone has updated its nameservers by querying the API for their status.
+
+    .PARAMETER CDPollTimeout
+        The number of seconds to wait while polling before giving up. Defaults to 300 (5 minutes).
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+
+    .EXAMPLE
+        $pass = Read-Host "Password" -AsSecureString
+        PS C:\>Save-DnsTxtClouDNS 'auth-id' '12345' $pass
+
+        Saves TXT records using a securestring object for CDPassword.
+
+    .EXAMPLE
+        Save-DnsTxtClouDNS 'auth-id' '12345' 'xxxxxxxx'
+
+        Saves TXT records using a standard string object for CDPasswordInsecure.
     #>
 }
 
@@ -187,6 +273,7 @@ function Save-DnsTxtClouDNS {
 
 function Get-CDCommonBody {
     [CmdletBinding(DefaultParameterSetName='Secure')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory,Position=0)]
         [ValidateSet('auth-id','sub-auth-id','sub-auth-user')]
@@ -232,22 +319,20 @@ function Find-CDZone {
         return $script:CDRecordZones.$RecordName
     }
 
-    $querystring = "/list-zones.json?page=1&rows-per-page=10"
-
     # Search for the zone from longest to shortest set of FQDN pieces.
     $pieces = $RecordName.Split('.')
     for ($i=1; $i -lt ($pieces.Count-1); $i++) {
         $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
         Write-Debug "Checking $zoneTest"
         try {
-            $response = Invoke-CDAPI $CommonBody "$querystring&search=$zoneTest"
+            $response = Invoke-CDAPI $CommonBody "/get-zone-info.json?&domain-name=$zoneTest"
 
             # check for results
             if ($response) {
-                $script:CDRecordZones.$RecordName = $response[0].name
-                return $response[0].name
+                $script:CDRecordZones.$RecordName = $response.name
+                return $response.name
             }
-        } catch { throw }
+        } catch { Write-Debug ($_.Exception.Message) }
     }
 
     throw "No zone found for $RecordName"
@@ -292,6 +377,21 @@ function Get-CDTxtRecord {
             return ($recs | Where-Object { $_.record -eq $TxtValue })
         }
     } catch { throw }
+}
+
+function Test-CDIsUpdated {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [string]$ZoneName,
+        [Parameter(Mandatory,Position=1)]
+        [hashtable]$CommonBody
+    )
+
+    Write-Verbose "Checking if $ZoneName nameservers are updated"
+    $response = Invoke-CDAPI $CommonBody "/is-updated.json?domain-name=$ZoneName" -Verbose:$false
+
+    return $response
 }
 
 function Invoke-CDAPI {
