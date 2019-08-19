@@ -51,6 +51,7 @@ FunctionsToExport = @(
     'Get-PAOrder',
     'Get-PAServer',
     'Install-PACertificate',
+    'Invoke-HttpChallengeListener',
     'New-PAAccount',
     'New-PACertificate',
     'New-PAOrder',
