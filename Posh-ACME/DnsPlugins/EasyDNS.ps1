@@ -1,56 +1,66 @@
-﻿
-Function Add-DnsTxtEasyDNS{
+﻿Function Add-DnsTxtEasyDNS {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [string]$edToken,
-        [string]$edKey,
+        [Parameter(Mandatory)]
+        [string]$EDToken,
+        [Parameter(Mandatory)]
+        [string]$EDKey,
+        [switch]$EDUseSandbox,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    #Basic Setup - set use live REST URL for easyDNS and manually encode token/key pair into header
-    $URI = "https://rest.easydns.net"
-    $pair = "$($edToken):$($edKey)"
+    # set the API base
+    $apiBase = if ($EDUseSandbox) { "https://sandbox.rest.easydns.net" } else { "https://rest.easydns.net" }
 
-    $encodedCreds = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($pair))
-    $basicAuthValue = "Basic $encodedCreds"
-    $Headers = @{Authorization = $basicAuthValue}
+    # create the basic auth header
+    $encodedCreds = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($EDToken):$($EDKey)"))
+    $Headers = @{ Authorization = "Basic $encodedCreds" }
 
-    #Split up the Recordname into host and domain by testing against account
-    $Bits = $RecordName.Split('.') | ? {$_ -ne '*'}
+    # find the domain/zone associated with this record
+    $Bits = $RecordName.Split('.')
     for ($i=2; $i -lt $Bits.Count; $i++) {
-        try{$Records=Invoke-RestMethod -Uri "$($URI)/zones/records/all/$($Bits[$(0-$i)..-1] -join '.')?format=json" -ContentType 'application/json' -Headers $Headers -Method GET @script:UseBasic -ErrorAction Stop}
-        catch {continue}
-        $domain = $Bits[$(0-$i)..-1] -join '.'
-        Write-Verbose $domain
+        $checkZone = $Bits[$(0-$i)..-1] -join '.'
+        try {
+            $Records = Invoke-RestMethod "$apiBase/zones/records/all/$($checkZone)?format=json" `
+                -ContentType 'application/json' -Headers $Headers -Method GET @script:UseBasic -EA Stop
+        } catch { continue }
+        $domain = $checkZone
+        Write-Verbose "Found $domain zone"
         break
     }
-    if (!$domain) {throw "Could not find domain"}
+    if (-not $domain) { throw "Unable to find zone for $RecordName" }
 
-    $hostname = $Bits[0..$(($Bits.Count-1)-$i)] -join '.'
+    # grab the relative portion of the fqdn
+    $recShort = $RecordName -ireplace [regex]::Escape(".$domain"), [string]::Empty
 
-    Write-Verbose "Check for duplicate"
-    foreach ($zRecord in $($Records.data | ? {$_.host -eq $hostname -and $_.rData -eq $TxtValue})) {
-        Write-Verbose "Duplicate found... Deleting"
-        $DeleteResponse = Invoke-RestMethod -Uri "$($URI)/zones/records/$($domain)/$($zRecord.id)?format=json" -ContentType 'application/json' -Headers $Headers -Method Delete @script:UseBasic
+    # check for existing record
+    $rec = $Records | Where-Object { $_.type -eq 'TXT' -and $_.host -eq $recShort -and $_.rData -eq $TxtValue }
+    if ($rec) {
+        Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
+    } else {
+        # add it
+        Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
+
+        $body = @{
+            host = $recShort
+            domain = $domain
+            ttl = 0
+            prio = 0
+            type = "txt"
+            rdata = $TxtValue
+        } | ConvertTo-Json
+        Write-Debug $body
+
+        Invoke-RestMethod "$apiBase/zones/records/add/$domain/txt?format=json" -Method Put `
+            -Body $body -ContentType 'application/json' -Headers $Headers @script:UseBasic | Out-Null
     }
 
-    $NewHost = @{
-    host = $hostname
-    domain = $domain
-    ttl = 0
-    prio = 0
-    type = "txt"
-    rdata = $TxtValue
-    }
-
-    Write-Verbose "Create new record"
-    $CreateResponse = Invoke-RestMethod -Body ($NewHost|ConvertTo-Json) -Uri "$($URI)/zones/records/add/$($domain)/txt?format=json" -ContentType 'application/json' -Headers $Headers -Method PUT @script:UseBasic
-        <#
+    <#
     .SYNOPSIS
         Add a DNS TXT record to EasyDNS.
 
@@ -63,61 +73,76 @@ Function Add-DnsTxtEasyDNS{
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER edToken
+    .PARAMETER EDToken
         The EasyDNS API Token.
 
-    .PARAMETER edKey
+    .PARAMETER EDKey
         The EasyDNS API Key.
+
+    .PARAMETER EDUseSandbox
+        If specified, the plugin runs against the Sandbox environment instead of the Live environment.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxtEasyDNS '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'dfasdasf3j42f' 'adsfj834sadfda'
+        Add-DnsTxtEasyDNS '_acme-challenge.example.com' 'txtvalue' -EDToken 'xxxxxxxx' -EDKey 'xxxxxxxx'
 
         Adds a TXT record for the specified site with the specified value.
     #>
 }
 
-Function Remove-DnsTxtEasyDNS{
+Function Remove-DnsTxtEasyDNS {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [string]$edToken,
-        [string]$edKey,
+        [Parameter(Mandatory)]
+        [string]$EDToken,
+        [Parameter(Mandatory)]
+        [string]$EDKey,
+        [switch]$EDUseSandbox,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    #Basic Setup - set use live REST URL for easyDNS and manually encode token/key pair into header
-    $URI = "https://rest.easydns.net"
-    $pair = "$($edToken):$($edKey)"
+    # set the API base
+    $apiBase = if ($EDUseSandbox) { "https://sandbox.rest.easydns.net" } else { "https://rest.easydns.net" }
 
-    $encodedCreds = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($pair))
-    $basicAuthValue = "Basic $encodedCreds"
-    $Headers = @{Authorization = $basicAuthValue}
+    # create the basic auth header
+    $encodedCreds = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($EDToken):$($EDKey)"))
+    $Headers = @{ Authorization = "Basic $encodedCreds" }
 
-    #Split up the Recordname into host and domain by testing against account
-    $Bits = $RecordName.Split('.') | ? {$_ -ne '*'}
+    # find the domain/zone associated with this record
+    $Bits = $RecordName.Split('.')
     for ($i=2; $i -lt $Bits.Count; $i++) {
-        try{$Records=Invoke-RestMethod -Uri "$($URI)/zones/records/all/$($Bits[$(0-$i)..-1] -join '.')?format=json" -ContentType 'application/json' -Headers $Headers -Method GET @script:UseBasic -ErrorAction Stop}
-        catch {continue}
-        $domain = $Bits[$(0-$i)..-1] -join '.'
-        Write-Verbose $domain
+        $checkZone = $Bits[$(0-$i)..-1] -join '.'
+        try {
+            $Records = Invoke-RestMethod "$apiBase/zones/records/all/$($checkZone)?format=json" `
+                -ContentType 'application/json' -Headers $Headers -Method GET @script:UseBasic -EA Stop
+        } catch { continue }
+        $domain = $checkZone
+        Write-Verbose "Found $domain zone"
         break
     }
-    if (!$domain) {throw "Could not find domain"}
+    if (-not $domain) { throw "Unable to find zone for $RecordName" }
 
-    $hostname = $Bits[0..$(($Bits.Count-1)-$i)] -join '.'
+    # grab the relative portion of the fqdn
+    $recShort = $RecordName -ireplace [regex]::Escape(".$domain"), [string]::Empty
 
-    Write-Verbose "Check for matching record $hostname | $domain | $TxtValue"
-    foreach ($zRecord in $($Records.data | ? {$_.host -eq $hostname -and $_.rData -eq $TxtValue})) {
-        Write-Verbose "Matching record found... deleting"
-        $DeleteResponse = Invoke-RestMethod -Uri "$($URI)/zones/records/$($domain)/$($zRecord.id)?format=json" -ContentType 'application/json' -Headers $Headers -Method Delete @script:UseBasic
+    # check for existing record
+    $rec = $Records | Where-Object { $_.type -eq 'TXT' -and $_.host -eq $recShort -and $_.rData -eq $TxtValue }
+    if ($rec) {
+        # remove it
+        Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
+        Invoke-RestMethod "$apiBase/zones/records/$domain/$($rec.id)?format=json" -Method Delete `
+            -ContentType 'application/json' -Headers $Headers @script:UseBasic | Out-Null
+    } else {
+        Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     }
+
     <#
     .SYNOPSIS
         Remove a DNS TXT record to EasyDNS.
@@ -131,24 +156,31 @@ Function Remove-DnsTxtEasyDNS{
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER edToken
+    .PARAMETER EDToken
         The EasyDNS API Token.
 
-    .PARAMETER edKey
+    .PARAMETER EDKey
         The EasyDNS API Key.
+
+    .PARAMETER EDUseSandbox
+        If specified, the plugin runs against the Sandbox environment instead of the Live environment.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxtEasyDNS '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'dfasdasf3j42f' 'adsfj834sadfda'
+        Remove-DnsTxtEasyDNS '_acme-challenge.example.com' 'txtvalue' -EDToken 'xxxxxxxx' -EDKey 'xxxxxxxx'
 
         Removes a TXT record for the specified site with the specified value.
     #>
 }
 
-Function Save-DnsTxtEasyDNS{
-param([Parameter(ValueFromRemainingArguments)] $ExtraParams)
+function Save-DnsTxtEasyDNS {
+    [CmdletBinding()]
+    param(
+        [Parameter(ValueFromRemainingArguments)]
+        $ExtraParams
+    )
     <#
     .SYNOPSIS
         Not required.
@@ -160,3 +192,11 @@ param([Parameter(ValueFromRemainingArguments)] $ExtraParams)
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     #>
 }
+
+############################
+# Helper Functions
+############################
+
+# API Docs
+# http://docs.sandbox.rest.easydns.net/
+# http://sandbox.rest.easydns.net:3000/
