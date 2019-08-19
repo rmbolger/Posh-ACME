@@ -1,3 +1,23 @@
+## 3.6.0 (2019-08-19)
+
+* Added new DNS plugins
+  * Domeneshop (Thanks @ornulfn)
+  * Dreamhost (Thanks @jhendricks123)
+  * EasyDNS (Thanks @abrysiuk)
+  * FreeDNS (afraid.org)
+* Added `Invoke-HttpChallengeListener` function (Thanks @soltroy). This runs a self-hosted web server that can answer HTTP challenges. Look for a wiki usage guide soon.
+* Added `Remove-PAServer` function. Warning: This deletes all data (accounts, orders, certs) associated with an ACME server.
+* Added `Install-PACertificate` function. This can be used to manually import a cert to the Windows cert store. (#159)
+* Added support for Cloudflare's new limited access API Tokens. See usage guide for details.
+* Added support for propagation polling with ClouDNS plugin. See usage guide for details.
+* Fixed edge case zone finding bug with ClouDNS plugin.
+* Fixed DOcean (Digital Ocean) plugin which broke because they now enforce a 30 sec TTL minimum on record creation.
+* Fixed overly aggressive error trapping in OVH plugin. (#162)
+* Fixed a typo in the OVH plugin usage guide.
+* Fixed SkipCertificateCheck is no longer ignored when passing a PAServer object via pipeline to Set-PAServer.
+* Fixed `Submit-ChallengeValidation` no longer tries to sleep when DnsSleep = 0.
+* Some internal refactoring.
+
 ## 3.5.0 (2019-06-21)
 
 * Added new DNS plugin for Simple DNS Plus (#149) (Thanks @alphaz18)

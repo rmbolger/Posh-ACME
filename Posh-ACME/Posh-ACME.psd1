@@ -107,12 +107,25 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-* Added new DNS plugin for Simple DNS Plus (#149) (Thanks @alphaz18)
-* Changed a bunch of "-ErrorAction SilentlyContinue" references to "Ignore" so we're not filling the $Error collection with junk.
-* Fix for Boulder removing ID field from new account output.
-* Fixed an issue in a number of plugins that could cause errors if the case of the requested record didn't match the server's zone case. (Thanks @Makr91)
-* Fixed a bug with the Route53 plugin when used on PowerShell Core without the AwsPowerShell module installed.
-* Fixed some typos in the OVH plugin usage guide examples (#147)
+## 3.6.0 (2019-08-19)
+
+* Added new DNS plugins
+  * Domeneshop (Thanks @ornulfn)
+  * Dreamhost (Thanks @jhendricks123)
+  * EasyDNS (Thanks @abrysiuk)
+  * FreeDNS (afraid.org)
+* Added `Invoke-HttpChallengeListener` function (Thanks @soltroy). This runs a self-hosted web server that can answer HTTP challenges. Look for a wiki usage guide soon.
+* Added `Remove-PAServer` function. Warning: This deletes all data (accounts, orders, certs) associated with an ACME server.
+* Added `Install-PACertificate` function. This can be used to manually import a cert to the Windows cert store. (#159)
+* Added support for Cloudflare's new limited access API Tokens. See usage guide for details.
+* Added support for propagation polling with ClouDNS plugin. See usage guide for details.
+* Fixed edge case zone finding bug with ClouDNS plugin.
+* Fixed DOcean (Digital Ocean) plugin which broke because they now enforce a 30 sec TTL minimum on record creation.
+* Fixed overly aggressive error trapping in OVH plugin. (#162)
+* Fixed a typo in the OVH plugin usage guide.
+* Fixed SkipCertificateCheck is no longer ignored when passing a PAServer object via pipeline to Set-PAServer.
+* Fixed `Submit-ChallengeValidation` no longer tries to sleep when DnsSleep = 0.
+* Some internal refactoring.
 '@
 
     } # End of PSData hashtable
