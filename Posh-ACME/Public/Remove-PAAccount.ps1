@@ -39,7 +39,7 @@ function Remove-PAAccount {
         Write-Verbose "Deleting account $($acct.id)"
 
         # delete the account's folder
-        $acctFolder = Join-Path $script:DirFolder $acct.id
+        $acctFolder = Join-Path (Get-DirFolder) $acct.id
         Remove-Item $acctFolder -Force -Recurse
 
         # unset the current account if it was this one
@@ -50,7 +50,7 @@ function Remove-PAAccount {
             $script:Order = $null
             $script:OrderFolder = $null
 
-            Remove-Item (Join-Path $script:DirFolder 'current-account.txt') -Force
+            Remove-Item (Join-Path (Get-DirFolder) 'current-account.txt') -Force
         }
 
     }

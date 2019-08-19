@@ -71,7 +71,7 @@ function Set-PAAccount {
             Write-Debug "Switching to account $ID"
 
             # save it as current
-            $ID | Out-File (Join-Path $script:DirFolder 'current-account.txt') -Force -EA Stop
+            $ID | Out-File (Join-Path (Get-DirFolder) 'current-account.txt') -Force -EA Stop
 
             # reset child object references
             $script:Order = $null
@@ -138,7 +138,7 @@ function Set-PAAccount {
             $acct.contact = $respObj.contact
 
             # save it to disk
-            $acctFolder = Join-Path $script:DirFolder $acct.id
+            $acctFolder = Join-Path (Get-DirFolder) $acct.id
             $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force -EA Stop
 
         } elseif ($KeyRollover) {
@@ -199,7 +199,7 @@ function Set-PAAccount {
                 $acct.KeyLength = $KeyLength
 
                 # save it to disk
-                $acctFolder = Join-Path $script:DirFolder $acct.id
+                $acctFolder = Join-Path (Get-DirFolder) $acct.id
                 $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force -EA Stop
             }
         }

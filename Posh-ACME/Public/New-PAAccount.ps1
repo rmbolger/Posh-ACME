@@ -123,9 +123,9 @@ function New-PAAccount {
     }
 
     # save it to memory and disk
-    $acct.id | Out-File (Join-Path $script:DirFolder 'current-account.txt') -Force -EA Stop
+    $acct.id | Out-File (Join-Path (Get-DirFolder) 'current-account.txt') -Force -EA Stop
     $script:Acct = $acct
-    $script:AcctFolder = Join-Path $script:DirFolder $acct.id
+    $script:AcctFolder = Join-Path (Get-DirFolder) $acct.id
     if (!(Test-Path $script:AcctFolder -PathType Container)) {
         New-Item -ItemType Directory -Path $script:AcctFolder -Force -EA Stop | Out-Null
     }

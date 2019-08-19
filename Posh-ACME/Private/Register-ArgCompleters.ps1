@@ -26,9 +26,9 @@ function Register-ArgCompleters {
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
         # nothing to auto complete if we don't have a server selected
-        if ([String]::IsNullOrWhiteSpace($script:DirFolder)) { return }
+        if ([String]::IsNullOrWhiteSpace((Get-DirFolder))) { return }
 
-        $ids = (Get-ChildItem -Path $script:DirFolder | Where-Object { $_ -is [IO.DirectoryInfo] }).BaseName
+        $ids = (Get-ChildItem -Path (Get-DirFolder) | Where-Object { $_ -is [IO.DirectoryInfo] }).BaseName
         $ids | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
             [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
         }

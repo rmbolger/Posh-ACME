@@ -62,7 +62,7 @@ function Update-PAAccount {
         $acct.contact = $respObj.contact
 
         # save it to disk
-        $acctFolder = Join-Path $script:DirFolder $acct.id
+        $acctFolder = Join-Path (Get-DirFolder) $acct.id
         $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force -EA Stop
     }
 

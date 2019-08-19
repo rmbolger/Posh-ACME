@@ -50,7 +50,7 @@ function Get-PAAccount {
 
             # read the contents of each accounts's acct.json
             Write-Debug "Loading PAAccount list from disk"
-            $rawFiles = Get-ChildItem "$($script:DirFolder)\*\acct.json" | Get-Content -Raw
+            $rawFiles = Get-ChildItem "$((Get-DirFolder))\*\acct.json" | Get-Content -Raw
             $accts = $rawFiles | ConvertFrom-Json | Sort-Object id | ForEach-Object {
 
                     # insert the type name and send the results to the pipeline
@@ -85,7 +85,7 @@ function Get-PAAccount {
             if ($ID) {
 
                 # build the path to acct.json
-                $acctFolder = Join-Path $script:DirFolder $ID
+                $acctFolder = Join-Path (Get-DirFolder) $ID
                 $acctFile = Join-Path $acctFolder 'acct.json'
 
                 # check if it exists
