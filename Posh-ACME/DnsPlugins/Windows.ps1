@@ -39,7 +39,13 @@ function Add-DnsTxtWindows {
         if ('ZoneScope' -notin (Get-Command Get-DnsServerResourceRecord).Parameters.Keys) {
             throw "ZoneScope is not supported in the version of the DnsServer module currently installed."
         } else {
-            $zoneScope.ZoneScope = $WinZoneScope
+            # In some configurations, not all zones that need to be modified have the specified
+            # scope and will throw errors if you try to access them with a specified scope. So
+            # we're going to make sure the specified scope exists before trying to use it.
+            $scopes = $zone | Get-DnsServerZoneScope @dnsParams
+            if ($WinZoneScope -in $scopes.ZoneScope) {
+                $zoneScope.ZoneScope = $WinZoneScope
+            }
         }
     }
 
@@ -131,7 +137,13 @@ function Remove-DnsTxtWindows {
         if ('ZoneScope' -notin (Get-Command Get-DnsServerResourceRecord).Parameters.Keys) {
             throw "ZoneScope is not supported in the version of the DnsServer module currently installed."
         } else {
-            $zoneScope.ZoneScope = $WinZoneScope
+            # In some configurations, not all zones that need to be modified have the specified
+            # scope and will throw errors if you try to access them with a specified scope. So
+            # we're going to make sure the specified scope exists before trying to use it.
+            $scopes = $zone | Get-DnsServerZoneScope @dnsParams
+            if ($WinZoneScope -in $scopes.ZoneScope) {
+                $zoneScope.ZoneScope = $WinZoneScope
+            }
         }
     }
 
