@@ -9,7 +9,8 @@ function Submit-Renewal {
         [switch]$AllAccounts,
         [switch]$NewKey,
         [switch]$Force,
-        [switch]$NoSkipManualDns
+        [switch]$NoSkipManualDns,
+        [hashtable]$PluginArgs
     )
 
     Begin {
@@ -73,6 +74,12 @@ function Submit-Renewal {
                     $certParams.CSRPath = $reqPath
                 }
                 $certParams.DnsPlugin = $order.DnsPlugin
+
+                # If new PluginArgs were specified, store these now.
+                if ($PluginArgs) {
+                    Export-PluginArgs $PluginArgs $order.DnsPlugin (Get-PAAccount)
+                }
+
                 $certParams.PluginArgs = Import-PluginArgs $order.DnsPlugin
                 $certParams.DnsAlias = $order.DnsAlias
                 $certParams.Force = $Force.IsPresent
