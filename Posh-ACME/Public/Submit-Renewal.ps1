@@ -167,6 +167,9 @@ function Submit-Renewal {
     .PARAMETER NoSkipManualDns
         If specified, orders that utilize the Manual DNS plugin will not be skipped and user interaction may be required to complete the process. Otherwise, orders that utilize the Manual DNS plugin will be skipped.
 
+    .PARAMETER PluginArgs
+        A hashtable containing an updated set of plugin arguments to use with the renewal. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
+
     .EXAMPLE
         Submit-Renewal
 
