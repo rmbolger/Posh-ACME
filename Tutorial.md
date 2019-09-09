@@ -164,7 +164,7 @@ These are designed to be used in a daily scheduled task. **Make sure to have it 
 
 ### Updating DNS Plugin Parameters on Renewal
 
-If you are authenticating to your DNS provider using a short-lived access token, you may need to update said token when it comes to renewal. You can do this by specifying the new plugin parameters using the ```-PluginArgs``` parameter. **The full set of plugin arguments must be specified**.
+DNS provider credentials can change over time and some plugins can be used with purposefully short-lived access tokens. In these cases, you can specify the new plugin parameters using the ```-PluginArgs``` parameter. **The full set of plugin arguments must be specified.**
 
 As an example, consider the case for the Azure DNS plugin:
 
