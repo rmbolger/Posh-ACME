@@ -9,7 +9,8 @@ function Submit-Renewal {
         [switch]$AllAccounts,
         [switch]$NewKey,
         [switch]$Force,
-        [switch]$NoSkipManualDns
+        [switch]$NoSkipManualDns,
+        [hashtable]$PluginArgs
     )
 
     Begin {
@@ -73,6 +74,12 @@ function Submit-Renewal {
                     $certParams.CSRPath = $reqPath
                 }
                 $certParams.DnsPlugin = $order.DnsPlugin
+
+                # If new PluginArgs were specified, store these now.
+                if ($PluginArgs) {
+                    Export-PluginArgs $PluginArgs $order.DnsPlugin (Get-PAAccount)
+                }
+
                 $certParams.PluginArgs = Import-PluginArgs $order.DnsPlugin
                 $certParams.DnsAlias = $order.DnsAlias
                 $certParams.Force = $Force.IsPresent
@@ -159,6 +166,9 @@ function Submit-Renewal {
 
     .PARAMETER NoSkipManualDns
         If specified, orders that utilize the Manual DNS plugin will not be skipped and user interaction may be required to complete the process. Otherwise, orders that utilize the Manual DNS plugin will be skipped.
+
+    .PARAMETER PluginArgs
+        A hashtable containing an updated set of plugin arguments to use with the renewal. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
 
     .EXAMPLE
         Submit-Renewal
