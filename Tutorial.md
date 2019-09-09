@@ -162,6 +162,17 @@ Submit-Renewal -AllAccounts
 
 These are designed to be used in a daily scheduled task. **Make sure to have it run as the same user you're currently logged in as** because the module config is all stored in your local profile. Each day, it will check the existing certs for ones that have reached the renewal window and renew them. It will just ignore the ones that aren't ready yet.
 
+### Updating DNS Plugin Parameters on Renewal
+
+If you are authenticating to your DNS provider using a short-lived access token, you may need to update said token when it comes to renewal. You can do this by specifying the new plugin parameters using the ```-PluginArgs``` parameter. **The full set of plugin arguments must be specified**.
+
+As an example, consider the case for the Azure DNS plugin:
+
+```powershell
+# renew specifying new plugin arguments
+Submit-Renewal -PluginArgs @{AZSubscriptionId='mysubscriptionid',AZAccessToken='myaccesstoken'}
+```
+
 ## Going Into Production
 
 Now that you've got everything working against the Let's Encrypt staging server, all you have to do is switch over to the production server and re-run your `New-PACertificate` command to get your shiny new publicly trusted certificate.
