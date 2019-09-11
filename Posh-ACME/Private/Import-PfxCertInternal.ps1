@@ -32,13 +32,16 @@ function Import-PfxCertInternal {
         try {
 
             $PfxFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($PfxFile)
-
             $pfxBytes = [IO.File]::ReadAllBytes($PfxFile)
 
-            $pfx = New-Object Security.Cryptography.X509Certificates.X509Certificate2($pfxBytes,$PfxPass,'Exportable,PersistKeySet,MachineKeySet')
+            $keyFlags = ([Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable -bor
+                [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::PersistKeySet -bor
+                [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::MachineKeySet)
 
-            $store = New-Object Security.Cryptography.X509Certificates.X509Store($StoreLoc,$StoreName)
-            $store.Open("MaxAllowed")
+            $pfx = [Security.Cryptography.X509Certificates.X509Certificate2]::new($pfxBytes,$PfxPass,$keyFlags)
+
+            $store = [Security.Cryptography.X509Certificates.X509Store]::new($StoreLoc,$StoreName)
+            $store.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
             $store.Add($pfx)
             $store.Close()
 
