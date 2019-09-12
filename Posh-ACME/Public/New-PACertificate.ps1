@@ -25,7 +25,7 @@ function New-PACertificate {
         [Parameter(ParameterSetName='FromScratch')]
         [switch]$OCSPMustStaple,
         [Parameter(ParameterSetName='FromScratch')]
-        [string]$FriendlyName='',
+        [string]$FriendlyName,
         [Parameter(ParameterSetName='FromScratch')]
         [string]$PfxPass='poshacme',
         [Parameter(ParameterSetName='FromScratch')]
@@ -127,6 +127,11 @@ function New-PACertificate {
                 if ('PfxPass' -notin $PSBoundParameters.Keys -and $oldOrder.PfxPass) {
                     $orderParams.PfxPass = $oldOrder.PfxPass
                 }
+            }
+
+            # Make sure FriendlyName is non-empty
+            if ([String]::IsNullOrWhiteSpace($orderParams.FriendlyName)) {
+                $orderParams.FriendlyName = $Domain[0]
             }
         }
 
@@ -285,7 +290,7 @@ function New-PACertificate {
         If specified, the certificate generated for this order will have the OCSP Must-Staple flag set.
 
     .PARAMETER FriendlyName
-        Set a friendly name for the certificate. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Defaults to an empty string.
+        Set a friendly name for the certificate. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Defaults to the first item in the Domain parameter.
 
     .PARAMETER PfxPass
         Set the export password for generated PFX files. Defaults to 'poshacme'.

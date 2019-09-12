@@ -8,7 +8,7 @@ function Export-CertPfx {
         [Parameter(Mandatory,Position=2)]
         [string]$OutputFile,
         [string]$ChainFile,
-        [string]$FriendlyName='',
+        [string]$FriendlyName,
         [string]$PfxPass=''
     )
 
@@ -21,11 +21,20 @@ function Export-CertPfx {
     $key  = Import-Pem $KeyFile     # [Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair]
     $cert = Import-Pem $CertFile    # [Org.BouncyCastle.X509.X509Certificate]
 
+    # BouncyCastle won't let use use a null value for a cert/key alias in the PFX file and Windows
+    # in some cases doesn't like the empty string default we were using previously. So we'll
+    # use the subject CN value unless something non-empty was passed in.
+    if ([String]::IsNullOrWhiteSpace($FriendlyName)) {
+        $FriendlyName = $cert.Subject.GetValueList([Org.BouncyCastle.Asn1.X509.X509Name]::CN)[0]
+    }
+
     # create a new Pkcs12Store
     $store = New-Object Org.BouncyCastle.Pkcs.Pkcs12Store
 
     # add the private key
-    $store.SetKeyEntry($FriendlyName, $key.Private, @($cert))
+    try {
+        $store.SetKeyEntry($FriendlyName, $key.Private, @($cert))
+    } catch { throw }
 
     # add the chain certs if specified
     if ('ChainFile' -in $PSBoundParameters.Keys) {
@@ -41,7 +50,9 @@ function Export-CertPfx {
                 $caName = $ca.SerialNumber
             }
 
-            $store.SetCertificateEntry($caName, $ca)
+            try {
+                $store.SetCertificateEntry($caName, $ca)
+            } catch { throw }
         }
     }
 
