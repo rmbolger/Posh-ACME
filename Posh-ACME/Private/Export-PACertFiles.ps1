@@ -29,7 +29,7 @@ function Export-PACertFiles {
         alg   = $acct.alg;
         kid   = $acct.location;
         nonce = $script:Dir.nonce;
-        url   = $order.certificate;
+        url   = $Order.certificate;
     }
 
     # download the cert+chain which is what ACMEv2 delivers by default
@@ -55,8 +55,8 @@ function Export-PACertFiles {
             CertFile     = $certFile;
             KeyFile      = $keyFile;
             OutputFile   = $pfxFile;
-            FriendlyName = $FriendlyName;
-            PfxPass      = $PfxPass;
+            FriendlyName = $Order.FriendlyName;
+            PfxPass      = $Order.PfxPass;
         }
         Export-CertPfx @pfxParams
         $pfxParams.OutputFile = $pfxFullFile
