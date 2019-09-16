@@ -27,10 +27,10 @@ function Import-PAConfig {
     if ([string]::IsNullOrWhiteSpace((Get-ConfigRoot))) {
         if ($IsWindows -or $PSVersionTable.PSEdition -eq 'Desktop') {
 			if($env:WEBSITE_INSTANCE_ID -eq $null -or $env:WEBSITE_INSTANCE_ID -eq ""){
-	            Set-ConfigRoot (Join-Path $env:HOME 'Posh-ACME')		
+				Set-ConfigRoot (Join-Path $env:HOME 'Posh-ACME')		
 			}
 			else{
-		        Set-ConfigRoot (Join-Path $env:LOCALAPPDATA 'Posh-ACME')
+				Set-ConfigRoot (Join-Path $env:LOCALAPPDATA 'Posh-ACME')
 			}
 		}elseif ($IsLinux) {
             Set-ConfigRoot (Join-Path $env:HOME '.config/Posh-ACME')
