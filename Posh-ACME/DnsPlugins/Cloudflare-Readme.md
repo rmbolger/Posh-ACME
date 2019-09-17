@@ -27,20 +27,20 @@ There are two choices for authentication against the Cloudflare API. The old way
 
 ## Using the Plugin
 
-If you're using the newer API Token method, you'll use the previously retrieved token value with either `CFAuthToken` or `CFAuthTokenInsecure`. The former requires a SecureString value which can only be used on Windows OSes or any OS with PowerShell 6.2 or later. If you're using the Global API Key method, you'll need to use the `CFAuthEmail` and `CFAuthKey` parameters with the account's email address and previously retrieved Global API Key.
+If you're using the newer API Token method, you'll use the previously retrieved token value with either `CFToken` or `CFTokenInsecure`. The former requires a SecureString value which can only be used on Windows OSes or any OS with PowerShell 6.2 or later. If you're using the Global API Key method, you'll need to use the `CFAuthEmail` and `CFAuthKey` parameters with the account's email address and previously retrieved Global API Key.
 
 ### API Token Secure (Windows or PS 6.2+)
 
 ```powershell
 $secToken = Read-Host -AsSecureString -Prompt 'API Token'
-$pArgs = @{ CFAuthToken = $secToken }
+$pArgs = @{ CFToken = $secToken }
 New-PACertificate example.com -DnsPlugin Cloudflare -PluginArgs $pArgs
 ```
 
 ### API Token Insecure (Any OS)
 
 ```powershell
-$pArgs = @{ CFAuthTokenInsecure = 'xxxxxxxxxx' }
+$pArgs = @{ CFTokenInsecure = 'xxxxxxxxxx' }
 New-PACertificate example.com -DnsPlugin Cloudflare -PluginArgs $pArgs
 ```
 
