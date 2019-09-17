@@ -2,8 +2,8 @@ function Submit-ChallengeValidation {
     [CmdletBinding()]
     param(
         [Parameter(Position=0)]
-        [ValidateScript({Test-ValidDnsPlugin $_ -ThrowOnFail})]
-        [string[]]$DnsPlugin,
+        [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
+        [string[]]$Plugin,
         [Parameter(Position=1)]
         [hashtable]$PluginArgs,
         [string[]]$DnsAlias,
@@ -13,18 +13,12 @@ function Submit-ChallengeValidation {
         [PSTypeName('PoshACME.PAOrder')]$Order
     )
 
-    # For the time being we're only going to support the 'dns-01' challenge because it's the
-    # only challenge type supported for wildcard domains, dealing with web servers for http-01
-    # will be a pain, and both versions of the tls-sni challenge have had support dropped
-    # pending a new tls replacement.
-
     # Here's the overview of this function's purpose:
-    # - publish TXT records for any pending challenges in the Order's authorizations list
-    # - notify ACME server to validate those records
+    # - publish challenges for any pending authorizations in the Order
+    # - notify ACME server to validate those challenges
     # - wait until the validations are complete (good or bad)
-    # - remove the TXT records that were published
+    # - unpublish the challenges that were published
     # - return the updated order if successful, otherwise throw
-
 
     # make sure any account passed in is actually associated with the current server
     # or if no account was specified, that there's a current account.
@@ -58,9 +52,10 @@ function Submit-ChallengeValidation {
     if ($Order.status -eq 'invalid') {
         throw "Order status is invalid for $($Order.MainDomain). Unable to continue."
 
-    } elseif ($Order.status -eq 'valid' -or $Order.status -eq 'processing') {
+    } elseif ($Order.status -in 'valid','processing') {
         Write-Warning "The server has already issued or is processing a certificate for order $($Order.MainDomain)."
         return
+
     } elseif ($Order.status -eq 'ready') {
         Write-Warning "The order $($Order.MainDomain) has already completed challenge validation and is awaiting finalization."
         return
@@ -73,18 +68,18 @@ function Submit-ChallengeValidation {
     # records for any that are still pending.
 
     $allAuths = @($Order | Get-PAAuthorizations)
-    $toValidate = @()
+    $published = @()
 
-    # fill out the DnsPlugin attribute so there's a value for each authorization in the order
-    if (!$DnsPlugin) {
-        Write-Warning "DnsPlugin not specified. Defaulting to Manual."
-        $DnsPlugin = @('Manual') * $allAuths.Count
-    } elseif ($DnsPlugin.Count -lt $allAuths.Count) {
-        $lastPlugin = $DnsPlugin[-1]
-        Write-Warning "Fewer DnsPlugin values than names in the order. Using $lastPlugin for the rest."
-        $DnsPlugin += @($lastPlugin) * ($allAuths.Count-$DnsPlugin.Count)
+    # fill out the Plugin attribute so there's a value for each authorization in the order
+    if (!$Plugin) {
+        Write-Warning "Plugin not specified. Defaulting to Manual."
+        $Plugin = @('Manual') * $allAuths.Count
+    } elseif ($Plugin.Count -lt $allAuths.Count) {
+        $lastPlugin = $Plugin[-1]
+        Write-Warning "Fewer Plugin values than names in the order. Using $lastPlugin for the rest."
+        $Plugin += @($lastPlugin) * ($allAuths.Count-$Plugin.Count)
     }
-    Write-Debug "DnsPlugin: $($DnsPlugin -join ',')"
+    Write-Debug "Plugin: $($Plugin -join ',')"
 
     # fill out the DnsAlias attribute so there's a value for each authorization in the order
     if (!$DnsAlias) {
@@ -99,83 +94,88 @@ function Submit-ChallengeValidation {
 
     if ($PluginArgs) {
         # export explicit args to the common account store
-        Export-PluginArgs $PluginArgs $DnsPlugin -Account $Account
+        Export-PluginArgs $PluginArgs $Plugin -Account $Account
     }
     # import existing args from the common account store
-    $PluginArgs = Import-PluginArgs $DnsPlugin -Account $Account
+    $PluginArgs = Import-PluginArgs $Plugin -Account $Account
 
     try {
         # loop through the authorizations looking for challenges to validate
-        for ($i=0; $i -lt ($allAuths.Count); $i++) {
+        for ($i=0; $i -lt $allAuths.Count; $i++) {
             $auth = $allAuths[$i]
 
-            # skip ones that are already valid
-            if ($auth.status -eq 'valid') {
+            if ($auth.status -eq 'pending') {
+
+                # Determine which challenge to publish based on the plugin type
+                $chalType = Get-PluginType $Plugin[$i]
+                $challenge = $auth.challenges | Where-Object { $_.type -eq $chalType }
+                if (-not $challenge) {
+                    throw "$($auth.fqdn) authorization contains no challenges that match the plugin type: $($Plugin[$i]) ($chalType)"
+                }
+
+                Publish-Challenge $auth.DNSId $Account $challenge.token $Plugin[$i] $PluginArgs -DnsAlias $DnsAlias[$i]
+
+                # save the details of what we published for cleanup later
+                $published += @{
+                    identifier = $auth.DNSId
+                    fqdn = $auth.fqdn
+                    authUrl = $auth.location
+                    plugin = $Plugin[$i]
+                    chalType = $chalType
+                    chalToken = $challenge.token
+                    chalUrl = $challenge.url
+                    DNSAlias = $DnsAlias[$i]
+                }
+
+            } elseif ($auth.status -eq 'valid') {
+
+                # skip ones that are already valid
                 Write-Verbose "$($auth.fqdn) authorization is already valid"
                 continue
 
-            } elseif ($auth.status -eq 'pending') {
-
-                if ($auth.DNS01Status -eq 'pending') {
-                    # publish the necessary TXT record
-                    Write-Verbose "Publishing DNS challenge for $($auth.fqdn)"
-                    if ([string]::IsNullOrWhiteSpace($DnsAlias[$i])) {
-                        # publish normally
-                        Publish-DnsChallenge $auth.DNSId $Account $auth.DNS01Token $DnsPlugin[$i] $PluginArgs
-                    } else {
-                        # publish to alias
-                        Publish-DnsChallenge $DnsAlias[$i] $Account $auth.DNS01Token $DnsPlugin[$i] $PluginArgs -NoPrefix
-                    }
-                    $toValidate += $i
-                } else {
-                    throw "Unexpected challenge status '$($auth.DNS01Status)' for $($auth.fqdn)."
-                }
-
-            } else { #status invalid, revoked, deactivated, or expired
+            } else {
+                #status invalid, revoked, deactivated, or expired
                 throw "$($auth.fqdn) authorization status is '$($auth.status)'. Create a new order and try again."
             }
         }
 
         # if we published any records, now we need to save them, wait for DNS
         # to propagate, and notify the server it can perform the validation
-        if ($toValidate.Count -gt 0) {
+        if ($published.Count -gt 0) {
 
-            # Call the Save function for each unique DNS Plugin used
-            $DnsPlugin[$toValidate] | Select-Object -Unique | ForEach-Object {
+            # grab the set of unique plugins that were used to publish challenges
+            $uniquePluginsUsed = $published.plugin | Sort-Object -Unique
+
+            # call the Save function for each plugin used
+            $uniquePluginsUsed | ForEach-Object {
                 Write-Verbose "Saving changes for $_ plugin"
-                Save-DnsChallenge $_ $PluginArgs
+                Save-Challenge $_ $PluginArgs
             }
 
-            if ($DnsSleep -gt 0) {
-                # sleep while the DNS changes propagate
+            # sleep while DNS changes propagate if there were DNS challenges published
+            if ($DnsSleep -gt 0 -and 'dns-01' -in ($uniquePluginsUsed | Get-PluginType)) {
                 Write-Verbose "Sleeping for $DnsSleep seconds while DNS change(s) propagate"
                 Start-SleepProgress $DnsSleep -Activity "Waiting for DNS to propagate"
             }
 
             # ask the server to validate the challenges
             Write-Verbose "Requesting challenge validations"
-            $allAuths[$toValidate].DNS01Url | Send-ChallengeAck -Account $Account
+            $published.chalUrl | Send-ChallengeAck -Account $Account
 
             # and wait for them to succeed or fail
-            Wait-AuthValidation @($allAuths[$toValidate].location) $ValidationTimeout
+            Wait-AuthValidation @($published.authUrl) $ValidationTimeout
         }
 
     } finally {
-        # always cleanup the TXT records if they were added
-        for ($i=0; $i -lt $toValidate.Count; $i++) {
-            $index = $toValidate[$i]
-
-            if ([string]::IsNullOrWhiteSpace($DnsAlias[$index])) {
-                # unpublish normally
-                Unpublish-DnsChallenge $allAuths[$index].DNSId $Account $allAuths[$index].DNS01Token $DnsPlugin[$index] $PluginArgs
-            } else {
-                # unpublish from alias
-                Unpublish-DnsChallenge $DnsAlias[$index] $Account $allAuths[$index].DNS01Token $DnsPlugin[$index] $PluginArgs -NoPrefix
-            }
+        # always cleanup the challenges that were published
+        $published | ForEach-Object {
+            Unpublish-Challenge $_.identifier $Account $_.chalToken $_.plugin $PluginArgs -DnsAlias $_.DNSAlias
         }
-        $DnsPlugin[$toValidate] | Select-Object -Unique | ForEach-Object {
+
+        # save the cleanup changes
+        $published.plugin | Sort-Object -Unique | ForEach-Object {
             Write-Verbose "Saving changes for $_ plugin"
-            Save-DnsChallenge $_ $PluginArgs
+            Save-Challenge $_ $PluginArgs
         }
     }
 
@@ -190,11 +190,11 @@ function Submit-ChallengeValidation {
     .DESCRIPTION
         An ACME order contains an authorization object for each domain in the order. The client must complete at least one of a set of challenges for each authorization in order to prove they own the domain. Once complete, the client asks the server to validate each challenge and waits for the server to do so and update the authorization status.
 
-    .PARAMETER DnsPlugin
+    .PARAMETER Plugin
         One or more DNS plugin names to use for this order's DNS challenges. If no plugin is specified, the "Manual" plugin will be used. If the same plugin is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many plugin names as there are domains in the order and in the same sequence as the ACME order.
 
     .PARAMETER PluginArgs
-        A hashtable containing the plugin arguments to use with the specified DnsPlugin list. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
+        A hashtable containing the plugin arguments to use with the specified Plugin list. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
 
         These arguments are saved to the current ACME account so they can be used automatically for subsequent certificates and renewals. New values will overwrite saved values for existing parameters.
 

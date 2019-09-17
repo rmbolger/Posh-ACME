@@ -43,20 +43,19 @@ FormatsToProcess = 'Posh-ACME.Format.ps1xml'
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = @(
     'Export-PAAccountKey'
-    'Get-DnsPluginHelp'
-    'Get-DnsPlugins'
     'Get-KeyAuthorization'
     'Get-PAAccount'
     'Get-PAAuthorizations'
     'Get-PACertificate'
     'Get-PAOrder'
+    'Get-PAPlugin'
     'Get-PAServer'
     'Install-PACertificate'
     'Invoke-HttpChallengeListener'
     'New-PAAccount'
     'New-PACertificate'
     'New-PAOrder'
-    'Publish-DnsChallenge'
+    'Publish-Challenge'
     'Remove-PAAccount'
     'Remove-PAOrder'
     'Remove-PAServer'
@@ -69,7 +68,7 @@ FunctionsToExport = @(
     'Submit-ChallengeValidation'
     'Submit-OrderFinalize'
     'Submit-Renewal'
-    'Unpublish-DnsChallenge'
+    'Unpublish-Challenge'
 )
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.

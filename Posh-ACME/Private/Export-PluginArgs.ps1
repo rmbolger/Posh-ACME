@@ -4,7 +4,7 @@ function Export-PluginArgs {
         [Parameter(Mandatory,Position=0)]
         [hashtable]$PluginArgs,
         [Parameter(Mandatory,Position=1)]
-        [string[]]$DnsPlugin,
+        [string[]]$Plugin,
         [PSTypeName('PoshACME.PAAccount')]$Account
     )
 
@@ -48,24 +48,28 @@ function Export-PluginArgs {
     }
 
     # define the set of parameter names to ignore
-    $ignoreParams = @('RecordName','TxtValue') + [Management.Automation.PSCmdlet]::CommonParameters +
+    $ignoreParams = @('RecordName','TxtValue','Url','Body') + [Management.Automation.PSCmdlet]::CommonParameters +
         [Management.Automation.PSCmdlet]::OptionalCommonParameters
 
-    # $DnsPlugin will most often come with duplicates after being called from Submit-ChallengeValidation
+    # $Plugin will most often come with duplicates after being called from Submit-ChallengeValidation
     # So grab just the unique set.
-    $uniquePlugins = $DnsPlugin | Sort-Object -Unique
+    $uniquePlugins = @($Plugin | Sort-Object -Unique)
 
     # loop through the unique set of plugins
-    foreach ($plugin in $uniquePlugins) {
-        # dot source the plugin file
-        try {
-            . (Join-Path $PSScriptRoot "..\DnsPlugins\$plugin.ps1")
-        } catch { throw }
+    $pluginDir = Join-Path $MyInvocation.MyCommand.Module.ModuleBase 'Plugins'
+    foreach ($p in $uniquePlugins) {
 
-        # check for the add command that should exist now
-        $addCmdName = "Add-DnsTxt$Plugin"
-        if (-not ($cmd = Get-Command $addCmdName -ErrorAction Ignore)) {
-            throw "Expected plugin command $addCmdName not found."
+        # validate the plugin and get its challenge type
+        $chalType = Get-PluginType $p
+
+        # dot source the plugin file
+        . (Join-Path $pluginDir "$p.ps1")
+
+        # grab a reference to the appropriate Add command
+        if ('dns-01' -eq $chalType) {
+            $cmd = Get-Command Add-DnsTxt
+        } else {
+            $cmd = Get-Command Add-HttpChallenge
         }
 
         # grab the set of non-common param names
@@ -76,7 +80,7 @@ function Export-PluginArgs {
 
         $hasNewArgs = $(foreach ($key in $PluginArgs.Keys) { if ($key -in $paramNames) { $true; break; } }) -eq $true
         if ($hasNewArgs) {
-            Write-Debug "New args for $plugin found."
+            Write-Debug "New args for $p found."
 
             # check for and remove old args
             foreach ($key in @($pData.Keys)) {
@@ -86,7 +90,7 @@ function Export-PluginArgs {
                 }
             }
         } else {
-            Write-Debug "No new args for $plugin"
+            Write-Debug "No new args for $p"
         }
     }
 

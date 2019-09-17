@@ -13,8 +13,8 @@ An [ACME v2 (RFC 8555)](https://tools.ietf.org/html/rfc8555) client implemented 
 - [OCSP Must-Staple](https://scotthelme.co.uk/ocsp-must-staple/) support
 - DNS challenge plugins for [various DNS providers](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) (pull requests welcome)
 - DNS challenge [CNAME support](https://github.com/rmbolger/Posh-ACME/blob/master/Tutorial.md#advanced-dns-challenge-aliases)
-- Help system for DNS plugins using `Get-DnsPlugins` and `Get-DnsPluginHelp`
 - Multiple accounts supported per certificate authority which allows different certs to have different contact emails
+- Help system for DNS plugins using `Get-PAPlugin`
 - PEM and PFX output files
 - No elevated Windows privileges required *(unless using -Install switch)*
 - Cross platform PowerShell Core support! [(FAQ)](https://github.com/rmbolger/Posh-ACME/wiki/Frequently-Asked-Questions-(FAQ)#does-posh-acme-work-cross-platform-on-powershell-core)
@@ -71,10 +71,10 @@ $certNames = '*.example.com','example.com'
 $email = 'admin@example.com'
 $pArgs = @{FBServer='fb.example.com'; FBCred=(Get-Credential)}
 
-New-PACertificate $certNames -AcceptTOS -Contact $email -DnsPlugin Flurbog -PluginArgs $pArgs
+New-PACertificate $certNames -AcceptTOS -Contact $email -Plugin Flurbog -PluginArgs $pArgs
 ```
 
-To learn how to use the supported DNS plugins, check out `Get-DnsPlugins` and `Get-DnsPluginHelp`. There's also a [tutorial](/Tutorial.md) for a more in-depth guide to using the module.
+To learn how to use the supported DNS plugins, check out `Get-PAPlugin <PluginName> -Guide`. There's also a [tutorial](/Tutorial.md) for a more in-depth guide to using the module.
 
 The output of `New-PACertificate` is an object that contains various properties about the certificate you generated. Only a subset of the properties are displayed by default. To see the full list including the filesystem paths to any certificate files that were generated, pipe the original output to `Format-List` or use `Get-PACertificate | Format-List`. The root config folder for all data saved by the module is either `%LOCALAPPDATA%\Posh-ACME` on Windows, `~/.config/Posh-ACME` on Linux, or `~/Library/Preferences/Posh-ACME` on Mac OS.
 

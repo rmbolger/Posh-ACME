@@ -53,7 +53,11 @@ function Update-PAOrder {
             # send the request
             try {
                 $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
-            } catch { throw }
+            } catch [AcmeException] {
+                Write-Warning "ACME Exception querying order details for $($order.MainDomain): $($_.Exception.Message)"
+                return
+            }
+
             Write-Debug "Response: $($response.Content)"
 
             $respObj = $response.Content | ConvertFrom-Json

@@ -5,20 +5,19 @@ function Register-ArgCompleters {
     # setup the argument completers
     # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/register-argumentcompleter?view=powershell-5.1
 
-    # Plugin/DnsPlugin
+    # Plugin name
     $PluginNameCompleter = {
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
-        $names = (Get-ChildItem -Path "$PSScriptRoot\..\DnsPlugins\*.ps1" -Exclude '_Example.ps1').BaseName
+        # We can't use the normal ModuleBase method to get the plugin folder here because
+        # the completer script block doesn't run in the module's context.
+        $names = (Get-ChildItem -Path "$PSScriptRoot\..\Plugins\*.ps1" -Exclude '_Example.ps1').BaseName
         $names | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
             [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
         }
     }
-
-    $PluginCommands = 'Publish-DnsChallenge','Unpublish-DnsChallenge','Save-DnsChallenge','Get-DnsPluginHelp'
+    $PluginCommands = 'New-PACertificate','Submit-ChallengeValidation','Publish-Challenge','Unpublish-Challenge','Save-Challenge','Get-PAPlugin','Set-PAOrder'
     Register-ArgumentCompleter -CommandName $PluginCommands -ParameterName 'Plugin' -ScriptBlock $PluginNameCompleter
-    $DnsPluginCommands = 'New-PACertificate','Submit-ChallengeValidation','Set-PAOrder'
-    Register-ArgumentCompleter -CommandName $DnsPluginCommands -ParameterName 'DnsPlugin' -ScriptBlock $PluginNameCompleter
 
     # Account ID
     $IDCommands = 'Get-PAAccount','Set-PAAccount','Remove-PAAccount','Export-PAAccountKey'

@@ -52,13 +52,13 @@ function Submit-Renewal {
                 }
 
                 # skip orders with no DNS plugin (likely because they were created using custom processes or HTTP validation)
-                if ($null -eq $order.DnsPlugin) {
-                    Write-Warning "Skipping renewal for order $($order.MainDomain) due to null DNS plugin."
+                if ($null -eq $order.Plugin) {
+                    Write-Warning "Skipping renewal for order $($order.MainDomain) due to null plugin."
                     return
                 }
 
                 # skip orders with a Manual DNS plugin by default because they require interactivity
-                if (!$NoSkipManualDns -and 'Manual' -in @($order.DnsPlugin)) {
+                if (!$NoSkipManualDns -and 'Manual' -in @($order.Plugin)) {
                     Write-Warning "Skipping renewal for order $($order.MainDomain) due to Manual DNS plugin. Use -NoSkipManualDns to avoid this."
                     return
                 }
@@ -79,14 +79,14 @@ function Submit-Renewal {
                     $reqPath = Join-Path (Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')) "request.csr"
                     $certParams.CSRPath = $reqPath
                 }
-                $certParams.DnsPlugin = $order.DnsPlugin
+                $certParams.Plugin = $order.Plugin
 
                 # If new PluginArgs were specified, store these now.
                 if ($PluginArgs) {
-                    Export-PluginArgs $PluginArgs $order.DnsPlugin
+                    Export-PluginArgs $PluginArgs $order.Plugin
                 }
 
-                $certParams.PluginArgs = Import-PluginArgs $order.DnsPlugin
+                $certParams.PluginArgs = Import-PluginArgs $order.Plugin
                 $certParams.DnsAlias = $order.DnsAlias
                 $certParams.Force = $Force.IsPresent
                 $certParams.DnsSleep = $order.DnsSleep

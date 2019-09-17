@@ -2,7 +2,7 @@ function Import-PluginArgs {
     [CmdletBinding()]
     param(
         [Parameter(Position=0)]
-        [string[]]$DnsPlugin,
+        [string[]]$Plugin,
         [PSTypeName('PoshACME.PAAccount')]$Account
     )
 
@@ -30,27 +30,32 @@ function Import-PluginArgs {
     }
 
     # If one or more plugins are specified, we want to filter out args from
-    # the saved set that are unrelated to thespecified ones.
+    # the saved set that are unrelated to the specified ones.
     # NOTE: There is no checking for ambiguous parameter sets here.
     # We're going to assume Export-PluginArgs has already made sure there are none saved.
-    if ($DnsPlugin) {
-        $uniquePlugins = @($DnsPlugin) | Sort-Object -Unique
+    if ($Plugin) {
+        $uniquePlugins = @($Plugin) | Sort-Object -Unique
         if ($uniquePlugins.Count -gt 0) {
             # Get the list of non-common param names from the specified plugins
             $paramNames = @()
-            $ignoreParams = @('RecordName','TxtValue') + [Management.Automation.PSCmdlet]::CommonParameters +
+            $ignoreParams = @('RecordName','TxtValue','Url','Body') + [Management.Automation.PSCmdlet]::CommonParameters +
                 [Management.Automation.PSCmdlet]::OptionalCommonParameters
 
-            foreach ($plugin in $uniquePlugins) {
-                # dot source the plugin file
-                try {
-                    . (Join-Path $PSScriptRoot "..\DnsPlugins\$plugin.ps1")
-                } catch { throw }
+            $pluginDir = Join-Path $MyInvocation.MyCommand.Module.ModuleBase 'Plugins'
 
-                # check for the add command that should exist now
-                $addCmdName = "Add-DnsTxt$Plugin"
-                if (-not ($cmd = Get-Command $addCmdName -ErrorAction Ignore)) {
-                    throw "Expected plugin command $addCmdName not found."
+            foreach ($p in $uniquePlugins) {
+
+                # validate the plugin and get its challenge type
+                $chalType = Get-PluginType $p
+
+                # dot source the plugin file
+                . (Join-Path $pluginDir "$p.ps1")
+
+                # grab a reference to the appropriate Add command
+                if ('dns-01' -eq $chalType) {
+                    $cmd = Get-Command Add-DnsTxt
+                } else {
+                    $cmd = Get-Command Add-HttpChallenge
                 }
 
                 # add the non-common names to the list

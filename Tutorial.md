@@ -54,21 +54,21 @@ So now you've got a certificate and that's great! But Let's Encrypt certificates
 
 ## DNS Plugins
 
-The ability to use a DNS plugin is going to depend on your DNS provider and the [available plugins](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) in the current version of the module. If your DNS provider is not supported by an existing plugin, please [submit an issue](https://github.com/rmbolger/Posh-ACME/issues) requesting support. If you have PowerShell development skills, you might also try writing a plugin yourself. Instructions can be found in the [DnsPlugins README](/Posh-ACME/DnsPlugins/README.md). Pull requests for new plugins are both welcome and appreciated. It's also possible to redirect ACME DNS validations using a [CNAME record](https://support.dnsimple.com/articles/cname-record/) in your primary zone pointing to another DNS server that is supported. More on that later.
+The ability to use a DNS plugin is going to depend on your DNS provider and the [available plugins](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) in the current version of the module. If your DNS provider is not supported by an existing plugin, please [submit an issue](https://github.com/rmbolger/Posh-ACME/issues) requesting support. If you have PowerShell development skills, you might also try writing a plugin yourself. Instructions can be found in the [Plugins README](/Posh-ACME/Plugins/README.md). Pull requests for new plugins are both welcome and appreciated. It's also possible to redirect ACME DNS validations using a [CNAME record](https://support.dnsimple.com/articles/cname-record/) in your primary zone pointing to another DNS server that is supported. More on that later.
 
 The first thing to do is figure out which DNS plugin to use and how to use it. Start by listing the available plugins.
 
 ```powershell
-Get-DnsPlugins
+Get-PAPlugin
 ```
 
 Using a DNS plugin will almost always require creating a hashtable with required plugin parameters. After choosing a plugin, find out what parameters are required by displaying the help for that plugin. In these examples, we'll use the AWS Route53 plugin.
 
 ```powershell
-Get-DnsPluginHelp Route53 Add
+Get-PAPlugin Route53 -Help
 ```
 
-This forwards a help request to the plugin's Add function. The output will look something like this. *Note: You can't actually use the `get-help` calls in the Remarks section because the function isn't actually exposed by the module. But most of the parameters you could use with `Get-Help` can also be used with `Get-DnsPluginHelp`*
+This forwards a help request to the plugin's Add function. The output will look something like this. *Note: You can't actually use the `get-help` calls in the Remarks section because the function isn't actually exposed by the module.*
 
 ```
 NAME
@@ -111,7 +111,7 @@ $r53Params = @{R53AccessKey='ABCD1234'; R53SecretKey=$r53Secret}
 
 This `$r53Params` variable is what we'll pass to the `-PluginArgs` parameter on functions that use it.
 
-Most plugins also have a Usage Guide that can provide more detailed help using or setting up the plugin. They're all linked from the [List of Supported DNS Providers](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) wiki page, but you can also read them locally from the DnsPlugins folder in the module. They're Markdown formatted and called `<plugin>-Readme.md`.
+Most plugins also have a Usage Guide that can provide more detailed help using or setting up the plugin. They're all linked from the [List of Supported DNS Providers](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) wiki page, but you can also read them locally from the Plugins folder in the module. They're Markdown formatted and called `<plugin>-Readme.md`.
 
 Now we know what plugin we're using and we have our plugin arguments in a hashtable. If this is the first time using a particular plugin, it's usually wise to test it before actually trying to use it for a new certificate. So let's do that. The command has no output unless we add the `-Verbose` switch to show what's going on under the hood.
 
@@ -119,14 +119,14 @@ Now we know what plugin we're using and we have our plugin arguments in a hashta
 # get a reference to the current account
 $acct = Get-PAAccount
 
-Publish-DnsChallenge site1.example.com -Account $acct -Token faketoken -Plugin Route53 `
+Publish-Challenge site1.example.com -Account $acct -Token faketoken -Plugin Route53 `
     -PluginArgs $r53Params -Verbose
 ```
 
 Assuming there was no error, you should be able to validate that the TXT record was created in the Route53 management console. If so, go ahead and unpublish the record. Otherwise, troubleshoot why it failed and get it working before moving on.
 
 ```powershell
-Unpublish-DnsChallenge site1.example.com -Account $acct -Token faketoken -Plugin Route53 `
+Unpublish-Challenge site1.example.com -Account $acct -Token faketoken -Plugin Route53 `
     -PluginArgs $r53Params -Verbose
 ```
 
@@ -135,7 +135,7 @@ All we have left to do is add the necessary plugin parameters to our original ce
 *Note: According to current Let's Encrypt [rate limits](https://letsencrypt.org/docs/rate-limits/), a single certificate can have up to 100 names. The only caveat is that wildcard certs may not contain any SANs that would overlap with the wildcard entry. So you'll get an error if you try to put `*.example.com` and `site1.example.com` in the same cert. But `*.example.com` and `example.com` or `site1.sub1.example.com` are just fine.*
 
 ```powershell
-New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@example.com -DnsPlugin Route53 `
+New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@example.com -Plugin Route53 `
     -PluginArgs $r53Params -Verbose
 ```
 
@@ -212,7 +212,7 @@ Now that you've got everything working against the Let's Encrypt staging server,
 ```powershell
 Set-PAServer LE_PROD
 
-New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@example.com -DnsPlugin Route53 `
+New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@example.com -Plugin Route53 `
     -PluginArgs $r53Params -Verbose
 ```
 
@@ -265,9 +265,9 @@ _acme-challenge.example.com  canonical name = acme.example.net
 
 ### Using the Challenge Alias
 
-Now that your CNAMEs are all setup, you just have to add one more parameter to your certificate request command, `-DnsAlias`. It works just like `-DnsPlugin` as an array that should have one element for each domain in the request. But if all of your CNAMEs point to the same place, you can just specify the alias once and it will use that alias for all the names.
+Now that your CNAMEs are all setup, you just have to add one more parameter to your certificate request command, `-DnsAlias`. It works just like `-Plugin` as an array that should have one element for each domain in the request. But if all of your CNAMEs point to the same place, you can just specify the alias once and it will use that alias for all the names.
 
 ```powershell
-New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@example.com -DnsPlugin Route53 `
+New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@example.com -Plugin Route53 `
     -PluginArgs $r53Params -DnsAlias acme.example.net -Verbose
 ```

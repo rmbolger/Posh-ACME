@@ -1,3 +1,20 @@
+## 4.0.0 (????-??-??)
+
+* DnsPlugins are now just Plugins and can support dns-01 or http-01 based challenges.
+  * All existing DNS plugins have been upgraded to the new plugin format. See the README in the plugins folder for details.
+* The DnsPlugin parameter is now Plugin in New-PACertificate and Submit-ChallengeValidation.
+* Publish-DnsChallenge and Unpublish-DnsChallenge are now Publish-Challenge and Unpublish-Challenge
+  * The -NoPrefix switch has been replaced with an explicit DnsAlias parameter that will override the Domain parameter if specified. "_acme-challenge." will not be automatically added to the DnsAlias parameter.
+* Save-DnsChallenge is now Save-Challenge
+* Get-DnsPlugins is now Get-PAPlugin
+  * With no parameters, lists all plugins and their details
+  * With a plugin parameter, shows the details for just that plugin
+  * With a plugin and -Help, shows the plugin's help
+  * With a plugin and -Guide, opens the default browser to the plugin's online guide
+  * With a plugin and -Params, displays the plugin-specific parameter sets
+* Get-DnsPluginHelp has been removed
+* Using Get-PAOrder with the -Refresh switch will no longer throw a terminating error if the ACME server returns an error. It will warn and return the cached copy of the order instead.
+
 ## 3.18.1 (2020-11-12)
 
 * Upgraded BouncyCastle to 1.8.8.2 for version parity with Az.KeyVault to prevent module load errors in PowerShell 6+

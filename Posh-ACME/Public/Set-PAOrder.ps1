@@ -11,8 +11,8 @@ function Set-PAOrder {
         [Parameter(ParameterSetName='Revoke')]
         [switch]$NoSwitch,
         [Parameter(ParameterSetName='Edit')]
-        [ValidateScript({Test-ValidDnsPlugin $_ -ThrowOnFail})]
-        [string[]]$DnsPlugin,
+        [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
+        [string[]]$Plugin,
         [Parameter(ParameterSetName='Edit')]
         [hashtable]$PluginArgs,
         [Parameter(ParameterSetName='Edit')]
@@ -100,16 +100,16 @@ function Set-PAOrder {
             $rewriteCer = $false
             $psbKeys = $PSBoundParameters.Keys
 
-            if ('DnsPlugin' -in $psbKeys -and
-                ($null -eq $order.DnsPlugin -or $null -ne (Compare-Object $DnsPlugin $order.DnsPlugin))) {
-                Write-Verbose "Setting DnsPlugin to $(($DnsPlugin -join ','))"
-                $order.DnsPlugin = $DnsPlugin
+            if ('Plugin' -in $psbKeys -and
+                ($null -eq $order.Plugin -or $null -ne (Compare-Object $Plugin $order.Plugin))) {
+                Write-Verbose "Setting Plugin to $(($Plugin -join ','))"
+                $order.Plugin = $Plugin
                 $saveChanges = $true
             }
 
             if ('PluginArgs' -in $psbKeys) {
-                Write-Verbose "Updating plugin args for plugin(s) $(($order.DnsPlugin -join ','))"
-                Export-PluginArgs $PluginArgs $order.DnsPlugin
+                Write-Verbose "Updating plugin args for plugin(s) $(($order.Plugin -join ','))"
+                Export-PluginArgs $PluginArgs $order.Plugin
             }
 
             if ('FriendlyName' -in $psbKeys -and $FriendlyName -ne $order.FriendlyName) {

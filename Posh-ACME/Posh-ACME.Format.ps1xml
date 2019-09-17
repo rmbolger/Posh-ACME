@@ -173,5 +173,67 @@
                 </TableRowEntries>
             </TableControl>
         </View>
+        <View>
+            <Name>PluginParameter</Name>
+            <ViewSelectedBy>
+                <TypeName>PoshACME.PluginParameter</TypeName>
+            </ViewSelectedBy>
+            <GroupBy>
+                <PropertyName>ParameterSet</PropertyName>
+                <CustomControlName>PluginParameter-GroupingFormat</CustomControlName>
+            </GroupBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader/>
+                    <TableColumnHeader><Label>Type</Label></TableColumnHeader>
+                    <TableColumnHeader/>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <Wrap/>
+                        <TableColumnItems>
+                            <TableColumnItem><PropertyName>Parameter</PropertyName></TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>
+                                    $_.ParameterType.Name
+                                </ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem><PropertyName>IsMandatory</PropertyName></TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
     </ViewDefinitions>
+
+    <Controls>
+        <Control>
+            <Name>PluginParameter-GroupingFormat</Name>
+            <CustomControl>
+                <CustomEntries>
+                    <CustomEntry>
+                        <CustomItem>
+                            <Frame>
+                                <LeftIndent>4</LeftIndent>
+                                <CustomItem>
+                                    <Text>Set Name: </Text>
+                                    <ExpressionBinding>
+                                        <ScriptBlock>
+                                        if ($_.IsDefault) {
+                                            "$($_.ParameterSet) (Default)"
+                                        } else {
+                                            $_.ParameterSet
+                                        }
+                                        </ScriptBlock>
+                                    </ExpressionBinding>
+                                    <NewLine/>
+                                </CustomItem>
+                            </Frame>
+                        </CustomItem>
+                    </CustomEntry>
+                </CustomEntries>
+            </CustomControl>
+        </Control>
+    </Controls>
+
 </Configuration>

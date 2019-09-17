@@ -143,7 +143,7 @@ function New-PAOrder {
     $order | Add-Member -MemberType NoteProperty -Name 'CertExpires' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'RenewAfter' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'OCSPMustStaple' -Value $OCSPMustStaple.IsPresent
-    $order | Add-Member -MemberType NoteProperty -Name 'DnsPlugin' -Value @('Manual')
+    $order | Add-Member -MemberType NoteProperty -Name 'Plugin' -Value @('Manual')
     $order | Add-Member -MemberType NoteProperty -Name 'DnsAlias' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'DnsSleep' -Value 120
     $order | Add-Member -MemberType NoteProperty -Name 'ValidationTimeout' -Value 60
