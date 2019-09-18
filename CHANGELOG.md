@@ -1,3 +1,11 @@
+## 3.7.0 (2019-09-18)
+
+* Submit-Renewal now has a PluginArgs parameter to make it easier to update plugin credentials without needing to create a new order from scratch. (Thanks @matt-FFFFFF)
+* The FriendlyName parameter in New-PACertificate and New-PAOrder now defaults to the certificate's primary name instead of an empty string to avoid a Windows bug that can occur when installing the generated PFX files.
+* Fixed Windows plugin issue when using WinZoneScope and not all zones have that scope (#168)
+* Fixed an internal bug with Export-PACertFiles that luckily didn't cause problems due to PowerShell variable scoping rules.
+* Fixed a typo in the Cloudflare guide examples. (Thanks @mccanney)
+
 ## 3.6.0 (2019-08-19)
 
 * Added new DNS plugins
