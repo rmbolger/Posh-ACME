@@ -125,7 +125,9 @@ All methods require specifying `AZSubscriptionId` which is the subscription that
 
 ### Explicit Credentials
 
-#### From Windows
+There are two parameter sets you can use with explicit credentials. The first which uses `AZAppCred` and takes a PSCredential object can only be used from Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The second uses `AZAppUsername` and `AZAppPasswordInsecure` as plain text strings and can be used on any OS.
+
+#### PSCredential (Windows or PS 6.2+)
 
 Specify `AZTenantId` and `AZAppCred` which is the Azure AD tenant guid and user/app credentials. For an app registration, the username is the service account's `ApplicationId` guid and the password is whatever you originally set for it.
 
@@ -140,11 +142,9 @@ $azParams = @{
 New-PACertificate test.example.com -DnsPlugin Azure -PluginArgs $azParams
 ```
 
-#### Non-Windows
+#### Plain text credentials (Any OS)
 
 Specify `AZTenantId` which is the Azure AD tenant guid. For user/app credentials, specify `AZAppUsername` and `AZAppPasswordInsecure`. For an app registration, the username is the service account's `ApplicationId` guid and the password is whatever you originally set for it.
-
-*Note: Specifying the username/password in plain text is required on non-Windows OSes due to [this bug](https://github.com/PowerShell/PowerShell/issues/1654) in PowerShell Core.*
 
 ```powershell
 $azParams = @{
