@@ -144,6 +144,28 @@ function New-PACertificate {
         # set the existing order as current
         Write-Verbose "Using existing order for $($order.MainDomain) with status $($order.status)"
         $order | Set-PAOrder
+
+        # Allow overriding some order properties that don't need to trigger a new order
+        if ('Install' -in $PSBoundParameters.Keys -and
+            $Install.IsPresent -ne $script:Order.Install)
+        {
+            Write-Verbose "Overriding Install property with $($Install.IsPresent)"
+            $script:Order.Install = $Install.IsPresent
+        }
+        if ('FriendlyName' -in $PSBoundParameters.Keys -and
+            -not [String]::IsNullOrWhiteSpace($FriendlyName) -and
+            $FriendlyName -ne $script:Order.FriendlyName)
+        {
+            Write-Verbose "Overriding FriendlyName property with $FriendlyName"
+            $script:Order.FriendlyName = $FriendlyName
+        }
+        if ('PfxPass' -in $PSBoundParameters.Keys -and
+            -not [String]::IsNullOrWhiteSpace($PfxPass) -and
+            $PfxPass -ne $script:Order.PfxPass)
+        {
+            Write-Verbose "Overriding PfxPass property with supplied value"
+            $script:Order.PfxPass = $PfxPass
+        }
     }
 
     # add validation parameters to the order object using explicit params
