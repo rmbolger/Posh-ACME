@@ -8,9 +8,9 @@ First, go to the Profile page for your account and record the `Rackspace API Key
 
 ## Using the Plugin
 
-There are two parameter sets you can use with this plugin. One is intended for Windows OSes while the other is intended for non-Windows until PowerShell Core fixes [this issue](https://github.com/PowerShell/PowerShell/issues/1654). The non-Windows API Key parameter is called `RSApiKeyInsecure` because the issue prevents PowerShell from encrypting/decrypting SecureString and PSCredential objects.
+There are two parameter sets you can use with this plugin. One requires being on Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The other can be used from any OS.
 
-### Windows
+### Windows or PS 6.2+
 
 ```powershell
 $rsKey = Read-Host "API Key" -AsSecureString
@@ -18,7 +18,7 @@ $rsParams = @{RSUsername='myusername';RSApiKey=$rsKey}
 New-PACertificate test.example.com -DnsPlugin Rackspace -PluginArgs $rsParams
 ```
 
-### Non-Windows
+### Any OS
 
 ```powershell
 $rsParams = @{RSUsername='myusername';RSApiKeyInsecure='xxxxxxxx'}

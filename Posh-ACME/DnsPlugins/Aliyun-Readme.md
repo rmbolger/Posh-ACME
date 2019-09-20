@@ -10,9 +10,9 @@ First, login to your account and go to the [Security Management](https://usercen
 
 ## Using the Plugin
 
-There are two parameter sets you can use with this plugin. One is intended for Windows OSes while the other is intended for non-Windows until PowerShell Core fixes [this issue](https://github.com/PowerShell/PowerShell/issues/1654). The non-Windows API Key parameter is called `AliSecretInsecure` because the issue prevents PowerShell from encrypting/decrypting SecureString and PSCredential objects.
+There are two parameter sets you can use with this plugin. One requires being on Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The other can be used from any OS.
 
-### Windows
+### Windows or PS 6.2+
 
 ```powershell
 $secret = Read-Host "Secret" -AsSecureString
@@ -20,7 +20,7 @@ $aliParams = @{AliKeyId='asdf1234';AliSecret=$secret}
 New-PACertificate test.example.com -DnsPlugin Aliyun -PluginArgs $aliParams
 ```
 
-### Non-Windows
+### Any OS
 
 ```powershell
 $aliParams = @{AliKeyId='asdf1234';AliSecretInsecure='xxxxxxxx'}

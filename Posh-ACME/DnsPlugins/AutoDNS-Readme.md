@@ -8,9 +8,9 @@ In addition to your username and password, you will also need a "Context" value 
 
 ## Using the Plugin
 
-There are two parameter sets you can use with this plugin. One is intended for Windows OSes while the other is intended for non-Windows until PowerShell Core fixes [this issue](https://github.com/PowerShell/PowerShell/issues/1654). The non-Windows password parameter is called `AutoDNSPasswordInsecure` because the issue prevents PowerShell from encrypting/decrypting SecureString and PSCredential objects.
+There are two parameter sets you can use with this plugin. One requires being on Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The other can be used from any OS.
 
-### Windows
+### Windows or PS 6.2+
 
 ```powershell
 $pass = Read-Host -Prompt "Password" -AsSecureString
@@ -23,7 +23,7 @@ $params = @{
 New-PACertificate test.example.com -DnsPlugin AutoDNS -PluginArgs $params
 ```
 
-### Non-Windows
+### Any OS
 
 ```powershell
 $params = @{
