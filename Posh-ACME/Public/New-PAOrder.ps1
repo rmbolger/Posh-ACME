@@ -139,8 +139,8 @@ function New-PAOrder {
     $order | Add-Member -MemberType NoteProperty -Name 'OCSPMustStaple' -Value $OCSPMustStaple.IsPresent
     $order | Add-Member -MemberType NoteProperty -Name 'DnsPlugin' -Value $null
     $order | Add-Member -MemberType NoteProperty -Name 'DnsAlias' -Value $null
-    $order | Add-Member -MemberType NoteProperty -Name 'DnsSleep' -Value $null
-    $order | Add-Member -MemberType NoteProperty -Name 'ValidationTimeout' -Value $null
+    $order | Add-Member -MemberType NoteProperty -Name 'DnsSleep' -Value 120
+    $order | Add-Member -MemberType NoteProperty -Name 'ValidationTimeout' -Value 60
     $order | Add-Member -MemberType NoteProperty -Name 'FriendlyName' -Value $FriendlyName
     $order | Add-Member -MemberType NoteProperty -Name 'PfxPass' -Value $PfxPass
     $order | Add-Member -MemberType NoteProperty -Name 'Install' -Value $Install.IsPresent

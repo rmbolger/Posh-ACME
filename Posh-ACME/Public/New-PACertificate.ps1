@@ -84,6 +84,7 @@ function New-PACertificate {
     # - has different SANs
     # - has different CSR
     $order = Get-PAOrder $Domain[0] -Refresh
+    $oldOrder = $null
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
     if ($Force -or !$order -or
         $order.status -eq 'invalid' -or
@@ -142,7 +143,6 @@ function New-PACertificate {
     } else {
         # set the existing order as current
         Write-Verbose "Using existing order for $($order.MainDomain) with status $($order.status)"
-        $oldOrder = $order
         $order | Set-PAOrder
     }
 
