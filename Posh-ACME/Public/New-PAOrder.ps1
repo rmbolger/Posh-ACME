@@ -226,6 +226,9 @@ function New-PAOrder {
     .PARAMETER OCSPMustStaple
         If specified, the certificate generated for this order will have the OCSP Must-Staple flag set.
 
+    .PARAMETER NewKey
+        If specified, a new private key will be generated for the certificate order. Otherwise, the old key is re-used if it exists. This is useful if you believe the current key has been compromised.
+
     .PARAMETER FriendlyName
         Set a friendly name for the certificate. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Defaults to the first item in the Domain parameter.
 
