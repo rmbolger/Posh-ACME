@@ -2,7 +2,8 @@ function Export-PACertFiles {
     [CmdletBinding()]
     param(
         [Parameter(Position=0)]
-        [PSTypeName('PoshACME.PAOrder')]$Order
+        [PSTypeName('PoshACME.PAOrder')]$Order,
+        [switch]$PfxOnly
     )
 
     # Make sure we have an account configured
@@ -24,28 +25,30 @@ function Export-PACertFiles {
     $pfxFile       = Join-Path $orderFolder 'cert.pfx'
     $pfxFullFile   = Join-Path $orderFolder 'fullchain.pfx'
 
-    # build the header for the Post-As-Get request
-    $header = @{
-        alg   = $acct.alg;
-        kid   = $acct.location;
-        nonce = $script:Dir.nonce;
-        url   = $Order.certificate;
+    if (-not $PfxOnly) {
+        # build the header for the Post-As-Get request
+        $header = @{
+            alg   = $acct.alg;
+            kid   = $acct.location;
+            nonce = $script:Dir.nonce;
+            url   = $Order.certificate;
+        }
+
+        # download the cert+chain which is what ACMEv2 delivers by default
+        # https://tools.ietf.org/html/rfc8555#section-7.4.2
+        try {
+            Invoke-ACME $header ([String]::Empty) $acct -OutFile $fullchainFile -EA Stop
+        } catch { throw }
+
+        # split it into individual PEMs
+        $pems = Split-PemChain $fullchainFile
+
+        # write the lone cert
+        Export-Pem $pems[0] $certFile
+
+        # write the chain
+        Export-Pem ($pems[1..($pems.Count-1)] | ForEach-Object {$_}) $chainFile
     }
-
-    # download the cert+chain which is what ACMEv2 delivers by default
-    # https://tools.ietf.org/html/rfc8555#section-7.4.2
-    try {
-        Invoke-ACME $header ([String]::Empty) $acct -OutFile $fullchainFile -EA Stop
-    } catch { throw }
-
-    # split it into individual PEMs
-    $pems = Split-PemChain $fullchainFile
-
-    # write the lone cert
-    Export-Pem $pems[0] $certFile
-
-    # write the chain
-    Export-Pem ($pems[1..($pems.Count-1)] | ForEach-Object {$_}) $chainFile
 
     # When using an pre-generated CSR file, there may be no private key.
     # So make sure we have a one before we try to generate PFX files.
@@ -61,5 +64,8 @@ function Export-PACertFiles {
         Export-CertPfx @pfxParams
         $pfxParams.OutputFile = $pfxFullFile
         Export-CertPfx @pfxParams -ChainFile $chainFile
+
+    } else {
+        Write-Verbose "No private key available. Skipping Pfx creation."
     }
 }
