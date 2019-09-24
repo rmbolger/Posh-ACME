@@ -22,8 +22,10 @@ function Add-DnsTxtGoDaddy {
 
     $headers = @{Authorization = "sso-key $($GDKey):$($GDSecret)"}
 
-    $zone = Find-GDZone -RecordName $RecordName -GDKey $GDKey -GDSecret $GDSecret
-    $recShort = ($RecordName -split ".$zone")[0]
+    if (-not ($zone = Find-GDZone $RecordName $headers $apiRoot)) {
+        throw "Unable to find matching zone for $RecordName."
+    }
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zone"), [string]::Empty
 
     # Get a list of existing TXT records for this record name
     try {
@@ -117,8 +119,10 @@ function Remove-DnsTxtGoDaddy {
 
     $headers = @{Authorization = "sso-key $($GDKey):$($GDSecret)"}
 
-    $zone = Find-GDZone -RecordName $RecordName -GDKey $GDKey -GDSecret $GDSecret
-    $recShort = ($RecordName -split ".$zone")[0]
+    if (-not ($zone = Find-GDZone $RecordName $headers $apiRoot)) {
+        throw "Unable to find matching zone for $RecordName."
+    }
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zone"), [string]::Empty
 
     # Get a list of existing TXT records for this record name
     try {
@@ -135,8 +139,8 @@ function Remove-DnsTxtGoDaddy {
         # set of results (which it may be the only one) and then send whatever's left.
 
         if ($recs.Count -le 1) {
-            # It's the last one, but there doesn't seem to be a way to actually remove it,
-            # so just clear the value from the record instead.
+            # It's the last one, but there's no way to remove it without re-writing the
+            # entire contents of the zone. So just clear the value from the record instead.
             $bodyJson = '[{"data":"","ttl":600}]'
         } else {
             # filter the record we want to delete and build the body
@@ -208,17 +212,18 @@ function Save-DnsTxtGoDaddy {
 # Helper Functions
 ############################
 
+# API Docs:
+# https://developer.godaddy.com/doc/endpoint/domains
+
 function Find-GDZone {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
-        [string]$GDKey,
+        [hashtable]$AuthHeader,
         [Parameter(Mandatory, Position = 2)]
-        [string]$GDSecret,
-        [Parameter(Mandatory = $false)]
-        [switch]$GDUseOTE
+        [string]$ApiRoot
     )
 
     # setup a module variable to cache the record to zone mapping
@@ -230,19 +235,15 @@ function Find-GDZone {
         return $script:GDRecordZones.$RecordName
     }
 
-    $apiRoot = "https://api.godaddy.com/v1/domains"
-    if ($GDUseOTE) {
-        $apiRoot = "https://api.ote-godaddy.com/v1/domains"
-    }
-
-    $headers = @{Authorization = "sso-key $($GDKey):$($GDSecret)"}
-
     # get the list of available zones
+    # (The docs are unclear if there is a limit to the number of responses it will
+    # send without some sort of paging. So people with very large accounts may run
+    # into trouble eventually)
     try {
-        $zones = (Invoke-RestMethod $apiRoot -Headers $headers @script:UseBasic -EA Stop) `
-            | Where-Object {$_.status -eq "ACTIVE"} `
-            | Select-Object -ExpandProperty domain
+        $zones = Invoke-RestMethod "$($ApiRoot)?statuses=ACTIVE" -Headers $AuthHeader @script:UseBasic -EA Stop |
+            ForEach-Object { $_.domain }
     } catch { throw }
+    Write-Debug "ACTIVE Zones found: $(($zones -join ', '))"
 
     # We need to find the closest/deepest
     # sub-zone that would hold the record rather than just adding it to the apex. So for something
@@ -252,7 +253,6 @@ function Find-GDZone {
     # - sub1.sub2.example.com
     # - sub2.example.com
     # - example.com
-
     $pieces = $RecordName.Split('.')
     for ($i = 1; $i -lt ($pieces.Count - 1); $i++) {
         $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
