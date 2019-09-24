@@ -261,7 +261,7 @@ function New-PACertificate {
         Write-Output $cert
 
     } elseif ($order.CertExpires) {
-        Write-Verbose "This certificate order has already been completed. Use -Force to overwrite the current certificate."
+        Write-Warning "This certificate order has already been completed. Use -Force to overwrite the current certificate."
     }
 
 
