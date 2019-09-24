@@ -1,11 +1,27 @@
 function Set-PAOrder {
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName='Edit')]
     param(
         [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$MainDomain,
+        [Parameter(ParameterSetName='Revoke', Mandatory)]
         [switch]$RevokeCert,
+        [Parameter(ParameterSetName='Revoke')]
+        [switch]$Force,
+        [Parameter(ParameterSetName='Edit')]
+        [Parameter(ParameterSetName='Revoke')]
         [switch]$NoSwitch,
-        [switch]$Force
+        [Parameter(ParameterSetName='Edit')]
+        [ValidateNotNullOrEmpty()]
+        [string]$FriendlyName,
+        [Parameter(ParameterSetName='Edit')]
+        [ValidateNotNullOrEmpty()]
+        [string]$PfxPass,
+        [Parameter(ParameterSetName='Edit')]
+        [switch]$Install,
+        [Parameter(ParameterSetName='Edit')]
+        [int]$DNSSleep,
+        [Parameter(ParameterSetName='Edit')]
+        [int]$ValidationTimeout
     )
 
     Begin {
@@ -25,16 +41,16 @@ function Set-PAOrder {
 
         # There are 3 types of calls the user might be making here.
         # - order switch
-        # - order switch and revocation
-        # - revocation only (possibly bulk via pipeline)
+        # - order switch and edit/revoke
+        # - edit/revoke only (possibly bulk via pipeline)
         # The default is to switch orders. So we have a -NoSwitch parameter to
         # indicate a non-switching revocation. But there's a chance they could forget
         # to use it for a bulk update. For now, we'll just let it happen and switch
         # to whatever order came through the pipeline last.
 
         if ($NoSwitch -and $MainDomain) {
-            # This is a non-switching revocation, so grab a cached reference to the
-            # order specified
+            # This is an explicit non-switching edit, so grab a cached reference
+            # to the specified order
             $order = Get-PAOrder $MainDomain
 
             if ($null -eq $order) {
@@ -60,13 +76,61 @@ function Set-PAOrder {
             $order = $script:Order
 
         } else {
-            # This is effectively a non-switching revocation because they didn't
+            # This is a defacto non-switching edit because they didn't
             # specify a MainDomain. So just use the current order.
             $order = $script:Order
         }
 
         # revoke if necessary
-        if ($RevokeCert) {
+        if ('Edit' -eq $PSCmdlet.ParameterSetName) {
+
+            $saveChanges = $false
+            $updatePfx = $false
+
+            if ('FriendlyName' -in $PSBoundParameters.Keys -and $FriendlyName -ne $order.FriendlyName) {
+                Write-Verbose "Setting FriendlyName to '$FriendlyName'"
+                $order.FriendlyName = $FriendlyName
+                $saveChanges = $true
+                $updatePfx = $true
+            }
+
+            if ('PfxPass' -in $PSBoundParameters.Keys -and $PfxPass -ne $order.PfxPass) {
+                Write-Verbose "Setting PfxPass to '$PfxPass'"
+                $order.PfxPass = $PfxPass
+                $saveChanges = $true
+                $updatePfx = $true
+            }
+
+            if ('Install' -in $PSBoundParameters.Keys -and $Install.IsPresent -ne $order.Install) {
+                Write-Verbose "Setting Install to $($Install.IsPresent)"
+                $order.Install = $Install.IsPresent
+                $saveChanges = $true
+            }
+
+            if ('DNSSleep' -in $PSBoundParameters.Keys -and $DNSSleep -ne $order.DNSSleep) {
+                Write-Verbose "Setting DNSSleep to $DNSSleep"
+                $order.DNSSleep = $DNSSleep
+                $saveChanges = $true
+            }
+
+            if ('ValidationTimeout' -in $PSBoundParameters.Keys -and $ValidationTimeout -ne $order.ValidationTimeout) {
+                Write-Verbose "Setting ValidationTimeout to $ValidationTimeout"
+                $order.ValidationTimeout = $ValidationTimeout
+                $saveChanges = $true
+            }
+
+            if ($saveChanges) {
+                Write-Verbose "Saving order changes"
+                $orderFolder = Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')
+                $order | ConvertTo-Json | Out-File (Join-Path $orderFolder 'order.json') -Force -EA Stop
+            }
+
+            if ($updatePfx -and (Get-PACertificate $order.MainDomain)) {
+                Export-PACertFiles $order -PfxOnly
+            }
+
+        } else {
+            # RevokeCert was specified
 
             # make sure the order has a cert to revoke and that it's not already expired
             if (-not $order.CertExpires) {
@@ -141,10 +205,10 @@ function Set-PAOrder {
 
     <#
     .SYNOPSIS
-        Set the current ACME order.
+        Set the current ACME order, edits an orders properties, or revokes an order's certificate.
 
     .DESCRIPTION
-        Switch between ACME orders on an account and/or revoke an order's certificate. Revoked certificate orders are not deleted and can be re-requested Submit-Renewal or New-PACertificate.
+        Switch to a specific ACME order and edit its properties or revoke its certificate. Revoked certificate orders are not deleted and can be re-requested using Submit-Renewal or New-PACertificate.
 
     .PARAMETER MainDomain
         The primary domain for the order. For a SAN order, this was the first domain in the list when creating the order.
@@ -158,15 +222,35 @@ function Set-PAOrder {
     .PARAMETER Force
         If specified, confirmation prompts for certificate revocation will be skipped.
 
+    .PARAMETER FriendlyName
+        Modify the friendly name for the certificate and subsequent renewals. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Must not be an empty string.
+
+    .PARAMETER PfxPass
+        Modify the PFX password for the certificate and subsequent renewals.
+
+    .PARAMETER Install
+        Enables the Install switch for the order. Use -Install:$false to disable the switch on the order. This affects whether the module will automatically import the certificate to the Windows certificate store on subsequent renewals. It will not import the current certificate if it exists. Use Install-PACertificate for that purpose.
+
+    .PARAMETER DNSSleep
+        Number of seconds to wait for DNS changes to propagate before asking the ACME server to validate DNS challenges.
+
+    .PARAMETER ValidationTimeout
+        Number of seconds to wait for the ACME server to validate the challenges after asking it to do so. If the timeout is exceeded, an error will be thrown.
+
     .EXAMPLE
         Set-PAOrder site1.example.com
 
         Switch to the specified domain's order.
 
     .EXAMPLE
-        Set-PAORder -RevokeCert
+        Set-PAOrder -RevokeCert
 
         Revoke the current order's certificate.
+
+    .EXAMPLE
+        Set-PAOrder -FriendlyName 'new friendly name'
+
+        Edit the friendly name for the current order and certificate if it exists.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME
