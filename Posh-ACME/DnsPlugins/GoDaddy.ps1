@@ -235,16 +235,6 @@ function Find-GDZone {
         return $script:GDRecordZones.$RecordName
     }
 
-    # get the list of available zones
-    # (The docs are unclear if there is a limit to the number of responses it will
-    # send without some sort of paging. So people with very large accounts may run
-    # into trouble eventually)
-    try {
-        $zones = Invoke-RestMethod "$($ApiRoot)?statuses=ACTIVE" -Headers $AuthHeader @script:UseBasic -EA Stop |
-            ForEach-Object { $_.domain }
-    } catch { throw }
-    Write-Debug "ACTIVE Zones found: $(($zones -join ', '))"
-
     # We need to find the closest/deepest
     # sub-zone that would hold the record rather than just adding it to the apex. So for something
     # like _acme-challenge.site1.sub1.sub2.example.com, we'd look for zone matches in the following
@@ -258,10 +248,22 @@ function Find-GDZone {
         $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
         Write-Debug "Checking $zoneTest"
 
-        if ($zoneTest -in $zones) {
-            $zoneName = $zones | Where-Object { $_ -eq $zoneTest }
+        try {
+            $domain = Invoke-RestMethod "$ApiRoot/$zoneTest" -Headers $AuthHeader @script:UseBasic -EA Stop
+        } catch {
+            # re-throw anything except a 404 because it just means the zone doesn't exist
+            if (404 -ne $_.Exception.Response.StatusCode.value__) {
+                throw
+            }
+            continue
+        }
+
+        if ($domain.status -eq 'ACTIVE') {
+            $zoneName = $domain.domain
             $script:GDRecordZones.$RecordName = $zoneName
             return $zoneName
+        } else {
+            Write-Debug "Found $zoneTest, but status was $($domain.status)"
         }
     }
 
