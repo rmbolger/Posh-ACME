@@ -11,7 +11,7 @@ function Register-ArgCompleters {
 
         # We can't use the normal ModuleBase method to get the plugin folder here because
         # the completer script block doesn't run in the module's context.
-        $names = (Get-ChildItem -Path "$PSScriptRoot\..\Plugins\*.ps1" -Exclude '_Example.ps1').BaseName
+        $names = (Get-ChildItem -Path "$PSScriptRoot\..\Plugins\*.ps1" -Exclude '_Example-*.ps1').BaseName
         $names | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
             [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
         }

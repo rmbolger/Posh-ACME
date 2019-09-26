@@ -97,8 +97,8 @@ function Save-DnsTxt {
 
     # If necessary, do work here to save or finalize changes performed by
     # Add/Remove functions. It is not uncommon for this function to have
-    # no work to do depending on the DNS provider. In that case, remove
-    # the $MyAPIVar parameters and just leave the body empty.
+    # no work to do depending on the DNS provider. In that case, just
+    # leave the function body empty.
 
     <#
     .SYNOPSIS
@@ -123,6 +123,8 @@ function Save-DnsTxt {
 ############################
 
 # Add additional functions here if necessary.
-# Make sure they're uniquely named and try to follow
-# verb-noun naming guidelines.
+
+# Try to follow verb-noun naming guidelines.
 # https://msdn.microsoft.com/en-us/library/ms714428
+
+# Add a commented link to API docs if they exist.

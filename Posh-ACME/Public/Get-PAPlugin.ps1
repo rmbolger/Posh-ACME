@@ -20,7 +20,7 @@ function Get-PAPlugin {
     # return the list of plugin details if a specific plugin wasn't specified
     if ([String]::IsNullOrWhiteSpace($Plugin)) {
 
-        $pluginNames = (Get-ChildItem (Join-Path $pluginDir *.ps1) -Exclude '_Example.ps1').BaseName | Sort-Object
+        $pluginNames = (Get-ChildItem (Join-Path $pluginDir *.ps1) -Exclude '_Example-*.ps1').BaseName | Sort-Object
         $pluginList = $pluginNames | ForEach-Object {
             [pscustomobject]@{
                 Plugin = $_
