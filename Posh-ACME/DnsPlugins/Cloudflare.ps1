@@ -178,6 +178,9 @@ function Save-DnsTxtCloudflare {
 # Helper Functions
 ############################
 
+# API Docs:
+# https://api.cloudflare.com/
+
 function Get-CFAuthHeader {
     [CmdletBinding(DefaultParameterSetName='Email')]
     param(
@@ -234,6 +237,29 @@ function Find-CFZone {
 
     $apiRoot = 'https://api.cloudflare.com/client/v4/zones'
 
+    if (-not $script:CFZoneIDs) {
+        $script:CFZoneIDs = @{}
+
+        # Due to a bug in the way Cloudflare implemented their limited scope
+        # API tokens, we can't check for domain existence directly because checking
+        # for a zone that doesn't exist returns an HTTP 403 which we can't just assume
+        # means 'not found'. So instead, we have to retrieve all zones and check
+        # locally for existence.
+        # https://community.cloudflare.com/t/bug-in-list-zones-endpoint-when-using-api-token/115048
+        $page = 0
+        do {
+            $page++
+            try {
+                $result = Invoke-RestMethod "$($apiRoot)?page=$page&per_page=50" `
+                    -Headers $AuthHeader @script:UseBasic -EA Stop
+            } catch { throw }
+            $result.result | Where-Object { $_.status -eq 'active' } | ForEach-Object {
+                Write-Debug "Found $($_.name) ($($_.id)) on page $page"
+                $script:CFZoneIDs[$_.name] = $_.id
+            }
+        } while ($page -lt $result.result_info.total_pages)
+    }
+
     # We need to find the zone ID for the closest/deepest sub-zone that would
     # contain the record.
     $pieces = $RecordName.Split('.')
@@ -241,12 +267,9 @@ function Find-CFZone {
 
         $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
         Write-Debug "Checking $zoneTest"
-        $response = Invoke-RestMethod "$apiRoot/?name=$zoneTest" -Headers $AuthHeader @script:UseBasic
 
-        # The response object always contains a "result" array even if empty
-        if ($response.result.Count -gt 0) {
-            Write-Debug ($response | ConvertTo-Json -Depth 5)
-            $zoneID = $response.result[0].id
+        if ($script:CFZoneIDs.ContainsKey($zoneTest)) {
+            $zoneID = $script:CFZoneIDs[$zoneTest]
             $script:CFRecordZones.$RecordName = $zoneID
             return $zoneID
         }
