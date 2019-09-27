@@ -1,3 +1,15 @@
+## 3.8.0 (2019-09-27)
+
+* `Set-PAOrder` now supports modifying some order properties such as FriendlyName, PfxPass, and the Install switch that don't require generating a new ACME order. FriendlyName or PfxPass changes will regenerate the current PFX files with the new value(s) if they exist. Changes to the Install switch will only affect future renewals.
+* Fixed FriendlyName, PfxPass, and Install parameters not applying when calling `New-PACertificate` against an existing order (#178)
+* Fixed GoDaddy plugin so it doesn't fail on large accounts (100+ domains) (#179)
+* Updated Cloudflare plugin to workaround API bug with limited scope tokens (#176)
+* Fixed DnsSleep and ValidationTimout being null when manually creating an order with `New-PAOrder` and finishing it with `New-PACertificate`.
+* Added parameter help for -NewKey on `New-PAOrder` which was missing.
+* When using `New-PACertificate` against an already completed order that is not ready for renewal, the informational message has been changed to Warning from Verbose to make it more apparent that nothing was done.
+* Updated `instdev.ps1` so it still works when the BouncyCastle DLL is locked and $ErrorActionPreference is set to Stop.
+* Updated a bunch of plugin guides with info regarding PowerShell 6.2's fix for the SecureString serialization bug and enabling the use of secure parameter sets on non-Windows.
+
 ## 3.7.0 (2019-09-18)
 
 * Submit-Renewal now has a PluginArgs parameter to make it easier to update plugin credentials without needing to create a new order from scratch. (Thanks @matt-FFFFFF)

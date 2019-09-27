@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '3.7.0'
+ModuleVersion = '3.8.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -42,31 +42,31 @@ FormatsToProcess = 'Posh-ACME.Format.ps1xml'
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = @(
-    'Get-DnsPluginHelp',
-    'Get-DnsPlugins',
-    'Get-KeyAuthorization',
-    'Get-PAAccount',
-    'Get-PAAuthorizations',
-    'Get-PACertificate',
-    'Get-PAOrder',
-    'Get-PAServer',
-    'Install-PACertificate',
-    'Invoke-HttpChallengeListener',
-    'New-PAAccount',
-    'New-PACertificate',
-    'New-PAOrder',
-    'Publish-DnsChallenge',
-    'Remove-PAAccount',
-    'Remove-PAOrder',
-    'Remove-PAServer',
-    'Save-DnsChallenge',
-    'Send-ChallengeAck',
-    'Set-PAAccount',
-    'Set-PAOrder',
-    'Set-PAServer',
-    'Submit-ChallengeValidation',
-    'Submit-OrderFinalize',
-    'Submit-Renewal',
+    'Get-DnsPluginHelp'
+    'Get-DnsPlugins'
+    'Get-KeyAuthorization'
+    'Get-PAAccount'
+    'Get-PAAuthorizations'
+    'Get-PACertificate'
+    'Get-PAOrder'
+    'Get-PAServer'
+    'Install-PACertificate'
+    'Invoke-HttpChallengeListener'
+    'New-PAAccount'
+    'New-PACertificate'
+    'New-PAOrder'
+    'Publish-DnsChallenge'
+    'Remove-PAAccount'
+    'Remove-PAOrder'
+    'Remove-PAServer'
+    'Save-DnsChallenge'
+    'Send-ChallengeAck'
+    'Set-PAAccount'
+    'Set-PAOrder'
+    'Set-PAServer'
+    'Submit-ChallengeValidation'
+    'Submit-OrderFinalize'
+    'Submit-Renewal'
     'Unpublish-DnsChallenge'
 )
 
@@ -107,13 +107,17 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 3.7.0 (2019-09-18)
+## 3.8.0 (2019-09-27)
 
-* Submit-Renewal now has a PluginArgs parameter to make it easier to update plugin credentials without needing to create a new order from scratch. (Thanks @matt-FFFFFF)
-* The FriendlyName parameter in New-PACertificate and New-PAOrder now defaults to the certificate's primary name instead of an empty string to avoid a Windows bug that can occur when installing the generated PFX files.
-* Fixed Windows plugin issue when using WinZoneScope and not all zones have that scope (#168)
-* Fixed an internal bug with Export-PACertFiles that luckily didn't cause problems due to PowerShell variable scoping rules.
-* Fixed a typo in the Cloudflare guide examples. (Thanks @mccanney)
+* `Set-PAOrder` now supports modifying some order properties such as FriendlyName, PfxPass, and the Install switch that don't require generating a new ACME order. FriendlyName or PfxPass changes will regenerate the current PFX files with the new value(s) if they exist. Changes to the Install switch will only affect future renewals.
+* Fixed FriendlyName, PfxPass, and Install parameters not applying when calling `New-PACertificate` against an existing order (#178)
+* Fixed GoDaddy plugin so it doesn't fail on large accounts (100+ domains) (#179)
+* Updated Cloudflare plugin to workaround API bug with limited scope tokens (#176)
+* Fixed DnsSleep and ValidationTimout being null when manually creating an order with `New-PAOrder` and finishing it with `New-PACertificate`.
+* Added parameter help for -NewKey on `New-PAOrder` which was missing.
+* When using `New-PACertificate` against an already completed order that is not ready for renewal, the informational message has been changed to Warning from Verbose to make it more apparent that nothing was done.
+* Updated `instdev.ps1` so it still works when the BouncyCastle DLL is locked and $ErrorActionPreference is set to Stop.
+* Updated a bunch of plugin guides with info regarding PowerShell 6.2's fix for the SecureString serialization bug and enabling the use of secure parameter sets on non-Windows.
 '@
 
     } # End of PSData hashtable
