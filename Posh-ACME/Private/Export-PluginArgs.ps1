@@ -39,9 +39,11 @@ function Export-PluginArgs {
     if (Test-Path -Path $pDataFile -PathType Leaf) {
         # import the existing file
         Write-Debug "Loading saved plugin data"
-        $pData = Import-CliXml $pDataFile
-    } else {
-        # nothing previously saved, so just use an empty hashtable
+        $pData = Import-CliXml $pDataFile -EA Ignore
+    }
+    if ($null -eq $pData -or $pData -isnot [hashtable]) {
+        # The existing file either didn't exist or was corrupt.
+        # Just initialize the old data to an empty hashtable.
         $pData = @{}
     }
 
