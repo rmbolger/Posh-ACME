@@ -23,17 +23,17 @@ function Add-DnsTxtUnoEuro {
     } | ConvertTo-Json
     $UEDNSExists = $false
 
-    Write-Debug "Finding DNS Zone"
-    if (-not ($UEDomain = Find-UEZone $RecordName $UEAccount $UEAccount)) {
-        Write-Debug "Unable to find matching zone for $recordName."
+    Write-Verbose "[UE-Plugin] Finding DNS Zone"
+    if (-not ($UEDomain = Find-UEZone $RecordName $UEAccount $UEAPIKey)) {
+        Write-Verbose "[UE Plugin] Unable to find matching zone for $recordName."
         throw "Unable to find matching zone for $RecordName."
     }
-    Write-Debug "Found $UEDomain. Isolating."
+    Write-Verbose "[UE-Plugin] Found domain $UEDomain."
     $UESubDomain = $RecordName -ireplace [regex]::Escape(".$UEDomain"), [string]::Empty
-    Write-Debug "Accepted domain $UEDomain and record $UESubDomain"
+    Write-Verbose "[UE-Plugin] Accepted domain $UEDomain and record $UESubDomain"
 
     # check for an existing record
-    Write-Debug "Running: GET $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/"
+    Write-Verbose "[UE-Plugin] Running: GET $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/"
     try {
         $UEResponse = Invoke-RestMethod $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/ -Method Get -ContentType 'application/json'
     }
@@ -42,20 +42,21 @@ function Add-DnsTxtUnoEuro {
         throw
     }
 
-    Write-Debug "Response: $UEResponse"
+    Write-Verbose "[UE-Plugin] Response: $UEResponse"
     foreach ($UEDNSRecord in $UEResponse.records) {
-        Write-Debug "Record: $UEDNSRecord looking for $UESubDomain"
+        Write-Debug "[UE Plugin] Records loop: $UEDNSRecord looking for $UESubDomain"
         if ($UEDNSRecord.name -eq $UESubDomain) {
             $UEDNSExists = $true
         }
     }
 
     if (!$UEDNSExists) {
-        Write-Debug "Record needs to be created."
-        Write-Debug "POST: $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/"
-        Invoke-RestMethod $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/ -Method Post -Body $UERequestObj -ContentType 'application/json'
+        Write-Verbose "[UE-Plugin] Record needs to be created."
+        Write-Verbose "[UE-Plugin] Running: POST $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/"
+        Write-Verbose "[UE-Plugin] Record POSTed: $UERequestObj"
+        Invoke-RestMethod $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/ -Method Post -Body $UERequestObj -ContentType 'application/json' | Out-Null
     } else {
-        Write-Debug "Record $RecordName with value $TxtValue already exists. Nothing to do."
+        Write-Verbose "[UE Plugin] Record $RecordName with value $TxtValue already exists. Nothing to do."
     }
 
     <#
@@ -95,25 +96,43 @@ function Remove-DnsTxtUnoEuro {
     )
 
     $UEApiRoot = 'https://api.unoeuro.com/1'
-    $DomainRegex = '([0-9a-z-]{2,}\.[0-9a-z-]{2,3}\.[0-9a-z-]{2,3}|[0-9a-z-]{2,}\.[0-9a-z-]{2,3})$'
-    $UEDomain = [Regex]::Match($RecordName, $DomainRegex).value
     $UEDNSExists = $false
 
+    Write-Verbose "[UE Plugin] Finding DNS Zone"
+    if (-not ($UEDomain = Find-UEZone $RecordName $UEAccount $UEAPIKey)) {
+        Write-Verbose "[UE Plugin] Unable to find matching zone for $recordName."
+        throw "Unable to find matching zone for $RecordName."
+    }
+    Write-Verbose "[UE Plugin] Found $UEDomain."
+    $UESubDomain = $RecordName -ireplace [regex]::Escape(".$UEDomain"), [string]::Empty
+    Write-Verbose "[UE Plugin] Accepted domain $UEDomain and record $UESubDomain"
+
     # check for an existing record
-    $UEResponse = Invoke-RestMethod $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/ -Method Get -ContentType 'application/json' @script:UseBasic
-    
+    Write-Verbose "[UE Plugin] Running: GET $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/"
+    try {
+        $UEResponse = Invoke-RestMethod $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/ -Method Get -ContentType 'application/json'
+    }
+    catch {
+        Write-Debug $_
+        throw
+    }
+
+    Write-Verbose "[UE Plugin] Response: $UEResponse"
     foreach ($UEDNSRecord in $UEResponse.records) {
-        if ($UEDNSRecord.name -eq ([Regex]::Replace($RecordName, [Regex]::Match($RecordName, '.'+$DomainRegex).value, ''))) {
-            Write-Verbose 'Found $UEDNSRecord.name with id $UEDNSRecord.record_id'
+        Write-Debug "[UE Plugin] Records loop: $UEDNSRecord looking for $UESubDomain"
+        if ($UEDNSRecord.name -eq $UESubDomain) {
+            Write-Debug '[UE Plugin] Found $UEDNSRecord.name with id $UEDNSRecord.record_id'
             $UEDNSExists = $UEDNSRecord.record_id
         }
     }
 
+    Write-Verbose "[UE Plugin] Continuing with DNSExists: $UEDNSExists"
     if ($UEDNSExists) {
-        Write-Verbose "Record is being deleted."
-        Invoke-RestMethod $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/$UEDNSExists -Method Delete -ContentType 'application/json' @script:UseBasic | Out-Null
+        Write-Verbose "[UE Plugin] Record is being deleted."
+        Write-Verbose "[UE Plugin] Running: DELETE $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/$UEDNSExists"
+        Invoke-RestMethod $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/$UEDNSExists -Method Delete -ContentType 'application/json' | Out-Null
     } else {
-        Write-Debug "Record $RecordName with value $TxtValue does not exist. Nothing to do."
+        Write-Verbose "[UE Plugin] Record $RecordName with value $TxtValue does not exist. Nothing to do."
     }
 
     <#
@@ -176,7 +195,7 @@ function Find-UEZone {
 
     # check for the record in the cache
     if ($script:UERecordZones.ContainsKey($RecordName)) {
-        Write-Debug "Test already ran once. Using cache to speed up process."
+        Write-Verbose "[UE Plugin] UEZone test already ran once. Using cache to speed up process."
         return $script:UERecordZones.$RecordName
     }
 
@@ -191,31 +210,31 @@ function Find-UEZone {
     $pieces = $RecordName.Split('.')
     for ($i = 1; $i -lt ($pieces.Count - 1); $i++) {
         $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
-        Write-Debug "Checking $zoneTest"
+        Write-Debug "[UE Plugin] Checking $zoneTest"
 
         try {
-            Write-Debug "Testing domain: $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$zoneTest/dns/records/"
+            Write-Debug "[UE Plugin] Testing domain: $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$zoneTest/dns/records/"
             $domain = Invoke-RestMethod "$UEApiRoot/$UEAccount/$UEAPIKey/my/products/$zoneTest/dns/records/" -Method Get -ContentType 'application/json'
         }
         catch {
-            Write-Debug "Error was caught: $_"
+            Write-Debug "[UE Plugin] Error was caught: $_"
             # re-throw anything except a 404 because it means that something is very wrong.
             # Unoeuro API returns code 400 no matter if it's wrong APIKey, Account or DNSZone. Therefore it's up to the next if-statement to sort it out.
             if (404 -eq $_.Exception.Response.StatusCode.value__) {
-                Write-Debug "Error was 404. Throwing error."
+                Write-Debug "[UE Plugin] Error was 404. Throwing error."
                 throw
             }
-            Write-Debug "Error was not 404 and will carry on."
+            Write-Debug "[UE Plugin] Error was not 404 and will carry on."
             continue
         }
 
-        Write-Debug "Test: $domain"
+        Write-Debug "[UE Plugin] Test: $domain"
         if ($domain.status -eq '200') {
-            Write-Debug "Test complete. Accecpted: $zoneTest"
+            Write-Verbose "[UE Plugin] Test complete. Accecpted: $zoneTest"
             $script:UERecordZones.$RecordName = $zoneTest
             return $zoneTest
         } else {
-            Write-Debug "Found $zoneTest, but status was $($domain.status)"
+            Write-Verbose "[UE Plugin] Found $zoneTest, but status was $($domain.status)"
         }
     }
 
