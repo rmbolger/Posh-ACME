@@ -35,7 +35,7 @@ function Add-DnsTxtUnoEuro {
     # check for an existing record
     Write-Verbose "[UE-Plugin] Running: GET $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/"
     try {
-        $UEResponse = Invoke-RestMethod $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/ -Method Get -ContentType 'application/json'
+        $UEResponse = Invoke-RestMethod $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/ -Method Get -ContentType 'application/json' @script:UseBasic
     }
     catch {
         Write-Debug $_
@@ -54,7 +54,7 @@ function Add-DnsTxtUnoEuro {
         Write-Verbose "[UE-Plugin] Record needs to be created."
         Write-Verbose "[UE-Plugin] Running: POST $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/"
         Write-Verbose "[UE-Plugin] Record POSTed: $UERequestObj"
-        Invoke-RestMethod $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/ -Method Post -Body $UERequestObj -ContentType 'application/json' | Out-Null
+        Invoke-RestMethod $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/ -Method Post -Body $UERequestObj -ContentType 'application/json' @script:UseBasic | Out-Null
     } else {
         Write-Verbose "[UE Plugin] Record $RecordName with value $TxtValue already exists. Nothing to do."
     }
@@ -110,7 +110,7 @@ function Remove-DnsTxtUnoEuro {
     # check for an existing record
     Write-Verbose "[UE Plugin] Running: GET $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/"
     try {
-        $UEResponse = Invoke-RestMethod $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/ -Method Get -ContentType 'application/json'
+        $UEResponse = Invoke-RestMethod $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/ -Method Get -ContentType 'application/json' @script:UseBasic
     }
     catch {
         Write-Debug $_
@@ -130,7 +130,7 @@ function Remove-DnsTxtUnoEuro {
     if ($UEDNSExists) {
         Write-Verbose "[UE Plugin] Record is being deleted."
         Write-Verbose "[UE Plugin] Running: DELETE $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/$UEDNSExists"
-        Invoke-RestMethod $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/$UEDNSExists -Method Delete -ContentType 'application/json' | Out-Null
+        Invoke-RestMethod $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$UEdomain/dns/records/$UEDNSExists -Method Delete -ContentType 'application/json' @script:UseBasic | Out-Null
     } else {
         Write-Verbose "[UE Plugin] Record $RecordName with value $TxtValue does not exist. Nothing to do."
     }
@@ -214,7 +214,7 @@ function Find-UEZone {
 
         try {
             Write-Debug "[UE Plugin] Testing domain: $UEApiRoot/$UEAccount/$UEAPIKey/my/products/$zoneTest/dns/records/"
-            $domain = Invoke-RestMethod "$UEApiRoot/$UEAccount/$UEAPIKey/my/products/$zoneTest/dns/records/" -Method Get -ContentType 'application/json'
+            $domain = Invoke-RestMethod "$UEApiRoot/$UEAccount/$UEAPIKey/my/products/$zoneTest/dns/records/" -Method Get -ContentType 'application/json' @script:UseBasic
         }
         catch {
             Write-Debug "[UE Plugin] Error was caught: $_"
