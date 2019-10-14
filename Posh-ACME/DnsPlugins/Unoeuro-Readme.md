@@ -1,6 +1,6 @@
 # How To Use the Unoeuro DNS Plugin
 
-This plugin works against the [Unoeuro](https://www.unoeuro.com/dns) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
+This plugin works against the [Unoeuro](https://www.unoeuro.com/) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
 
 ## Finding your information in Unoeuro
 
@@ -11,5 +11,5 @@ Using Unoeuro API requires only your account name or account number and API Key 
 
 ```powershell
 $pArgs = @{ UEAccount='UE123456'; UEAPIKey='ABCDEFghijkLmNoPq' }
-New-PACertificate example.com -DnsPlugin unoeuro -PluginArgs $pArgs
+New-PACertificate example.com -DnsPlugin Unoeuro -PluginArgs $pArgs
 ```
