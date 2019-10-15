@@ -237,7 +237,7 @@ function Find-CFZone {
 
     $apiRoot = 'https://api.cloudflare.com/client/v4/zones'
 
-    if (-not $script:CFZoneIDs) {
+    if ($script:CFZoneIDs.count -eq 0) {
         $script:CFZoneIDs = @{}
 
         # Due to a bug in the way Cloudflare implemented their limited scope
