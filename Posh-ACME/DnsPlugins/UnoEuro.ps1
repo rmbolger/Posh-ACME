@@ -61,15 +61,15 @@ function Add-DnsTxtUnoEuro {
 
     <#
     .SYNOPSIS
-        Add a DNS TXT record to Unoeuro.
+        Add a DNS TXT record to UnoEuro.
     .DESCRIPTION
-        Use Unoeuro api to add a TXT record to a Unoeuro DNS zone.
+        Use UnoEuro api to add a TXT record to a UnoEuro DNS zone.
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
     .PARAMETER TxtValue
         The value of the TXT record.
     .PARAMETER UEAccountName
-        The accountname of the account used to connect to Unoeuro API (e.g. EU123456)
+        The accountname of the account used to connect to UnoEuro API (e.g. EU123456)
     .PARAMETER UEAPIKey
         The API Key associated with the account entered in the UEAccountName parameter.
     .PARAMETER ExtraParams
@@ -137,15 +137,15 @@ function Remove-DnsTxtUnoEuro {
 
     <#
     .SYNOPSIS
-        Removes a DNS TXT record from Unoeuro.
+        Removes a DNS TXT record from UnoEuro.
     .DESCRIPTION
-        Use Unoeuro api to remove a TXT record from a Unoeuro DNS zone.
+        Use UnoEuro api to remove a TXT record from a UnoEuro DNS zone.
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
     .PARAMETER TxtValue
         The value of the TXT record.
     .PARAMETER UEAccountName
-        The accountname of the account used to connect to Unoeuro API (e.g. EU123456)
+        The accountname of the account used to connect to UnoEuro API (e.g. EU123456)
     .PARAMETER UEAPIKey
         The API Key associated with the account entered in the UEAccountName parameter.
     .PARAMETER ExtraParams
@@ -156,7 +156,7 @@ function Remove-DnsTxtUnoEuro {
     #>
 }
 
-function Save-DnsTxtUnoeuro {
+function Save-DnsTxtUnoEuro {
     [CmdletBinding()]
     param(
         [Parameter(ValueFromRemainingArguments)]
@@ -219,7 +219,7 @@ function Find-UEZone {
         catch {
             Write-Debug "[UE Plugin] Error was caught: $_"
             # re-throw anything except a 404 because it means that something is very wrong.
-            # Unoeuro API returns code 400 no matter if it's wrong APIKey, Account or DNSZone. Therefore it's up to the next if-statement to sort it out.
+            # UnoEuro API returns code 400 no matter if it's wrong APIKey, Account or DNSZone. Therefore it's up to the next if-statement to sort it out.
             if (404 -eq $_.Exception.Response.StatusCode.value__) {
                 Write-Debug "[UE Plugin] Error was 404. Throwing error."
                 throw
@@ -248,9 +248,9 @@ function Find-UEZone {
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
     .PARAMETER UEAccount
-        The Unoeuro account ID or name.
+        The UnoEuro account ID or name.
     .PARAMETER UEAPIKey
-        The Unoeuro API Key.
+        The UnoEuro API Key.
     .EXAMPLE
         Find-UEZone -RecordName '_acme-challenge.site1.example.com' -GDKey 'asdfqwer12345678' -GDSecret 'dfasdasf3j42f'
         Finds the appropriate DNS zone for the supplied record
