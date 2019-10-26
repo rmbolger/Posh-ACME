@@ -1,3 +1,9 @@
+## 3.9.0 (2019-10-26)
+
+* Added new DNS plugin [UnoEuro](https://www.unoeuro.com/) (Thanks @OrKarstoft)
+* Fix for Cloudflare plugin not working properly when limited scope token didn't have at least read permissions to all zones on an account. To use an edit token with limited zone permissions, you must now also specify a secondary token with read permissions to all zones. See the [plugin guide](https://github.com/rmbolger/Posh-ACME/blob/master/Posh-ACME/DnsPlugins/Cloudflare-Readme.md) for details. (#184)
+*  Fix for PropertyNotFound exception when imported plugin data is null or not the expected hashtable value (#182)
+
 ## 3.8.0 (2019-09-27)
 
 * `Set-PAOrder` now supports modifying some order properties such as FriendlyName, PfxPass, and the Install switch that don't require generating a new ACME order. FriendlyName or PfxPass changes will regenerate the current PFX files with the new value(s) if they exist. Changes to the Install switch will only affect future renewals.
