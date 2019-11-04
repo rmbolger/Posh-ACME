@@ -13,7 +13,8 @@ All methods require that the identity being used to authenticate has been given 
 Using an account with access to create roles and app registrations, connect to Azure with the following commands. We'll be saving the resulting Subscription and Tenant ID values for later.
 
 ```powershell
-# this will pop up a web-GUI dialog to login with
+# On Windows, this will pop up a web-GUI to login with. On other OSes,
+# it will ask you to open a browser separately with a code for logging in.
 $az = Connect-AzAccount
 
 # Save the subscription/tentant ID for later
@@ -107,12 +108,12 @@ $thumbprint = $cert.Thumbprint
 
 #### Certificate Based Principal on non-Windows
 
-Before we can create a certificate based credential, we have to actually create a certificate to use with it. As of PowerShell 6.2.3, the non-Windows support for .NET's certificate store abstraction is still not great. So we need to create the cert with OpenSSL and reference the PEM files directly rather than using the thumbprint value like on Windows. Self-signed certs are fine here because we're only using them to sign data and Azure just needs to verify the signature using the public key we will associate with the principal.
+Before we can create a certificate based credential, we have to actually create a certificate to use with it. As of PowerShell 6.2.3, the non-Windows support for .NET's certificate store abstraction is still not great. So we need to create the cert with OpenSSL and reference a PFX file directly rather than using the thumbprint value like on Windows. Self-signed certs are fine here because we're only using them to sign data and Azure just needs to verify the signature using the public key we will associate with the principal.
 
 ```powershell
 # Depending on your OpenSSL config, this may prompt you for certificate details
-# like Country, Organization, etc. None of the details matter and can be set to
-# anything.
+# like Country, Organization, etc. None of the details matter for the purposes of
+# authentication and can be set to anything you like.
 openssl req -x509 -nodes -sha256 -days 1826 -newkey rsa:2048 -keyout poshacme.key -out poshacme.crt
 
 # change the export password to whatever you want, but remember what it is so you can
