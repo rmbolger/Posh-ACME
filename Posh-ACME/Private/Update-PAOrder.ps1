@@ -22,15 +22,12 @@ function Update-PAOrder {
                 return
             }
             $order = $script:Order
-            $UpdatingCurrent = $true
         } else {
             # even if they specified the order explicitly, we may still be updating the
             # "current" order. So figure that out and set a flag for later.
             if ($script:Order -and $script:Order.MainDomain -and $script:Order.MainDomain -eq $MainDomain) {
-                $UpdatingCurrent = $true
                 $order = $script:Order
             } else {
-                $UpdatingCurrent = $false
                 $order = Get-PAOrder $MainDomain
                 if ($null -eq $order) {
                     Write-Warning "Specified order for $MainDomain was not found. Nothing to update."
@@ -39,7 +36,10 @@ function Update-PAOrder {
             }
         }
 
-        if (!$SaveOnly) {
+        if (-not $SaveOnly -and
+            (-not $order.expires -or (Get-DateTimeOffsetNow) -lt ([DateTimeOffset]::Parse($order.expires))) )
+        {
+
             Write-Debug "Refreshing order $($order.MainDomain)"
 
             # build the header
@@ -64,6 +64,11 @@ function Update-PAOrder {
             if ($respObj.certificate) {
                 $order.certificate = $respObj.certificate
             }
+        } elseif (-not $SaveOnly) {
+            # Let's Encrypt no longer returns order details for expired orders
+            # https://github.com/letsencrypt/boulder/commit/83aafd18842e093483d6701b92419ca8f7f1855b
+            # So don't bother asking if we know it's already expired.
+            Write-Debug "Order $($order.MainDomain) is expired. Skipping server refresh."
         }
 
         # save it to disk
