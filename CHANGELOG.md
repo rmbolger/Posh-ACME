@@ -1,3 +1,11 @@
+## 3.10.0 (2019-11-06)
+
+* Added new DNS plugin [HurricaneElectric](https://dns.he.net/)
+* Azure plugin now supports certificate based authentication. See the [plugin guide](https://github.com/rmbolger/Posh-ACME/blob/master/Posh-ACME/DnsPlugins/Azure-Readme.md) for details. (#190)
+* Setup examples in the Azure plugin guide now utilize the [Az](https://www.powershellgallery.com/packages/Az/3.0.0) module rather than the legacy AzureRm.* modules. (#189)
+* Fix for "No order for ID" errors caused by recent Boulder changes that no longer return order details for expired orders. (#192)
+* Fixed being unable to switch active orders if an error occurred trying to refresh the order details from the ACME server.
+
 ## 3.9.0 (2019-10-26)
 
 * Added new DNS plugin [UnoEuro](https://www.unoeuro.com/) (Thanks @OrKarstoft)
