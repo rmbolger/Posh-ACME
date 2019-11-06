@@ -101,7 +101,7 @@ REMARKS
 
 From the `SYNTAX` section, we can see there are two different ways to call the function. Regardless of the plugin, you can always ignore `RecordName`, `TxtValue`, and `ExtraParams` as those are handled by the module. 
 
-The first option requires `[-R53AccessKey] <String>` and `[-R53SecretKey] <SecureString>`. These are API credentials for AWS and presumably as an AWS user, you already know how to generate them. If not, most plugins should have an associated usage guide called `<Plugin>-Readme.md` that can provide more in-depth help. The access key is just a normal string variable. But the secret key is a `SecureString` which takes a bit more effort to setup. So let's create the hashtable we need.
+The first option requires `[-R53AccessKey] <String>` and `[-R53SecretKey] <SecureString>`. These are API credentials for AWS and presumably as an AWS user, you already know how to generate them. The access key is just a normal string variable. But the secret key is a `SecureString` which takes a bit more effort to setup. So let's create the hashtable we need.
 
 ```powershell
 $r53Secret = Read-Host Secret -AsSecureString
