@@ -112,6 +112,7 @@ PrivateData = @{
 * Setup examples in the Azure plugin guide now utilize the [Az](https://www.powershellgallery.com/packages/Az/3.0.0) module rather than the legacy AzureRm.* modules. (#189)
 * Fix for "No order for ID" errors caused by recent Boulder changes that no longer return order details for expired orders. (#192)
 * Fixed being unable to switch active orders if an error occurred trying to refresh the order details from the ACME server.
+* Added additional guidance on renewals and deployment to the tutorial.
 '@
 
     } # End of PSData hashtable
