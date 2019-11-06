@@ -3,7 +3,7 @@
 - [Picking a Server](#picking-a-server)
 - [Your First Certificate](#your-first-certificate)
 - [DNS Plugins](#dns-plugins)
-- [Renewing A Certificate](#renewing-a-certificate)
+- [Renewals and Deployment](#renewals-and-deployment)
 - [Going Into Production](#going-into-production)
 - [(Advanced) DNS Challenge Aliases](#advanced-dns-challenge-aliases)
 
@@ -142,15 +142,17 @@ We included the `-Verbose` switch again so we can see what's going on. But norma
 
 Keep in mind that **PluginArgs are saved to the local profile and tied to the current ACME account**. This is what enables easy renewals that we'll discuss in the next section. It also means you can generate additional certificates without having to specify the PluginArgs parameter again as long as you're using the same DNS plugin. However, because new values overwrite old values, it means that you can't use different sets of parameters for different certificates unless you create a different ACME account.
 
-## Renewing A Certificate
+## Renewals and Deployment
 
-Now that you have a cert that can successfully answer DNS challenges via a plugin, it's even easier to renew it.
+Now that you have a cert order that can successfully answer DNS challenges via a plugin, it's even easier to renew it.
 
 ```powershell
 Submit-Renewal
 ```
 
-The module saves all of the parameters associated with an order and re-uses the same values to renew it. It will throw a warning right now because the cert hasn't reached the suggested renewal window. But you can use `-Force` to do it anyway if you want to try it. If you end up with multiple certs or even multiple accounts with multiple certs, there are flags to renew all of those as well.
+The module saves all of the parameters associated with an order and re-uses the same values to renew it. It will throw a warning right now because the cert hasn't reached the suggested renewal window. But you can use `-Force` to do it anyway if you want to try it. Let's Encrypt currently caches authorizations for roughly 30 days, so the forced renewal won't need to go through validating the challenges again.
+
+If you multiple orders on an account or even multiple accounts, there are flags to renew all of those as well.
 
 ```powershell
 # renew all orders on the current account
@@ -158,9 +160,38 @@ Submit-Renewal -AllOrders
 
 # renew all orders across all accounts in the current profile
 Submit-Renewal -AllAccounts
+
+# The -Force parameter works with these as well.
 ```
 
-These are designed to be used in a daily scheduled task. **Make sure to have it run as the same user you're currently logged in as** because the module config is all stored in your local profile. Each day, it will check the existing certs for ones that have reached the renewal window and renew them. It will just ignore the ones that aren't ready yet.
+Because PowerShell has no native way to run recurring tasks, you'll need to set something up using whatever job scheduling utility your OS provides like Task Scheduler on Windows or cron on Linux. It is suggested to run the job once or twice a day at ideally randomized times. At the very least, try not to run them directly on any hour marks to avoid potential load spikes on the ACME server. With a couple exceptions, **the task must run as the same user you're currently logged in as** due to the location of the config and encryption on secure plugin parameters. It's possible to use different users if you're utilizing the [`POSHACME_HOME`](https://github.com/rmbolger/Posh-ACME/wiki/%28Advanced%29-Using-an-Alternate-Config-Location) environment variable on both accounts and you're either not on Windows or not utilizing any secure plugin parameters (PSCredential or SecureString types).
+
+Posh-ACME doesn't currently handle certificate deployment. So you'll likely want to create a script to both renew the cert and deploy it to your service/application. All the details you should need to deploy the cert are in the PACertificate object that is returned by `Submit-Renewal`. It's also the same object returned by `New-PACertificate` and `Get-PACertificate`; the latter being useful to test deployment scripts with.
+
+`Submit-Renewal` will only return PACertificate objects for certs that were actually renewed successfully. So the typical template for a renew/deploy script might look something like this.
+
+```powershell
+Set-PAOrder example.com
+if ($cert = Submit-Renewal) {
+    # do stuff with $cert to deploy it
+}
+```
+
+For a job that is renewing multiple certificates, it might look more like this.
+
+```powershell
+Submit-Renewal -AllOrders | ForEach-Object {
+    $cert = $_
+    if ($cert.MainDomain -eq 'example.com') {
+        # deploy for example.com
+    } elseif ($cert.MainDomain -eq 'example.net') {
+        # deploy for example.com
+    } else {
+        # deploy for everything else
+    }
+}
+```
+
 
 ### Updating DNS Plugin Parameters on Renewal
 
