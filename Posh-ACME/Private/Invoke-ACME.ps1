@@ -132,9 +132,20 @@ function Invoke-ACME {
         # So a JSON parseable error object should be in the response body.
         try { $acmeError = $body | ConvertFrom-Json }
         catch {
-            Write-Warning "Response body was not JSON parseable"
-            # re-throw the original exception
-            throw $ex
+            # Old endpoints won't necessarily throw rfc7807 bodies
+            # for 404 errors. So we're going to fake them.
+            # https://github.com/letsencrypt/boulder/issues/4540
+            if (404 -eq $response.StatusCode) {
+                $acmeError = @{
+                    type = 'urn:ietf:params:acme:error:malformed'
+                    detail = 'Page not found'
+                    status = 404
+                }
+            } else {
+                Write-Warning "Response body was not JSON parseable"
+                # re-throw the original exception
+                throw $ex
+            }
         }
 
         # check for badNonce and retry once
