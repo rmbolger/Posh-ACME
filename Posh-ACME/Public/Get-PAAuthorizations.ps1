@@ -107,6 +107,9 @@ function Get-PAAuthorizations {
     .PARAMETER AuthURLs
         One or more authorization URLs. You also pipe in one or more PoshACME.PAOrder objects.
 
+    .PARAMETER Account
+        An existing ACME account object such as the output from Get-PAAccount. If no account is specified, the current account will be used.
+
     .EXAMPLE
         Get-PAAuthorizations https://acme.example.com/authz/1234567
 

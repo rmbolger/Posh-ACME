@@ -1,5 +1,6 @@
 function Revoke-PAAuthorization {
     [CmdletBinding(SupportsShouldProcess)]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess','')]
     param(
         [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [Alias('authorizations')]
@@ -89,4 +90,50 @@ function Revoke-PAAuthorization {
         }
 
     }
+
+
+
+    <#
+    .SYNOPSIS
+        Revoke the authorization associated with an ACME identifier.
+
+    .DESCRIPTION
+        Many ACME server implementations cache succesful authorizations for a certain amount of time to avoid requiring an account to re-authorize identifiers for additional orders submitted during the cache window.
+
+        This can make testing authorization challenges in a client more cumbersome by having to create new orders with uncached identifiers. This function allows you to revoke those cached authorizations so that subsequent orders will go through the full challenge validation process.
+
+    .PARAMETER AuthURLs
+        One or more authorization URLs. You also pipe in one or more PoshACME.PAOrder objects.
+
+    .PARAMETER Account
+        An existing ACME account object such as the output from Get-PAAccount. If no account is specified, the current account will be used.
+
+    .PARAMETER Force
+        If specified, no confirmation prompts will be presented.
+
+    .EXAMPLE
+        Revoke-PAAuthorization https://acme.example.com/authz/1234567
+
+        Revoke the authorization for the specified URL using the current account.
+
+    .EXAMPLE
+        Get-PAOrder | Revoke-PAAuthorization -Force
+
+        Revoke all authorizations for the current order on the current account without confirmation prompts.
+
+    .EXAMPLE
+        Get-PAOrder -List | Revoke-PAAuthorizations
+
+        Revoke all authorizations for all orders on the current account.
+
+    .LINK
+        Project: https://github.com/rmbolger/Posh-ACME
+
+    .LINK
+        Get-PAAuthorizations
+
+    .LINK
+        Get-PAOrder
+
+    #>
 }
