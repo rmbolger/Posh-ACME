@@ -1,3 +1,12 @@
+## 3.11.0 (2019-11-12)
+
+* Added `Revoke-PAAuthorization` which enables revocation of identifier authorizations associated with an account.
+* `Get-PAAuthorizations` now has an optional -Account parameter and better error handling.
+* `Get-PAAuthorization` has been added as an alias for `Get-PAAuthorizations` to better comply with PowerShell naming standards. It will likely be formally renamed in version 4.x and the old name should be considered deprecated. This change should allow dependent scripts to prepare for that change in advance.
+* `Install-PACertificate` now supports parameters to select the store name, location, and the exportable flag.
+* Workaround for Boulder [issue](https://github.com/letsencrypt/boulder/issues/4540) that doesn't return JSON error bodies for old endpoints.
+* Fixed bug creating new orders with a changed KeyLength value that was preventing the required new private key from being created.
+
 ## 3.10.0 (2019-11-06)
 
 * Added new DNS plugin [HurricaneElectric](https://dns.he.net/)

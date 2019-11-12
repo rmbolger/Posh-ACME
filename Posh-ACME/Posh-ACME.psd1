@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '3.10.0'
+ModuleVersion = '3.11.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -110,12 +110,12 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-* Added new DNS plugin [HurricaneElectric](https://dns.he.net/)
-* Azure plugin now supports certificate based authentication. See the [plugin guide](https://github.com/rmbolger/Posh-ACME/blob/master/Posh-ACME/DnsPlugins/Azure-Readme.md) for details. (#190)
-* Setup examples in the Azure plugin guide now utilize the [Az](https://www.powershellgallery.com/packages/Az/3.0.0) module rather than the legacy AzureRm.* modules. (#189)
-* Fix for "No order for ID" errors caused by recent Boulder changes that no longer return order details for expired orders. (#192)
-* Fixed being unable to switch active orders if an error occurred trying to refresh the order details from the ACME server.
-* Added additional guidance on renewals and deployment to the tutorial.
+* Added `Revoke-PAAuthorization` which enables revocation of identifier authorizations associated with an account.
+* `Get-PAAuthorizations` now has an optional -Account parameter and better error handling.
+* `Get-PAAuthorization` has been added as an alias for `Get-PAAuthorizations` to better comply with PowerShell naming standards. It will likely be formally renamed in version 4.x and the old name should be considered deprecated. This change should allow dependent scripts to prepare for that change in advance.
+* `Install-PACertificate` now supports parameters to select the store name, location, and the exportable flag.
+* Workaround for Boulder [issue](https://github.com/letsencrypt/boulder/issues/4540) that doesn't return JSON error bodies for old endpoints.
+* Fixed bug creating new orders with a changed KeyLength value that was preventing the required new private key from being created.
 '@
 
     } # End of PSData hashtable
