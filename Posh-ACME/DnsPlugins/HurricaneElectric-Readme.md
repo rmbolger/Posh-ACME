@@ -10,13 +10,13 @@ There's not really any setup aside from knowing your account credentials. Hurric
 
 ## Using the Plugin
 
-Your account credentials will either be used with the `FDCredential` parameter or `FDUsername`/`FDPassword` parameters. FDCredential uses a PSCredential object that should only be used on Windows or any OS that has PowerShell 6.2 or later. Any environment can use the FDUsername/FDPassword option.
+Your account credentials will either be used with the `HECredential` parameter or `HEUsername`/`HEPassword` parameters. HECredential uses a PSCredential object that should only be used on Windows or any OS that has PowerShell 6.2 or later. Any environment can use the HEUsername/HEPassword option.
 
 ### Windows or PS 6.2+
 
 ```powershell
 # create the plugin args hashtable
-$pArgs = @{ FDCredential = (Get-Credential) }
+$pArgs = @{ HECredential = (Get-Credential) }
 
 # generate the cert
 New-PACertificate example.com -DnsPlugin HurricaneElectric -PluginArgs $pArgs
@@ -27,8 +27,8 @@ New-PACertificate example.com -DnsPlugin HurricaneElectric -PluginArgs $pArgs
 ```powershell
 # create the plugin args hashtable
 $pArgs = @{
-    FDUsername = 'myusername'
-    FDPassword = 'mypassword'
+    HEUsername = 'myusername'
+    HEPassword = 'mypassword'
 }
 
 # generate the cert
