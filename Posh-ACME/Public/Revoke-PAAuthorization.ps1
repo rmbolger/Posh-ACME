@@ -84,7 +84,7 @@ function Revoke-PAAuthorization {
                 $response = Invoke-ACME $header $payload $Account -EA Stop
                 Write-Debug "Response: $($response.Content)"
             } catch [AcmeException] {
-                Write-Warning $_.Exception.Data.detail
+                Write-Error $_.Exception.Data.detail
             }
 
         }
