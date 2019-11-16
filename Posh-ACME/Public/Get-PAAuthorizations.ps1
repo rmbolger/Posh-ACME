@@ -4,7 +4,9 @@ function Get-PAAuthorizations {
     param(
         [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [Alias('authorizations')]
-        [string[]]$AuthURLs
+        [string[]]$AuthURLs,
+        [Parameter(Position=1)]
+        [PSTypeName('PoshACME.PAAccount')]$Account
     )
 
     # Every order has an array of authorization URLs that can be used to
@@ -17,9 +19,20 @@ function Get-PAAuthorizations {
     # challenge types are added in the future.
 
     Begin {
-        # Make sure we have an account configured
-        if (!($acct = Get-PAAccount)) {
-            throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+        # make sure any account passed in is actually associated with the current server
+        # or if no account was specified, that there's a current account.
+        if (!$Account) {
+            if (!($Account = Get-PAAccount)) {
+                throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first."
+            }
+        } else {
+            if ($Account.id -notin (Get-PAAccount -List).id) {
+                throw "Specified account id $($Account.id) was not found in the current server's account list."
+            }
+        }
+        # make sure it's valid
+        if ($Account.status -ne 'valid') {
+            throw "Account status is $($Account.status)."
         }
     }
 
@@ -31,9 +44,9 @@ function Get-PAAuthorizations {
                 $header = @{alg=$acct.alg; kid=$acct.location;nonce=$script:Dir.nonce;url=$AuthUrl}
                 $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
                 $auth = $response.Content | ConvertFrom-Json
-            } catch {
-                if ($_.ErrorDetails.Message -like '*Expired authorization*') {
-                    Write-Warning "Authorization has expired. Unable to retrieve details."
+            } catch [AcmeException] {
+                if ($_.Exception.Data.status -eq 404) {
+                    Write-Warning "Authorization not found on server. $($_.Exception.Data.detail)"
                     continue
                 } else { throw }
             }
@@ -93,6 +106,9 @@ function Get-PAAuthorizations {
 
     .PARAMETER AuthURLs
         One or more authorization URLs. You also pipe in one or more PoshACME.PAOrder objects.
+
+    .PARAMETER Account
+        An existing ACME account object such as the output from Get-PAAccount. If no account is specified, the current account will be used.
 
     .EXAMPLE
         Get-PAAuthorizations https://acme.example.com/authz/1234567

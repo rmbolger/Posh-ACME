@@ -73,6 +73,11 @@ function New-PAOrder {
 
     Write-Debug "Creating new $KeyLength order with domains: $($Domain -join ', ')"
 
+    # Force a key change if the KeyLength is different than the old order
+    if ($order -and $order.KeyLength -ne $KeyLength) {
+        $NewKey = [switch]::Present
+    }
+
     # build the protected header for the request
     $header = @{
         alg   = $acct.alg;
@@ -185,9 +190,7 @@ function New-PAOrder {
     # and we're using a CSR or it's explicitly requested or the new KeyLength doesn't match the old one.
     $keyPath = Join-Path $script:OrderFolder 'cert.key'
     $removeOldKey = ( (Test-Path $keyPath -PathType Leaf) -and
-                      ('FromCSR' -eq $PSCmdlet.ParameterSetName -or
-                       $NewKey -or
-                       $KeyLength -ne $order.KeyLength) )
+                      ($NewKey -or 'FromCSR' -eq $PSCmdlet.ParameterSetName) )
 
     # backup the old private key if necessary
     if ($removeOldKey) {

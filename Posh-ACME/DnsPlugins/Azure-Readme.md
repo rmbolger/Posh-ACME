@@ -1,6 +1,6 @@
 # How To Use the Azure DNS Plugin
 
-This plugin works against the [Azure DNS](https://azure.microsoft.com/en-us/services/dns/) provider. It is assumed that you already have an active subscription with at least one DNS zone, associated Resource Group, and an account with access to create roles and app registrations. The commands used in this guide will also make use of the [AzureRM.Profile](https://www.powershellgallery.com/packages/AzureRM.profile), [AzureRM.Resources](https://www.powershellgallery.com/packages/AzureRM.Resources), [AzureRM.Compute](https://www.powershellgallery.com/packages/AzureRM.Compute), and [AzureRM.Dns](https://www.powershellgallery.com/packages/AzureRM.Dns) modules for setting up permissions in Azure. But they are not required to use the plugin normally.
+This plugin works against the [Azure DNS](https://azure.microsoft.com/en-us/services/dns/) provider. It is assumed that you already have an active subscription with at least one DNS zone, associated Resource Group, and an account with access to create roles and app registrations. The setup commands used in this guide will also make use of the [Az](https://www.powershellgallery.com/packages/Az/) module. But it is not required to use the plugin normally.
 
 ## Setup
 
@@ -10,22 +10,24 @@ All methods require that the identity being used to authenticate has been given 
 
 ### Connect to Azure
 
-Using an account with access to create roles and app registrations, connect to Azure with the following commands.
+Using an account with access to create roles and app registrations, connect to Azure with the following commands. We'll be saving the resulting Subscription and Tenant ID values for later.
 
 ```powershell
-$azcred = Get-Credential
-$profile = Connect-AzureRMAccount -Cred $azcred
-$profile
-```
+# On Windows, this will pop up a web-GUI to login with. On other OSes,
+# it will ask you to open a browser separately with a code for logging in.
+$az = Connect-AzAccount
 
-The `$profile` variable output will contain some fields we'll need later such as `SubscriptionId` and `TenantId`.
+# Save the subscription/tentant ID for later
+$subscriptionID = $az.Context.Subscription.Id
+$tenantID = $az.Context.Subscription.TenantId
+```
 
 ### Create a Custom Role
 
 We're going to create a custom role that is limited to modifying TXT records in whatever resource group it is assigned to. It will be based on the default `DNS Zone Contributor` role.
 
 ```powershell
-$roleDef = Get-AzureRmRoleDefinition -Name "DNS Zone Contributor"
+$roleDef = Get-AzRoleDefinition -Name "DNS Zone Contributor"
 $roleDef.Id = $null
 $roleDef.Name = "DNS TXT Contributor"
 $roleDef.Description = "Manage DNS TXT records only."
@@ -38,76 +40,145 @@ $roleDef.Actions.Add("Microsoft.ResourceHealth/availabilityStatuses/read")
 $roleDef.Actions.Add("Microsoft.Resources/deployments/read")
 $roleDef.Actions.Add("Microsoft.Resources/subscriptions/resourceGroups/read")
 $roleDef.AssignableScopes.Clear()
-$roleDef.AssignableScopes.Add("/subscriptions/$($profile.Context.Subscription.Id)")
+$roleDef.AssignableScopes.Add("/subscriptions/$($az.Context.Subscription.Id)")
 
-$role = New-AzureRmRoleDefinition $roleDef
+$role = New-AzRoleDefinition $roleDef
 $role
 ```
 
-### (Optional) Create a Service Account
+### (Optional) Create a Service Principal / App Registration
 
-If you're using Posh-ACME from outside Azure and not using an existing access token, it is wise to create a service account specifically for modifying TXT records (e.g. App Registration). Ideally, the password should be long and randomized. The account will show up in the "App registrations" section of your Azure Active Directory.
+If you're using Posh-ACME from outside Azure and not using an existing access token, it is wise to create a dedicated service principal limited to modifying TXT records. Service Principals are tied to App Registrations in Azure AD and creating the former will automatically create the latter (though it's technically possible to create them separately).
 
-```powershell
-$svcPass = Read-Host Pass -AsSecureString
-$svcAcct = New-AzureRmADServicePrincipal -DisplayName PoshACME -Password $svcPass
-$svcAcct
-```
-
-The `ApplicationId` field in the variable output will be used later when assigning permissions and creating the credential object needed for the plugin.
-
-### Assign Permissions To Resource Group
-
-When you created the DNS zones, you had to assign them to a resource group. If they're all in the same Resource Group, this step will be much quicker. If not, you should either move them all to the same Resource Group or you'll have to repeat this step for each one.
+Service Principals are associated with one or more Credentials which can be password or certificated based. Certificates can be a bit trickier to setup particularly on non-Windows OSes, but Microsoft recommends them over passwords. We'll go over both methods below. Both also have configurable expiration values that default to 1 year and we'll be setting ours to 5 years, but you can choose whatever you like.
 
 ```powershell
-# get a reference to the Resource Group
-$resGroup = Get-AzureRmResourceGroup "MyResourceGroup"
-$resName = $resGroup.ResourceGroupName
-
-# get a reference to the Role name we created earlier
-$roleName = $role.Name
+$notBefore = Get-Date
+$notAfter = $notBefore.AddYears(5)
 ```
 
-#### Service Account / App Registration
+#### Password Based Principal
 
-For an App Registration, we need to assign permissions to the Application ID which we can get from the `$svcAcct` variable we created earlier or the App's properties dialog in the Azure dashboard.
+The `New-AzADServicePrincipal` function will generate a password for us, so all we have to do is give it a name and specify our expiration dates.
 
 ```powershell
-$appID = $svcAcct.ApplicationId.ToString()
-New-AzureRmRoleAssignment -ApplicationId $appID -ResourceGroupName $resName -RoleDefinitionName $roleName
+$sp = New-AzADServicePrincipal -DisplayName PoshACME -StartDate $notBefore -EndDate $notAfter
 ```
 
-#### Managed Service Identity (MSI)
+You'll use your new credential with either the `AZAppCred` plugin parameter or `AZAppUsername` and `AZAppPasswordInsecure` plugin parameters. The username is in the `ApplicationId` property and the password is in `Secret`. Here's how to save a reference to them for later.
+
+```powershell
+# For AZAppCred
+$appCred = [pscredential]::new($sp.ApplicationId,$sp.Secret)
+
+# For AZAppUsername and AZAppPasswordInsecure
+$appUser = $appCred.UserName
+$appPass = $appCred.GetNetworkCredential().Password
+```
+
+#### Certificate Based Principal on Windows
+
+Before we can create a certificate based credential, we have to actually create a certificate to use with it. Self-signed certs are fine here because we're only using them to sign data and Azure just needs to verify the signature using the public key we will associate with the principal.
+
+*Note: New-SelfSignedCertificate is only available on Windows 10/2016 or later. Check [this document](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-authenticate-service-principal-powershell) for instructions on earlier OSes.*
+
+*Note: If you plan on using an existing certificate, make sure it is being stored using the legacy CSP called "Microsoft Enhanced RSA and AES Cryptographic Provider" that supports the SHA256 hashing algorithm. PowerShell doesn't yet support retrieving private key values from newer KSP based providers.*
+
+```powershell
+# Keep in mind that this certificate will be created in the current user's certificate
+# store. If you intend to use it from another account, you will need to either create it
+# there or export it and re-import it there.
+$cert = New-SelfSignedCertificate -CertStoreLocation "Cert:\CurrentUser\My" `
+    -Subject "CN=Azure App PoshACME" -HashAlgorithm SHA256 `
+    -Provider "Microsoft Enhanced RSA and AES Cryptographic Provider" `
+    -NotBefore $notBefore -NotAfter $notAfter
+
+$certData = [System.Convert]::ToBase64String($cert.GetRawCertData())
+
+$sp = New-AzADServicePrincipal -DisplayName PoshACME -CertValue $certData `
+    -StartDate $cert.NotBefore -EndDate $cert.NotAfter
+```
+
+You'll use your new credential with the `AZAppUsername` and `AZCertThumbprint` plugin parameters. Here's how to save a reference to them for later.
+
+```powershell
+$appUser = $sp.ApplicationId
+$thumbprint = $cert.Thumbprint
+```
+
+#### Certificate Based Principal on non-Windows
+
+Before we can create a certificate based credential, we have to actually create a certificate to use with it. As of PowerShell 6.2.3, the non-Windows support for .NET's certificate store abstraction is still not great. So we need to create the cert with OpenSSL and reference a PFX file directly rather than using the thumbprint value like on Windows. Self-signed certs are fine here because we're only using them to sign data and Azure just needs to verify the signature using the public key we will associate with the principal.
+
+```powershell
+# Depending on your OpenSSL config, this may prompt you for certificate details
+# like Country, Organization, etc. None of the details matter for the purposes of
+# authentication and can be set to anything you like.
+openssl req -x509 -nodes -sha256 -days 1826 -newkey rsa:2048 -keyout poshacme.key -out poshacme.crt
+
+# change the export password to whatever you want, but remember what it is so you can
+# provide it as part of the plugin parameters
+openssl pkcs12 -export -in poshacme.crt -inkey poshacme.key -CSP "Microsoft Enhanced RSA and AES Cryptographic Provider" -out poshacme.pfx -passout "pass:poshacme"
+
+$cert = [Security.Cryptography.X509Certificates.X509Certificate2]::new('./poshacme.crt')
+$certData = [Convert]::ToBase64String($cert.GetRawCertData())
+
+$sp = New-AzADServicePrincipal -DisplayName PoshACMELinux -CertValue $certData `
+    -StartDate $cert.NotBefore -EndDate $cert.NotAfter
+
+# (optional) delete the PEM files we don't need for plugin purposes
+rm poshacme.crt poshacme.key
+
+# IMPORTANT: Anyone who can read the crt/key or pfx files may be able to impersonate this
+# service principal. So make sure to move and/or change permissions on the files so
+# that only the process running Posh-ACME can read them.
+```
+
+You'll use your new credential with the `AZAppUsername`, `AZCertPfx`, and `AZPfxPass` plugin parameters. Here's how to save a reference to them for later.
+
+```powershell
+$appUser = $sp.ApplicationId
+# modify the path and/or password as appropriate
+$certPfx = (Resolve-Path './poshacme.pfx').ToString()
+$pfxPass = 'poshacme'
+```
+
+### Assign Permissions to the Service Principal
+
+Now we'll tie everything together by assigning the service principal we created to the custom Role we created and the Resource Group that contains our DNS zones. If your zones are in more than one resource group, just repeat this for each one. If you used your own method for creating a service princpal, just use `Get-AzAdServicePrincipal` to get a reference to it first.
+
+```powershell
+# modify the ResourceGroupName as appropriate for your environment
+New-AzRoleAssignment -ApplicationId $sp.ApplicationId -ResourceGroupName 'MyZones' `
+    -RoleDefinitionName 'DNS TXT Contributor'
+```
+
+### (Optional) Using a Managed Service Identity (MSI)
 
 When using a [Managed Service Identity (MSI)](https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/overview), we need the security principal ID of the VM or Service to assign permissions to. This example will query a VM.
 
 ```powershell
-$spID = (Get-AzureRMVM -ResourceGroupName '<VM Resource Group>' -Name '<VM Name>').identity.principalid
-New-AzureRmRoleAssignment -ObjectId $spID -ResourceGroupName $resName -RoleDefinitionName $roleName
+# NOTE: The VM must have a managed identity associated with it for this to work
+$spID = (Get-AzVM -ResourceGroupName '<VM Resource Group>' -Name '<VM Name>').Identity.PrincipalId
+New-AzRoleAssignment -ObjectId $spID -ResourceGroupName 'MyZones' `
+    -RoleDefinitionName 'DNS TXT Contributor'
 ```
 
-### (Optional) Get Existing Access Token
+In addition to the `AZSubscriptionId` plugin parameter that all auth methods must provide, the only plugin parameter you'll need is the `AZUseIMDS` switch.
 
-Any existing user, application, or managed service principal should work as long as it has been assigned permissions to managed DNS TXT records.
+### (Optional) Using An Existing Access Token
 
-To use the context you are currently using with Powershell, use this function to retrieve the token.
+Any existing user, application, or managed service principal should work as long as it has been assigned permissions to manage DNS TXT records in the zones you're requesting certificates for.
+
+Here's how to get the token for the context you are currently logged in with using with Powershell.
+
 ```powershell
-Function Get-AccessToken() {
-    $tenantId = (Get-AzureRmContext).Tenant.Id
-
-    $cache = (Get-AzureRmContext).tokencache
-    $cacheItem = $cache.ReadItems() | Where-Object { $_.TenantId -eq $tenantId } | Select-Object -First 1
-    return $cacheItem.AccessToken
-}
-
-$subId = (Get-AzureRmContext).Subscription.Id
-$token = Get-AccessToken
-$azParams = @{AZSubscriptionId=$subId;AZAccessToken=$token;}
-
+$ctx = Get-AzContext
+$token = ($ctx.TokenCache.ReadItems() | ?{ $_.TenantId -eq $ctx.Subscription.TenantId } |
+    Select -First 1).AccessToken
 ```
 
-To use the account you are currently logged in to with Azure CLI 2.0, use the following command to generate a token. Remember to use the correct subscription.
+Here's a similar method using Azure CLI 2.0.
 ```powershell
 # show all subscriptions - the one marked as "isDefault": true will be used to create the token
 az account list
@@ -119,53 +190,91 @@ To get a token for the MSI when running in a VM, Azure Function or App Service -
 * [Getting a token for an MSI-enabled VM](https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/how-to-use-vm-token)
 * [Getting a token for an MSI-enabled App Service or Function](https://docs.microsoft.com/en-us/azure/app-service/app-service-managed-service-identity)
 
+
 ## Using the Plugin
 
-All methods require specifying `AZSubscriptionId` which is the subscription that contains the DNS zones to modify.
+All authentication methods require specifying `AZSubscriptionId` which is the subscription that contains the DNS zones to modify. Password and Certificate based credentials also require `AZTenantId` which is the Azure AD tenant guid. Additional parameters are outlined in each section below.
 
-### Explicit Credentials
+### Password Credential
 
-There are two parameter sets you can use with explicit credentials. The first which uses `AZAppCred` and takes a PSCredential object can only be used from Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The second uses `AZAppUsername` and `AZAppPasswordInsecure` as plain text strings and can be used on any OS.
+There are two parameter sets you can use with password based credentials. The first is used with `AZAppCred`, a PSCredential object, and can only be used from Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The second uses `AZAppUsername` and `AZAppPasswordInsecure` as plain text strings and can be used on any OS.
 
 #### PSCredential (Windows or PS 6.2+)
 
-Specify `AZTenantId` and `AZAppCred` which is the Azure AD tenant guid and user/app credentials. For an app registration, the username is the service account's `ApplicationId` guid and the password is whatever you originally set for it.
+PSCredential objects require a username and password. For a service principal, the username is the its `ApplicationId` guid and the password is whatever was originally set for it. If you've been following the setup instructions, you may have `$subscriptionID`, `$tenantID`, and `$appCred` variables you can use instead of the sample values below.
 
 ```powershell
 $azParams = @{
-  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
-  AZTenantId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
+  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+  AZTenantId='yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
   AZAppCred=(Get-Credential)
 }
 
 # issue a cert
-New-PACertificate test.example.com -DnsPlugin Azure -PluginArgs $azParams
+New-PACertificate example.com -DnsPlugin Azure -PluginArgs $azParams
 ```
 
 #### Plain text credentials (Any OS)
 
-Specify `AZTenantId` which is the Azure AD tenant guid. For user/app credentials, specify `AZAppUsername` and `AZAppPasswordInsecure`. For an app registration, the username is the service account's `ApplicationId` guid and the password is whatever you originally set for it.
+For a service principal, the username is its `ApplicationId` guid and the password is whatever was originally set for it. If you've been following the setup instructions, you may have `$subscriptionID`, `$tenantID`, `$appUser`, and `$appPass` variables you can use instead of the sample values below.
 
 ```powershell
 $azParams = @{
-  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
-  AZTenantId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
+  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+  AZTenantId='yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
   AZAppUsername='myuser'
-  AZAppPasswordInsecure='xxxxxxxxxxxxxxxxxx';
+  AZAppPasswordInsecure='xxxxxxxxxxxxxxxxxx'
 }
 
 # issue a cert
-New-PACertificate test.example.com -DnsPlugin Azure -PluginArgs $azParams
+New-PACertificate example.com -DnsPlugin Azure -PluginArgs $azParams
+```
+
+### Certificate Credential
+
+As of PowerShell 6.2.3 (November 2019), support for the certificate store abstractions only really works on Windows. So there are separate instructions for Windows and non-Windows OSes.
+
+#### Windows Certificate
+
+You'll need to specify the service principal username which is its `ApplicationId` guid and the certificate thumbprint value. If you've been following the setup instructions, you may have `$subscriptionID`, `$tenantID`, `$appUser`, and `$thumbprint` variables you can use instead of the sample values below.
+
+```powershell
+$azParams = @{
+  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+  AZTenantId='yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
+  AZAppUsername='zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz'
+  AZCertThumbprint='1A2B3C4D5E6F1A2B3C4D5E6F1A2B3C4D5E6F1A2B'
+}
+
+# issue a cert
+New-PACertificate example.com -DnsPlugin Azure -PluginArgs $azParams
+```
+
+#### Non-Windows Certificate
+
+You'll need to specify the service principal username which is its `ApplicationId` guid, the path to the PFX file, and the PFX password. If you've been following the setup instructions, you may have `$subscriptionID`, `$tenantID`, `$appUser`, `$certPfx`, and `$pfxPass` variables you can use instead of the sample values below.
+
+```powershell
+$azParams = @{
+  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+  AZTenantId='yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
+  AZAppUsername='zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz'
+  AZCertPfx='/home/certuser/poshacme.pfx'
+  AZPfxPass='poshacme'
+}
+
+# issue a cert
+New-PACertificate example.com -DnsPlugin Azure -PluginArgs $azParams
 ```
 
 ### Existing Access Token
 
-Specify `AZAccessToken` using the value you retrieved earlier.
+Only the subscription guid and the access token you previously retrieved are required for this method.
 
 ```powershell
 $azParams = @{
-  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
-  AZAccessToken=$token;
+  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+  AZAccessToken=$token
 }
 
 # issue a cert
@@ -174,7 +283,7 @@ New-PACertificate test.example.com -DnsPlugin Azure -PluginArgs $azParams
 
 ### Instance Metadata Service (IMDS)
 
-Just add the `AZUseIMDS` switch.
+Only the subscription guid and the `AZUseIMDS` switch are required for this method.
 
 ```powershell
 $azParams = @{

@@ -4,8 +4,10 @@ function Import-PfxCertInternal {
         [Parameter(Mandatory,Position=0)]
         [string]$PfxFile,
         [securestring]$PfxPass,
-        [string]$StoreName = 'LocalMachine',
-        [string]$StoreLoc = 'My'
+        [ValidateSet('LocalMachine','CurrentUser')]
+        [string]$StoreLocation = 'LocalMachine',
+        [string]$StoreName = 'My',
+        [switch]$NotExportable
     )
 
     # The PowerShell native Import-PfxCertificate function only exists on
@@ -31,16 +33,27 @@ function Import-PfxCertInternal {
 
         try {
 
+            # read the file into memory
             $PfxFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($PfxFile)
             $pfxBytes = [IO.File]::ReadAllBytes($PfxFile)
 
-            $keyFlags = ([Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable -bor
-                [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::PersistKeySet -bor
-                [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::MachineKeySet)
+            # build the key flags
+            $keyFlags = [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::PersistKeySet
+            if (-not $NotExportable) {
+                $keyFlags = $keyFlags -bor [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable
+            }
+            if ('LocalMachine' -eq $StoreLocation) {
+                $keyFlags = $keyFlags -bor [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::MachineKeySet
+            } else {
+                $keyFlags = $keyFlags -bor [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::UserKeySet
+            }
+            Write-Debug "Key Flags: $keyFlags"
 
+            # create the certificate object
             $pfx = [Security.Cryptography.X509Certificates.X509Certificate2]::new($pfxBytes,$PfxPass,$keyFlags)
 
-            $store = [Security.Cryptography.X509Certificates.X509Store]::new($StoreLoc,$StoreName)
+            # add it to the store
+            $store = [Security.Cryptography.X509Certificates.X509Store]::new($StoreName,$StoreLocation)
             $store.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
             $store.Add($pfx)
             $store.Close()

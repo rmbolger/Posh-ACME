@@ -8,16 +8,26 @@ function Add-DnsTxtAzure {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$AZSubscriptionId,
-        [Parameter(ParameterSetName='Credential',Mandatory,Position=3)]
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='Credential',Mandatory)]
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
+        [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
+        [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZTenantId,
-        [Parameter(ParameterSetName='Credential',Mandatory,Position=4)]
+        [Parameter(ParameterSetName='Credential',Mandatory)]
         [pscredential]$AZAppCred,
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=4)]
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
+        [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
+        [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZAppUsername,
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=5)]
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
         [string]$AZAppPasswordInsecure,
-        [Parameter(ParameterSetName='Token',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
+        [string]$AZCertThumbprint,
+        [Parameter(ParameterSetName='CertFile',Mandatory)]
+        [string]$AZCertPfx,
+        [Parameter(ParameterSetName='CertFile',Mandatory)]
+        [string]$AZPfxPass,
+        [Parameter(ParameterSetName='Token',Mandatory)]
         [string]$AZAccessToken,
         [Parameter(ParameterSetName='IMDS',Mandatory)]
         [switch]$AZUseIMDS,
@@ -81,7 +91,22 @@ function Add-DnsTxtAzure {
         The Tenant or Directory ID of the Azure AD instance that controls access to your Azure DNS zone. This can be found on the Properties page of your Azure AD instance.
 
     .PARAMETER AZAppCred
-        The username and password for an Azure AD App Registration that has permissions to write TXT records on specified zone. The username is the Application ID of the App Registration which can be found on its Properties page. The password is whatever was set at creation time.
+        The username and password for an Azure AD user or service principal that has permissions to write TXT records in the specified zone. The username is the Application ID of the App Registration which can be found on its Properties page. The password is whatever was set at creation time.
+
+    .PARAMETER AZAppUsername
+        The username for an Azure AD user or service principal that has permissions to write TXT records in the specified zone. The username for a service principal is the Application ID of its associated App Registration which can be found on its properties page.
+
+    .PARAMETER AZAppPasswordInsecure
+        The password for the principal specified by AZAppUsername.
+
+    .PARAMETER AZCertThumbprint
+        The thumbprint for a service principal's authentication certificate. This parameter should only be used from Windows. On non-Windows, please use AZCertPfx and AZPfxPass parameters instead.
+
+    .PARAMETER AZCertPfx
+        The path to a service principal's PFX certificate file used for authentication.
+
+    .PARAMETER AZPfxPass
+        The export password for the PFX file specified by AZCertPfx.
 
     .PARAMETER AZAccessToken
         An existing Azure access token (JWT) to use for authorization when modifying TXT records. This is useful only for short lived instances or when the Azure authentication logic lives outside the module because access tokens are only valid for 1 hour.
@@ -130,16 +155,26 @@ function Remove-DnsTxtAzure {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$AZSubscriptionId,
-        [Parameter(ParameterSetName='Credential',Mandatory,Position=3)]
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='Credential',Mandatory)]
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
+        [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
+        [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZTenantId,
-        [Parameter(ParameterSetName='Credential',Mandatory,Position=4)]
+        [Parameter(ParameterSetName='Credential',Mandatory)]
         [pscredential]$AZAppCred,
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=4)]
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
+        [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
+        [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZAppUsername,
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=5)]
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
         [string]$AZAppPasswordInsecure,
-        [Parameter(ParameterSetName='Token',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
+        [string]$AZCertThumbprint,
+        [Parameter(ParameterSetName='CertFile',Mandatory)]
+        [string]$AZCertPfx,
+        [Parameter(ParameterSetName='CertFile',Mandatory)]
+        [string]$AZPfxPass,
+        [Parameter(ParameterSetName='Token',Mandatory)]
         [string]$AZAccessToken,
         [Parameter(ParameterSetName='IMDS',Mandatory)]
         [switch]$AZUseIMDS,
@@ -214,7 +249,22 @@ function Remove-DnsTxtAzure {
         The Tenant or Directory ID of the Azure AD instance that controls access to your Azure DNS zone. This can be found on the Properties page of your Azure AD instance.
 
     .PARAMETER AZAppCred
-        The username and password for an Azure AD App Registration that has permissions to write TXT records on specified zone. The username is the Application ID of the App Registration which can be found on its Properties page. The password is whatever was set at creation time.
+        The username and password for an Azure AD user or service principal that has permissions to write TXT records in the specified zone. The username is the Application ID of the App Registration which can be found on its Properties page. The password is whatever was set at creation time.
+
+    .PARAMETER AZAppUsername
+        The username for an Azure AD user or service principal that has permissions to write TXT records in the specified zone. The username for a service principal is the Application ID of its associated App Registration which can be found on its properties page.
+
+    .PARAMETER AZAppPasswordInsecure
+        The password for the principal specified by AZAppUsername.
+
+    .PARAMETER AZCertThumbprint
+        The thumbprint for a service principal's authentication certificate. This parameter should only be used from Windows. On non-Windows, please use AZCertPfx and AZPfxPass parameters instead.
+
+    .PARAMETER AZCertPfx
+        The path to a service principal's PFX certificate file used for authentication.
+
+    .PARAMETER AZPfxPass
+        The export password for the PFX file specified by AZCertPfx.
 
     .PARAMETER AZAccessToken
         An existing Azure access token (JWT) to use for authorization when modifying TXT records. This is useful only for short lived instances or when the Azure authentication logic lives outside the module because access tokens are only valid for 1 hour.
@@ -314,16 +364,26 @@ function Connect-AZTenant {
     [CmdletBinding(DefaultParameterSetName='Credential')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
-        [Parameter(ParameterSetName='Credential',Mandatory,Position=0)]
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=0)]
+        [Parameter(ParameterSetName='Credential',Mandatory)]
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
+        [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
+        [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZTenantId,
-        [Parameter(ParameterSetName='Credential',Mandatory,Position=1)]
+        [Parameter(ParameterSetName='Credential',Mandatory)]
         [pscredential]$AZAppCred,
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=1)]
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
+        [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
+        [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZAppUsername,
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
         [string]$AZAppPasswordInsecure,
-        [Parameter(ParameterSetName='Token',Mandatory,Position=0)]
+        [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
+        [string]$AZCertThumbprint,
+        [Parameter(ParameterSetName='CertFile',Mandatory)]
+        [string]$AZCertPfx,
+        [Parameter(ParameterSetName='CertFile',Mandatory)]
+        [string]$AZPfxPass,
+        [Parameter(ParameterSetName='Token',Mandatory)]
         [string]$AZAccessToken,
         [Parameter(ParameterSetName='IMDS',Mandatory)]
         [switch]$AZUseIMDS,
@@ -331,9 +391,12 @@ function Connect-AZTenant {
         $ExtraConnectParams
     )
 
+    # https://docs.microsoft.com/en-us/azure/active-directory/develop/v1-oauth2-client-creds-grant-flow
+    # https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials
+
     # just return if we already have a valid Bearer token
     if ($script:AZToken ) {
-        Write-Debug "Token Expires: $($script:AZToken.Expires)"
+        Write-Debug "Current Token Expires: $($script:AZToken.Expires)"
         if ((Get-DateTimeOffsetNow) -lt $script:AZToken.Expires) {
             Write-Debug "Existing token has not expired."
             return
@@ -341,7 +404,7 @@ function Connect-AZTenant {
     }
 
     if ('Token' -eq $PSCmdlet.ParameterSetName) {
-        # decode the token payload so we can get ultimately get its expiration
+        # decode the token payload so we can check its expiration
         Write-Debug "Authenticating with provided access token"
         $token = ConvertFrom-AccessToken $AZAccessToken
 
@@ -353,31 +416,118 @@ function Connect-AZTenant {
             Write-Debug "Authenticating with Instance Metadata Service (IMDS)"
             $queryString = "api-version=2018-02-01&resource=$([uri]::EscapeDataString('https://management.core.windows.net/'))"
             $token = Invoke-RestMethod "http://169.254.169.254/metadata/identity/oauth2/token?$queryString" `
-                -Headers @{Metadata='true'} @script:UseBasic
+                -Headers @{Metadata='true'} @script:UseBasic -EA Stop
         } catch { throw }
 
-    } else {
-        # Credential and CredentialInsecure are the only ones left and we need the plaintext version to
-        # authenticate with.
+    } elseif ($PSCmdlet.ParameterSetName -in 'Credential','CredentialInsecure') {
+        # We need the plaintext password to authenticate with.
         if ('Credential' -eq $PSCmdlet.ParameterSetName) {
             $AZAppUsername = $AZAppCred.UserName
             $AZAppPasswordInsecure = $AZAppCred.GetNetworkCredential().Password
         }
 
+        Write-Debug "Authenticating with password based credential"
+        $clientId = [uri]::EscapeDataString($AZAppUsername)
+        $clientSecret = [uri]::EscapeDataString($AZAppPasswordInsecure)
+        $resource = [uri]::EscapeDataString('https://management.core.windows.net/')
+        $authBody = "grant_type=client_credentials&client_id=$clientId&client_secret=$clientSecret&resource=$resource"
         try {
-            Write-Debug "Authenticating with explicit credentials"
-            $clientId = [uri]::EscapeDataString($AZAppUsername)
-            $clientSecret = [uri]::EscapeDataString($AZAppPasswordInsecure)
-            $resource = [uri]::EscapeDataString('https://management.core.windows.net/')
-            $authBody = "grant_type=client_credentials&client_id=$clientId&client_secret=$clientSecret&resource=$resource"
             $token = Invoke-RestMethod "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token" `
-                -Method Post -Body $authBody @script:UseBasic
+                -Method Post -Body $authBody @script:UseBasic -EA Stop
+        } catch { throw }
+
+    } elseif ($PSCmdlet.ParameterSetName -in 'CertThumbprint','CertFile') {
+
+        if ('CertThumbprint' -eq $PSCmdlet.ParameterSetName) {
+            # Look up the cert based on the thumbprint
+            # check CurrentUser first
+            if (-not ($cert = Get-Item "Cert:\CurrentUser\My\$AZCertThumbprint" -EA Ignore)) {
+                # check LocalMachine
+                if (-not ($cert = Get-Item "Cert:\LocalMachine\My\$AZCertThumbprint" -EA Ignore)) {
+                    throw "Certificate with thumbprint $AZCertThumbprint not found in CurrentUser or LocalMachine stores."
+                }
+            }
+        } else {
+            $AZCertPfx = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($AZCertPfx)
+            if (Test-Path $AZCertPfx -PathType Leaf) {
+                Write-Debug "Using pfx file"
+                $AZPfxObj = [IO.File]::ReadAllBytes($AZCertPfx)
+
+                # export the contents as a plugin var
+                $b64Contents = ConvertTo-Base64Url -Bytes $AZPfxObj
+                Export-PluginVar AZPfxObj $b64Contents
+            } else {
+                $b64Contents = Import-PluginVar AZPfxObj
+
+                if (-not $b64Contents) {
+                    throw "AZCertPfx not found at `"$AZCertPfx`" and no cached data exists."
+                } else {
+                    Write-Warning "AZCertPfx not found at `"$AZCertPfx`". Attempting to use cached data."
+                    try {
+                        $AZPfxObj = [byte[]]($b64Contents | ConvertFrom-Base64Url -AsByteArray)
+                        Write-Debug $AZPfxObj.GetType().ToString()
+                    } catch { throw }
+                }
+            }
+
+            # We're working with a PFX file, so import into an X509Certificate2 object
+            try {
+                $cert = [Security.Cryptography.X509Certificates.X509Certificate2]::new($AZPfxObj,$AZPfxPass)
+            } catch { throw }
+        }
+
+        # make sure it has a private key attached that won't break
+        if (-not $cert.HasPrivateKey) {
+            throw "Private key missing for certificate with thumbprint $($cert.Thumbprint)."
+        }
+        if ($null -eq $cert.PrivateKey -or $cert.PrivateKey -isnot [Security.Cryptography.AsymmetricAlgorithm]) {
+            throw "Private key invalid for certificate with thumbprint $($cert.Thumbprint)."
+        }
+        $privKey = $cert.PrivateKey
+        if ($privKey -isnot [Security.Cryptography.RSACryptoServiceProvider]) {
+            # On non-Windows, the private key ends up being of type RSAOpenSsl
+            # which for some reason doesn't allow reading of the KeySize attribute
+            # which then breaks New-Jws's internal validation checks. So we need
+            # to convert it to an RSACryptoServiceProvider object instead.
+            $keyParams = $privKey.ExportParameters($true)
+            $privKey = [Security.Cryptography.RSACryptoServiceProvider]::new()
+            $privKey.ImportParameters($keyParams)
+        }
+
+        Write-Debug "Authenticating with certificate based credential"
+        $clientId = [uri]::EscapeDataString($AZAppUsername)
+        $assertType = [uri]::EscapeDataString('urn:ietf:params:oauth:client-assertion-type:jwt-bearer')
+        $resource = [uri]::EscapeDataString('https://management.core.windows.net/')
+
+        # build the JWT
+        $jwtHead = @{
+            alg = 'RS256'
+            typ = 'JWT'
+            x5t = ConvertTo-Base64Url -Bytes $cert.GetCertHash()
+        }
+        $jwtClaim = @{
+            aud = "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token"
+            nbf = [DateTimeOffset]::Now.ToUnixTimeSeconds().ToString()
+            exp = ([DateTimeOffset]::Now.ToUnixTimeSeconds() + 3600).ToString()
+            iss = $AZAppUsername
+            sub = $AZAppUsername
+            jti = (New-Guid).ToString()   # apparently a random guid works rather than needing to query the KeyId of the actual credential
+        }
+        $payload = $jwtClaim | ConvertTo-Json -Compress
+        try {
+            $jwt = New-Jws $privKey $jwtHead $payload -Compact -NoHeaderValidation -EA Stop
+        } catch { throw }
+
+        $authBody = "grant_type=client_credentials&client_id=$clientId&resource=$resource&client_assertion_type=$assertType&client_assertion=$jwt"
+        try {
+            $token = Invoke-RestMethod "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token" `
+                -Method Post -Body $authBody @script:UseBasic -EA Stop
         } catch { throw }
     }
 
     Write-Debug "Retrieved token expiration: $($token.expires_on)"
 
-    # create a token object that we can use for subsequence calls with a 5 min buffer on the expiration
+    # create a token object we can use for subsequent calls with a 5 min buffer on the expiration
     $script:AZToken = [pscustomobject]@{
         Expires    = [DateTimeOffset]::FromUnixTimeSeconds($token.expires_on).AddMinutes(-5)
         AuthHeader = @{ Authorization = "Bearer $($token.access_token)" }

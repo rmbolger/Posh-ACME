@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '3.8.0'
+ModuleVersion = '3.11.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -59,6 +59,7 @@ FunctionsToExport = @(
     'Remove-PAAccount'
     'Remove-PAOrder'
     'Remove-PAServer'
+    'Revoke-PAAuthorization'
     'Save-DnsChallenge'
     'Send-ChallengeAck'
     'Set-PAAccount'
@@ -77,7 +78,9 @@ CmdletsToExport = @()
 VariablesToExport = @()
 
 # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-AliasesToExport = @()
+AliasesToExport = @(
+    'Get-PAAuthorization'
+)
 
 # DSC resources to export from this module
 # DscResourcesToExport = @()
@@ -107,17 +110,12 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 3.8.0 (2019-09-27)
-
-* `Set-PAOrder` now supports modifying some order properties such as FriendlyName, PfxPass, and the Install switch that don't require generating a new ACME order. FriendlyName or PfxPass changes will regenerate the current PFX files with the new value(s) if they exist. Changes to the Install switch will only affect future renewals.
-* Fixed FriendlyName, PfxPass, and Install parameters not applying when calling `New-PACertificate` against an existing order (#178)
-* Fixed GoDaddy plugin so it doesn't fail on large accounts (100+ domains) (#179)
-* Updated Cloudflare plugin to workaround API bug with limited scope tokens (#176)
-* Fixed DnsSleep and ValidationTimout being null when manually creating an order with `New-PAOrder` and finishing it with `New-PACertificate`.
-* Added parameter help for -NewKey on `New-PAOrder` which was missing.
-* When using `New-PACertificate` against an already completed order that is not ready for renewal, the informational message has been changed to Warning from Verbose to make it more apparent that nothing was done.
-* Updated `instdev.ps1` so it still works when the BouncyCastle DLL is locked and $ErrorActionPreference is set to Stop.
-* Updated a bunch of plugin guides with info regarding PowerShell 6.2's fix for the SecureString serialization bug and enabling the use of secure parameter sets on non-Windows.
+* Added `Revoke-PAAuthorization` which enables revocation of identifier authorizations associated with an account.
+* `Get-PAAuthorizations` now has an optional -Account parameter and better error handling.
+* `Get-PAAuthorization` has been added as an alias for `Get-PAAuthorizations` to better comply with PowerShell naming standards. It will likely be formally renamed in version 4.x and the old name should be considered deprecated. This change should allow dependent scripts to prepare for that change in advance.
+* `Install-PACertificate` now supports parameters to select the store name, location, and the exportable flag.
+* Workaround for Boulder [issue](https://github.com/letsencrypt/boulder/issues/4540) that doesn't return JSON error bodies for old endpoints.
+* Fixed bug creating new orders with a changed KeyLength value that was preventing the required new private key from being created.
 '@
 
     } # End of PSData hashtable

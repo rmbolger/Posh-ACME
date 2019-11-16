@@ -62,7 +62,11 @@ function Set-PAOrder {
             # This is a definite order switch
 
             # refresh the cached copy
-            Update-PAOrder $MainDomain
+            try {
+                Update-PAOrder $MainDomain
+            } catch [AcmeException] {
+                Write-Warning "Error refreshing order status from ACME server: $($_.Exception.Data.detail)"
+            }
 
             Write-Debug "Switching to order $MainDomain"
 

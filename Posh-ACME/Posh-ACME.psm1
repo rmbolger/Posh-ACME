@@ -43,7 +43,7 @@ $script:WellKnownDirs = @{
     LE_STAGE = 'https://acme-staging-v02.api.letsencrypt.org/directory';
 }
 $script:HEADER_NONCE = 'Replay-Nonce'
-$script:USER_AGENT = "Posh-ACME/3.8.0 PowerShell/$($PSVersionTable.PSVersion)"
+$script:USER_AGENT = "Posh-ACME/3.11.0 PowerShell/$($PSVersionTable.PSVersion)"
 $script:COMMON_HEADERS = @{'Accept-Language'='en-us,en;q=0.5'}
 
 # Invoke-WebRequest and Invoke-RestMethod on PowerShell 5.1 both use
@@ -63,5 +63,10 @@ if ('UseBasicParsing' -in (Get-Command Invoke-WebRequest).Parameters.Keys) {
 }
 
 Register-ArgCompleters
+
+# Get-PAAuthorizations is deprecated and will be replaced with the singular
+# version in 4.x. Prepare for that eventual reality by adding it as an alias
+# now.
+Set-Alias Get-PAAuthorization -Value Get-PAAuthorizations
 
 Import-PAConfig

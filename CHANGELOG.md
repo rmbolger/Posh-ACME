@@ -1,3 +1,27 @@
+## 3.11.0 (2019-11-12)
+
+* Added `Revoke-PAAuthorization` which enables revocation of identifier authorizations associated with an account.
+* `Get-PAAuthorizations` now has an optional -Account parameter and better error handling.
+* `Get-PAAuthorization` has been added as an alias for `Get-PAAuthorizations` to better comply with PowerShell naming standards. It will likely be formally renamed in version 4.x and the old name should be considered deprecated. This change should allow dependent scripts to prepare for that change in advance.
+* `Install-PACertificate` now supports parameters to select the store name, location, and the exportable flag.
+* Workaround for Boulder [issue](https://github.com/letsencrypt/boulder/issues/4540) that doesn't return JSON error bodies for old endpoints.
+* Fixed bug creating new orders with a changed KeyLength value that was preventing the required new private key from being created.
+
+## 3.10.0 (2019-11-06)
+
+* Added new DNS plugin [HurricaneElectric](https://dns.he.net/)
+* Azure plugin now supports certificate based authentication. See the [plugin guide](https://github.com/rmbolger/Posh-ACME/blob/master/Posh-ACME/DnsPlugins/Azure-Readme.md) for details. (#190)
+* Setup examples in the Azure plugin guide now utilize the [Az](https://www.powershellgallery.com/packages/Az/3.0.0) module rather than the legacy AzureRm.* modules. (#189)
+* Fix for "No order for ID" errors caused by recent Boulder changes that no longer return order details for expired orders. (#192)
+* Fixed being unable to switch active orders if an error occurred trying to refresh the order details from the ACME server.
+* Added additional guidance on renewals and deployment to the tutorial.
+
+## 3.9.0 (2019-10-26)
+
+* Added new DNS plugin [UnoEuro](https://www.unoeuro.com/) (Thanks @OrKarstoft)
+* Fix for Cloudflare plugin not working properly when limited scope token didn't have at least read permissions to all zones on an account. To use an edit token with limited zone permissions, you must now also specify a secondary token with read permissions to all zones. See the [plugin guide](https://github.com/rmbolger/Posh-ACME/blob/master/Posh-ACME/DnsPlugins/Cloudflare-Readme.md) for details. (#184)
+*  Fix for PropertyNotFound exception when imported plugin data is null or not the expected hashtable value (#182)
+
 ## 3.8.0 (2019-09-27)
 
 * `Set-PAOrder` now supports modifying some order properties such as FriendlyName, PfxPass, and the Install switch that don't require generating a new ACME order. FriendlyName or PfxPass changes will regenerate the current PFX files with the new value(s) if they exist. Changes to the Install switch will only affect future renewals.

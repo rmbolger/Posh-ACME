@@ -243,9 +243,9 @@ function Connect-GCloudDns {
         $b64Contents = Import-PluginVar GCKeyObj
 
         if (-not $b64Contents) {
-            throw "Key file $GCKeyFile not found at `"$GCKeyFile`" and no cached data exists."
+            throw "GCKeyFile not found at `"$GCKeyFile`" and no cached data exists."
         } else {
-            Write-Warning "Key file not found at `"$GCKeyFile`". Attempting to use cached key data."
+            Write-Warning "GCKeyFile not found at `"$GCKeyFile`". Attempting to use cached key data."
             try {
                 $GCKeyObj = $b64Contents | ConvertFrom-Base64Url | ConvertFrom-Json
             } catch { throw }
