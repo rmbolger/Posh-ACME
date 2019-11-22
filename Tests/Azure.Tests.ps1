@@ -34,7 +34,7 @@ Describe "Connect-AZTenant" {
 
         It "calls Invoke-RestMethod if no existing token" {
             $script:AZToken = $null
-            Connect-AZTenant $fakeTenant $fakeCred
+            Connect-AZTenant -AZTenantId $fakeTenant -AZAppCred $fakeCred
             Assert-MockCalled -CommandName Invoke-RestMethod -Times 1 -Exactly -Scope It -ParameterFilter {
                 $Body -match "[&?]client_id=fake%20user(&|$)" -and $Body -match "[&?]client_secret=fake%2[Bb]p%26ss(&|$)"
             }
@@ -42,7 +42,7 @@ Describe "Connect-AZTenant" {
         }
         It "calls Invoke-RestMethod if token expired" {
             $script:AZToken = $fakeExpiredToken
-            Connect-AZTenant $fakeTenant $fakeCred
+            Connect-AZTenant -AZTenantId $fakeTenant -AZAppCred $fakeCred
             Assert-MockCalled -CommandName Invoke-RestMethod -Times 1 -Exactly -Scope It
             Assert-MockCalled -CommandName ConvertFrom-AccessToken -Times 0 -Exactly -Scope It
         }
@@ -54,7 +54,7 @@ Describe "Connect-AZTenant" {
         }
         It "calls nothing if current token is valid" {
             $script:AZToken = $fakeGoodToken
-            Connect-AZTenant $fakeTenant $fakeCred
+            Connect-AZTenant -AZTenantId $fakeTenant -AZAppCred $fakeCred
             Assert-MockCalled -CommandName Invoke-RestMethod -Times 0 -Exactly -Scope It
             Assert-MockCalled -CommandName ConvertFrom-AccessToken -Times 0 -Exactly -Scope It
         }
