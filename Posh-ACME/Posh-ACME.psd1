@@ -26,7 +26,7 @@ DotNetFrameworkVersion = '4.7.1'
 # RequiredModules = @()
 
 # Assemblies that must be loaded prior to importing this module
-RequiredAssemblies = @('lib\BouncyCastle.Crypto.dll')
+RequiredAssemblies = @('lib\BC.Crypto.1.8.5.2-netstandard2.0.dll')
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module.
 # ScriptsToProcess = @()
