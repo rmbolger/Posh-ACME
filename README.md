@@ -71,7 +71,7 @@ The output of `New-PACertificate` is an object that contains various properties 
 # Requirements and Platform Support
 
 * Supports Windows PowerShell 5.1 or later (Desktop edition) **with .NET Framework 4.7.1** or later
-* Supports [PowerShell Core](https://docs.microsoft.com/en-us/powershell/scripting/powershell-scriptin) 6.0 or later (Core edition) on all supported OS platforms.
+* Supports [PowerShell Core](https://docs.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-core-60) 6.0 or later (Core edition) on all supported OS platforms.
 
 # Changelog
 
