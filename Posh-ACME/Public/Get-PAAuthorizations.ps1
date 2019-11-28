@@ -41,8 +41,8 @@ function Get-PAAuthorizations {
 
             # request the object
             try {
-                $header = @{alg=$acct.alg; kid=$acct.location;nonce=$script:Dir.nonce;url=$AuthUrl}
-                $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
+                $header = @{alg=$Account.alg; kid=$Account.location;nonce=$script:Dir.nonce;url=$AuthUrl}
+                $response = Invoke-ACME $header ([String]::Empty) $Account -EA Stop
                 $auth = $response.Content | ConvertFrom-Json
             } catch [AcmeException] {
                 if ($_.Exception.Data.status -eq 404) {
