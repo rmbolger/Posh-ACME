@@ -244,8 +244,8 @@ function New-PACertificate {
         # and RenewAfter fields
         Write-Verbose "Updating cert expiration and renewal window"
         $certExpires = (Import-Pem (Join-Path $script:OrderFolder 'cert.cer')).NotAfter
-        $script:Order.CertExpires = $certExpires.ToString('yyyy-MM-ddTHH:mm:ssZ')
-        $script:Order.RenewAfter = $certExpires.AddDays(-30).ToString('yyyy-MM-ddTHH:mm:ssZ')
+        $script:Order.CertExpires = $certExpires.ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture)
+        $script:Order.RenewAfter = $certExpires.AddDays(-30).ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture)
         Update-PAOrder -SaveOnly
 
         Write-Verbose "Successfully created certificate."

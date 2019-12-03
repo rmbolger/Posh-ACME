@@ -16,7 +16,7 @@ function Repair-ISODate {
     # we're sending back the ISO 8601 string for the specified DateTime object.
     if ($InputDate -and $InputDate -is [DateTime]) {
 
-        return $InputDate.ToString('yyyy-MM-ddTHH:mm:ssZ')
+        return $InputDate.ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture)
 
     } else { return $InputDate }
 }
