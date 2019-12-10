@@ -17,7 +17,7 @@ function Register-ArgCompleters {
 
     $PluginCommands = 'Publish-DnsChallenge','Unpublish-DnsChallenge','Save-DnsChallenge','Get-DnsPluginHelp'
     Register-ArgumentCompleter -CommandName $PluginCommands -ParameterName 'Plugin' -ScriptBlock $PluginNameCompleter
-    $DnsPluginCommands = 'New-PACertificate','Submit-ChallengeValidation'
+    $DnsPluginCommands = 'New-PACertificate','Submit-ChallengeValidation','Set-PAOrder'
     Register-ArgumentCompleter -CommandName $DnsPluginCommands -ParameterName 'DnsPlugin' -ScriptBlock $PluginNameCompleter
 
     # Account ID
