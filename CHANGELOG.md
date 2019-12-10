@@ -1,3 +1,16 @@
+## 3.12.0 (2019-12-10)
+
+* `Set-PAOrder` now has `-DnsPlugin` and `-PluginArgs` parameters to allow changing plugins and associated credentials prior to a renewal operation.
+* Upgraded BouncyCastle library to version 1.8.5.2 and renamed the DLL to avoid conflicts with older copies that may get installed into the .NET GAC by other software.
+* ACME server errors returned during calls to `Revoke-PAAuthorization` are now non-terminating errors rather than warnings.
+* Fixed bug where new orders created with `New-PACertificate` and no explicit plugin wouldn't get the Manual default if the account was already authorized for the included names.
+* Fixed `Get-PAAuthorizations` when using explicit account reference
+* Fixed datetime parsing issues on non-US culture environments (#208)
+* Fixed errors thrown by `Submit-Renewal` when run against an order with a null DnsPlugin. A warning is now thrown instead.
+* Fixed parameter binding error when using `-PluginArgs` with `Submit-Renewal`
+* Fixed HurricanElectric guide's parameter references
+* Fixed Azure tests
+
 ## 3.11.0 (2019-11-12)
 
 * Added `Revoke-PAAuthorization` which enables revocation of identifier authorizations associated with an account.

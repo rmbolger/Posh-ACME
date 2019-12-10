@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '3.11.0'
+ModuleVersion = '3.12.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -110,12 +110,16 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-* Added `Revoke-PAAuthorization` which enables revocation of identifier authorizations associated with an account.
-* `Get-PAAuthorizations` now has an optional -Account parameter and better error handling.
-* `Get-PAAuthorization` has been added as an alias for `Get-PAAuthorizations` to better comply with PowerShell naming standards. It will likely be formally renamed in version 4.x and the old name should be considered deprecated. This change should allow dependent scripts to prepare for that change in advance.
-* `Install-PACertificate` now supports parameters to select the store name, location, and the exportable flag.
-* Workaround for Boulder [issue](https://github.com/letsencrypt/boulder/issues/4540) that doesn't return JSON error bodies for old endpoints.
-* Fixed bug creating new orders with a changed KeyLength value that was preventing the required new private key from being created.
+* `Set-PAOrder` now has `-DnsPlugin` and `-PluginArgs` parameters to allow changing plugins and associated credentials prior to a renewal operation.
+* Upgraded BouncyCastle library to version 1.8.5.2 and renamed the DLL to avoid conflicts with older copies that may get installed into the .NET GAC by other software.
+* ACME server errors returned during calls to `Revoke-PAAuthorization` are now non-terminating errors rather than warnings.
+* Fixed bug where new orders created with `New-PACertificate` and no explicit plugin wouldn't get the Manual default if the account was already authorized for the included names.
+* Fixed `Get-PAAuthorizations` when using explicit account reference
+* Fixed datetime parsing issues on non-US culture environments (#208)
+* Fixed errors thrown by `Submit-Renewal` when run against an order with a null DnsPlugin. A warning is now thrown instead.
+* Fixed parameter binding error when using `-PluginArgs` with `Submit-Renewal`
+* Fixed HurricanElectric guide's parameter references
+* Fixed Azure tests
 '@
 
     } # End of PSData hashtable
