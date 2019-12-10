@@ -83,7 +83,7 @@ function Submit-Renewal {
 
                 # If new PluginArgs were specified, store these now.
                 if ($PluginArgs) {
-                    Export-PluginArgs $PluginArgs $order.DnsPlugin (Get-PAAccount)
+                    Export-PluginArgs $PluginArgs $order.DnsPlugin
                 }
 
                 $certParams.PluginArgs = Import-PluginArgs $order.DnsPlugin
