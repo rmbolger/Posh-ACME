@@ -11,6 +11,9 @@ function Set-PAOrder {
         [Parameter(ParameterSetName='Revoke')]
         [switch]$NoSwitch,
         [Parameter(ParameterSetName='Edit')]
+        [ValidateScript({Test-ValidDnsPlugin $_ -ThrowOnFail})]
+        [string[]]$DnsPlugin,
+        [Parameter(ParameterSetName='Edit')]
         [ValidateNotNullOrEmpty()]
         [string]$FriendlyName,
         [Parameter(ParameterSetName='Edit')]
@@ -90,34 +93,42 @@ function Set-PAOrder {
 
             $saveChanges = $false
             $updatePfx = $false
+            $psbKeys = $PSBoundParameters.Keys
 
-            if ('FriendlyName' -in $PSBoundParameters.Keys -and $FriendlyName -ne $order.FriendlyName) {
+            if ('DnsPlugin' -in $psbKeys -and
+                ($null -eq $order.DnsPlugin -or $null -ne (Compare-Object $DnsPlugin $order.DnsPlugin))) {
+                Write-Verbose "Setting DnsPlugin to $(($DnsPlugin -join ','))"
+                $order.DnsPlugin = $DnsPlugin
+                $saveChanges = $true
+            }
+
+            if ('FriendlyName' -in $psbKeys -and $FriendlyName -ne $order.FriendlyName) {
                 Write-Verbose "Setting FriendlyName to '$FriendlyName'"
                 $order.FriendlyName = $FriendlyName
                 $saveChanges = $true
                 $updatePfx = $true
             }
 
-            if ('PfxPass' -in $PSBoundParameters.Keys -and $PfxPass -ne $order.PfxPass) {
+            if ('PfxPass' -in $psbKeys -and $PfxPass -ne $order.PfxPass) {
                 Write-Verbose "Setting PfxPass to '$PfxPass'"
                 $order.PfxPass = $PfxPass
                 $saveChanges = $true
                 $updatePfx = $true
             }
 
-            if ('Install' -in $PSBoundParameters.Keys -and $Install.IsPresent -ne $order.Install) {
+            if ('Install' -in $psbKeys -and $Install.IsPresent -ne $order.Install) {
                 Write-Verbose "Setting Install to $($Install.IsPresent)"
                 $order.Install = $Install.IsPresent
                 $saveChanges = $true
             }
 
-            if ('DNSSleep' -in $PSBoundParameters.Keys -and $DNSSleep -ne $order.DNSSleep) {
+            if ('DNSSleep' -in $psbKeys -and $DNSSleep -ne $order.DNSSleep) {
                 Write-Verbose "Setting DNSSleep to $DNSSleep"
                 $order.DNSSleep = $DNSSleep
                 $saveChanges = $true
             }
 
-            if ('ValidationTimeout' -in $PSBoundParameters.Keys -and $ValidationTimeout -ne $order.ValidationTimeout) {
+            if ('ValidationTimeout' -in $psbKeys -and $ValidationTimeout -ne $order.ValidationTimeout) {
                 Write-Verbose "Setting ValidationTimeout to $ValidationTimeout"
                 $order.ValidationTimeout = $ValidationTimeout
                 $saveChanges = $true
