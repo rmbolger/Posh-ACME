@@ -14,6 +14,8 @@ function Set-PAOrder {
         [ValidateScript({Test-ValidDnsPlugin $_ -ThrowOnFail})]
         [string[]]$DnsPlugin,
         [Parameter(ParameterSetName='Edit')]
+        [hashtable]$PluginArgs,
+        [Parameter(ParameterSetName='Edit')]
         [ValidateNotNullOrEmpty()]
         [string]$FriendlyName,
         [Parameter(ParameterSetName='Edit')]
@@ -100,6 +102,11 @@ function Set-PAOrder {
                 Write-Verbose "Setting DnsPlugin to $(($DnsPlugin -join ','))"
                 $order.DnsPlugin = $DnsPlugin
                 $saveChanges = $true
+            }
+
+            if ('PluginArgs' -in $psbKeys) {
+                Write-Verbose "Updating plugin args for plugin(s) $(($order.DnsPlugin -join ','))"
+                Export-PluginArgs $PluginArgs $order.DnsPlugin
             }
 
             if ('FriendlyName' -in $psbKeys -and $FriendlyName -ne $order.FriendlyName) {
