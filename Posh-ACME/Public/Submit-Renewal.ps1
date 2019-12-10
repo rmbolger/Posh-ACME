@@ -51,7 +51,13 @@ function Submit-Renewal {
                     return
                 }
 
-                # skip orders with a Manual DNS plugin
+                # skip orders with no DNS plugin (likely because they were created using custom processes or HTTP validation)
+                if ($null -eq $order.DnsPlugin) {
+                    Write-Warning "Skipping renewal for order $($order.MainDomain) due to null DNS plugin."
+                    return
+                }
+
+                # skip orders with a Manual DNS plugin by default because they require interactivity
                 if (!$NoSkipManualDns -and 'Manual' -in @($order.DnsPlugin)) {
                     Write-Warning "Skipping renewal for order $($order.MainDomain) due to Manual DNS plugin. Use -NoSkipManualDns to avoid this."
                     return
