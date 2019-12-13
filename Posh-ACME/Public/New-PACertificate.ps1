@@ -77,7 +77,7 @@ function New-PACertificate {
     # one if:
     # - -Force was used
     # - it doesn't exist
-    # - is invalid
+    # - is invalid or deactivated
     # - is valid and within the renewal window
     # - is pending, but expired
     # - has different KeyLength
@@ -87,7 +87,7 @@ function New-PACertificate {
     $oldOrder = $null
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
     if ($Force -or !$order -or
-        $order.status -eq 'invalid' -or
+        $order.status -in 'invalid','deactivated' -or
         ($order.status -eq 'valid' -and $order.RenewAfter -and (Get-DateTimeOffsetNow) -ge ([DateTimeOffset]::Parse($order.RenewAfter))) -or
         ($order.status -eq 'pending' -and (Get-DateTimeOffsetNow) -gt ([DateTimeOffset]::Parse($order.expires))) -or
         $CertKeyLength -ne $order.KeyLength -or
