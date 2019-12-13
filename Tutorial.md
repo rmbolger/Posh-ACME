@@ -195,7 +195,7 @@ Submit-Renewal -AllOrders | ForEach-Object {
 
 ### Updating DNS Plugin Parameters on Renewal
 
-DNS provider credentials can change over time and some plugins can be used with purposefully short-lived access tokens. In these cases, you can specify the new plugin parameters using the ```-PluginArgs``` parameter. **The full set of plugin arguments must be specified.**
+DNS provider credentials can change over time and some plugins can be used with purposefully short-lived access tokens. In these cases, you can specify the new plugin parameters using the `-PluginArgs` parameter on either `Set-PAOrder` or `Submit-Renewal`. **The full set of plugin arguments must be specified.**
 
 As an example, consider the case for the Azure DNS plugin:
 
