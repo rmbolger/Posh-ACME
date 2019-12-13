@@ -4,8 +4,10 @@ function Add-HttpChallenge {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [string]$Url,
+        [string]$Domain,
         [Parameter(Mandatory,Position=1)]
+        [string]$Token,
+        [Parameter(Mandatory,Position=2)]
         [string]$Body,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -16,8 +18,13 @@ function Add-HttpChallenge {
     # existing plugins. But make sure common ones across this
     # plugin are the same.
 
-    # Do work here to publish the specified $Body text at the specified
-    # $Url. Remember to add @script:UseBasic to all calls to
+    # Do work here to publish the specified $Body text at the appropriate
+    # URL using the $Domain and $Token values. If needed, you can build
+    # the full URL like this:
+    #
+    #     $publishUrl = "http://$($Domain)/.well-known/acme-challenge/$($Token)"
+    #
+    # Remember to add @script:UseBasic to all calls to
     # Invoke-RestMethod or Invoke-WebRequest.
 
     <#
@@ -27,8 +34,11 @@ function Add-HttpChallenge {
     .DESCRIPTION
         Description for <My HTTP Server/Provider>
 
-    .PARAMETER Url
-        The URL that ACME servers will query to validate the challenge.
+    .PARAMETER Domain
+        The fully qualified domain name to publish the challenge for.
+
+    .PARAMETER Token
+        The token value associated with this specific challenge.
 
     .PARAMETER Body
         The text that should make up the response body from the URL.
@@ -37,9 +47,9 @@ function Add-HttpChallenge {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-HttpChallenge 'http://example.com/.well-known/acme-challenge/TOKEN' 'body-value'
+        Add-HttpChallenge 'example.com' 'TOKEN' 'body-value'
 
-        Adds an HTTP challenge from the specified site with the specified body.
+        Adds an HTTP challenge for the specified domain, token, and body value.
     #>
 }
 
@@ -47,8 +57,10 @@ function Remove-HttpChallenge {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [string]$Url,
+        [string]$Domain,
         [Parameter(Mandatory,Position=1)]
+        [string]$Token,
+        [Parameter(Mandatory,Position=2)]
         [string]$Body,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -59,8 +71,13 @@ function Remove-HttpChallenge {
     # existing plugins. But make sure common ones across this
     # plugin are the same.
 
-    # Do work here to unpublish the specified $Body text from the specified
-    # $Url. Remember to add @script:UseBasic to all calls to
+    # Do work here to unpublish the specified $Body text from the appropriate
+    # URL using the $Domain and $Token values. If needed, you can build
+    # the full URL like this:
+    #
+    #     $publishUrl = "http://$($Domain)/.well-known/acme-challenge/$($Token)"
+    #
+    # Remember to add @script:UseBasic to all calls to
     # Invoke-RestMethod or Invoke-WebRequest.
 
     <#
@@ -70,8 +87,11 @@ function Remove-HttpChallenge {
     .DESCRIPTION
         Description for <My HTTP Server/Provider>
 
-    .PARAMETER Url
-        The URL that ACME servers will query to validate the challenge.
+    .PARAMETER Domain
+        The fully qualified domain name to publish the challenge for.
+
+    .PARAMETER Token
+        The token value associated with this specific challenge.
 
     .PARAMETER Body
         The text that should make up the response body from the URL.
@@ -80,9 +100,9 @@ function Remove-HttpChallenge {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-HttpChallenge 'http://example.com/.well-known/acme-challenge/TOKEN' 'body-value'
+        Remove-HttpChallenge 'example.com' 'TOKEN' 'body-value'
 
-        Removes an HTTP challenge from the specified site with the specified body.
+        Removes an HTTP challenge for the specified domain, token, and body value.
     #>
 }
 
@@ -97,10 +117,6 @@ function Save-HttpChallenge {
     # Make sure their names are unique across all existing
     # plugins. But make sure common ones across this plugin
     # are the same.
-
-    # Do work here to publish the specified $Body text at the specified
-    # $Url. Remember to add @script:UseBasic to all calls to
-    # Invoke-RestMethod or Invoke-WebRequest.
 
     # If necessary, do work here to save or finalize changes performed by
     # Add/Remove functions. It is not uncommon for this function to have

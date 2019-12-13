@@ -52,9 +52,8 @@ function Unpublish-Challenge {
 
         $txtValue = Get-KeyAuthorization $Token $Account -ForDNS
 
-        Write-Debug "Calling $Plugin plugin to remove $recordName TXT with value $txtValue"
-
         # call the function with the required parameters and splatting the rest
+        Write-Debug "Calling $Plugin plugin to remove $recordName TXT with value $txtValue"
         Remove-DnsTxt -RecordName $recordName -TxtValue $txtValue @PluginArgs
 
     } else { # http-01 is the only other challenge type we support at the moment
@@ -64,13 +63,11 @@ function Unpublish-Challenge {
             throw "Plugin is missing Remove-HttpChallenge function. Unable to continue."
         }
 
-        $publishUrl = "http://$($Domain)/.well-known/acme-challenge/$($Token)"
         $keyAuth = Get-KeyAuthorization $Token $Account
 
-        Write-Debug "Calling $Plugin to remove $keyAuth body for challenge URL $publishUrl"
-
         # call the function with the required parameters and splatting the rest
-        Remove-HttpChallenge -Url $publishUrl -Body $keyAuth @PluginArgs
+        Write-Debug "Calling $Plugin plugin to remove challenge for $Domain with token $Token and key auth $keyAuth"
+        Remove-HttpChallenge -Domain $Domain -Token $Token -Body $keyAuth @PluginArgs
 
     }
 

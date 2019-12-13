@@ -52,9 +52,8 @@ function Publish-Challenge {
 
         $txtValue = Get-KeyAuthorization $Token $Account -ForDNS
 
-        Write-Debug "Calling $Plugin plugin to add $recordName TXT with value $txtValue"
-
         # call the function with the required parameters and splatting the rest
+        Write-Debug "Calling $Plugin plugin to add $recordName TXT with value $txtValue"
         Add-DnsTxt -RecordName $recordName -TxtValue $txtValue @PluginArgs
 
     } else { # http-01 is the only other challenge type we support at the moment
@@ -64,13 +63,11 @@ function Publish-Challenge {
             throw "Plugin is missing Add-HttpChallenge function. Unable to continue."
         }
 
-        $publishUrl = "http://$($Domain)/.well-known/acme-challenge/$($Token)"
         $keyAuth = Get-KeyAuthorization $Token $Account
 
-        Write-Debug "Calling $Plugin to add $keyAuth body for challenge URL $publishUrl"
-
         # call the function with the required parameters and splatting the rest
-        Add-HttpChallenge -Url $publishUrl -Body $keyAuth @PluginArgs
+        Write-Debug "Calling $Plugin plugin to add challenge for $Domain with token $Token and key auth $keyAuth"
+        Add-HttpChallenge -Domain $Domain -Token $Token -Body $keyAuth @PluginArgs
 
     }
 

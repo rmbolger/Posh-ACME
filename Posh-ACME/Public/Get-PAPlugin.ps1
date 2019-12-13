@@ -60,7 +60,7 @@ function Get-PAPlugin {
     elseif ('Params' -eq $PSCmdlet.ParameterSetName) {
 
         # define the set of parameter names to ignore
-        $ignoreParams = @('RecordName','TxtValue','Url','Body') + [Management.Automation.PSCmdlet]::CommonParameters +
+        $ignoreParams = @('RecordName','TxtValue','Domain','Token','Body') + [Management.Automation.PSCmdlet]::CommonParameters +
             [Management.Automation.PSCmdlet]::OptionalCommonParameters
 
         # Now we want to make a flattened list of parameters that are tagged with

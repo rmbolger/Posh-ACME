@@ -37,7 +37,7 @@ Many DNS providers will only need the Add and Remove functions. In those cases, 
 
 ### `Add-HttpChallenge` and `Remove-HttpChallenge`
 
-These are responsible for publishing/unpublishing the ACME challenge body text at a specific HTTP URL. There are two mandatory and positional string parameters, `$Url` and `$Body`. Url is the address the ACME validation servers will query to validate the challenge. Body is the text value they expect to get in response to that query. Do not modify or remove these first two parameters.
+These are responsible for publishing/unpublishing the ACME challenge body text at a specific HTTP URL. There are three mandatory and positional string parameters, `$Domain`, `$Token`, and `$Body`. Domain and Token are what the validation server will use to build the URL it will check against (`http://<Domain>/.well-known/acme-challenge/<Token>`). Body is the text value it expects to get in response to that query. Do not modify or remove these first three parameters.
 
 Additional parameters should be added as necessary for the specific HTTP provider such as filesystem paths, credentials, or API keys. In addition to standard PowerShell naming standards, their names must also not conflict with any other plugin's parameters. A good way to do that is to use a unique prefix on all of the parameters. It doesn't have to match the plugin name exactly as long as it's unique and reasonably related to the plugin. Common parameters that can be shared between this plugin's functions should be named the same as each other.
 
