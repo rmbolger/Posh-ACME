@@ -152,7 +152,7 @@ Submit-Renewal
 
 The module saves all of the parameters associated with an order and re-uses the same values to renew it. It will throw a warning right now because the cert hasn't reached the suggested renewal window. But you can use `-Force` to do it anyway if you want to try it. Let's Encrypt currently caches authorizations for roughly 30 days, so the forced renewal won't need to go through validating the challenges again.
 
-If you multiple orders on an account or even multiple accounts, there are flags to renew all of those as well.
+If you have multiple orders on an account or even multiple accounts, there are flags to renew all of those as well.
 
 ```powershell
 # renew all orders on the current account
