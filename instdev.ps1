@@ -2,12 +2,12 @@
 
 # set the user module path based on edition and platform
 if ('PSEdition' -notin $PSVersionTable.Keys -or $PSVersionTable.PSEdition -eq 'Desktop') {
-    $installpath = "$($env:USERPROFILE)\Documents\WindowsPowerShell\Modules"
+    $installpath = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules'
 } else {
     if ($IsWindows) {
-        $installpath = "$($env:USERPROFILE)\Documents\PowerShell\Modules"
+        $installpath = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Modules'
     } else {
-        $installpath = "$($env:HOME)/.local/share/powershell/Modules"
+        $installpath = Join-Path ([Environment]::GetFolderPath('MyDocuments')) '.local/share/powershell/Modules'
     }
 }
 
