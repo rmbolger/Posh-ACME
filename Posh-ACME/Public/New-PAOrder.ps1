@@ -200,7 +200,7 @@ function New-PAOrder {
     }
 
     # backup any old certs/requests that might exist
-    $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include cert.cer,cert.pfx,fullchain.pfx
+    $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include cert.cer,cert.pfx,chain.cer,fullchain.cer,fullchain.pfx
     $oldFiles | Move-Item -Destination { "$($_.FullName).bak" } -Force
 
     return $order
