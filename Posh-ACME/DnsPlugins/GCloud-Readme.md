@@ -50,3 +50,11 @@ The only plugin argument you need is the path to the JSON account file you downl
 ```powershell
 New-PACertificate test.example.com -DnsPlugin GCloud -PluginArgs @{GCKeyFile='<path to json>'}
 ```
+
+## App Engine Compatibility Note
+
+If you're planning on uploading your certificate to Google App Engine, it has been reported that it only supports RSA based certificates. So don't use an ECC key option. It also requires the private key to be in PKCS#1 format and the module currently outputs the key as PKCS#8. You can convert it with openssl using the following command:
+
+```
+openssl rsa -in cert.key -out cert-pkcs1.key
+```
