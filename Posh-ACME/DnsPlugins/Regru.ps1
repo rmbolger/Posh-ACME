@@ -48,9 +48,7 @@
     if ($zone.result -eq 'error') {
         throw $zone.error_text
     }
-    else {
-        $zone
-    }
+
     <#
      .SYNOPSIS
         Remove a DNS TXT record from Reg.Ru.
@@ -137,9 +135,6 @@ function Remove-DnsTxtRegRu {
     $zone = $($result.answer.domains | Where-Object { $_.dname -eq $DomainName })
     if ($zone.result -eq 'error') {
         throw $zone.error_text
-    }
-    else {
-        $zone
     }
 
     <#
