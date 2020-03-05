@@ -11,6 +11,7 @@ You will need the "PDD" administrator token.
 ## Using the Plugin
 
 The plugin arguments you need is the administrator token created earlier and domain name delegated on yandex.
+Also, you should use DNSSleep parameter more than 900, bacause 15 min is a minimal allowed ttl value for Yandex.
 
 ```powershell
 New-PACertificate test.domain.zone -DnsPlugin Yandex -PluginArgs @{YandexApiKey='xxxxxxxxxxxxxxxx'; DomainName='domain.zone'} -DnsSleep 1000
