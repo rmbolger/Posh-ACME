@@ -1,5 +1,5 @@
 function Add-DnsTxtPointDNS {
-    [CmdLetBinding()]
+    [CmdLetBinding(DefaultParameterSetName='Secure')]
     param (
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -28,40 +28,49 @@ function Add-DnsTxtPointDNS {
         $records = Get-PDZoneRecords $zone.id "TXT" $label $headers
     } catch { throw }
 
-    $data = @( $records | % { $_.zone_record.data -replace '"','' } )
+    $data = @( $records | ForEach-Object { $_.zone_record.data -replace '"','' } )
 
     if ($records.Count -eq 0 -or $TxtValue -notin $data) {
         try {
             Write-Verbose "Adding record $RecordName with TXT value $TxtValue"
             Add-PDZoneRecord $zone.id "TXT" $label $TxtValue $headers
         } catch { throw }
-    } 
+    }
 
     <#
     .SYNOPSIS
-        Add a DNS TXT record to Zonomi.
+        Add a DNS TXT record to PointDNS.
+
     .DESCRIPTION
-        Uses the Zonomi DNS API to add a DNS TXT record.
+        Uses the PointDNS API to add a DNS TXT record.
+
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
+
     .PARAMETER TxtValue
         The value of the TXT record.
+
     .PARAMETER PDUser
-        PointDNS User name / Email
+        PointDNS Username / Email
+
     .PARAMETER PDKey
-        PointDNS API key as a secure string.
+        PointDNS API key. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+
     .PARAMETER PDKeyInsecure
-        PointDNS API key as a string
+        PointDNS API key. This standard String version may be used on any OS.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+
     .EXAMPLE
-        Add-DnsTxtExample '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'user@email.domain' 'aqwswederf'
+        Add-DnsTxtPointDNS '_acme-challenge.example.com' 'txt-value' 'user@example.com' 'key-value'
+
         Adds a TXT record for the specified site with the specified value.
     #>
 }
 
 function Remove-DnsTxtPointDNS {
-    [CmdLetBinding()]
+    [CmdLetBinding(DefaultParameterSetName='Secure')]
     param (
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -90,7 +99,7 @@ function Remove-DnsTxtPointDNS {
         $records = Get-PDZoneRecords $zone.id "TXT" $label $headers
     } catch { throw }
 
-    $data = @( $records | % { $_.zone_record.data -replace '"','' } )
+    $data = @( $records | ForEach-Object { $_.zone_record.data -replace '"','' } )
 
     if ($records.Count -eq 0 -or $TxtValue -notin $data) {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
@@ -100,27 +109,36 @@ function Remove-DnsTxtPointDNS {
             $record = ($records | Where-Object { $_.zone_record.data -replace '"','' -eq $TxtValue})
             Remove-PDZoneRecord $zone.id $record.zone_record.id $headers
         } catch { throw }
-    } 
+    }
 
     <#
     .SYNOPSIS
         Remove a DNS TXT record from PointDNS.
+
     .DESCRIPTION
-        Uses the PintDNS API to remove a DNS TXT record.
+        Uses the PointDNS API to remove a DNS TXT record.
+
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
+
     .PARAMETER TxtValue
         The value of the TXT record.
+
     .PARAMETER PDUser
-        PointDNS User name / Email
+        PointDNS Username / Email
+
     .PARAMETER PDKey
-        PointDNS API key as a secure string.
+        PointDNS API key. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+
     .PARAMETER PDKeyInsecure
-        PointDNS API key as a string
+        PointDNS API key. This standard String version may be used on any OS.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+
     .EXAMPLE
-        Remove-DnsTxtExample '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'user@email.domain' 'aqwswederf'
+        Remove-DnsTxtPointDNS '_acme-challenge.example.com' 'txt-value' 'user@example.com' 'key-value'
+
         Removes a TXT record for the specified site with the specified value.
     #>
 }
@@ -221,7 +239,7 @@ function Get-PDZone {
 
     try {
         $response = Invoke-RestMethod -Uri $apiBase -Headers $Headers `
-            -Method Get -EA Stop @script:UseBasic 
+            -Method Get -EA Stop @script:UseBasic
     } catch { throw }
 
     foreach ($zone in $response.zone) {
@@ -289,7 +307,7 @@ function Get-PDAuthHeaders {
 
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
         $PDKeyInsecure = (New-Object pscredential "user",$PDKey).GetNetworkCredential().Password
-    } 
+    }
 
     $authHeader = Get-PDAuthHeader $PDUser $PDKeyInsecure
     $headers = @{ 'Authorization' = $authHeader }
