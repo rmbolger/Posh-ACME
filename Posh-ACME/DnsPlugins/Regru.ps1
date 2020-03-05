@@ -122,7 +122,7 @@ function Remove-DnsTxtRegRu {
         "password"            = $RegRuPassword
         "domains"             = $domains
         "subdomain"           = $ShortRecordName
-        "content"             = $TxtValue  # set content of existing record to prevent unvanted removal of other records with same type
+        "content"             = $TxtValue  # set content of existing record to prevent unwanted removal of other records with same type
         "record_type"         = "TXT"
         "output_content_type" = "plain"
     } | ConvertTo-Json
