@@ -14,14 +14,10 @@
     )
 
     $AuthHeader = @{"PddToken" = $YandexApiKey }
-
     $ShortRecordName = $RecordName.Replace("." + $DomainName, '')
 
     # Query existing TXT record
-    try {
-        $dnsRecordId = ((Invoke-RestMethod -Method GET -Header $AuthHeader -ContentType "application/json" -uri "https://pddimp.yandex.ru/api2/admin/dns/list?domain=$($DomainName)").records | Where-Object { $_.subdomain -eq $ShortRecordName }).record_id
-    }
-    catch { throw }
+    $dnsRecordId = GetDnsRecordId -AuthHeader $AuthHeader -DomainName $DomainName -ShortRecordName $ShortRecordName
 
     try {
         # Add the new TXT record
@@ -31,7 +27,6 @@
             if ($response.success -eq 'error') {
                 throw $response.error
             }
-    
         }
         # modify existing TXT record
         else {
@@ -43,7 +38,6 @@
         }    
     }
     catch { throw }
-
 
     <#
     .SYNOPSIS
@@ -90,20 +84,15 @@ function Remove-DnsTxtYandex {
     )
 
     $AuthHeader = @{"PddToken" = $YandexApiKey }
-    
     $ShortRecordName = $RecordName.Replace("." + $DomainName, '')
 
     # Query existing TXT record
-    try {
-        $dnsRecordId = (Invoke-RestMethod -Method GET -Header $AuthHeader -ContentType "application/json" -uri "https://pddimp.yandex.ru/api2/admin/dns/list?domain=$($DomainName)").records | Where-Object { $_.subdomain -eq $ShortRecordName }
-    }
-    catch { throw }
+    $dnsRecordId = GetDnsRecordId -AuthHeader $AuthHeader -DomainName $DomainName -ShortRecordName $ShortRecordName
 
     try {
-        
         $body = "domain=$DomainName&record_id=$dnsRecordId"
         $response = Invoke-RestMethod -Method POST -Header $AuthHeader -ContentType "application/x-www-form-urlencoded" -Body $body -uri 'https://pddimp.yandex.ru/api2/admin/dns/del'
-        if ($response.success = 'error') {
+        if ($response.success -eq 'error') {
             throw $response.error
         }        
     }
@@ -137,7 +126,6 @@ function Remove-DnsTxtYandex {
         Removes a TXT record for the specified site with the specified value.
     #>
 }
-
 function Save-DnsTxtYandex {
     [CmdletBinding()]
     param(
@@ -154,4 +142,22 @@ function Save-DnsTxtYandex {
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     #>
+}
+
+### Internal functions
+function GetDnsRecordId {
+    param (
+        [Parameter(Mandatory)]
+        $AuthHeader,
+        [Parameter(Mandatory)]
+        $DomainName,
+        [Parameter(Mandatory)]
+        $ShortRecordName
+    )
+    
+    $response = Invoke-RestMethod -Method GET -Header $AuthHeader -ContentType "application/x-www-form-urlencoded" -uri "https://pddimp.yandex.ru/api2/admin/dns/list?domain=$DomainName"
+    if ($response.success -eq 'error') {
+        throw $response.error
+    }
+    $($response.records | Where-Object { $_.subdomain -eq $ShortRecordName }).record_id
 }
