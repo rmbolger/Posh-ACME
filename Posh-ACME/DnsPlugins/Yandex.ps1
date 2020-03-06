@@ -1,43 +1,48 @@
 ﻿function Add-DnsTxtYandex {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
-        [Parameter(Mandatory, Position = 0)]
+        [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
-        [Parameter(Mandatory, Position = 1)]
+        [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory, Position = 2)]
-        [string]$YandexApiKey,
-        [Parameter(Position = 3)]
-        [string]$DomainName,
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
+        [securestring]$YDAdminToken,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [string]$YDAdminTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $AuthHeader = @{"PddToken" = $YandexApiKey }
-    $ShortRecordName = $RecordName.Replace("." + $DomainName, '')
-
-    # Query existing TXT record
-    $dnsRecordId = GetDnsRecordId -AuthHeader $AuthHeader -DomainName $DomainName -ShortRecordName $ShortRecordName
+    # grab the cleartext token if the secure version was used
+    # and make the auth header
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $YDAdminTokenInsecure = (New-Object PSCredential "user",$YDAdminToken).GetNetworkCredential().Password
+    }
+    $AuthHeader = @{ PddToken = $YDAdminTokenInsecure }
 
     try {
-        # Add the new TXT record
-        if (!$dnsRecordId) {
-            $body = "domain=$DomainName&type=TXT&subdomain=$ShortRecordName&ttl=1&content=$TxtValue"
-            $response = Invoke-RestMethod -Method POST -Header $AuthHeader -ContentType "application/x-www-form-urlencoded" -Body $body -uri 'https://pddimp.yandex.ru/api2/admin/dns/add'
-            if ($response.success -eq 'error') {
-                throw $response.error
-            }
+        Write-Verbose "Searching for existing TXT record"
+        $zoneName,$rec = Get-YandexTxtRecord $RecordName $TxtValue $AuthHeader
+    } catch { throw }
+
+    # separate the portion of the name that doesn't contain the zone name
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+
+    if ($rec) {
+        Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
+    } else {
+        # add a new record
+        $body = "domain=$zoneName&subdomain=$recShort&content=$TxtValue&type=TXT&ttl=1"
+        try {
+            Write-Verbose "Adding $RecordName with value $TxtValue"
+            $response = Invoke-RestMethod 'https://pddimp.yandex.ru/api2/admin/dns/add' `
+                -Method POST -Body $body -Headers $AuthHeader -ContentType 'application/x-www-form-urlencoded' `
+                @script:UseBasic -EA Stop
+        } catch { throw }
+        if ($response.success -ne 'ok') {
+            throw "Yandex API threw unexpected error: $($response.error)"
         }
-        # modify existing TXT record
-        else {
-            $body = "domain=$DomainName&record_id=$dnsRecordId&ttl=1&content=$TxtValue"
-            $response = Invoke-RestMethod -Method POST -Header $AuthHeader -ContentType "application/x-www-form-urlencoded" -Body $body -uri 'https://pddimp.yandex.ru/api2/admin/dns/edit'
-            if ($response.success -eq 'error') {
-                throw $response.error
-            }
-        }    
     }
-    catch { throw }
 
     <#
     .SYNOPSIS
@@ -52,51 +57,71 @@
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER YandexApiKey
-        Your Yandex DNS API key.
+    .PARAMETER YDAdminToken
+        The Yandex admin token generated for your account. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
 
-    .PARAMETER DomainName
-        Your domain from Yandex admin panel.
+    .PARAMETER YDAdminTokenInsecure
+        The Yandex admin token generated for your account. This standard String version may be used on any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxtYandex '_acme-challenge.site1.domain.zone' 'asdfqwer12345678' 'domain.zone'
+        $token = Read-Host -Prompt "Yandex Token" -AsSecureString
+        PS C:\>Add-DnsTxtYandex '_acme-challenge.example.com' 'txt-value' $token
 
-        Adds a TXT record for the specified site with the specified value.
+        Adds the specified TXT record with the specified value using a secure token.
+
+    .EXAMPLE
+        Add-DnsTxtYandex '_acme-challenge.example.com' 'txt-value' 'my-token'
+
+        Adds the specified TXT record with the specified value using a plaintext token.
     #>
 }
 
 function Remove-DnsTxtYandex {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
-        [Parameter(Mandatory, Position = 0)]
+        [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
-        [Parameter(Mandatory, Position = 1)]
+        [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory, Position = 2)]
-        [string]$YandexApiKey,
-        [Parameter(Position = 3)]
-        [string]$DomainName,
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
+        [securestring]$YDAdminToken,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [string]$YDAdminTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $AuthHeader = @{"PddToken" = $YandexApiKey }
-    $ShortRecordName = $RecordName.Replace("." + $DomainName, '')
-
-    # Query existing TXT record
-    $dnsRecordId = GetDnsRecordId -AuthHeader $AuthHeader -DomainName $DomainName -ShortRecordName $ShortRecordName
+    # grab the cleartext token if the secure version was used
+    # and make the auth header
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $YDAdminTokenInsecure = (New-Object PSCredential "user",$YDAdminToken).GetNetworkCredential().Password
+    }
+    $AuthHeader = @{ PddToken = $YDAdminTokenInsecure }
 
     try {
-        $body = "domain=$DomainName&record_id=$dnsRecordId"
-        $response = Invoke-RestMethod -Method POST -Header $AuthHeader -ContentType "application/x-www-form-urlencoded" -Body $body -uri 'https://pddimp.yandex.ru/api2/admin/dns/del'
-        if ($response.success -eq 'error') {
-            throw $response.error
-        }        
+        Write-Verbose "Searching for existing TXT record"
+        $zoneName,$rec = Get-YandexTxtRecord $RecordName $TxtValue $AuthHeader
+    } catch { throw }
+
+    if ($rec) {
+        # delete the record
+        $body = "domain=$zoneName&record_id=$($rec.record_id)"
+        try {
+            Write-Verbose "Removing $RecordName with value $TxtValue"
+            $response = Invoke-RestMethod 'https://pddimp.yandex.ru/api2/admin/dns/del' `
+                -Method POST -Body $body -Headers $AuthHeader -ContentType 'application/x-www-form-urlencoded' `
+                @script:UseBasic -EA Stop
+        } catch { throw }
+        if ($response.success -ne 'ok') {
+            throw "Yandex API threw unexpected error: $($response.error)"
+        }
+    } else {
+        Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     }
-    catch { throw }
+
 
     <#
     .SYNOPSIS
@@ -111,19 +136,25 @@ function Remove-DnsTxtYandex {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER YandexApiKey
-        Your Yandex DNS API key.
+    .PARAMETER YDAdminToken
+        The Yandex admin token generated for your account. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
 
-    .PARAMETER DomainName
-        Your domain from Yandex admin panel.
+    .PARAMETER YDAdminTokenInsecure
+        The Yandex admin token generated for your account. This standard String version may be used on any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxtyandex '_acme-challenge.site1.domain.zone' 'asdfqwer12345678' 'domain.zone'
+        $token = Read-Host -Prompt "Yandex Token" -AsSecureString
+        PS C:\>Remove-DnsTxtYandex '_acme-challenge.example.com' 'txt-value' $token
 
-        Removes a TXT record for the specified site with the specified value.
+        Removes the specified TXT record with the specified value using a secure token.
+
+    .EXAMPLE
+        Remove-DnsTxtYandex '_acme-challenge.example.com' 'txt-value' 'my-token'
+
+        Removes the specified TXT record with the specified value using a plaintext token.
     #>
 }
 function Save-DnsTxtYandex {
@@ -144,20 +175,92 @@ function Save-DnsTxtYandex {
     #>
 }
 
-### Internal functions
-function GetDnsRecordId {
-    param (
-        [Parameter(Mandatory)]
-        $AuthHeader,
-        [Parameter(Mandatory)]
-        $DomainName,
-        [Parameter(Mandatory)]
-        $ShortRecordName
+############################
+# Helper Functions
+############################
+
+# API Docs
+# https://tech.yandex.com/domain/doc/concepts/api-dns-docpage/
+
+function Get-YandexTxtRecord {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [string]$RecordName,
+        [Parameter(Mandatory,Position=1)]
+        [string]$TxtValue,
+        [Parameter(Mandatory,Position=2)]
+        [hashtable]$AuthHeader
     )
-    
-    $response = Invoke-RestMethod -Method GET -Header $AuthHeader -ContentType "application/x-www-form-urlencoded" -uri "https://pddimp.yandex.ru/api2/admin/dns/list?domain=$DomainName"
-    if ($response.success -eq 'error') {
-        throw $response.error
+
+    $apiRoot = 'https://pddimp.yandex.ru/api2/admin/dns'
+
+    # setup a module variable to cache the record to zone mapping
+    # so it's quicker to find later
+    if (!$script:YDRecordZones) { $script:YDRecordZones = @{} }
+
+    # check for the record in the cache
+    if ($script:YDRecordZones.ContainsKey($RecordName)) {
+        $zone = $script:YDRecordZones.$RecordName
     }
-    $($response.records | Where-Object { $_.subdomain -eq $ShortRecordName }).record_id
+
+    # Yandex doesn't really have a standalone API endpoint to check for the existence of a zone.
+    # But you sort of get it for free with the endpoint to list a zone's records. If the zone
+    # doesn't exist, you'll get an error saying as much.
+
+    if ($zone) {
+        # use the zone name we already found
+        Write-Debug "Querying record list from zone $zone"
+        try {
+            $response = Invoke-RestMethod "$apiRoot/list?domain=$zone" -Headers $AuthHeader `
+                @script:UseBasic -EA Stop
+        } catch { throw }
+
+        if ($response.success -ne 'ok') {
+            if ($response.error -eq 'no_auth') {
+                throw "Failed to authenticate against Yandex API. Double check token value."
+            } else {
+                throw "Yandex API threw unexpected error: $($response.error)"
+            }
+        }
+
+    } else {
+        # find the zone for the closest/deepest sub-zone that would contain the record.
+        $pieces = $RecordName.Split('.')
+        for ($i=1; $i -lt ($pieces.Count-1); $i++) {
+
+            $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+            Write-Debug "Checking $zoneTest"
+            $response = $null
+
+            try {
+                $response = Invoke-RestMethod "$apiRoot/list?domain=$zoneTest" -Headers $AuthHeader `
+                    @script:UseBasic -EA Stop
+            } catch { throw }
+
+            if ($response.success -eq 'ok') {
+                $script:YDRecordZones.$RecordName = $zoneTest
+                $zone = $zoneTest
+                break
+            } else {
+                if ($response.error -eq 'no_auth') {
+                    throw "Failed to authenticate against Yandex API. Double check token value."
+                }
+                elseif ($response.error -ne 'no_such_domain') {
+                    throw "Yandex API threw unexpected error: $($response.error)"
+                }
+                $response = $null
+            }
+        }
+    }
+
+    if (-not $response) {
+        throw "Unable to find Yandex hosted zone for $RecordName"
+    }
+
+    $rec = $response.records | Where-Object {
+        $_.type -eq 'TXT' -and $_.fqdn -eq $RecordName -and $_.content -eq $TxtValue
+    }
+
+    return @($zone,$rec)
 }
