@@ -6,20 +6,20 @@ function Add-DnsTxtLoopia {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
-        [string]$LoopiaAPIUser,
+        [string]$LoopiaUser,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
-        [securestring]$LoopiaAPIPass,
+        [securestring]$LoopiaPass,
         [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
-        [string]$LoopiaAPIPassInsecure,
+        [string]$LoopiaPassInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # grab the plaintext password if the secure version was used
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $LoopiaAPIPassInsecure = (New-Object PSCredential "user",$LoopiaAPIPass).GetNetworkCredential().Password
+        $LoopiaPassInsecure = (New-Object PSCredential "user",$LoopiaPass).GetNetworkCredential().Password
     }
-    $creds = @($LoopiaAPIUser,$LoopiaAPIPassInsecure)
+    $creds = @($LoopiaUser,$LoopiaPassInsecure)
 
     $zoneName = Find-LoopiaZone $RecordName $creds
     if (-not $zoneName) {
@@ -40,6 +40,7 @@ function Add-DnsTxtLoopia {
     if ($recID) {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
     } else {
+        Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
         Add-LoopiaTXTRecord $recShort $zoneName $TxtValue $creds
     }
 
@@ -56,13 +57,13 @@ function Add-DnsTxtLoopia {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER LoopiaAPIUser
+    .PARAMETER LoopiaUser
         The Loopia API username.
 
-    .PARAMETER LoopiaAPIPass
+    .PARAMETER LoopiaPass
         The Loopia API password. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
 
-    .PARAMETER LoopiaAPIPassInsecure
+    .PARAMETER LoopiaPassInsecure
         The Loopia API password. This standard String version may be used on any OS.
 
     .PARAMETER ExtraParams
@@ -89,20 +90,20 @@ function Remove-DnsTxtLoopia {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
-        [string]$LoopiaAPIUser,
+        [string]$LoopiaUser,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
-        [securestring]$LoopiaAPIPass,
+        [securestring]$LoopiaPass,
         [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
-        [string]$LoopiaAPIPassInsecure,
+        [string]$LoopiaPassInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # grab the plaintext password if the secure version was used
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $LoopiaAPIPassInsecure = (New-Object PSCredential "user",$LoopiaAPIPass).GetNetworkCredential().Password
+        $LoopiaPassInsecure = (New-Object PSCredential "user",$LoopiaPass).GetNetworkCredential().Password
     }
-    $creds = @($LoopiaAPIUser,$LoopiaAPIPassInsecure)
+    $creds = @($LoopiaUser,$LoopiaPassInsecure)
 
     $zoneName = Find-LoopiaZone $RecordName $creds
     if (-not $zoneName) {
@@ -121,6 +122,7 @@ function Remove-DnsTxtLoopia {
     $recID,$recCount = Test-LoopiaTXTRecordExists $recShort $zoneName $TxtValue $creds
 
     if ($recID) {
+        Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
         if ($recCount -gt 1) {
             # just remove the record
             Remove-LoopiaTXTRecord $recShort $zoneName $creds -RecordID $recID
@@ -146,13 +148,13 @@ function Remove-DnsTxtLoopia {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER LoopiaAPIUser
+    .PARAMETER LoopiaUser
         The Loopia API username.
 
-    .PARAMETER LoopiaAPIPass
+    .PARAMETER LoopiaPass
         The Loopia API password. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
 
-    .PARAMETER LoopiaAPIPassInsecure
+    .PARAMETER LoopiaPassInsecure
         The Loopia API password. This standard String version may be used on any OS.
 
     .PARAMETER ExtraParams
