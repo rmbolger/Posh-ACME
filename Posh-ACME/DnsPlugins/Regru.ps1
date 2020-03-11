@@ -1,52 +1,64 @@
-﻿function Add-DnsTxtRegRu {
-    [CmdletBinding()]
+function Add-DnsTxtRegRu {
+    [CmdletBinding(DefaultParameterSetName = 'Secure')]
     param(
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(Mandatory, Position = 2)]
+        [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 2)]
+        [pscredential]$RegRuCredential,
+        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 2)]
         [string]$RegRuLogin,
-        [Parameter(Mandatory, Position = 3)]
-        [string]$RegRuPassword,
-        [Parameter(Position = 4)]
-        [string]$DomainName,
+        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 3)]
+        [string]$RegRuPwdInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $ShortRecordName = $RecordName.Replace("." + $DomainName, '')
-
-    #Check existing record
-    $existingRecord = Get-RR-DnsRecordId $RegRuLogin $RegRuPassword $ShortRecordName $DomainName
-    if ($existingRecord) {
-        #Remove existing record before add new
-        Remove-DnsTxtRegRu -RecordName $RecordName -TxtValue $existingRecord.content -RegRuLogin $RegRuLogin -RegRuPassword $RegRuPassword -DomainName $DomainName
+    if ($PSCmdlet.ParameterSetName -eq 'Secure') {
+        $RegRuLogin = $RegRuCredential.UserName
+        $RegRuPwdInsecure = $RegRuCredential.GetNetworkCredential().Password
     }
 
-    #Add new TXT record
-    $url = 'https://api.reg.ru/api/regru2/zone/add_txt?input_data='
-    $reqFormat = '&input_format=json'
-    $domains = @(
-        @{"dname" = $DomainName }
-    )
-    $body = @{
-        "username"            = $RegRuLogin
-        "password"            = $RegRuPassword
-        "domains"             = $domains
-        "subdomain"           = $ShortRecordName
-        "text"                = $TxtValue
-        "output_content_type" = "plain"
-    } | ConvertTo-Json
-
-    $result = Invoke-RestMethod -Method GET -ContentType "application/json" -Uri $($url + $body + $reqFormat)
-    if ($result.result -eq 'error') {
-        throw $result.error_text
+    try {
+        Write-Verbose "Searching for existing TXT record"
+        $zoneName, $rec = Get-RrDnsZone $RecordName $TxtValue $RegRuLogin $RegRuPwdInsecure
     }
+    catch { throw }
 
-    $zone = $($result.answer.domains | Where-Object { $_.dname -eq $DomainName })
-    if ($zone.result -eq 'error') {
-        throw $zone.error_text
+    # separate the portion of the name that doesn't contain the zone name
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+
+    if ($rec) {
+        Write-Verbose "Record $RecordName already contains $TxtValue. Nothing to do."
+    }
+    else {
+
+        #Add new TXT record
+        $url = 'https://api.reg.ru/api/regru2/zone/add_txt?input_data='
+        $reqFormat = '&input_format=json'
+        $domains = @(
+            @{"dname" = $zoneName }
+        )
+        $body = @{
+            "username"            = $RegRuLogin
+            "password"            = $RegRuPwdInsecure
+            "domains"             = $domains
+            "subdomain"           = $recShort
+            "text"                = $TxtValue
+            "output_content_type" = "plain"
+        } | ConvertTo-Json
+
+        $response = Invoke-RestMethod -Method GET -ContentType "application/json" -Uri $($url + $body + $reqFormat)
+
+        if ($response.result -eq 'error') {
+            throw $response.error_text
+        }
+        
+        $selected = $($response.answer.domains | Where-Object { $_.dname -eq $zoneName })
+        if ($selected.result -eq 'error') {
+            throw $selected.error_text
+        }
     }
 
     <#
@@ -82,61 +94,69 @@
 }
 
 function Remove-DnsTxtRegRu {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Secure')]
     param(
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(Mandatory, Position = 2)]
+        [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 2)]
+        [pscredential]$RegRuCredential,
+        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 2)]
         [string]$RegRuLogin,
-        [Parameter(Mandatory, Position = 3)]
-        [string]$RegRuPassword,
-        [Parameter(Position = 4)]
-        [string]$DomainName,
+        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 3)]
+        [string]$RegRuPwdInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $ShortRecordName = $RecordName.Replace("." + $DomainName, '')
+    if ($PSCmdlet.ParameterSetName -eq 'Secure') {
+        $RegRuLogin = $RegRuCredential.UserName
+        $RegRuPwdInsecure = $RegRuCredential.GetNetworkCredential().Password
+    }
 
-    #Check existing record content
-    $existingRecord = Get-RR-DnsRecordId $RegRuLogin $RegRuPassword $ShortRecordName $DomainName
-    if ($existingRecord) {
-        if ($existingRecord.content -ne $TxtValue) {
-            $TxtValue = $existingRecord.content
+    try {
+        Write-Verbose "Searching for existing TXT record"
+        $zoneName, $rec = Get-RrDnsZone $RecordName $TxtValue $RegRuLogin $RegRuPwdInsecure
+    }
+    catch { throw }
+
+    # separate the portion of the name that doesn't contain the zone name
+    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+
+    if ($rec) {
+        # delete the record
+        Write-Verbose "Removing $RecordName with value $TxtValue"
+
+        $url = 'https://api.reg.ru/api/regru2/zone/remove_record?input_data='
+        $reqFormat = '&input_format=json'
+        $domains = @(
+            @{"dname" = $zoneName }
+        )
+        $body = @{
+            "username"            = $RegRuLogin
+            "password"            = $RegRuPwdInsecure
+            "domains"             = $domains
+            "subdomain"           = $recShort
+            "content"             = $TxtValue  # set content of existing record to prevent unwanted removal of other records with same type
+            "record_type"         = "TXT"
+            "output_content_type" = "plain"
+        } | ConvertTo-Json
+        
+        $response = Invoke-RestMethod -Method GET -ContentType "application/json" -Uri $($url + $body + $reqFormat)
+        if ($response.result -eq 'error') {
+            throw $response.error_text
+        }
+        
+        $selected = $($response.answer.domains | Where-Object { $_.dname -eq $zoneName })
+        if ($selected.result -eq 'error') {
+            throw $selected.error_text
         }
     }
     else {
-        throw "existing record not found"
+        Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     }
     
-
-    $url = 'https://api.reg.ru/api/regru2/zone/remove_record?input_data='
-    $reqFormat = '&input_format=json'
-    $domains = @(
-        @{"dname" = $DomainName }
-    )
-    $body = @{
-        "username"            = $RegRuLogin
-        "password"            = $RegRuPassword
-        "domains"             = $domains
-        "subdomain"           = $ShortRecordName
-        "content"             = $TxtValue  # set content of existing record to prevent unwanted removal of other records with same type
-        "record_type"         = "TXT"
-        "output_content_type" = "plain"
-    } | ConvertTo-Json
-
-    $result = Invoke-RestMethod -Method GET -ContentType "application/json" -Uri $($url + $body + $reqFormat)
-    if ($result.result -eq 'error') {
-        throw $result.error_text
-    }
-
-    $zone = $($result.answer.domains | Where-Object { $_.dname -eq $DomainName })
-    if ($zone.result -eq 'error') {
-        throw $zone.error_text
-    }
-
     <#
     .SYNOPSIS
         Remove a DNS TXT record from Reg.Ru.
@@ -187,45 +207,109 @@ function Save-DnsTxtRegRu {
     #>
 }
 
-### Internal functions
+############################
+# Helper Functions
+############################
 
-function Get-RR-DnsRecordId {
+# API Docs
+# https://www.reg.com/support/help/api2
+
+function Get-RrDnsZone {
+    [CmdletBinding(DefaultParameterSetName = 'Secure')]
     param (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, Position = 0)]
+        [string]$RecordName,
+        [Parameter(Mandatory, Position = 1)]
+        [string]$TxtValue,
+        [Parameter(Mandatory, Position = 2)]
         [string]$RegRuLogin,
-        [Parameter(Mandatory)]
-        [string]$RegRuPassword,
-        [Parameter(Mandatory)]
-        $ShortRecordName,
-        [Parameter(Mandatory)]
-        $DomainName
-
+        [Parameter(Mandatory, Position = 3)]
+        [string]$RegRuPwdInsecure
     )
+    
 
-    $url = 'https://api.reg.ru/api/regru2/zone/get_resource_records?input_data='
+    $BaseApiUrl = 'https://api.reg.ru/api/regru2/zone/'
     $reqFormat = '&input_format=json'
-    $domains = @(
-        @{"dname" = $DomainName }
-    )
-    $body = @{
-        "username"            = $RegRuLogin
-        "password"            = $RegRuPassword
-        "domains"             = $domains
-        "output_content_type" = "plain"
-    } | ConvertTo-Json
+    
+    # setup a module variable to cache the record to zone mapping
+    # so it's quicker to find later
+    if (!$script:RRRecordZones) { $script:RRRecordZones = @{ } }
 
-    $result = Invoke-RestMethod -Method GET -ContentType "application/json" -Uri $($url + $body + $reqFormat)
-    if ($result.result -eq 'error') {
-        throw $result.error_text
+    # check for the record in the cache
+    if ($script:RRRecordZones.ContainsKey($RecordName)) {
+        $zone = $script:RRRecordZones.$RecordName
     }
 
-    $zone = $($result.answer.domains | Where-Object { $_.dname -eq $DomainName })
-    if ($zone.result -eq 'error') {
-        throw $zone.error_text
+    if (!$zone) {
+        # find the zone for the closest/deepest sub-zone that would contain the record.
+        $pieces = $RecordName.Split('.')
+        for ($i = 1; $i -lt ($pieces.Count - 1); $i++) {
+        
+            $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+            Write-Debug "Checking $zoneTest"
+            $response = $null
+        
+            $domains = @(
+                @{"dname" = $zoneTest }
+            )
+            $body = @{
+                "username"            = $RegRuLogin
+                "password"            = $RegRuPwdInsecure
+                "domains"             = $domains
+                "output_content_type" = "plain"
+            } | ConvertTo-Json
+            try {
+                $response = Invoke-RestMethod -Method GET -ContentType "application/json" -Uri $($BaseApiUrl + 'nop?input_data=' + $body + $reqFormat)
+            }
+            catch { throw }
+        
+            $Selected = $response.answer.domains | Where-Object { $_.dname -eq $zoneTest }
+        
+            if ($Selected.result -eq 'success') {
+                $script:RRRecordZones.$RecordName = $zoneTest
+                $zone = $zoneTest
+                break
+            }
+            else {
+                if ($response.result -ne 'success') {
+                    Write-Debug "Failed to operate against Reg.Ru API. Check your login, password and allowed IPs."
+                    throw $response.error_text
+                }
+                elseif ($Selected.error_code -ne 'DOMAIN_NOT_FOUND') {
+                    throw "Reg.Ru API threw unexpected error: $($response.error_text)"
+                }
+                $response = $null
+            }
+        }
+    }
+    if ($zone) {
+        # use the zone name we already found
+        $domains = @(
+            @{"dname" = $zone }
+        )
+        $body = @{
+            "username"            = $RegRuLogin
+            "password"            = $RegRuPwdInsecure
+            "domains"             = $domains
+            "output_content_type" = "plain"
+        } | ConvertTo-Json
+        $response = Invoke-RestMethod -Method GET -ContentType "application/json" -Uri $($BaseApiUrl + 'get_resource_records?input_data=' + $body + $reqFormat)
+
+        if ($response.result -ne 'success') {
+            "Failed to operate against Reg.Ru API. Check your login, password and allowed IPs." | Write-Host
+            throw $response.error_text
+        }
+
+        $Selected = $response.answer.domains | Where-Object { $_.dname -eq $zone }
+        if ($Selected.result -eq 'success') {
+            $rec = $Selected.rrs | Where-Object { $_.content -eq $TxtValue }
+        }
+        else { 
+            throw $Selected.error_text
+        }
     }
     else {
-        $record = $zone.rrs | Where-Object { $_.subname -eq $ShortRecordName -and $_.rectype -eq 'TXT' }
+        throw "DNS zone not found"
     }
-
-    $record
+    return @($zone, $rec)
 }
