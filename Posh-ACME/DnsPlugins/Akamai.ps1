@@ -522,6 +522,14 @@ function Invoke-AKRest {
         Accept = $AcceptHeader
     }
 
+    # Apparently Akamai doesn't support the "Expect: 100 Continue" header
+    # and other implementations try to explicitly disable it using
+    # [System.Net.ServicePointManager]::Expect100Continue = $false
+    # However, none of the environments I tested (PS 5.1, 6, and 7)
+    # actually sent that header by default for any HTTP verb.
+    # It's plausible it was sent pre-5.1 or pre-.NET 4.7.1. But since
+    # we don't support those, we don't have to worry about them.
+
     # build the call parameters
     $irmParams = @{
         Method = $Method
@@ -538,8 +546,8 @@ function Invoke-AKRest {
     try {
         Invoke-RestMethod @irmParams @script:UseBasic
     } catch {
-        # swallow 404 errors and just return $null
-        # anything else, let it through
+        # ignore 404 errors and just return $null
+        # otherwise, let it through
         if ([Net.HttpStatusCode]::NotFound -eq $_.Exception.Response.StatusCode) {
             return $null
         } else { throw }
