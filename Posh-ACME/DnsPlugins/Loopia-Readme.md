@@ -1,4 +1,4 @@
-# How to use the PointDNS Plugin
+# How to use the Loopia Plugin
 
 This plugin works against the [Loopia](https://www.loopia.com/loopiadns/) DNS provider. It presumes
 that you have already set up an account and registered or transferred the domain(s) you are targeting. You will also need to be subscribed to their Advanced DNS product.
