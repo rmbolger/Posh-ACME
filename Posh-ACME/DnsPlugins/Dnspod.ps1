@@ -31,7 +31,7 @@ function Add-DnsTxtDnspod {
 
     try {
         Write-Verbose "Searching for existing TXT record"
-        $zone, $rec = Get-DnspodTxtRecord $RecordName $TxtValue $AuthHeader
+        $zone, $rec = Get-DnspodTxtRecord $RecordName $TxtValue
     }
     catch { throw }
 
@@ -45,10 +45,10 @@ function Add-DnsTxtDnspod {
             
             $recShort = $RecordName -ireplace [regex]::Escape(".$($zone.name)"), [string]::Empty
             $ApiEndpoint = 'https://api.dnspod.com/Record.Create'
-            $body = "user_token=$authToken&format=json&domain_id=$($zone.id)&sub_domain=$recShort&record_type=TXT&record_line=default&value=$txtValue&ttl=1"
+            $body = "user_token=$($script:authToken)&format=json&domain_id=$($zone.id)&sub_domain=$recShort&record_type=TXT&record_line=default&value=$txtValue&ttl=1"
             $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body -UserAgent $script:DnspodUA
 
-            if (!$($response.status.code -ne 1 -and $response.status.code -ne 31)) {
+            if ($response.status.code -ne 1 -and $response.status.code -ne 31) {
                 throw $response.status.message
             }
         }
@@ -69,10 +69,13 @@ function Add-DnsTxtDnspod {
         The value of the TXT record.
 
     .PARAMETER DnspodCredential
-        The Dnspod admin token generated for your account. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+        The pscredentials object with your Dnspod account credential. Can only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER DnspodUsernameInsecure
-        The Dnspod admin token generated for your account. This standard String version may be used on any OS.
+        Your Dnspod e-mail account. This standard String version may be used on any OS.
+
+    .PARAMETER DnspodPwdInsecure
+        Your Dnspod account password. This standard String version may be used on any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -123,7 +126,7 @@ function Remove-DnsTxtDnspod {
 
     try {
         Write-Verbose "Searching for existing TXT record"
-        $zone, $rec = Get-DnspodTxtRecord $RecordName $TxtValue $AuthHeader
+        $zone, $rec = Get-DnspodTxtRecord $RecordName $TxtValue
     }
     catch { throw }
 
@@ -133,10 +136,10 @@ function Remove-DnsTxtDnspod {
             Write-Verbose "Removing $RecordName with value $TxtValue"
             
             $ApiEndpoint = 'https://api.dnspod.com/Record.Remove'
-            $body = "user_token=$authToken&format=json&domain_id=$($zone.id)&record_id=$($rec.id)"
+            $body = "user_token=$($script:authToken)&format=json&domain_id=$($zone.id)&record_id=$($rec.id)"
             $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body -UserAgent $script:DnspodUA
 
-            if (!$($response.status.code -ne 1 -and $response.status.code -ne 8)) {
+            if ($response.status.code -ne 1 -and $response.status.code -ne 8) {
                 throw $response.status.message
             }
         }
@@ -161,10 +164,13 @@ function Remove-DnsTxtDnspod {
         The value of the TXT record.
 
     .PARAMETER DnspodCredential
-        The Dnspod admin token generated for your account. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+        The pscredentials object with your Dnspod account credential. Can only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER DnspodUsernameInsecure
-        The Dnspod admin token generated for your account. This standard String version may be used on any OS.
+        Your Dnspod e-mail account. This standard String version may be used on any OS.
+
+    .PARAMETER DnspodPwdInsecure
+        Your Dnspod account password. This standard String version may be used on any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -208,28 +214,13 @@ function Save-DnsTxtDnspod {
 # https://www.dnspod.com/docs/info.html
 
 function Get-DnspodTxtRecord {
-    [CmdletBinding(DefaultParameterSetName = 'Secure')]
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
-        [string]$TxtValue,
-        [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 2)]
-        [pscredential]$DnspodCredential,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 2)]
-        [string]$DnspodUsername,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 3)]
-        [string]$DnspodPwdInsecure
+        [string]$TxtValue
     )
-
-    if (!$script:authToken) {
-        if ($PSCmdlet.ParameterSetName -eq 'Secure') {
-            Get-DnspodAuthToken $DnspodCredential
-        }
-        else {
-            Get-DnspodAuthToken $DnspodUsername $DnspodPwdInsecure
-        }
-    } 
 
     # setup a module variable to cache the record to zone mapping
     # so it's quicker to find later
@@ -246,7 +237,7 @@ function Get-DnspodTxtRecord {
             # get zone
             $ApiEndpoint = 'https://api.dnspod.com/Domain.List'
     
-            $body = "user_token=$authToken&format=json"
+            $body = "user_token=$($script:authToken)&format=json"
             
             $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body -UserAgent $script:DnspodUA
 
@@ -271,26 +262,26 @@ function Get-DnspodTxtRecord {
 
     }
 
-    try {
+        try {
         
-        # separate the portion of the name that doesn't contain the zone name
-        $recShort = $RecordName -ireplace [regex]::Escape(".$($zone.name)"), [string]::Empty
+            # separate the portion of the name that doesn't contain the zone name
+            $recShort = $RecordName -ireplace [regex]::Escape(".$($zone.name)"), [string]::Empty
     
-        # get record
-        $ApiEndpoint = 'https://api.dnspod.com/Record.List'
+            # get record
+            $ApiEndpoint = 'https://api.dnspod.com/Record.List'
     
-        $body = "user_token=$authToken&format=json&domain_id=$($zone.id)"
+            $body = "user_token=$($script:authToken)&format=json&domain_id=$($zone.id)"
             
-        $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body -UserAgent $script:DnspodUA
+            $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body -UserAgent $script:DnspodUA
 
-        if ($response.status.code -ne 1) {
-            throw $response.status.message
+            if ($response.status.code -ne 1) {
+                throw $response.status.message
+            }
+            else {
+                $rec = $response.records | Where-Object { $_.name -eq $recShort -and $_.type -eq 'TXT' -and $_.value -eq $txtValue }
+            }    
         }
-        else {
-            $rec = $response.records | Where-Object { $_.name -eq $recShort -and $_.type -eq 'TXT' -and $_.value -eq $txtValue }
-        }    
-    }
-    catch { throw }
+        catch { throw }
 
     return @($zone, $rec)
 }
@@ -314,7 +305,7 @@ function Get-DnspodAuthToken {
     # Set global user-agent
     if (!$script:DnspodUA) { $script:DnspodUA = 'POSH-ACME Dnspod plugin 1.0' }
 
-    $ApiEndpoint = 'https://api.dnspod.com/Auth?'
+    $ApiEndpoint = 'https://api.dnspod.com/Auth'
 
     $body = "login_email=$DnspodUsername&login_password=$DnspodPwdInsecure&format=json"
     try {
@@ -330,5 +321,6 @@ function Get-DnspodAuthToken {
         throw $response.status.message
     }
     # Set global AuthToken
-    $script:authToken = $response.dnspod.user_token
+    Write-Debug "Auth token = $($response.user_token)"
+    $script:authToken = $response.user_token
 }
