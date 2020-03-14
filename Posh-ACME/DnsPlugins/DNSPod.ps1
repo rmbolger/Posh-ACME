@@ -71,27 +71,27 @@ function Add-DnsTxtDNSPod {
         The value of the TXT record.
 
     .PARAMETER DNSPodCredential
-        The pscredentials object with your DNSPod account credential. Can only be used on Windows or any OS with PowerShell 6.2+.
+        DNSPod account credentials as a PSCredential object. This can only be used on Windows or any OS with PowerShell 6.2+.
 
-    .PARAMETER DNSPodUsernameInsecure
-        Your DNSPod e-mail account. This standard String version may be used on any OS.
+    .PARAMETER DNSPodUsername
+        DNSPod account email address.
 
     .PARAMETER DNSPodPwdInsecure
-        Your DNSPod account password. This standard String version may be used on any OS.
+        DNSPod account password.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $token = Read-Host -Prompt "DNSPod Token" -AsSecureString
-        PS C:\>Add-DnsTxtDNSPod '_acme-challenge.example.com' 'txt-value' $token
+        Add-DnsTxtDNSPod '_acme-challenge.example.com' 'txt-value' -DNSPodCredential (Get-Credential)
 
-        Adds the specified TXT record with the specified value using a secure token.
+        Adds a TXT record for the specified site with the specified value using a PSCredential object.
 
     .EXAMPLE
-        Add-DnsTxtDNSPod '_acme-challenge.example.com' 'txt-value' 'my-token'
+        $creds = @{DNSPodUsername='me@example.com';DNSPodPwdInsecure='xxxxxxxx'}
+        PS C:\>Add-DnsTxtDNSPod '_acme-challenge.example.com' 'txt-value' @creds
 
-        Adds the specified TXT record with the specified value using a plaintext token.
+        Adds a TXT record for the specified site with the specified value using plain text credentials.
     #>
 }
 
@@ -168,27 +168,27 @@ function Remove-DnsTxtDNSPod {
         The value of the TXT record.
 
     .PARAMETER DNSPodCredential
-        The pscredentials object with your DNSPod account credential. Can only be used on Windows or any OS with PowerShell 6.2+.
+        DNSPod account credentials as a PSCredential object. This can only be used on Windows or any OS with PowerShell 6.2+.
 
-    .PARAMETER DNSPodUsernameInsecure
-        Your DNSPod e-mail account. This standard String version may be used on any OS.
+    .PARAMETER DNSPodUsername
+        DNSPod account email address.
 
     .PARAMETER DNSPodPwdInsecure
-        Your DNSPod account password. This standard String version may be used on any OS.
+        DNSPod account password.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $token = Read-Host -Prompt "DNSPod Token" -AsSecureString
-        PS C:\>Remove-DnsTxtDNSPod '_acme-challenge.example.com' 'txt-value' $token
+        Remove-DnsTxtDNSPod '_acme-challenge.example.com' 'txt-value' -DNSPodCredential (Get-Credential)
 
-        Removes the specified TXT record with the specified value using a secure token.
+        Removes a TXT record for the specified site with the specified value using a PSCredential object.
 
     .EXAMPLE
-        Remove-DnsTxtDNSPod '_acme-challenge.example.com' 'txt-value' 'my-token'
+        $creds = @{DNSPodUsername='me@example.com';DNSPodPwdInsecure='xxxxxxxx'}
+        PS C:\>Remove-DnsTxtDNSPod '_acme-challenge.example.com' 'txt-value' @creds
 
-        Removes the specified TXT record with the specified value using a plaintext token.
+        Removes a TXT record for the specified site with the specified value using plain text credentials.
     #>
 }
 
