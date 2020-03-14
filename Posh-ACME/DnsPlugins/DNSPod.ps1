@@ -46,7 +46,9 @@ function Add-DnsTxtDNSPod {
             $recShort = $RecordName -ireplace [regex]::Escape(".$($zone.name)"), [string]::Empty
             $ApiEndpoint = 'https://api.dnspod.com/Record.Create'
             $body = "user_token=$($script:DNSPodAuthToken)&format=json&domain_id=$($zone.id)&sub_domain=$recShort&record_type=TXT&record_line=default&value=$txtValue&ttl=1"
-            $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body -UserAgent $script:USER_AGENT
+
+            $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body `
+                -UserAgent $script:USER_AGENT -EA Stop @script:UseBasic
 
             if ($response.status.code -ne 1 -and $response.status.code -ne 31) {
                 throw $response.status.message
@@ -137,7 +139,9 @@ function Remove-DnsTxtDNSPod {
 
             $ApiEndpoint = 'https://api.dnspod.com/Record.Remove'
             $body = "user_token=$($script:DNSPodAuthToken)&format=json&domain_id=$($zone.id)&record_id=$($rec.id)"
-            $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body -UserAgent $script:USER_AGENT
+
+            $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body `
+                -UserAgent $script:USER_AGENT -EA Stop @script:UseBasic
 
             if ($response.status.code -ne 1 -and $response.status.code -ne 8) {
                 throw $response.status.message
@@ -239,7 +243,8 @@ function Get-DNSPodTxtRecord {
 
             $body = "user_token=$($script:DNSPodAuthToken)&format=json"
 
-            $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body -UserAgent $script:USER_AGENT
+            $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body `
+                -UserAgent $script:USER_AGENT -EA Stop @script:UseBasic
 
             if ($response.status.code -ne 1) {
                 throw $response.status.message
@@ -272,7 +277,8 @@ function Get-DNSPodTxtRecord {
 
             $body = "user_token=$($script:DNSPodAuthToken)&format=json&domain_id=$($zone.id)"
 
-            $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body -UserAgent $script:USER_AGENT
+            $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body `
+                -UserAgent $script:USER_AGENT -EA Stop @script:UseBasic
 
             if ($response.status.code -ne 1) {
                 throw $response.status.message
@@ -306,9 +312,11 @@ function Get-DNSPodAuthToken {
 
     $body = "login_email=$DNSPodUsername&login_password=$DNSPodPwdInsecure&format=json"
     try {
-        $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body -UserAgent $script:USER_AGENT
+        $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body `
+            -UserAgent $script:USER_AGENT -EA Stop @script:UseBasic
+
         # username and password not needed anymore, remove variables for better safety
-        Remove-Variable DNSPodUsername, DNSPodPwdInsecure
+        Remove-Variable DNSPodUsername, DNSPodPwdInsecure, body
     }
     catch {
         throw
