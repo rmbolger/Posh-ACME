@@ -307,6 +307,10 @@ function Get-DNSPodAuthToken {
         $DNSPodPwdInsecure = $DNSPodCredential.GetNetworkCredential().Password
     }
 
+    # make credentials URL safe
+    $DNSPodUsername = [Web.HTTPUtility]::UrlEncode($DNSPodUsername)
+    $DNSPodPwdInsecure = [Web.HTTPUtility]::UrlEncode($DNSPodPwdInsecure)
+
     $ApiEndpoint = 'https://api.dnspod.com/Auth'
 
     $body = "login_email=$DNSPodUsername&login_password=$DNSPodPwdInsecure&format=json"
