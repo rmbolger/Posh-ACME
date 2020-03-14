@@ -4,19 +4,17 @@ This plugin works against the [DNSPod](https://dnspod.com/) provider. It is assu
 
 ## Using the Plugin
 
-### Windows or PS 6.2+
+There is no setup with this plugin. It uses the same email/password you login to the website with. You may supply them in the `DNSPodCredential` parameter as a PSCredential object. But it can only be used from Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). You may also supply them separately in the `DNSPodUsername` and `DNSPodPwdInsecure` parameters and standard strings.
 
-You need to put the account email address and password in a PSCredential object and use it with the `DNSPodCredential` parameter.
+### Windows or PS 6.2+
 
 ```powershell
 $pArgs = @{ DNSPodCredential = (Get-Credential) }
 
-New-PACertificate example.com -DnsPlugin DNSPod -PluginArgs $pArgs -DNSSleep 120
+New-PACertificate example.com -DnsPlugin DNSPod -PluginArgs $pArgs
 ```
 
 ### Any OS
-
-You need to set `DNSPodUsername` as the account email address and `DNSPodPwdInsecure` as account password.
 
 ```powershell
 $pArgs = @{
@@ -24,5 +22,5 @@ $pArgs = @{
     DNSPodPwdInsecure = 'password'
 }
 
-New-PACertificate example.com -DnsPlugin DNSPod -PluginArgs $pArgs -DNSSleep 120
+New-PACertificate example.com -DnsPlugin DNSPod -PluginArgs $pArgs
 ```
