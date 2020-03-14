@@ -45,7 +45,7 @@ function Add-DnsTxtDNSPod {
 
             $recShort = $RecordName -ireplace [regex]::Escape(".$($zone.name)"), [string]::Empty
             $ApiEndpoint = 'https://api.dnspod.com/Record.Create'
-            $body = "user_token=$($script:DNSPodAuthToken)&format=json&domain_id=$($zone.id)&sub_domain=$recShort&record_type=TXT&record_line=default&value=$txtValue&ttl=1"
+            $body = "user_token=$($script:DNSPodAuthToken)&format=json&domain_id=$($zone.id)&sub_domain=$recShort&record_type=TXT&record_line=default&value=$TxtValue&ttl=1"
 
             $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body `
                 -UserAgent $script:USER_AGENT -EA Stop @script:UseBasic
@@ -254,7 +254,6 @@ function Get-DNSPodTxtRecord {
             }
 
             $zone = $hostedZones | Where-Object { $RecordName -match $_.name }
-            Remove-Variable hostedZones, response
 
             #save zone to cache
             $script:DNSPodRecordZones.$RecordName = $zone
@@ -267,27 +266,27 @@ function Get-DNSPodTxtRecord {
 
     }
 
-        try {
+    try {
 
-            # separate the portion of the name that doesn't contain the zone name
-            $recShort = $RecordName -ireplace [regex]::Escape(".$($zone.name)"), [string]::Empty
+        # separate the portion of the name that doesn't contain the zone name
+        $recShort = $RecordName -ireplace [regex]::Escape(".$($zone.name)"), [string]::Empty
 
-            # get record
-            $ApiEndpoint = 'https://api.dnspod.com/Record.List'
+        # get record
+        $ApiEndpoint = 'https://api.dnspod.com/Record.List'
 
-            $body = "user_token=$($script:DNSPodAuthToken)&format=json&domain_id=$($zone.id)"
+        $body = "user_token=$($script:DNSPodAuthToken)&format=json&domain_id=$($zone.id)"
 
-            $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body `
-                -UserAgent $script:USER_AGENT -EA Stop @script:UseBasic
+        $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body `
+            -UserAgent $script:USER_AGENT -EA Stop @script:UseBasic
 
-            if ($response.status.code -ne 1) {
-                throw $response.status.message
-            }
-            else {
-                $rec = $response.records | Where-Object { $_.name -eq $recShort -and $_.type -eq 'TXT' -and $_.value -eq $txtValue }
-            }
+        if ($response.status.code -ne 1) {
+            throw $response.status.message
         }
-        catch { throw }
+        else {
+            $rec = $response.records | Where-Object { $_.name -eq $recShort -and $_.type -eq 'TXT' -and $_.value -eq $TxtValue }
+        }
+    }
+    catch { throw }
 
     return @($zone, $rec)
 }
