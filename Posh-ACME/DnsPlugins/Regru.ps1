@@ -49,7 +49,8 @@ function Add-DnsTxtRegRu {
             "output_content_type" = "plain"
         } | ConvertTo-Json
 
-        $response = Invoke-RestMethod -Method GET -ContentType "application/json" -Uri $($url + $body + $reqFormat)
+        $response = Invoke-RestMethod -Method GET -Uri $($url + $body + $reqFormat) `
+            -ContentType "application/json" -EA Stop @script:UseBasic
 
         if ($response.result -eq 'error') {
             throw $response.error_text
@@ -143,7 +144,8 @@ function Remove-DnsTxtRegRu {
             "output_content_type" = "plain"
         } | ConvertTo-Json
         
-        $response = Invoke-RestMethod -Method GET -ContentType "application/json" -Uri $($url + $body + $reqFormat)
+        $response = Invoke-RestMethod -Method GET -Uri $($url + $body + $reqFormat) `
+            -ContentType "application/json" -EA Stop @script:UseBasic
         if ($response.result -eq 'error') {
             throw $response.error_text
         }
@@ -259,7 +261,8 @@ function Get-RrDnsZone {
                 "output_content_type" = "plain"
             } | ConvertTo-Json
             try {
-                $response = Invoke-RestMethod -Method GET -ContentType "application/json" -Uri $($BaseApiUrl + 'nop?input_data=' + $body + $reqFormat)
+                $response = Invoke-RestMethod -Method GET -Uri $($BaseApiUrl + 'nop?input_data=' + $body + $reqFormat) `
+                    -ContentType "application/json" -EA Stop @script:UseBasic
             }
             catch { throw }
         
@@ -293,7 +296,8 @@ function Get-RrDnsZone {
             "domains"             = $domains
             "output_content_type" = "plain"
         } | ConvertTo-Json
-        $response = Invoke-RestMethod -Method GET -ContentType "application/json" -Uri $($BaseApiUrl + 'get_resource_records?input_data=' + $body + $reqFormat)
+        $response = Invoke-RestMethod -Method GET -Uri $($BaseApiUrl + 'get_resource_records?input_data=' + $body + $reqFormat) `
+            -ContentType "application/json" -EA Stop @script:UseBasic
 
         if ($response.result -ne 'success') {
             "Failed to operate against Reg.Ru API. Check your login, password and allowed IPs." | Write-Host
