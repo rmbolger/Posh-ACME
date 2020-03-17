@@ -8,6 +8,8 @@ function Add-DnsTxtAzure {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$AZSubscriptionId,
+        [Parameter(Position=3)]
+        [string]$AZResourceGroup,
         [Parameter(ParameterSetName='Credential',Mandatory)]
         [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
@@ -38,7 +40,7 @@ function Add-DnsTxtAzure {
     Connect-AZTenant @PSBoundParameters
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (!($zoneID = Get-AZZoneId $RecordName $AZSubscriptionId)) {
+    if (!($zoneID = Get-AZZoneId $RecordName $AZSubscriptionId $AzResourceGroup)) {
         throw "Unable to find Azure hosted zone for $RecordName"
     }
 
@@ -89,6 +91,9 @@ function Add-DnsTxtAzure {
 
     .PARAMETER AZTenantId
         The Tenant or Directory ID of the Azure AD instance that controls access to your Azure DNS zone. This can be found on the Properties page of your Azure AD instance.
+
+    .PARAMETER AZResourceGroup
+        The Resource Group Name of the Azure Resource Group which contains the Azure DNS zones. This allows you to restrict access for the POSH-ACME DNS Plugin to a particular resource group.
 
     .PARAMETER AZAppCred
         The username and password for an Azure AD user or service principal that has permissions to write TXT records in the specified zone. The username is the Application ID of the App Registration which can be found on its Properties page. The password is whatever was set at creation time.
@@ -155,6 +160,8 @@ function Remove-DnsTxtAzure {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$AZSubscriptionId,
+        [Parameter(Position=3)]
+        [string]$AZResourceGroup,
         [Parameter(ParameterSetName='Credential',Mandatory)]
         [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
@@ -185,7 +192,7 @@ function Remove-DnsTxtAzure {
     Connect-AZTenant @PSBoundParameters
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (!($zoneID = Get-AZZoneId $RecordName $AZSubscriptionId)) {
+    if (!($zoneID = Get-AZZoneId $RecordName $AZSubscriptionId $AZResourceGroup)) {
         throw "Unable to find Azure hosted zone for $RecordName"
     }
 
@@ -247,6 +254,9 @@ function Remove-DnsTxtAzure {
 
     .PARAMETER AZTenantId
         The Tenant or Directory ID of the Azure AD instance that controls access to your Azure DNS zone. This can be found on the Properties page of your Azure AD instance.
+
+    .PARAMETER AZResourceGroup
+        The Resource Group Name of the Azure Resource Group which contains the Azure DNS zones. This allows you to restrict access for the POSH-ACME DNS Plugin to a particular resource group.
 
     .PARAMETER AZAppCred
         The username and password for an Azure AD user or service principal that has permissions to write TXT records in the specified zone. The username is the Application ID of the App Registration which can be found on its Properties page. The password is whatever was set at creation time.
@@ -540,7 +550,9 @@ function Get-AZZoneId {
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [string]$AZSubscriptionId
+        [string]$AZSubscriptionId,
+        [Parameter(Position=2)]
+        [string]$AZResourceGroup
     )
 
     # setup a module variable to cache the record to zone ID mapping
@@ -558,7 +570,11 @@ function Get-AZZoneId {
     # subscription. There's also no way to filter the list server side and the maximum results
     # per query is 100. So we basically have to keep querying until there's no 'nextLink' in
     # the response.
-    $url = "https://management.azure.com/subscriptions/$($AZSubscriptionId)/providers/Microsoft.Network/dnszones?api-version=2018-03-01-preview"
+    if ($AZResourceGroup) {
+        $url = "https://management.azure.com/subscriptions/$($AZSubscriptionId)/resourceGroups/$($AZResourceGroup)/providers/Microsoft.Network/dnszones?api-version=2018-03-01-preview"
+    } else {
+        $url = "https://management.azure.com/subscriptions/$($AZSubscriptionId)/providers/Microsoft.Network/dnszones?api-version=2018-03-01-preview"
+    }
     $zones = @()
     do {
         Write-Debug "Querying zones list page"
