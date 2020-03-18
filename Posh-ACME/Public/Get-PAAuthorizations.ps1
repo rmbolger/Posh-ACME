@@ -57,6 +57,20 @@ function Get-PAAuthorizations {
             # fix any dates that may have been parsed by PSCore's JSON serializer
             $auth.expires = Repair-ISODate $auth.expires
 
+            # Workaround non-compliant ACME servers such as Nexus CM that don't include
+            # the status field on challenge objects. Just copy the auth's status to
+            # each challenge.
+            $nonCompliantServer = $false
+            $auth.challenges | ForEach-Object {
+                if ('status' -notin $_.PSObject.Properties.Name) {
+                    $nonCompliantServer = $true
+                    $_ | Add-Member -MemberType NoteProperty -Name 'status' -Value $auth.status
+                }
+            }
+            if ($nonCompliantServer) {
+                Write-Warning "ACME server returned non-compliant challenge objects with no status. Please report this to your ACME server vendor."
+            }
+
             # add "nice to have" members to the auth object
             $auth | Add-Member -MemberType NoteProperty -Name 'DNSId' -Value $auth.identifier.value
             $auth | Add-Member -MemberType NoteProperty -Name 'fqdn' -Value "$(if ($auth.wildcard) {'*.'})$($auth.DNSId)"
