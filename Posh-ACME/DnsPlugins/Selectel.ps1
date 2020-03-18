@@ -19,7 +19,7 @@ function Add-DnsTxtSelectel {
         $SelectelAdminTokenInsecure = (New-Object PSCredential "user", $SelectelAdminToken).GetNetworkCredential().Password
     }
     $AuthHeader = @{ 'X-Token' = $SelectelAdminTokenInsecure }
-    
+
     $apiRoot = 'https://api.selectel.ru/domains/v1/'
 
     try {
@@ -37,11 +37,13 @@ function Add-DnsTxtSelectel {
             'name'    = $RecordName
             'type'    = "TXT"
             'ttl'     = "60"
-            'content' = $txtValue
+            'content' = $TxtValue
         } | ConvertTo-Json
         try {
             Write-Verbose "Adding $RecordName with value $TxtValue"
-            $rec = Invoke-RestMethod -Method POST -Uri $($apiRoot + $zone.id.ToString() + '/records/') -Headers $AuthHeader -ContentType 'application/json' -Body $body
+            $rec = Invoke-RestMethod -Method POST -Uri $($apiRoot + $zone.id.ToString() + '/records/') `
+                -Headers $AuthHeader -ContentType 'application/json' -Body $body `
+                -EA Stop @script:UseBasic
         }
         catch { throw }
     }
@@ -107,7 +109,7 @@ function Remove-DnsTxtSelectel {
 
     try {
         Write-Verbose "Searching for existing TXT record"
-        $zoneName, $rec = Get-SelectelTxtRecord $RecordName $TxtValue $AuthHeader
+        $zone, $rec = Get-SelectelTxtRecord $RecordName $TxtValue $AuthHeader
     }
     catch { throw }
 
@@ -115,7 +117,8 @@ function Remove-DnsTxtSelectel {
         # delete the record
         try {
             Write-Verbose "Removing $RecordName with value $TxtValue"
-            Invoke-RestMethod -Method DELETE -Uri ($apiRoot + $zone.id.ToString() + '/records/' + $rec.id) -Headers $AuthHeader -ContentType 'application/json' | Out-Null
+            Invoke-RestMethod -Method DELETE -Uri ($apiRoot + $zone.id.ToString() + '/records/' + $rec.id) `
+                -Headers $AuthHeader -ContentType 'application/json' -EA Stop @script:UseBasic | Out-Null
         }
         catch { throw }
     }
@@ -210,8 +213,8 @@ function Get-SelectelTxtRecord {
 
         try {
             # get zone
-            [array]$hostedZones = Invoke-RestMethod -Method GET -Uri $apiRoot -Headers $AuthHeader -ContentType 'application/json'# `
-            #    @script:UseBasic -EA Stop
+            [array]$hostedZones = Invoke-RestMethod -Method GET -Uri $apiRoot -Headers $AuthHeader `
+                -ContentType 'application/json' -EA Stop @script:UseBasic
             $zone = $hostedZones | Where-Object { $RecordName -match $_.name }
             Remove-Variable hostedZones
 
@@ -219,20 +222,19 @@ function Get-SelectelTxtRecord {
             $script:SelectelRecordZones.$RecordName = $zone
         }
         catch { throw }
-
-        if (!$zone) {
-            throw "Failed to find hosted zone for $RecordName"
-        }
-
     }
-    else {
-        try {
-            # get record
-            [array]$records = Invoke-RestMethod -Method GET -Uri ($apiRoot + $zone.id.ToString() + '/records/') -Headers $AuthHeader -ContentType 'application/json'
-            $rec = $records | Where-Object { $_.name -eq $txtRecord -and $_.type -eq 'TXT' -and $_.content -eq $txtValue }
-            Remove-Variable records        
-        }
-        catch { throw }
+    if (!$zone) {
+        throw "Failed to find hosted zone for $RecordName"
     }
+
+    try {
+        # get record
+        [array]$records = Invoke-RestMethod -Method GET -Uri ($apiRoot + $zone.id.ToString() + '/records/') `
+            -Headers $AuthHeader -ContentType 'application/json' -EA Stop @script:UseBasic
+        $rec = $records | Where-Object { $_.name -eq $RecordName -and $_.type -eq 'TXT' -and $_.content -eq $TxtValue }
+        Remove-Variable records
+    }
+    catch { throw }
+
     return @($zone, $rec)
 }

@@ -15,12 +15,12 @@ There are two parameter sets you can use with this plugin. The first uses `Selec
 ```powershell
 $token = Read-Host "Selectel API key" -AsSecureString
 $StParams = @{SelectelAdminToken=$token}
-New-PACertificate example.com -DnsPlugin Selectel -PluginArgs $StParams -DNSSleep 120
+New-PACertificate example.com -DnsPlugin Selectel -PluginArgs $StParams
 ```
 
 ### Any OS
 
 ```powershell
 $StParams = @{SelectelAdminTokenInsecure='xxxxxxxxxxxx'}
-New-PACertificate example.com -DnsPlugin Selectel -PluginArgs $StParams -DNSSleep 120
+New-PACertificate example.com -DnsPlugin Selectel -PluginArgs $StParams
 ```
