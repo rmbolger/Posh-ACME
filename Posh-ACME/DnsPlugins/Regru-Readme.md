@@ -1,19 +1,20 @@
 # How To Use the Reg.ru Plugin
 
-This plugin works against the [Reg.ru](https://reg.ru) provider.
+This plugin works against the [Reg.ru](https://reg.ru) and [Reg.com](https://reg.com) provider.
 It is assumed that you have already setup an account and registered the domain you will be working against.
 
 ## Setup
 
-You need to [allow acces to API from your IP or subnet](https://www.reg.ru/user/account/#/settings/api/).
+API Access is not allowed without adding your client machine's IP or subnet to a whitelist. You may also set a separate API password that is different than your primary account password. But it is not required. Both settings are configured from the API Settings page.
 
-You can [set "API" administrator password instead your account password](https://www.reg.ru/user/account/#/settings/api/).
+- [Reg.ru API Settings](https://www.reg.ru/user/account/#/settings/api/)
+- [Reg.com API Settings](https://www.reg.com/user/account/#/settings/api/)
 
 ## Using the Plugin
 
-The plugin arguments you need is the administrator login and administrator password or API password.
-Also, you need to set TTL to 3600 for your zone and use DNSSleep parameter more than 3600 in most cases.
-Unfortunately, 1 hour is a minimal value for Reg.ru
+You will need to provide your account email address and password (or API password) in either the `RegRuCredential` parameter as a PSCredential object or `RegRuLogin` and `RegRuPwdInsecure` parameters as standard string values. The PSCredential option may only be used on Windows or any OS running PowerShell 6.2 or later.
+
+It has been reported that the typical DNS propagation time for this provider is close to 1 hour. So be sure to set the DNSSleep parameter longer than 3600.
 
 ### Windows or PS 6.2+
 
@@ -35,6 +36,5 @@ $pArgs = @{
 }
 
 # generate the cert
-```powershell
 New-PACertificate test.domain.zone -DnsPlugin Regru -DNSSleep 4000 -PluginArgs $pArgs
 ```
