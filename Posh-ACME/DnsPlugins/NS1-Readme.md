@@ -20,5 +20,5 @@ New-PACertificate test.example.com -DnsPlugin NS1 -PluginArgs @{NS1Key=$ns1Key}
 ### Non-Windows
 
 ```powershell
-New-PACertificate test.example.com -DnsPlugin NS1 -PluginArgs @{NS1Key='xxxxxxxxxxxx'}
+New-PACertificate test.example.com -DnsPlugin NS1 -PluginArgs @{NS1KeyInsecure='xxxxxxxxxxxx'}
 ```
