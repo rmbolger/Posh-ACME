@@ -27,5 +27,5 @@ New-PACertificate test.example.com -DnsPlugin Linode -PluginArgs @{LIToken=$toke
 
 ```powershell
 $token = 'xxxxxxxxxxxxxxxx'
-New-PACertificate test.example.com -DnsPlugin Linode -PluginArgs @{LIToken=$token} -DnsSleep 1020
+New-PACertificate test.example.com -DnsPlugin Linode -PluginArgs @{LITokenInsecure=$token} -DnsSleep 1020
 ```
