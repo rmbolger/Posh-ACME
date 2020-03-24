@@ -23,6 +23,6 @@ New-PACertificate example.com -DnsPlugin PointDNS -PluginArgs $pdParams
 ### Any OS
 
 ```powershell
-$pdParams = @{PDUser='email@example.com';PDKey='xxxxxxxxxxxx'}
+$pdParams = @{PDUser='email@example.com';PDKeyInsecure='xxxxxxxxxxxx'}
 New-PACertificate example.com -DnsPlugin PointDNS -PluginArgs $pdParams
 ```
