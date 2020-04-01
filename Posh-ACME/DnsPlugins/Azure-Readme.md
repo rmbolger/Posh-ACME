@@ -59,10 +59,10 @@ $notAfter = $notBefore.AddYears(5)
 
 #### Password Based Principal
 
-The `New-AzADServicePrincipal` function will generate a password for us, so all we have to do is give it a name and specify our expiration dates.
+The `New-AzADServicePrincipal` function will generate a password for us, so all we have to do is give it a name and specify our expiration dates. We'll also use `-SkipAssignment` to prevent the default functionality of giving it the Contributor role on the subscription.
 
 ```powershell
-$sp = New-AzADServicePrincipal -DisplayName PoshACME -StartDate $notBefore -EndDate $notAfter
+$sp = New-AzADServicePrincipal -DisplayName PoshACME -StartDate $notBefore -EndDate $notAfter -SkipAssignment
 ```
 
 You'll use your new credential with either the `AZAppCred` plugin parameter or `AZAppUsername` and `AZAppPasswordInsecure` plugin parameters. The username is in the `ApplicationId` property and the password is in `Secret`. Here's how to save a reference to them for later.
@@ -96,7 +96,7 @@ $cert = New-SelfSignedCertificate -CertStoreLocation "Cert:\CurrentUser\My" `
 $certData = [System.Convert]::ToBase64String($cert.GetRawCertData())
 
 $sp = New-AzADServicePrincipal -DisplayName PoshACME -CertValue $certData `
-    -StartDate $cert.NotBefore -EndDate $cert.NotAfter
+    -StartDate $cert.NotBefore -EndDate $cert.NotAfter -SkipAssignment
 ```
 
 You'll use your new credential with the `AZAppUsername` and `AZCertThumbprint` plugin parameters. Here's how to save a reference to them for later.
@@ -124,7 +124,7 @@ $cert = [Security.Cryptography.X509Certificates.X509Certificate2]::new('./poshac
 $certData = [Convert]::ToBase64String($cert.GetRawCertData())
 
 $sp = New-AzADServicePrincipal -DisplayName PoshACMELinux -CertValue $certData `
-    -StartDate $cert.NotBefore -EndDate $cert.NotAfter
+    -StartDate $cert.NotBefore -EndDate $cert.NotAfter -SkipAssignment
 
 # (optional) delete the PEM files we don't need for plugin purposes
 rm poshacme.crt poshacme.key
