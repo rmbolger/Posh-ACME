@@ -33,25 +33,29 @@ function Add-DnsTxtGandi {
     $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
     $recUrl = "https://dns.api.gandi.net/api/v5/domains/$zoneName/records/$recShort/TXT"
     try {
-        $rec = Invoke-RestMethod $recUrl @restParams @script:UseBasic
+        $rec = Invoke-RestMethod $recUrl @restParams @script:UseBasic -EA Stop
     } catch {}
 
-    if ($rec -and $TxtValue -in $rec.rrset_values) {
+    if ($rec -and "`"$TxtValue`"" -in $rec.rrset_values) {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
     } else {
         if (-not $rec) {
             # add new record
+            Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
+            $body = @{rrset_values=@("`"$TxtValue`"")}
+            Write-Debug "Sending body:`n$(($body | ConvertTo-Json))"
+            $bodyJson = $body | ConvertTo-Json -Compress
             try {
-                Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
-                $bodyJson = @{rrset_values=@($TxtValue)} | ConvertTo-Json -Compress
                 Invoke-RestMethod $recUrl -Method Post -Body $bodyJson `
                     @restParams @script:UseBasic -EA Stop | Out-Null
             } catch { throw }
         } else {
             # update the existing record
+            Write-Verbose "Updating a TXT record for $RecordName with value $TxtValue"
+            $body = @{rrset_values=(@($rec.rrset_values) + @("`"$TxtValue`""))}
+            Write-Debug "Sending body:`n$(($body | ConvertTo-Json))"
+            $bodyJson = $body | ConvertTo-Json -Compress
             try {
-                Write-Verbose "Updating a TXT record for $RecordName with value $TxtValue"
-                $bodyJson = @{rrset_values=(@($rec.rrset_values.Trim('"')) + @($TxtValue))} | ConvertTo-Json -Compress
                 Invoke-RestMethod $recUrl -Method Put -Body $bodyJson `
                     @restParams @script:UseBasic -EA Stop | Out-Null
             } catch { throw }
@@ -128,30 +132,31 @@ function Remove-DnsTxtGandi {
     $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
     $recUrl = "https://dns.api.gandi.net/api/v5/domains/$zoneName/records/$recShort/TXT"
     try {
-        $rec = Invoke-RestMethod $recUrl @restParams @script:UseBasic
+        $rec = Invoke-RestMethod $recUrl @restParams @script:UseBasic -EA Stop
     } catch {}
 
     if ($rec -and "`"$TxtValue`"" -in $rec.rrset_values) {
         if ($rec.rrset_values.Count -gt 1) {
             # remove just the value we care about
+            Write-Verbose "Removing $TxtValue from TXT record for $RecordName"
+            $otherVals = $rec.rrset_values | Where-Object { $_ -ne "`"$TxtValue`"" }
+            $body = @{rrset_values=@($otherVals)}
+            Write-Debug "Sending body:`n$(($body | ConvertTo-Json))"
+            $bodyJson =  $body | ConvertTo-Json -Compress
             try {
-                Write-Verbose "Removing $TxtValue from TXT record for $RecordName"
-                $otherVals = $rec.rrset_values.Trim('"') | Where-Object { $_ -ne $TxtValue }
-                $bodyJson = @{rrset_values=@($otherVals)} | ConvertTo-Json -Compress
                 Invoke-RestMethod $recUrl -Method Put -Body $bodyJson `
                     @restParams @script:UseBasic -EA Stop | Out-Null
             } catch { throw }
         } else {
             # delete the whole record because this value is the last one
+            Write-Verbose "Removing TXT record for $RecordName"
             try {
-                Write-Verbose "Removing TXT record for $RecordName"
                 Invoke-RestMethod $recUrl -Method Delete `
                     @restParams @script:UseBasic -EA Stop | Out-Null
             } catch { throw }
         }
     } else {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
-        Write-Debug ($rec.rrset_values -join "`r`n")
     }
 
 
@@ -248,7 +253,7 @@ function Find-GandiZone {
         Write-Debug "Checking $zoneTest"
         try {
             Invoke-RestMethod "https://dns.api.gandi.net/api/v5/domains/$zoneTest" `
-                @RestParams @script:UseBasic | Out-Null
+                @RestParams @script:UseBasic -EA Stop | Out-Null
             $script:GandiRecordZones.$RecordName = $zoneTest
             return $zoneTest
         } catch {}
