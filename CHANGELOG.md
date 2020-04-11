@@ -1,3 +1,21 @@
+## 3.13.0 (2020-04-11)
+
+* Added new DNS plugins
+  * Akamai
+  * DNSPod (Thanks @WiZaRd31337)
+  * Loopia
+  * PointDNS (Thanks @danielsen)
+  * Reg.ru (Thanks @WiZaRd31337)
+  * RFC2136
+  * Selectel.ru (Thanks @WiZaRd31337)
+  * Yandex (Thanks @WiZaRd31337)
+* When creating a new order, chain.cer and fullchain.cer are now backed up along with the other files.
+* Added a workaround for non-compliant ACME server Nexus CM (#227)
+* Various usage guide corrections. (Thanks @webprofusion-chrisc)
+* Fixed a bug where New-PACertificate required the `-Force` parameter if the previous order was deactivated.
+* Fixed the dev install script to account for a redirected Documents folder.
+* Minor changes to how Gandi plugin works to address potential edge case bugs.
+
 ## 3.12.0 (2019-12-10)
 
 * `Set-PAOrder` now has `-DnsPlugin` and `-PluginArgs` parameters to allow changing plugins and associated credentials prior to a renewal operation.

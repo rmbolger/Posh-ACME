@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '3.12.0'
+ModuleVersion = '3.13.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -110,16 +110,21 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-* `Set-PAOrder` now has `-DnsPlugin` and `-PluginArgs` parameters to allow changing plugins and associated credentials prior to a renewal operation.
-* Upgraded BouncyCastle library to version 1.8.5.2 and renamed the DLL to avoid conflicts with older copies that may get installed into the .NET GAC by other software.
-* ACME server errors returned during calls to `Revoke-PAAuthorization` are now non-terminating errors rather than warnings.
-* Fixed bug where new orders created with `New-PACertificate` and no explicit plugin wouldn't get the Manual default if the account was already authorized for the included names.
-* Fixed `Get-PAAuthorizations` when using explicit account reference
-* Fixed datetime parsing issues on non-US culture environments (#208)
-* Fixed errors thrown by `Submit-Renewal` when run against an order with a null DnsPlugin. A warning is now thrown instead.
-* Fixed parameter binding error when using `-PluginArgs` with `Submit-Renewal`
-* Fixed HurricanElectric guide's parameter references
-* Fixed Azure tests
+* Added new DNS plugins
+  * Akamai
+  * DNSPod (Thanks @WiZaRd31337)
+  * Loopia
+  * PointDNS (Thanks @danielsen)
+  * Reg.ru (Thanks @WiZaRd31337)
+  * RFC2136
+  * Selectel.ru (Thanks @WiZaRd31337)
+  * Yandex (Thanks @WiZaRd31337)
+* When creating a new order, chain.cer and fullchain.cer are now backed up along with the other files.
+* Added a workaround for non-compliant ACME server Nexus CM (#227)
+* Various usage guide corrections. (Thanks @webprofusion-chrisc)
+* Fixed a bug where New-PACertificate required the `-Force` parameter if the previous order was deactivated.
+* Fixed the dev install script to account for a redirected Documents folder.
+* Minor changes to how Gandi plugin works to address potential edge case bugs.
 '@
 
     } # End of PSData hashtable
