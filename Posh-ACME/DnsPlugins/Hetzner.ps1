@@ -21,7 +21,6 @@ Function Add-DnsTxtHetzner {
     }
     $restParams = @{
         Headers = @{
-            'X-Consumer-Username' = ''
             'Auth-API-Token' = $HetznerTokenInsecure
             Accept = 'application/json'
         }
@@ -88,7 +87,6 @@ Function Add-DnsTxtHetzner {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
         Add-DnsTxtHetzner '_acme-challenge.example.com' 'txt-value' -HetznerTokenInsecure 'xxxxxxxx'
-
         Adds or updates the specified TXT record with the specified value.
     #>
 }
@@ -116,7 +114,6 @@ Function Remove-DnsTxtHetzner {
     }
     $restParams = @{
         Headers = @{
-            'X-Consumer-Username' = ''
             'Auth-API-Token' = $HetznerTokenInsecure
             Accept = 'application/json'
         }
@@ -172,7 +169,6 @@ Function Remove-DnsTxtHetzner {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
         Remove-DnsTxtHetzner '_acme-challenge.example.com' 'txt-value' -HetznerTokenInsecure 'xxxxxxxx'
-
         Removes the specified TXT record with the specified value.
     #>
 }
