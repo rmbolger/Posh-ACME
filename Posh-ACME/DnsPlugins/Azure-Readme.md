@@ -174,7 +174,7 @@ Here's how to get the token for the context you are currently logged in with usi
 
 ```powershell
 $ctx = Get-AzContext
-$token = ($ctx.TokenCache.ReadItems() | ?{ $_.TenantId -eq $ctx_az.Subscription.TenantId -and $_.Resource -eq "https://management.core.windows.net/" } |
+$token = ($ctx.TokenCache.ReadItems() | ?{ $_.TenantId -eq $ctx.Subscription.TenantId -and $_.Resource -eq "https://management.core.windows.net/" } |
     Select -First 1).AccessToken
 ```
 
