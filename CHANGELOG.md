@@ -1,3 +1,10 @@
+## 3.14.0 (2020-05-07)
+
+* Added new DNS plugin [Hetzner](https://www.hetzner.de/) (Thanks @derguterat)
+* Fix for Google DNS plugin to ignore private zones. (Thanks @timwsuqld)
+* Fix for Azure usage guide for using existing access token. (Thanks @arestarh)
+* Fix for RFC2136 plugin which makes it usable for records other than the root domain.
+
 ## 3.13.0 (2020-04-11)
 
 * Added new DNS plugins

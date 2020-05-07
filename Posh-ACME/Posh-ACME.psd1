@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '3.13.0'
+ModuleVersion = '3.14.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -110,21 +110,12 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-* Added new DNS plugins
-  * Akamai
-  * DNSPod (Thanks @WiZaRd31337)
-  * Loopia
-  * PointDNS (Thanks @danielsen)
-  * Reg.ru (Thanks @WiZaRd31337)
-  * RFC2136
-  * Selectel.ru (Thanks @WiZaRd31337)
-  * Yandex (Thanks @WiZaRd31337)
-* When creating a new order, chain.cer and fullchain.cer are now backed up along with the other files.
-* Added a workaround for non-compliant ACME server Nexus CM (#227)
-* Various usage guide corrections. (Thanks @webprofusion-chrisc)
-* Fixed a bug where New-PACertificate required the `-Force` parameter if the previous order was deactivated.
-* Fixed the dev install script to account for a redirected Documents folder.
-* Minor changes to how Gandi plugin works to address potential edge case bugs.
+## 3.14.0 (2020-05-07)
+
+* Added new DNS plugin [Hetzner](https://www.hetzner.de/) (Thanks @derguterat)
+* Fix for Google DNS plugin to ignore private zones. (Thanks @timwsuqld)
+* Fix for Azure usage guide for using existing access token. (Thanks @arestarh)
+* Fix for RFC2136 plugin which makes it usable for records other than the root domain.
 '@
 
     } # End of PSData hashtable
