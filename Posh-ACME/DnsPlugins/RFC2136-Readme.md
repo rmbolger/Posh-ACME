@@ -19,9 +19,7 @@ When using a TSIG key, you will typically have 3 values; a key name, a key type 
 
 ### Plugin Dependencies
 
-Due to the inexplicable lack of good native DNS libraries within PowerShell/.NET, this plugin relies on external executables to query DNS and send the dynamic updates. On Windows, the queries are performed using `nslookup.exe` which is installed by default on all supported Windows versions. On non-Windows, the `dig` utility is used which is also typically installed by default on most non-Windows OSes.
-
-To send dynamic updates, the plugin uses the `nsupdate` utility which is part of the ISC BIND distribution. Most modern Linux distributions will have this installed by default, but double check to be sure. **On Windows, you will need to download and install the utility.** Go to the [ISC BIND Downloads](https://www.isc.org/download/) page and download the current stable version for Windows. You don't actually need to run the installer. It is sufficient to simply unzip the archive and either add that folder to your `PATH` environment variable or specify the full path to `nsupdate.exe` in the plugin arguments. *(Adding the folder to your PATH also gives you easy access to the `dig` utility which many DNS admins prefer over nslookup)*
+Due to the inexplicable lack of good native DNS libraries within PowerShell/.NET, this plugin relies on the `nsupdate` utility which is part of the ISC BIND distribution. Most modern Linux distributions will have this installed by default, but double check to be sure. **On Windows, you will need to download and install the utility.** Go to the [ISC BIND Downloads](https://www.isc.org/download/) page and download the current stable version for Windows. You don't actually need to run the installer. It is sufficient to simply unzip the archive and either add that folder to your `PATH` environment variable or specify the full path to `nsupdate.exe` in the plugin arguments. *(Adding the folder to your PATH also gives you easy access to the `dig` utility which many DNS admins prefer over nslookup)*
 
 ## Using the Plugin
 
