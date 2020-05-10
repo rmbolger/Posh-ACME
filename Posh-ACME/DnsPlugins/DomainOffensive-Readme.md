@@ -11,8 +11,15 @@ We need to retrieve an secret API token for the account that will be used to upd
 Your personal API token is specified using the `Token` parameter.
 
 ```powershell
+# Example: Provide the private token via secure string (Windows or any OS with PowerShell 6.2+)
 $pArgs = @{
-    Token = '1md6xRcUCTrB58kbpwAH'
+    DomOffToken = $secureString
+}
+New-PACertificate example.com -DnsPlugin DomainOffensive -PluginArgs $pArgs
+
+# Alternative Example by directly providing the private token as string
+$pArgs = @{
+    DomOffTokenInsecure = '1md6xRcUCTrB58kbpwAH'
 }
 New-PACertificate example.com -DnsPlugin DomainOffensive -PluginArgs $pArgs
 ```
