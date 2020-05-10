@@ -2,11 +2,13 @@ function Add-DnsTxtDomainOffensive {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [string]$Token,
-        [Parameter(Mandatory,Position=1)]
         [string]$RecordName,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(Mandatory,Position=1)]
         [string]$TxtValue
+        [Parameter(Mandatory,Position=2)]
+        [string]$Token,
+        [Parameter(ValueFromRemainingArguments)]
+        $ExtraParams
     )
 
     Write-Verbose "Adding $RecordName with value $TxtValue on Domain Offensive"
@@ -34,7 +36,7 @@ function Add-DnsTxtDomainOffensive {
         The value of the TXT record.
 
     .EXAMPLE
-        Add-DnsTxtDomainOffensive '1md6xRcUCTrB58kbpwAH' '_acme-challenge.site1.example.com' 'OVxwaDm7MgN1IRG0eSivJMlepO9CL4X8vKo6Tcns'
+        Add-DnsTxtDomainOffensive '_acme-challenge.site1.example.com' 'OVxwaDm7MgN1IRG0eSivJMlepO9CL4X8vKo6Tcns' '1md6xRcUCTrB58kbpwAH'
 
         Adds a TXT record for the specified site with the specified value using the account associated with the given token.
 
@@ -47,9 +49,13 @@ function Remove-DnsTxtDomainOffensive {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [string]$Token,
+        [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [string]$RecordName
+        [string]$TxtValue
+        [Parameter(Mandatory,Position=2)]
+        [string]$Token,
+        [Parameter(ValueFromRemainingArguments)]
+        $ExtraParams
     )
 
     Write-Verbose "Removing $RecordName with value $TxtValue on Domain Offensive"
@@ -74,9 +80,9 @@ function Remove-DnsTxtDomainOffensive {
         The fully qualified name of the TXT record to be removed.
 
     .EXAMPLE
-        Add-DnsTxtDomainOffensive '1md6xRcUCTrB58kbpwAH' '_acme-challenge.site1.example.com'
+        Remove-DnsTxtDomainOffensive '_acme-challenge.site1.example.com' '' '1md6xRcUCTrB58kbpwAH'
 
-        Adds a TXT record for the specified site with the specified value using the account associated with the given token.
+        Remove the given TXT record from the account associated with the given token.
 
     .LINK
         https://www.do.de/wiki/LetsEncrypt_-_Entwickler
