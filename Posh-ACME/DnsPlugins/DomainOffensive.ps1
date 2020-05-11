@@ -1,10 +1,10 @@
 function Add-DnsTxtDomainOffensive {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [string]$TxtValue
+        [string]$TxtValue,
         [Parameter(ParameterSetName='Secure', Mandatory, Position=2)]
         [securestring]$DomOffToken,
         [Parameter(ParameterSetName='Insecure', Mandatory, Position=2)]
@@ -20,12 +20,14 @@ function Add-DnsTxtDomainOffensive {
 
     Write-Verbose "Adding $RecordName with value $TxtValue on Domain Offensive"
     $uri = "https://www.do.de/api/letsencrypt?token=$DomOffTokenInsecure&domain=$RecordName&value=$TxtValue"
-    $response = Invoke-RestMethod -Method Get -Uri $uri @script:UseBasic
-    
+    try {
+        $response = Invoke-RestMethod -Method Get -Uri $uri @script:UseBasic -EA Stop
+    } catch { throw }
+
     if (!$response.success) {
         throw "Failed to add Domain Offensive DNS record; Result=$($response)"
     }
-    
+
     <#
     .SYNOPSIS
         Add a DNS TXT record to a Domain Offensive DNS Zone
@@ -46,11 +48,15 @@ function Add-DnsTxtDomainOffensive {
         The value of the TXT record.
 
     .EXAMPLE
-        Add-DnsTxtDomainOffensive '_acme-challenge.site1.example.com' 'OVxwaDm7MgN1IRG0eSivJMlepO9CL4X8vKo6Tcns' $secureString
-        or
-        Add-DnsTxtDomainOffensive '_acme-challenge.site1.example.com' 'OVxwaDm7MgN1IRG0eSivJMlepO9CL4X8vKo6Tcns' '1md6xRcUCTrB58kbpwAH'
+        $secToken = Read-Host -Prompt "Token" -AsSecureString
+        PS C:\>Add-DnsTxtDomainOffensive '_acme-challenge.example.com' 'txt-value' $secToken
 
-        Adds a TXT record for the specified site with the specified value using the account associated with the given token.
+        Adds the specified TXT record with the specified value using a secure token.
+
+    .EXAMPLE
+        Add-DnsTxtDomainOffensive '_acme-challenge.example.com' 'txt-value' 'token-value'
+
+        Adds the specified TXT record with the specified value using a standard string token.
 
     .LINK
         https://www.do.de/wiki/LetsEncrypt_-_Entwickler
@@ -58,12 +64,12 @@ function Add-DnsTxtDomainOffensive {
 }
 
 function Remove-DnsTxtDomainOffensive {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [string]$TxtValue
+        [string]$TxtValue,
         [Parameter(ParameterSetName='Secure', Mandatory, Position=2)]
         [securestring]$DomOffToken,
         [Parameter(ParameterSetName='Insecure', Mandatory, Position=2)]
@@ -79,8 +85,10 @@ function Remove-DnsTxtDomainOffensive {
 
     Write-Verbose "Removing $RecordName with value $TxtValue on Domain Offensive"
     $uri = "https://www.do.de/api/letsencrypt?token=$DomOffTokenInsecure&domain=$RecordName&action=delete"
-    $response = Invoke-RestMethod -Method Get -Uri $uri @script:UseBasic
-    
+    try {
+        $response = Invoke-RestMethod -Method Get -Uri $uri @script:UseBasic -EA Stop
+    } catch { throw }
+
     if (!$response.success) {
         throw "Failed to remove Domain Offensive DNS record; Result=$($response)"
     }
@@ -102,11 +110,15 @@ function Remove-DnsTxtDomainOffensive {
         The fully qualified name of the TXT record to be removed.
 
     .EXAMPLE
-        Remove-DnsTxtDomainOffensive '_acme-challenge.site1.example.com' '' $secureString
-        or
-        Remove-DnsTxtDomainOffensive '_acme-challenge.site1.example.com' '' '1md6xRcUCTrB58kbpwAH'
+        $secToken = Read-Host -Prompt "Token" -AsSecureString
+        PS C:\>Remove-DnsTxtDomainOffensive '_acme-challenge.example.com' 'txt-value' $secToken
 
-        Remove the given TXT record from the account associated with the given token.
+        Removes the specified TXT record with the specified value using a secure token.
+
+    .EXAMPLE
+        Remove-DnsTxtDomainOffensive '_acme-challenge.example.com' 'txt-value' 'token-value'
+
+        Removes the specified TXT record with the specified value using a standard string token.
 
     .LINK
         https://www.do.de/wiki/LetsEncrypt_-_Entwickler
@@ -118,7 +130,7 @@ function Save-DnsTxtDomainOffensive {
     param(
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
-    )    
+    )
 
     <#
     .SYNOPSIS

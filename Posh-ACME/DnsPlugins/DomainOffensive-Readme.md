@@ -4,7 +4,7 @@ This plugin works against the [Domain Offensive](https://www.do.de/) DNS provide
 
 ## Setup
 
-We need to retrieve an secret API token for the account that will be used to update DNS records. Further information can ba found at [the (german) developer docs.](https://www.do.de/wiki/LetsEncrypt_-_Entwickler).
+We need to retrieve an secret API token for the account that will be used to update DNS records. Further information can ba found at the (german) [developer docs](https://www.do.de/wiki/LetsEncrypt_-_Entwickler).
 
 ## Using the Plugin
 
@@ -13,8 +13,9 @@ Your personal API token is specified using the `DomOffToken` or `DomOffTokenInse
 
 ### Windows and/or PS 6.2+ only (secure string)
 ```powershell
+$secToken = Read-Host -Prompt "Token" -AsSecureString
 $pArgs = @{
-    DomOffToken = $secureString
+    DomOffToken = $secToken
 }
 New-PACertificate example.com -DnsPlugin DomainOffensive -PluginArgs $pArgs
 ```
@@ -23,7 +24,7 @@ New-PACertificate example.com -DnsPlugin DomainOffensive -PluginArgs $pArgs
 ### Any OS (default string)
 ```powershell
 $pArgs = @{
-    DomOffTokenInsecure = '1md6xRcUCTrB58kbpwAH'
+    DomOffTokenInsecure = 'token-value'
 }
 New-PACertificate example.com -DnsPlugin DomainOffensive -PluginArgs $pArgs
 ```
