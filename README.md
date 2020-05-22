@@ -39,13 +39,9 @@ Install-Module -Name Posh-ACME -Scope CurrentUser
 
 ## Development
 
-To install the latest *development* version from the git master branch, use the following PowerShell command. This method assumes a default PowerShell environment that includes the [`PSModulePath`](https://msdn.microsoft.com/en-us/library/dd878326.aspx) environment variable. You must also make sure `Get-ExecutionPolicy` does not return `Restricted` or `AllSigned`.
+To install the latest *development* version from the git master branch, use the following PowerShell command. This method assumes a default [`PSModulePath`](https://msdn.microsoft.com/en-us/library/dd878326.aspx) environment variable.
 
 ```powershell
-# If necessary, set less restrictive execution policy.
-# Not needed on non-Windows
-Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
-
 # install latest dev version
 iex (irm https://raw.githubusercontent.com/rmbolger/Posh-ACME/master/instdev.ps1)
 ```

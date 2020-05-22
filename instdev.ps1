@@ -17,6 +17,7 @@ if (('PSEdition' -notin $PSVersionTable.Keys -or
      $IsWindows) -and
      (Get-ExecutionPolicy) -notin 'Unrestricted','RemoteSigned','Bypass')
 {
+    Write-Host "Setting user execution policy to RemoteSigned" -ForegroundColor Cyan
     Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 }
 
@@ -24,11 +25,6 @@ if (('PSEdition' -notin $PSVersionTable.Keys -or
 New-Item -ItemType Directory -Force -Path $installpath | out-null
 
 if ([String]::IsNullOrWhiteSpace($PSScriptRoot)) {
-    # likely running from online, so download
-    $webclient = New-Object System.Net.WebClient
-    $url = 'https://github.com/rmbolger/Posh-ACME/archive/master.zip'
-    Write-Host "Downloading latest version of Posh-ACME from $url" -ForegroundColor Cyan
-    $file = Join-Path ([system.io.path]::GetTempPath()) 'Posh-ACME.zip'
 
     # GitHub now requires TLS 1.2
     # https://blog.github.com/2018-02-23-weak-cryptographic-standards-removed/
@@ -38,7 +34,13 @@ if ([String]::IsNullOrWhiteSpace($PSScriptRoot)) {
         [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor $_
     }
 
-    $webclient.DownloadFile($url,$file)
+    # likely running from online, so download
+    $url = 'https://github.com/rmbolger/Posh-ACME/archive/master.zip'
+    Write-Host "Downloading latest version of Posh-ACME from $url" -ForegroundColor Cyan
+    $file = Join-Path ([system.io.path]::GetTempPath()) 'Posh-ACME.zip'
+    $webclient = New-Object System.Net.WebClient
+    try { $webclient.DownloadFile($url,$file) }
+    catch { throw }
     Write-Host "File saved to $file" -ForegroundColor Green
 
     # extract the zip
