@@ -68,9 +68,9 @@ New-PACertificate example.com -AcceptTOS
 This uses the default `Manual` DNS plugin which requires you to manually edit your DNS server to create the TXT records required for challenge validation. Here's a more complete example with a typical wildcard cert utilizing a hypothetical `Flurbog` DNS plugin that also adds a contact email address to the account for expiration notifications.
 
 ```powershell
-$pArgs = @{FBServer='fb.example.com'; FBCred=(Get-Credential)}
 $certNames = '*.example.com','example.com'
 $email = 'admin@example.com'
+$pArgs = @{FBServer='fb.example.com'; FBCred=(Get-Credential)}
 New-PACertificate $certNames -AcceptTOS -Contact $email -DnsPlugin Flurbog -PluginArgs $pArgs
 ```
 
