@@ -52,17 +52,26 @@ iex (irm https://raw.githubusercontent.com/rmbolger/Posh-ACME/master/instdev.ps1
 
 # Quick Start
 
-If you're starting from a fresh install, the minimum parameters you need are the domain name for your cert and the `-AcceptTOS` flag.
+On Windows, you may need to set a less restrictive PowerShell execution policy before you can import the module.
 
 ```powershell
-New-PACertificate site1.example.com -AcceptTOS
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+Import-Module Posh-ACME
+```
+
+The minimum parameters you need for a cert are the domain name and the `-AcceptTOS` flag.
+
+```powershell
+New-PACertificate example.com -AcceptTOS
 ```
 
 This uses the default `Manual` DNS plugin which requires you to manually edit your DNS server to create the TXT records required for challenge validation. Here's a more complete example with a typical wildcard cert utilizing a hypothetical `Flurbog` DNS plugin that also adds a contact email address to the account for expiration notifications.
 
 ```powershell
-New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact admin@example.com -DnsPlugin Flurbog `
-                  -PluginArgs @{FBServer='fb.example.com'; FBCred=(Get-Credential)}
+$pArgs = @{FBServer='fb.example.com'; FBCred=(Get-Credential)}
+$certNames = '*.example.com','example.com'
+$email = 'admin@example.com'
+New-PACertificate $certNames -AcceptTOS -Contact $email -DnsPlugin Flurbog -PluginArgs $pArgs
 ```
 
 To learn how to use the supported DNS plugins, check out `Get-DnsPlugins` and `Get-DnsPluginHelp`. There's also a [tutorial](/Tutorial.md) for a more in-depth guide to using the module.
