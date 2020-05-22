@@ -71,6 +71,7 @@ This uses the default `Manual` DNS plugin which requires you to manually edit yo
 $certNames = '*.example.com','example.com'
 $email = 'admin@example.com'
 $pArgs = @{FBServer='fb.example.com'; FBCred=(Get-Credential)}
+
 New-PACertificate $certNames -AcceptTOS -Contact $email -DnsPlugin Flurbog -PluginArgs $pArgs
 ```
 
