@@ -11,6 +11,15 @@ if ('PSEdition' -notin $PSVersionTable.Keys -or $PSVersionTable.PSEdition -eq 'D
     }
 }
 
+# deal with execution policy on Windows
+if (('PSEdition' -notin $PSVersionTable.Keys -or
+     $PSVersionTable.PSEdition -eq 'Desktop' -or
+     $IsWindows) -and
+     (Get-ExecutionPolicy) -notin 'Unrestricted','RemoteSigned','Bypass')
+{
+    Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+}
+
 # create user-specific modules folder if it doesn't exist
 New-Item -ItemType Directory -Force -Path $installpath | out-null
 
