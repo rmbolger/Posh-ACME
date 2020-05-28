@@ -258,7 +258,7 @@ function Find-GDZone {
             continue
         }
 
-        if ($domain.status -eq 'ACTIVE') {
+        if ($domain.status -in 'ACTIVE','PENDING_DNS_ACTIVE') {
             $zoneName = $domain.domain
             $script:GDRecordZones.$RecordName = $zoneName
             return $zoneName
