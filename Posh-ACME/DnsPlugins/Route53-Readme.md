@@ -1,11 +1,12 @@
 # How To Use the Route53 DNS Plugin
 
-This plugin works against the [AWS Route53](https://aws.amazon.com/route53/) DNS provider. It is assumed that you already have an AWS account with at least one DNS zone, and access to create IAM users/roles. The commands used in this guide will also make use of the [AwsPowershell](https://www.powershellgallery.com/packages/AWSPowerShell) or [AwsPowershell.NetCore](https://www.powershellgallery.com/packages/AWSPowerShell.NetCore) module depending on your environment.
+This plugin works against the [AWS Route53](https://aws.amazon.com/route53/) DNS provider. It is assumed that you already have an AWS account with at least one DNS zone. The setup portion of this guide also assumes you have access to create IAM users/roles. If you have been given access credentials by your AWS admin, you may need them to create the IAM policies necessary for you to edit the zone TXT records.
 
-NOTE: The `AwsPowershell` module is *not required* in order to use the plugin normally unless you use the profile name authentication method. But it will use the module if installed.
-
+Using this plugin does not require external module dependencies *unless* you use the profile name authentication method. In that case, you will either need the [Aws.Tools.Route53](https://www.powershellgallery.com/packages/AWS.Tools.Route53/) or the older [AWSPowerShell](https://www.powershellgallery.com/packages/AWSPowerShell) or [AWSPowerShell.NetCore](https://www.powershellgallery.com/packages/AWSPowerShell.NetCore) module depending on your environment. More details can be found in the [AWS PowerShell documentation](https://docs.aws.amazon.com/powershell/).
 
 ## Setup
+
+*NOTE: The examples in this section require either the [AWS.Tools.IdentityManagement](https://www.powershellgallery.com/packages/AWS.Tools.IdentityManagement) module or the older [AWSPowerShell](https://www.powershellgallery.com/packages/AWSPowerShell) or [AWSPowerShell.NetCore](https://www.powershellgallery.com/packages/AWSPowerShell.NetCore) module depending on your environment.*
 
 There are generally two different ways to use this plugin depending on whether you are running it from outside AWS or inside from something like an EC2 instance. When outside, you need to specify explicit credentials for an IAM account that has permissions to modify a zone. When inside, you may instead choose to authenticate using an [IAM Role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html). When using explicit credentials, a personal high-level account will work, but it's a better idea to create a dedicated user with the minimum necessary privileges to create the TXT records necessary for ACME challenges.
 
@@ -13,7 +14,7 @@ If you already have your policies, users, groups, and roles setup, skip the rest
 
 ### Setup Admin Credentials
 
-You'll need to create an Access key and associated secret for your account to use with the AwsPowershell module. Once you have those, use the following commands to save them to a local profile and set it as the default credential. If you have previously configured your AWS credentials into a profile via `Set-AWSCredentials`, skip that command below and replace references to the profile name in the `Initialize-AWSDefaultConfiguration` command with your own.
+You'll need to create an Access key and associated secret for your account to use with the AWS module. Once you have those, use the following commands to save them to a local profile and set it as the default credential. If you have previously configured your AWS credentials into a profile via `Set-AWSCredentials`, skip that command below and replace references to the profile name in the `Initialize-AWSDefaultConfiguration` command with your own.
 
 ```powershell
 Set-AWSCredential -StoreAs 'dnsadmin' -AccessKey 'xxxxxxxx' -SecretKey 'xxxxxxxx'
@@ -123,9 +124,9 @@ $r53Params = @{R53AccessKey='xxxxxxxx';R53SecretKeyInsecure='yyyyyyyy'}
 New-PACertificate test.example.com -DnsPlugin Route53 -PluginArgs $r53Params
 ```
 
-You may also use the `R53ProfileName` parameter to specify the profile name of an existing credential stored with `Set-AwsCredential` from the AWS powershell module. Remember that the `AwsPowershell` module must remain installed for renewals when using this method.
+### AWS Powershell Module Profile (any OS)
 
-### AwsPowershell Profile (any OS)
+You may also use the `R53ProfileName` parameter to specify the profile name of an existing credential stored with `Set-AwsCredential` from an AWS powershell module. Remember that the module must remain installed for renewals when using this method.
 
 ```powershell
 # store the access/secret key in a profile called 'poshacme'
@@ -136,9 +137,9 @@ $r53Params = @{R53ProfileName='poshacme'}
 New-PACertificate test.example.com -DnsPlugin Route53 -PluginArgs $r53Params
 ```
 
-When using an IAM Role, the only thing you need to specify is a switch called `R53UseIAMRole`.
-
 ### IAM Role (any OS)
+
+When using an IAM Role, the only thing you need to specify is a switch called `R53UseIAMRole`.
 
 ```powershell
 New-PACertificate test.example.com -DnsPlugin Route53 -PluginArgs @{R53UseIAMRole=$true}

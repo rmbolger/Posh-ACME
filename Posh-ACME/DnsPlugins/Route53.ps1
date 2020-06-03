@@ -92,7 +92,7 @@ function Add-DnsTxtRoute53 {
         Add a DNS TXT record to a Route53 hosted zone.
 
     .DESCRIPTION
-        This plugin currently requires the AwsPowershell module to be installed. For authentication to AWS, you can either specify an Access/Secret key pair or the name of an AWS credential profile previously stored using Set-AWSCredential.
+        For authentication to AWS, you can either specify an Access/Secret key pair or the name of an AWS credential profile previously stored using Set-AWSCredential.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -110,7 +110,7 @@ function Add-DnsTxtRoute53 {
         The Secret Key for the IAM account specified by -R53AccessKey. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER R53ProfileName
-        The profile name of a previously stored credential using Set-AWSCredential from the AwsPowershell module. This only works if the AwsPowershell module is installed.
+        The profile name of a previously stored credential using Set-AWSCredential from the AWS PowerShell module. This only works if the module is installed.
 
     .PARAMETER R53UseIAMRole
         If specified, the module will attempt to authenticate using the AWS metadata service via an associated IAM Role. This will only work if the system is running within AWS and has been assigned an IAM Role with the proper permissions.
@@ -121,7 +121,7 @@ function Add-DnsTxtRoute53 {
     .EXAMPLE
         Add-DnsTxtRoute53 '_acme-challenge.site1.example.com' 'asdfqwer12345678' -R53ProfileName 'myprofile'
 
-        Add a TXT record using a profile name saved in the AwsPowershell module.
+        Add a TXT record using a profile name saved in the AWS PowerShell module.
 
     .EXAMPLE
         $seckey = Read-Host -Prompt 'Secret Key:' -AsSecureString
@@ -242,7 +242,7 @@ function Remove-DnsTxtRoute53 {
         Remove a DNS TXT record from a Route53 hosted zone.
 
     .DESCRIPTION
-        This plugin currently requires the AwsPowershell module to be installed. For authentication to AWS, you can either specify an Access/Secret key pair or the name of an AWS credential profile previously stored using Set-AWSCredential.
+        For authentication to AWS, you can either specify an Access/Secret key pair or the name of an AWS credential profile previously stored using Set-AWSCredential.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -260,7 +260,7 @@ function Remove-DnsTxtRoute53 {
         The Secret Key for the IAM account specified by -R53AccessKey. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER R53ProfileName
-        The profile name of a previously stored credential using Set-AWSCredential from the AwsPowershell module. This only works if the AwsPowershell module is installed.
+        The profile name of a previously stored credential using Set-AWSCredential from the AWS PowerShell module. This only works if the module is installed.
 
     .PARAMETER R53UseIAMRole
         If specified, the module will attempt to authenticate using the AWS metadata service via an associated IAM Role. This will only work if the system is running within AWS and has been assigned an IAM Role with the proper permissions.
@@ -271,7 +271,7 @@ function Remove-DnsTxtRoute53 {
     .EXAMPLE
         Remove-DnsTxtRoute53 '_acme-challenge.site1.example.com' 'asdfqwer12345678' -R53ProfileName 'myprofile'
 
-        Remove a TXT record using a profile name saved in the AwsPowershell module.
+        Remove a TXT record using a profile name saved in the AWS PowerShell module.
 
     .EXAMPLE
         $seckey = Read-Host -Prompt 'Secret Key:' -AsSecureString
@@ -331,20 +331,38 @@ function Initialize-R53Config {
         $ExtraConnectParams
     )
 
-    # We now have the ability to do direct REST calls against AWS without the AwsPowerShell dependency
-    # as long as the user provided explicit keys rather than a profile name.
-    # However, we're still going to prefer using the module if it's installed because it's less likely
-    # to break over time if AWS updates the REST API requirements. Or rather, fixing it should be as simple
-    # as installing an updated version of the AwsPowerhell module.
+    # We now have the ability to do direct REST calls against AWS without depending
+    # on AWS's own PowerShell module as long as the user provided explicit keys
+    # rather than a profile name. However, we're still going to prefer using the
+    # module if it's installed because it's less likely to break over time if
+    # AWS updates the REST API requirements. Or rather, fixing it should be as
+    # simple as installing an updated version of the module.
 
-    # check for AwsPowershell module availability
-    if ($PSEdition -eq 'Core') { $modName = 'AwsPowershell.NetCore' } else { $modName = 'AwsPowershell' }
-    $modAvailable = $null -ne (Get-Module -ListAvailable $modName -Verbose:$false)
-    if ($modAvailable) {
-        Import-Module $modName -Verbose:$false
+    # Prior to version 4 of the AWS PowerShell Tools, the module was called
+    # AWSPowerShell or AWSPowerShell.NetCore depending on the PowerShell edition
+    # you were on. Both were single monolithic modules. In version 4, they've
+    # split all the features into sub-modules, but there are no distinctions
+    # between editions anymore. For Route53 specifically, we care about
+    # AWS.Tools.Route53. Thankfully, everything in 4 is backwards compatible with
+    # 3, so we don't need to do any special casing depending on which module is
+    # installed.
+
+    # check for AWS module availability
+    if ($null -ne (Get-Module -ListAvailable 'AWS.Tools.Route53')) {
+        Import-Module 'AWS.Tools.Route53' -Verbose:$false
         $script:AwsUseModule = $true
-    } else {
-        Write-Verbose "The $modName module was not found."
+    }
+    elseif ($PSEdition -eq 'Core' -and
+            $null -ne (Get-Module -ListAvailable 'AWSPowerShell.Netcore')) {
+        Import-Module 'AWSPowerShell.NetCore' -Verbose:$false
+        $script:AwsUseModule = $true
+    }
+    elseif ($null -eq (Get-Module -ListAvailable 'AWSPowerShell')) {
+        Import-Module 'AWSPowerShell' -Verbose:$false
+        $script:AwsUseModule = $true
+    }
+    else {
+        Write-Verbose "An AWS PowerShell module for Route53 was not found. https://docs.aws.amazon.com/powershell/"
         $script:AwsUseModule = $false
     }
 
@@ -360,7 +378,7 @@ function Initialize-R53Config {
             break
         }
         'IAMRole' {
-            if ($modAvailable) {
+            if ($script:AwsUseModule) {
                 # the module will use the IAMRole by default if nothing else is specified
                 $script:AwsCredParam = @{}
             } else {
@@ -382,8 +400,8 @@ function Initialize-R53Config {
         default {
             # the only thing left is profile name which requires the module
             # so error if we didn't find it
-            if (-not $modAvailable) {
-                throw "The $modName module is required to use this plugin with the R53ProfileName parameter."
+            if (-not $script:AwsUseModule) {
+                throw "An AWS PowerShell module is required to use this plugin with the R53ProfileName parameter. https://docs.aws.amazon.com/powershell/"
             }
             $script:AwsCredParam = @{ProfileName=$R53ProfileName}
         }
