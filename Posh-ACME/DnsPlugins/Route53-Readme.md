@@ -103,9 +103,9 @@ Now you'd need to attach the role with your EC2 instance or launch a new instanc
 
 ## Using the Plugin
 
-If you are using explicit credentials, you may send them directly to the plugin via `R53AccessKey` and `R53SecretKey`/`R53SecretKeyInsecure` parameters. The "insecure" version of the secret parameter is for non-Windows OSes that can't currently use the SecureString version. If you lost the keys, you can re-generate them from the AWS IAM console. But there's no way to retrieve an existing secret key value.
+If you are using explicit credentials, you may send them directly to the plugin via `R53AccessKey` and `R53SecretKey`/`R53SecretKeyInsecure` parameters. A SecureString value is required for `R53SecretKey` which will only work on Windows or any OS with PowerShell 6.2 or later. The "insecure" version of the secret parameter can be used on any OS. If you lost the keys, you can re-generate them from the AWS IAM console. But there's no way to retrieve an existing secret key value.
 
-### Windows
+### Windows or PS 6.2+
 
 ```powershell
 # store the secret key as a SecureString
@@ -113,15 +113,15 @@ $sec = Read-Host -Prompt "Secret Key" -AsSecureString
 
 # set the params and generate the cert
 $r53Params = @{R53AccessKey='xxxxxxxx';R53SecretKey=$sec}
-New-PACertificate test.example.com -DnsPlugin Route53 -PluginArgs $r53Params
+New-PACertificate example.com -DnsPlugin Route53 -PluginArgs $r53Params
 ```
 
-### Non-Windows
+### Any OS
 
 ```powershell
 # set the params and generate the cert
 $r53Params = @{R53AccessKey='xxxxxxxx';R53SecretKeyInsecure='yyyyyyyy'}
-New-PACertificate test.example.com -DnsPlugin Route53 -PluginArgs $r53Params
+New-PACertificate example.com -DnsPlugin Route53 -PluginArgs $r53Params
 ```
 
 ### AWS Powershell Module Profile (any OS)
@@ -134,7 +134,7 @@ Set-AWSCredential -StoreAs 'poshacme' -AccessKey 'xxxxxxxx' -SecretKey 'yyyyyyyy
 
 # set the params and generate the cert
 $r53Params = @{R53ProfileName='poshacme'}
-New-PACertificate test.example.com -DnsPlugin Route53 -PluginArgs $r53Params
+New-PACertificate example.com -DnsPlugin Route53 -PluginArgs $r53Params
 ```
 
 ### IAM Role (any OS)
@@ -142,5 +142,5 @@ New-PACertificate test.example.com -DnsPlugin Route53 -PluginArgs $r53Params
 When using an IAM Role, the only thing you need to specify is a switch called `R53UseIAMRole`.
 
 ```powershell
-New-PACertificate test.example.com -DnsPlugin Route53 -PluginArgs @{R53UseIAMRole=$true}
+New-PACertificate example.com -DnsPlugin Route53 -PluginArgs @{R53UseIAMRole=$true}
 ```
