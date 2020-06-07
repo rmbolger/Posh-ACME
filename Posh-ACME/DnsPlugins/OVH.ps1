@@ -17,6 +17,7 @@ function Add-DnsTxtOVH {
         [string]$OVHConsumerKeyInsecure,
         [ValidateSet('ovh-eu','ovh-us','ovh-ca','soyoustart-eu','soyoustart-ca','kimsufi-eu','kimsufi-ca','runabove-ca')]
         [string]$OVHRegion = 'ovh-eu',
+        [switch]$OVHUseModify,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -26,20 +27,60 @@ function Add-DnsTxtOVH {
     $domain = Find-OVHDomain $RecordName
     $recShort = $RecordName -ireplace [regex]::Escape(".$domain"), [string]::Empty
 
+    $recs = Get-OVHTxtRecords $recShort $domain
 
-    $rec = Get-OVHTxtRecord $recShort $domain $TxtValue
-
-    if ($rec) {
+    if ($recs | Where-Object { $_.target -eq "`"$TxtValue`"" }) {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
-    } else {
-        # add the record
+    }
+    elseif ($OVHUseModify) {
+        # try to modify an existing record we haven't already modified in this session
+        $recsToModify = $recs | Where-Object { $_.id -notin $script:OVHModifiedRecs }
+
+        if ($recsToModify.Count -gt 0) {
+            $modSuccess = $false
+
+            foreach ($rec in $recsToModify) {
+                $query = "$($script:OVHCreds.ApiBase)/domain/zone/$domain/record/$($rec.id)"
+                $body = @{target="`"$TxtValue`""} | ConvertTo-Json -Compress
+                try {
+                    Write-Verbose "Attempting to modify record ID $($rec.id)."
+                    Invoke-OVHRest PUT $query $body | Out-Null
+
+                    # add the zone to be saved
+                    if ($domain -notin $script:OVHZonesToSave) {
+                        $script:OVHZonesToSave += $domain
+                    }
+
+                    $script:OVHModifiedRecs += $rec.id
+                    $modSuccess = $true
+                    break
+                } catch {}
+            }
+            if (-not $modSuccess) {
+                Write-Verbose "Failed to modify any existing records. Re-throwing the last exception."
+                throw ($Error[0].Exception)
+            }
+        } else {
+            throw "No existing records were found to modify in $domain that haven't already been modified."
+        }
+    }
+    else {
+        # add a new record
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
+
         $query = "$($script:OVHCreds.ApiBase)/domain/zone/$domain/record"
-        $body = @{fieldType='TXT'; subDomain=$recShort; target="`"$TxtValue`""} | ConvertTo-Json -Compress
+        $body = @{
+            fieldType = 'TXT'
+            subDomain = $recShort
+            target    = "`"$TxtValue`""
+        } | ConvertTo-Json -Compress
+
         Invoke-OVHRest POST $query $body | Out-Null
 
         # add the zone to be saved
-        if ($domain -notin $script:OVHZonesToSave) { $script:OVHZonesToSave += $domain }
+        if ($domain -notin $script:OVHZonesToSave) {
+            $script:OVHZonesToSave += $domain
+        }
     }
 
 
@@ -74,6 +115,9 @@ function Add-DnsTxtOVH {
     .PARAMETER OVHRegion
         The region code associated with your OVH account. Must be one of the following: 'ovh-eu','ovh-us','ovh-ca','soyoustart-eu','soyoustart-ca','kimsufi-eu','kimsufi-ca','runabove-ca'
 
+    .PARAMETER OVHUseModify
+        If specified, the plugin will attempt to modify existing TXT records instead of adding/removing new ones. This is only necessary when the API credential has been given modify permissions on particular record IDs instead of write access to a whole zone.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -94,7 +138,7 @@ function Add-DnsTxtOVH {
 }
 
 function Remove-DnsTxtOVH {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -112,26 +156,36 @@ function Remove-DnsTxtOVH {
         [string]$OVHConsumerKeyInsecure,
         [ValidateSet('ovh-eu','ovh-us','ovh-ca','soyoustart-eu','soyoustart-ca','kimsufi-eu','kimsufi-ca','runabove-ca')]
         [string]$OVHRegion = 'ovh-eu',
+        [switch]$OVHUseModify,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    # if we're in modify mode, we don't do anything and leave the records as-is
+    if ($OVHUseModify) {
+        Write-Debug "Skipping record delete because Modify mode is enabled."
+        return
+    }
 
     Connect-OVH @PSBoundParameters
 
     $domain = Find-OVHDomain $RecordName
     $recShort = $RecordName -ireplace [regex]::Escape(".$domain"), [string]::Empty
 
-    $rec = Get-OVHTxtRecord $recShort $domain $TxtValue
+    $recs = Get-OVHTxtRecords $recShort $domain
 
-    if ($rec) {
+    if ($recs | Where-Object { $_.target -eq "`"$TxtValue`"" }) {
         # delete the record
         Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
         $query = "$($script:OVHCreds.ApiBase)/domain/zone/$domain/record/$($rec.id)"
         Invoke-OVHRest DELETE $query | Out-Null
 
         # add the zone to be saved
-        if ($domain -notin $script:OVHZonesToSave) { $script:OVHZonesToSave += $domain }
-    } else {
+        if ($domain -notin $script:OVHZonesToSave) {
+            $script:OVHZonesToSave += $domain
+        }
+    }
+    else {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     }
 
@@ -166,8 +220,8 @@ function Remove-DnsTxtOVH {
     .PARAMETER OVHRegion
         The region code associated with your OVH account. Must be one of the following: 'ovh-eu','ovh-us','ovh-ca','soyoustart-eu','soyoustart-ca','kimsufi-eu','kimsufi-ca','runabove-ca'
 
-    .PARAMETER ExtraParams
-        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+    .PARAMETER OVHUseModify
+        If specified, the plugin will attempt to modify existing TXT records instead of adding/removing new ones. This is only necessary when the API credential has been given modify permissions on particular record IDs instead of write access to a whole zone.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -189,18 +243,35 @@ function Remove-DnsTxtOVH {
 }
 
 function Save-DnsTxtOVH {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
+        [Parameter(Mandatory)]
+        [string]$OVHAppKey,
+        [Parameter(ParameterSetName='Secure',Mandatory)]
+        [securestring]$OVHAppSecret,
+        [Parameter(ParameterSetName='Secure',Mandatory)]
+        [securestring]$OVHConsumerKey,
+        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [string]$OVHAppSecretInsecure,
+        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [string]$OVHConsumerKeyInsecure,
+        [ValidateSet('ovh-eu','ovh-us','ovh-ca','soyoustart-eu','soyoustart-ca','kimsufi-eu','kimsufi-ca','runabove-ca')]
+        [string]$OVHRegion = 'ovh-eu',
+        [switch]$OVHUseModify,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     if ($script:OVHCreds) {
-        # Apply zone modifications
+        # Apply zone modifications by calling the "refresh" endpoint
         foreach ($zone in $script:OVHZonesToSave) {
+            Write-Verbose "Refreshing $zone zone"
             Invoke-OVHRest POST "$($script:OVHCreds.ApiBase)/domain/zone/$zone/refresh" | Out-Null
         }
+        $script:OVHZonesToSave = @()
     }
+
+    $script:OVHModifiedRecs = @()
 
     <#
     .SYNOPSIS
@@ -208,6 +279,27 @@ function Save-DnsTxtOVH {
 
     .DESCRIPTION
         Notifies OVH to apply zone modifications.
+
+    .PARAMETER OVHAppKey
+        The Application Key value associated with the OVH API application you created.
+
+    .PARAMETER OVHAppSecret
+        The SecureString version of the Application Secret value associated with the OVH API application you created.
+
+    .PARAMETER OVHAppSecretInsecure
+        The standard string version of the Application Secret value associated with the OVH API application you created.
+
+    .PARAMETER OVHConsumerKey
+        The SecureString version of the Consumer Key value generated for the API application you created.
+
+    .PARAMETER OVHConsumerKeyInsecure
+        The standard string version of the Consumer Key value generated for the API application you created.
+
+    .PARAMETER OVHRegion
+        The region code associated with your OVH account. Must be one of the following: 'ovh-eu','ovh-us','ovh-ca','soyoustart-eu','soyoustart-ca','kimsufi-eu','kimsufi-ca','runabove-ca'
+
+    .PARAMETER OVHUseModify
+        If specified, the plugin will attempt to modify existing TXT records instead of adding/removing new ones. This is only necessary when the API credential has been given modify permissions on particular record IDs instead of write access to a whole zone.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -266,7 +358,13 @@ function Connect-OVH {
         ApiBase = $apiBase
     }
 
-    $script:OVHZonesToSave = @()
+    # setup a tracking variable for zones we need to "refresh"
+    if (-not $script:OVHZonesToSave) { $script:OVHZonesToSave = @() }
+
+    # setup a tracking variable for modified records
+    if (-not $script:OVHModifiedRecs) { $script:OVHModifiedRecs = @() }
+
+
 }
 
 function Invoke-OVHRest {
@@ -334,30 +432,33 @@ function Find-OVHDomain {
         Write-Debug "Checking $zoneTest"
         try {
             # a non-error response indicates the zone exists
-            Invoke-OvhRest GET "$($script:OVHCreds.ApiBase)/domain/zone/$zoneTest" | Out-Null
+            Invoke-OvhRest GET "$($script:OVHCreds.ApiBase)/domain/zone/$zoneTest/record?fieldType=TXT" | Out-Null
             # save the zone name
             $script:OVHRecordZones.$RecordName = $zoneTest
             return $zoneTest
         } catch {
-            # re-throw anything except a 404 because it just means the zone doesn't exist
-            if (404 -ne $_.Exception.Response.StatusCode.value__) {
-                throw
+            # re-throw anything except a 403 or 404 because they indicate the zone
+            # either doesn't exist or we haven't been given access to it.
+            if (403 -eq $_.Exception.Response.StatusCode.value__) {
+                Write-Debug "$zoneTest either doesn't exist or our credentials haven't been given read access to it."
             }
+            elseif (404 -eq $_.Exception.Response.StatusCode.value__) {
+                Write-Debug "$zoneTest does not exist"
+            }
+            else { throw }
         }
     }
 
     throw "No zone found for $RecordName"
 }
 
-function Get-OVHTxtRecord {
+function Get-OVHTxtRecords {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
         [string]$RecordShort,
         [Parameter(Mandatory)]
-        [string]$Domain,
-        [Parameter(Mandatory)]
-        [string]$TxtValue
+        [string]$Domain
     )
 
     # First we search for just the record and type which only returns a list of record IDs when found
@@ -369,22 +470,21 @@ function Get-OVHTxtRecord {
 
     # now we loop through the IDs to request the record details so we can check if the target matches
     foreach ($id in $recIDs) {
-        $rec = Invoke-OVHRest GET "$($script:OVHCreds.ApiBase)/domain/zone/$Domain/record/$id"
-        if ($rec.target -eq "`"$TxtValue`"") {
-            return $rec
-        }
+        Invoke-OVHRest GET "$($script:OVHCreds.ApiBase)/domain/zone/$Domain/record/$id"
     }
-
-    return $null
 }
 
 function Invoke-OVHSetup {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='AllOrList')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$AppKey,
         [ValidateSet('ovh-eu','ovh-us','ovh-ca','soyoustart-eu','soyoustart-ca','kimsufi-eu','kimsufi-ca','runabove-ca')]
-        [string]$OVHRegion = 'ovh-eu'
+        [string]$OVHRegion = 'ovh-eu',
+        [Parameter(ParameterSetName='AllOrList')]
+        [string[]]$Zone,
+        [Parameter(ParameterSetName='Custom',Mandatory)]
+        [object[]]$AccessRules
     )
 
     # So when creating an OVH app key, they don't give you the "Consumer Key" by default. They have
@@ -411,16 +511,38 @@ function Invoke-OVHSetup {
 
     $header = @{ 'X-Ovh-Application' = $AppKey }
 
-    $bodyJson = @{
-        accessRules = @(
-            @{ method = 'GET';    path = '/domain/zone/*' }
-            @{ method = 'GET';    path = '/domain/zone/*/record' }
-            @{ method = 'POST';   path = '/domain/zone/*/record' }
-            @{ method = 'DELETE'; path = '/domain/zone/*/record/*' }
-            @{ method = 'POST';   path = '/domain/zone/*/refresh' }
-        )
+    # build the body that will request permissions for this app
+    $body = @{
         redirection = 'https://github.com/rmbolger/Posh-ACME/wiki/OVH-Success-Redirect'
-    } | ConvertTo-Json -Compress
+    }
+
+    if ('AllOrList' -eq $PSCmdlet.ParameterSetName) {
+        if ($Zone) {
+            # setup permissions for a specific set of zones
+            $body.accessRules = @()
+            foreach ($z in $Zone) {
+                $body.accessRules += @(
+                    @{ method = 'GET';    path = "/domain/zone/$z/record*" }
+                    @{ method = 'POST';   path = "/domain/zone/$z/record" }
+                    @{ method = 'DELETE'; path = "/domain/zone/$z/record/*" }
+                    @{ method = 'POST';   path = "/domain/zone/$z/refresh" }
+                )
+            }
+        } else {
+            # setup permissions for all zones
+            $body.accessRules = @(
+                @{ method = 'GET';    path = '/domain/zone/*/record*' }
+                @{ method = 'POST';   path = '/domain/zone/*/record' }
+                @{ method = 'DELETE'; path = '/domain/zone/*/record/*' }
+                @{ method = 'POST';   path = '/domain/zone/*/refresh' }
+            )
+        }
+    } else {
+        # setup custom permissions
+        $body.accessRules = $AccessRules
+    }
+
+    $bodyJson = $body | ConvertTo-Json -Compress
 
     $UseBasic = @{}
     if ('UseBasicParsing' -in (Get-Command Invoke-RestMethod).Parameters.Keys) {
