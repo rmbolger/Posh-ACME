@@ -7,8 +7,10 @@ Describe "New-Jws" {
         # generate some valid parameters
         $rsaKey = New-Object Security.Cryptography.RSACryptoServiceProvider 2048
         $ecKey = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve+NamedCurves]::nistP256)
+        $fakeHmac = [Security.Cryptography.HMACSHA256]::new((1..64))
         $rsaHeader = @{alg='RS256';jwk=($rsaKey | ConvertTo-Jwk -PublicOnly);nonce='fakenonce';url='https://example.com'}
         $ecHeader = @{alg='ES256';jwk=($ecKey | ConvertTo-Jwk -PublicOnly);nonce='fakenonce';url='https://example.com'}
+        $hmacHeader = @{alg='HS256';kid='xxxxxxxxxxxx';url='https://example.com'}
         $payload = '{"mykey":"myvalue"}'
 
         Context "Parameter validation" {
@@ -41,6 +43,16 @@ Describe "New-Jws" {
                 $ecHeader.alg = 'RS256'
                 { New-Jws $ecKey $ecHeader $payload } | Should -Throw
                 $ecHeader.alg = 'ES256'
+            }
+            It "mis-matched 'alg' #3" {
+                $hmacHeader.alg = 'RS256'
+                { New-Jws $fakeHmac $hmacHeader $payload } | Should -Throw
+                $hmacHeader.alg = 'HS256'
+            }
+            It "mis-matched 'alg' #4" {
+                $hmacHeader.alg = 'HS384'
+                { New-Jws $fakeHmac $hmacHeader $payload } | Should -Throw
+                $hmacHeader.alg = 'HS256'
             }
             It "both 'jwk' and 'kid' supplied" {
                 $rsaHeader.kid = 'https://fake/account'
@@ -184,6 +196,49 @@ Describe "New-Jws" {
             $pubKey = ConvertFrom-Jwk ($header.jwk | ConvertTo-Json)
             It "decoded 'signature' verifies properly" {
                 $pubKey.VerifyData($dataBytes,$sigBytes,$HashAlgo) | Should -Be $true
+            }
+
+        }
+
+        Context "HMAC256 and Test and Verify" {
+
+            It "should not throw with good parameters" {
+                { New-Jws $fakeHmac $hmacHeader $payload } | Should -Not -Throw
+            }
+            $result = New-Jws $fakeHmac $hmacHeader $payload
+            It "result is parseable JSON" {
+                { $result | ConvertFrom-Json } | Should -Not -Throw
+            }
+            $jws = $result | ConvertFrom-Json
+            It "'payload' is Base64Url encoded" {
+                { $jws.payload | ConvertFrom-Base64Url } | Should -Not -Throw
+            }
+            $payload = $jws.payload | ConvertFrom-Base64Url
+            It "decoded 'payload' is parseable JSON" {
+                { $payload | ConvertFrom-Json } | Should -Not -Throw
+            }
+            It "'protected' is Base64Url encoded" {
+                { $jws.protected | ConvertFrom-Base64Url } | Should -Not -Throw
+            }
+            $protected = $jws.protected | ConvertFrom-Base64Url
+            It "decoded 'protected' is parseable JSON" {
+                { $protected | ConvertFrom-Json } | Should -Not -Throw
+            }
+            $header = $protected | ConvertFrom-Json
+            It "parsed 'alg' matches input 'alg'" {
+                $header.alg | Should -BeExactly $hmacHeader.alg
+            }
+            It "parsed 'kid' matches input 'kid'" {
+                $header.kid | Should -BeExactly $hmacHeader.kid
+            }
+            It "parsed 'url' matches input 'url'" {
+                $header.url | Should -BeExactly $hmacHeader.url
+            }
+            It "'signature' is Base64Url encoded" {
+                { $jws.signature | ConvertFrom-Base64Url -AsByteArray } | Should -Not -Throw
+            }
+            It "'signature' is correct" {
+                $jws.signature | Should -BeExactly '9XcxZ0lM4bMYmOo_efT8t4t1zg-tjktyUDHzVxTMmTs'
             }
 
         }
