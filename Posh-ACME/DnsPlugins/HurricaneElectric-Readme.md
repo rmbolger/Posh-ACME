@@ -2,7 +2,7 @@
 
 This plugin works against [Hurricane Electric DNS](https://dns.he.net/). It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
 
-*NOTE: Hurricane Electric can be configured as a secondary/slave to your primary zones hosted elsewhere. This plugin will not work for secondary zones. You must use a plugin that is able to modify the primary nameservers.*
+*NOTE: Hurricane Electric can be configured as a secondary to your primary zones hosted elsewhere. This plugin will not work for secondary zones. You must use a plugin that is able to modify the primary nameservers.*
 
 ## Setup
 
