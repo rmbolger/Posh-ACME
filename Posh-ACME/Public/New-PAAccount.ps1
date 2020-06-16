@@ -192,6 +192,15 @@ function New-PAAccount {
     .PARAMETER Force
         If specified, confirmation prompts that may have been generated will be skipped.
 
+    .PARAMETER ExtAcctKID
+        The external account key identifier supplied by the CA. This is required for ACME CAs that require external account binding.
+
+    .PARAMETER ExtAcctHMACKey
+        The external account HMAC key supplied by the CA and encoded as Base64Url. This is required for ACME CAs that require external account binding.
+
+    .PARAMETER ExtAcctAlgorithm
+        The HMAC algorithm to use. Defaults to 'HS256'.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
