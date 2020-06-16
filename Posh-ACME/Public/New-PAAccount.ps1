@@ -10,13 +10,29 @@ function New-PAAccount {
         [string]$KeyLength='ec-256',
         [switch]$AcceptTOS,
         [switch]$Force,
+        [string]$ExtAcctKID,
+        [string]$ExtAcctHMACKey,
         [Parameter(ValueFromRemainingArguments=$true)]
         $ExtraParams
     )
 
     # make sure we have a server configured
-    if (!(Get-PAServer)) {
+    if (-not ($acmeServer = Get-PAServer)) {
         throw "No ACME server configured. Run Set-PAServer first."
+    }
+
+    # make sure the external account binding parameters were specified if this ACME
+    # server requires them.
+    if ($acmeServer.meta -and $acmeServer.meta.externalAccountRequired -and
+        (-not $ExtAcctKID -or -not $ExtAcctHMACKey))
+    {
+        throw "The current ACME server requires external account credentials to create a new ACME account. Please run New-PAAccount with the ExtAcctKID and ExtAcctHMACKey parameters."
+    }
+
+    # try to decode the HMAC key if specified
+    if ($ExtAcctHMACKey) {
+        $keyBytes = ConvertFrom-Base64Url $ExtAcctHMACKey -AsByteArray
+        $hmacKey = [Security.Cryptography.HMACSHA256]::new($keyBytes)
     }
 
     # make sure the Contact emails have a "mailto:" prefix
@@ -58,10 +74,10 @@ function New-PAAccount {
 
     # build the protected header for the request
     $header = @{
-        alg   = $alg;
-        jwk   = ($acctKey | ConvertTo-Jwk -PublicOnly);
-        nonce = $script:Dir.nonce;
-        url   = $script:Dir.newAccount;
+        alg   = $alg
+        jwk   = ($acctKey | ConvertTo-Jwk -PublicOnly)
+        nonce = $script:Dir.nonce
+        url   = $script:Dir.newAccount
     }
 
     # init the payload
@@ -71,6 +87,21 @@ function New-PAAccount {
     }
     if ($AcceptTOS) {
         $payload.termsOfServiceAgreed = $true
+    }
+
+    # add external account binding if specified
+    if ($ExtAcctKID -and $ExtAcctHMACKey) {
+
+        $eabHeader = @{
+            alg = 'HS256'
+            kid = $ExtAcctKID
+            url = $script:Dir.newAccount
+        }
+
+        $eabPayload = $header.jwk | ConvertTo-Json -Compress
+
+        $payload.externalAccountBinding =
+            New-Jws $hmacKey $eabHeader $eabPayload | ConvertFrom-Json
     }
 
     # convert it to json
