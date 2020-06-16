@@ -238,7 +238,7 @@ Describe "New-Jws" {
                 { $jws.signature | ConvertFrom-Base64Url -AsByteArray } | Should -Not -Throw
             }
             It "'signature' is correct" {
-                $jws.signature | Should -BeExactly '9XcxZ0lM4bMYmOo_efT8t4t1zg-tjktyUDHzVxTMmTs'
+                $jws.signature | Should -BeExactly 'aL4olvukpK93jKQdehHblFD5tN3-2SQV8NS4Uwa-Zj4'
             }
 
         }

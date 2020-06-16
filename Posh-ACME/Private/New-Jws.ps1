@@ -103,6 +103,7 @@ function New-Jws {
         # create the signature
         $HashAlgo = [Security.Cryptography.HashAlgorithmName]::SHA256
         $PaddingType = [Security.Cryptography.RSASignaturePadding]::Pkcs1
+        Write-Debug "Signing message using $($Header.alg)"
         $SignedBytes = $Key.SignData($MessageBytes, $HashAlgo, $PaddingType)
     }
     elseif ($Key -and $Key -is [Security.Cryptography.ECDsa]) {
@@ -124,6 +125,7 @@ function New-Jws {
         }
 
         # create the signature
+        Write-Debug "Signing message using $($Header.alg)"
         $SignedBytes = $Key.SignData($MessageBytes, $HashAlgo)
     }
     else {
@@ -138,6 +140,7 @@ function New-Jws {
         }
 
         # create the signature
+        Write-Debug "Signing message using $($Header.alg)"
         $SignedBytes = $HMAC.ComputeHash($MessageBytes)
     }
 
