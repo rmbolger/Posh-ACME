@@ -134,7 +134,7 @@ function New-Jws {
         # Make sure the header 'alg' matches the hmac type.
         if (($Header.alg -notin 'HS256','HS384','HS512') -or
             ($Header.alg -eq 'HS256' -and $HMAC.HashSize -ne 256) -or
-            ($Header.alg -eq 'HS384' -and $HMAC.HashSize -ne 382) -or
+            ($Header.alg -eq 'HS384' -and $HMAC.HashSize -ne 384) -or
             ($Header.alg -eq 'HS512' -and $HMAC.HashSize -ne 512)) {
             throw "Supplied HMAC object (HashSize $($HMAC.HashSize) does not match 'alg' ($($Header.alg)) in the supplied header or alg is not supported."
         }

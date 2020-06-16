@@ -12,6 +12,8 @@ function New-PAAccount {
         [switch]$Force,
         [string]$ExtAcctKID,
         [string]$ExtAcctHMACKey,
+        [ValidateSet('HS256','HS384','HS512')]
+        [string]$ExtAcctAlgorithm = 'HS256',
         [Parameter(ValueFromRemainingArguments=$true)]
         $ExtraParams
     )
@@ -32,7 +34,11 @@ function New-PAAccount {
     # try to decode the HMAC key if specified
     if ($ExtAcctHMACKey) {
         $keyBytes = ConvertFrom-Base64Url $ExtAcctHMACKey -AsByteArray
-        $hmacKey = [Security.Cryptography.HMACSHA256]::new($keyBytes)
+        $hmacKey = switch ($ExtAcctAlgorithm) {
+            'HS256' { [Security.Cryptography.HMACSHA256]::new($keyBytes); break; }
+            'HS384' { [Security.Cryptography.HMACSHA384]::new($keyBytes); break; }
+            'HS512' { [Security.Cryptography.HMACSHA512]::new($keyBytes); break; }
+        }
     }
 
     # make sure the Contact emails have a "mailto:" prefix
@@ -93,7 +99,7 @@ function New-PAAccount {
     if ($ExtAcctKID -and $ExtAcctHMACKey) {
 
         $eabHeader = @{
-            alg = 'HS256'
+            alg = $ExtAcctAlgorithm
             kid = $ExtAcctKID
             url = $script:Dir.newAccount
         }
