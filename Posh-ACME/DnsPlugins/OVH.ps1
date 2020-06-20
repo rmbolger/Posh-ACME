@@ -27,7 +27,7 @@ function Add-DnsTxtOVH {
     $domain = Find-OVHDomain $RecordName
     $recShort = $RecordName -ireplace [regex]::Escape(".$domain"), [string]::Empty
 
-    $recs = Get-OVHTxtRecords $recShort $domain
+    $recs = @(Get-OVHTxtRecords $recShort $domain)
 
     if ($recs | Where-Object { $_.target -eq "`"$TxtValue`"" }) {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
@@ -42,7 +42,7 @@ function Add-DnsTxtOVH {
         }
 
         # try to modify an existing record we haven't already modified in this session
-        $recsToModify = $recs | Where-Object { $_.id -notin $script:OVHModifiedRecs }
+        $recsToModify = @($recs | Where-Object { $_.id -notin $script:OVHModifiedRecs })
 
         if ($recsToModify.Count -gt 0) {
             $modSuccess = $false
