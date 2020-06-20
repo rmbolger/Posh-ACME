@@ -180,7 +180,7 @@ function Remove-DnsTxtOVH {
     $domain = Find-OVHDomain $RecordName
     $recShort = $RecordName -ireplace [regex]::Escape(".$domain"), [string]::Empty
 
-    $recs = Get-OVHTxtRecords $recShort $domain
+    $recs = @(Get-OVHTxtRecords $recShort $domain)
 
     if ($recs | Where-Object { $_.target -eq "`"$TxtValue`"" }) {
         # delete the record
