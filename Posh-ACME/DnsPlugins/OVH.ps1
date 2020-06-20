@@ -33,13 +33,16 @@ function Add-DnsTxtOVH {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
     }
     elseif ($OVHUseModify) {
-        # try to modify an existing record we haven't already modified in this session
-        $recsToModify = $recs | Where-Object { $_.id -notin $script:OVHModifiedRecs }
+
+        Write-Debug "Checking for records to modify from the list: $(($recs.id -join ','))"
 
         # list the previously modified record IDs in the debug log
         if ($script:OVHModifiedRecs.Count -gt 0) {
             Write-Debug "Ignoring previously modified IDs: $(($script:OVHModifiedRecs -join ','))"
         }
+
+        # try to modify an existing record we haven't already modified in this session
+        $recsToModify = $recs | Where-Object { $_.id -notin $script:OVHModifiedRecs }
 
         if ($recsToModify.Count -gt 0) {
             $modSuccess = $false
