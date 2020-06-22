@@ -8,6 +8,7 @@ function Add-DnsTxtAcmeDns {
         [Parameter(Mandatory,Position=2)]
         [string]$ACMEServer,
         [string[]]$ACMEAllowFrom,
+        [hashtable]$ACMERegistration,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -34,6 +35,22 @@ function Add-DnsTxtAcmeDns {
             Write-Verbose "No existing acme-dns registrations found"
             $ACMEReg = [pscustomobject]@{}
         }
+    }
+
+    # Add or override existing registrations with passed in registrations
+    if ($ACMERegistration) {
+        foreach ($fqdn in $ACMERegistration.Keys) {
+            if ($fqdn -notin $ACMEReg.PSObject.Properties.Name) {
+                Write-Debug "Adding passed in registration for $fqdn"
+                $ACMEReg | Add-Member $fqdn $ACMERegistration.$fqdn
+            } else {
+                Write-Debug "Overwriting saved registration with passed in value for $fqdn"
+                $ACMEReg.$fqdn = $ACMERegistration.$fqdn
+            }
+        }
+
+        # save the new registration(s)
+        Export-PluginVar ACMEReg $ACMEReg
     }
 
     # create a new subdomain registration if necessary
