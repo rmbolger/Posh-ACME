@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '3.14.0'
+ModuleVersion = '3.15.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -110,12 +110,14 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 3.14.0 (2020-05-07)
+## 3.15.0 (2020-06-22)
 
-* Added new DNS plugin [Hetzner](https://www.hetzner.de/) (Thanks @derguterat)
-* Fix for Google DNS plugin to ignore private zones. (Thanks @timwsuqld)
-* Fix for Azure usage guide for using existing access token. (Thanks @arestarh)
-* Fix for RFC2136 plugin which makes it usable for records other than the root domain.
+* Added new DNS plugin [DomainOffensive](https://www.do.de) (Thanks @Armitxes)
+* `New-PAAccount` now has `ExtAcctKID`, `ExtAcctHMACKey`, and `ExtAcctAlgorithm` parameters to support Certificate Authorities that require external account binding. Look for a guide in the wiki soon.
+* Added support for the new AWS.Tools modules when using Route53.
+* Added support for more restricted API permissions when using OVH. It's now possible to only grant write access to a specific list of zones or even individual TXT records. See the usage guide for details.
+* Added pre-registration support for AcmeDns. See the usage guide for details.
+* Fixed a bug with GoDaddy that prevented managing DNS-only hosted domains.
 '@
 
     } # End of PSData hashtable
