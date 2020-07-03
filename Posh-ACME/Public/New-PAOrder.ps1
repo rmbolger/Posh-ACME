@@ -59,15 +59,21 @@ function New-PAOrder {
         # confirm if previous order is still in progress
         } elseif ($order -and $order.status -in 'pending','ready','processing') {
 
-            if (!$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
-                "Existing order with status $($order.status).")) { return }
+            if (!($null -eq [Environment]::UserInteractive -or [Environment]::UserInteractive) -or
+                  !$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
+                    "Existing order with status $($order.status).")) {
+                 return "Order status not valid"
+            }
 
         # confirm if previous order not up for renewal
         } elseif ($order -and $order.status -eq 'valid' -and
                     (Get-DateTimeOffsetNow) -lt ([DateTimeOffset]::Parse($order.RenewAfter))) {
 
-            if (!$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
-                "Existing order has not reached suggested renewal window.")) { return }
+            if (!($null -eq [Environment]::UserInteractive -or [Environment]::UserInteractive) -or
+                  !$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
+                    "Existing order has not reached suggested renewal window.")) {
+                 return "Order not due for renewal"
+            }
         }
     }
 
