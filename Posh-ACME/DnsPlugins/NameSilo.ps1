@@ -4,10 +4,8 @@ function Add-DnsTxtNameSilo {
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [string]$TxtValue,
-        [Parameter(Mandatory,Position=3)]
-        [string]$Domain,
-        [Parameter(Mandatory,Position=4)]
+        [string]$TxtValue,        
+        [Parameter(Mandatory,Position=2)]
         [string]$NameSiloApiKey,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -15,7 +13,10 @@ function Add-DnsTxtNameSilo {
 
     $apiBase = 'https://www.namesilo.com/api'
     $RecordName = $RecordName.ToLower()
-
+    $domainList = $RecordName.Split('.')
+    $domainCount = @($domainList).Count - 1
+    $Domain = $domainList[$domainCount-1] + "." + $domainList[$domainCount]
+    $RecordName = $RecordName.TrimEnd($Domain)
     try {       
         $uri = "$apiBase/dnsAddRecord?version=1&type=xml&key=$($NameSiloApiKey)&domain=$($Domain)&rrtype=TXT&rrhost=$($RecordName)&rrvalue=$($TxtValue)"
         $response = Invoke-RestMethod -Uri $uri
@@ -39,9 +40,6 @@ function Add-DnsTxtNameSilo {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER Domain
-        The domain to add the record to.
-
     .PARAMETER NameSiloApiKey
         The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager
 
@@ -63,8 +61,6 @@ function Remove-DnsTxtNameSilo {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
-        [string]$Domain,
-        [Parameter(Mandatory,Position=3)]
         [string]$NameSiloApiKey,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -72,7 +68,10 @@ function Remove-DnsTxtNameSilo {
 
     $apiBase = 'https://www.namesilo.com/api'
     $RecordName = $RecordName.ToLower()
-    
+    $domainList = $RecordName.Split('.')
+    $domainCount = @($domainList).Count - 1
+    $Domain = $domainList[$domainCount-1] + "." + $domainList[$domainCount]
+    $RecordName = $RecordName.TrimEnd($Domain)
     try {
         $response = Invoke-RestMethod "$apiBase/dnsListRecords?version=1&type=xml&key=$($NameSiloApiKey)&domain=$($Domain)"
     } catch { throw }
@@ -115,9 +114,6 @@ function Remove-DnsTxtNameSilo {
 
     .PARAMETER TxtValue
         The value of the TXT record.
-
-    .PARAMETER Domain
-        The domain to add the record to.
 
     .PARAMETER NameSiloApiKey
         The API key for the NameSilo account. Created at https://www.namesilo.com/api-reference
