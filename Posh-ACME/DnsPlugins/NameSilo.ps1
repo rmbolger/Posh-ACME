@@ -18,8 +18,8 @@ function Add-DnsTxtNameSilo {
     $Domain = $domainList[$domainCount-1] + "." + $domainList[$domainCount]
     $RecordName = $RecordName.TrimEnd($Domain)
     try {       
-        $uri = "$apiBase/dnsAddRecord?version=1&type=xml&key=$($NameSiloApiKey)&domain=$($Domain)&rrtype=TXT&rrhost=$($RecordName)&rrvalue=$($TxtValue)"
-        $response = Invoke-RestMethod -Uri $uri
+        $uri = "$apiBase/dnsAddRecord?version=1&type=xml&key=$($NameSiloApiKey)&domain=$($Domain)&rrtype=TXT&rrhost=$($RecordName)&rrvalue=$($TxtValue)&rrttl=3600"
+        $response = Invoke-RestMethod -Uri $uri @script:UseBasic
     } catch { throw }
 
     if ($response["namesilo"].reply.code -cne 300) {
@@ -73,7 +73,7 @@ function Remove-DnsTxtNameSilo {
     $Domain = $domainList[$domainCount-1] + "." + $domainList[$domainCount]
     $RecordName = $RecordName.TrimEnd($Domain)
     try {
-        $response = Invoke-RestMethod "$apiBase/dnsListRecords?version=1&type=xml&key=$($NameSiloApiKey)&domain=$($Domain)"
+        $response = Invoke-RestMethod "$apiBase/dnsListRecords?version=1&type=xml&key=$($NameSiloApiKey)&domain=$($Domain)" @script:UseBasic
     } catch { throw }
 
     $reply = $response["namesilo"].reply
@@ -88,7 +88,7 @@ function Remove-DnsTxtNameSilo {
         try {
             Write-Verbose "Deleting $RecordName with value $TxtValue"
             $rrid = $record.record_id
-            $response2 = Invoke-RestMethod "$apiBase/dnsDeleteRecord?version=1&type=xml&key=$($NameSiloApiKey)&domain=$($Domain)&rrid=$($rrid)"
+            $response2 = Invoke-RestMethod "$apiBase/dnsDeleteRecord?version=1&type=xml&key=$($NameSiloApiKey)&domain=$($Domain)&rrid=$($rrid)" @script:UseBasic
             $reply2 = $response2["namesilo"].reply
             if ($reply2.code -cne 300) {
                 throw "Failed to list domain records: $($reply2.detail)"
