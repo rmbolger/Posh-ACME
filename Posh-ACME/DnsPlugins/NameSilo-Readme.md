@@ -8,9 +8,9 @@ For authentication against the NameSilo API, an API key is required. Open the [a
 
 ## Using the Plugin
 
-Provide the `NameSiloApiKey` parameter with the saved API key and the `Domain` parameter with the domain name to be updated.
+Provide the `NameSiloApiKey` parameter with the saved API key. Note that NameSilo only updates DNS records every 15 minutes, so try with a -DnsSleep setting of 900
 
 ```powershell
-$pArgs = @{ NameSiloApiKey='xxxxxxxx' Domain='example.com' }
-New-PACertificate example.com -DnsPlugin NameSilo -PluginArgs $pArgs
+$pArgs = @{ NameSiloApiKey='xxxxxxxx' }
+New-PACertificate example.com -DnsPlugin NameSilo -PluginArgs $pArgs -DnsSleep 900
 ```
