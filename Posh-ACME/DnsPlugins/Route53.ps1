@@ -357,7 +357,7 @@ function Initialize-R53Config {
         Import-Module 'AWSPowerShell.NetCore' -Verbose:$false
         $script:AwsUseModule = $true
     }
-    elseif ($null -eq (Get-Module -ListAvailable 'AWSPowerShell')) {
+    elseif ($null -ne (Get-Module -ListAvailable 'AWSPowerShell')) {
         Import-Module 'AWSPowerShell' -Verbose:$false
         $script:AwsUseModule = $true
     }
