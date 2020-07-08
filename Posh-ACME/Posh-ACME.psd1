@@ -110,14 +110,9 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 3.15.0 (2020-06-22)
+## 3.15.1 (2020-07-08)
 
-* Added new DNS plugin [DomainOffensive](https://www.do.de) (Thanks @Armitxes)
-* `New-PAAccount` now has `ExtAcctKID`, `ExtAcctHMACKey`, and `ExtAcctAlgorithm` parameters to support Certificate Authorities that require external account binding. Look for a guide in the wiki soon.
-* Added support for the new AWS.Tools modules when using Route53.
-* Added support for more restricted API permissions when using OVH. It's now possible to only grant write access to a specific list of zones or even individual TXT records. See the usage guide for details.
-* Added pre-registration support for AcmeDns. See the usage guide for details.
-* Fixed a bug with GoDaddy that prevented managing DNS-only hosted domains.
+* Fixed Route53 trying to load AWSPowerShell module when not installed (#263)
 '@
 
     } # End of PSData hashtable

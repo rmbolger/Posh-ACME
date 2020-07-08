@@ -1,3 +1,7 @@
+## 3.15.1 (2020-07-08)
+
+* Fixed Route53 trying to load AWSPowerShell module when not installed (#263)
+
 ## 3.15.0 (2020-06-22)
 
 * Added new DNS plugin [DomainOffensive](https://www.do.de) (Thanks @Armitxes)
