@@ -109,8 +109,14 @@ function Submit-Renewal {
                 }
 
                 if ($orders.Count -gt 0) {
-                    # recurse to renew these orders
-                    $orders | Submit-Renewal -NewKey:$NewKey.IsPresent -Force:$Force.IsPresent
+                    # If new PluginArgs were specified use them
+                    if ($PluginArgs) {
+                        # recurse to renew these orders
+                        $orders | Submit-Renewal -NewKey:$NewKey.IsPresent -Force:$Force.IsPresent -NoSkipManualDns:$NoSkipManualDns.IsPresent -PluginArgs $PluginArgs
+                    } else {
+                        # recurse to renew these orders
+                        $orders | Submit-Renewal -NewKey:$NewKey.IsPresent -Force:$Force.IsPresent -NoSkipManualDns:$NoSkipManualDns.IsPresent
+                    }
                 } else {
                     Write-Verbose "No renewable orders found for account $($script:Acct.id)."
                 }
@@ -129,9 +135,14 @@ function Submit-Renewal {
                 foreach ($acct in $accounts) {
                     # set it as current
                     $acct | Set-PAAccount
-
-                    # recurse to renew all orders on it
-                    Submit-Renewal -AllOrders -NewKey:$NewKey.IsPresent -Force:$Force.IsPresent
+                    # If new PluginArgs were specified use them
+                    if ($PluginArgs) {
+                        # recurse to renew all orders on it
+                        Submit-Renewal -AllOrders -NewKey:$NewKey.IsPresent -Force:$Force.IsPresent -NoSkipManualDns:$NoSkipManualDns.IsPresent -PluginArgs $PluginArgs
+                    } else {
+                        # recurse to renew all orders on it
+                        Submit-Renewal -AllOrders -NewKey:$NewKey.IsPresent -Force:$Force.IsPresent -NoSkipManualDns:$NoSkipManualDns.IsPresent
+                    }
                 }
 
                 # restore the old current account
