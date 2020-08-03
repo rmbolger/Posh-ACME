@@ -8,9 +8,21 @@ For authentication against the NameSilo API, an API key is required. Open the [a
 
 ## Using the Plugin
 
-Provide the `NameSiloApiKey` parameter with the saved API key. Note that NameSilo only updates DNS records every 15 minutes. So try with a `-DnsSleep` setting of 900 or more.
+You will need to provide the API key as a SecureString value to `NameSiloKey` or a standard string value to `NameSiloKeyInsecure`. The SecureString version can only be used from Windows or any OS running PowerShell 6.2 or later.
+
+Note that NameSilo only updates DNS records every 15 minutes. So you should also provide a `-DnsSleep` parameter of 900 or more.
+
+### Windows or PS 6.2+
 
 ```powershell
-$pArgs = @{ NameSiloApiKey='xxxxxxxx' }
+$key = Read-Host "NameSilo Key" -AsSecureString
+$pArgs = @{ NameSiloKey = $key }
+New-PACertificate example.com -DnsPlugin NameSilo -PluginArgs $pArgs -DnsSleep 900
+```
+
+### Any OS
+
+```powershell
+$pArgs = @{ NameSiloKeyInsecure = 'xxxxxxxxxxxxxxxxxxxxxxxxx' }
 New-PACertificate example.com -DnsPlugin NameSilo -PluginArgs $pArgs -DnsSleep 900
 ```
