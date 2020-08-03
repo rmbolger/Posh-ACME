@@ -28,8 +28,8 @@ function Add-DnsTxtNameSilo {
 
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
         try {
-            $uri = "https://www.namesilo.com/api/dnsAddRecord?version=1&type=xml&key=$($NameSiloKeyInsecure)&domain=$($zone)&rrtype=TXT&rrhost=$($recShort)&rrvalue=$($TxtValue)&rrttl=3600"
-            $response = Invoke-RestMethod $uri -Body $body @script:UseBasic -EA Stop
+            $query = "https://www.namesilo.com/api/dnsAddRecord?version=1&type=xml&key=$($NameSiloKeyInsecure)&domain=$($zone)&rrtype=TXT&rrhost=$($recShort)&rrvalue=$($TxtValue)&rrttl=3600"
+            $response = Invoke-RestMethod $query @script:UseBasic -EA Stop
         } catch { throw }
 
         if ($response -and $response.namesilo.reply.code -ne 300) {
