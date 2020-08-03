@@ -4,28 +4,40 @@ function Add-DnsTxtNameSilo {
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [string]$TxtValue,        
-        [Parameter(Mandatory,Position=2)]
-        [string]$NameSiloApiKey,
+        [string]$TxtValue,
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
+        [securestring]$NameSiloKey,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [string]$NameSiloKeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $apiBase = 'https://www.namesilo.com/api'
-    $RecordName = $RecordName.ToLower()
-    $domainList = $RecordName.Split('.')
-    $domainCount = @($domainList).Count - 1
-    $Domain = $domainList[$domainCount-1] + "." + $domainList[$domainCount]
-    $RecordName = $RecordName.TrimEnd($Domain)
-    try {       
-        $uri = "$apiBase/dnsAddRecord?version=1&type=xml&key=$($NameSiloApiKey)&domain=$($Domain)&rrtype=TXT&rrhost=$($RecordName)&rrvalue=$($TxtValue)&rrttl=3600"
-        $response = Invoke-RestMethod -Uri $uri @script:UseBasic
-    } catch { throw }
-
-    if ($response["namesilo"].reply.code -cne 300) {
-        throw "Failed to add TXT record: $($response["namesilo"].reply.detail)"
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $NameSiloKeyInsecure = (New-Object pscredential "user",$NameSiloKey).GetNetworkCredential().Password
     }
-    
+
+    # query the zone and record ID if it exists
+    $zone, $recID = Get-NameSiloTXTRecordID $RecordName $TxtValue $NameSiloKeyInsecure
+
+    if ($recID) {
+        Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
+    } else {
+
+        $recShort = $RecordName -ireplace [regex]::Escape(".$zone"), [string]::Empty
+
+        Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
+        try {
+            $uri = "https://www.namesilo.com/api/dnsAddRecord?version=1&type=xml&key=$($NameSiloKeyInsecure)&domain=$($zone)&rrtype=TXT&rrhost=$($recShort)&rrvalue=$($TxtValue)&rrttl=3600"
+            $response = Invoke-RestMethod $uri -Body $body @script:UseBasic -EA Stop
+        } catch { throw }
+
+        if ($response -and $response.namesilo.reply.code -ne 300) {
+            throw "Failed to add TXT record: $($response.namesilo.reply.detail)"
+        }
+
+    }
+
 
     <#
     .SYNOPSIS
@@ -40,16 +52,19 @@ function Add-DnsTxtNameSilo {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER NameSiloApiKey
-        The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager
+    .PARAMETER NameSiloKey
+        The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+
+    .PARAMETER NameSiloKeyInsecure
+        The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager. This standard String version may be used on any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxtNameSilo -RecordName "_acme-challenge.site1.example.com" -TxtValue "asdfqwer12345678" -Domain "example.com" -NameSiloApiKey "namesilo_api_key"
+        Add-DnsTxtNameSilo -RecordName '_acme-challenge.example.com' 'txt-value' -NameSiloKeyInsecure 'api-key'
 
-        Adds a TXT record for the specified domain with the specified value.
+        Adds a TXT record for the specified site with the specified value.
     #>
 }
 
@@ -60,47 +75,35 @@ function Remove-DnsTxtNameSilo {
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
-        [string]$NameSiloApiKey,
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
+        [securestring]$NameSiloKey,
+        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [string]$NameSiloKeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $apiBase = 'https://www.namesilo.com/api'
-    $RecordName = $RecordName.ToLower()
-    $domainList = $RecordName.Split('.')
-    $domainCount = @($domainList).Count - 1
-    $Domain = $domainList[$domainCount-1] + "." + $domainList[$domainCount]
-    $RecordName = $RecordName.TrimEnd($Domain)
-    try {
-        $response = Invoke-RestMethod "$apiBase/dnsListRecords?version=1&type=xml&key=$($NameSiloApiKey)&domain=$($Domain)" @script:UseBasic
-    } catch { throw }
-
-    $reply = $response["namesilo"].reply
-
-    if ($reply.code -cne 300) {
-        throw "Failed to list domain records: $($reply.detail)"
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $NameSiloKeyInsecure = (New-Object pscredential "user",$NameSiloKey).GetNetworkCredential().Password
     }
-    
-    $record = $reply.resource_record | Where-Object {$_.type -match "TXT" -and $_.host -match $($RecordName) -and $_.value -match $($TxtValue)}
-    if (@($record).Count -eq 1) {
-        # grab the record and delete it
-        try {
-            Write-Verbose "Deleting $RecordName with value $TxtValue"
-            $rrid = $record.record_id
-            $response2 = Invoke-RestMethod "$apiBase/dnsDeleteRecord?version=1&type=xml&key=$($NameSiloApiKey)&domain=$($Domain)&rrid=$($rrid)" @script:UseBasic
-            $reply2 = $response2["namesilo"].reply
-            if ($reply2.code -cne 300) {
-                throw "Failed to list domain records: $($reply2.detail)"
-            }    
-        } catch { throw }
-    } elseif (@($record).Count -gt 1) {
-        throw "multiple domain records found"
-    }
-    else {
-        # nothing to do
+
+    # query the zone and record ID if it exists
+    $zone, $recID = Get-NameSiloTXTRecordID $RecordName $TxtValue $NameSiloKeyInsecure
+
+    if ($recID) {
+
+        Write-Verbose "Removing TXT record for $RecordName with value $TxtValue and id $recID"
+
+        $query = "https://www.namesilo.com/api/dnsDeleteRecord?version=1&type=xml&key=$($NameSiloKeyInsecure)&domain=$($zone)&rrid=$($recID)"
+        $response = Invoke-RestMethod $query @script:UseBasic -EA Stop
+        if ($response -and $response.namesilo.reply.code -ne 300) {
+            throw "Failed to delete record: $($response.namesilo.reply.detail)"
+        }
+
+    } else {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     }
+
 
     <#
     .SYNOPSIS
@@ -115,16 +118,19 @@ function Remove-DnsTxtNameSilo {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER NameSiloApiKey
-        The API key for the NameSilo account. Created at https://www.namesilo.com/api-reference
+    .PARAMETER NameSiloKey
+        The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+
+    .PARAMETER NameSiloKeyInsecure
+        The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager. This standard String version may be used on any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxtNameSilo '_acme-challenge.site1.example.com' 'asdfqwer12345678' 'NameSilo_api_client_id' 'NameSilo_api_client_secret'
+        Remove-DnsTxtNameSilo -RecordName '_acme-challenge.example.com' 'txt-value' -NameSiloKeyInsecure 'api-key'
 
-        Removes a TXT record for the specified domain with the specified value.
+        Removes a TXT record for the specified site with the specified value.
     #>
 }
 
@@ -144,4 +150,90 @@ function Save-DnsTxtNameSilo {
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     #>
+}
+
+
+##################################
+# Helper Functions
+##################################
+
+# https://www.namesilo.com/api-reference
+
+function Get-NameSiloTXTRecordID {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [string]$RecordName,
+        [Parameter(Mandatory,Position=1)]
+        [string]$TxtValue,
+        [Parameter(Mandatory,Position=2)]
+        [string]$NameSiloKeyInsecure
+    )
+
+    # Get the zone from the record name
+    $zone = Find-NameSiloZone $RecordName $NameSiloKeyInsecure
+    if ($null -eq $zone) {
+        throw "Cannot find NameSilo domain for $RecordName"
+    }
+
+    # query all records for the zone
+    try {
+        $query = "https://www.namesilo.com/api/dnsListRecords?version=1&type=xml&key=$($NameSiloKeyInsecure)&domain=$($zone)"
+        $response = Invoke-RestMethod $query @script:UseBasic -EA Stop
+    } catch { throw }
+    if ($response -and $response.namesilo.reply.code -ne 300) {
+        throw "Failed to list domain records: $($response.namesilo.reply.detail)"
+    }
+
+    # grab the matching record if it exists
+    $record = $response.namesilo.reply.resource_record | Where-Object {
+        $_.type -eq 'TXT' -and
+        $_.host -eq $RecordName -and
+        $_.value -eq $TxtValue
+    }
+
+    # return the record ID and zone name
+    if ($record) {
+        return @($zone,$record.record_id)
+    } else {
+        return @($zone,$null)
+    }
+
+}
+
+function Find-NameSiloZone {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [string]$RecordName,
+        [Parameter(Mandatory,Position=1)]
+        [string]$NameSiloKeyInsecure
+    )
+
+    if (!$script:NameSiloZones) { $script:NameSiloZones = @{} }
+
+    if ($script:NameSiloZones.ContainsKey($RecordName)) {
+        return $script:NameSiloZones.$RecordName
+    }
+
+    # grab the list of registered domains for this account
+    $query = "https://www.namesilo.com/api/listDomains?version=1&type=xml&key=$($NameSiloKeyInsecure)"
+    $response = Invoke-RestMethod $query @script:UseBasic -EA Stop
+    if ($response -and $response.namesilo.reply.code -ne 300) {
+        throw "Unexpected response from NameSilo API: $($response.namesilo.reply.detail)"
+    }
+    $domains = @($response.namesilo.reply.domains.domain)
+
+    # find the closest match based on the record name
+    $pieces = $RecordName.Split('.')
+    for ($j=1; $j -lt ($pieces.Count-1); $j++) {
+        $zone = "$( $pieces[$j..($pieces.Count-1)] -join '.' )"
+
+        if ($zone -in $domains) {
+            $script:NameSiloZones.$RecordName = $zone
+            return $zone
+        }
+    }
+
+    return $null
 }
