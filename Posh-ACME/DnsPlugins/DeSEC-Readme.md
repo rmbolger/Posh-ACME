@@ -4,17 +4,23 @@ This plugin works against the [deSEC](https://desec.io/#!/en/product/dnshosting)
 
 ## Setup
 
-No setup required, just use the the API token from registration email.
+You may already have an API token from your original registration email. If not, go to the [Token Management](https://desec.io/tokens) page and create a new one. The value will only be shown once towards the bottom of the screen. *It is not the ID value in the list of tokens.*
 
 ## Using the Plugin
 
-The API token will be used with the `DSToken` parameter. We just have to create it as a SecureString first.
-`DSTTL` is the TTL of new `TXT` record (optional, defaults to 300 if not provided).
+You will need to provide the API token as a SecureString value to `DSToken` or a standard string value to `DSTokenInsecure`. The SecureString version can only be used from Windows or any OS running PowerShell 6.2 or later. `DSTTL` is the TTL of new `TXT` record (optional, defaults to 300 if not provided).
+
+### Windows or PS 6.2+
 
 ```powershell
-# if on Windows
-$token = Read-Host "API token" -AsSecureString
-New-PACertificate test.example.com -DnsPlugin DeSEC -PluginArgs @{DSToken=$token; DSTTL=3600}
-# otherwise
-New-PACertificate test.example.com -DnsPlugin DeSEC -PluginArgs @{DSTokenInsecure='yourdesectoken'; DSTTL=3600}
+$token = Read-Host "deSEC Token" -AsSecureString
+$pArgs = @{ DSToken = $token; DSTTL=3600 }
+New-PACertificate example.com -DnsPlugin DeSEC -PluginArgs $pArgs
+```
+
+### Any OS
+
+```powershell
+$pArgs = @{ DSTokenInsecure = 'token-value'; DSTTL=3600 }
+New-PACertificate example.com -DnsPlugin DeSEC -PluginArgs $pArgs
 ```
