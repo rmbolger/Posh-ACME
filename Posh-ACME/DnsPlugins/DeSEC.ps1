@@ -19,11 +19,11 @@ function Add-DnsTxtDeSec {
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
         $DSTokenInsecure = (New-Object PSCredential ("user", $DSToken)).GetNetworkCredential().Password
     }
+    $AuthHeader = @{ Authorization = "Token $($DSTokenInsecure)" }
 
     try {
-        $rrset, $recordUri, $domain, $subname = Find-DeSECRRset $RecordName $DSTokenInsecure
+        $rrset, $recordUri, $domain, $subname = Find-DeSECRRset $RecordName $AuthHeader
 
-        $auth = Get-DeSECAuthHeader $DSTokenInsecure
         if ($rrset) {
             if ("`"$TxtValue`"" -in $rrset.records) {
                 Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
@@ -35,8 +35,7 @@ function Add-DnsTxtDeSec {
                 records = $rrset.records
             } | ConvertTo-Json
             Write-Verbose "Adding record $RecordName with value $TxtValue to existing RRset."
-            Invoke-RestMethod $recordUri -Method Patch -Headers $auth -Body $data `
-                -ContentType 'application/json' @script:UseBasic | Out-Null
+            Invoke-deSEC $recordUri $AuthHeader -Method Patch -Body $data | Out-Null
         } else {
             $data = @{
                 subname = $subname
@@ -46,8 +45,7 @@ function Add-DnsTxtDeSec {
             } | ConvertTo-Json
 
             Write-Verbose "Creating new RRset for record $RecordName with value $TxtValue."
-            Invoke-RestMethod "https://desec.io/api/v1/domains/$($domain)/rrsets/" -Method Post -Body $data `
-                -Headers $auth -ContentType 'application/json' @script:UseBasic | Out-Null
+            Invoke-deSEC "/domains/$($domain)/rrsets/" $AuthHeader -Method Post -Body $data | Out-Null
         }
     } catch {
         throw
@@ -79,8 +77,8 @@ function Add-DnsTxtDeSec {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $DSToken = ConvertTo-SecureString 'yourdesectoken' -AsPlainText -Force
-        Add-DnsTxtDeSec '_acme-challenge.site1.example.com' 'asdfqwer12345678' $DSToken
+        $DSToken = ConvertTo-SecureString 'token-value' -AsPlainText -Force
+        Add-DnsTxtDeSec '_acme-challenge.example.com' 'txt-value' $DSToken
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -105,10 +103,11 @@ function Remove-DnsTxtDeSec {
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
         $DSTokenInsecure = (New-Object PSCredential ("user", $DSToken)).GetNetworkCredential().Password
     }
+    $AuthHeader = @{ Authorization = "Token $($DSTokenInsecure)" }
 
     # get existing record
     try {
-        $rrset, $recordUri, $domain, $subname = Find-DeSECRRset $RecordName $DSTokenInsecure
+        $rrset, $recordUri, $domain, $subname = Find-DeSECRRset $RecordName $AuthHeader
         if (!$rrset) {
             Write-Debug "Record $RecordName doesn't exist. Nothing to do."
             return
@@ -123,14 +122,11 @@ function Remove-DnsTxtDeSec {
     }
 
     try {
-        $auth = Get-DeSECAuthHeader $DSTokenInsecure
-
         $data = @{
             records = $rrset.records.where( { $_ -ne "`"$TxtValue`"" } )
         } | ConvertTo-Json
         Write-Verbose "Deleting record $RecordName with value $TxtValue."
-        Invoke-RestMethod $recordUri -Method Patch -Headers $auth -Body $data `
-            -ContentType 'application/json' @script:UseBasic | Out-Null
+        Invoke-deSEC $recordUri $AuthHeader -Method Patch -Body $data | Out-Null
     } catch { throw }
 
     <#
@@ -156,8 +152,8 @@ function Remove-DnsTxtDeSec {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $DSToken = ConvertTo-SecureString 'yourdesectoken' -AsPlainText -Force
-        Remove-DnsTxtDeSec '_acme-challenge.site1.example.com' 'asdfqwer12345678' $DSToken
+        $DSToken = ConvertTo-SecureString 'token-value' -AsPlainText -Force
+        Remove-DnsTxtDeSec '_acme-challenge.example.com' 'txt-value' $DSToken
 
         Removes a TXT record for the specified site with the specified value.
     #>
@@ -186,38 +182,37 @@ function Save-DnsTxtDeSec {
 # Helper Functions
 ############################
 
+# API Docs:
+# https://desec.readthedocs.io/en/latest/quickstart.html
+
 function Find-DeSECRRset {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [string]$DSTokenInsecure
+        [hashtable]$AuthHeader
     )
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (!($domain = Find-DeSECZone $RecordName $DSTokenInsecure)) {
+    if (!($domain = Find-DeSECZone $RecordName $AuthHeader)) {
         throw "Unable to find deSEC hosted zone for $RecordName"
     }
 
     $subname = $RecordName -ireplace [regex]::Escape(".$domain"), [string]::Empty
 
-
     # .NET thinks all URLS are Windows filenames (no trailing dot)
     # replace trailing ... with escaped %2e%2e%2e
     # https://stackoverflow.com/questions/856885/httpwebrequest-to-url-with-dot-at-the-end
-    $recordUri = "https://desec.io/api/v1/domains/$($domain)/rrsets/$($subname)%2e%2e%2e/TXT/"
+    $recordUri = "/domains/$($domain)/rrsets/$($subname)%2e%2e%2e/TXT/"
     Write-Debug "$RecordName has URI: $recordUri"
-
-    $auth = Get-DeSECAuthHeader $DSTokenInsecure
 
     # get existing record
     try {
-        $rrset = Invoke-RestMethod $recordUri -Headers $auth `
-            -ContentType 'application/json' @script:UseBasic
+        $rrset = Invoke-deSEC $recordUri $AuthHeader
         return $rrset, $recordUri, $domain, $subname
     } catch {
-        if ($_.Exception.Response.StatusCode.Value__ -eq 404) {
+        if (404 -eq $_.Exception.Response.StatusCode) {
             return $null, $null, $domain, $subname
         }
         throw
@@ -230,7 +225,7 @@ function Find-DeSECZone {
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [string]$DSTokenInsecure
+        [hashtable]$AuthHeader
     )
 
     # setup a module variable to cache the record to zone mapping
@@ -244,8 +239,7 @@ function Find-DeSECZone {
 
     # get the list of available zones
     try {
-        $auth = Get-DeSECAuthHeader $DSTokenInsecure
-        $zones = (Invoke-RestMethod "https://desec.io/api/v1/domains/" -Headers $auth @script:UseBasic).name
+        $zones = (Invoke-deSEC "/domains/" $AuthHeader).name
     } catch { throw }
 
     # Since the provider could be hosting both apex and sub-zones, we need to find the closest/deepest
@@ -271,17 +265,80 @@ function Find-DeSECZone {
     return $null
 }
 
-function Get-DeSECAuthHeader {
+function Invoke-DeSEC {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [string]$DSTokenInsecure
+        [string]$Query,
+        [Parameter(Mandatory,Position=1)]
+        [hashtable]$AuthHeader,
+        [Parameter(Position=2)]
+        [Microsoft.PowerShell.Commands.WebRequestMethod]$Method=([Microsoft.PowerShell.Commands.WebRequestMethod]::Get),
+        [string]$Body
     )
 
-    # now build the header hashtable
-    $header = @{
-       Authorization = "Token $($DSTokenInsecure)"
+    # To gracefully deal with deSEC's API throttling, we need to catch HTTP 429
+    # responses which *should* have a Retry-After header indicating how long we
+    # need to wait to retry the request.
+
+    # build the appropriate function parameters to splat
+    $queryParams = @{
+        Uri = "https://desec.io/api/v1$Query"
+        Method = $Method
+        Headers = $AuthHeader
+        ErrorAction = 'Stop'
+    }
+    if ($Body) {
+        $queryParams.ContentType = 'application/json'
+        $queryParams.Body = $Body
     }
 
-    return $header
+    $retryHeader = 'Retry-After'
+    $retrySeconds = 30  # default in case the header is missing from the response
+    do {
+        $retry = $false
+        try { Invoke-RestMethod @queryParams @script:UseBasic }
+        catch {
+            # re-throw anything other than HTTP 429
+            if (429 -ne $_.Exception.Response.StatusCode) {
+                throw
+            }
+            $retry = $true
+
+            # Since we can't catch explicit exception types between PowerShell editions
+            # without errors for non-existent types, we need to string match the type names
+            # and re-throw anything we don't care about.
+            $exType = $_.Exception.GetType().FullName
+            $response = $_.Exception.Response
+
+            if ('System.Net.WebException' -eq $exType) {
+                # PowerShell Desktop edition
+                # Response object: System.Net.HttpWebResponse
+
+                # grab the retry timeout suggestion if it exists
+                if ($retryHeader -in $response.Headers) {
+                    $retrySeconds = $response.GetResponseHeader($retryHeader) | Select-Object -First 1
+                    Write-Debug "Got $retrySeconds from $retryHeader header"
+                }
+
+            } elseif ('Microsoft.PowerShell.Commands.HttpResponseException' -eq $exType) {
+                # PowerShell Core edition
+                # Linux Response: System.Net.Http.CurlHandler+CurlResponseMessage
+                #   Mac Response: ???
+                #   Win Response: System.Net.Http.HttpResponseMessage
+
+                # grab the retry timeout suggestion if it exists
+                if ($retryHeader -in $response.Headers.Key) {
+                    $retrySeconds = ($response.Headers | Where-Object { $_.Key -eq $retryHeader }).Value | Select-Object -First 1
+                    Write-Debug "Got $retrySeconds from $retryHeader header"
+                }
+
+            } else { throw }
+
+            # Sleep for the suggested time
+            Write-Verbose "deSEC API throttling triggered. Will retry in $retrySeconds second(s)."
+            Start-Sleep -Seconds $retrySeconds
+        }
+    } while ($retry)
+
 }
