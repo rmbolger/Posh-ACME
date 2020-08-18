@@ -28,26 +28,48 @@ function Export-PACertFiles {
     if (-not $PfxOnly) {
         # build the header for the Post-As-Get request
         $header = @{
-            alg   = $acct.alg;
-            kid   = $acct.location;
-            nonce = $script:Dir.nonce;
-            url   = $Order.certificate;
+            alg   = $acct.alg
+            kid   = $acct.location
+            nonce = $script:Dir.nonce
+            url   = $Order.certificate
         }
 
         # download the cert+chain which is what ACMEv2 delivers by default
         # https://tools.ietf.org/html/rfc8555#section-7.4.2
         try {
-            Invoke-ACME $header ([String]::Empty) $acct -OutFile $fullchainFile -EA Stop
+            $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
+            $pems = Split-PemChain -ChainBytes $response.Content
+
+            # write the lone cert
+            Export-Pem $pems[0] $certFile
+
+            # write the primary chain as chain0.cer
+            $chain0File = Join-Path $orderFolder 'chain0.cer'
+            Export-Pem ($pems[1..($pems.Count-1)] | ForEach-Object {$_}) $chain0File
+
+            # check for alternate chain header links
+            $links = @(Get-AlternateLinks $response.Headers)
+
+            # download the alternate chains
+            for ($i = 0; $i -lt $links.Count; $i++) {
+                Write-Debug "Alt Chain $($i+1): $($links[$i])"
+                $header.url = $links[$i]
+                $header.nonce = $script:Dir.nonce
+
+                $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
+                $pems = Split-PemChain -ChainBytes $response.Content
+
+                # write additional chain files as chain1.cer,chain2.cer,etc.
+                $altChainFile = Join-Path $orderFolder "chain$($i+1).cer"
+                Export-Pem ($pems[1..($pems.Count-1)] | ForEach-Object {$_}) $altChainFile
+            }
+
         } catch { throw }
 
-        # split it into individual PEMs
-        $pems = Split-PemChain $fullchainFile
-
-        # write the lone cert
-        Export-Pem $pems[0] $certFile
-
-        # write the chain
-        Export-Pem ($pems[1..($pems.Count-1)] | ForEach-Object {$_}) $chainFile
+        # build the appropriate chain and fullchain files
+        Copy-Item $chain0File $chainFile
+        $fullchainLines = (Get-Content $certFile) + (Get-Content $chain0File)
+        Export-Pem $fullchainLines $fullchainFile
     }
 
     # When using an pre-generated CSR file, there may be no private key.

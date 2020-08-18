@@ -11,8 +11,7 @@ function Invoke-ACME {
         [Parameter(ParameterSetName='RawKey',Mandatory,Position=2)]
         [ValidateScript({Test-ValidKey $_ -ThrowOnFail})]
         [Security.Cryptography.AsymmetricAlgorithm]$Key,
-        [switch]$NoRetry,
-        [string]$OutFile
+        [switch]$NoRetry
     )
 
     # make sure we have a server configured
@@ -54,9 +53,6 @@ function Invoke-ACME {
             UserAgent = $script:USER_AGENT
             Headers = $script:COMMON_HEADERS
             ErrorAction = 'Stop'
-        }
-        if (-not [String]::IsNullOrWhiteSpace($OutFile)) {
-            $iwrSplat.OutFile = $OutFile
         }
 
         $response = Invoke-WebRequest @iwrSplat @script:UseBasic
@@ -184,9 +180,6 @@ function Invoke-ACME {
 
     .PARAMETER NoRetry
         If specified, don't retry on bad nonce errors. Occasionally, the nonce provided in an ACME message will be rejected. By default, this function requests a new nonce once and tries to send the message again before giving up.
-
-    .PARAMETER OutFile
-        Specifies the output file for which this function saves the response body. Enter a path and file name. If you omit the path, the default is the current location.
 
     .EXAMPLE
         $acct = Get-PAAccount
