@@ -33,7 +33,8 @@ function New-PACertificate {
         [switch]$Install,
         [switch]$Force,
         [int]$DNSSleep=120,
-        [int]$ValidationTimeout=60
+        [int]$ValidationTimeout=60,
+        [string]$PreferredChain
     )
 
     # Make sure we have a server set. But don't override the current
@@ -134,6 +135,13 @@ function New-PACertificate {
             if ([String]::IsNullOrWhiteSpace($orderParams.FriendlyName)) {
                 $orderParams.FriendlyName = $Domain[0]
             }
+        }
+
+        # add new or old preferred chain
+        if ('PreferredChain' -in $PSBoundParameters.Keys) {
+            $orderParams.PreferredChain = $PreferredChain
+        } elseif ($oldOrder.PreferredChain) {
+            $orderParams.PreferredChain = $oldOrder.PreferredChain
         }
 
         # and force a new order
@@ -328,6 +336,9 @@ function New-PACertificate {
 
     .PARAMETER ValidationTimeout
         Number of seconds to wait for the ACME server to validate the challenges after asking it to do so. Default is 60. If the timeout is exceeded, an error will be thrown.
+
+    .PARAMETER PreferredChain
+        If the CA offers multiple certificate chains, prefer the chain with an issuer matching this Subject Common Name. If no match, the default offered chain will be used.
 
     .EXAMPLE
         New-PACertificate site1.example.com -AcceptTOS
