@@ -97,7 +97,7 @@ function Import-Pem {
             $privSpec = [Org.BouncyCastle.Security.PrivateKeyFactory]::CreateKey($privInfo)
             $pubKey = $pKey.GetPublicKey()
 
-            if ($pubKey -ne $null) {
+            if ($null -ne $pubKey) {
                 $pubInfo = New-Object Org.BouncyCastle.Asn1.X509.SubjectPublicKeyInfo($algId,$pubKey.GetBytes())
                 $pubSpec = [Org.BouncyCastle.Security.PublicKeyFactory]::CreateKey($pubInfo)
             } else {
