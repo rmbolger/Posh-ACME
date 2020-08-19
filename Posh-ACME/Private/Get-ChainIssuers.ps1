@@ -6,9 +6,8 @@ function Get-ChainIssuers {
         [string]$OrderFolder
     )
 
-    # Go through the list of chainX.cer files and build a hashtable
-    # where the keys are the Issuer CN value from each cert in the
-    # chain and the value is the path to the file it's in.
+    # Go through the list of chainX.cer files and parse the Issuer CN value
+    # from each cert in the chain then return it and its associated file path.
 
     $files = Get-ChildItem (Join-Path $OrderFolder 'chain*.cer') -Exclude 'chain.cer'
     $issuers = foreach ($f in $files) {
