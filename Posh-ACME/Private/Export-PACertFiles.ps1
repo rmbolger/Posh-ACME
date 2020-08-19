@@ -26,18 +26,24 @@ function Export-PACertFiles {
     $pfxFullFile   = Join-Path $orderFolder 'fullchain.pfx'
 
     if (-not $PfxOnly) {
-        # build the header for the Post-As-Get request
-        $header = @{
-            alg   = $acct.alg
-            kid   = $acct.location
-            nonce = $script:Dir.nonce
-            url   = $Order.certificate
-        }
 
-        # download the cert+chain which is what ACMEv2 delivers by default
-        # https://tools.ietf.org/html/rfc8555#section-7.4.2
-        try {
-            $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
+        # Re-download the cert/chains if the order has not expired.
+        if ((Get-DateTimeOffsetNow) -lt [DateTimeOffset]::Parse($order.expires)) {
+
+            # build the header for the Post-As-Get request
+            $header = @{
+                alg   = $acct.alg
+                kid   = $acct.location
+                nonce = $script:Dir.nonce
+                url   = $Order.certificate
+            }
+
+            # download the cert+chain which is what ACMEv2 delivers by default
+            # https://tools.ietf.org/html/rfc8555#section-7.4.2
+            try {
+                $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
+            } catch { throw }
+
             $pems = Split-PemChain -ChainBytes $response.Content
 
             # write the lone cert
@@ -56,19 +62,38 @@ function Export-PACertFiles {
                 $header.url = $links[$i]
                 $header.nonce = $script:Dir.nonce
 
-                $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
+                try {
+                    $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
+                } catch {throw}
                 $pems = Split-PemChain -ChainBytes $response.Content
 
                 # write additional chain files as chain1.cer,chain2.cer,etc.
                 $altChainFile = Join-Path $orderFolder "chain$($i+1).cer"
                 Export-Pem ($pems[1..($pems.Count-1)] | ForEach-Object {$_}) $altChainFile
             }
+        }
+        else {
+            Write-Warning "Order has expired. Unable to re-download cert/chain files. Using cached copies."
+        }
 
-        } catch { throw }
+        # try to find the chain file matching the preferred issuer if specified
+        if (-not ([String]::IsNullOrWhiteSpace($order.PreferredChain))) {
+            $selectedChainFile = Get-ChainIssuers $orderFolder |
+                Where-Object { $_.issuer -eq $order.PreferredChain } |
+                Select-Object -First 1 -Expand filePath
+            Write-Debug "Preferred chain, $($order.PreferredChain), matched: $selectedChainFile"
+
+            if (-not $selectedChainFile) {
+                Write-Warning "The preferred chain issuer, $($order.PreferredChain), was not found. Using the default chain."
+                $selectedChainFile = $chain0File
+            }
+        } else {
+            $selectedChainFile = $chain0File
+        }
 
         # build the appropriate chain and fullchain files
-        Copy-Item $chain0File $chainFile
-        $fullchainLines = (Get-Content $certFile) + (Get-Content $chain0File)
+        Copy-Item $selectedChainFile $chainFile
+        $fullchainLines = (Get-Content $certFile) + (Get-Content $selectedChainFile)
         Export-Pem $fullchainLines $fullchainFile
     }
 
