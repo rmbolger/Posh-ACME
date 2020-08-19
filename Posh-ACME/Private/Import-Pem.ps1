@@ -73,7 +73,7 @@ function Import-Pem {
                 $rsa.Prime1, $rsa.Prime2, $rsa.Exponent1, $rsa.Exponent2,
                 $rsa.Coefficient)
 
-        # check fo EC keys
+        # check for EC keys
         } elseif ($seq[0] -eq 1 -or
                   ($seq[0] -eq 0 -and $seq[1].Count -eq 2 -and
                    $seq[1][0] -eq [Org.BouncyCastle.Asn1.X9.X9ObjectIdentifiers]::IdECPublicKey) ) {
