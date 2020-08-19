@@ -20,7 +20,8 @@ function New-PAOrder {
         [string]$PfxPass='poshacme',
         [Parameter(ParameterSetName='FromScratch')]
         [switch]$Install,
-        [switch]$Force
+        [switch]$Force,
+        [string]$PreferredChain
     )
 
     # Make sure we have an account configured
@@ -149,6 +150,7 @@ function New-PAOrder {
     $order | Add-Member -MemberType NoteProperty -Name 'FriendlyName' -Value $FriendlyName
     $order | Add-Member -MemberType NoteProperty -Name 'PfxPass' -Value $PfxPass
     $order | Add-Member -MemberType NoteProperty -Name 'Install' -Value $Install.IsPresent
+    $order | Add-Member -MemberType NoteProperty -Name 'PreferredChain' -Value $PreferredChain
 
     # make sure there's a certificate field for later
     if ('certificate' -notin $order.PSObject.Properties.Name) {
@@ -203,6 +205,10 @@ function New-PAOrder {
     $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include cert.cer,cert.pfx,chain.cer,fullchain.cer,fullchain.pfx
     $oldFiles | Move-Item -Destination { "$($_.FullName).bak" } -Force
 
+    # remove old chain files
+    Get-ChildItem (Join-Path $script:OrderFolder 'chain*.cer') -Exclude chain.cer |
+        Remove-Item -Force
+
     return $order
 
 
@@ -243,6 +249,9 @@ function New-PAOrder {
 
     .PARAMETER Force
         If specified, confirmation prompts that may have been generated will be skipped.
+
+    .PARAMETER PreferredChain
+        If the CA offers multiple certificate chains, prefer the chain with an issuer matching this Subject Common Name. If no match, the default offered chain will be used.
 
     .EXAMPLE
         New-PAOrder site1.example.com

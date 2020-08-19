@@ -26,7 +26,9 @@ function Set-PAOrder {
         [Parameter(ParameterSetName='Edit')]
         [int]$DNSSleep,
         [Parameter(ParameterSetName='Edit')]
-        [int]$ValidationTimeout
+        [int]$ValidationTimeout,
+        [Parameter(ParameterSetName='Edit')]
+        [string]$PreferredChain
     )
 
     Begin {
@@ -90,11 +92,12 @@ function Set-PAOrder {
             $order = $script:Order
         }
 
-        # revoke if necessary
+        # Edit or Revoke?
         if ('Edit' -eq $PSCmdlet.ParameterSetName) {
 
             $saveChanges = $false
-            $updatePfx = $false
+            $rewritePfx = $false
+            $rewriteCer = $false
             $psbKeys = $PSBoundParameters.Keys
 
             if ('DnsPlugin' -in $psbKeys -and
@@ -113,14 +116,14 @@ function Set-PAOrder {
                 Write-Verbose "Setting FriendlyName to '$FriendlyName'"
                 $order.FriendlyName = $FriendlyName
                 $saveChanges = $true
-                $updatePfx = $true
+                $rewritePfx = $true
             }
 
             if ('PfxPass' -in $psbKeys -and $PfxPass -ne $order.PfxPass) {
                 Write-Verbose "Setting PfxPass to '$PfxPass'"
                 $order.PfxPass = $PfxPass
                 $saveChanges = $true
-                $updatePfx = $true
+                $rewritePfx = $true
             }
 
             if ('Install' -in $psbKeys -and $Install.IsPresent -ne $order.Install) {
@@ -141,13 +144,24 @@ function Set-PAOrder {
                 $saveChanges = $true
             }
 
+            if ('PreferredChain' -in $psbKeys -and $PreferredChain -ne $order.PreferredChain) {
+                Write-Verbose "Setting PreferredChain to $PreferredChain"
+                $order.PreferredChain = $PreferredChain
+                $saveChanges = $true
+                $rewritePfx = $true
+                $rewriteCer = $true
+            }
+
             if ($saveChanges) {
                 Write-Verbose "Saving order changes"
                 $orderFolder = Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')
                 $order | ConvertTo-Json | Out-File (Join-Path $orderFolder 'order.json') -Force -EA Stop
             }
 
-            if ($updatePfx -and (Get-PACertificate $order.MainDomain)) {
+            $cert = Get-PACertificate $order.MainDomain
+            if ($rewriteCer -and $cert) {
+                Export-PACertFiles $order
+            } elseif ($rewritePfx -and $cert) {
                 Export-PACertFiles $order -PfxOnly
             }
 
@@ -258,6 +272,9 @@ function Set-PAOrder {
 
     .PARAMETER ValidationTimeout
         Number of seconds to wait for the ACME server to validate the challenges after asking it to do so. If the timeout is exceeded, an error will be thrown.
+
+    .PARAMETER PreferredChain
+        If the CA offers multiple certificate chains, prefer the chain with an issuer matching this Subject Common Name. If no match, the default offered chain will be used.
 
     .EXAMPLE
         Set-PAOrder site1.example.com
