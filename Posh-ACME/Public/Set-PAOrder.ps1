@@ -146,7 +146,11 @@ function Set-PAOrder {
 
             if ('PreferredChain' -in $psbKeys -and $PreferredChain -ne $order.PreferredChain) {
                 Write-Verbose "Setting PreferredChain to $PreferredChain"
-                $order.PreferredChain = $PreferredChain
+                if ('PreferredChain' -notin $order.PSObject.Properties.Name) {
+                    $order | Add-Member -MemberType NoteProperty -Name 'PreferredChain' -Value $PreferredChain
+                } else {
+                    $order.PreferredChain = $PreferredChain
+                }
                 $saveChanges = $true
                 $rewritePfx = $true
                 $rewriteCer = $true
