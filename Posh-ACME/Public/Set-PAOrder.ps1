@@ -109,7 +109,7 @@ function Set-PAOrder {
 
             if ('PluginArgs' -in $psbKeys) {
                 Write-Verbose "Updating plugin args for plugin(s) $(($order.Plugin -join ','))"
-                Export-PluginArgs $PluginArgs $order.Plugin
+                Export-PluginArgs $order.MainDomain $order.Plugin $PluginArgs
             }
 
             if ('FriendlyName' -in $psbKeys -and $FriendlyName -ne $order.FriendlyName) {

@@ -93,11 +93,11 @@ function Submit-ChallengeValidation {
     Write-Debug "DnsAlias: $($DnsAlias -join ',')"
 
     if ($PluginArgs) {
-        # export explicit args to the common account store
-        Export-PluginArgs $PluginArgs $Plugin -Account $Account
+        # merge/overwrite explicit args
+        Export-PluginArgs $Order.MainDomain $Plugin $PluginArgs
     }
-    # import existing args from the common account store
-    $PluginArgs = Import-PluginArgs $Plugin -Account $Account
+    # import existing args
+    $PluginArgs = Get-PAPluginArgs $Order.MainDomain
 
     try {
         # loop through the authorizations looking for challenges to validate

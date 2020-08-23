@@ -1,19 +1,23 @@
 ## 4.0.0 (????-??-??)
 
 * DnsPlugins are now just Plugins and can support dns-01 or http-01 based challenges.
-  * All existing DNS plugins have been upgraded to the new plugin format. See the README in the plugins folder for details.
-* The DnsPlugin parameter is now Plugin in New-PACertificate and Submit-ChallengeValidation.
-* Publish-DnsChallenge and Unpublish-DnsChallenge are now Publish-Challenge and Unpublish-Challenge
-  * The -NoPrefix switch has been replaced with an explicit DnsAlias parameter that will override the Domain parameter if specified. "_acme-challenge." will not be automatically added to the DnsAlias parameter.
-* Save-DnsChallenge is now Save-Challenge
-* Get-DnsPlugins is now Get-PAPlugin
+  * All existing DNS plugins have been upgraded to the new plugin format. See the README in the plugins folder for details and instructions on how to upgrade your own custom plugins.
+* The `DnsPlugin` parameter is now `Plugin` in `New-PACertificate` and `Submit-ChallengeValidation`.
+* `Publish-DnsChallenge` and `Unpublish-DnsChallenge` are now `Publish-Challenge` and `Unpublish-Challenge`
+  * The `NoPrefix` switch has been replaced with a `DnsAlias` parameter that will override the `Domain` parameter if specified. "_acme-challenge." will not be automatically added to the `DnsAlias` parameter.
+* `Save-DnsChallenge` is now `Save-Challenge`
+* `Get-DnsPlugins` is now `Get-PAPlugin`
   * With no parameters, lists all plugins and their details
   * With a plugin parameter, shows the details for just that plugin
-  * With a plugin and -Help, shows the plugin's help
-  * With a plugin and -Guide, opens the default browser to the plugin's online guide
-  * With a plugin and -Params, displays the plugin-specific parameter sets
-* Get-DnsPluginHelp has been removed
-* Using Get-PAOrder with the -Refresh switch will no longer throw a terminating error if the ACME server returns an error. It will warn and return the cached copy of the order instead.
+  * With a plugin and `-Help`, shows the plugin's help
+  * With a plugin and `-Guide`, opens the default browser to the plugin's online guide
+  * With a plugin and `-Params`, displays the plugin-specific parameter sets
+* `Get-DnsPluginHelp` has been removed
+* Plugin args are now saved per-order rather than per-account.
+  * Unfortunately, this means new orders using the same plugin(s) as a previous order will no longer reuse the previous args.
+  * Added `Get-PAPluginArgs` which returns a hashtable with the plugin args associated with the current or specified order. You can use this to retrieve another order's plugin args and use that object with your new order.
+  * Pre-4.x plugin args will be automatically migrated to per-order plugin args the first time an account is selected using `Set-PAAccount` or on module load for the last selected account. The old file will be backed up with a ".v3" extension in case you need to revert.
+* Using `Get-PAOrder` with `-Refresh` will no longer throw a terminating error if the ACME server returns an error. It will warn and return the cached copy of the order instead.
 
 ## 3.18.1 (2020-11-12)
 

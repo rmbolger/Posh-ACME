@@ -19,24 +19,10 @@ function Add-DnsTxt {
     # server and a CNAME record created by the user based on the registration before
     # proceeding. Each registration needs to be saved so it can be re-used later without
     # the user needing to explicitly pass it in.
-
-    # So we're going to use the new Import/Export-PluginVar functions but we also need to
-    # allow for importing the legacy ACMEReg value from plugindata.xml that will no longer
-    # be passed in.
     if (-not ($ACMEReg = Import-PluginVar ACMEReg)) {
-        # check for legacy registration data by getting all saved pluginargs on this account
-        # which should include AcmeReg if it still exists
-        $pargs = Import-PluginArgs
-        if ($pargs.ACMEReg) {
-            # Convert the hashtable to JSON and back to basically make it PSCustomObject
-            # which the rest of the plugin is now expecting
-            Write-Verbose "Migrating legacy acme-dns registrations"
-            $ACMEReg = $pargs.ACMEReg | ConvertTo-Json | ConvertFrom-Json
-        } else {
-            # no existing data, so create an empty object to use
-            Write-Verbose "No existing acme-dns registrations found"
-            $ACMEReg = [pscustomobject]@{}
-        }
+        # no existing data, so create an empty object to use
+        Write-Verbose "No existing acme-dns registrations found"
+        $ACMEReg = [pscustomobject]@{}
     }
 
     # Add or override existing registrations with passed in registrations
