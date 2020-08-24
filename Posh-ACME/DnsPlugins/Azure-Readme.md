@@ -96,13 +96,13 @@ $cert = New-SelfSignedCertificate -CertStoreLocation "Cert:\CurrentUser\My" `
 $certData = [System.Convert]::ToBase64String($cert.GetRawCertData())
 
 $sp = New-AzADServicePrincipal -DisplayName PoshACME -CertValue $certData `
-    -StartDate $cert.NotBefore -EndDate $cert.NotAfter -SkipAssignment
+    -StartDate $cert.NotBefore -EndDate $cert.NotAfter
 ```
 
 You'll use your new credential with the `AZAppUsername` and `AZCertThumbprint` plugin parameters. Here's how to save a reference to them for later.
 
 ```powershell
-$appUser = $sp.ApplicationId
+$appUser = $sp.ApplicationId.ToString()
 $thumbprint = $cert.Thumbprint
 ```
 
@@ -120,11 +120,11 @@ openssl req -x509 -nodes -sha256 -days 1826 -newkey rsa:2048 -keyout poshacme.ke
 # provide it as part of the plugin parameters
 openssl pkcs12 -export -in poshacme.crt -inkey poshacme.key -CSP "Microsoft Enhanced RSA and AES Cryptographic Provider" -out poshacme.pfx -passout "pass:poshacme"
 
-$cert = [Security.Cryptography.X509Certificates.X509Certificate2]::new('./poshacme.crt')
+$cert = [Security.Cryptography.X509Certificates.X509Certificate2]::new((Resolve-Path './poshacme.crt'))
 $certData = [Convert]::ToBase64String($cert.GetRawCertData())
 
 $sp = New-AzADServicePrincipal -DisplayName PoshACMELinux -CertValue $certData `
-    -StartDate $cert.NotBefore -EndDate $cert.NotAfter -SkipAssignment
+    -StartDate $cert.NotBefore -EndDate $cert.NotAfter
 
 # (optional) delete the PEM files we don't need for plugin purposes
 rm poshacme.crt poshacme.key
@@ -137,7 +137,7 @@ rm poshacme.crt poshacme.key
 You'll use your new credential with the `AZAppUsername`, `AZCertPfx`, and `AZPfxPass` plugin parameters. Here's how to save a reference to them for later.
 
 ```powershell
-$appUser = $sp.ApplicationId
+$appUser = $sp.ApplicationId.ToString()
 # modify the path and/or password as appropriate
 $certPfx = (Resolve-Path './poshacme.pfx').ToString()
 $pfxPass = 'poshacme'

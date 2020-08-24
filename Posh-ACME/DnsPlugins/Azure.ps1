@@ -472,7 +472,11 @@ function Connect-AZTenant {
 
             # We're working with a PFX file, so import into an X509Certificate2 object
             try {
-                $cert = [Security.Cryptography.X509Certificates.X509Certificate2]::new($AZPfxObj,$AZPfxPass)
+                $cert = [Security.Cryptography.X509Certificates.X509Certificate2]::new(
+                    $AZPfxObj,
+                    $AZPfxPass,
+                    [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable
+                )
             } catch { throw }
         }
 
