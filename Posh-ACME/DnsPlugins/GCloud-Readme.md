@@ -45,7 +45,7 @@ Start by going to the [Service accounts](https://console.cloud.google.com/iam-ad
 
 ## Using the Plugin
 
-The only plugin argument you need is the path to the JSON account file you downloaded. The plugin will cache the contents of this file on first use in case the original gets deleted or moved. But as long as it still exists, the real file will take precedence over the cached copy so you can update it in the future if necessary.
+The only plugin argument you need is the path to the JSON account file you downloaded. The plugin will cache the contents of this file on each use in case the original gets deleted or moved. But as long as it still exists, the real file will take precedence over the cached copy so you can update it in the future if necessary.
 
 ```powershell
 New-PACertificate test.example.com -DnsPlugin GCloud -PluginArgs @{GCKeyFile='<path to json>'}
