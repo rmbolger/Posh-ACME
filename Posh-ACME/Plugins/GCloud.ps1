@@ -228,30 +228,43 @@ function Connect-GCloudDns {
 
     Write-Verbose "Signing into GCloud DNS"
 
-    # We want to save the contents of GCKeyFile so the user isn't necessarily stuck
-    # keeping it wherever it originally was when they ran the command. But we still want
-    # to use the file by default in case they've updated it as long as it still exists.
+    # We want to cache the contents of GCKeyFile so renewals don't break if the original
+    # file is moved/deleted. But we still want to primarily use the actual file by default
+    # in case it has been updated.
 
+    # expand the path to the file
     $GCKeyFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($GCKeyFile)
-    if (Test-Path $GCKeyFile -PathType Leaf) {
-        Write-Debug "Using key file"
-        $GCKeyObj = Get-Content $GCKeyFile | ConvertFrom-Json
 
-        # export the contents as a plugin var
+    # get the previously cached values
+    $cachedFiles = Import-PluginVar 'GCKeyObj'
+    if (-not $cachedFiles -or $cachedFiles -is [string]) {
+        $cachedFiles = [pscustomobject]@{}
+    }
+
+    if (Test-Path $GCKeyFile -PathType Leaf) {
+
+        Write-Debug "Using key file"
+        $GCKeyObj = Get-Content $GCKeyFile -Raw | ConvertFrom-Json
+
+        # add the contents to our cached files
         $b64Contents = $GCKeyObj | ConvertTo-Json -Compress | ConvertTo-Base64Url
-        Export-PluginVar GCKeyObj $b64Contents
+        if ($GCKeyFile -in $cachedFiles.PSObject.Properties.Name) {
+            $cachedFiles.$GCKeyFile = $b64Contents
+        } else {
+            $cachedFiles | Add-Member -MemberType NoteProperty -Name $GCKeyFile -Value $b64Contents
+        }
+        Export-PluginVar 'GCKeyObj' $cachedFiles
+
+    } elseif ($GCKeyFile -in $cachedFiles.PSObject.Properties.Name) {
+
+        Write-Warning "GCKeyFile not found at `"$GCKeyFile`". Attempting to use cached key data."
+        $b64Contents = $cachedFiles.$GCKeyFile
+        try {
+            $GCKeyObj = $b64Contents | ConvertFrom-Base64Url | ConvertFrom-Json
+        } catch { throw }
 
     } else {
-        $b64Contents = Import-PluginVar GCKeyObj
-
-        if (-not $b64Contents) {
-            throw "GCKeyFile not found at `"$GCKeyFile`" and no cached data exists."
-        } else {
-            Write-Warning "GCKeyFile not found at `"$GCKeyFile`". Attempting to use cached key data."
-            try {
-                $GCKeyObj = $b64Contents | ConvertFrom-Base64Url | ConvertFrom-Json
-            } catch { throw }
-        }
+        throw "GCKeyFile not found at `"$GCKeyFile`" and no cached data exists."
     }
 
     Write-Debug "Loading private key for $($GCKeyObj.client_email)"

@@ -441,6 +441,7 @@ function Connect-AZTenant {
     } elseif ($PSCmdlet.ParameterSetName -in 'CertThumbprint','CertFile') {
 
         if ('CertThumbprint' -eq $PSCmdlet.ParameterSetName) {
+            Write-Debug "Looking for cert thumbprint $AZCertThumbprint"
             # Look up the cert based on the thumbprint
             # check CurrentUser first
             if (-not ($cert = Get-Item "Cert:\CurrentUser\My\$AZCertThumbprint" -EA Ignore)) {
@@ -450,26 +451,40 @@ function Connect-AZTenant {
                 }
             }
         } else {
+            Write-Debug "Looking for cert pfx $AZCertPfx"
             $AZCertPfx = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($AZCertPfx)
+
+            # get the previously cached values
+            $cachedFiles = Import-PluginVar 'AZPfxObj'
+            if (-not $cachedFiles -or $cachedFiles -is [string]) {
+                $cachedFiles = [pscustomobject]@{}
+            }
+
             if (Test-Path $AZCertPfx -PathType Leaf) {
+
                 Write-Debug "Using pfx file"
                 $AZPfxObj = [IO.File]::ReadAllBytes($AZCertPfx)
 
-                # export the contents as a plugin var
+                # add the contents to our cached files
                 $b64Contents = ConvertTo-Base64Url -Bytes $AZPfxObj
-                Export-PluginVar AZPfxObj $b64Contents
-            } else {
-                $b64Contents = Import-PluginVar AZPfxObj
-
-                if (-not $b64Contents) {
-                    throw "AZCertPfx not found at `"$AZCertPfx`" and no cached data exists."
+                if ($AZCertPfx -in $cachedFiles.PSObject.Properties.Name) {
+                    $cachedFiles.$AZCertPfx = $b64Contents
                 } else {
-                    Write-Warning "AZCertPfx not found at `"$AZCertPfx`". Attempting to use cached data."
-                    try {
-                        $AZPfxObj = [byte[]]($b64Contents | ConvertFrom-Base64Url -AsByteArray)
-                        Write-Debug $AZPfxObj.GetType().ToString()
-                    } catch { throw }
+                    $cachedFiles | Add-Member -MemberType NoteProperty -Name $AZCertPfx -Value $b64Contents
                 }
+                Export-PluginVar 'AZPfxObj' $cachedFiles
+
+            } elseif ($AZCertPfx -in $cachedFiles.PSObject.Properties.Name) {
+
+                Write-Warning "AZCertPfx not found at `"$AZCertPfx`". Attempting to use cached key data."
+                $b64Contents = $cachedFiles.$AZCertPfx
+                try {
+                    $AZPfxObj = [byte[]]($b64Contents | ConvertFrom-Base64Url -AsByteArray)
+                    Write-Debug $AZPfxObj.GetType().ToString()
+                } catch { throw }
+
+            } else {
+                throw "AZCertPfx not found at `"$AZCertPfx`" and no cached data exists."
             }
 
             # We're working with a PFX file, so import into an X509Certificate2 object
