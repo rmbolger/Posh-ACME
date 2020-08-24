@@ -101,7 +101,7 @@ function Publish-Challenge {
         When using DNS Alias support with DNS validation plugins, the alias domain that the TXT record will be written to. This should be the complete FQDN including the '_acme-challenge.' prefix if necessary. This field is ignored for non-DNS validation plugins.
 
     .EXAMPLE
-        $auths = Get-PAOrder | Get-PAAuthorizations
+        $auths = Get-PAOrder | Get-PAAuthorization
         PS C:\>Publish-Challenge $auths[0].DNSId (Get-PAAccount) $auths[0].DNS01Token Manual @{}
 
         Publish a DNS challenge for the first authorization in the current order using the Manual DNS plugin.

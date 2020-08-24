@@ -98,7 +98,7 @@ function Get-KeyAuthorization {
         Get the key authorization for the specified token using the current account.
 
     .EXAMPLE
-        (Get-PAOrder | Get-PAAuthorizations).DNS01Token | Get-KeyAuthorization
+        (Get-PAOrder | Get-PAAuthorization).DNS01Token | Get-KeyAuthorization
 
         Get all key authorizations for the DNS challenges in the current order using the current account.
 
@@ -106,7 +106,7 @@ function Get-KeyAuthorization {
         Project: https://github.com/rmbolger/Posh-ACME
 
     .LINK
-        Get-PAAuthorizations
+        Get-PAAuthorization
 
     .LINK
         Submit-ChallengeValidation

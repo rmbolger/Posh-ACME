@@ -56,7 +56,7 @@ function Revoke-PAAuthorization {
         # Remove any duplicates that might exist
         $urls = $urls | Select-Object -Unique
 
-        $auths = $urls | Get-PAAuthorizations -Account $Account
+        $auths = $urls | Get-PAAuthorization -Account $Account
 
         # loop through the URLs and request deactivation
         foreach ($auth in $auths) {
@@ -130,7 +130,7 @@ function Revoke-PAAuthorization {
         Project: https://github.com/rmbolger/Posh-ACME
 
     .LINK
-        Get-PAAuthorizations
+        Get-PAAuthorization
 
     .LINK
         Get-PAOrder

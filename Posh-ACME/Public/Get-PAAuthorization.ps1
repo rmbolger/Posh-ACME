@@ -1,4 +1,4 @@
-function Get-PAAuthorizations {
+function Get-PAAuthorization {
     [CmdletBinding()]
     [OutputType('PoshACME.PAAuthorization')]
     param(
@@ -130,17 +130,17 @@ function Get-PAAuthorizations {
         An existing ACME account object such as the output from Get-PAAccount. If no account is specified, the current account will be used.
 
     .EXAMPLE
-        Get-PAAuthorizations https://acme.example.com/authz/1234567
+        Get-PAAuthorization https://acme.example.com/authz/1234567
 
         Get the authorization for the specified URL.
 
     .EXAMPLE
-        Get-PAOrder | Get-PAAuthorizations
+        Get-PAOrder | Get-PAAuthorization
 
         Get the authorizations for the current order on the current account.
 
     .EXAMPLE
-        Get-PAOrder -List | Get-PAAuthorizations
+        Get-PAOrder -List | Get-PAAuthorization
 
         Get the authorizations for all orders on the current account.
 

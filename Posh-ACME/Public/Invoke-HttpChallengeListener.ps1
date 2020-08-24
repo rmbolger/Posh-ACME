@@ -58,7 +58,7 @@ function Invoke-HttpChallengeListener {
         }
 
         # get pending authorizations for the order
-        $openAuthorizations = @($order | Get-PAAuthorizations -Verbose:$false |
+        $openAuthorizations = @($order | Get-PAAuthorization -Verbose:$false |
             Where-Object { $_.status -eq 'pending' -and $_.HTTP01Status -eq 'pending' })
 
         # return if there's nothing to do
@@ -140,7 +140,7 @@ function Invoke-HttpChallengeListener {
 
                         # check if the published authorizations are no longer pending
                         # valid or invalid doesn't matter because we can't retry, so there's no need to wait longer
-                        $completeAuths = @( $order | Get-PAAuthorizations -Verbose:$false |
+                        $completeAuths = @( $order | Get-PAAuthorization -Verbose:$false |
                             Where-Object { $_.fqdn -in $httpPublish.fqdn -and $_.status -ne 'pending' } )
 
                         if ($completeAuths.Count -eq $httpPublish.Count) {
@@ -209,7 +209,7 @@ function Invoke-HttpChallengeListener {
             }
 
             # return PAAuthorizations for MainDomain if output may be used in a variable/pipe
-            $order | Get-PAAuthorizations -Verbose:$false
+            $order | Get-PAAuthorization -Verbose:$false
         }
     }
 
@@ -259,6 +259,6 @@ function Invoke-HttpChallengeListener {
         Get-PAOrder
 
     .LINK
-        Get-PAAuthorizations
+        Get-PAAuthorization
     #>
 }

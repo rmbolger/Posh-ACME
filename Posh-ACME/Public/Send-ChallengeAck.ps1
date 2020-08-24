@@ -60,14 +60,14 @@ function Send-ChallengeAck {
         The ACME account associated with the challenge.
 
     .EXAMPLE
-        $auths = Get-PAOrder | Get-PAAuthorizations
+        $auths = Get-PAOrder | Get-PAAuthorization
 
         PS C:\>Send-ChallengeAck $auths[0].DNS01Url
 
         Tell the ACME server to validate the first DNS challenge in the current order.
 
     .EXAMPLE
-        $auths = Get-PAOrder | Get-PAAuthorizations
+        $auths = Get-PAOrder | Get-PAAuthorization
 
         PS C:\>$httpUrls = ($auths | ?{ $_.status -eq 'pending' }).HTTP01Url
         PS C:\>$httpUrls | Send-ChallengeAck
@@ -78,7 +78,7 @@ function Send-ChallengeAck {
         Project: https://github.com/rmbolger/Posh-ACME
 
     .LINK
-        Get-PAAuthorizations
+        Get-PAAuthorization
 
     .LINK
         Submit-ChallengeValidation

@@ -23,7 +23,7 @@ Describe "Get-PAAuthorizations" {
             Mock -ModuleName Posh-ACME Invoke-ACME { [pscustomobject]@{ Content = $fakeAuthzNoExpires } }
 
             InModuleScope Posh-ACME {
-                { Get-PAAuthorizations 'https://acme.example.com/authz/1' } | Should -Not -Throw
+                { Get-PAAuthorization 'https://acme.example.com/authz/1' } | Should -Not -Throw
             }
         }
     }
@@ -46,11 +46,11 @@ Describe "Get-PAAuthorizations" {
             Mock -ModuleName Posh-ACME Write-Warning {}
 
             InModuleScope Posh-ACME {
-                { Get-PAAuthorizations 'https://acme.example.com/authz/1' } | Should -Not -Throw
+                { Get-PAAuthorization 'https://acme.example.com/authz/1' } | Should -Not -Throw
 
                 Should -Invoke Write-Warning
 
-                $auth = Get-PAAuthorizations 'https://acme.example.com/authz/1'
+                $auth = Get-PAAuthorization 'https://acme.example.com/authz/1'
 
                 $auth.challenges[0].status | Should -Be 'pending'
                 $auth.challenges[1].status | Should -Be 'pending'

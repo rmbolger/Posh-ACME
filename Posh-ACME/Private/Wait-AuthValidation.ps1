@@ -17,7 +17,7 @@ function Wait-AuthValidation {
             # don't re-query things we know are already valid
             if ($i -in $skips) { continue; }
 
-            $auth = Get-PAAuthorizations $AuthUrls[$i] -Verbose:$false
+            $auth = Get-PAAuthorization $AuthUrls[$i] -Verbose:$false
             Write-Debug "T$tries Authorization for $($auth.fqdn) status '$($auth.status)'."
 
             if ($auth.status -eq 'valid') {

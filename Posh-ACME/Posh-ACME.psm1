@@ -77,9 +77,9 @@ if ('UseBasicParsing' -in (Get-Command Invoke-WebRequest).Parameters.Keys) {
 
 Register-ArgCompleters
 
-# Get-PAAuthorizations is deprecated and will be replaced with the singular
-# version in 4.x. Prepare for that eventual reality by adding it as an alias
-# now.
-Set-Alias Get-PAAuthorization -Value Get-PAAuthorizations
+# Get-PAAuthorizations was renamed to Get-PAAuthorization in 4.x. But we'll add
+# an alias to the old version so that we don't break scripts since it functions
+# the same.
+Set-Alias Get-PAAuthorizations -Value Get-PAAuthorization
 
 Import-PAConfig

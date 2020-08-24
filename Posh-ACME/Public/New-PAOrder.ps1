@@ -125,7 +125,7 @@ function New-PAOrder {
     # unfortunately, there's no way to know which authorization URL is for which identifier
     # just by parsing it. So we need to query the details for each one in order to put them
     # in the right order
-    $auths = Get-PAAuthorizations $order.authorizations
+    $auths = Get-PAAuthorization $order.authorizations
     for ($i=0; $i -lt $order.identifiers.Count; $i++) {
         $auth = $auths | Where-Object { $_.fqdn -eq $order.identifiers[$i].value }
         $order.authorizations[$i] = $auth.location

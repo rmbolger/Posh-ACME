@@ -67,7 +67,7 @@ function Submit-ChallengeValidation {
     # So we're going to check all of the authorization statuses and publish
     # records for any that are still pending.
 
-    $allAuths = @($Order | Get-PAAuthorizations)
+    $allAuths = @($Order | Get-PAAuthorization)
     $published = @()
 
     # fill out the Plugin attribute so there's a value for each authorization in the order

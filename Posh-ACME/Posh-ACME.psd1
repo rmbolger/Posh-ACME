@@ -45,7 +45,7 @@ FunctionsToExport = @(
     'Export-PAAccountKey'
     'Get-KeyAuthorization'
     'Get-PAAccount'
-    'Get-PAAuthorizations'
+    'Get-PAAuthorization'
     'Get-PACertificate'
     'Get-PAOrder'
     'Get-PAPlugin'
