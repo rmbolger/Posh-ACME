@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '3.15.1'
+ModuleVersion = '3.16.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -110,9 +110,16 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 3.15.1 (2020-07-08)
+## 3.16.0 (2020-08-31)
 
-* Fixed Route53 trying to load AWSPowerShell module when not installed (#263)
+* Added new DNS plugin [NameSilo](https://www.namesilo.com) (Thanks @rkone)
+* Added Preferred Chain support
+  * There is a new `-PreferredChain` parameter on `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder`.
+  * For new or existing orders, you may select an alternate CA chain based on the Issuing CA subject name if alternate chains are offered by the CA.
+  * Example: `-PreferredChain 'ISRG Root X1'`
+* Fixed a bug with `Submit-Renewal` that wasn't properly using `-PluginArgs` and `-NoSkipManualDns` parameters when `-AllOrders` or `-AllAccounts` switches were also used (#266 #275). (Thanks @f-bader)
+* deSEC plugin has added retry logic to address API throttling issues for certs with many names (#275).
+* Fixed a bug with Azure plugin when using `AZCertPfx` authentication from Windows.
 '@
 
     } # End of PSData hashtable
