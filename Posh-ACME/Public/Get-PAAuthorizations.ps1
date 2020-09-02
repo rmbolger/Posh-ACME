@@ -71,7 +71,7 @@ function Get-PAAuthorizations {
             # According to RFC 8555 7.1.4 the expires property is only REQUIRED when the property status is "valid".
             # It's OPTIONAL for any other status and some CA's will not return it.
             # Only repair the timestamp if it actually exists
-            if([bool]($auth.PSobject.Properties.name -match "expires")) {
+            if ('expires' -in $auth.PSObject.Properties.Name) {
                 # fix any dates that may have been parsed by PSCore's JSON serializer
                 $auth.expires = Repair-ISODate $auth.expires
             }
