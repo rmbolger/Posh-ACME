@@ -54,9 +54,6 @@ function Get-PAAuthorizations {
             $auth.PSObject.TypeNames.Insert(0,'PoshACME.PAAuthorization')
             Write-Debug "Response: $($auth | ConvertTo-Json)"
 
-            # fix any dates that may have been parsed by PSCore's JSON serializer
-            $auth.expires = Repair-ISODate $auth.expires
-
             # Workaround non-compliant ACME servers such as Nexus CM that don't include
             # the status field on challenge objects. Just copy the auth's status to
             # each challenge.
@@ -69,6 +66,14 @@ function Get-PAAuthorizations {
             }
             if ($nonCompliantServer) {
                 Write-Warning "ACME server returned non-compliant challenge objects with no status. Please report this to your ACME server vendor."
+            }
+
+            # According to RFC 8555 7.1.4 the expires property is only REQUIRED when the property status is "valid".
+            # It's OPTIONAL for any other status and some CA's will not return it.
+            # Only repair the timestamp if it actually exists
+            if ('expires' -in $auth.PSObject.Properties.Name) {
+                # fix any dates that may have been parsed by PSCore's JSON serializer
+                $auth.expires = Repair-ISODate $auth.expires
             }
 
             # add "nice to have" members to the auth object
