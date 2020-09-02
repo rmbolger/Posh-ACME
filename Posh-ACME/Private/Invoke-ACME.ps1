@@ -147,7 +147,7 @@ function Invoke-ACME {
         # check for badNonce and retry once
         if (!$NoRetry -and $freshNonce -and $acmeError.type -and $acmeError.type -like '*:badNonce') {
             $Header.nonce = $script:Dir.nonce
-            Write-Debug "Retrying with updated nonce"
+            Write-Verbose "Nonce rejected by ACME server. Retrying with updated nonce."
             return (Invoke-ACME $Header $PayloadJson -Key $acctKey -NoRetry)
         }
 
