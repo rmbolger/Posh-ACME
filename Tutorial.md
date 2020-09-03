@@ -201,7 +201,7 @@ As an example, consider the case for the Azure DNS plugin:
 
 ```powershell
 # renew specifying new plugin arguments
-Submit-Renewal -PluginArgs @{AZSubscriptionId='mysubscriptionid',AZAccessToken='myaccesstoken'}
+Submit-Renewal -PluginArgs @{AZSubscriptionId='mysubscriptionid';AZAccessToken='myaccesstoken'}
 ```
 
 ## Going Into Production
