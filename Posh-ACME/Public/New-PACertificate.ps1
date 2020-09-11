@@ -248,12 +248,19 @@ function New-PACertificate {
         # Download the cert chain, split it up, and generate a PFX files
         Export-PACertFiles $order
 
-        # check the certificate expiration date so we can update the CertExpires
-        # and RenewAfter fields
         Write-Verbose "Updating cert expiration and renewal window"
-        $certExpires = (Import-Pem -InputFile (Join-Path $script:OrderFolder 'cert.cer')).NotAfter
-        $script:Order.CertExpires = $certExpires.ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture)
-        $script:Order.RenewAfter = $certExpires.AddDays(-30).ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture)
+
+        # Calculate the appropriate renewal window. The generally accepted suggestion
+        # is 1/3 the total lifetime of the cert earlier than its expiration. For
+        # example, 90 day certs renew 30 days before expiration. For longer lived
+        # certs we're going to cap to renewal window at 30 days before renewal.
+        $cert = Import-Pem (Join-Path $script:OrderFolder 'cert.cer')
+        $lifetime = $cert.NotAfter - $cert.NotBefore
+        $renewHours = [Math]::Max(720, ($lifetime.TotalHours / 3))
+
+        # Set the CertExpires and RenewAfter fields
+        $script:Order.CertExpires = $cert.NotAfter.ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture)
+        $script:Order.RenewAfter = $cert.NotAfter.AddHours(-$renewHours).ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture)
         Update-PAOrder -SaveOnly
 
         Write-Verbose "Successfully created certificate."
