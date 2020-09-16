@@ -27,13 +27,13 @@ function Add-DnsTxtDMEasy {
     }
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (!($zoneID,$zoneName = Find-DMEZone $RecordName $DMEKey $DMESecretInsecure $apiBase)) {
+    $zoneID,$zoneName = Find-DMEZone $RecordName $DMEKey $DMESecretInsecure $apiBase
+    if (-not $zoneID) {
         throw "Unable to find DME hosted zone for $RecordName"
     }
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
-
+    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).Trim('.')
 
     $recRoot = "$apiBase/$zoneID/records"
 
@@ -126,12 +126,13 @@ function Remove-DnsTxtDMEasy {
     }
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (!($zoneID,$zoneName = Find-DMEZone $RecordName $DMEKey $DMESecretInsecure $apiBase)) {
+    $zoneID,$zoneName = Find-DMEZone $RecordName $DMEKey $DMESecretInsecure $apiBase
+    if (-not $zoneID) {
         throw "Unable to find DME hosted zone for $RecordName"
     }
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).Trim('.')
 
     $recRoot = "$apiBase/$zoneID/records"
 
@@ -281,7 +282,7 @@ function Find-DMEZone {
     try {
         $auth = Get-DMEAuthHeader $DMEKey $DMESecretInsecure
         $response = Invoke-RestMethod $ApiBase -Headers $auth -ContentType 'application/json' @script:UseBasic
-        $zones = $response.data
+        $zones = @($response.data)
     } catch { throw }
 
     # Since DME could be hosting both apex and sub-zones, we need to find the closest/deepest
@@ -293,8 +294,8 @@ function Find-DMEZone {
     # - sub2.example.com
     # - example.com
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
 
         if ($zoneTest -in $zones.name) {
