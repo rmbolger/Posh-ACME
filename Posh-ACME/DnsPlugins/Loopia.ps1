@@ -28,7 +28,7 @@ function Add-DnsTxtLoopia {
     Write-Debug "Found zone $zoneName"
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
 
     if (-not (Test-LoopiaSubdomainExists $recShort $zoneName $creds)) {
         # we need to add the "subdomain" object before we add records to it
@@ -112,7 +112,7 @@ function Remove-DnsTxtLoopia {
     Write-Debug "Found zone $zoneName"
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
 
     if (-not (Test-LoopiaSubdomainExists $recShort $zoneName $creds)) {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
@@ -280,8 +280,8 @@ function Find-LoopiaZone {
     }
 
     $pieces = $RecordName.Split('.')
-    for ($j=1; $j -lt ($pieces.Count-1); $j++) {
-        $zone = "$( $pieces[$j..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zone = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zone"
 
         if ($zone -in $domains) {

@@ -43,7 +43,7 @@ function Add-DnsTxtDNSimple {
 
     # get all the instances of the record
     try {
-        $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+        $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
         $recs = (Invoke-RestMethod "$apiRoot/$acctID/zones/$zoneName/records?name=$recShort&type=TXT&per_page=100" `
             @restParams @script:UseBasic).data
     } catch { throw }
@@ -140,7 +140,7 @@ function Remove-DnsTxtDNSimple {
 
     # get all the instances of the record
     try {
-        $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+        $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
         $recs = (Invoke-RestMethod "$apiRoot/$acctID/zones/$zoneName/records?name=$recShort&type=TXT&per_page=100" `
             @restParams @script:UseBasic).data
     } catch { throw }
@@ -249,8 +249,8 @@ function Find-DSZone {
     # - example.com
 
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         try {
             # if the call succeeds, the zone exists, so we don't care about the actualy response

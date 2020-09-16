@@ -33,7 +33,7 @@ function Add-DnsTxtLinode {
 
     # get all the instances of the record
     try {
-        $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+        $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
         $restParams.Headers.'X-Filter' = @{name=$recShort;type='TXT'} | ConvertTo-Json -Compress
         $recs = (Invoke-RestMethod "$apiRoot/domains/$zoneID/records" @restParams @script:UseBasic).data
     } catch { throw }
@@ -121,7 +121,7 @@ function Remove-DnsTxtLinode {
 
     # get all the instances of the record
     try {
-        $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+        $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
         $restParams.Headers.'X-Filter' = @{name=$recShort;type='TXT'} | ConvertTo-Json -Compress
         $recs = (Invoke-RestMethod "$apiRoot/domains/$zoneID/records" @restParams @script:UseBasic).data
     } catch { throw }
@@ -229,8 +229,8 @@ function Find-LIZone {
     # - example.com
 
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         try {
             $RestParams.Headers.'X-Filter' = "{`"domain`":`"$zoneTest`"}"

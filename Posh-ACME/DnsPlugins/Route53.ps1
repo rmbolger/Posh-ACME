@@ -562,7 +562,7 @@ function Get-R53ZoneId {
     # Loop through increasingly general sub-zones to find the most specific
     # zone this record should live in.
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
         $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )."
         Write-Verbose "Checking $zoneTest"
 

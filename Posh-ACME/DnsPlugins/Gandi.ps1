@@ -30,7 +30,7 @@ function Add-DnsTxtGandi {
     Write-Debug "Found zone $zoneName"
 
     # find the matching TXT record if it exists
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
     $recUrl = "https://dns.api.gandi.net/api/v5/domains/$zoneName/records/$recShort/TXT"
     try {
         $rec = Invoke-RestMethod $recUrl @restParams @script:UseBasic -EA Stop
@@ -129,7 +129,7 @@ function Remove-DnsTxtGandi {
     Write-Debug "Found zone $zoneName"
 
     # find the matching TXT record if it exists
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
     $recUrl = "https://dns.api.gandi.net/api/v5/domains/$zoneName/records/$recShort/TXT"
     try {
         $rec = Invoke-RestMethod $recUrl @restParams @script:UseBasic -EA Stop
@@ -248,8 +248,8 @@ function Find-GandiZone {
     # - example.com
 
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         try {
             Invoke-RestMethod "https://dns.api.gandi.net/api/v5/domains/$zoneTest" `

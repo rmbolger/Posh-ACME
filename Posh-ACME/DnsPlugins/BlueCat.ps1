@@ -1,5 +1,6 @@
 function Add-DnsTxtBlueCat {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
@@ -66,6 +67,7 @@ function Add-DnsTxtBlueCat {
 
 function Remove-DnsTxtBlueCat {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
@@ -89,7 +91,7 @@ function Remove-DnsTxtBlueCat {
     $proxy = Get-BlueCatWsdlProxy -Username $BlueCatUsername -Password $BlueCatPassword -Uri $BlueCatUri
     $view = Get-View -ConfigurationName $BlueCatConfig -ViewName $BlueCatView -BlueCatProxy $proxy
     $parentZone = Get-ParentZone -AbsoluteName $RecordName -ViewId $view.id -BlueCatProxy $proxy
-    $txtRecordName = $RecordName -ireplace [regex]::Escape(".$($parentZone.absoluteName)"), [string]::Empty
+    $txtRecordName = ($RecordName -ireplace [regex]::Escape($parentZone.absoluteName), [string]::Empty).TrimEnd('.')
     $txtRecords = $proxy.getEntitiesByName($parentZone.id, $txtRecordName, "TXTRecord", 0, [int16]::MaxValue)
     $txtRecords = $txtRecords | ForEach-Object { (ConvertPSObjectToHashtable -InputObject $_) + (StringToHashtable -String $_.properties) }
     $txtRecord = $txtRecords | Where-Object { $_.txt -eq $TxtValue }
@@ -138,6 +140,7 @@ function Remove-DnsTxtBlueCat {
 
 function Save-DnsTxtBlueCat {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory, Position = 0)]
         [string]$BlueCatUsername,
@@ -204,6 +207,7 @@ function CheckPSVersion {
 }
 
 function Get-BlueCatWsdlProxy {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory = $true)]
         [String]$Username,

@@ -398,8 +398,8 @@ function Find-AKZone {
 
     # Search for the zone from longest to shortest set of FQDN pieces.
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         try {
             $response = Invoke-AKRest "/config-dns/v2/zones?search=$zoneTest&types=primary&showAll=true" @RestParams

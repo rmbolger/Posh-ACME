@@ -25,7 +25,7 @@ function Add-DnsTxtAliyun {
     Write-Debug "Found zone $zoneName"
 
     # grab the relative portion of the fqdn
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
     if ($recShort -eq $RecordName) { $recShort = '@' }
 
     # query for an existing record
@@ -109,7 +109,7 @@ function Remove-DnsTxtAliyun {
     Write-Debug "Found zone $zoneName"
 
     # grab the relative portion of the fqdn
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
     if ($recShort -eq $RecordName) { $recShort = '@' }
 
     # query for an existing record
@@ -270,8 +270,8 @@ function Find-AliZone {
 
     # Search for the zone from longest to shortest set of FQDN pieces.
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         try {
             $response = Invoke-AliRest DescribeDomains @("KeyWord=$zoneTest") $AliKeyId $AliSecret

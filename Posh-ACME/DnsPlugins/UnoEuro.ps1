@@ -29,7 +29,7 @@ function Add-DnsTxtUnoEuro {
         throw "Unable to find matching zone for $RecordName."
     }
     Write-Verbose "[UE-Plugin] Found domain $UEDomain."
-    $UESubDomain = $RecordName -ireplace [regex]::Escape(".$UEDomain"), [string]::Empty
+    $UESubDomain = ($RecordName -ireplace [regex]::Escape($UEDomain), [string]::Empty).TrimEnd('.')
     Write-Verbose "[UE-Plugin] Accepted domain $UEDomain and record $UESubDomain"
 
     # check for an existing record
@@ -104,7 +104,7 @@ function Remove-DnsTxtUnoEuro {
         throw "Unable to find matching zone for $RecordName."
     }
     Write-Verbose "[UE Plugin] Found $UEDomain."
-    $UESubDomain = $RecordName -ireplace [regex]::Escape(".$UEDomain"), [string]::Empty
+    $UESubDomain = ($RecordName -ireplace [regex]::Escape($UEDomain), [string]::Empty).TrimEnd('.')
     Write-Verbose "[UE Plugin] Accepted domain $UEDomain and record $UESubDomain"
 
     # check for an existing record
@@ -208,8 +208,8 @@ function Find-UEZone {
     # - sub2.example.com
     # - example.com
     $pieces = $RecordName.Split('.')
-    for ($i = 1; $i -lt ($pieces.Count - 1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "[UE Plugin] Checking $zoneTest"
 
         try {

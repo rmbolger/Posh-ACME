@@ -24,7 +24,7 @@ function Add-DnsTxtNameSilo {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
     } else {
 
-        $recShort = $RecordName -ireplace [regex]::Escape(".$zone"), [string]::Empty
+        $recShort = ($RecordName -ireplace [regex]::Escape($zone), [string]::Empty).TrimEnd('.')
 
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
         try {
@@ -226,8 +226,8 @@ function Find-NameSiloZone {
 
     # find the closest match based on the record name
     $pieces = $RecordName.Split('.')
-    for ($j=1; $j -lt ($pieces.Count-1); $j++) {
-        $zone = "$( $pieces[$j..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zone = $pieces[$i..($pieces.Count-1)] -join '.'
 
         if ($zone -in $domains) {
             $script:NameSiloZones.$RecordName = $zone

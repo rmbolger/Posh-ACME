@@ -29,7 +29,7 @@ function Add-DnsTxtClouDNS {
     try { $zoneName = Find-CDZone $RecordName $body } catch { throw }
     Write-Debug "Found zone $zoneName"
 
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
 
     # search for an existing record
     try { $rec = Get-CDTxtRecord $recShort $TxtValue $zoneName $body } catch { throw }
@@ -120,7 +120,7 @@ function Remove-DnsTxtClouDNS {
     try { $zoneName = Find-CDZone $RecordName $body } catch { throw }
     Write-Debug "Found zone $zoneName"
 
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
 
     # search for an existing record
     try { $rec = Get-CDTxtRecord $recShort $TxtValue $zoneName $body } catch { throw }
@@ -321,8 +321,8 @@ function Find-CDZone {
 
     # Search for the zone from longest to shortest set of FQDN pieces.
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         try {
             $response = Invoke-CDAPI $CommonBody "/get-zone-info.json?&domain-name=$zoneTest"

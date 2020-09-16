@@ -22,7 +22,7 @@ function Add-DnsTxtFreeDNS {
     Write-Verbose "Found owned domain $($zone.domain) ($($zone.id))"
 
     $rec = Get-FDTxtRecords $zone.id $zone.domain $RecordName $TxtValue
-    $recShort = $RecordName -ireplace [regex]::Escape(".$($zone.domain)"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zone.domain), [string]::Empty).TrimEnd('.')
 
     if ($rec) {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
@@ -412,7 +412,7 @@ function Find-FDZone {
 
     # Search for the zone from longest to shortest set of FQDN pieces.
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         if ($zoneTest -in $domains.domain) {

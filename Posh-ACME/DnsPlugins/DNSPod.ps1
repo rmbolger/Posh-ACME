@@ -43,7 +43,7 @@ function Add-DnsTxtDNSPod {
         try {
             Write-Verbose "Adding $RecordName with value $TxtValue"
 
-            $recShort = $RecordName -ireplace [regex]::Escape(".$($zone.name)"), [string]::Empty
+            $recShort = ($RecordName -ireplace [regex]::Escape($zone.name), [string]::Empty).TrimEnd('.')
             $ApiEndpoint = 'https://api.dnspod.com/Record.Create'
             $body = "user_token=$($script:DNSPodAuthToken)&format=json&domain_id=$($zone.id)&sub_domain=$recShort&record_type=TXT&record_line=default&value=$TxtValue&ttl=1"
 
@@ -269,7 +269,7 @@ function Get-DNSPodTxtRecord {
     try {
 
         # separate the portion of the name that doesn't contain the zone name
-        $recShort = $RecordName -ireplace [regex]::Escape(".$($zone.name)"), [string]::Empty
+        $recShort = ($RecordName -ireplace [regex]::Escape($zone.name), [string]::Empty).TrimEnd('.')
 
         # get record
         $ApiEndpoint = 'https://api.dnspod.com/Record.List'

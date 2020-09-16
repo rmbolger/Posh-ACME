@@ -22,21 +22,21 @@
     $Headers = @{ Authorization = "Basic $encodedCreds" }
 
     # find the domain/zone associated with this record
-    $Bits = $RecordName.Split('.')
-    for ($i=2; $i -lt $Bits.Count; $i++) {
-        $checkZone = $Bits[$(0-$i)..-1] -join '.'
+    $pieces = $RecordName.Split('.')
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         try {
-            $Records = Invoke-RestMethod "$apiBase/zones/records/all/$($checkZone)?format=json" `
+            $Records = Invoke-RestMethod "$apiBase/zones/records/all/$($zoneTest)?format=json" `
                 -ContentType 'application/json' -Headers $Headers -Method GET @script:UseBasic -EA Stop
         } catch { continue }
-        $domain = $checkZone
+        $domain = $zoneTest
         Write-Verbose "Found $domain zone"
         break
     }
     if (-not $domain) { throw "Unable to find zone for $RecordName" }
 
     # grab the relative portion of the fqdn
-    $recShort = $RecordName -ireplace [regex]::Escape(".$domain"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($domain), [string]::Empty).TrimEnd('.')
 
     # check for existing record
     $rec = $Records.data | Where-Object { $_.type -eq 'TXT' -and $_.host -eq $recShort -and $_.rData -eq $TxtValue }
@@ -116,21 +116,21 @@ Function Remove-DnsTxtEasyDNS {
     $Headers = @{ Authorization = "Basic $encodedCreds" }
 
     # find the domain/zone associated with this record
-    $Bits = $RecordName.Split('.')
-    for ($i=2; $i -lt $Bits.Count; $i++) {
-        $checkZone = $Bits[$(0-$i)..-1] -join '.'
+    $pieces = $RecordName.Split('.')
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         try {
-            $Records = Invoke-RestMethod "$apiBase/zones/records/all/$($checkZone)?format=json" `
+            $Records = Invoke-RestMethod "$apiBase/zones/records/all/$($zoneTest)?format=json" `
                 -ContentType 'application/json' -Headers $Headers -Method GET @script:UseBasic -EA Stop
         } catch { continue }
-        $domain = $checkZone
+        $domain = $zoneTest
         Write-Verbose "Found $domain zone"
         break
     }
     if (-not $domain) { throw "Unable to find zone for $RecordName" }
 
     # grab the relative portion of the fqdn
-    $recShort = $RecordName -ireplace [regex]::Escape(".$domain"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($domain), [string]::Empty).TrimEnd('.')
 
     # check for existing record
     $rec = $Records.data | Where-Object { $_.type -eq 'TXT' -and $_.host -eq $recShort -and $_.rData -eq $TxtValue }

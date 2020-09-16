@@ -30,8 +30,8 @@ function Add-DnsTxtWindows {
     $zone = Get-DnsServerZone $zoneName @dnsParams -EA Stop
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
-    Write-Verbose "Record short name: $recShort"
+    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    Write-Debug "Record short name: $recShort"
 
     # check for zone scope usage
     $zoneScope = @{}
@@ -126,10 +126,12 @@ function Remove-DnsTxtWindows {
     if (!($zoneName = Find-WinZone $RecordName $dnsParams)) {
         throw "Unable to find zone for $RecordName"
     }
+    Write-Verbose "Found $zoneName"
     $zone = Get-DnsServerZone $zoneName @dnsParams -EA Stop
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    Write-Debug "Record short name: $recShort"
 
     # check for zone scope usage
     $zoneScope = @{}
@@ -278,8 +280,8 @@ function Find-WinZone {
     # - example.com
 
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
 
         if ($zoneTest -in $zones.ZoneName) {

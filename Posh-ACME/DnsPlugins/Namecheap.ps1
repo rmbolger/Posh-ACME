@@ -26,7 +26,7 @@ function Add-DnsTxtNamecheap {
     try { $recs = Get-NCRecords $sld $tld $body } catch { throw }
 
     # get the short version of the record name to match against
-    $recMatch = $RecordName -ireplace [regex]::Escape(".$sld.$tld"), [string]::Empty
+    $recMatch = ($RecordName -ireplace [regex]::Escape("$sld.$tld"), [string]::Empty).TrimEnd('.')
 
     # check for an existing record
     if ($recs | Where-Object { $_.Name -eq $recMatch -and $_.Type -eq 'TXT' -and $_.Address -eq $TxtValue }) {
@@ -128,7 +128,7 @@ function Remove-DnsTxtNamecheap {
     try { $recs = Get-NCRecords $sld $tld $body } catch { throw }
 
     # get the short version of the record name to match against
-    $recMatch = $RecordName -ireplace [regex]::Escape(".$sld.$tld"), [string]::Empty
+    $recMatch = ($RecordName -ireplace [regex]::Escape("$sld.$tld"), [string]::Empty).TrimEnd('.')
 
     # check for an existing record
     if ($delRec = $recs | Where-Object { $_.Name -eq $recMatch -and $_.Type -eq 'TXT' -and $_.Address -eq $TxtValue }) {
@@ -286,8 +286,8 @@ function Find-NCDomain {
     # domains like (example.co.uk). So we're going to search for the zone from longest to shortest
     # set of pieces.
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         try {
             $response = Invoke-NCAPI $CommonBody -QueryAdditions "SearchTerm=$zoneTest"

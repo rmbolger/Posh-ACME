@@ -31,7 +31,7 @@ function Add-DnsTxtIBMSoftLayer {
     try { $zoneID,$zoneName = Find-IBMZone $RecordName $IBMCredential $apiBase } catch { throw }
     Write-Debug "Found zone $zoneName with ID $zoneID"
 
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
 
     # search for an existing record
     try { $rec = Get-IBMTxtRecord $zoneID $recShort $TxtValue $IBMCredential $apiBase } catch { throw }
@@ -122,7 +122,7 @@ function Remove-DnsTxtIBMSoftLayer {
     try { $zoneID,$zoneName = Find-IBMZone $RecordName $IBMCredential $apiBase } catch { throw }
     Write-Debug "Found zone $zoneName with ID $zoneID"
 
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
 
     # search for an existing record
     try { $rec = Get-IBMTxtRecord $zoneID $recShort $TxtValue $IBMCredential $apiBase } catch { throw }
@@ -228,8 +228,8 @@ function Find-IBMZone {
 
     # Search for the zone from longest to shortest set of FQDN pieces.
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         try {
             $response = Invoke-RestMethod "$ApiBase/SoftLayer_Dns_Domain/getByDomainName/$zoneTest.json" `

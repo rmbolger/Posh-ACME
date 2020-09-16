@@ -25,7 +25,7 @@ function Add-DnsTxtGoDaddy {
     if (-not ($zone = Find-GDZone $RecordName $headers $apiRoot)) {
         throw "Unable to find matching zone for $RecordName."
     }
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zone"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zone), [string]::Empty).TrimEnd('.')
 
     # Get a list of existing TXT records for this record name
     try {
@@ -122,7 +122,7 @@ function Remove-DnsTxtGoDaddy {
     if (-not ($zone = Find-GDZone $RecordName $headers $apiRoot)) {
         throw "Unable to find matching zone for $RecordName."
     }
-    $recShort = $RecordName -ireplace [regex]::Escape(".$zone"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zone), [string]::Empty).TrimEnd('.')
 
     # Get a list of existing TXT records for this record name
     try {
@@ -244,8 +244,8 @@ function Find-GDZone {
     # - sub2.example.com
     # - example.com
     $pieces = $RecordName.Split('.')
-    for ($i = 1; $i -lt ($pieces.Count - 1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
 
         try {

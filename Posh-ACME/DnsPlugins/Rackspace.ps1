@@ -279,8 +279,8 @@ function Find-RSZone {
     $apiRoot = $script:RSAuth.dnsBase
 
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         try {
             $response = Invoke-RestMethod "$apiRoot/domains?name=$zoneTest" @script:UseBasic `

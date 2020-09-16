@@ -33,7 +33,7 @@ Function Add-DnsTxtHetzner {
     }
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName -ireplace [regex]::Escape(".$($zone.name)"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zone.name), [string]::Empty).TrimEnd('.')
 
     # Get a list of existing TXT records for this record name
     try {
@@ -126,7 +126,7 @@ Function Remove-DnsTxtHetzner {
     }
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = $RecordName -ireplace [regex]::Escape(".$($zone.name)"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($zone.name), [string]::Empty).TrimEnd('.')
 
     # Get a list of existing TXT records for this record name
     try {
@@ -229,8 +229,8 @@ Function Find-HetznerZone {
     # - sub2.example.com
     # - example.com
     $pieces = $RecordName.Split('.')
-    for ($i = 1; $i -lt ($pieces.Count - 1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
 
         $zone = $response.zones | Select-Object id,name |

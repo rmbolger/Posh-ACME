@@ -250,8 +250,8 @@ function Find-NS1Zone {
     } catch { throw }
 
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         if ($zoneTest -in $zones.zone) {
             $zoneName = ($zones | Where-Object { $_.zone -eq $zoneTest }).zone

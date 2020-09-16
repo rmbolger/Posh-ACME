@@ -585,8 +585,8 @@ function Get-AZZoneId {
     # - example.com
 
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Verbose "Checking $zoneTest"
 
         if ($zoneTest -in $zones.name) {
@@ -631,7 +631,7 @@ function Get-AZTxtRecord {
     # parse the zone name from the zone id and strip it from $RecordName
     # to get the relativeRecordSetName
     $zoneName = $ZoneID.Substring($ZoneID.LastIndexOf('/')+1)
-    $relName = $RecordName -ireplace [regex]::Escape(".$zoneName"), [string]::Empty
+    $relName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
 
     $recID = "$ZoneID/TXT/$($relName)"
 

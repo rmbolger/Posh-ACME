@@ -25,7 +25,7 @@ function Add-DnsTxtOVH {
     Connect-OVH @PSBoundParameters
 
     $domain = Find-OVHDomain $RecordName
-    $recShort = $RecordName -ireplace [regex]::Escape(".$domain"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($domain), [string]::Empty).TrimEnd('.')
 
     $recs = @(Get-OVHTxtRecords $recShort $domain)
 
@@ -178,7 +178,7 @@ function Remove-DnsTxtOVH {
     Connect-OVH @PSBoundParameters
 
     $domain = Find-OVHDomain $RecordName
-    $recShort = $RecordName -ireplace [regex]::Escape(".$domain"), [string]::Empty
+    $recShort = ($RecordName -ireplace [regex]::Escape($domain), [string]::Empty).TrimEnd('.')
 
     $recs = @(Get-OVHTxtRecords $recShort $domain)
 
@@ -435,8 +435,8 @@ function Find-OVHDomain {
 
     # Search for the zone from longest to shortest set of FQDN pieces.
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         try {
             # a non-error response indicates the zone exists

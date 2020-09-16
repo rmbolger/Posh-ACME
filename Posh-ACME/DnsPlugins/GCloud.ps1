@@ -325,7 +325,7 @@ function Find-GCZone {
     # - example.com
 
     $pieces = $RecordName.Split('.')
-    for ($i=1; $i -lt ($pieces.Count-1); $i++) {
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
         $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )."
         Write-Debug "Checking $zoneTest"
 

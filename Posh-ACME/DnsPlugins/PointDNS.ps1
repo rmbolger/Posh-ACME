@@ -24,8 +24,8 @@ function Add-DnsTxtPointDNS {
     }
 
     try {
-        $label = $RecordName -ireplace [regex]::Escape(".$zone.name"), [string]::Empty
-        $records = Get-PDZoneRecords $zone.id "TXT" $label $headers
+        $recShort = ($RecordName -ireplace [regex]::Escape($zone.name), [string]::Empty).TrimEnd('.')
+        $records = Get-PDZoneRecords $zone.id "TXT" $recShort $headers
     } catch { throw }
 
     $data = @( $records | ForEach-Object { $_.zone_record.data -replace '"','' } )
@@ -33,8 +33,10 @@ function Add-DnsTxtPointDNS {
     if ($records.Count -eq 0 -or $TxtValue -notin $data) {
         try {
             Write-Verbose "Adding record $RecordName with TXT value $TxtValue"
-            Add-PDZoneRecord $zone.id "TXT" $label $TxtValue $headers
+            Add-PDZoneRecord $zone.id "TXT" $recShort $TxtValue $headers
         } catch { throw }
+    } else {
+        Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
     }
 
     <#
@@ -95,8 +97,8 @@ function Remove-DnsTxtPointDNS {
     }
 
     try {
-        $label = $RecordName -ireplace [regex]::Escape(".$zone.name"), [string]::Empty
-        $records = Get-PDZoneRecords $zone.id "TXT" $label $headers
+        $recShort = ($RecordName -ireplace [regex]::Escape($zone.name), [string]::Empty).TrimEnd('.')
+        $records = Get-PDZoneRecords $zone.id "TXT" $recShort $headers
     } catch { throw }
 
     $data = @( $records | ForEach-Object { $_.zone_record.data -replace '"','' } )
@@ -213,8 +215,8 @@ function Find-PDZone {
     }
 
     $pieces = $RecordName.Split('.')
-    for ($j=1; $j -lt ($pieces.Count-1); $j++) {
-        $zone = "$( $pieces[$j..($pieces.Count-1)] -join '.' )"
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $zone = $pieces[$i..($pieces.Count-1)] -join '.'
         $response = Get-PDZone $zone $Headers
 
         if ($null -ne $response) {
