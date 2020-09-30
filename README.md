@@ -14,13 +14,13 @@ An [ACME v2 (RFC 8555)](https://tools.ietf.org/html/rfc8555) client implemented 
 - DNS challenge plugins for [various DNS providers](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) (pull requests welcome)
 - DNS challenge [CNAME support](https://github.com/rmbolger/Posh-ACME/blob/master/Tutorial.md#advanced-dns-challenge-aliases)
 - Help system for DNS plugins using `Get-DnsPlugins` and `Get-DnsPluginHelp`
-- DNS plugins support batch updates
-- Multiple accounts supported per user profile which allows different certs to have different contact emails
+- Multiple accounts supported per certificate authority which allows different certs to have different contact emails
 - PEM and PFX output files
 - No elevated Windows privileges required *(unless using -Install switch)*
 - Cross platform PowerShell Core support! [(FAQ)](https://github.com/rmbolger/Posh-ACME/wiki/Frequently-Asked-Questions-(FAQ)#does-posh-acme-work-cross-platform-on-powershell-core)
 - Manual HTTP challenge support ([Guide](https://github.com/rmbolger/Posh-ACME/wiki/%28Advanced%29-Manual-HTTP-Challenge-Validation))
-- External Account Binding support for CAs that require it.
+- External Account Binding support for CAs that require it
+- Preferred Chain support to use alternative CA trust chains
 
 # Install
 
