@@ -51,7 +51,7 @@ function Get-PACertificate {
             }
 
             # import the cert
-            $cert = Import-Pem $certFile
+            $cert = Import-Pem -InputFile $certFile
 
             $sha1 = New-Object System.Security.Cryptography.SHA1CryptoServiceProvider
             $allSANs = @($order.MainDomain); if ($order.SANs.Count -gt 0) { $allSANs += @($order.SANs) }

@@ -19,7 +19,7 @@ function New-Csr {
     # Check for an existing key
     if (Test-Path $keyFile -PathType Leaf) {
 
-        $keyPair = Import-Pem $keyFile
+        $keyPair = Import-Pem -InputFile $keyFile
 
         if ($Order.KeyLength -notlike 'ec-*') {
             $sigAlgo = 'SHA256WITHRSA'

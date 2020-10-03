@@ -13,7 +13,7 @@ function Get-CsrDetails {
 
     # parse the file into a [Org.BouncyCastle.Asn1.Pkcs.CertificationRequest]
     Write-Debug "Attempting to import CSR pem"
-    $csr = Import-Pem $CSRPath
+    $csr = Import-Pem -InputFile $CSRPath
     $details = @{
         Base64Url = ConvertTo-Base64Url $csr.GetEncoded()
     }

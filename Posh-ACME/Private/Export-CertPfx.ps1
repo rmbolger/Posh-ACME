@@ -18,8 +18,8 @@ function Export-CertPfx {
     $ChainFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($ChainFile)
 
     # read in the files as native BouncyCastle objects
-    $key  = Import-Pem $KeyFile     # [Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair]
-    $cert = Import-Pem $CertFile    # [Org.BouncyCastle.X509.X509Certificate]
+    $key  = Import-Pem -InputFile $KeyFile     # [Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair]
+    $cert = Import-Pem -InputFile $CertFile    # [Org.BouncyCastle.X509.X509Certificate]
 
     # BouncyCastle won't let use use a null value for a cert/key alias in the PFX file and Windows
     # in some cases doesn't like the empty string default we were using previously. So we'll
