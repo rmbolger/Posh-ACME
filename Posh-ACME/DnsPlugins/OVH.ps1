@@ -182,7 +182,9 @@ function Remove-DnsTxtOVH {
 
     $recs = @(Get-OVHTxtRecords $recShort $domain)
 
-    if ($recs | Where-Object { $_.target -eq "`"$TxtValue`"" }) {
+    $rec = $recs | Where-Object { $_.target -eq "`"$TxtValue`"" }
+
+    if ($rec) {
         # delete the record
         Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
         $query = "$($script:OVHCreds.ApiBase)/domain/zone/$domain/record/$($rec.id)"
