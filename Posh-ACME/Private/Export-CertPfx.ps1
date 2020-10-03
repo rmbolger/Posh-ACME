@@ -41,7 +41,7 @@ function Export-CertPfx {
         $pems = @(Split-PemChain $ChainFile)
 
         foreach ($pem in $pems) {
-            $ca = Import-Pem -InputString ($pem -join '')
+            $ca = Import-Pem -InputString ($pem -join [Environment]::NewLine)
 
             # try to parse the subject to use as the alias
             if ($ca.SubjectDN -match "CN=([^,]+)") {

@@ -24,7 +24,7 @@ function Get-ChainIssuers {
                 continue
             }
             if ($inCert -and '-----END CERTIFICATE-----' -eq $lines[$i].Trim()) {
-                $certString = $lines[$iBegin..$i] -join [String]::Empty
+                $certString = $lines[$iBegin..$i] -join [Environment]::NewLine
                 $cert = Import-Pem -InputString $certString
                 $issuerCN = $cert.IssuerDN.GetValueList([Org.BouncyCastle.Asn1.X509.X509Name]::CN)
                 Write-Debug "Found issuer, $issuerCN, in $filePath"

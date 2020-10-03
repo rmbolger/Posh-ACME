@@ -21,10 +21,10 @@ function Export-Pem {
             # create the structure
             $privKeyStruct = New-Object Org.BouncyCastle.Asn1.Sec.ECPrivateKeyStructure -ArgumentList $orderBitLength,$privParam.D,$pubKey,$x962
 
-            # ECPrivateKeyStructure.GetDerEncoded() seems to return a PKCS1 version of the key
+            # ECPrivateKeyStructure.GetDerEncoded() seems to return a SEC1 version of the key
             $privKeyStr = [Convert]::ToBase64String($privKeyStruct.GetDerEncoded())
 
-            # PKCS1 means 'EC PRIVATE KEY' rather than just 'PRIVATE KEY'
+            # SEC1 means 'EC PRIVATE KEY' rather than just 'PRIVATE KEY'
             # build an array with the proper header/footer
             $pem = @('-----BEGIN EC PRIVATE KEY-----')
             for ($i=0; $i -lt $privKeyStr.Length; $i += 64) {
