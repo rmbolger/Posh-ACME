@@ -1,13 +1,15 @@
 function New-PAAccount {
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding(SupportsShouldProcess,DefaultParameterSetName='Generate')]
     [OutputType('PoshACME.PAAccount')]
     param(
         [Parameter(Position=0)]
         [string[]]$Contact,
-        [Parameter(Position=1)]
+        [Parameter(ParameterSetName='Generate',Position=1)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [Alias('AccountKeyLength')]
         [string]$KeyLength='ec-256',
+        [Parameter(ParameterSetName='ImportKey',Mandatory)]
+        [string]$KeyFile,
         [switch]$AcceptTOS,
         [switch]$Force,
         [string]$ExtAcctKID,
@@ -53,20 +55,58 @@ function New-PAAccount {
         Write-Warning "No email contacts specified for this account. Certificate expiration warnings will not be sent unless you add at least one with Set-PAAccount."
     }
 
-    # There's a chance we may be creating effectively a duplicate account. So check
-    # for confirmation if there's already one with the same contacts and keylength.
-    if (!$Force) {
-        $accts = @(Get-PAAccount -List -Refresh -Contact $Contact -KeyLength $KeyLength -Status 'valid')
-        if ($accts.Count -gt 0) {
-            if (!$PSCmdlet.ShouldContinue("Do you wish to duplicate?",
-                "Existing account with matching contacts and key length.")) { return }
+    if ('Generate' -eq $PSCmdlet.ParameterSetName) {
+
+        # There's a chance we may be creating effectively a duplicate account. So check
+        # for confirmation if there's already one with the same contacts and keylength.
+        if (!$Force) {
+            $accts = @(Get-PAAccount -List -Refresh -Contact $Contact -KeyLength $KeyLength -Status 'valid')
+            if ($accts.Count -gt 0) {
+                if (!$PSCmdlet.ShouldContinue("Do you wish to duplicate?",
+                    "Existing account with matching contacts and key length.")) { return }
+            }
         }
+
+        Write-Debug "Creating new $KeyLength account with contact: $($Contact -join ', ')"
+
+        # create the account key
+        $acctKey = New-PAKey $KeyLength
+
+    } else { # ImportKey parameter set
+
+        # make sure the file exists
+        if (-not (Test-Path $KeyFile -PathType Leaf)) {
+            try { throw "KeyFile $KeyFile not found" }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
+        }
+
+        Write-Debug "Attempting to import private key $KeyFile"
+        $bcKeyPair = Import-Pem -InputFile $KeyFile
+        try {
+            $acctKey = $bcKeyPair | ConvertFrom-BCKey
+        }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
+
+        # determine the appropriate $KeyLength variable based on the imported
+        # key's properties
+        if ($acctKey -is [Security.Cryptography.RSACryptoServiceProvider]) {
+            $kl = $acctKey.KeySize.ToString()
+        }
+        elseif ($acctKey -is [Security.Cryptography.ECDsa]) {
+            $kl = "ec-$($acctKey.KeySize.ToString())"
+        }
+        else {
+            try { throw "Unknown account key type: $($acctKey.GetType())" }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
+        }
+        if (Test-ValidKeyLength $kl) {
+            $KeyLength = $kl
+        } else {
+            try { throw "Imported key length is invalid: $kl" }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
+        }
+        Write-Debug "KeyLength parsed as $KeyLength"
     }
-
-    Write-Debug "Creating new $KeyLength account with contact: $($Contact -join ', ')"
-
-    # create the account key
-    $acctKey = New-PAKey $KeyLength
 
     # create the algorithm identifier as described by
     # https://tools.ietf.org/html/rfc7518#section-3.1
@@ -185,6 +225,9 @@ function New-PAAccount {
 
     .PARAMETER KeyLength
         The type and size of private key to use. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to 'ec-256'.
+
+    .PARAMETER KeyFile
+        The path to an existing EC or RSA private key file. This will attempt to create the account using the specified key as the ACME account key. This can be used to recover/import an existing ACME account if one is already associated with the key.
 
     .PARAMETER AcceptTOS
         If not specified, the ACME server will throw an error with a link to the current Terms of Service. Using this switch indicates acceptance of those Terms of Service and is required for successful account creation.
