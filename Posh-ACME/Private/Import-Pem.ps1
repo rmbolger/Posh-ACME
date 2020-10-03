@@ -34,12 +34,14 @@ function Import-Pem {
     {
         # Certs, Requests, and private keys that get parsed as a full key pair
         # are all things we can just return as-is
+        Write-Debug "PemReader found '$($pemObj.GetType())'. Returning as-is"
         return $pemObj
     }
     elseif ($pemObj -is [Org.BouncyCastle.Crypto.Parameters.RsaPrivateCrtKeyParameters]) {
         # A PKCS8 encoded RSA private key comes out as just the private key
         # parameters. We have to generate the public key parameters and fold
         # them into a full key pair object.
+        Write-Debug "PemReader found '$($pemObj.GetType())'. Attempting to convert to AsymmetricCipherKeyPair."
 
         $pubSpec = [Org.BouncyCastle.Crypto.Parameters.RsaKeyParameters]::new(
             $false,$pemObj.Modulus,$pemObj.PublicExponent
@@ -51,6 +53,7 @@ function Import-Pem {
     elseif ($pemObj -is [Org.BouncyCastle.Crypto.Parameters.ECPrivateKeyParameters]) {
         # A PKCS8 encoded EC private key comes out as just the key parameters
         # We have to transform them into a full key pair object
+        Write-Debug "PemReader found '$($pemObj.GetType())'. Attempting to convert to AsymmetricCipherKeyPair."
 
         $multiplier = [Org.BouncyCastle.Math.EC.Multiplier.FixedPointCombMultiplier]::new()
         $q = $multiplier.Multiply($pemObj.Parameters.G, $pemObj.D)
@@ -63,7 +66,7 @@ function Import-Pem {
     }
     else {
         # not sure what we ended up with
-        throw "Unsupported PEM type: $($pemObj.GetType())"
+        throw "PemReader found unsupported '$($pemObj.GetType())'."
     }
 
     return $pemObj
