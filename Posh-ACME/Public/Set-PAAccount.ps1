@@ -10,11 +10,14 @@ function Set-PAAccount {
         [Parameter(ParameterSetName='Normal')]
         [switch]$Force,
         [Parameter(ParameterSetName='Rollover',Mandatory)]
+        [Parameter(ParameterSetName='RolloverImportKey',Mandatory)]
         [switch]$KeyRollover,
         [Parameter(ParameterSetName='Rollover')]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [Alias('AccountKeyLength')]
         [string]$KeyLength='ec-256',
+        [Parameter(ParameterSetName='RolloverImportKey',Mandatory)]
+        [string]$KeyFile,
         [switch]$NoSwitch
     )
 
@@ -155,8 +158,19 @@ function Set-PAAccount {
                 url   = $script:Dir.keyChange;
             }
 
-            # create the new account key
-            $newKey = New-PAKey $KeyLength
+            if ($KeyFile) {
+                # attempt to use the specified key as the new account key
+                try {
+                    $kLength = [string]::Empty
+                    $newKey = New-PAKey -KeyFile $KeyFile -ParsedLength ([ref]$kLength)
+                    $KeyLength = $kLength
+                }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
+
+            } else {
+                # generate a new account key
+                $newKey = New-PAKey $KeyLength
+            }
 
             # create the algorithm identifier as described by
             # https://tools.ietf.org/html/rfc7518#section-3.1
@@ -235,6 +249,9 @@ function Set-PAAccount {
     .PARAMETER KeyLength
         The type and size of private key to use. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to 'ec-256'.
 
+    .PARAMETER KeyFile
+        The path to an existing EC or RSA private key file. This will attempt to use the specified key as the new ACME account key.
+
     .PARAMETER NoSwitch
         If specified, the currently active account will not change. Useful primarily for bulk updating contact information across accounts. This switch is ignored if no ID is specified.
 
@@ -267,6 +284,11 @@ function Set-PAAccount {
         Set-PAAccount -KeyRollover -KeyLength ec-384
 
         Replace the current account key with a new ECC key using P-384 curve.
+
+    .EXAMPLE
+        Set-PAAccount -KeyRollover -KeyFile .\mykey.key
+
+        Replace the current account key with a pre-generated private key.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME

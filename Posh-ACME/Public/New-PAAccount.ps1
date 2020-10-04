@@ -74,38 +74,12 @@ function New-PAAccount {
 
     } else { # ImportKey parameter set
 
-        # make sure the file exists
-        if (-not (Test-Path $KeyFile -PathType Leaf)) {
-            try { throw "KeyFile $KeyFile not found" }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
-        }
-
-        Write-Debug "Attempting to import private key $KeyFile"
-        $bcKeyPair = Import-Pem -InputFile $KeyFile
         try {
-            $acctKey = $bcKeyPair | ConvertFrom-BCKey
+            $kLength = [string]::Empty
+            $acctKey = New-PAKey -KeyFile $KeyFile -ParsedLength ([ref]$kLength)
+            $KeyLength = $kLength
         }
         catch { $PSCmdlet.ThrowTerminatingError($_) }
-
-        # determine the appropriate $KeyLength variable based on the imported
-        # key's properties
-        if ($acctKey -is [Security.Cryptography.RSACryptoServiceProvider]) {
-            $kl = $acctKey.KeySize.ToString()
-        }
-        elseif ($acctKey -is [Security.Cryptography.ECDsa]) {
-            $kl = "ec-$($acctKey.KeySize.ToString())"
-        }
-        else {
-            try { throw "Unknown account key type: $($acctKey.GetType())" }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
-        }
-        if (Test-ValidKeyLength $kl) {
-            $KeyLength = $kl
-        } else {
-            try { throw "Imported key length is invalid: $kl" }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
-        }
-        Write-Debug "KeyLength parsed as $KeyLength"
     }
 
     # create the algorithm identifier as described by
@@ -266,6 +240,11 @@ function New-PAAccount {
         New-PAAccount -KeyLength 'ec-384' -AcceptTOS -Force
 
         Create a new account with no contact email and an ECC key using P-384 curve that ignores any confirmations.
+
+    .Example
+        New-PAAccount -KeyFile .\mykey.key -AcceptTOS
+
+        Create a new account using a pre-generated private key file.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME
