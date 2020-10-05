@@ -15,16 +15,18 @@ function Export-Pem {
             # grab the things we need to build an ECPrivateKeyStructure that includes the public key
             $privParam = $BCKeyPair.Private
             $orderBitLength = $privParam.Parameters.N.BitLength
-            $x962 = New-Object Org.BouncyCastle.Asn1.X9.X962Parameters -ArgumentList $privParam.PublicKeyParamSet
-            $pubKey = New-Object Org.BouncyCastle.Asn1.DerBitString -ArgumentList @(,$BCKeyPair.Public.Q.GetEncoded())
+            $x962 = [Org.BouncyCastle.Asn1.X9.X962Parameters]::new($privParam.PublicKeyParamSet)
+            $pubKey = [Org.BouncyCastle.Asn1.DerBitString]::new($BCKeyPair.Public.Q.GetEncoded())
 
             # create the structure
-            $privKeyStruct = New-Object Org.BouncyCastle.Asn1.Sec.ECPrivateKeyStructure -ArgumentList $orderBitLength,$privParam.D,$pubKey,$x962
+            $privKeyStruct = [Org.BouncyCastle.Asn1.Sec.ECPrivateKeyStructure]::new(
+                $orderBitLength, $privParam.D, $pubKey, $x962
+            )
 
             # ECPrivateKeyStructure.GetDerEncoded() seems to return a SEC1 version of the key
             $privKeyStr = [Convert]::ToBase64String($privKeyStruct.GetDerEncoded())
 
-            # SEC1 means 'EC PRIVATE KEY' rather than just 'PRIVATE KEY'
+            # SEC1 means 'EC PRIVATE KEY' rather than just 'PRIVATE KEY' for PKCS8
             # build an array with the proper header/footer
             $pem = @('-----BEGIN EC PRIVATE KEY-----')
             for ($i=0; $i -lt $privKeyStr.Length; $i += 64) {
@@ -82,7 +84,7 @@ function Export-Pem {
     # normal PowerShell stuff for outputting files will work. So we'll use a .NET StreamWriter
     # instead.
     try {
-        $sw = New-Object IO.StreamWriter($OutputFile, $false, [Text.Encoding]::ASCII)
+        $sw = [IO.StreamWriter]::new($OutputFile, $false, [Text.Encoding]::ASCII)
         $sw.NewLine = "`n"
         foreach ($line in $pem) {
             $sw.WriteLine($line)
