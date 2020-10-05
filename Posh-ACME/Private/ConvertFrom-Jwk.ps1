@@ -1,11 +1,13 @@
 function ConvertFrom-Jwk {
     [CmdletBinding(DefaultParameterSetName='JSON')]
     [OutputType('System.Security.Cryptography.AsymmetricAlgorithm')]
+    [OutputType('Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair')]
     param(
         [Parameter(ParameterSetName='JSON',Mandatory,Position=0,ValueFromPipeline)]
         [string]$JwkJson,
         [Parameter(ParameterSetName='Object',Mandatory,Position=0,ValueFromPipeline)]
-        [pscustomobject]$Jwk
+        [pscustomobject]$Jwk,
+        [switch]$AsBC
     )
 
     # RFC 7515 - JSON Web Key (JWK)
@@ -22,103 +24,158 @@ function ConvertFrom-Jwk {
 
         if ($PSCmdlet.ParameterSetName -eq 'JSON') {
             try {
-                $Jwk = $JwkJson | ConvertFrom-Json
+                $Jwk = $JwkJson | ConvertFrom-Json -EA Stop
             } catch { throw }
         }
 
-        if ('kty' -notin $Jwk.PSObject.Properties.Name) {
-            throw "Invalid JWK. No 'kty' element found."
+        if ([String]::IsNullOrWhiteSpace($Jwk.kty)) {
+            throw "Invalid JWK. Missing 'kty' parameter."
+        }
+        if ($Jwk.kty -notin 'RSA','EC') {
+            throw "Invalid JWK. Unsupported 'kty' element found."
         }
 
-        # create a KeyParameters object from the values given for each key type
-        switch ($Jwk.kty) {
-
-            'RSA' {
-                $keyParams = New-Object Security.Cryptography.RSAParameters
-
-                # make sure we have the required public key parameters per
-                # https://tools.ietf.org/html/rfc7518#section-6.3.1
-                $hasE = ![string]::IsNullOrWhiteSpace($Jwk.e)
-                $hasN = ![string]::IsNullOrWhiteSpace($Jwk.n)
-                if ($hasE -and $hasN) {
-                    $keyParams.Exponent = $Jwk.e  | ConvertFrom-Base64Url -AsByteArray
-                    $keyParams.Modulus  = $Jwk.n  | ConvertFrom-Base64Url -AsByteArray
-                } else {
-                    throw "Invalid RSA JWK. Missing one or more public key parameters."
+        # validate RSA parameters
+        if ('RSA' -eq $Jwk.kty) {
+            'n','e','d','p','q','dp','dq','qi' | ForEach-Object {
+                if ([String]::IsNullOrWhiteSpace($Jwk.$_)) {
+                    throw "Invalid RSA JWK. Missing '$_' parameter."
                 }
-
-                # Add the private key parameters if they were included
-                # Per https://tools.ietf.org/html/rfc7518#section-6.3.2,
-                # 'd' is the only required private parameter. The rest SHOULD
-                # be included and if any *are* included then they all MUST be included.
-                # HOWEVER, Microsoft's RSA implementation either can't or won't create
-                # a private key unless all (d,p,q,dp,dq,qi) are included.
-                $hasD = ![string]::IsNullOrWhiteSpace($Jwk.D)
-                $hasP = ![string]::IsNullOrWhiteSpace($Jwk.P)
-                $hasQ = ![string]::IsNullOrWhiteSpace($Jwk.Q)
-                $hasDP = ![string]::IsNullOrWhiteSpace($Jwk.DP)
-                $hasDQ = ![string]::IsNullOrWhiteSpace($Jwk.DQ)
-                $hasQI = ![string]::IsNullOrWhiteSpace($Jwk.QI)
-                if ($hasD -and $hasP -and $hasQ -and $hasDP -and $hasDQ -and $hasQI) {
-                    $keyParams.D        = $Jwk.d  | ConvertFrom-Base64Url -AsByteArray
-                    $keyParams.P        = $Jwk.p  | ConvertFrom-Base64Url -AsByteArray
-                    $keyParams.Q        = $Jwk.q  | ConvertFrom-Base64Url -AsByteArray
-                    $keyParams.DP       = $Jwk.dp | ConvertFrom-Base64Url -AsByteArray
-                    $keyParams.DQ       = $Jwk.dq | ConvertFrom-Base64Url -AsByteArray
-                    $keyParams.InverseQ = $Jwk.qi | ConvertFrom-Base64Url -AsByteArray
-                } elseif ($hasD -or $hasP -or $hasQ -or $hasDP -or $hasDQ -or $hasQI) {
-                    throw "Invalid RSA JWK. Incomplete set of private key parameters."
-                }
-
-                # create the key
-                $key = New-Object Security.Cryptography.RSACryptoServiceProvider
-                $key.ImportParameters($keyParams)
-                break;
-            }
-
-            'EC' {
-                # check for a valid curve
-                if ('crv' -notin $Jwk.PSObject.Properties.Name) {
-                    throw "Invalid JWK. No 'crv' found for key type EC."
-                }
-                $Curve = switch ($jwk.crv) {
-                    'P-256' { [Security.Cryptography.ECCurve+NamedCurves]::nistP256; break }
-                    'P-384' { [Security.Cryptography.ECCurve+NamedCurves]::nistP384; break }
-                    'P-521' { [Security.Cryptography.ECCurve+NamedCurves]::nistP521; break }
-                    default { throw "Unsupported JWK curve (crv) found." }
-                }
-
-                # make sure we have the required public key parameters per
-                # https://tools.ietf.org/html/rfc7518#section-6.2.1
-                $hasX = ![string]::IsNullOrWhiteSpace($Jwk.x)
-                $hasY = ![string]::IsNullOrWhiteSpace($Jwk.y)
-                if ($hasX -and $hasY) {
-                    $Q = New-Object Security.Cryptography.ECPoint
-                    $Q.X = $Jwk.x | ConvertFrom-Base64Url -AsByteArray
-                    $Q.Y = $Jwk.y | ConvertFrom-Base64Url -AsByteArray
-                    $keyParams = New-Object Security.Cryptography.ECParameters
-                    $keyParams.Q = $Q
-                    $keyParams.Curve = $Curve
-                } else {
-                    throw "Invalid EC JWK. Missing one or more public key parameters."
-                }
-
-                # add the private key parameter
-                if (![string]::IsNullOrWhiteSpace($Jwk.d)) {
-                    $keyParams.D = $Jwk.d | ConvertFrom-Base64Url -AsByteArray
-                }
-
-                # create the key
-                $key = [Security.Cryptography.ECDsa]::Create()
-                $key.ImportParameters($keyParams)
-                break;
-            }
-            default {
-                throw "Unsupported JWK key type (kty) found."
             }
         }
 
-        # return the key
-        return $key
+        # validate EC parameters
+        if ('EC' -eq $Jwk.kty) {
+            'crv','x','y','d' | ForEach-Object {
+                if ([String]::IsNullOrWhiteSpace($Jwk.$_)) {
+                    throw "Invalid EC JWK. Missing '$_' parameter."
+                }
+            }
+        }
+
+        if ('RSA' -eq $Jwk.kty -and -not $AsBC) {
+            # create a .NET AsymmetricAlgorithm (RSACryptoServiceProvider)
+
+            $keyParams = [Security.Cryptography.RSAParameters]::new()
+
+            # make sure we have the required public key parameters per
+            # https://tools.ietf.org/html/rfc7518#section-6.3.1
+            $keyParams.Exponent = $Jwk.e | ConvertFrom-Base64Url -AsByteArray
+            $keyParams.Modulus  = $Jwk.n | ConvertFrom-Base64Url -AsByteArray
+
+            # Add the private key parameters if they were included
+            # Per https://tools.ietf.org/html/rfc7518#section-6.3.2,
+            # 'd' is the only required private parameter. The rest SHOULD
+            # be included and if any *are* included then they all MUST be included.
+            # HOWEVER, Microsoft's RSA implementation either can't or won't create
+            # a private key unless all (d,p,q,dp,dq,qi) are included.
+            $keyParams.D        = $Jwk.d  | ConvertFrom-Base64Url -AsByteArray
+            $keyParams.P        = $Jwk.p  | ConvertFrom-Base64Url -AsByteArray
+            $keyParams.Q        = $Jwk.q  | ConvertFrom-Base64Url -AsByteArray
+            $keyParams.DP       = $Jwk.dp | ConvertFrom-Base64Url -AsByteArray
+            $keyParams.DQ       = $Jwk.dq | ConvertFrom-Base64Url -AsByteArray
+            $keyParams.InverseQ = $Jwk.qi | ConvertFrom-Base64Url -AsByteArray
+
+            # create the key
+            $key = [Security.Cryptography.RSACryptoServiceProvider]::new()
+            return $key.ImportParameters($keyParams)
+
+        }
+        elseif ('EC' -eq $Jwk.kty -and -not $AsBC) {
+            # create a .NET AsymmetricAlgorithm (ECDsa)
+
+            # check for a valid curve
+            $Curve = switch ($jwk.crv) {
+                'P-256' { [Security.Cryptography.ECCurve+NamedCurves]::nistP256; break }
+                'P-384' { [Security.Cryptography.ECCurve+NamedCurves]::nistP384; break }
+                'P-521' { [Security.Cryptography.ECCurve+NamedCurves]::nistP521; break }
+                default { throw "Unsupported JWK curve (crv) found: $($Jwk.crv)." }
+            }
+
+            # make sure we have the required public key parameters per
+            # https://tools.ietf.org/html/rfc7518#section-6.2.1
+            $Q = [Security.Cryptography.ECPoint]::new()
+            $Q.X = $Jwk.x | ConvertFrom-Base64Url -AsByteArray
+            $Q.Y = $Jwk.y | ConvertFrom-Base64Url -AsByteArray
+            $keyParams = [Security.Cryptography.ECParameters]::new()
+            $keyParams.Q = $Q
+            $keyParams.Curve = $Curve
+
+            # add the private key parameter
+            $keyParams.D = $Jwk.d | ConvertFrom-Base64Url -AsByteArray
+
+            # create the key
+            $key = [Security.Cryptography.ECDsa]::Create()
+            return $key.ImportParameters($keyParams)
+
+        }
+        elseif ('RSA' -eq $Jwk.kty -and $AsBC) {
+            # create a BouncyCastle AsymmetricCipherKeyPair (RSA)
+
+            # create public N (Modulus) and E (Exponent)
+            $nBytes = $Jwk.n | ConvertFrom-Base64Url -AsByteArray
+            $eBytes = $Jwk.e | ConvertFrom-Base64Url -AsByteArray
+            $n = [Org.BouncyCastle.Math.BigInteger]::new(1, $nBytes)
+            $e = [Org.BouncyCastle.Math.BigInteger]::new(1, $eBytes)
+
+            # create private pieces (D, P, Q, DP, DQ, QI)
+            $dBytes = $Jwk.d | ConvertFrom-Base64Url -AsByteArray
+            $pBytes = $Jwk.p | ConvertFrom-Base64Url -AsByteArray
+            $qBytes = $Jwk.q | ConvertFrom-Base64Url -AsByteArray
+            $dpBytes = $Jwk.dp | ConvertFrom-Base64Url -AsByteArray
+            $dqBytes = $Jwk.dq | ConvertFrom-Base64Url -AsByteArray
+            $qiBytes = $Jwk.qi | ConvertFrom-Base64Url -AsByteArray
+            $d = [Org.BouncyCastle.Math.BigInteger]::new(1, $dBytes)
+            $p = [Org.BouncyCastle.Math.BigInteger]::new(1, $pBytes)
+            $q = [Org.BouncyCastle.Math.BigInteger]::new(1, $qBytes)
+            $dp = [Org.BouncyCastle.Math.BigInteger]::new(1, $dpBytes)
+            $dq = [Org.BouncyCastle.Math.BigInteger]::new(1, $dqBytes)
+            $qi = [Org.BouncyCastle.Math.BigInteger]::new(1, $qiBytes)
+
+            # build the pub/priv parameters
+            $pubKeyParam = [Org.BouncyCastle.Crypto.Parameters.RsaKeyParameters]::new(
+                $false, $n, $e
+            )
+            $privKeyParam = [Org.BouncyCastle.Crypto.Parameters.RsaPrivateCrtKeyParameters]::new(
+                $n, $e, $d, $p, $q, $dp, $dq, $qi
+            )
+
+            return [Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair]::new(
+                $pubKeyParam, $privKeyParam
+            )
+
+        }
+        elseif ('EC' -eq $Jwk.kty -and $AsBC) {
+            # create a BouncyCastle AsymmetricCipherKeyPair (EC)
+
+            # find the curve and its oid (aka PublicKeyParamSet)
+            $crv = [Org.BouncyCastle.Asn1.Nist.NistNamedCurves]::GetByName($Jwk.crv)
+            $crvOid = [Org.BouncyCastle.Asn1.Nist.NistNamedCurves]::GetOid($Jwk.crv)
+
+            # create the ECPoint, Q
+            $xBytes = $Jwk.x | ConvertFrom-Base64Url -AsByteArray
+            $yBytes = $Jwk.y | ConvertFrom-Base64Url -AsByteArray
+            $x = [Org.BouncyCastle.Math.BigInteger]::new(1, $xBytes)
+            $y = [Org.BouncyCastle.Math.BigInteger]::new(1, $yBytes)
+            $q = $crv.Curve.CreatePoint($x, $y)
+
+            # create the BigInteger, D
+            $dBytes = $Jwk.d | ConvertFrom-Base64Url -AsByteArray
+            $d = [Org.BouncyCastle.Math.BigInteger]::new(1, $dBytes)
+
+            # build the pub/priv parameters
+            $pubKeyParam = [Org.BouncyCastle.Crypto.Parameters.ECPublicKeyParameters]::new(
+                'EC', $q, $crvOid
+            )
+            $privKeyParam = [Org.BouncyCastle.Crypto.Parameters.ECPrivateKeyParameters]::new(
+                'EC', $d, $crvOid
+            )
+
+            return [Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair]::new(
+                $pubKeyParam, $privKeyParam
+            )
+
+        }
+
     }
 }
