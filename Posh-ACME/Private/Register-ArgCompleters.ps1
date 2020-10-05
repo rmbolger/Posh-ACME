@@ -21,7 +21,7 @@ function Register-ArgCompleters {
     Register-ArgumentCompleter -CommandName $DnsPluginCommands -ParameterName 'DnsPlugin' -ScriptBlock $PluginNameCompleter
 
     # Account ID
-    $IDCommands = 'Get-PAAccount','Set-PAAccount','Remove-PAAccount'
+    $IDCommands = 'Get-PAAccount','Set-PAAccount','Remove-PAAccount','Export-PAAccountKey'
     Register-ArgumentCompleter -CommandName $IDCommands -ParameterName 'ID' -ScriptBlock {
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
