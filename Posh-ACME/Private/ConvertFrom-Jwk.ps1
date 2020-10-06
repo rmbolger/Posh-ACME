@@ -37,19 +37,37 @@ function ConvertFrom-Jwk {
 
         # validate RSA parameters
         if ('RSA' -eq $Jwk.kty) {
-            'n','e','d','p','q','dp','dq','qi' | ForEach-Object {
+            # error if any public params are missing
+            'n','e' | ForEach-Object {
                 if ([String]::IsNullOrWhiteSpace($Jwk.$_)) {
                     throw "Invalid RSA JWK. Missing '$_' parameter."
                 }
+            }
+            $publicOnly = $true
+
+            # for private params, we either want all or none
+            $privCount = @('d','p','q','dp','dq','qi' | Where-Object {
+                -not [String]::IsNullOrWhiteSpace($Jwk.$_)
+            }).Count
+            if ($privCount -gt 0 -and $privCount -lt 6) {
+                throw "Invalid RSA JWK. Missing one or more private parameters."
+            }
+            elseif ($privCount -eq 6) {
+                $publicOnly = $false
             }
         }
 
         # validate EC parameters
         if ('EC' -eq $Jwk.kty) {
-            'crv','x','y','d' | ForEach-Object {
+            # error if any public params are missing
+            'crv','x','y' | ForEach-Object {
                 if ([String]::IsNullOrWhiteSpace($Jwk.$_)) {
                     throw "Invalid EC JWK. Missing '$_' parameter."
                 }
+            }
+            $publicOnly = $true
+            if (-not [String]::IsNullOrWhiteSpace($Jwk.d)) {
+                $publicOnly = $false
             }
         }
 
@@ -69,16 +87,19 @@ function ConvertFrom-Jwk {
             # be included and if any *are* included then they all MUST be included.
             # HOWEVER, Microsoft's RSA implementation either can't or won't create
             # a private key unless all (d,p,q,dp,dq,qi) are included.
-            $keyParams.D        = $Jwk.d  | ConvertFrom-Base64Url -AsByteArray
-            $keyParams.P        = $Jwk.p  | ConvertFrom-Base64Url -AsByteArray
-            $keyParams.Q        = $Jwk.q  | ConvertFrom-Base64Url -AsByteArray
-            $keyParams.DP       = $Jwk.dp | ConvertFrom-Base64Url -AsByteArray
-            $keyParams.DQ       = $Jwk.dq | ConvertFrom-Base64Url -AsByteArray
-            $keyParams.InverseQ = $Jwk.qi | ConvertFrom-Base64Url -AsByteArray
+            if (-not $publicOnly) {
+                $keyParams.D        = $Jwk.d  | ConvertFrom-Base64Url -AsByteArray
+                $keyParams.P        = $Jwk.p  | ConvertFrom-Base64Url -AsByteArray
+                $keyParams.Q        = $Jwk.q  | ConvertFrom-Base64Url -AsByteArray
+                $keyParams.DP       = $Jwk.dp | ConvertFrom-Base64Url -AsByteArray
+                $keyParams.DQ       = $Jwk.dq | ConvertFrom-Base64Url -AsByteArray
+                $keyParams.InverseQ = $Jwk.qi | ConvertFrom-Base64Url -AsByteArray
+            }
 
-            # create the key
+            # create and return the key
             $key = [Security.Cryptography.RSACryptoServiceProvider]::new()
-            return $key.ImportParameters($keyParams)
+            $key.ImportParameters($keyParams)
+            return $key
 
         }
         elseif ('EC' -eq $Jwk.kty -and -not $AsBC) {
@@ -101,12 +122,15 @@ function ConvertFrom-Jwk {
             $keyParams.Q = $Q
             $keyParams.Curve = $Curve
 
-            # add the private key parameter
-            $keyParams.D = $Jwk.d | ConvertFrom-Base64Url -AsByteArray
+            if (-not $publicOnly) {
+                # add the private key parameter
+                $keyParams.D = $Jwk.d | ConvertFrom-Base64Url -AsByteArray
+            }
 
-            # create the key
+            # create and return the key
             $key = [Security.Cryptography.ECDsa]::Create()
-            return $key.ImportParameters($keyParams)
+            $key.ImportParameters($keyParams)
+            return $key
 
         }
         elseif ('RSA' -eq $Jwk.kty -and $AsBC) {
@@ -118,31 +142,41 @@ function ConvertFrom-Jwk {
             $n = [Org.BouncyCastle.Math.BigInteger]::new(1, $nBytes)
             $e = [Org.BouncyCastle.Math.BigInteger]::new(1, $eBytes)
 
-            # create private pieces (D, P, Q, DP, DQ, QI)
-            $dBytes = $Jwk.d | ConvertFrom-Base64Url -AsByteArray
-            $pBytes = $Jwk.p | ConvertFrom-Base64Url -AsByteArray
-            $qBytes = $Jwk.q | ConvertFrom-Base64Url -AsByteArray
-            $dpBytes = $Jwk.dp | ConvertFrom-Base64Url -AsByteArray
-            $dqBytes = $Jwk.dq | ConvertFrom-Base64Url -AsByteArray
-            $qiBytes = $Jwk.qi | ConvertFrom-Base64Url -AsByteArray
-            $d = [Org.BouncyCastle.Math.BigInteger]::new(1, $dBytes)
-            $p = [Org.BouncyCastle.Math.BigInteger]::new(1, $pBytes)
-            $q = [Org.BouncyCastle.Math.BigInteger]::new(1, $qBytes)
-            $dp = [Org.BouncyCastle.Math.BigInteger]::new(1, $dpBytes)
-            $dq = [Org.BouncyCastle.Math.BigInteger]::new(1, $dqBytes)
-            $qi = [Org.BouncyCastle.Math.BigInteger]::new(1, $qiBytes)
-
-            # build the pub/priv parameters
+            # build the public parameters
             $pubKeyParam = [Org.BouncyCastle.Crypto.Parameters.RsaKeyParameters]::new(
                 $false, $n, $e
             )
-            $privKeyParam = [Org.BouncyCastle.Crypto.Parameters.RsaPrivateCrtKeyParameters]::new(
-                $n, $e, $d, $p, $q, $dp, $dq, $qi
-            )
 
-            return [Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair]::new(
-                $pubKeyParam, $privKeyParam
-            )
+            if ($publicOnly) {
+                # BouncyCastle won't let us return a full key pair without the private
+                # portion, so just return the public parameters for now
+                return $pubKeyParam
+            }
+            else {
+                # create private pieces (D, P, Q, DP, DQ, QI)
+                $dBytes = $Jwk.d | ConvertFrom-Base64Url -AsByteArray
+                $pBytes = $Jwk.p | ConvertFrom-Base64Url -AsByteArray
+                $qBytes = $Jwk.q | ConvertFrom-Base64Url -AsByteArray
+                $dpBytes = $Jwk.dp | ConvertFrom-Base64Url -AsByteArray
+                $dqBytes = $Jwk.dq | ConvertFrom-Base64Url -AsByteArray
+                $qiBytes = $Jwk.qi | ConvertFrom-Base64Url -AsByteArray
+                $d = [Org.BouncyCastle.Math.BigInteger]::new(1, $dBytes)
+                $p = [Org.BouncyCastle.Math.BigInteger]::new(1, $pBytes)
+                $q = [Org.BouncyCastle.Math.BigInteger]::new(1, $qBytes)
+                $dp = [Org.BouncyCastle.Math.BigInteger]::new(1, $dpBytes)
+                $dq = [Org.BouncyCastle.Math.BigInteger]::new(1, $dqBytes)
+                $qi = [Org.BouncyCastle.Math.BigInteger]::new(1, $qiBytes)
+
+                # build the private parameters
+                $privKeyParam = [Org.BouncyCastle.Crypto.Parameters.RsaPrivateCrtKeyParameters]::new(
+                    $n, $e, $d, $p, $q, $dp, $dq, $qi
+                )
+
+                # return the full keypair
+                return [Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair]::new(
+                    $pubKeyParam, $privKeyParam
+                )
+            }
 
         }
         elseif ('EC' -eq $Jwk.kty -and $AsBC) {
@@ -159,21 +193,31 @@ function ConvertFrom-Jwk {
             $y = [Org.BouncyCastle.Math.BigInteger]::new(1, $yBytes)
             $q = $crv.Curve.CreatePoint($x, $y)
 
-            # create the BigInteger, D
-            $dBytes = $Jwk.d | ConvertFrom-Base64Url -AsByteArray
-            $d = [Org.BouncyCastle.Math.BigInteger]::new(1, $dBytes)
-
-            # build the pub/priv parameters
+            # build the public parameters
             $pubKeyParam = [Org.BouncyCastle.Crypto.Parameters.ECPublicKeyParameters]::new(
                 'EC', $q, $crvOid
             )
-            $privKeyParam = [Org.BouncyCastle.Crypto.Parameters.ECPrivateKeyParameters]::new(
-                'EC', $d, $crvOid
-            )
 
-            return [Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair]::new(
-                $pubKeyParam, $privKeyParam
-            )
+            if ($publicOnly) {
+                # BouncyCastle won't let us return a full key pair without the private
+                # portion, so just return the public parameters for now
+                return $pubKeyParam
+            }
+            else {
+                # create the BigInteger, D
+                $dBytes = $Jwk.d | ConvertFrom-Base64Url -AsByteArray
+                $d = [Org.BouncyCastle.Math.BigInteger]::new(1, $dBytes)
+
+                # build the private parameters
+                $privKeyParam = [Org.BouncyCastle.Crypto.Parameters.ECPrivateKeyParameters]::new(
+                    'EC', $d, $crvOid
+                )
+
+                # return the full keypair
+                return [Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair]::new(
+                    $pubKeyParam, $privKeyParam
+                )
+            }
 
         }
 
