@@ -7,12 +7,11 @@ function New-Jws {
         [Parameter(Mandatory, ParameterSetName='HMAC', Position=0)]
         [Security.Cryptography.HMAC]$HMAC,
         [Parameter(Mandatory, Position=1)]
-        [hashtable]$Header,
+        [System.Collections.IDictionary]$Header,
         [Parameter(Mandatory, Position=2)]
         [AllowEmptyString()]
         [string]$PayloadJson,
         [switch]$Compact,
-        [Parameter(ParameterSetName='Asymmetric')]
         [switch]$NoHeaderValidation
     )
 
@@ -58,11 +57,31 @@ function New-Jws {
             throw "Unsupported Key type. Must be RSA or ECDsa"
         }
 
+        # validate the headers
         if (-not $NoHeaderValidation) {
-            # validate the header
+
             if ('alg' -notin $Header.Keys -or $Header.alg -notin 'RS256','ES256','ES384') {
                 throw "Missing or invalid 'alg' in supplied Header"
             }
+
+            # Make sure header 'alg' matches key type.
+            if ($Key -and $Key -is [Security.Cryptography.RSA] -and $Header.alg -ne 'RS256') {
+                throw "Supplied RSA Key does not match 'alg' ($($Header.alg)) in supplied Header."
+            }
+
+            # Make sure header 'alg' matches key type. EC keys depend on the curve
+            # ES256 = P-256 and SHA256 hash
+            # ES384 = P-384 and SHA384 hash
+            # ES521 = P-521 and SHA512 hash (note 521 vs 512, very confusing)
+            if ($Key -and $Key -is [Security.Cryptography.ECDsa] -and
+                ($Header.alg -notin 'ES256','ES384','ES512' -or
+                ($Header.alg -eq 'ES256' -and $Key.KeySize -ne 256) -or
+                ($Header.alg -eq 'ES384' -and $Key.KeySize -ne 384) -or
+                ($Header.alg -eq 'ES512' -and $Key.KeySize -ne 521))
+            ) {
+                throw "Supplied EC Key (P-$($Key.KeySize)) does not match 'alg' ($($Header.alg)) in supplied header or alg is not supported."
+            }
+
             if (!('jwk' -in $Header.Keys -xor 'kid' -in $Header.Keys)) {
                 if ('jwk' -in $Header.Keys) {
                     throw "Conflicting key entries. Both 'jwk' and 'kid' found in supplied Header"
@@ -94,29 +113,15 @@ function New-Jws {
     $MessageBytes = [Text.Encoding]::ASCII.GetBytes($Message)
 
     if ($Key -and $Key -is [Security.Cryptography.RSA]) {
-        # Make sure header 'alg' matches key type. All RSA keys are currently
-        # restricted to RS256 regardless of key size.
-        if ($Header.alg -ne 'RS256') {
-            throw "Supplied RSA Key does not match 'alg' ($($Header.alg)) in supplied Header."
-        }
 
         # create the signature
         $HashAlgo = [Security.Cryptography.HashAlgorithmName]::SHA256
         $PaddingType = [Security.Cryptography.RSASignaturePadding]::Pkcs1
-        Write-Debug "Signing message using $($Header.alg)"
+        Write-Debug "Signing message using RSA with $HashAlgo"
         $SignedBytes = $Key.SignData($MessageBytes, $HashAlgo, $PaddingType)
+
     }
     elseif ($Key -and $Key -is [Security.Cryptography.ECDsa]) {
-        # Make sure header 'alg' matches key type. EC keys depend on the curve
-        # ES256 = P-256 and SHA256 hash
-        # ES384 = P-384 and SHA384 hash
-        # ES521 = P-521 and SHA512 hash (note 521 vs 512, very confusing)
-        if (($Header.alg -notin 'ES256','ES384','ES512') -or
-            ($Header.alg -eq 'ES256' -and $Key.KeySize -ne 256) -or
-            ($Header.alg -eq 'ES384' -and $Key.KeySize -ne 384) -or
-            ($Header.alg -eq 'ES512' -and $Key.KeySize -ne 521)) {
-            throw "Supplied EC Key (P-$($Key.KeySize)) does not match 'alg' ($($Header.alg)) in supplied header or alg is not supported."
-        }
 
         $HashAlgo = switch ($Key.KeySize) {
             256 { [Security.Cryptography.HashAlgorithmName]::SHA256; break }
@@ -125,22 +130,24 @@ function New-Jws {
         }
 
         # create the signature
-        Write-Debug "Signing message using $($Header.alg)"
+        Write-Debug "Signing message using EC with $HashAlgo"
         $SignedBytes = $Key.SignData($MessageBytes, $HashAlgo)
     }
     else {
         # we must be using the passed in HMAC
 
         # Make sure the header 'alg' matches the hmac type.
-        if (($Header.alg -notin 'HS256','HS384','HS512') -or
+        if (-not $NoHeaderValidation -and $HMAC -and
+            ($Header.alg -notin 'HS256','HS384','HS512' -or
             ($Header.alg -eq 'HS256' -and $HMAC.HashSize -ne 256) -or
             ($Header.alg -eq 'HS384' -and $HMAC.HashSize -ne 384) -or
-            ($Header.alg -eq 'HS512' -and $HMAC.HashSize -ne 512)) {
+            ($Header.alg -eq 'HS512' -and $HMAC.HashSize -ne 512))
+        ) {
             throw "Supplied HMAC object (HashSize $($HMAC.HashSize) does not match 'alg' ($($Header.alg)) in the supplied header or alg is not supported."
         }
 
         # create the signature
-        Write-Debug "Signing message using $($Header.alg)"
+        Write-Debug "Signing message using HMAC with hash size $($HMAC.HashSize)"
         $SignedBytes = $HMAC.ComputeHash($MessageBytes)
     }
 
