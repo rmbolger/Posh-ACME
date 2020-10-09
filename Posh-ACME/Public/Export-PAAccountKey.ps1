@@ -76,7 +76,9 @@ function Export-PAAccountKey {
     .EXAMPLE
         $fldr = Join-Path ([Environment]::GetFolderPath('Desktop')) 'AcmeAccountKeys'
         PS C:\>New-Item -ItemType Directory -Force -Path $fldr | Out-Null
-        PS C:\>Get-PAAccount -List | %{ Export-PAAccountKey $_.ID -Output}
+        PS C:\>Get-PAAccount -List | %{
+        PS C:\>    Export-PAAccountKey $_.ID -OutputFile "$fldr\$($_.ID).key" -Force
+        PS C:\>}
 
         Backup all account keys for this ACME server to a folder on the desktop.
 
