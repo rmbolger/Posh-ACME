@@ -9,7 +9,7 @@ Describe "New-Jws" {
             InModuleScope Posh-ACME {
 
                 # invalid RSA sizes
-                1024,4224 | %{
+                @(1024) | %{
                     $keypair = [Security.Cryptography.RSACryptoServiceProvider]::new($_)
                     $header = [ordered]@{
                         alg   = 'RS256'

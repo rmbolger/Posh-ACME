@@ -1,15 +1,28 @@
-name: Pester
+name: Pester Tests
 on:
   push:
     branches: [ master ]
 jobs:
-  test-pwsh:
+  Test-DesktopEdition:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
     - name: Run Pester tests
       run: |
-        Set-PSRepository psgallery -InstallationPolicy trusted
-        Install-Module -Name Pester -RequiredVersion 5.0.4 -Confirm:$false -Force
-        Invoke-Pester
+        Import-Module Pester -MinimumVersion 5.0
+        $cfg = [PesterConfiguration]@{Run=@{Exit=$true}}
+        Invoke-Pester -Configuration $cfg
+      shell: powershell
+  Test-CoreEdition:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run Pester tests
+      run: |
+        Import-Module Pester -MinimumVersion 5.0
+        $cfg = [PesterConfiguration]@{Run=@{Exit=$true}}
+        Invoke-Pester -Configuration $cfg
       shell: pwsh

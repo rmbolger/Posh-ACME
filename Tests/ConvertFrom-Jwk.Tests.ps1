@@ -425,7 +425,7 @@ Describe "ConvertFrom-Jwk" {
 
                 # curve names appear to be platform specific
                 $curveName = 'ECDSA_P521'
-                if ($IsWindows -or $PSEdition -eq 'Desktop') {
+                if ($IsWindows -or $PSEdition -eq 'Desktop' -or $IsMacOs) {
                     $curveName = 'nistP521'
                 }
 
@@ -459,7 +459,7 @@ Describe "ConvertFrom-Jwk" {
 
                 # curve names appear to be platform specific
                 $curveName = 'ECDSA_P521'
-                if ($IsWindows -or $PSEdition -eq 'Desktop') {
+                if ($IsWindows -or $PSEdition -eq 'Desktop' -or $IsMacOs) {
                     $curveName = 'nistP521'
                 }
 
@@ -493,7 +493,7 @@ Describe "ConvertFrom-Jwk" {
 
                 # curve names appear to be platform specific
                 $curveName = 'ECDSA_P384'
-                if ($IsWindows -or $PSEdition -eq 'Desktop') {
+                if ($IsWindows -or $PSEdition -eq 'Desktop' -or $IsMacOs) {
                     $curveName = 'nistP384'
                 }
 
@@ -527,7 +527,7 @@ Describe "ConvertFrom-Jwk" {
 
                 # curve names appear to be platform specific
                 $curveName = 'ECDSA_P384'
-                if ($IsWindows -or $PSEdition -eq 'Desktop') {
+                if ($IsWindows -or $PSEdition -eq 'Desktop' -or $IsMacOs) {
                     $curveName = 'nistP384'
                 }
 
@@ -561,7 +561,7 @@ Describe "ConvertFrom-Jwk" {
 
                 # curve names appear to be platform specific
                 $curveName = 'ECDSA_P521'
-                if ($IsWindows -or $PSEdition -eq 'Desktop') {
+                if ($IsWindows -or $PSEdition -eq 'Desktop' -or $IsMacOs) {
                     $curveName = 'nistP521'
                 }
 
@@ -595,7 +595,7 @@ Describe "ConvertFrom-Jwk" {
 
                 # curve names appear to be platform specific
                 $curveName = 'ECDSA_P521'
-                if ($IsWindows -or $PSEdition -eq 'Desktop') {
+                if ($IsWindows -or $PSEdition -eq 'Desktop' -or $IsMacOs) {
                     $curveName = 'nistP521'
                 }
 
