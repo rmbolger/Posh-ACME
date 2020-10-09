@@ -46,8 +46,9 @@ The command will sleep for 2 minutes by default to allow the DNS changes to prop
 - **fullchain.cer** (Base64 encoded PEM with cert+chain)
 - **fullchain.pfx** (PKCS12 container with cert+key+chain)
 
-Currently, the responsibility for deploying the certificate to your web server or service is up to you. There may be deployment plugins supported eventually. But for now, the idea is that this module is just a piece of your larger PowerShell based deployment strategy. The certificate details are written to the pipeline so you can either save them to a variable or pipe the output to another command.
-The password set for the PFX files is `poshacme` because we didn't override the default with `-PfxPass`. If you're running PowerShell with elevated privileges on Windows, you can also add the `-Install` switch to automatically import the certificate into the local computer's certificate store.
+Posh-ACME is only really designed to *obtain* certificates, not deploy them to your web server or service. The certificate details are written to the pipeline so you can either save them to a variable or pipe the output to another command. [Posh-ACME.Deploy](https://github.com/rmbolger/Posh-ACME.Deploy) is a sister module containing some example deployment functions for common services to get you started. But ultimately, it's up to you how you want to deploy your certificates.
+
+The password on the PFX files is `poshacme` because we didn't override the default with `-PfxPass`. If you're running PowerShell with elevated privileges on Windows, you can also add the `-Install` switch to automatically import the certificate into the local computer's certificate store.
 
 So now you've got a certificate and that's great! But Let's Encrypt certificates expire relatively quickly (90 days). And you won't be able to renew this certificate without going through the manual DNS TXT record hassle again. So let's add a DNS plugin to the process.
 
@@ -166,7 +167,7 @@ Submit-Renewal -AllAccounts
 
 Because PowerShell has no native way to run recurring tasks, you'll need to set something up using whatever job scheduling utility your OS provides like Task Scheduler on Windows or cron on Linux. It is suggested to run the job once or twice a day at ideally randomized times. At the very least, try not to run them directly on any hour marks to avoid potential load spikes on the ACME server. With a couple exceptions, **the task must run as the same user you're currently logged in as** due to the location of the config and encryption on secure plugin parameters. It's possible to use different users if you're utilizing the [`POSHACME_HOME`](https://github.com/rmbolger/Posh-ACME/wiki/%28Advanced%29-Using-an-Alternate-Config-Location) environment variable on both accounts and you're either not on Windows or not utilizing any secure plugin parameters (PSCredential or SecureString types).
 
-Posh-ACME doesn't currently handle certificate deployment. So you'll likely want to create a script to both renew the cert and deploy it to your service/application. All the details you should need to deploy the cert are in the PACertificate object that is returned by `Submit-Renewal`. It's also the same object returned by `New-PACertificate` and `Get-PACertificate`; the latter being useful to test deployment scripts with.
+As mentioned earlier, Posh-ACME doesn't handle certificate deployment. So you'll likely want to create a script to both renew the cert and deploy it to your service/application. All the details you should need to deploy the cert are in the PACertificate object that is returned by `Submit-Renewal`. It's also the same object returned by `New-PACertificate` and `Get-PACertificate`; the latter being useful to test deployment scripts with.
 
 `Submit-Renewal` will only return PACertificate objects for certs that were actually renewed successfully. So the typical template for a renew/deploy script might look something like this.
 
@@ -254,7 +255,7 @@ _acme-challenge.example.com | **(BAD)** example.net
 You should verify your CNAME got created correctly before you try and use it. If you're inside a business with a split-brain DNS infrastructure, you might need to explicitly query a public external resolver like CloudFlare's 1.1.1.1. However, some modern firewalls can be configured to prevent this ability. So make sure you can successfully query a known-good external record first.
 
 ```
-C:\>nslookup -q=CNAME _acme-challenge.example.com 1.1.1.1
+C:\>nslookup -q=CNAME _acme-challenge.example.com. 1.1.1.1
 Server:  1dot1dot1dot1.cloudflare-dns.com
 Address:  1.1.1.1
 
