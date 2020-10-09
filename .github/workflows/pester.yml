@@ -3,15 +3,15 @@ on:
   push:
     branches: [ action-testing ]
 jobs:
-  test-pwsh:
+  Test-CoreEdition:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
     - name: Run Pester tests
       run: |
-        Set-PSRepository psgallery -InstallationPolicy trusted
-        Install-Module -Name Pester -RequiredVersion 5.0.4 -Confirm:$false -Force
-        Import-Module Pester
+        #Set-PSRepository psgallery -InstallationPolicy trusted
+        #Install-Module -Name Pester -RequiredVersion 5.0.4 -Confirm:$false -Force
+        Import-Module Pester -MinimumVersion 5.0
         $cfg = [PesterConfiguration]@{Run=@{Exit=$true}}
         Invoke-Pester -Configuration $cfg
       shell: pwsh
