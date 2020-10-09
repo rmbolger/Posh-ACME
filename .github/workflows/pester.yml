@@ -1,7 +1,7 @@
 name: Pester Tests
 on:
   push:
-    branches: [ action-testing ]
+    branches: [ master ]
 jobs:
   Test-DesktopEdition:
     runs-on: windows-latest
