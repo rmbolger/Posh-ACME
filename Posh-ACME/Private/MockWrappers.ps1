@@ -1,6 +1,13 @@
 # The functions in this file exist solely to allow
 # easier mocking in Pester tests.
 
+# this one
+function TestData {
+    # This one is specifically for mocking so we can more easily
+    # pass data to the module scope from where it might be defined
+    # in the test-wide BeforeAll section.
+}
+
 function Get-DateTimeOffsetNow {
     [System.DateTimeOffset]::Now
 }

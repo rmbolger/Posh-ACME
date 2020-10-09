@@ -1,16 +1,17 @@
-Get-Module Posh-ACME | Remove-Module -Force
-Import-Module Posh-ACME -Force
+BeforeAll {
+    Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+}
 
 Describe "Get-PAAuthorizations" {
 
-    InModuleScope Posh-ACME {
-
-        $fakeAcct = Get-ChildItem "$PSScriptRoot\TestFiles\fakeAccount.json" | Get-Content -Raw | ConvertFrom-Json
+    BeforeAll {
+        $fakeAcct = Get-Content "$PSScriptRoot\TestFiles\fakeAccount1.json" -Raw | ConvertFrom-Json
         $fakeAcct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
-        Mock Get-PAAccount { return $fakeAcct }
+        Mock -ModuleName Posh-ACME Get-PAAccount { return $fakeAcct }
+    }
 
-        Context "No expires property in authz response" {
-
+    Context "No expires property in authz response" {
+        It "Does not throw" {
             $fakeAuthzNoExpires = @{
                 identifier = @{ type='dns'; value='example.com' }
                 status = 'pending'
@@ -20,18 +21,16 @@ Describe "Get-PAAuthorizations" {
                     @{ type='tls-alpn-01'; status='pending'; url='https://acme.example.com/chal/3' }
                 )
             } | ConvertTo-Json -Depth 5
+            Mock -ModuleName Posh-ACME Invoke-ACME { [pscustomobject]@{ Content = $fakeAuthzNoExpires } }
 
-            $fakeResponse = [pscustomobject]@{ Content = $fakeAuthzNoExpires }
-
-            Mock Invoke-ACME { return $fakeResponse }
-
-            It "Does not throw an error" {
+            InModuleScope Posh-ACME {
                 { Get-PAAuthorizations 'https://acme.example.com/authz/1' } | Should -Not -Throw
             }
-
         }
+    }
 
-        Context "No status property in authz challenges" {
+    Context "No status property in authz challenges" {
+        It "Handles gracefully" {
 
             $fakeAuthzNoChallengeStatus = @{
                 identifier = @{ type='dns'; value='example.com' }
@@ -44,25 +43,21 @@ Describe "Get-PAAuthorizations" {
                 )
             } | ConvertTo-Json -Depth 5
 
-            $fakeResponse = [pscustomobject]@{ Content = $fakeAuthzNoChallengeStatus }
+            Mock -ModuleName Posh-ACME Invoke-ACME { return [pscustomobject]@{ Content = $fakeAuthzNoChallengeStatus } }
+            Mock -ModuleName Posh-ACME Write-Warning {}
 
-            Mock Invoke-ACME { return $fakeResponse }
-            Mock Write-Warning { }
-
-            It "Does not throw an error" {
+            InModuleScope Posh-ACME {
                 { Get-PAAuthorizations 'https://acme.example.com/authz/1' } | Should -Not -Throw
-            }
-            It "Warns about the problem" {
-                Assert-MockCalled Write-Warning
-            }
-            It "Adds challenge statuses to match parent status" {
+
+                Should -Invoke Write-Warning
+
                 $auth = Get-PAAuthorizations 'https://acme.example.com/authz/1'
+
                 $auth.challenges[0].status | Should -Be 'pending'
                 $auth.challenges[1].status | Should -Be 'pending'
                 $auth.challenges[2].status | Should -Be 'pending'
             }
-
         }
-
     }
+
 }

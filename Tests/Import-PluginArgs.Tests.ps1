@@ -1,5 +1,11 @@
-Get-Module Posh-ACME | Remove-Module -Force
-Import-Module Posh-ACME -Force
+BeforeAll {
+    Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+
+    $fakeAcct1 = Get-Content "$PSScriptRoot\TestFiles\fakeAccount1.json" -Raw | ConvertFrom-Json
+    $fakeAcct1.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
+    $fakeAcct2 = Get-Content "$PSScriptRoot\TestFiles\fakeAccount2.json" -Raw | ConvertFrom-Json
+    $fakeAcct2.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
+}
 
 # Note: These tests depend on knowing the paramters associated with some of the actual
 # DNS plugins. So if the parameters in the plugins change, the tests will need updating
@@ -7,70 +13,154 @@ Import-Module Posh-ACME -Force
 
 Describe "Import-PluginArgs" {
 
-    InModuleScope Posh-ACME {
+    BeforeAll {
+        Mock -ModuleName Posh-ACME Get-DirFolder { return 'TestDrive:\' }
+        New-Item "TestDrive:\$($fakeAcct1.id)" -ItemType Directory -ErrorAction Ignore
+        New-Item "TestDrive:\$($fakeAcct2.id)" -ItemType Directory -ErrorAction Ignore
+    }
 
-        $fakeAcct = Get-ChildItem "$PSScriptRoot\TestFiles\fakeAccount.json" | Get-Content -Raw | ConvertFrom-Json
-        $fakeAcct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
+    Context "Param Checks" {
 
-        Mock Get-DirFolder { return 'TestDrive:\' }
-        New-Item "TestDrive:\$($fakeAcct.id)" -ItemType Directory -ErrorAction Ignore
+        It "Works with no accounts at all" {
+            Mock -ModuleName Posh-ACME Get-PAAccount { $null }
+            Mock -ModuleName Posh-ACME Get-PAAccount { $null } -ParameterFilter { $List }
+            Mock -ModuleName Posh-ACME TestData { $fakeAcct1 }
 
-        Context "No active account" {
+            InModuleScope Posh-ACME {
+                $acct = TestData
 
-            Mock Get-PAAccount { $null }
-
-            It "Throws when no account specified" {
-                { Import-PluginArgs }                  | Should -Throw
-                { Import-PluginArgs Route53 }          | Should -Throw
-                { Import-PluginArgs Route53,Infoblox } | Should -Throw
-                { Import-PluginArgs FakePlugin }       | Should -Throw
-            }
-            It "Throws when specified account doesn't exist on server" {
-                Mock Get-PAAccount { @() } -ParameterFilter { $List }
-                { Import-PluginArgs -Account $fakeAcct }         | Should -Throw
-                { Import-PluginArgs Route53 -Account $fakeAcct } | Should -Throw
-            }
-            It "Does not throw when specified account does exist on server" {
-                Mock Get-PAAccount { @($fakeAcct) } -ParameterFilter { $List }
-                { Import-PluginArgs -Account $fakeAcct }         | Should -Not -Throw
-                { Import-PluginArgs Route53 -Account $fakeAcct } | Should -Not -Throw
+                { Import-PluginArgs Route53 }                | Should -Throw
+                { Import-PluginArgs Route53,Infoblox }       | Should -Throw
+                { Import-PluginArgs Route53 -Account $acct } | Should -Throw
             }
         }
 
-        Context "No plugindata.xml" {
+        It "Works with 1 inactive account" {
+            Mock -ModuleName Posh-ACME Get-PAAccount { $null }
+            Mock -ModuleName Posh-ACME Get-PAAccount { @($fakeAcct1) } -ParameterFilter { $List }
+            Mock -ModuleName Posh-ACME TestData { $fakeAcct1 }
 
-            Mock Get-PAAccount { $fakeAcct }
+            InModuleScope Posh-ACME {
+                $acct = TestData
+                $acct2 = [pscustomobject]@{id='99999';PSTypeName='PoshACME.PAAccount'}
 
-            It "Does not throw" {
+                { Import-PluginArgs Route53 }                | Should -Throw
+                { Import-PluginArgs Route53,Infoblox }       | Should -Throw
+                { Import-PluginArgs Route53 -Account $acct } | Should -Not -Throw
+                $acct2.id = '99999'
+                { Import-PluginArgs Route53 -Account $acct2Clone } | Should -Throw
+            }
+        }
+
+        It "Works with 1 active account" {
+            Mock -ModuleName Posh-ACME Get-PAAccount { $fakeAcct1 }
+            Mock -ModuleName Posh-ACME Get-PAAccount { @($fakeAcct1) } -ParameterFilter { $List }
+            Mock -ModuleName Posh-ACME TestData { $fakeAcct1 }
+
+            InModuleScope Posh-ACME {
+                $acct = TestData
+                $acct2 = [pscustomobject]@{id='99999';PSTypeName='PoshACME.PAAccount'}
+
+                { Import-PluginArgs Route53 }                | Should -Not -Throw
+                { Import-PluginArgs Route53,Infoblox }       | Should -Not -Throw
+                { Import-PluginArgs Route53 -Account $acct } | Should -Not -Throw
+                $acct2.id = '99999'
+                { Import-PluginArgs Route53 -Account $acct2 } | Should -Throw
+            }
+        }
+
+        It "Works with 0 active (2 total) accounts" {
+            Mock -ModuleName Posh-ACME Get-PAAccount { $null }
+            Mock -ModuleName Posh-ACME Get-PAAccount { @($fakeAcct1,$fakeAcct2) } -ParameterFilter { $List }
+            Mock -ModuleName Posh-ACME TestData { $fakeAcct1 }
+
+            InModuleScope Posh-ACME {
+                $acct = TestData
+                $acct2 = [pscustomobject]@{id='99999';PSTypeName='PoshACME.PAAccount'}
+
+                { Import-PluginArgs Route53 }                | Should -Throw
+                { Import-PluginArgs Route53,Infoblox }       | Should -Throw
+                { Import-PluginArgs Route53 -Account $acct } | Should -Not -Throw
+                $acct2.id = '22222'
+                { Import-PluginArgs Route53 -Account $acct2 } | Should -Not -Throw
+                $acct2.id = '99999'
+                { Import-PluginArgs Route53 -Account $acct2 } | Should -Throw
+            }
+        }
+
+        It "Works with 1 active (2 total) account" {
+            Mock -ModuleName Posh-ACME Get-PAAccount { $fakeAcct1 }
+            Mock -ModuleName Posh-ACME Get-PAAccount { @($fakeAcct1,$fakeAcct2) } -ParameterFilter { $List }
+            Mock -ModuleName Posh-ACME TestData { $fakeAcct1 }
+
+            InModuleScope Posh-ACME {
+                $acct = TestData
+                $acct2 = [pscustomobject]@{id='99999';PSTypeName='PoshACME.PAAccount'}
+
+                { Import-PluginArgs Route53 }                | Should -Not -Throw
+                { Import-PluginArgs Route53,Infoblox }       | Should -Not -Throw
+                { Import-PluginArgs Route53 -Account $acct } | Should -Not -Throw
+                $acct2.id = '22222'
+                { Import-PluginArgs Route53 -Account $acct2 } | Should -Not -Throw
+                $acct2.id = '99999'
+                { Import-PluginArgs Route53 -Account $acct2 } | Should -Throw
+            }
+        }
+    }
+
+    Context "No plugindata.xml" {
+
+        BeforeAll {
+            Mock -ModuleName Posh-ACME Get-PAAccount { $fakeAcct1 }
+        }
+
+        It "Does not throw" {
+            InModuleScope Posh-ACME {
                 { Import-PluginArgs } | Should -Not -Throw
             }
-            It "Returns nothing with no arguments" {
-                Import-PluginArgs | Should -BeNullOrEmpty
-            }
-            It "Returns nothing with plugin arguments" {
-                Import-PluginArgs Route53          | Should -BeNullOrEmpty
-                Import-PluginArgs Route53,Infoblox | Should -BeNullOrEmpty
+        }
+
+        It "Returns nothing with no arguments" {
+            InModuleScope Posh-ACME {
+                $result = Import-PluginArgs
+                $result | Should -BeOfType [hashtable]
+                $result | Should -BeNullOrEmpty
             }
         }
 
-        Context "Invalid plugindata.xml" {
+        It "Returns nothing with plugin arguments" {
+            InModuleScope Posh-ACME {
+                $result = Import-PluginArgs Route53
+                $result | Should -BeOfType [hashtable]
+                $result | Should -BeNullOrEmpty
+                $result = Import-PluginArgs Route53,Infoblox
+                $result | Should -BeOfType [hashtable]
+                $result | Should -BeNullOrEmpty
+            }
+        }
+    }
 
-            Mock Get-PAAccount { $fakeAcct }
-            'Unparseable data for Import-CliXml' | Out-File "TestDrive:\$($fakeAcct.id)\plugindata.xml"
+    Context "Invalid plugindata.xml" {
 
-            It "Throws with unparseable plugindata.xml" {
+        BeforeAll {
+            Mock Get-PAAccount { $fakeAcct1 }
+            'Unparseable data for Import-CliXml' | Out-File "TestDrive:\$($fakeAcct1.id)\plugindata.xml"
+        }
+
+        It "Throws with unparseable plugindata.xml" {
+            InModuleScope Posh-ACME {
                 { Import-PluginArgs }                  | Should -Throw
                 { Import-PluginArgs Route53 }          | Should -Throw
                 { Import-PluginArgs Route53,Infoblox } | Should -Throw
                 { Import-PluginArgs FakePlugin }       | Should -Throw
             }
-
-            Remove-Item "TestDrive:\$($fakeAcct.id)\plugindata.xml" -Force
         }
+    }
 
-        Context "Valid plugindata.xml (no encryption)" {
+    Context "Valid plugindata.xml (no encryption)" {
 
-            Mock Get-PAAccount { $fakeAcct }
+        BeforeAll {
+            Mock -ModuleName Posh-ACME Get-PAAccount { $fakeAcct1 }
             $fakeData = @{
                 IBUsername = 'fakeuser'
                 IBPassword = 'fakepass'
@@ -79,19 +169,25 @@ Describe "Import-PluginArgs" {
                 AliKeyId = 'fakeid'
                 AliSecretInsecure = 'fakesecret'
             }
-            $fakeData | Export-Clixml "TestDrive:\$($fakeAcct.id)\plugindata.xml"
+            $fakeData | Export-Clixml "TestDrive:\$($fakeAcct1.id)\plugindata.xml"
+        }
 
-            It "Does not throw with no arguments" {
+        It "Does not throw with no arguments" {
+            InModuleScope Posh-ACME {
                 { Import-PluginArgs } | Should -Not -Throw
             }
-            It "Throws with invalid plugin" {
+        }
+
+        It "Throws with invalid plugin" {
+            InModuleScope Posh-ACME {
                 { Import-PluginArgs FakePlugin } | Should -Throw
             }
-            $pargs = Import-PluginArgs
-            It "Returns a hashtable" {
-                $pargs | Should -BeOfType [hashtable]
-            }
-            It "Returns all saved data with no arguments" {
+        }
+
+        It "Returns all saved data with no arguments" {
+            InModuleScope Posh-ACME {
+                $pargs = Import-PluginArgs
+                $pargs                   | Should -BeOfType [hashtable]
                 $pargs.Keys.Count        | Should -Be 6
                 $pargs.IBUsername        | Should -Be 'fakeuser'
                 $pargs.IBPassword        | Should -Be 'fakepass'
@@ -100,13 +196,21 @@ Describe "Import-PluginArgs" {
                 $pargs.AliKeyId          | Should -Be 'fakeid'
                 $pargs.AliSecretInsecure | Should -Be 'fakesecret'
             }
-            It "Returns plugin specific data with one plugin specified" {
+        }
+
+        It "Returns plugin specific data with one plugin specified" {
+            InModuleScope Posh-ACME {
                 $pargs = Import-PluginArgs Route53
-                $pargs.Keys.Count | Should -Be 1
+                $pargs                | Should -BeOfType [hashtable]
+                $pargs.Keys.Count     | Should -Be 1
                 $pargs.R53ProfileName | Should -Be 'fake-profile'
             }
-            It "Returns plugin specific data with multiple plugins specified" {
+        }
+
+        It "Returns plugin specific data with multiple plugins specified" {
+            InModuleScope Posh-ACME {
                 $pargs = Import-PluginArgs Infoblox,Aliyun,Cloudflare
+                $pargs                   | Should -BeOfType [hashtable]
                 $pargs.Keys.Count        | Should -Be 5
                 $pargs.IBUsername        | Should -Be 'fakeuser'
                 $pargs.IBPassword        | Should -Be 'fakepass'
@@ -114,13 +218,16 @@ Describe "Import-PluginArgs" {
                 $pargs.AliKeyId          | Should -Be 'fakeid'
                 $pargs.AliSecretInsecure | Should -Be 'fakesecret'
             }
-            It "Returns no data for plugins that have no saved data" {
+        }
+
+        It "Returns no data for plugins that have no saved data" {
+            InModuleScope Posh-ACME {
                 $pargs = Import-PluginArgs Cloudflare
+                $pargs | Should -BeOfType [hashtable]
                 $pargs | Should -BeNullOrEmpty
             }
-
-            Remove-Item "TestDrive:\$($fakeAcct.id)\plugindata.xml" -Force
         }
 
     }
+
 }
