@@ -47,6 +47,17 @@ $script:HEADER_NONCE = 'Replay-Nonce'
 $script:USER_AGENT = "Posh-ACME/3.16.0 PowerShell/$($PSVersionTable.PSVersion)"
 $script:COMMON_HEADERS = @{'Accept-Language'='en-us,en;q=0.5'}
 
+# Add an appropriate platform to the user-agent if possible
+if ($IsWindows -or $PSVersionTable.PSEdition -eq 'Desktop') {
+    $script:USER_AGENT += " Platform/Windows"
+} elseif ($IsLinux) {
+    $script:USER_AGENT += " Platform/Linux"
+} elseif ($IsMacOs) {
+    $script:USER_AGENT += " Platform/MacOS"
+} else {
+    $script:USER_AGENT += " Platform/Unknown"
+}
+
 # Invoke-WebRequest and Invoke-RestMethod on PowerShell 5.1 both use
 # IE's DOM parser by default which gives you some nice things that we
 # don't use like html/form parsing. The problem is that it can generate
