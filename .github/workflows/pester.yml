@@ -9,6 +9,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run Pester tests
       run: |
+        $netBuild = (Get-ItemProperty "HKLM:SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full").Release
+        Write-Host ".NET Build = $netBuild"
         Import-Module Pester -MinimumVersion 5.0
         $cfg = [PesterConfiguration]@{Run=@{Exit=$true}}
         Invoke-Pester -Configuration $cfg
