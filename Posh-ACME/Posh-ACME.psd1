@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '3.16.0'
+ModuleVersion = '3.17.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -111,16 +111,21 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 3.16.0 (2020-08-31)
+## 3.17.0 (2020-10-09)
 
-* Added new DNS plugin [NameSilo](https://www.namesilo.com) (Thanks @rkone)
-* Added Preferred Chain support
-  * There is a new `-PreferredChain` parameter on `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder`.
-  * For new or existing orders, you may select an alternate CA chain based on the Issuing CA subject name if alternate chains are offered by the CA.
-  * Example: `-PreferredChain 'ISRG Root X1'`
-* Fixed a bug with `Submit-Renewal` that wasn't properly using `-PluginArgs` and `-NoSkipManualDns` parameters when `-AllOrders` or `-AllAccounts` switches were also used (#266 #275). (Thanks @f-bader)
-* deSEC plugin has added retry logic to address API throttling issues for certs with many names (#275).
-* Fixed a bug with Azure plugin when using `AZCertPfx` authentication from Windows.
+* NOTE: Let's Encrypt is now [restricting](https://community.letsencrypt.org/t/issuing-for-common-rsa-key-sizes-only/133839) RSA private key sizes to 2048, 3072, and 4096 for certificates. But Posh-ACME will continue to allow custom key sizes which may still work with other certificate authorities.
+
+* `New-PAAccount` and `Set-PAAccount -KeyRollover` now have a `-KeyFile` parameter that can be used to import an existing private key instead of generating a new one from scratch.
+* Added `Export-PAAccountKey` which can be use to export your ACME account private key as a standard Base64 encoded PEM file.
+  * For Boulder-based CAs, this can be used to recover lost ACME account configurations if you run `New-PAAccount` with the `-KeyFile` parameter and specify the exported key.
+* Updated Zonomi plugin to support alternative providers who use a compatible API. (#282)
+* Fixed a bug in OVH plugin that would prevent TXT record deletion in some cases. (#283)
+* Fixed a bug in many plugins that would prevent TXT record editing when the record name was also the zone root (#280) (Thanks @ShaBangBinBash)
+* Fixed tutorial syntax error (#277) (Thanks @Leon99)
+* Fixed errors in `Get-PAAuthorizations` when returned object has no 'expires' property. (#276) (Thanks @mortenmw)
+* Changed bad nonce retry message from Debug to Verbose so people using PowerShell's transcript features will see it more easily.
+* A generic platform value has been added to the user agent string the module sends with its ACME requests.
+* Tests have been updated for use with Pester v5. Running them in a dedicated PowerShell process is recommended.
 '@
 
     } # End of PSData hashtable

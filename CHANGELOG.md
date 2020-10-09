@@ -1,3 +1,19 @@
+## 3.17.0 (2020-10-09)
+
+* NOTE: Let's Encrypt is now [restricting](https://community.letsencrypt.org/t/issuing-for-common-rsa-key-sizes-only/133839) RSA private key sizes to 2048, 3072, and 4096 for certificates. But Posh-ACME will continue to allow custom key sizes which may still work with other certificate authorities. 
+
+* `New-PAAccount` and `Set-PAAccount -KeyRollover` now have a `-KeyFile` parameter that can be used to import an existing private key instead of generating a new one from scratch.
+* Added `Export-PAAccountKey` which can be use to export your ACME account private key as a standard Base64 encoded PEM file.
+  * For Boulder-based CAs, this can be used to recover lost ACME account configurations if you run `New-PAAccount` with the `-KeyFile` parameter and specify the exported key.
+* Updated Zonomi plugin to support alternative providers who use a compatible API. (#282)
+* Fixed a bug in OVH plugin that would prevent TXT record deletion in some cases. (#283)
+* Fixed a bug in many plugins that would prevent TXT record editing when the record name was also the zone root (#280) (Thanks @ShaBangBinBash)
+* Fixed tutorial syntax error (#277) (Thanks @Leon99)
+* Fixed errors in `Get-PAAuthorizations` when returned object has no 'expires' property. (#276) (Thanks @mortenmw)
+* Changed bad nonce retry message from Debug to Verbose so people using PowerShell's transcript features will see it more easily.
+* A generic platform value has been added to the user agent string the module sends with its ACME requests.
+* Tests have been updated for use with Pester v5. Running them in a dedicated PowerShell process is recommended.
+
 ## 3.16.0 (2020-08-31)
 
 * Added new DNS plugin [NameSilo](https://www.namesilo.com) (Thanks @rkone)

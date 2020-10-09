@@ -44,7 +44,7 @@ $script:WellKnownDirs = @{
     LE_STAGE = 'https://acme-staging-v02.api.letsencrypt.org/directory';
 }
 $script:HEADER_NONCE = 'Replay-Nonce'
-$script:USER_AGENT = "Posh-ACME/3.16.0 PowerShell/$($PSVersionTable.PSVersion)"
+$script:USER_AGENT = "Posh-ACME/3.17.0 PowerShell/$($PSVersionTable.PSVersion)"
 $script:COMMON_HEADERS = @{'Accept-Language'='en-us,en;q=0.5'}
 
 # Add an appropriate platform to the user-agent if possible
