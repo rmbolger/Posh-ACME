@@ -1,7 +1,7 @@
 name: Pester
 on:
   push:
-    branches: [ master ]
+    branches: [ action-testing ]
 jobs:
   test-pwsh:
     runs-on: windows-latest
