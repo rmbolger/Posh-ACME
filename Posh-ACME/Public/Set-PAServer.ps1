@@ -33,7 +33,7 @@ function Set-PAServer {
         $DirectoryUrl | Out-File (Join-Path (Get-ConfigRoot) 'current-server.txt') -Force -EA Stop
 
         # reload config from disk
-        Import-PAConfig 'Server'
+        Import-PAConfig -Level 'Server'
 
         # Show a link to the TOS if this server has no accounts associated with it yet.
         if (!(Get-PAAccount -List)) {

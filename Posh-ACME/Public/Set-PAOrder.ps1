@@ -81,7 +81,7 @@ function Set-PAOrder {
             $MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force -EA Stop
 
             # reload the cache from disk
-            Import-PAConfig 'Order'
+            Import-PAConfig -Level 'Order'
 
             # grab a local reference to the newly current order
             $order = $script:Order

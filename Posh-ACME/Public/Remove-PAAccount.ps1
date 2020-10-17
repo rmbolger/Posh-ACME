@@ -44,13 +44,9 @@ function Remove-PAAccount {
 
         # unset the current account if it was this one
         if ($script:Acct -and $script:Acct.id -eq $acct.id) {
-            $script:Acct = $null
-            $script:AcctFolder = $null
             $acct = $null
-            $script:Order = $null
-            $script:OrderFolder = $null
-
             Remove-Item (Join-Path (Get-DirFolder) 'current-account.txt') -Force
+            Import-PAConfig -Level 'Account'
         }
 
     }

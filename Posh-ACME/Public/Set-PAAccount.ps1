@@ -81,7 +81,7 @@ function Set-PAAccount {
             $script:OrderFolder = $null
 
             # reload the cache from disk
-            Import-PAConfig 'Account'
+            Import-PAConfig -Level 'Account'
 
             # grab a local reference to the newly current account
             $acct = $script:Acct
