@@ -33,6 +33,31 @@ if ('SkipCertificateCheck' -notin (Get-Command Invoke-RestMethod).Parameters.Key
     $script:SkipCertSupported = $true
 }
 
+# add a function so it's easier to mock enable/disable
+function Set-CertValidation {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [bool]$Skip
+    )
+
+    if ($Skip) {
+        Write-Debug "Disabling cert validation"
+        if ($script:SkipCertSupported) {
+            $script:UseBasic.SkipCertificateCheck = $true
+        } else {
+            [CertValidation]::Ignore()
+        }
+    } else {
+        Write-Debug "Enabling cert validation"
+        if ($script:SkipCertSupported) {
+            $script:UseBasic.SkipCertificateCheck = $false
+        } else {
+            [CertValidation]::Restore()
+        }
+    }
+}
+
 # The version of Invoke-RestMethod included with PowerShell Core 6 now has a native
 # -SslProtocol parameter. According to the docs, it defaults to supporting all
 # protocols "supported by the system". So we shouldn't need to tweak the supported

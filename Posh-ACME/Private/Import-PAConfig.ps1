@@ -69,21 +69,7 @@ function Import-PAConfig {
             $script:Dir = Get-PAServer $dirUrl
 
             # deal with cert validation options between PS editions
-            if ($script:Dir.SkipCertificateCheck) {
-                Write-Debug "skipping cert validation"
-                if ($script:SkipCertSupported) {
-                    $script:UseBasic.SkipCertificateCheck = $true
-                } else {
-                    [CertValidation]::Ignore()
-                }
-            } else {
-                Write-Debug "restoring cert validation"
-                if ($script:SkipCertSupported) {
-                    $script:UseBasic.SkipCertificateCheck = $false
-                } else {
-                    [CertValidation]::Restore()
-                }
-            }
+            Set-CertValidation $script:Dir.SkipCertificateCheck
 
             $ImportAccount = $true
 
