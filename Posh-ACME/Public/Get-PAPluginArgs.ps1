@@ -23,11 +23,21 @@ function Get-PAPluginArgs {
             throw "No ACME order configured. Run Set-PAOrder, New-PAOrder, or specify a MainDomain."
         }
 
-        if (-not $MainDomain) { $MainDomain = $script:Order.MainDomain }
+        # use the current order if something else wasn't specified
+        if (-not $MainDomain) {
+            $MainDomain = $script:Order.MainDomain
+        } else {
+            $WarnOnMissing = $true
+        }
 
         $orderFolder = Join-Path $script:AcctFolder $MainDomain.Replace('*','!')
         $pDataFile = Join-Path $orderFolder 'pluginargs.json'
         $pData = @{}
+
+        # write a warning if they specified an order and it doesn't exist
+        if ($WarnOnMissing -and -not (Test-Path $orderFolder -PathType Container)) {
+            Write-Warning "No order found for $MainDomain in $orderFolder"
+        }
 
         if (Test-Path $pDataFile -PathType Leaf) {
 
