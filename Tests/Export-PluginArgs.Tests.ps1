@@ -5,320 +5,197 @@
 Describe "Export-PluginArgs" {
 
     BeforeAll {
+        # copy a fake config root to the test drive
+        Get-ChildItem "$PSScriptRoot\TestFiles\ConfigRoot\" | Copy-Item -Dest 'TestDrive:\' -Recurse
         $env:POSHACME_HOME = 'TestDrive:\'
         Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
-
-        $fakeAcct1 = Get-Content "$PSScriptRoot\TestFiles\fakeAccount1.json" -Raw | ConvertFrom-Json
-        $fakeAcct1.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
-        $fakeAcct2 = Get-Content "$PSScriptRoot\TestFiles\fakeAccount2.json" -Raw | ConvertFrom-Json
-        $fakeAcct2.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
-
-        Mock -ModuleName Posh-ACME Get-DirFolder { return 'TestDrive:\' }
-        New-Item "TestDrive:\$($fakeAcct1.id)" -ItemType Directory -ErrorAction Ignore
-        New-Item "TestDrive:\$($fakeAcct2.id)" -ItemType Directory -ErrorAction Ignore
     }
 
-    Context "Param Checks" {
-
-        BeforeAll {
-            Mock -ModuleName Posh-ACME Export-CliXml { }
-        }
-
-        It "Works with no accounts at all" {
-            Mock -ModuleName Posh-ACME Get-PAAccount { $null }
-            Mock -ModuleName Posh-ACME Get-PAAccount { $null } -ParameterFilter { $List }
-            Mock -ModuleName Posh-ACME TestData { $fakeAcct1 }
-
-            InModuleScope Posh-ACME {
-                $pargs = @{R53ProfileName='fake-profile'}
-                $acct = TestData
-
-                { Export-PluginArgs $pargs Route53 }                | Should -Throw
-                { Export-PluginArgs $pargs Route53,Infoblox }       | Should -Throw
-                { Export-PluginArgs $pargs Route53 -Account $acct } | Should -Throw
-            }
-        }
-
-        It "Works with 1 inactive account" {
-            Mock -ModuleName Posh-ACME Get-PAAccount { $null }
-            Mock -ModuleName Posh-ACME Get-PAAccount { @($fakeAcct1) } -ParameterFilter { $List }
-            Mock -ModuleName Posh-ACME TestData { $fakeAcct1 }
-
-            InModuleScope Posh-ACME {
-                $pargs = @{R53ProfileName='fake-profile'}
-                $acct = TestData
-                $acct2 = [pscustomobject]@{id='99999';PSTypeName='PoshACME.PAAccount'}
-
-                { Export-PluginArgs $pargs Route53 }                | Should -Throw
-                { Export-PluginArgs $pargs Route53,Infoblox }       | Should -Throw
-                { Export-PluginArgs $pargs Route53 -Account $acct } | Should -Not -Throw
-                $acct2.id = '99999'
-                { Export-PluginArgs $pargs Route53 -Account $acct2Clone } | Should -Throw
-            }
-        }
-
-        It "Works with 1 active account" {
-            Mock -ModuleName Posh-ACME Get-PAAccount { $fakeAcct1 }
-            Mock -ModuleName Posh-ACME Get-PAAccount { @($fakeAcct1) } -ParameterFilter { $List }
-            Mock -ModuleName Posh-ACME TestData { $fakeAcct1 }
-
-            InModuleScope Posh-ACME {
-                $pargs = @{R53ProfileName='fake-profile'}
-                $acct = TestData
-                $acct2 = [pscustomobject]@{id='99999';PSTypeName='PoshACME.PAAccount'}
-
-                { Export-PluginArgs $pargs Route53 }                | Should -Not -Throw
-                { Export-PluginArgs $pargs Route53,Infoblox }       | Should -Not -Throw
-                { Export-PluginArgs $pargs Route53 -Account $acct } | Should -Not -Throw
-                $acct2.id = '99999'
-                { Export-PluginArgs $pargs Route53 -Account $acct2 } | Should -Throw
-            }
-        }
-
-        It "Works with 0 active (2 total) accounts" {
-            Mock -ModuleName Posh-ACME Get-PAAccount { $null }
-            Mock -ModuleName Posh-ACME Get-PAAccount { @($fakeAcct1,$fakeAcct2) } -ParameterFilter { $List }
-            Mock -ModuleName Posh-ACME TestData { $fakeAcct1 }
-
-            InModuleScope Posh-ACME {
-                $pargs = @{R53ProfileName='fake-profile'}
-                $acct = TestData
-                $acct2 = [pscustomobject]@{id='99999';PSTypeName='PoshACME.PAAccount'}
-
-                { Export-PluginArgs $pargs Route53 }                | Should -Throw
-                { Export-PluginArgs $pargs Route53,Infoblox }       | Should -Throw
-                { Export-PluginArgs $pargs Route53 -Account $acct } | Should -Not -Throw
-                $acct2.id = '22222'
-                { Export-PluginArgs $pargs Route53 -Account $acct2 } | Should -Not -Throw
-                $acct2.id = '99999'
-                { Export-PluginArgs $pargs Route53 -Account $acct2 } | Should -Throw
-            }
-        }
-
-        It "Works with 1 active (2 total) account" {
-            Mock -ModuleName Posh-ACME Get-PAAccount { $fakeAcct1 }
-            Mock -ModuleName Posh-ACME Get-PAAccount { @($fakeAcct1,$fakeAcct2) } -ParameterFilter { $List }
-            Mock -ModuleName Posh-ACME TestData { $fakeAcct1 }
-
-            InModuleScope Posh-ACME {
-                $pargs = @{R53ProfileName='fake-profile'}
-                $acct = TestData
-                $acct2 = [pscustomobject]@{id='99999';PSTypeName='PoshACME.PAAccount'}
-
-                { Export-PluginArgs $pargs Route53 }                | Should -Not -Throw
-                { Export-PluginArgs $pargs Route53,Infoblox }       | Should -Not -Throw
-                { Export-PluginArgs $pargs Route53 -Account $acct } | Should -Not -Throw
-                $acct2.id = '22222'
-                { Export-PluginArgs $pargs Route53 -Account $acct2 } | Should -Not -Throw
-                $acct2.id = '99999'
-                { Export-PluginArgs $pargs Route53 -Account $acct2 } | Should -Throw
-            }
-        }
-    }
-
-    Context "No plugindata.xml" {
-
-        BeforeAll {
-            Mock -ModuleName Posh-ACME Get-PAAccount { $fakeAcct1 }
-            $pDataFile = "TestDrive:\$($fakeAcct1.id)\plugindata.xml"
-        }
-
-        It "Saves all plugin args (1 plugin)" {
-            InModuleScope Posh-ACME {
-                $pargs = @{
-                    R53ProfileName='fake-profile'
-                    MyFakeParam='this has no plugin'
-                }
-                Export-PluginArgs $pargs Route53
-            }
-
-            $pDataFile | Should -Exist
-            $result = Import-Clixml $pDataFile
-            $result | Should -BeOfType [hashtable]
-            $result.Keys.Count | Should -Be 2
-            $result.R53ProfileName | Should -BeExactly 'fake-profile'
-            $result.MyFakeParam | Should -BeExactly 'this has no plugin'
-        }
-
-        It "Saves all plugin args (2 plugins)" {
-            InModuleScope Posh-ACME {
-                $pargs = @{
-                    R53ProfileName='fake-profile'
-                    IBUsername = 'admin'
-                    MyFakeParam='this has no plugin'
-                }
-                Export-PluginArgs $pargs Route53,Infoblox
-            }
-
-            $pDataFile | Should -Exist -EA Stop
-            $result = Import-Clixml $pDataFile
-            $result                | Should -BeOfType [hashtable]
-            $result.Keys.Count     | Should -Be 3
-            $result.R53ProfileName | Should -BeExactly 'fake-profile'
-            $result.IBUsername     | Should -BeExactly 'admin'
-            $result.MyFakeParam    | Should -BeExactly 'this has no plugin'
-        }
-    }
-
-    Context "Invalid plugindata.xml" {
-
-        BeforeAll {
-            Mock -ModuleName Posh-ACME Get-PAAccount { $fakeAcct1 }
-            $pDataFile = "TestDrive:\$($fakeAcct1.id)\plugindata.xml"
-            'Unparseable data for Import-CliXml' | Out-File $pDataFile
-        }
-
+    Context "No account" {
         It "Throws" {
             InModuleScope Posh-ACME {
-                $pargs = @{
-                    R53ProfileName='fake-profile'
-                    MyFakeParam='this has no plugin'
-                }
-                { Export-PluginArgs $pargs Route53 }          | Should -Throw
-                { Export-PluginArgs $pargs Route53,Infoblox } | Should -Throw
-                { Export-PluginArgs $pargs FakePlugin }       | Should -Throw
+                Mock Get-PAAccount {}
+                { Export-PluginArgs 'fakedomain' 'Route53' @{} } | Should -Throw "*No ACME account*"
             }
         }
     }
 
-    Context "Valid plugindata.xml (no encryption)" {
+    Context "Order doesn't exist" {
+        It "Throws" {
+            InModuleScope Posh-ACME {
+                $pargs = @{R53ProfileName='fake-profile'}
+                { Export-PluginArgs 'fakedomain' Route53 $pargs }          | Should -Throw
+                { Export-PluginArgs 'fakedomain' Route53,Infoblox $pargs } | Should -Throw
+            }
+        }
+    }
+
+    Context "No existing plugin data" {
 
         BeforeAll {
-            Mock -ModuleName Posh-ACME Get-PAAccount { $fakeAcct1 }
-            $pDataFile = "TestDrive:\$($fakeAcct1.id)\plugindata.xml"
-            'Unparseable data for Import-CliXml' | Out-File $pDataFile
+            # switch to the test account with no plugin data
+            '22222' | Out-File 'TestDrive:\acme.test\current-account.txt'
+            InModuleScope Posh-ACME { Import-PAConfig }
+            $jsonPath = 'TestDrive:\acme.test\22222\!.example.org\pluginargs.json'
         }
 
-        It "Replaces old values for 1 plugin" {
-            @{
-                IBUsername = 'old-user'
-                IBPassword = 'old-pass'
-            } | Export-CliXml $pDataFile
+        BeforeEach {
+            Remove-Item $jsonPath -Force -EA Ignore
+        }
 
-            InModuleScope Posh-ACME {
-                $pargs = @{
-                    IBUsername = 'new-user'
-                    IBPassword = 'new-pass'
-                }
-                Export-PluginArgs $pargs Infoblox
+        It "Saves all plugin-specific args" -TestCases @(
+            @{ splat=@{ Plugin='Route53'; PluginArgs=@{} } }
+            @{ splat=@{ Plugin='Route53'; PluginArgs=@{bad1='asdf'} } }
+            @{ splat=@{ Plugin='Route53'; PluginArgs=@{R53AccessKey='asdf';bad1='asdf'} } }
+            @{ splat=@{ Plugin='Route53'; PluginArgs=@{R53AccessKey='asdf';R53SecretKeyInsecure='qwer';bad1='asdf'} } }
+            @{ splat=@{ Plugin='Route53'; PluginArgs=@{R53AccessKey='asdf';R53SecretKeyInsecure='qwer';bad1='1234';bad2=5678} } }
+            @{ splat=@{ Plugin='Route53'; PluginArgs=@{R53AccessKey='asdf';R53SecretKeyInsecure='qwer'} } }
+            @{ splat=@{ Plugin='Route53'; PluginArgs=@{R53AccessKey='asdf'} } }
+            @{ splat=@{ Plugin='AcmeDns','DeSEC'; PluginArgs=@{ACMEServer='asdf';DSTTL=123;bad1='asdf';bad2=456} } }
+        ) {
+            InModuleScope Posh-ACME -Parameters @{Splat=$splat} {
+                param($Splat)
+                Export-PluginArgs '*.example.org' @Splat
             }
 
-            $pDataFile | Should -Exist -EA Stop
-            $result = Import-CliXml $pDataFile
-            $result.Keys.Count | Should -Be 2
-            $result.IBUsername | Should -BeExactly 'new-user'
-            $result.IBPassword | Should -BeExactly 'new-pass'
+            $jsonPath | Should -Exist
+            { Get-Content $jsonPath -Raw | ConvertFrom-Json } | Should -Not -Throw
+
+            $result = Get-PAPluginArgs $splat.MainDomain
+            $paramAllowed = $splat.Plugin | ForEach-Object { Get-PAPlugin $_ -Param } |
+                Select-Object -Expand Parameter | Sort-Object -Unique
+
+            # everything from the original PluginArgs should match
+            $splat.PluginArgs.GetEnumerator() | ForEach-Object {
+                if ($_.Key -in $paramAllowed) {
+                    $result[$_.Key] | Should -Be $_.Value
+                } else {
+                    $result[$_.Key] | Should -BeNullOrEmpty
+                }
+            }
         }
 
-        It "Replaces old values for multiple plugins" {
-            @{
-                IBUsername = 'old-user'
-                IBPassword = 'old-pass'
-                R53ProfileName = 'old-profile'
-            } | Export-CliXml $pDataFile
-
-            InModuleScope Posh-ACME {
-                $pargs = @{
-                    IBUsername = 'new-user'
-                    IBPassword = 'new-pass'
-                    R53ProfileName = 'new-profile'
+        It "Exports All Supported Data Types" {
+            $secstring = ConvertTo-SecureString 'secstring' -AsPlainText -Force
+            $pArgs = @{
+                ACMEServer = 'string'
+                ACMEAllowFrom = 'a','b','c'
+                ACMERegistration = @{
+                    'domain1' = @('d','e','f')
+                    'domain2' = @('g','h','i')
                 }
-                Export-PluginArgs $pargs Infoblox,Route53
+                DSTTL = 123
+                DSToken = $secstring
+                IBCred = [pscredential]::new('admin1',$secstring)
+                IBIgnoreCert = $true
+            }
+            InModuleScope Posh-ACME -Parameters @{PArgs=$pArgs} {
+                param($PArgs)
+                Export-PluginArgs '*.example.org' -Plugin 'AcmeDns','DeSEC','Infoblox' -PluginArgs $PArgs
             }
 
-            $pDataFile | Should -Exist -EA Stop
-            $result = Import-CliXml $pDataFile
-            $result.Keys.Count     | Should -Be 3
-            $result.IBUsername     | Should -BeExactly 'new-user'
-            $result.IBPassword     | Should -BeExactly 'new-pass'
-            $result.R53ProfileName | Should -BeExactly 'new-profile'
+            $jsonPath | Should -Exist
+            { Get-Content $jsonPath -Raw | ConvertFrom-Json } | Should -Not -Throw
+
+            $json = Get-Content $jsonPath -Raw | ConvertFrom-Json
+
+            $json.ACMEServer               | Should -Be 'string'
+            $json.ACMEAllowFrom            | Should -HaveCount 3
+            $json.ACMEAllowFrom            | Should -Be 'a','b','c'
+            $json.ACMERegistration.domain1 | Should -Not -BeNullOrEmpty
+            $json.ACMERegistration.domain1 | Should -HaveCount 3
+            $json.ACMERegistration.domain1 | Should -Be 'd','e','f'
+            $json.ACMERegistration.domain2 | Should -Not -BeNullOrEmpty
+            $json.ACMERegistration.domain2 | Should -HaveCount 3
+            $json.ACMERegistration.domain2 | Should -Be 'g','h','i'
+            $json.DSTTL                    | Should -Be 123
+            $json.IBIgnoreCert             | Should -BeTrue
+
+            $json.DSToken.origType | Should -Be 'securestring'
+            $token = $json.DSToken.value | ConvertTo-SecureString
+            $tokenPlain = [pscredential]::new('u',$token).GetNetworkCredential().Password
+            $tokenPlain            | Should -Be 'secstring'
+
+            $json.IBCred.origType | Should -Be 'pscredential'
+            $json.IBCred.user     | Should -Be 'admin1'
+            $pass = $json.IBCred.pass | ConvertTo-SecureString
+            $passPlain = [pscredential]::new('u',$pass).GetNetworkCredential().Password
+            $passPlain            | Should -Be 'secstring'
+        }
+    }
+
+    Context "Existing Plugin Data" {
+
+        BeforeAll {
+            # switch to the test account with no plugin data
+            '22222' | Out-File 'TestDrive:\acme.test\current-account.txt'
+            InModuleScope Posh-ACME { Import-PAConfig }
+            $jsonPath = 'TestDrive:\acme.test\22222\!.example.org\pluginargs.json'
         }
 
-        It "Removes conflicting parameters for 1 plugin" {
-            @{ R53ProfileName = 'old-profile' } | Export-CliXml $pDataFile
+        BeforeEach {
+            Remove-Item $jsonPath -Force -EA Ignore
+        }
 
-            InModuleScope Posh-ACME {
-                $pargs = @{
-                    R53AccessKey = 'new-key'
-                    R53SecretKeyInsecure = 'new-secret'
-                }
-                Export-PluginArgs $pargs Route53
+        It "Replaces 1 param set with another" {
+            $set1 = @{ R53ProfileName = 'xxxxx' }
+            $set2 = @{ R53AccessKey = 'yyyyy'; R53SecretKeyInsecure='zzzzz' }
+
+            $set1 | ConvertTo-Json | Out-File $jsonPath -Encoding utf8
+            InModuleScope Posh-ACME -Parameters @{PArgs=$set2} {
+                param($PArgs)
+                Export-PluginArgs '*.example.org' -Plugin 'Route53' -PluginArgs $PArgs
             }
 
-            $pDataFile | Should -Exist -EA Stop
-            $result = Import-Clixml $pDataFile
-            $result.Keys.Count           | Should -Be 2
-            $result.R53AccessKey         | Should -BeExactly 'new-key'
-            $result.R53SecretKeyInsecure | Should -BeExactly 'new-secret'
-        }
+            $result = Get-PAPluginArgs
+            $result.R53ProfileName       | Should -BeNullOrEmpty
+            $result.R53AccessKey         | Should -Be 'yyyyy'
+            $result.R53SecretKeyInsecure | Should -Be 'zzzzz'
 
-        It "Removes conflicting parameters for multiple plugins" {
-            @{
-                R53ProfileName = 'old-profile'
-                AZAccessToken = 'old-token'
-            } | Export-CliXml $pDataFile
-
-            InModuleScope Posh-ACME {
-                $pargs = @{
-                    R53AccessKey = 'new-key'
-                    R53SecretKeyInsecure = 'new-secret'
-                    AZAppUsername = 'new-user'
-                    AZAppPasswordInsecure = 'new-pass'
-                }
-                Export-PluginArgs $pargs Route53,Azure
+            $set2 | ConvertTo-Json | Out-File $jsonPath -Encoding utf8
+            InModuleScope Posh-ACME -Parameters @{PArgs=$set1} {
+                param($PArgs)
+                Export-PluginArgs '*.example.org' -Plugin 'Route53' -PluginArgs $PArgs
             }
 
-            $pDataFile | Should -Exist
-            $result = Import-Clixml $pDataFile
-            $result.Keys.Count            | Should -Be 4
-            $result.R53AccessKey          | Should -BeExactly 'new-key'
-            $result.R53SecretKeyInsecure  | Should -BeExactly 'new-secret'
-            $result.AZAppUsername         | Should -BeExactly 'new-user'
-            $result.AZAppPasswordInsecure | Should -BeExactly 'new-pass'
+            $result = Get-PAPluginArgs
+            $result.R53ProfileName       | Should -Be 'xxxxx'
+            $result.R53AccessKey         | Should -BeNullOrEmpty
+            $result.R53SecretKeyInsecure | Should -BeNullOrEmpty
         }
 
-        It "Does not change parameters unassociated with plugin" {
-            @{
-                R53ProfileName = 'old-profile'
-                AZAccessToken = 'old-token'
-            } | Export-CliXml $pDataFile
+        It "Only replaces param sets for specified plugins" {
 
-            InModuleScope Posh-ACME {
-                $pargs = @{
-                    R53ProfileName = 'new-profile'
-                }
-                Export-PluginArgs $pargs Route53
+            $set1 = @{ R53ProfileName = 'xxxxx'; Fake1='asdf'; ACMEServer='qwer' }
+            $set2 = @{ R53AccessKey = 'yyyyy'; R53SecretKeyInsecure='zzzzz'; ACMEServer='newvalue' }
+
+            $set1 | ConvertTo-Json | Out-File $jsonPath -Encoding utf8
+            InModuleScope Posh-ACME -Parameters @{PArgs=$set2} {
+                param($PArgs)
+                Export-PluginArgs '*.example.org' -Plugin 'Route53' -PluginArgs $PArgs
             }
 
-            $pDataFile | Should -Exist -EA Stop
-            $result = Import-Clixml $pDataFile
-            $result.Keys.Count     | Should -Be 2
-            $result.R53ProfileName | Should -BeExactly 'new-profile'
-            $result.AZAccessToken  | Should -BeExactly 'old-token'
-        }
+            $result = Get-PAPluginArgs
+            $result.R53ProfileName       | Should -BeNullOrEmpty
+            $result.Fake1                | Should -Be 'asdf'
+            $result.ACMEServer           | Should -Be 'qwer'
+            $result.R53AccessKey         | Should -Be 'yyyyy'
+            $result.R53SecretKeyInsecure | Should -Be 'zzzzz'
 
-        It "Includes all new parameters unassociated with plugin" {
-            @{
-                R53ProfileName = 'old-profile'
-            } | Export-CliXml $pDataFile
-
-            InModuleScope Posh-ACME {
-                $pargs = @{
-                    R53ProfileName = 'new-profile'
-                    FakeParam1 = 'fake1'
-                    FakeParam2 = 'fake2'
-                }
-                Export-PluginArgs $pargs Route53
+            $set1 | ConvertTo-Json | Out-File $jsonPath -Encoding utf8
+            InModuleScope Posh-ACME -Parameters @{PArgs=$set2} {
+                param($PArgs)
+                Export-PluginArgs '*.example.org' -Plugin 'Route53','AcmeDns' -PluginArgs $PArgs
             }
 
-            $pDataFile | Should -Exist -EA Stop
-            $result = Import-Clixml $pDataFile
-            $result.Keys.Count     | Should -Be 3
-            $result.R53ProfileName | Should -BeExactly 'new-profile'
-            $result.FakeParam1     | Should -BeExactly 'fake1'
-            $result.FakeParam2     | Should -BeExactly 'fake2'
-        }
+            $result = Get-PAPluginArgs
+            $result.R53ProfileName       | Should -BeNullOrEmpty
+            $result.Fake1                | Should -Be 'asdf'
+            $result.ACMEServer           | Should -Be 'newvalue'
+            $result.R53AccessKey         | Should -Be 'yyyyy'
+            $result.R53SecretKeyInsecure | Should -Be 'zzzzz'
 
+        }
     }
 
 }
