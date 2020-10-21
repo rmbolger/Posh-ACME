@@ -1,6 +1,7 @@
 Describe "New-Jws" {
 
     BeforeAll {
+        $env:POSHACME_HOME = 'TestDrive:\'
         Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
     }
 

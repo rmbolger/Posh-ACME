@@ -1,8 +1,9 @@
-BeforeAll {
-    Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
-}
-
 Describe "Get-CsrDetails" {
+
+    BeforeAll {
+        $env:POSHACME_HOME = 'TestDrive:\'
+        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+    }
 
     Context "Missing CSR file" {
         It "Throws if file doesn't exist" {

@@ -1,8 +1,9 @@
-BeforeAll {
-    Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
-}
-
 Describe "ConvertTo-Base64Url" {
+
+    BeforeAll {
+        $env:POSHACME_HOME = 'TestDrive:\'
+        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+    }
 
     It "Encodes string values properly" {
         InModuleScope Posh-ACME {

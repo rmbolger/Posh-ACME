@@ -1,12 +1,3 @@
-BeforeAll {
-    Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
-
-    $fakeAcct1 = Get-Content "$PSScriptRoot\TestFiles\fakeAccount1.json" -Raw | ConvertFrom-Json
-    $fakeAcct1.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
-    $fakeAcct2 = Get-Content "$PSScriptRoot\TestFiles\fakeAccount2.json" -Raw | ConvertFrom-Json
-    $fakeAcct2.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
-}
-
 # Note: These tests depend on knowing the paramters associated with some of the actual
 # DNS plugins. So if the parameters in the plugins change, the tests will need updating
 # as well.
@@ -14,6 +5,14 @@ BeforeAll {
 Describe "Export-PluginArgs" {
 
     BeforeAll {
+        $env:POSHACME_HOME = 'TestDrive:\'
+        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+
+        $fakeAcct1 = Get-Content "$PSScriptRoot\TestFiles\fakeAccount1.json" -Raw | ConvertFrom-Json
+        $fakeAcct1.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
+        $fakeAcct2 = Get-Content "$PSScriptRoot\TestFiles\fakeAccount2.json" -Raw | ConvertFrom-Json
+        $fakeAcct2.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
+
         Mock -ModuleName Posh-ACME Get-DirFolder { return 'TestDrive:\' }
         New-Item "TestDrive:\$($fakeAcct1.id)" -ItemType Directory -ErrorAction Ignore
         New-Item "TestDrive:\$($fakeAcct2.id)" -ItemType Directory -ErrorAction Ignore

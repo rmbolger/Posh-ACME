@@ -1,10 +1,9 @@
-BeforeAll {
-    Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
-}
-
 Describe "Get-PAAuthorizations" {
 
     BeforeAll {
+        $env:POSHACME_HOME = 'TestDrive:\'
+        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+
         $fakeAcct = Get-Content "$PSScriptRoot\TestFiles\fakeAccount1.json" -Raw | ConvertFrom-Json
         $fakeAcct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
         Mock -ModuleName Posh-ACME Get-PAAccount { return $fakeAcct }

@@ -1,11 +1,8 @@
-BeforeAll {
-    . (Join-Path $PSScriptRoot "..\Posh-ACME\DnsPlugins\Azure.ps1")
-    . (Join-Path $PSScriptRoot "..\Posh-ACME\Private\MockWrappers.ps1")
-}
-
 Describe "Connect-AZTenant" {
 
     BeforeAll {
+        . (Join-Path $PSScriptRoot "..\Posh-ACME\DnsPlugins\Azure.ps1")
+        . (Join-Path $PSScriptRoot "..\Posh-ACME\Private\MockWrappers.ps1")
         $fakeTokenResponse = [pscustomobject]@{
             expires_on   = '1530691200' # 2018-07-04 08:00:00 UTC
             access_token = 'faketoken'

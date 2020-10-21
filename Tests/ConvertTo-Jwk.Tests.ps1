@@ -1,16 +1,17 @@
-BeforeAll {
-    Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
-
-    # create sample keys
-    $rsa2048 = [Security.Cryptography.RSACryptoServiceProvider]::new(2048)
-    $rsa3072 = [Security.Cryptography.RSACryptoServiceProvider]::new(3072)
-    $rsa4096 = [Security.Cryptography.RSACryptoServiceProvider]::new(4096)
-    $ec256 = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve]::CreateFromValue('1.2.840.10045.3.1.7'))
-    $ec384 = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.34'))
-    $ec521 = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.35'))
-}
-
 Describe "ConvertTo-Jwk" {
+
+    BeforeAll {
+        $env:POSHACME_HOME = 'TestDrive:\'
+        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+
+        # create sample keys
+        $rsa2048 = [Security.Cryptography.RSACryptoServiceProvider]::new(2048)
+        $rsa3072 = [Security.Cryptography.RSACryptoServiceProvider]::new(3072)
+        $rsa4096 = [Security.Cryptography.RSACryptoServiceProvider]::new(4096)
+        $ec256 = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve]::CreateFromValue('1.2.840.10045.3.1.7'))
+        $ec384 = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.34'))
+        $ec521 = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.35'))
+    }
 
     Context "Bad Input" {
         It "Should throw" {
