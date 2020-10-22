@@ -7,7 +7,6 @@ function Submit-Renewal {
         [switch]$AllOrders,
         [Parameter(ParameterSetName='AllAccounts',Mandatory)]
         [switch]$AllAccounts,
-        [switch]$NewKey,
         [switch]$Force,
         [switch]$NoSkipManualDns,
         [hashtable]$PluginArgs
@@ -70,7 +69,6 @@ function Submit-Renewal {
                 if ([String]::IsNullOrWhiteSpace($order.CSRBase64Url)) {
                     $certParams.Domain = @($order.MainDomain);
                     if ($order.SANs.Count -gt 0) { $certParams.Domain += @($order.SANs) }
-                    $certParams.NewCertKey = $NewKey.IsPresent
                     $certParams.OCSPMustStaple = $order.OCSPMustStaple
                     $certParams.FriendlyName = $order.FriendlyName
                     $certParams.PfxPass = $order.PfxPass
@@ -111,7 +109,6 @@ function Submit-Renewal {
                 if ($orders.Count -gt 0) {
 
                     $renewParams = @{
-                        NewKey = $NewKey.IsPresent
                         Force = $Force.IsPresent
                         NoSkipManualDns = $NoSkipManualDns.IsPresent
                     }
@@ -146,7 +143,6 @@ function Submit-Renewal {
 
                     $renewParams = @{
                         AllOrders = $true
-                        NewKey = $NewKey.IsPresent
                         Force = $Force.IsPresent
                         NoSkipManualDns = $NoSkipManualDns.IsPresent
                     }
@@ -190,9 +186,6 @@ function Submit-Renewal {
     .PARAMETER AllAccounts
         If specified, renew all valid orders on all valid accounts in this profile. Orders that have not reached the renewal window will be skipped unless -Force is used.
 
-    .PARAMETER NewKey
-        If specified, a new private key will be generated for the certificate renewal. Otherwise, the old key is re-used. This is useful if you believe the current key has been compromised.
-
     .PARAMETER Force
         If specified, an order that hasn't reached its renewal window will not throw an error and will not be skipped when using either of the -All parameters.
 
@@ -223,9 +216,9 @@ function Submit-Renewal {
         Renew all valid orders on all valid accounts that have reached their suggested renewal window.
 
     .EXAMPLE
-        Submit-Renewal site1.example.com -NewKey -Force
+        Submit-Renewal site1.example.com -Force
 
-        Renew the order for the specified site regardless of its renewal window and generate a new private key.
+        Renew the order for the specified site regardless of its renewal window.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME

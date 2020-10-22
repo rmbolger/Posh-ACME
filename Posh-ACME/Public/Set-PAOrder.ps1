@@ -28,7 +28,9 @@ function Set-PAOrder {
         [Parameter(ParameterSetName='Edit')]
         [int]$ValidationTimeout,
         [Parameter(ParameterSetName='Edit')]
-        [string]$PreferredChain
+        [string]$PreferredChain,
+        [Parameter(ParameterSetName='Edit')]
+        [switch]$AlwaysNewKey
     )
 
     Begin {
@@ -156,6 +158,18 @@ function Set-PAOrder {
                 $rewriteCer = $true
             }
 
+            if ('AlwaysNewKey' -in $psbKeys -and
+                (-not $order.AlwaysNewKey -or $AlwaysNewKey.IsPresent -ne $order.AlwaysNewKey)
+            ) {
+                Write-Verbose "Setting AlwaysNewKey to $($AlwaysNewKey.IsPresent)"
+                if ('AlwaysNewKey' -notin $order.PSObject.Properties.Name) {
+                    $order | Add-Member -MemberType NoteProperty -Name 'AlwaysNewKey' -Value $AlwaysNewKey.IsPresent
+                } else {
+                    $order.AlwaysNewKey = $AlwaysNewKey.IsPresent
+                }
+                $saveChanges = $true
+            }
+
             if ($saveChanges) {
                 Write-Verbose "Saving order changes"
                 $orderFolder = Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')
@@ -279,6 +293,9 @@ function Set-PAOrder {
 
     .PARAMETER PreferredChain
         If the CA offers multiple certificate chains, prefer the chain with an issuer matching this Subject Common Name. If no match, the default offered chain will be used.
+
+    .PARAMETER AlwaysNewKey
+        If specified, the order will be configured to always generate a new private key during each renewal. Otherwise, the old key is re-used if it exists.
 
     .EXAMPLE
         Set-PAOrder site1.example.com

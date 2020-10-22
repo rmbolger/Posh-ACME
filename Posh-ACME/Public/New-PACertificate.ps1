@@ -11,7 +11,7 @@ function New-PACertificate {
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$CertKeyLength='2048',
         [Parameter(ParameterSetName='FromScratch')]
-        [switch]$NewCertKey,
+        [switch]$AlwaysNewKey,
         [switch]$AcceptTOS,
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$AccountKeyLength='ec-256',
@@ -106,7 +106,7 @@ function New-PACertificate {
                 Domain         = $Domain;
                 KeyLength      = $CertKeyLength;
                 OCSPMustStaple = $OCSPMustStaple.IsPresent;
-                NewKey         = $NewCertKey.IsPresent;
+                AlwaysNewKey   = $AlwaysNewKey.IsPresent;
                 Install        = $Install.IsPresent;
                 FriendlyName   = $FriendlyName;
                 PfxPass        = $PfxPass;
@@ -119,6 +119,9 @@ function New-PACertificate {
                 }
                 if ('OCSPMustStaple' -notin $PSBoundParameters.Keys) {
                     $orderParams.OCSPMustStaple = $oldOrder.OCSPMustStaple
+                }
+                if ('AlwaysNewKey' -notin $PSBoundParameters.Keys -and $oldOrder.AlwaysNewKey) {
+                    $orderParams.AlwaysNewKey = $oldOrder.AlwaysNewKey
                 }
                 if ('Install' -notin $PSBoundParameters.Keys -and $oldOrder.Install) {
                     $orderParams.Install = $oldOrder.Install
@@ -154,6 +157,12 @@ function New-PACertificate {
         $order | Set-PAOrder
 
         # Allow overriding some order properties that don't need to trigger a new order
+        if ('AlwaysNewKey' -in $PSBoundParameters.Keys -and
+            $AlwaysNewKey.IsPresent -ne $script:Order.AlwaysNewKey)
+        {
+            Write-Verbose "Overriding AlwaysNewKey property with $($AlwaysNewKey.IsPresent)"
+            $script:Order.AlwaysNewKey = $AlwaysNewKey.IsPresent
+        }
         if ('Install' -in $PSBoundParameters.Keys -and
             $Install.IsPresent -ne $script:Order.Install)
         {
@@ -302,8 +311,8 @@ function New-PACertificate {
     .PARAMETER CertKeyLength
         The type and size of private key to use for the certificate. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to '2048'.
 
-    .PARAMETER NewCertKey
-        If specified, a new private key will be generated for the certificate. Otherwise, a new key will only be generated if one doesn't already exist for the primary domain or the key type or length have changed from the previous order.
+    .PARAMETER AlwaysNewKey
+        If specified, the order will be configured to always generate a new private key during each renewal. Otherwise, the old key is re-used if it exists.
 
     .PARAMETER AcceptTOS
         This switch is required when creating a new account as part of a certificate request. It implies you have read and accepted the Terms of Service for the ACME server you are connected to. The first time you connect to an ACME server, a link to the Terms of Service should have been displayed.

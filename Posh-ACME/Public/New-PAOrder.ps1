@@ -12,8 +12,7 @@ function New-PAOrder {
         [Parameter(ParameterSetName='FromScratch')]
         [switch]$OCSPMustStaple,
         [Parameter(ParameterSetName='FromScratch')]
-        [Alias('NewCertKey')]
-        [switch]$NewKey,
+        [switch]$AlwaysNewKey,
         [Parameter(ParameterSetName='FromScratch')]
         [string]$FriendlyName,
         [Parameter(ParameterSetName='FromScratch')]
@@ -76,7 +75,7 @@ function New-PAOrder {
 
     # Force a key change if the KeyLength is different than the old order
     if ($order -and $order.KeyLength -ne $KeyLength) {
-        $NewKey = [switch]::Present
+        $ForceNewKey = $true
     }
 
     # build the protected header for the request
@@ -151,6 +150,7 @@ function New-PAOrder {
     $order | Add-Member -MemberType NoteProperty -Name 'PfxPass' -Value $PfxPass
     $order | Add-Member -MemberType NoteProperty -Name 'Install' -Value $Install.IsPresent
     $order | Add-Member -MemberType NoteProperty -Name 'PreferredChain' -Value $PreferredChain
+    $order | Add-Member -MemberType NoteProperty -Name 'AlwaysNewKey' -Value $AlwaysNewKey.IsPresent
 
     # make sure there's a certificate field for later
     if ('certificate' -notin $order.PSObject.Properties.Name) {
@@ -192,7 +192,7 @@ function New-PAOrder {
     # and we're using a CSR or it's explicitly requested or the new KeyLength doesn't match the old one.
     $keyPath = Join-Path $script:OrderFolder 'cert.key'
     $removeOldKey = ( (Test-Path $keyPath -PathType Leaf) -and
-                      ($NewKey -or 'FromCSR' -eq $PSCmdlet.ParameterSetName) )
+                      ($order.AlwaysNewKey -or $ForceNewKey -or 'FromCSR' -eq $PSCmdlet.ParameterSetName) )
 
     # backup the old private key if necessary
     if ($removeOldKey) {
@@ -235,8 +235,8 @@ function New-PAOrder {
     .PARAMETER OCSPMustStaple
         If specified, the certificate generated for this order will have the OCSP Must-Staple flag set.
 
-    .PARAMETER NewKey
-        If specified, a new private key will be generated for the certificate order. Otherwise, the old key is re-used if it exists. This is useful if you believe the current key has been compromised.
+    .PARAMETER AlwaysNewKey
+        If specified, the order will be configured to always generate a new private key during each renewal. Otherwise, the old key is re-used if it exists.
 
     .PARAMETER FriendlyName
         Set a friendly name for the certificate. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Defaults to the first item in the Domain parameter.
