@@ -467,11 +467,7 @@ function Connect-AZTenant {
 
                 # add the contents to our cached files
                 $b64Contents = ConvertTo-Base64Url -Bytes $AZPfxObj
-                if ($AZCertPfx -in $cachedFiles.PSObject.Properties.Name) {
-                    $cachedFiles.$AZCertPfx = $b64Contents
-                } else {
-                    $cachedFiles | Add-Member -MemberType NoteProperty -Name $AZCertPfx -Value $b64Contents
-                }
+                $cachedFiles | Add-Member $AZCertPfx $b64Contents -Force
                 Export-PluginVar 'AZPfxObj' $cachedFiles
 
             } elseif ($AZCertPfx -in $cachedFiles.PSObject.Properties.Name) {

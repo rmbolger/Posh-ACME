@@ -136,21 +136,23 @@ function New-PAOrder {
     }
 
     # add additional members we'll need for later
-    $order | Add-Member -MemberType NoteProperty -Name 'MainDomain' -Value $Domain[0]
-    $order | Add-Member -MemberType NoteProperty -Name 'SANs' -Value $SANs
-    $order | Add-Member -MemberType NoteProperty -Name 'KeyLength' -Value $KeyLength
-    $order | Add-Member -MemberType NoteProperty -Name 'CertExpires' -Value $null
-    $order | Add-Member -MemberType NoteProperty -Name 'RenewAfter' -Value $null
-    $order | Add-Member -MemberType NoteProperty -Name 'OCSPMustStaple' -Value $OCSPMustStaple.IsPresent
-    $order | Add-Member -MemberType NoteProperty -Name 'Plugin' -Value @('Manual')
-    $order | Add-Member -MemberType NoteProperty -Name 'DnsAlias' -Value $null
-    $order | Add-Member -MemberType NoteProperty -Name 'DnsSleep' -Value 120
-    $order | Add-Member -MemberType NoteProperty -Name 'ValidationTimeout' -Value 60
-    $order | Add-Member -MemberType NoteProperty -Name 'FriendlyName' -Value $FriendlyName
-    $order | Add-Member -MemberType NoteProperty -Name 'PfxPass' -Value $PfxPass
-    $order | Add-Member -MemberType NoteProperty -Name 'Install' -Value $Install.IsPresent
-    $order | Add-Member -MemberType NoteProperty -Name 'PreferredChain' -Value $PreferredChain
-    $order | Add-Member -MemberType NoteProperty -Name 'AlwaysNewKey' -Value $AlwaysNewKey.IsPresent
+    $order | Add-Member -NotePropertyMembers @{
+        MainDomain        = $Domain[0]
+        SANs              = $SANs
+        KeyLength         = $KeyLength
+        CertExpires       = $null
+        RenewAfter        = $null
+        OCSPMustStaple    = $OCSPMustStaple.IsPresent
+        Plugin            = @('Manual')
+        DnsAlias          = $null
+        DnsSleep          = 120
+        ValidationTimeout = 60
+        FriendlyName      = $FriendlyName
+        PfxPass           = $PfxPass
+        Install           = $Install.IsPresent
+        PreferredChain    = $PreferredChain
+        AlwaysNewKey      = $AlwaysNewKey.IsPresent
+    }
 
     # make sure there's a certificate field for later
     if ('certificate' -notin $order.PSObject.Properties.Name) {

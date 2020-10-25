@@ -28,13 +28,8 @@ function Add-DnsTxt {
     # Add or override existing registrations with passed in registrations
     if ($ACMERegistration) {
         foreach ($fqdn in $ACMERegistration.Keys) {
-            if ($fqdn -notin $ACMEReg.PSObject.Properties.Name) {
-                Write-Debug "Adding passed in registration for $fqdn"
-                $ACMEReg | Add-Member $fqdn $ACMERegistration.$fqdn
-            } else {
-                Write-Debug "Overwriting saved registration with passed in value for $fqdn"
-                $ACMEReg.$fqdn = $ACMERegistration.$fqdn
-            }
+            Write-Debug "Adding passed in registration for $fqdn"
+            $ACMEReg | Add-Member $fqdn $ACMERegistration.$fqdn -Force
         }
 
         # save the new registration(s)

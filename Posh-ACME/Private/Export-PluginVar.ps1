@@ -23,13 +23,8 @@ function Export-PluginVar {
         $pVars = [pscustomobject]@{}
     }
 
-    if ($VarName -in $pVars.PSObject.Properties.Name) {
-        # overwrite the value
-        $pVars.$VarName = $VarValue
-    } else {
-        # add a new value
-        $pVars | Add-Member $VarName $VarValue
-    }
+    # add/overwrite the value
+    $pVars | Add-Member $VarName $VarValue -Force
 
     # save the updated file
     Write-Debug "Saving updated plugin vars"

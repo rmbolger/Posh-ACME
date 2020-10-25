@@ -248,11 +248,7 @@ function Connect-GCloudDns {
 
         # add the contents to our cached files
         $b64Contents = $GCKeyObj | ConvertTo-Json -Compress | ConvertTo-Base64Url
-        if ($GCKeyFile -in $cachedFiles.PSObject.Properties.Name) {
-            $cachedFiles.$GCKeyFile = $b64Contents
-        } else {
-            $cachedFiles | Add-Member -MemberType NoteProperty -Name $GCKeyFile -Value $b64Contents
-        }
+        $cachedFiles | Add-Member $GCKeyFile $b64Contents -Force
         Export-PluginVar 'GCKeyObj' $cachedFiles
 
     } elseif ($GCKeyFile -in $cachedFiles.PSObject.Properties.Name) {

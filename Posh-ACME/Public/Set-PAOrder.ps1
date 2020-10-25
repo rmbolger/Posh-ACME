@@ -148,11 +148,7 @@ function Set-PAOrder {
 
             if ('PreferredChain' -in $psbKeys -and $PreferredChain -ne $order.PreferredChain) {
                 Write-Verbose "Setting PreferredChain to $PreferredChain"
-                if ('PreferredChain' -notin $order.PSObject.Properties.Name) {
-                    $order | Add-Member -MemberType NoteProperty -Name 'PreferredChain' -Value $PreferredChain
-                } else {
-                    $order.PreferredChain = $PreferredChain
-                }
+                $order | Add-Member 'PreferredChain' $PreferredChain -Force
                 $saveChanges = $true
                 $rewritePfx = $true
                 $rewriteCer = $true
@@ -162,11 +158,7 @@ function Set-PAOrder {
                 (-not $order.AlwaysNewKey -or $AlwaysNewKey.IsPresent -ne $order.AlwaysNewKey)
             ) {
                 Write-Verbose "Setting AlwaysNewKey to $($AlwaysNewKey.IsPresent)"
-                if ('AlwaysNewKey' -notin $order.PSObject.Properties.Name) {
-                    $order | Add-Member -MemberType NoteProperty -Name 'AlwaysNewKey' -Value $AlwaysNewKey.IsPresent
-                } else {
-                    $order.AlwaysNewKey = $AlwaysNewKey.IsPresent
-                }
+                $order | Add-Member 'AlwaysNewKey' $AlwaysNewKey.IsPresent -Force
                 $saveChanges = $true
             }
 
