@@ -43,7 +43,7 @@ function Get-PAOrder {
                     $_.PSObject.Properties.Remove('DnsPlugin')
                 }
 
-                # de-obfuscate 4.x PfxPassB64U if found
+                # de-obfuscate PfxPassB64U
                 if ('PfxPassB64U' -in $_.PSObject.Properties.Name) {
                     $_ | Add-Member 'PfxPass' ($_.PfxPassB64U | ConvertFrom-Base64Url)
                     $_.PSObject.Properties.Remove('PfxPassB64U')
@@ -82,7 +82,7 @@ function Get-PAOrder {
                         $order.PSObject.Properties.Remove('DnsPlugin')
                     }
 
-                    # de-obfuscate 4.x PfxPassB64U if found
+                    # de-obfuscate PfxPassB64U
                     if ('PfxPassB64U' -in $order.PSObject.Properties.Name) {
                         $order | Add-Member 'PfxPass' ($order.PfxPassB64U | ConvertFrom-Base64Url)
                         $order.PSObject.Properties.Remove('PfxPassB64U')
