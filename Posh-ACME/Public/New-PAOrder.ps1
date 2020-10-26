@@ -177,10 +177,7 @@ function New-PAOrder {
     $order.MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force -EA Stop
     $script:Order = $order
     $orderFolder = $order | Get-OrderFolder
-    if (!(Test-Path $orderFolder -PathType Container)) {
-        New-Item -ItemType Directory -Path $orderFolder -Force -EA Stop | Out-Null
-    }
-    $order | ConvertTo-Json | Out-File (Join-Path $orderFolder 'order.json') -Force
+    Update-PAOrder -SaveOnly
 
     # Make a local copy of the specified CSR file
     if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {

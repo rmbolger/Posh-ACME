@@ -77,6 +77,9 @@ function Update-PAOrder {
 
         # save it to disk
         $orderFolder = $order | Get-OrderFolder
+        if (-not (Test-Path $orderFolder -PathType Container)) {
+            New-Item -ItemType Directory -Path $orderFolder -Force -EA Stop | Out-Null
+        }
         $order | ConvertTo-Json | Out-File (Join-Path $orderFolder 'order.json') -Force -EA Stop
     }
 

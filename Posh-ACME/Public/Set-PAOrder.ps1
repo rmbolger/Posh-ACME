@@ -164,8 +164,7 @@ function Set-PAOrder {
 
             if ($saveChanges) {
                 Write-Verbose "Saving order changes"
-                $orderFolder = $order | Get-OrderFolder
-                $order | ConvertTo-Json | Out-File (Join-Path $orderFolder 'order.json') -Force -EA Stop
+                $order | Update-PAOrder -SaveOnly
             }
 
             $cert = Get-PACertificate $order.MainDomain
