@@ -52,7 +52,7 @@ function Get-PAPluginArgs {
                 if ($prop.TypeNameOfValue -eq 'System.Management.Automation.PSCustomObject') {
                     if ($prop.Value.origType) {
                         if ('pscredential' -eq $prop.Value.origType) {
-                            $pData[$prop.Name] = New-Object PSCredential $prop.Value.user,($prop.Value.pass | ConvertTo-SecureString)
+                            $pData[$prop.Name] = [pscredential]::new($prop.Value.user,($prop.Value.pass | ConvertTo-SecureString))
                         }
                         elseif ('securestring' -eq $prop.Value.origType) {
                             $pData[$prop.Name] = $prop.Value.value | ConvertTo-SecureString
