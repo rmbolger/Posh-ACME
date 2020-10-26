@@ -40,7 +40,7 @@ function Remove-PAOrder {
         Write-Verbose "Deleting order for $($order.MainDomain)"
 
         # delete the order's folder
-        $orderFolder = Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')
+        $orderFolder = $order | Get-OrderFolder
         Remove-Item $orderFolder -Force -Recurse
 
         # unset the current order if it was this one

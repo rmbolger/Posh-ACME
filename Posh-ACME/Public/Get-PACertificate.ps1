@@ -42,7 +42,7 @@ function Get-PACertificate {
             if ($null -eq $order) { return $null }
 
             # build the path to cert.cer
-            $domainFolder = Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')
+            $domainFolder = $order | Get-OrderFolder
             $certFile = Join-Path $domainFolder 'cert.cer'
 
             # double check the cert exists

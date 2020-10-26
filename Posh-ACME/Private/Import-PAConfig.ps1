@@ -79,7 +79,6 @@ function Import-PAConfig {
             $script:Dir = $null
             $script:AcctFolder = $null
             $script:Acct = $null
-            $script:OrderFolder = $null
             $script:Order = $null
         }
     }
@@ -119,7 +118,6 @@ function Import-PAConfig {
             # wipe references since we have no current account
             $script:AcctFolder = $null
             $script:Acct = $null
-            $script:OrderFolder = $null
             $script:Order = $null
         }
     }
@@ -130,12 +128,10 @@ function Import-PAConfig {
         $domain = [string](Get-Content (Join-Path $script:AcctFolder 'current-order.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($domain)) {
 
-            $script:OrderFolder = Join-Path $script:AcctFolder $domain.Replace('*','!')
             $script:Order = Get-PAOrder $domain
 
         } else {
             # wipe references since we have no current order
-            $script:OrderFolder = $null
             $script:Order = $null
         }
     }

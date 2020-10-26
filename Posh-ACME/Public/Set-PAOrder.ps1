@@ -164,7 +164,7 @@ function Set-PAOrder {
 
             if ($saveChanges) {
                 Write-Verbose "Saving order changes"
-                $orderFolder = Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')
+                $orderFolder = $order | Get-OrderFolder
                 $order | ConvertTo-Json | Out-File (Join-Path $orderFolder 'order.json') -Force -EA Stop
             }
 
@@ -189,7 +189,7 @@ function Set-PAOrder {
             }
 
             # make sure the cert file actually exists
-            $certFile = Join-Path (Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')) 'cert.cer'
+            $certFile = Join-Path ($order | Get-OrderFolder) 'cert.cer'
             if (!(Test-Path $certFile -PathType Leaf)) {
                 Write-Warning "Unable to revoke certificate. $certFile not found."
                 return

@@ -62,8 +62,7 @@ function Get-PAOrder {
             if ($MainDomain) {
 
                 # build the path to order.json
-                $domainFolder = Join-Path $script:AcctFolder $MainDomain.Replace('*','!')
-                $orderFile =  Join-Path $domainFolder 'order.json'
+                $orderFile =  Join-Path ($MainDomain | Get-OrderFolder) 'order.json'
 
                 # check for an order.json
                 if (Test-Path $orderFile -PathType Leaf) {

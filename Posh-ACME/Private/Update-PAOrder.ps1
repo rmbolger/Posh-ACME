@@ -76,7 +76,7 @@ function Update-PAOrder {
         }
 
         # save it to disk
-        $orderFolder = Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')
+        $orderFolder = $order | Get-OrderFolder
         $order | ConvertTo-Json | Out-File (Join-Path $orderFolder 'order.json') -Force -EA Stop
     }
 

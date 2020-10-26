@@ -263,7 +263,7 @@ function New-PACertificate {
         # is 1/3 the total lifetime of the cert earlier than its expiration. For
         # example, 90 day certs renew 30 days before expiration. For longer lived
         # certs we're going to cap to renewal window at 30 days before renewal.
-        $cert = Import-Pem (Join-Path $script:OrderFolder 'cert.cer')
+        $cert = Import-Pem (Join-Path ($order | Get-OrderFolder) 'cert.cer')
         $lifetime = $cert.NotAfter - $cert.NotBefore
         $renewHours = [Math]::Max(720, ($lifetime.TotalHours / 3))
 

@@ -78,7 +78,6 @@ function Set-PAAccount {
 
             # reset child object references
             $script:Order = $null
-            $script:OrderFolder = $null
 
             # reload the cache from disk
             Import-PAConfig -Level 'Account'

@@ -74,7 +74,7 @@ function Submit-Renewal {
                     $certParams.PfxPass = $order.PfxPass
                     if (Test-WinOnly) { $certParams.Install = $order.Install }
                 } else {
-                    $reqPath = Join-Path (Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')) "request.csr"
+                    $reqPath = Join-Path ($order | Get-OrderFolder) "request.csr"
                     $certParams.CSRPath = $reqPath
                 }
                 $certParams.Plugin = $order.Plugin

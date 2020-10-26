@@ -30,7 +30,7 @@ function Get-PAPluginArgs {
             $WarnOnMissing = $true
         }
 
-        $orderFolder = Join-Path $script:AcctFolder $MainDomain.Replace('*','!')
+        $orderFolder = $MainDomain | Get-OrderFolder
         $pDataFile = Join-Path $orderFolder 'pluginargs.json'
         $pData = @{}
 

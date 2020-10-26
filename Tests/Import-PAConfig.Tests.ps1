@@ -42,7 +42,6 @@ Describe "Import-PAConfig" {
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
                 $script:AcctFolder       | Should -Be (Join-Path 'TestDrive:' 'acme.test\11111')
                 $script:Acct.id          | Should -Be 11111
-                $script:OrderFolder      | Should -Be (Join-Path 'TestDrive:' 'acme.test\11111\example.com')
                 $script:Order.MainDomain | Should -Be 'example.com'
                 Should -Invoke Set-CertValidation -ParameterFilter { $Skip -eq $false }
             }
@@ -64,7 +63,6 @@ Describe "Import-PAConfig" {
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
                 $script:AcctFolder       | Should -Be (Join-Path 'TestDrive:' 'acme.test\11111')
                 $script:Acct.id          | Should -Be 11111
-                $script:OrderFolder      | Should -BeNullOrEmpty
                 $script:Order            | Should -BeNullOrEmpty
                 Should -Invoke Set-CertValidation -ParameterFilter { $Skip -eq $false }
             }
@@ -86,7 +84,6 @@ Describe "Import-PAConfig" {
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
                 $script:AcctFolder       | Should -BeNullOrEmpty
                 $script:Acct             | Should -BeNullOrEmpty
-                $script:OrderFolder      | Should -BeNullOrEmpty
                 $script:Order            | Should -BeNullOrEmpty
                 Should -Invoke Set-CertValidation -ParameterFilter { $Skip -eq $false }
             }
@@ -108,7 +105,6 @@ Describe "Import-PAConfig" {
                 $script:Dir              | Should -BeNullOrEmpty
                 $script:AcctFolder       | Should -BeNullOrEmpty
                 $script:Acct             | Should -BeNullOrEmpty
-                $script:OrderFolder      | Should -BeNullOrEmpty
                 $script:Order            | Should -BeNullOrEmpty
                 Should -Not -Invoke Set-CertValidation
             }
@@ -139,7 +135,6 @@ Describe "Import-PAConfig" {
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
                 $script:AcctFolder       | Should -Be (Join-Path 'TestDrive:' 'acme.test\11111')
                 $script:Acct.id          | Should -Be 11111
-                $script:OrderFolder      | Should -Be (Join-Path 'TestDrive:' 'acme.test\11111\!.example.com')
                 $script:Order.MainDomain | Should -Be '*.example.com'
                 Should -Not -Invoke Set-CertValidation
             }
@@ -170,7 +165,6 @@ Describe "Import-PAConfig" {
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
                 $script:AcctFolder       | Should -Be (Join-Path 'TestDrive:' 'acme.test\22222')
                 $script:Acct.id          | Should -Be 22222
-                $script:OrderFolder      | Should -Be (Join-Path 'TestDrive:' 'acme.test\22222\!.example.org')
                 $script:Order.MainDomain | Should -Be '*.example.org'
                 Should -Not -Invoke Set-CertValidation
             }
@@ -201,7 +195,6 @@ Describe "Import-PAConfig" {
                 $script:Dir.location     | Should -Be 'https://acme2.test/directory'
                 $script:AcctFolder       | Should -BeNullOrEmpty
                 $script:Acct             | Should -BeNullOrEmpty
-                $script:OrderFolder      | Should -BeNullOrEmpty
                 $script:Order            | Should -BeNullOrEmpty
                 Should -Invoke Set-CertValidation -ParameterFilter { $Skip -eq $true }
             }

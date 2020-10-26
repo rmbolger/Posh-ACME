@@ -22,7 +22,6 @@ function Set-PAServer {
         $script:Acct = $null
         $script:AcctFolder = $null
         $script:Order = $null
-        $script:OrderFolder = $null
 
         # deal with cert validation options between PS editions
         Set-CertValidation $script:Dir.SkipCertificateCheck

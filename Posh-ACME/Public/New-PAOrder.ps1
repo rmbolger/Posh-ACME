@@ -176,23 +176,23 @@ function New-PAOrder {
     # save it to memory and disk
     $order.MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force -EA Stop
     $script:Order = $order
-    $script:OrderFolder = Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')
-    if (!(Test-Path $script:OrderFolder -PathType Container)) {
-        New-Item -ItemType Directory -Path $script:OrderFolder -Force -EA Stop | Out-Null
+    $orderFolder = $order | Get-OrderFolder
+    if (!(Test-Path $orderFolder -PathType Container)) {
+        New-Item -ItemType Directory -Path $orderFolder -Force -EA Stop | Out-Null
     }
-    $order | ConvertTo-Json | Out-File (Join-Path $script:OrderFolder 'order.json') -Force
+    $order | ConvertTo-Json | Out-File (Join-Path $orderFolder 'order.json') -Force
 
     # Make a local copy of the specified CSR file
     if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
-        $csrDest = Join-Path $script:OrderFolder 'request.csr'
+        $csrDest = Join-Path $orderFolder 'request.csr'
         if ($CSRPath -ne $csrDest) {
-            Copy-Item -Path $CSRPath -Destination "$($script:OrderFolder)\request.csr"
+            Copy-Item -Path $CSRPath -Destination $csrDest
         }
     }
 
     # Determine whether to remove the old private key. This is necessary if it exists
     # and we're using a CSR or it's explicitly requested or the new KeyLength doesn't match the old one.
-    $keyPath = Join-Path $script:OrderFolder 'cert.key'
+    $keyPath = Join-Path $orderFolder 'cert.key'
     $removeOldKey = ( (Test-Path $keyPath -PathType Leaf) -and
                       ($order.AlwaysNewKey -or $ForceNewKey -or 'FromCSR' -eq $PSCmdlet.ParameterSetName) )
 
@@ -204,11 +204,11 @@ function New-PAOrder {
     }
 
     # backup any old certs/requests that might exist
-    $oldFiles = Get-ChildItem (Join-Path $script:OrderFolder *) -Include cert.cer,cert.pfx,chain.cer,fullchain.cer,fullchain.pfx
+    $oldFiles = Get-ChildItem (Join-Path $orderFolder *) -Include cert.cer,cert.pfx,chain.cer,fullchain.cer,fullchain.pfx
     $oldFiles | Move-Item -Destination { "$($_.FullName).bak" } -Force
 
     # remove old chain files
-    Get-ChildItem (Join-Path $script:OrderFolder 'chain*.cer') -Exclude chain.cer |
+    Get-ChildItem (Join-Path $orderFolder 'chain*.cer') -Exclude chain.cer |
         Remove-Item -Force
 
     return $order

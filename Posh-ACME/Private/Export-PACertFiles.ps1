@@ -15,7 +15,7 @@ function Export-PACertFiles {
     if (-not $Order -and !($Order = Get-PAOrder)) {
         throw "No ACME order specified and no current order selected. Run Set-PAOrder or specify an existing order object."
     }
-    $orderFolder = Join-Path $script:AcctFolder $Order.MainDomain.Replace('*','!')
+    $orderFolder = $Order | Get-OrderFolder
 
     # build output paths
     $certFile      = Join-Path $orderFolder 'cert.cer'

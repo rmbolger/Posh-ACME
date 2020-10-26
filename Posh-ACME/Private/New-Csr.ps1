@@ -12,7 +12,7 @@ function New-Csr {
     }
 
     # Order verification should have already been taken care of
-    $orderFolder = Join-Path $script:AcctFolder $Order.MainDomain.Replace('*','!')
+    $orderFolder = $Order | Get-OrderFolder
     $keyFile = Join-Path $orderFolder 'cert.key'
     $reqFile = Join-Path $orderFolder 'request.csr'
 
