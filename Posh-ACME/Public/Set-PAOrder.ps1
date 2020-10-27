@@ -22,6 +22,9 @@ function Set-PAOrder {
         [ValidateNotNullOrEmpty()]
         [string]$PfxPass,
         [Parameter(ParameterSetName='Edit')]
+        [ValidateScript({Test-SecureStringNotNullOrEmpty $_ -ThrowOnFail})]
+        [securestring]$PfxPassSecure,
+        [Parameter(ParameterSetName='Edit')]
         [switch]$Install,
         [Parameter(ParameterSetName='Edit')]
         [int]$DNSSleep,
@@ -37,6 +40,20 @@ function Set-PAOrder {
         # Make sure we have an account configured
         if (!(Get-PAAccount)) {
             throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+        }
+
+        # PfxPassSecure takes precedence over PfxPass if both are specified but we
+        # need the value in plain text. So we'll just take over the PfxPass variable
+        # to use for the rest of the function.
+        if ($PfxPassSecure) {
+            # throw a warning if they also specified PfxPass
+            if ('PfxPass' -in $PSBoundParameters.Keys) {
+                Write-Warning "PfxPass and PfxPassSecure were both specified. Using value from PfxPassSecure."
+            }
+
+            # override the existing PfxPass parameter
+            $PfxPass = [pscredential]::new('u',$PfxPassSecure).GetNetworkCredential().Password
+            $PSBoundParameters.PfxPass = $PfxPass
         }
     }
 
@@ -271,7 +288,10 @@ function Set-PAOrder {
         Modify the friendly name for the certificate and subsequent renewals. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Must not be an empty string.
 
     .PARAMETER PfxPass
-        Modify the PFX password for the certificate and subsequent renewals.
+        Modify the PFX password for the certificate and subsequent renewals. When the PfxPassSecure parameter is specified, this parameter is ignored.
+
+    .PARAMETER PfxPassSecure
+        Modify the PFX password for the certificate and subsequent renewals using a SecureString value. When this parameter is specified, the PfxPass parameter is ignored.
 
     .PARAMETER Install
         Enables the Install switch for the order. Use -Install:$false to disable the switch on the order. This affects whether the module will automatically import the certificate to the Windows certificate store on subsequent renewals. It will not import the current certificate if it exists. Use Install-PACertificate for that purpose.

@@ -23,6 +23,7 @@
   * `-NewKey` has been removed from `New-PAOrder` and `Submit-Renewal`
   * `-NewCertKey` has been removed from `New-PACertificate`
 * The PfxPass parameter on order objects is now obfuscated when serialized to disk. (#207)
+* Added 'PfxPassSecure' parameter to 'New-PACertificate', 'New-PAOrder', and 'Set-PAOrder' which takes precedence over 'PfxPass' if specified. (#207)
 
 ## 3.18.1 (2020-11-12)
 

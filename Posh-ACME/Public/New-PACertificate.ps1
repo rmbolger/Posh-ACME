@@ -29,6 +29,9 @@ function New-PACertificate {
         [Parameter(ParameterSetName='FromScratch')]
         [string]$PfxPass='poshacme',
         [Parameter(ParameterSetName='FromScratch')]
+        [ValidateScript({Test-SecureStringNotNullOrEmpty $_ -ThrowOnFail})]
+        [securestring]$PfxPassSecure,
+        [Parameter(ParameterSetName='FromScratch')]
         [ValidateScript({Test-WinOnly -ThrowOnFail})]
         [switch]$Install,
         [switch]$Force,
@@ -72,6 +75,20 @@ function New-PACertificate {
         $Domain = $csrDetails.Domain
         $CertKeyLength = $csrDetails.KeyLength
         $OCSPMustStaple = New-Object Management.Automation.SwitchParameter($csrDetails.OCSPMustStaple)
+    }
+
+    # PfxPassSecure takes precedence over PfxPass if both are specified but we
+    # need the value in plain text. So we'll just take over the PfxPass variable
+    # to use for the rest of the function.
+    if ($PfxPassSecure) {
+        # throw a warning if they also specified PfxPass
+        if ('PfxPass' -in $PSBoundParameters.Keys) {
+            Write-Warning "PfxPass and PfxPassSecure were both specified. Using value from PfxPassSecure."
+        }
+
+        # override the existing PfxPass parameter
+        $PfxPass = [pscredential]::new('u',$PfxPassSecure).GetNetworkCredential().Password
+        $PSBoundParameters.PfxPass = $PfxPass
     }
 
     # Check for an existing order from the MainDomain for this call and create a new
@@ -339,7 +356,10 @@ function New-PACertificate {
         Set a friendly name for the certificate. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Defaults to the first item in the Domain parameter.
 
     .PARAMETER PfxPass
-        Set the export password for generated PFX files. Defaults to 'poshacme'.
+        Set the export password for generated PFX files. Defaults to 'poshacme'. When the PfxPassSecure parameter is specified, this parameter is ignored.
+
+    .PARAMETER PfxPassSecure
+        Set the export password for generated PFX files using a SecureString value. When this parameter is specified, the PfxPass parameter is ignored.
 
     .PARAMETER Install
         If specified, the certificate generated for this order will be imported to the local computer's Personal certificate store. Using this switch requires running the command from an elevated PowerShell session.
