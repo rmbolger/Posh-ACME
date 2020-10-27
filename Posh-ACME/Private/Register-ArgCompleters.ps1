@@ -37,7 +37,7 @@ function Register-ArgCompleters {
     $KeyLengthCompleter = {
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
-        $commonLengths = '2048','4096','ec-256','ec-384'
+        $commonLengths = '2048','3072','4096','ec-256','ec-384'
         $commonLengths | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
             [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
         }
