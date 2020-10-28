@@ -67,4 +67,21 @@ function Register-ArgCompleters {
     $MainDomainCommands = 'Get-PACertificate','Get-PAOrder','Remove-PAOrder','Set-PAOrder','Submit-Renewal'
     Register-ArgumentCompleter -CommandName $MainDomainCommands -ParameterName 'MainDomain' -ScriptBlock $MainDomainCompleter
 
+    # DirectoryUrl
+    $DirectoryUrlCompleter = {
+        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+
+        # combine the existing servers with the available shortcuts to cycle through
+        $dirJsonPaths = Join-Path (Get-ConfigRoot) '*\dir.json'
+        $choices = $(
+            Get-Content $dirJsonPaths -Raw | ConvertFrom-Json | Select-Object -Expand location
+            $script:WellKnownDirs.Keys
+        )
+
+        $choices | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
+            [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+        }
+    }
+
+    Register-ArgumentCompleter -CommandName 'Set-PAServer' -ParameterName 'DirectoryUrl' -ScriptBlock $DirectoryUrlCompleter
 }
