@@ -24,6 +24,8 @@
   * `-NewCertKey` has been removed from `New-PACertificate`
 * The PfxPass parameter on order objects is now obfuscated when serialized to disk. (#207)
 * Added 'PfxPassSecure' parameter to 'New-PACertificate', 'New-PAOrder', and 'Set-PAOrder' which takes precedence over 'PfxPass' if specified. (#207)
+* BUYPASS_PROD and BUYPASS_TEST are now recognized shortcuts for the the buypass.com CA environments when you use `Set-PAServer`.
+
 
 ## 3.18.1 (2020-11-12)
 

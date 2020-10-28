@@ -40,8 +40,10 @@ Foreach($import in @($Public + $Private))
 
 # setup some module wide variables
 $script:WellKnownDirs = @{
-    LE_PROD = 'https://acme-v02.api.letsencrypt.org/directory';
-    LE_STAGE = 'https://acme-staging-v02.api.letsencrypt.org/directory';
+    LE_PROD = 'https://acme-v02.api.letsencrypt.org/directory'
+    LE_STAGE = 'https://acme-staging-v02.api.letsencrypt.org/directory'
+    BUYPASS_PROD = 'https://api.buypass.com/acme/directory'
+    BUYPASS_TEST = 'https://api.test4.buypass.no/acme/directory'
 }
 $script:HEADER_NONCE = 'Replay-Nonce'
 $script:USER_AGENT = "Posh-ACME/3.18.1 PowerShell/$($PSVersionTable.PSVersion)"
