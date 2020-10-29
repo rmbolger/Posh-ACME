@@ -16,6 +16,7 @@ function New-PAAccount {
         [string]$ExtAcctHMACKey,
         [ValidateSet('HS256','HS384','HS512')]
         [string]$ExtAcctAlgorithm = 'HS256',
+        [switch]$UseAltPluginEncryption,
         [Parameter(ValueFromRemainingArguments=$true)]
         $ExtraParams
     )
@@ -171,6 +172,12 @@ function New-PAAccount {
         # But it's not currently implemented in Boulder. Tracking issue is here:
         # https://github.com/letsencrypt/boulder/issues/3335
         orders = $respObj.orders
+        sskey = $null
+    }
+
+    # add a new AES key if specified
+    if ($UseAltPluginEncryption) {
+        $acct.sskey = New-AesKey
     }
 
     # save it to memory and disk
@@ -217,6 +224,9 @@ function New-PAAccount {
 
     .PARAMETER ExtAcctAlgorithm
         The HMAC algorithm to use. Defaults to 'HS256'.
+
+    .PARAMETER UseAltPluginEncryption
+        If specified, the account will be configured to use a randomly generated AES key to encrypt sensitive plugin parameters on disk instead of using the OS's native encryption methods. This can be useful if the config is being shared across systems or platforms. You can revert to OS native encryption using -UseAltPluginEncryption:$false.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

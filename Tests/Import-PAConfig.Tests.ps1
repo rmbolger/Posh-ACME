@@ -7,31 +7,6 @@ Describe "Import-PAConfig" {
         Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
     }
 
-    Context "Encryption Key Checks" {
-        It "Creates encryption key if it doesn't exist" {
-            InModuleScope Posh-ACME {
-                Mock Get-EncKey {}
-                Mock New-EncKey {}
-
-                Import-PAConfig
-                Should -Invoke Get-EncKey -Exactly 1
-                Should -Invoke New-EncKey -Exactly 1
-            }
-        }
-
-        It "Skips encryption key creation if it already exists" {
-            InModuleScope Posh-ACME {
-                Mock Get-EncKey { [byte[]](1..32) }
-                Mock New-EncKey {}
-
-                Import-PAConfig
-                Should -Invoke Get-EncKey -Exactly 1
-                Should -Invoke New-EncKey -Exactly 0
-            }
-
-        }
-    }
-
     Context "Module Load - Complete Config" {
         It "Sets Script Variables" {
             InModuleScope Posh-ACME {

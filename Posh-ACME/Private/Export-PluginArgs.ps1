@@ -6,7 +6,8 @@ function Export-PluginArgs {
         [Parameter(Mandatory,Position=1)]
         [string[]]$Plugin,
         [Parameter(Mandatory,Position=2)]
-        [hashtable]$PluginArgs
+        [hashtable]$PluginArgs,
+        [switch]$IgnoreExisting
     )
 
     # In this function, we're trying to merge the specified plugin args with the existing set
@@ -24,7 +25,7 @@ function Export-PluginArgs {
 
     Begin {
         # Make sure we have an account configured
-        if (-not (Get-PAAccount)) {
+        if (-not ($acct = Get-PAAccount)) {
             throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
         }
     }
@@ -39,7 +40,10 @@ function Export-PluginArgs {
             throw "No ACME order found for $MainDomain."
         }
 
-        $pData = Get-PAPluginArgs $order.MainDomain
+        $pData = @{}
+        if (-not $IgnoreExisting) {
+            $pData = Get-PAPluginArgs $order.MainDomain
+        }
 
         # define the set of parameter names to ignore
         $ignoreParams = @('RecordName','TxtValue','Url','Body') +
@@ -97,19 +101,26 @@ function Export-PluginArgs {
         # Now we need to export the merged object as JSON
         # but we have to pre-serialize things like SecureString and PSCredential
         # first because ConvertTo-Json can't deal with those natively.
+
+        # determine whether we're using a custom key
+        $encParam = @{}
+        if (-not [String]::IsNullOrEmpty($acct.sskey)) {
+            $encParam.Key = $acct.sskey | ConvertFrom-Base64Url -AsByteArray
+        }
+
         $pDataSafe = @{}
         foreach ($key in $pData.Keys) {
             if ($pData.$key -is [securestring]) {
                 $pDataSafe.$key = [pscustomobject]@{
                     origType = 'securestring'
-                    value = $pData.$key | ConvertFrom-SecureString
+                    value = $pData.$key | ConvertFrom-SecureString @encParam
                 }
             }
             elseif ($pData.$key -is [pscredential]) {
                 $pDataSafe.$key = [pscustomobject]@{
                     origType = 'pscredential'
                     user = $pData.$key.Username
-                    pass = $pData.$key.Password | ConvertFrom-SecureString
+                    pass = $pData.$key.Password | ConvertFrom-SecureString @encParam
                 }
             }
             else {

@@ -10,7 +10,7 @@ function Get-PAPluginArgs {
         trap { $PSCmdlet.ThrowTerminatingError($PSItem) }
 
         # Make sure we have an account configured
-        if (-not (Get-PAAccount)) {
+        if (-not ($acct = Get-PAAccount)) {
             throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
         }
     }
@@ -42,9 +42,15 @@ function Get-PAPluginArgs {
         if (Test-Path $pDataFile -PathType Leaf) {
 
             # Despite being exported as a hashtable, it comes back in as a PSCustomObject
-            # And while there's  -AsHashtable in PS 6+, we can't rely on it until we
+            # And while there's -AsHashtable in PS 6+, we can't rely on it until we
             # drop support for PS 5.1.
             $pDataSafe = Get-Content $pDataFile -Raw -Encoding utf8 -EA Ignore | ConvertFrom-Json
+
+            # determine whether we're using a custom key
+            $encParam = @{}
+            if (-not [String]::IsNullOrEmpty($acct.sskey)) {
+                $encParam.Key = $acct.sskey | ConvertFrom-Base64Url -AsByteArray
+            }
 
             # Convert it to a hashtable and do our custom deserialization on SecureString
             # and PSCredential objects.
@@ -52,10 +58,12 @@ function Get-PAPluginArgs {
                 if ($prop.TypeNameOfValue -eq 'System.Management.Automation.PSCustomObject') {
                     if ($prop.Value.origType) {
                         if ('pscredential' -eq $prop.Value.origType) {
-                            $pData[$prop.Name] = [pscredential]::new($prop.Value.user,($prop.Value.pass | ConvertTo-SecureString))
+                            $pData[$prop.Name] = [pscredential]::new(
+                                $prop.Value.user,($prop.Value.pass | ConvertTo-SecureString @encParam)
+                            )
                         }
                         elseif ('securestring' -eq $prop.Value.origType) {
-                            $pData[$prop.Name] = $prop.Value.value | ConvertTo-SecureString
+                            $pData[$prop.Name] = $prop.Value.value | ConvertTo-SecureString @encParam
                         }
                     }
                     else {
