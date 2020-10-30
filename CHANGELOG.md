@@ -32,6 +32,7 @@
   * `Unpublish-DnsChallenge` is now `Unpublish-Challenge`
   * `Save-DnsChallenge` is now `Save-Challenge`
   * `Get-DnsPlugins` and `Get-DnsPluginHelp` have been replaced by `Get-PAPlugin`
+  * `Invoke-HttpChallengeListener` should be considered deprecated and may be removed in a future release. Users should migrate to the `WebSelfHost` plugin.
 * Parameter Name Changes
   * All `DnsPlugin` parameters are now `Plugin` with a `DnsPlugin` alias for backwards compatibility. The alias should be considered deprecated and may be removed in a future release.
   * The `NoPrefix` switch in Publish/Unpublish-Challenge has been replaced with a `DnsAlias` parameter that will override the `Domain` parameter if specified. "_acme-challenge." will not be automatically added to the `DnsAlias` parameter.
