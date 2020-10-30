@@ -3,6 +3,7 @@ function Submit-ChallengeValidation {
     param(
         [Parameter(Position=0)]
         [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
+        [Alias('DnsPlugin')]
         [string[]]$Plugin,
         [Parameter(Position=1)]
         [hashtable]$PluginArgs,

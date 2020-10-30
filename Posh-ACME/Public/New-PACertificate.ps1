@@ -19,6 +19,7 @@ function New-PACertificate {
         [Alias('location')]
         [string]$DirectoryUrl='LE_PROD',
         [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
+        [Alias('DnsPlugin')]
         [string[]]$Plugin,
         [hashtable]$PluginArgs,
         [string[]]$DnsAlias,

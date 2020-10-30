@@ -12,6 +12,7 @@ function Set-PAOrder {
         [switch]$NoSwitch,
         [Parameter(ParameterSetName='Edit')]
         [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
+        [Alias('DnsPlugin')]
         [string[]]$Plugin,
         [Parameter(ParameterSetName='Edit')]
         [hashtable]$PluginArgs,
