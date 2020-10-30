@@ -196,7 +196,6 @@ Describe "Import-PAConfig" {
                 )}
                 Mock Export-PluginArgs {}
                 Import-PAConfig
-                #$order1file = 'TestDrive:\acme.test\11111\example.com\plugindata.json'
                 Should -Invoke Export-PluginArgs -Exactly 2 -ParameterFilter {
                     $MainDomain -in 'example.com','*.example.com' -and
                     $Plugin -in 'Route53','DOcean'
