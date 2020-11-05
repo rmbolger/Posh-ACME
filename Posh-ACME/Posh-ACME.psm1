@@ -46,7 +46,7 @@ $script:WellKnownDirs = @{
     BUYPASS_TEST = 'https://api.test4.buypass.no/acme/directory'
 }
 $script:HEADER_NONCE = 'Replay-Nonce'
-$script:USER_AGENT = "Posh-ACME/3.18.1 PowerShell/$($PSVersionTable.PSVersion)"
+$script:USER_AGENT = "Posh-ACME/4.0.0-alpha PowerShell/$($PSVersionTable.PSVersion)"
 $script:COMMON_HEADERS = @{'Accept-Language'='en-us,en;q=0.5'}
 $script:PluginTypes = @{}
 

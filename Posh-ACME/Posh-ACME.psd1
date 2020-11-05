@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '3.18.1'
+ModuleVersion = '4.0.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -96,6 +96,8 @@ AliasesToExport = @(
 PrivateData = @{
 
     PSData = @{
+
+        PreRelease = 'alpha'
 
         # Tags applied to this module. These help with module discovery in online galleries.
         Tags = 'LetsEncrypt','ssl','tls','certificates','acme','Linux','Mac'
