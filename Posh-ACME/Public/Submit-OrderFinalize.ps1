@@ -61,6 +61,18 @@ function Submit-OrderFinalize {
     } catch { throw }
     Write-Debug "Response: $($response.Content)"
 
+    # send telemetry ping
+    $null = Start-Job {
+        $papingArgs = @{
+            Uri = 'https://paping.dvolve.net/paping/'
+            Method = 'HEAD'
+            UserAgent = $input
+            TimeoutSec = 1
+            ErrorAction = 'Ignore'
+        }
+        Invoke-RestMethod @papingArgs
+    } -InputObject $script:USER_AGENT -EA Ignore
+
     # Boulder's ACME implementation (at least on Staging) currently doesn't
     # quite follow the spec at this point. What I've observed is that the
     # response to the finalize request is indeed the order object and it appears

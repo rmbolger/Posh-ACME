@@ -6,14 +6,15 @@ function Update-PAServer {
         [Alias('location')]
         [string]$DirectoryUrl,
         [switch]$NonceOnly,
-        [switch]$SkipCertificateCheck
+        [switch]$SkipCertificateCheck,
+        [switch]$DisableTelemetry
     )
 
     Process {
 
         # grab the directory url from explicit parameters or the current memory copy
-        if (!$DirectoryUrl) {
-            if (!$script:Dir -or !$script:Dir.location) {
+        if (-not $DirectoryUrl) {
+            if (-not $script:Dir) {
                 throw "No ACME server configured. Run Set-PAServer or specify a DirectoryUrl."
             }
             $DirectoryUrl = $script:Dir.location
@@ -21,7 +22,7 @@ function Update-PAServer {
         } else {
             # even if they specified the directory url explicitly, we may still be updating the
             # "current" server. So figure that out and set a flag for later.
-            if ($script:Dir -and $script:Dir.location -and $script:Dir.location -eq $DirectoryUrl) {
+            if ($script:Dir -and $script:Dir.location -eq $DirectoryUrl) {
                 $UpdatingCurrent = $true
             } else {
                 $UpdatingCurrent = $false
@@ -33,7 +34,7 @@ function Update-PAServer {
         $dirFile = Join-Path $dirFolder 'dir.json'
 
         # Full refresh
-        if (!$NonceOnly -or !(Test-Path $dirFile -PathType Leaf)) {
+        if (-not $NonceOnly -or -not (Test-Path $dirFile -PathType Leaf)) {
 
             # If the caller asked for a NonceOnly refresh but there's no existing dir.json,
             # we'll just do a full refresh with a warning.
@@ -52,7 +53,7 @@ function Update-PAServer {
             if ($dirObj -is [pscustomobject] -and 'newAccount' -in $dirObj.PSObject.Properties.name) {
 
                 # create the directory folder if necessary
-                if (!(Test-Path $dirFolder -PathType Container)) {
+                if (-not (Test-Path $dirFolder -PathType Container)) {
                     New-Item -ItemType Directory -Path $dirFolder -Force -EA Stop | Out-Null
                 }
 
@@ -61,6 +62,7 @@ function Update-PAServer {
                     location = $DirectoryUrl
                     nonce = $null
                     SkipCertificateCheck = $SkipCertificateCheck.IsPresent
+                    DisableTelemetry = $DisableTelemetry.IsPresent
                 }
                 $dirObj.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
 

@@ -22,8 +22,15 @@
 * Certificate orders can now be configured to always generate a new private key using the `AlwaysNewKey` parameter and the old parameters for key replacement have been removed. (#181)
 * The PfxPass parameter on order objects is now obfuscated when serialized to disk. (#207)
 * Added `PfxPassSecure` (SecureString) parameter to `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder` which takes precedence over `PfxPass` if specified. (#207)
+* The `DirectoryUrl` parameter in `Set-PAServer` is now optional. If not specified, it will use the currently active server.
+* An attempt will now be made to send anonymous telemetry data to the Posh-ACME team when `Submit-OrderFinalize` is called directly or indirectly.
+  * The only data sent is the standard HTTP User-Agent header which includes the Posh-ACME version, PowerShell version, and generic OS platform (Windows/Linux/MacOS/Unknown).
+  * This can be disabled per ACME server using a new `DisableTelemetry` parameter in `Set-PAServer`.
+  * The data will be used to guide future development decisions in the module.
+  * The same User-Agent header is also sent with all calls to the ACME server which is a requirement of the protocol and can't be disabled.
 * BUYPASS_PROD and BUYPASS_TEST are now recognized shortcuts for the the buypass.com CA environments when you use `Set-PAServer`.
 * Added tab completion for `DirectoryUrl` in `Set-PAServer`.
+* Added `Quiet` parameter to `Get-PAServer` which will prevent warnings if the specified server was not found.
 
 ### Breaking Changes
 
