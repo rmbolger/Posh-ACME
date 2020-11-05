@@ -269,7 +269,8 @@ function New-PACertificate {
     # disk
     if ($order.status -eq 'valid' -and !$order.CertExpires) {
         if ([string]::IsNullOrWhiteSpace($order.certificate)) {
-            throw "Order status is valid, but no certificate URL was found."
+            try { throw "Order status is valid, but no certificate URL was found." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         # Download the cert chain, split it up, and generate a PFX files

@@ -23,7 +23,8 @@ function New-PAAccount {
 
     # make sure we have a server configured
     if (-not ($acmeServer = Get-PAServer)) {
-        throw "No ACME server configured. Run Set-PAServer first."
+        try { throw "No ACME server configured. Run Set-PAServer first." }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     # make sure the external account binding parameters were specified if this ACME
@@ -31,7 +32,8 @@ function New-PAAccount {
     if ($acmeServer.meta -and $acmeServer.meta.externalAccountRequired -and
         (-not $ExtAcctKID -or -not $ExtAcctHMACKey))
     {
-        throw "The current ACME server requires external account credentials to create a new ACME account. Please run New-PAAccount with the ExtAcctKID and ExtAcctHMACKey parameters."
+        try { throw "The current ACME server requires external account credentials to create a new ACME account. Please run New-PAAccount with the ExtAcctKID and ExtAcctHMACKey parameters." }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     # try to decode the HMAC key if specified
@@ -138,7 +140,8 @@ function New-PAAccount {
     if ($response.Headers.ContainsKey('Location')) {
         $location = $response.Headers['Location'] | Select-Object -First 1
     } else {
-        throw 'No Location header found in newAccount output'
+        try { throw 'No Location header found in newAccount output' }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     $respObj = $response.Content | ConvertFrom-Json

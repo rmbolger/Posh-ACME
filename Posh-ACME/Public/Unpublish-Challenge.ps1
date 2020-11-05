@@ -21,10 +21,12 @@ function Unpublish-Challenge {
 
     # get the validation type
     if (-not (Get-Command 'Get-CurrentPluginType' -EA Ignore)) {
-        throw 'Plugin is missing Get-CurrentPluginType function. Unable to continue.'
+        try { throw 'Plugin is missing Get-CurrentPluginType function. Unable to continue.' }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
     if (($chalType = Get-CurrentPluginType) -notin 'dns-01','http-01') {
-        throw 'Plugin sent unrecognized challenge type.'
+        try { throw 'Plugin sent unrecognized challenge type.' }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     # sanitize the $Domain if it was passed in as a wildcard on accident
@@ -38,7 +40,8 @@ function Unpublish-Challenge {
 
         # check for the Remove command that should exist now from the plugin
         if (-not (Get-Command 'Remove-DnsTxt' -EA Ignore)) {
-            throw "Plugin is missing Remove-DnsTxt function. Unable to continue."
+            try { throw "Plugin is missing Remove-DnsTxt function. Unable to continue." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         # determine the appropriate record name
@@ -60,7 +63,8 @@ function Unpublish-Challenge {
 
         # check for the Remove command that should exist now from the plugin
         if (-not (Get-Command 'Remove-HttpChallenge' -EA Ignore)) {
-            throw "Plugin is missing Remove-HttpChallenge function. Unable to continue."
+            try { throw "Plugin is missing Remove-HttpChallenge function. Unable to continue." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         $keyAuth = Get-KeyAuthorization $Token $Account

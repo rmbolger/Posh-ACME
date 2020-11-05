@@ -25,39 +25,45 @@ function Submit-ChallengeValidation {
     # or if no account was specified, that there's a current account.
     if (!$Account) {
         if (!($Account = Get-PAAccount)) {
-            throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first."
+            try { throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     } else {
         if ($Account.id -notin (Get-PAAccount -List).id) {
-            throw "Specified account id $($Account.id) was not found in the current server's account list."
+            try { throw "Specified account id $($Account.id) was not found in the current server's account list." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     }
     # make sure it's valid
     if ($Account.status -ne 'valid') {
-        throw "Account status is $($Account.status)."
+        try { throw "Account status is $($Account.status)." }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     # make sure any order passed in is actually associated with the account
     # or if no order was specified, that there's a current order.
     if (!$Order) {
         if (!($Order = Get-PAOrder)) {
-            throw "No Order parameter specified and no current order selected. Try running Set-PAOrder first."
+            try { throw "No Order parameter specified and no current order selected. Try running Set-PAOrder first." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     } else {
         if ($Order.MainDomain -notin (Get-PAOrder -List).MainDomain) {
-            throw "Specified order for $($Order.MainDomain) was not found in the current account's order list."
+            try { throw "Specified order for $($Order.MainDomain) was not found in the current account's order list." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     }
 
     # make sure the order has a valid state for this function
     if ($Order.status -eq 'invalid') {
-        throw "Order status is invalid for $($Order.MainDomain). Unable to continue."
-
-    } elseif ($Order.status -in 'valid','processing') {
+        try { throw "Order status is invalid for $($Order.MainDomain). Unable to continue." }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
+    }
+    elseif ($Order.status -in 'valid','processing') {
         Write-Warning "The server has already issued or is processing a certificate for order $($Order.MainDomain)."
         return
-
-    } elseif ($Order.status -eq 'ready') {
+    }
+    elseif ($Order.status -eq 'ready') {
         Write-Warning "The order $($Order.MainDomain) has already completed challenge validation and is awaiting finalization."
         return
     }
@@ -111,7 +117,8 @@ function Submit-ChallengeValidation {
                 $chalType = Get-PluginType $Plugin[$i]
                 $challenge = $auth.challenges | Where-Object { $_.type -eq $chalType }
                 if (-not $challenge) {
-                    throw "$($auth.fqdn) authorization contains no challenges that match the plugin type: $($Plugin[$i]) ($chalType)"
+                    try { throw "$($auth.fqdn) authorization contains no challenges that match the plugin type: $($Plugin[$i]) ($chalType)" }
+                    catch { $PSCmdlet.ThrowTerminatingError($_) }
                 }
 
                 Publish-Challenge $auth.DNSId $Account $challenge.token $Plugin[$i] $PluginArgs -DnsAlias $DnsAlias[$i]
@@ -136,7 +143,8 @@ function Submit-ChallengeValidation {
 
             } else {
                 #status invalid, revoked, deactivated, or expired
-                throw "$($auth.fqdn) authorization status is '$($auth.status)'. Create a new order and try again."
+                try { throw "$($auth.fqdn) authorization status is '$($auth.status)'. Create a new order and try again." }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
         }
 

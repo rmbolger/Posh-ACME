@@ -10,7 +10,8 @@ function Remove-PAAccount {
     Begin {
         # make sure we have a server configured
         if (!(Get-PAServer)) {
-            throw "No ACME server configured. Run Set-PAServer first."
+            try { throw "No ACME server configured. Run Set-PAServer first." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     }
 

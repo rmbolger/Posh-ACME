@@ -20,7 +20,8 @@ function Invoke-HttpChallengeListener {
 
         # Make sure we have an account configured
         if (-not ($acct = Get-PAAccount)) {
-            throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+            try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         # account present, lets start
@@ -53,7 +54,8 @@ function Invoke-HttpChallengeListener {
         else {
             # try to get the order specified by $MainDomain
             if (-not ($order = Get-PAOrder -MainDomain $MainDomain)) {
-                throw "No order found for domain $MainDomain"
+                try { throw "No order found for domain $MainDomain" }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
         }
 

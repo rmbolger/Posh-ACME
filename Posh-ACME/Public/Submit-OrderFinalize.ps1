@@ -13,27 +13,32 @@ function Submit-OrderFinalize {
     # or if no account was specified, that there's a current account.
     if (!$Account) {
         if (!($Account = Get-PAAccount)) {
-            throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first."
+            try { throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     } else {
         if ($Account.id -notin (Get-PAAccount -List).id) {
-            throw "Specified account id $($Account.id) was not found in the current server's account list."
+            try { throw "Specified account id $($Account.id) was not found in the current server's account list." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     }
     # make sure it's valid
     if ($Account.status -ne 'valid') {
-        throw "Account status is $($Account.status)."
+        try { throw "Account status is $($Account.status)." }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     # make sure any order passed in is actually associated with the account
     # or if no order was specified, that there's a current order.
     if (!$Order) {
         if (!($Order = Get-PAOrder)) {
-            throw "No Order parameter specified and no current order selected. Try running Set-PAOrder first."
+            try { throw "No Order parameter specified and no current order selected. Try running Set-PAOrder first." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     } else {
         if ($Order.MainDomain -notin (Get-PAOrder -List).MainDomain) {
-            throw "Specified order for $($Order.MainDomain) was not found in the current account's order list."
+            try { throw "Specified order for $($Order.MainDomain) was not found in the current account's order list." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     }
 
@@ -90,7 +95,8 @@ function Submit-OrderFinalize {
         $Order = Get-PAOrder $Order.MainDomain -Refresh
 
         if ($Order.status -eq 'invalid') {
-            throw "Order status for $($Order.MainDomain) is invalid."
+            try { throw "Order status for $($Order.MainDomain) is invalid." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         } elseif ($Order.status -eq 'valid' -and ![string]::IsNullOrWhiteSpace($Order.certificate)) {
             return
         } else {
@@ -102,9 +108,8 @@ function Submit-OrderFinalize {
     }
 
     # If we're here, it means our poll timed out because we didn't return already. So throw.
-    throw "Timed out waiting for order to become valid."
-
-
+    try { throw "Timed out waiting for order to become valid." }
+    catch { $PSCmdlet.ThrowTerminatingError($_) }
 
 
 

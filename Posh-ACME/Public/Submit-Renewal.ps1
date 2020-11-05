@@ -16,7 +16,8 @@ function Submit-Renewal {
         # make sure we have an account if renewing all or a specific order
         if ($PSCmdlet.ParameterSetName -in 'Specific','AllOrders') {
             if (-not (Get-PAAccount)) {
-                throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+                try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
         }
     }
@@ -30,7 +31,8 @@ function Submit-Renewal {
                 # grab the order from explicit parameters or the current memory copy
                 if (!$MainDomain) {
                     if (!$script:Order -or !$script:Order.MainDomain) {
-                        throw "No ACME order configured. Run Set-PAOrder or specify a MainDomain."
+                        try { throw "No ACME order configured. Run Set-PAOrder or specify a MainDomain." }
+                        catch { $PSCmdlet.ThrowTerminatingError($_) }
                     }
                     $order = $script:Order
                 } else {

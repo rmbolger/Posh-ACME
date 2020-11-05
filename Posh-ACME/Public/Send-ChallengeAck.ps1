@@ -12,16 +12,19 @@ function Send-ChallengeAck {
         # or if no account was specified, that there's a current account.
         if (!$Account) {
             if (!($Account = Get-PAAccount)) {
-                throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first."
+                try { throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first." }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
         } else {
             if ($Account.id -notin (Get-PAAccount -List).id) {
-                throw "Specified account id $($Account.id) was not found in the current server's account list."
+                try { throw "Specified account id $($Account.id) was not found in the current server's account list." }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
         }
         # make sure it's valid
         if ($Account.status -ne 'valid') {
-            throw "Account status is $($Account.status)."
+            try { throw "Account status is $($Account.status)." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     }
 

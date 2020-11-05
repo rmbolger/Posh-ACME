@@ -28,7 +28,8 @@ function New-PAOrder {
 
     # Make sure we have an account configured
     if (!($acct = Get-PAAccount)) {
-        throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+        try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     # If using a pre-generated CSR, extract the details so we can generate expected parameters
@@ -187,7 +188,8 @@ function New-PAOrder {
         Write-Debug "Adding location $location"
         $order | Add-Member -MemberType NoteProperty -Name 'location' -Value $location
     } else {
-        throw 'No Location header found in newOrder output'
+        try { throw 'No Location header found in newOrder output' }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     # save it to memory and disk

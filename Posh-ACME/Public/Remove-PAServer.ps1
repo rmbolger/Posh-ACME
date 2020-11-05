@@ -19,7 +19,8 @@ function Remove-PAServer {
         # Make sure the server exists on disk
         $dirFolder = ConvertTo-DirFolder $DirectoryUrl
         if (-not (Test-Path $dirFolder -PathType Container)) {
-            throw "Server $DirectoryUrl does not have an associated config folder. Nothing to delete."
+            Write-Warning "Server $DirectoryUrl does not have an associated config folder. Nothing to delete."
+            return
         }
 
         # confirm deletion unless -Force was used

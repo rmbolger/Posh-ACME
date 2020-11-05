@@ -40,7 +40,8 @@ function Set-PAOrder {
     Begin {
         # Make sure we have an account configured
         if (!(Get-PAAccount)) {
-            throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+            try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         # PfxPassSecure takes precedence over PfxPass if both are specified but we
@@ -63,7 +64,8 @@ function Set-PAOrder {
         # throw an error if there's no current order and no MainDomain
         # passed in
         if (!$script:Order -and !$MainDomain) {
-            throw "No ACME order configured. Run New-PAOrder or specify a MainDomain."
+            try { throw "No ACME order configured. Run New-PAOrder or specify a MainDomain." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         # There are 3 types of calls the user might be making here.
@@ -235,7 +237,8 @@ function Set-PAOrder {
                 }
             }
             if ($certStart -lt 0 -or $certEnd -lt 0) {
-                throw "Malformed certificate file. $certFile"
+                try { throw "Malformed certificate file. $certFile" }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
             $certStr = $certLines[$certStart..$certEnd] -join '' | ConvertTo-Base64Url -FromBase64
 

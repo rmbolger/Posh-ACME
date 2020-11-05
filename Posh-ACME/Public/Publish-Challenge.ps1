@@ -21,10 +21,12 @@ function Publish-Challenge {
 
     # get the validation type
     if (-not (Get-Command 'Get-CurrentPluginType' -EA Ignore)) {
-        throw 'Plugin is missing Get-CurrentPluginType function. Unable to continue.'
+        try { throw 'Plugin is missing Get-CurrentPluginType function. Unable to continue.' }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
     if (($chalType = Get-CurrentPluginType) -notin 'dns-01','http-01') {
-        throw 'Plugin sent unrecognized challenge type.'
+        try { throw 'Plugin sent unrecognized challenge type.' }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     # sanitize the $Domain if it was passed in as a wildcard on accident
@@ -38,7 +40,8 @@ function Publish-Challenge {
 
         # check for the Add command that should exist now from the plugin
         if (-not (Get-Command 'Add-DnsTxt' -EA Ignore)) {
-            throw "Plugin is missing Add-DnsTxt function. Unable to continue."
+            try { throw "Plugin is missing Add-DnsTxt function. Unable to continue." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         # determine the appropriate record name
@@ -60,7 +63,8 @@ function Publish-Challenge {
 
         # check for the Add command that should exist now from the plugin
         if (-not (Get-Command 'Add-HttpChallenge' -EA Ignore)) {
-            throw "Plugin is missing Add-HttpChallenge function. Unable to continue."
+            try { throw "Plugin is missing Add-HttpChallenge function. Unable to continue." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         $keyAuth = Get-KeyAuthorization $Token $Account

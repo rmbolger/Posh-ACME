@@ -14,10 +14,12 @@ function Save-Challenge {
 
     # get the validation type
     if (-not (Get-Command 'Get-CurrentPluginType' -EA Ignore)) {
-        throw 'Plugin is missing Get-CurrentPluginType function. Unable to continue.'
+        try { throw 'Plugin is missing Get-CurrentPluginType function. Unable to continue.' }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
     if (($chalType = Get-CurrentPluginType) -notin 'dns-01','http-01') {
-        throw 'Plugin sent unrecognized challenge type.'
+        try { throw 'Plugin sent unrecognized challenge type.' }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     # do stuff appropriate for the challenge type
@@ -25,7 +27,8 @@ function Save-Challenge {
 
         # check for the Save command that should exist now from the plugin
         if (-not (Get-Command 'Save-DnsTxt' -EA Ignore)) {
-            throw "Plugin is missing Save-DnsTxt function. Unable to continue."
+            try { throw "Plugin is missing Save-DnsTxt function. Unable to continue." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         Write-Debug "Calling $Plugin plugin to save"
@@ -37,7 +40,8 @@ function Save-Challenge {
 
         # check for the Save command that should exist now from the plugin
         if (-not (Get-Command 'Save-HttpChallenge' -EA Ignore)) {
-            throw "Plugin is missing Save-HttpChallenge function. Unable to continue."
+            try { throw "Plugin is missing Save-HttpChallenge function. Unable to continue." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         Write-Debug "Calling $Plugin plugin to save"

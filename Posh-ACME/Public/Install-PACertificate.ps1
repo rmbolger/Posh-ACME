@@ -21,7 +21,8 @@ function Install-PACertificate {
             $PACertificate = Get-PACertificate
 
             if (-not $PACertificate) {
-                throw "No certificate found for current order."
+                try { throw "No certificate found for current order." }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
         }
 

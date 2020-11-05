@@ -31,6 +31,7 @@
 * BUYPASS_PROD and BUYPASS_TEST are now recognized shortcuts for the the buypass.com CA environments when you use `Set-PAServer`.
 * Added tab completion for `DirectoryUrl` in `Set-PAServer`.
 * Added `Quiet` parameter to `Get-PAServer` which will prevent warnings if the specified server was not found.
+* `Remove-PAServer` will now throw a warning instead of an error if the specified server doesn't exist on disk.
 
 ### Breaking Changes
 
