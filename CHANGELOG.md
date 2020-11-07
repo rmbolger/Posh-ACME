@@ -1,3 +1,9 @@
+## 3.18.0 (2020-11-07)
+
+* Added new DNS plugin [DuckDNS](https://www.duckdns.org/). Note that due to provider limitations, this plugin can only normally be used for certs with a single name unless you workaround the limitation with custom scripting. See the [usage guide](https://github.com/rmbolger/Posh-ACME/blob/master/Posh-ACME/DnsPlugins/DuckDNS-Readme.md) for details.
+* Fixed an example in `Export-PAAccountKey` help.
+* Added code to detect 4.x configs and gracefully revert in case folks need to downgrade after upgrading to 4.x when it comes out.
+
 ## 3.17.0 (2020-10-09)
 
 * NOTE: Let's Encrypt is now [restricting](https://community.letsencrypt.org/t/issuing-for-common-rsa-key-sizes-only/133839) RSA private key sizes to 2048, 3072, and 4096 for certificates. But Posh-ACME will continue to allow custom key sizes which may still work with other certificate authorities. 
