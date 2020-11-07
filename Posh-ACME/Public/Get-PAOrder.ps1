@@ -37,6 +37,18 @@ function Get-PAOrder {
                 $_.CertExpires = Repair-ISODate $_.CertExpires
                 $_.RenewAfter = Repair-ISODate $_.RenewAfter
 
+                # convert 4.x Plugin parameter back to 3.x DnsPlugin if found
+                if ('Plugin' -in $_.PSObject.Properties.Name) {
+                    $_ | Add-Member 'DnsPlugin' $_.Plugin
+                    $_.PSObject.Properties.Remove('Plugin')
+                }
+
+                # de-obfuscate 4.x PfxPassB64U if found
+                if ('PfxPassB64U' -in $_.PSObject.Properties.Name) {
+                    $_ | Add-Member 'PfxPass' ($_.PfxPassB64U | ConvertFrom-Base64Url)
+                    $_.PSObject.Properties.Remove('PfxPassB64U')
+                }
+
                 # insert the type name and send the results to the pipeline
                 $_.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
                 $_
@@ -64,6 +76,18 @@ function Get-PAOrder {
                     $order.expires = Repair-ISODate $order.expires
                     $order.CertExpires = Repair-ISODate $order.CertExpires
                     $order.RenewAfter = Repair-ISODate $order.RenewAfter
+
+                    # convert 4.x Plugin parameter back to 3.x DnsPlugin if found
+                    if ('Plugin' -in $order.PSObject.Properties.Name) {
+                        $order | Add-Member 'DnsPlugin' $order.Plugin
+                        $order.PSObject.Properties.Remove('Plugin')
+                    }
+
+                    # de-obfuscate 4.x PfxPassB64U if found
+                    if ('PfxPassB64U' -in $order.PSObject.Properties.Name) {
+                        $order | Add-Member 'PfxPass' ($order.PfxPassB64U | ConvertFrom-Base64Url)
+                        $order.PSObject.Properties.Remove('PfxPassB64U')
+                    }
 
                 } else {
                     return $null
