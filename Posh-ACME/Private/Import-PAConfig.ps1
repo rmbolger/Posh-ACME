@@ -104,7 +104,7 @@ function Import-PAConfig {
                     }
                 }
 
-                Move-Item $pDataV3File (Join-Path $script:AcctFolder 'plugindata.xml.v3')
+                Move-Item $pDataV3File (Join-Path $script:AcctFolder 'plugindata.xml.v3') -Force
             }
 
         } else {
