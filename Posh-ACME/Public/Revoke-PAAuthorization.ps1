@@ -84,8 +84,7 @@ function Revoke-PAAuthorization {
 
             Write-Verbose "Revoking authorization for $($auth.fqdn)"
             try {
-                $response = Invoke-ACME $header $payload $Account -EA Stop
-                Write-Debug "Response: $($response.Content)"
+                Invoke-ACME $header $payload $Account -EA Stop | Out-Null
             } catch [AcmeException] {
                 Write-Error $_.Exception.Data.detail
             }

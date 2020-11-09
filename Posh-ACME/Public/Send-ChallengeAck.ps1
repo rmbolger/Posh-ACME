@@ -40,8 +40,7 @@ function Send-ChallengeAck {
 
         # send the notification
         try {
-            $response = Invoke-ACME $header '{}' $Account -EA Stop
-            Write-Debug "Response: $($response.Content)"
+            Invoke-ACME $header '{}' $Account -EA Stop | Out-Null
         } catch { throw }
 
     }

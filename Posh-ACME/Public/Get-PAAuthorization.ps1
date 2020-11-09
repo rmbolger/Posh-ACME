@@ -55,7 +55,6 @@ function Get-PAAuthorization {
             }
             # inject the type name
             $auth.PSObject.TypeNames.Insert(0,'PoshACME.PAAuthorization')
-            Write-Debug "Response: $($auth | ConvertTo-Json)"
 
             # Workaround non-compliant ACME servers such as Nexus CM that don't include
             # the status field on challenge objects. Just copy the auth's status to

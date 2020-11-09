@@ -105,9 +105,13 @@ function New-Jws {
     }
 
     # build the "<protected>.<payload>" string we're going to be signing
-    Write-Debug "Header: $($Header | ConvertTo-Json)"
+    Write-Debug "ACME Header: `n$($Header | ConvertTo-Json)"
     $HeaderB64 = ConvertTo-Base64Url ($Header | ConvertTo-Json -Compress)
-    Write-Debug "Payload: $PayloadJson"
+    if ($PayloadJson -eq [String]::Empty) {
+        Write-Debug "ACME Payload: (empty)"
+    } else {
+        Write-Debug "ACME Payload: `n$PayloadJson"
+    }
     $PayloadB64 = ConvertTo-Base64Url $PayloadJson
     $Message = "$HeaderB64.$PayloadB64"
     $MessageBytes = [Text.Encoding]::ASCII.GetBytes($Message)

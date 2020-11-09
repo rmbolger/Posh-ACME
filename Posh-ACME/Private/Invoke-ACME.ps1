@@ -53,14 +53,24 @@ function Invoke-ACME {
             UserAgent = $script:USER_AGENT
             Headers = $script:COMMON_HEADERS
             ErrorAction = 'Stop'
+            Verbose = $false
         }
 
+        Write-Debug "POST $($iwrSplat.Uri)"
         $response = Invoke-WebRequest @iwrSplat @script:UseBasic
+
+        if ($response -and $response.Content) {
+            if ($response.Headers['Content-Type'] -ne 'application/pem-certificate-chain') {
+                Write-Debug "ACME Response: `n$($response.Content)"
+            } else {
+                Write-Debug "ACME Response: (binary)"
+            }
+        }
 
         # update the next nonce if it was sent
         if ($response -and $response.Headers.ContainsKey($script:HEADER_NONCE)) {
             $script:Dir.nonce = $response.Headers[$script:HEADER_NONCE] | Select-Object -First 1
-            Write-Debug "Updating nonce: $($script:Dir.nonce)"
+            Write-Debug "Updated nonce: $($script:Dir.nonce)"
         }
 
         return $response
@@ -81,7 +91,7 @@ function Invoke-ACME {
             # update the next nonce if it was sent
             if ($script:HEADER_NONCE -in $response.Headers) {
                 $script:Dir.nonce = $response.GetResponseHeader($script:HEADER_NONCE) | Select-Object -First 1
-                Write-Debug "Updating nonce from error response: $($script:Dir.nonce)"
+                Write-Debug "Updated nonce from error response: $($script:Dir.nonce)"
                 $freshNonce = $true
             }
 
@@ -90,7 +100,7 @@ function Invoke-ACME {
             $sr.BaseStream.Position = 0
             $sr.DiscardBufferedData()
             $body = $sr.ReadToEnd()
-            Write-Debug "Error Body: $body"
+            Write-Debug "ACME Error Body: `n$body"
 
         } elseif ('Microsoft.PowerShell.Commands.HttpResponseException' -eq $exType) {
 
@@ -106,7 +116,7 @@ function Invoke-ACME {
             # update the next nonce if it was sent
             if ($script:HEADER_NONCE -in $response.Headers.Key) {
                 $script:Dir.nonce = ($response.Headers | Where-Object { $_.Key -eq $script:HEADER_NONCE }).Value | Select-Object -First 1
-                Write-Debug "Updating nonce from error response: $($script:Dir.nonce)"
+                Write-Debug "Updated nonce from error response: $($script:Dir.nonce)"
                 $freshNonce = $true
             }
 
@@ -119,7 +129,7 @@ function Invoke-ACME {
             # tags. And since our body should be JSON, there shouldn't be any tags to remove.
             # So we'll just go with it for now until someone reports a problem.
             $body = $_.ErrorDetails.Message
-            Write-Debug "Error Body: $body"
+            Write-Debug "ACME Error Body: `n$body"
 
         } else { throw }
 
@@ -138,7 +148,7 @@ function Invoke-ACME {
                     status = 404
                 }
             } else {
-                Write-Warning "Response body was not JSON parseable"
+                Write-Warning "ACME response body was not JSON parseable"
                 # re-throw the original exception
                 throw $ex
             }

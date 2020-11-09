@@ -237,7 +237,7 @@ function Connect-RackspaceDns {
     try {
         $response = Invoke-RestMethod 'https://identity.api.rackspacecloud.com/v2.0/tokens' `
             -Method Post -ContentType 'application/json' -Body $rsAuthBody @script:UseBasic
-        Write-Debug "Response $($response | ConvertTo-Json)"
+        Write-Debug "Rackspace Response: `n$($response | ConvertTo-Json)"
     } catch { throw }
 
     # save what we care about to a script variable

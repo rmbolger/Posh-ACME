@@ -58,8 +58,6 @@ function Update-PAOrder {
                 return
             }
 
-            Write-Debug "Response: $($response.Content)"
-
             $respObj = $response.Content | ConvertFrom-Json
 
             # update the things that could have changed

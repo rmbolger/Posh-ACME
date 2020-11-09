@@ -53,7 +53,6 @@ function Update-PAAccount {
         try {
             $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
         } catch { throw }
-        Write-Debug "Response: $($response.Content)"
 
         $respObj = $response.Content | ConvertFrom-Json
 

@@ -254,9 +254,8 @@ function Set-PAOrder {
 
             # send the request
             try {
-                $response = Invoke-ACME $header $payloadJson $acct -EA Stop
+                Invoke-ACME $header $payloadJson $acct -EA Stop | Out-Null
             } catch { throw }
-            Write-Debug "Response: $($response.Content)"
 
             # refresh the order
             Update-PAOrder $order.MainDomain

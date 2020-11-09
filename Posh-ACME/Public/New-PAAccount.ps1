@@ -134,7 +134,6 @@ function New-PAAccount {
     try {
         $response = Invoke-ACME $header $payloadJson -Key $acctKey -EA Stop
     } catch { throw }
-    Write-Debug "Response: $($response.Content)"
 
     # grab the Location header
     if ($response.Headers.ContainsKey('Location')) {

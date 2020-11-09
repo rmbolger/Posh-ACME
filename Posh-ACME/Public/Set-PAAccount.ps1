@@ -163,7 +163,6 @@ function Set-PAAccount {
             try {
                 $response = Invoke-ACME $header $payloadJson $acct -EA Stop
             } catch { throw }
-            Write-Debug "Response: $($response.Content)"
 
             $respObj = ($response.Content | ConvertFrom-Json)
 
@@ -234,7 +233,6 @@ function Set-PAAccount {
             try {
                 $response = Invoke-ACME $header $payloadJson $acct -EA Stop
             } catch { throw }
-            Write-Debug "Response: $($response.Content)"
 
             $respObj = ($response.Content | ConvertFrom-Json)
             if ($respObj.status -eq 'valid') {

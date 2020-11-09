@@ -91,7 +91,7 @@ function Get-PAAccount {
 
                 # check if it exists
                 if (Test-Path $acctFile -PathType Leaf) {
-                    Write-Debug "Loading PAAccount from disk"
+                    Write-Debug "Loading PAAccount $ID from disk"
                     $acct = Get-ChildItem $acctFile | Get-Content -Raw | ConvertFrom-Json
                     $acct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
                 } else {

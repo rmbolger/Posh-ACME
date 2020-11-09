@@ -62,9 +62,8 @@ function Submit-OrderFinalize {
 
     # send the request
     try {
-        $response = Invoke-ACME $header "{`"csr`":`"$csr`"}" $Account -EA Stop
+        Invoke-ACME $header "{`"csr`":`"$csr`"}" $Account -EA Stop | Out-Null
     } catch { throw }
-    Write-Debug "Response: $($response.Content)"
 
     # send telemetry ping
     $null = Start-Job {

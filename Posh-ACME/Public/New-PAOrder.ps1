@@ -115,7 +115,6 @@ function New-PAOrder {
     try {
         $response = Invoke-ACME $header $payloadJson $acct -EA Stop
     } catch { throw }
-    Write-Debug "Response: $($response.Content)"
 
     # process the response
     $order = $response.Content | ConvertFrom-Json
