@@ -175,6 +175,9 @@ function Submit-ChallengeValidation {
             Wait-AuthValidation @($published.authUrl) $ValidationTimeout
         }
 
+    } catch {
+        $PSCmdlet.ThrowTerminatingError($_)
+
     } finally {
         # always cleanup the challenges that were published
         $published | ForEach-Object {
