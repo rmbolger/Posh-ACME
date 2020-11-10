@@ -72,9 +72,10 @@ function Submit-OrderFinalize {
             Method = 'HEAD'
             UserAgent = $input
             TimeoutSec = 1
+            Verbose = $false
             ErrorAction = 'Ignore'
         }
-        Invoke-RestMethod @papingArgs
+        Invoke-RestMethod @papingArgs | Out-Null
     } -InputObject $script:USER_AGENT -EA Ignore
 
     # Boulder's ACME implementation (at least on Staging) currently doesn't
