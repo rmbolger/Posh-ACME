@@ -30,7 +30,8 @@ function Wait-AuthValidation {
 
             } elseif ($auth.status -eq 'invalid') {
                 # throw the error detail message
-                $message = ($auth.challenges | Where-Object { $_.type -eq 'dns-01' }).error.detail
+                $chal = $auth.challenges | Where-Object { $_.error } | Select-Object -First 1
+                $message = $chal.error.detail
                 throw "Authorization invalid for $($auth.fqdn): $message"
 
             } else {
