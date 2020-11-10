@@ -17,6 +17,8 @@ function Set-PAOrder {
         [Parameter(ParameterSetName='Edit')]
         [hashtable]$PluginArgs,
         [Parameter(ParameterSetName='Edit')]
+        [string[]]$DnsAlias,
+        [Parameter(ParameterSetName='Edit')]
         [ValidateNotNullOrEmpty()]
         [string]$FriendlyName,
         [Parameter(ParameterSetName='Edit')]
@@ -27,6 +29,8 @@ function Set-PAOrder {
         [securestring]$PfxPassSecure,
         [Parameter(ParameterSetName='Edit')]
         [switch]$Install,
+        [Parameter(ParameterSetName='Edit')]
+        [switch]$OCSPMustStaple,
         [Parameter(ParameterSetName='Edit')]
         [int]$DNSSleep,
         [Parameter(ParameterSetName='Edit')]
@@ -134,6 +138,12 @@ function Set-PAOrder {
                 Export-PluginArgs $order.MainDomain $order.Plugin $PluginArgs
             }
 
+            if ('DnsAlias' -in $psbKeys) {
+                Write-Verbose "Setting DnsAlias to $($DnsAlias -join ',')"
+                $order.DnsAlias = @($DnsAlias)
+                $saveChanges = $true
+            }
+
             if ('FriendlyName' -in $psbKeys -and $FriendlyName -ne $order.FriendlyName) {
                 Write-Verbose "Setting FriendlyName to '$FriendlyName'"
                 $order.FriendlyName = $FriendlyName
@@ -151,6 +161,13 @@ function Set-PAOrder {
             if ('Install' -in $psbKeys -and $Install.IsPresent -ne $order.Install) {
                 Write-Verbose "Setting Install to $($Install.IsPresent)"
                 $order.Install = $Install.IsPresent
+                $saveChanges = $true
+            }
+
+            if ('OCSPMustStaple' -in $psbKeys -and $OCSPMustStaple.IsPresent -ne $order.OCSPMustStaple) {
+                Write-Verbose "Setting OCSPMustStaple to $($OCSPMustStaple.IsPresent)"
+                Write-Warning "Changing the value of OCSPMustStaple only affects future certificates generated with this order. It can not change the state of an existing certificate."
+                $order.OCSPMustStaple = $OCSPMustStaple.IsPresent
                 $saveChanges = $true
             }
 
@@ -281,11 +298,20 @@ function Set-PAOrder {
     .PARAMETER RevokeCert
         If specified, a request will be sent to the associated ACME server to revoke the certificate on this order. Clients may wish to do this if the certificate is decommissioned or the private key has been compromised. A warning will be displayed if the order is not currently valid or the existing certificate file can't be found.
 
+    .PARAMETER Force
+        If specified, confirmation prompts for certificate revocation will be skipped.
+
     .PARAMETER NoSwitch
         If specified, the currently selected order will not change. Useful primarily for bulk certificate revocation. This switch is ignored if no MainDomain is specified.
 
-    .PARAMETER Force
-        If specified, confirmation prompts for certificate revocation will be skipped.
+    .PARAMETER Plugin
+        One or more validation plugin names to use for this order's challenges. If no plugin is specified, the DNS "Manual" plugin will be used. If the same plugin is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many plugin names as there are domains in the order and in the same sequence as the order.
+
+    .PARAMETER PluginArgs
+        A hashtable containing the plugin arguments to use with the specified Plugin list. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
+
+    .PARAMETER DnsAlias
+        One or more FQDNs that DNS challenges should be published to instead of the certificate domain's zone. This is used in advanced setups where a CNAME in the certificate domain's zone has been pre-created to point to the alias's FQDN which makes the ACME server check the alias domain when validation challenge TXT records. If the same alias is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many alias FQDNs as there are domains in the order and in the same sequence as the order.
 
     .PARAMETER FriendlyName
         Modify the friendly name for the certificate and subsequent renewals. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Must not be an empty string.
@@ -298,6 +324,9 @@ function Set-PAOrder {
 
     .PARAMETER Install
         Enables the Install switch for the order. Use -Install:$false to disable the switch on the order. This affects whether the module will automatically import the certificate to the Windows certificate store on subsequent renewals. It will not import the current certificate if it exists. Use Install-PACertificate for that purpose.
+
+    .PARAMETER OCSPMustStaple
+        If specified, the certificate generated for this order will have the OCSP Must-Staple flag set.
 
     .PARAMETER DNSSleep
         Number of seconds to wait for DNS changes to propagate before asking the ACME server to validate DNS challenges.
