@@ -191,9 +191,6 @@ function New-PAOrder {
     if ('Plugin' -in $PSBoundParameters.Keys) {
         $order.Plugin = @($Plugin)
     }
-    if ('PluginArgs' -in $PSBoundParameters.Keys) {
-        Export-PluginArgs $order.MainDomain $order.Plugin $PluginArgs
-    }
     if ('DnsAlias' -in $PSBoundParameters.Keys) {
         $order.DnsAlias = @($DnsAlias)
     }
@@ -213,6 +210,11 @@ function New-PAOrder {
     $script:Order = $order
     $orderFolder = $order | Get-OrderFolder
     Update-PAOrder -SaveOnly
+
+    # export plugin args now they the order exists on disk
+    if ('PluginArgs' -in $PSBoundParameters.Keys) {
+        Export-PluginArgs $order.MainDomain $order.Plugin $PluginArgs
+    }
 
     # Make a local copy of the specified CSR file
     if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
