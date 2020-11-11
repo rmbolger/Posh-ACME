@@ -41,15 +41,18 @@ function New-PACertificate {
         [string]$PreferredChain
     )
 
+    # grab the set of parameter keys to make comparisons easier later
+    $psbKeys = $PSBoundParameters.Keys
+
     # Make sure we have a server set. But don't override the current
     # one unless explicitly specified.
-    if (!(Get-PAServer) -or ('DirectoryUrl' -in $PSBoundParameters.Keys)) {
+    if (-not (Get-PAServer) -or 'DirectoryUrl' -in $psbKeys) {
         Set-PAServer $DirectoryUrl
     } else {
         # refresh the directory info (which should also get a fresh nonce)
         Update-PAServer
     }
-    Write-Verbose "Using directory $($script:Dir.location)"
+    Write-Verbose "Using ACME Server $($script:Dir.location)"
 
     # Make sure we have an account set. If Contact and/or AccountKeyLength
     # were specified and don't match the current one but do match a different,
@@ -57,11 +60,11 @@ function New-PACertificate {
     # accounts, create a new one.
     $acct = Get-PAAccount
     $accts = @(Get-PAAccount -List -Refresh -Status 'valid' @PSBoundParameters)
-    if (!$accts -or $accts.Count -eq 0) {
+    if (-not $accts -or $accts.Count -eq 0) {
         # no matches for the set of filters, so create new
         Write-Verbose "Creating a new $AccountKeyLength account with contact: $($Contact -join ', ')"
         $acct = New-PAAccount @PSBoundParameters
-    } elseif ($accts.Count -gt 0 -and (!$acct -or $acct.id -notin $accts.id)) {
+    } elseif ($accts.Count -gt 0 -and (-not $acct -or $acct.id -notin $accts.id)) {
         # we got matches, but there's no current account or the current one doesn't match
         # so set the first match as current
         $acct = $accts[0]
@@ -83,7 +86,7 @@ function New-PACertificate {
     # to use for the rest of the function.
     if ($PfxPassSecure) {
         # throw a warning if they also specified PfxPass
-        if ('PfxPass' -in $PSBoundParameters.Keys) {
+        if ('PfxPass' -in $psbKeys) {
             Write-Warning "PfxPass and PfxPassSecure were both specified. Using value from PfxPassSecure."
         }
 
@@ -94,7 +97,7 @@ function New-PACertificate {
 
     # Check for an existing order from the MainDomain for this call and create a new
     # one if:
-    # - -Force was used
+    # - Force was used
     # - it doesn't exist
     # - is invalid or deactivated
     # - is valid and within the renewal window
@@ -105,50 +108,47 @@ function New-PACertificate {
     $order = Get-PAOrder $Domain[0] -Refresh
     $oldOrder = $null
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
-    if ($Force -or !$order -or
+    if ($Force -or -not $order -or
         $order.status -in 'invalid','deactivated' -or
         ($order.status -eq 'valid' -and $order.RenewAfter -and (Get-DateTimeOffsetNow) -ge ([DateTimeOffset]::Parse($order.RenewAfter))) -or
         ($order.status -eq 'pending' -and (Get-DateTimeOffsetNow) -gt ([DateTimeOffset]::Parse($order.expires))) -or
         $CertKeyLength -ne $order.KeyLength -or
         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') -or
-        ($csrDetails -and $csrDetails.Base64Url -ne $order.CSRBase64Url ) ) {
+        ($csrDetails -and $csrDetails.Base64Url -ne $order.CSRBase64Url ) )
+    {
 
-        if ($order) { $oldOrder = $order }
+        $oldOrder = $order
 
         # Create a hashtable of order parameters to splat
         if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
+            # most values will be pulled from the CSR
             $orderParams = @{ CSRPath = $CSRPath }
-
-        } else {
+        }
+        else {
+            # set the defaults based on what was passed in
             $orderParams = @{
-                Domain         = $Domain;
-                KeyLength      = $CertKeyLength;
-                OCSPMustStaple = $OCSPMustStaple.IsPresent;
-                AlwaysNewKey   = $AlwaysNewKey.IsPresent;
-                Install        = $Install.IsPresent;
-                FriendlyName   = $FriendlyName;
-                PfxPass        = $PfxPass;
+                Domain         = $Domain
+                KeyLength      = $CertKeyLength
+                OCSPMustStaple = $OCSPMustStaple
+                AlwaysNewKey   = $AlwaysNewKey
+                FriendlyName   = $FriendlyName
+                PfxPass        = $PfxPass
+                Install        = $Install
             }
 
-            # load values from the old order if they exist and weren't explicitly specified
-            if ($order) {
-                if ('CertKeyLength' -notin $PSBoundParameters.Keys) {
-                    $orderParams.KeyLength = $oldOrder.KeyLength
-                }
-                if ('OCSPMustStaple' -notin $PSBoundParameters.Keys) {
-                    $orderParams.OCSPMustStaple = $oldOrder.OCSPMustStaple
-                }
-                if ('AlwaysNewKey' -notin $PSBoundParameters.Keys -and $oldOrder.AlwaysNewKey) {
-                    $orderParams.AlwaysNewKey = $oldOrder.AlwaysNewKey
-                }
-                if ('Install' -notin $PSBoundParameters.Keys -and $oldOrder.Install) {
-                    $orderParams.Install = $oldOrder.Install
-                }
-                if ('FriendlyName' -notin $PSBoundParameters.Keys -and $oldOrder.FriendlyName) {
-                    $orderParams.FriendlyName = $oldOrder.FriendlyName
-                }
-                if ('PfxPass' -notin $PSBoundParameters.Keys -and $oldOrder.PfxPass) {
-                    $orderParams.PfxPass = $oldOrder.PfxPass
+            # add values from the old order if they exist and weren't overrridden
+            # by explicit parameters
+            if ($oldOrder) {
+                @(  'CertKeyLength'
+                    'OCSPMustStaple'
+                    'AlwaysNewKey'
+                    'FriendlyName'
+                    'PfxPass'
+                    'Install' ) | ForEach-Object {
+
+                    if ($oldOrder.$_ -and $_ -notin $psbKeys) {
+                        $orderParams.$_ = $oldOrder.$_
+                    }
                 }
             }
 
@@ -158,74 +158,54 @@ function New-PACertificate {
             }
         }
 
-        # add new or old preferred chain
-        if ('PreferredChain' -in $PSBoundParameters.Keys) {
-            $orderParams.PreferredChain = $PreferredChain
-        } elseif ($oldOrder.PreferredChain) {
-            $orderParams.PreferredChain = $oldOrder.PreferredChain
+        # add common explicit order parameters backed up by old order params
+        @(  'Plugin'
+            'DnsAlias'
+            'DnsSleep'
+            'ValidationTimeout'
+            'PreferredChain' ) | ForEach-Object {
+
+            if ($_ -in $psbKeys) {
+                $orderParams.$_ = $PSBoundParameters.$_
+            } elseif ($oldOrder -and $oldOrder.$_) {
+                $orderParams.$_ = $oldOrder.$_
+            }
+        }
+        if ('PluginArgs' -in $psbKeys) {
+            $orderParams.PluginArgs = $PluginArgs
         }
 
-        # and force a new order
+        # create a new order
         Write-Verbose "Creating a new order for $($Domain -join ', ')"
+        Write-Verbose "New order params: `n$($orderParams | ConvertTo-Json)"
         $order = New-PAOrder @orderParams -Force
 
     } else {
-        # set the existing order as current
+        # set the existing order as active and override explicit order properties that
+        # don't need to trigger a new order
         Write-Verbose "Using existing order for $($order.MainDomain) with status $($order.status)"
-        $order | Set-PAOrder
 
-        # Allow overriding some order properties that don't need to trigger a new order
-        if ('AlwaysNewKey' -in $PSBoundParameters.Keys -and
-            $AlwaysNewKey.IsPresent -ne $script:Order.AlwaysNewKey)
-        {
-            Write-Verbose "Overriding AlwaysNewKey property with $($AlwaysNewKey.IsPresent)"
-            $script:Order.AlwaysNewKey = $AlwaysNewKey.IsPresent
-        }
-        if ('Install' -in $PSBoundParameters.Keys -and
-            $Install.IsPresent -ne $script:Order.Install)
-        {
-            Write-Verbose "Overriding Install property with $($Install.IsPresent)"
-            $script:Order.Install = $Install.IsPresent
-        }
-        if ('FriendlyName' -in $PSBoundParameters.Keys -and
-            -not [String]::IsNullOrWhiteSpace($FriendlyName) -and
-            $FriendlyName -ne $script:Order.FriendlyName)
-        {
-            Write-Verbose "Overriding FriendlyName property with $FriendlyName"
-            $script:Order.FriendlyName = $FriendlyName
-        }
-        if ('PfxPass' -in $PSBoundParameters.Keys -and
-            -not [String]::IsNullOrWhiteSpace($PfxPass) -and
-            $PfxPass -ne $script:Order.PfxPass)
-        {
-            Write-Verbose "Overriding PfxPass property with supplied value"
-            $script:Order.PfxPass = $PfxPass
-        }
-    }
+        $setOrderParams = @{}
+        @(  'AlwaysNewKey'
+            'Plugin'
+            'PluginArgs'
+            'DnsAlias'
+            'Install'
+            'FriendlyName'
+            'PfxPass'
+            'Install'
+            'DnsSleep'
+            'ValidationTimeout'
+            'PreferredChain' ) | ForEach-Object {
 
-    # add validation parameters to the order object using explicit params
-    # backed up by previous order params
-    if ('Plugin' -in $PSBoundParameters.Keys) {
-        $script:Order.Plugin = $Plugin
-    } elseif ($oldOrder) {
-        $script:Order.Plugin = $oldOrder.Plugin
+            if ($_ -in $psbKeys) {
+                $setOrderParams.$_ = $PSBoundParameters.$_
+            }
+        }
+        Write-Verbose "Set order params: `n$($setOrderParams | ConvertTo-Json)"
+        $order | Set-PAOrder @setOrderParams
+        $order = Get-PAOrder
     }
-    if ('DnsAlias' -in $PSBoundParameters.Keys) {
-        $script:Order.DnsAlias = $DnsAlias
-    } elseif ($oldOrder) {
-        $script:Order.DnsAlias = $oldOrder.DnsAlias
-    }
-    $script:Order.DnsSleep = $DnsSleep
-    if ($oldOrder -and 'DnsSleep' -notin $PSBoundParameters.Keys) {
-        $script:Order.DnsSleep = $oldOrder.DnsSleep
-    }
-    $script:Order.ValidationTimeout = $ValidationTimeout
-    if ($oldOrder -and 'ValidationTimeout' -notin $PSBoundParameters.Keys) {
-        $script:Order.ValidationTimeout = $oldOrder.ValidationTimeout
-    }
-    Write-Debug "Saving validation params to order"
-    Update-PAOrder -SaveOnly
-    $order = $script:Order
 
     # deal with "pending" orders that may have authorization challenges to prove
     if ($order.status -eq 'pending') {
@@ -242,7 +222,7 @@ function New-PACertificate {
         if ($order.DnsAlias) {
             $chalParams.DnsAlias = $order.DnsAlias
         }
-        if ('PluginArgs' -in $PSBoundParameters.Keys) {
+        if ('PluginArgs' -in $psbKeys) {
             $chalParams.PluginArgs = $PluginArgs
         }
 
