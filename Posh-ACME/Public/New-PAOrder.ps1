@@ -9,6 +9,10 @@ function New-PAOrder {
         [Parameter(ParameterSetName='FromScratch',Position=1)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$KeyLength='2048',
+        [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
+        [string[]]$Plugin,
+        [hashtable]$PluginArgs,
+        [string[]]$DnsAlias,
         [Parameter(ParameterSetName='FromScratch')]
         [switch]$OCSPMustStaple,
         [Parameter(ParameterSetName='FromScratch')]
@@ -22,8 +26,10 @@ function New-PAOrder {
         [securestring]$PfxPassSecure,
         [Parameter(ParameterSetName='FromScratch')]
         [switch]$Install,
-        [switch]$Force,
-        [string]$PreferredChain
+        [int]$DnsSleep=120,
+        [int]$ValidationTimeout=60,
+        [string]$PreferredChain,
+        [switch]$Force
     )
 
     # Make sure we have an account configured
@@ -162,8 +168,8 @@ function New-PAOrder {
         OCSPMustStaple    = $OCSPMustStaple.IsPresent
         Plugin            = @('Manual')
         DnsAlias          = $null
-        DnsSleep          = 120
-        ValidationTimeout = 60
+        DnsSleep          = $DnsSleep
+        ValidationTimeout = $ValidationTimeout
         FriendlyName      = $FriendlyName
         PfxPass           = $PfxPass
         Install           = $Install.IsPresent
@@ -173,12 +179,23 @@ function New-PAOrder {
 
     # make sure there's a certificate field for later
     if ('certificate' -notin $order.PSObject.Properties.Name) {
-        $order | Add-Member -MemberType NoteProperty -Name 'certificate' -Value $null
+        $order | Add-Member 'certificate' $null
     }
 
     # add the CSR data if we have it
     if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
-        $order | Add-Member -MemberType NoteProperty -Name 'CSRBase64Url' -Value $csrDetails.Base64Url
+        $order | Add-Member 'CSRBase64Url' $csrDetails.Base64Url
+    }
+
+    # update other optional fields
+    if ('Plugin' -in $PSBoundParameters.Keys) {
+        $order.Plugin = @($Plugin)
+    }
+    if ('PluginArgs' -in $PSBoundParameters.Keys) {
+        Export-PluginArgs $order.MainDomain $order.Plugin $PluginArgs
+    }
+    if ('DnsAlias' -in $PSBoundParameters.Keys) {
+        $order.DnsAlias = @($DnsAlias)
     }
 
     # add the location from the header
@@ -238,7 +255,7 @@ function New-PAOrder {
     .DESCRIPTION
         Creating an ACME order is the first step of the certificate request process. To create a SAN certificate with multiple names, include them all in an array for the -Domain parameter. The first name in the list will be considered the "MainDomain" and will also be in the certificate subject field. LetsEncrypt currently limits SAN certificates to 100 names.
 
-        Be aware that only one order per MainDomain can exist with this module. Subsequent orders that have the same MainDomain will overwrite previous orders and certificates under the assumption that you are trying to renew or update the certificate with additional names.
+        Be aware that only one order per MainDomain per ACME Account can exist with this module. Subsequent orders that have the same MainDomain will overwrite previous orders and certificates under the assumption that you are trying to renew or update the certificate with additional names.
 
     .PARAMETER Domain
         One or more domain names to include in this order/certificate. The first one in the list will be considered the "MainDomain" and be set as the subject of the finalized certificate.
@@ -248,6 +265,15 @@ function New-PAOrder {
 
     .PARAMETER KeyLength
         The type and size of private key to use. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to '2048'.
+
+    .PARAMETER Plugin
+        One or more validation plugin names to use for this order's challenges. If no plugin is specified, the DNS "Manual" plugin will be used. If the same plugin is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many plugin names as there are domains in the order and in the same sequence as the order.
+
+    .PARAMETER PluginArgs
+        A hashtable containing the plugin arguments to use with the specified Plugin list. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
+
+    .PARAMETER DnsAlias
+        One or more FQDNs that DNS challenges should be published to instead of the certificate domain's zone. This is used in advanced setups where a CNAME in the certificate domain's zone has been pre-created to point to the alias's FQDN which makes the ACME server check the alias domain when validation challenge TXT records. If the same alias is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many alias FQDNs as there are domains in the order and in the same sequence as the order.
 
     .PARAMETER OCSPMustStaple
         If specified, the certificate generated for this order will have the OCSP Must-Staple flag set.
@@ -267,11 +293,17 @@ function New-PAOrder {
     .PARAMETER Install
         If specified, the certificate generated for this order will be imported to the local computer's Personal certificate store.
 
-    .PARAMETER Force
-        If specified, confirmation prompts that may have been generated will be skipped.
+    .PARAMETER DnsSleep
+        Number of seconds to wait for DNS changes to propagate before asking the ACME server to validate DNS challenges.
+
+    .PARAMETER ValidationTimeout
+        Number of seconds to wait for the ACME server to validate the challenges after asking it to do so. If the timeout is exceeded, an error will be thrown.
 
     .PARAMETER PreferredChain
         If the CA offers multiple certificate chains, prefer the chain with an issuer matching this Subject Common Name. If no match, the default offered chain will be used.
+
+    .PARAMETER Force
+        If specified, confirmation prompts that may have been generated will be skipped.
 
     .EXAMPLE
         New-PAOrder site1.example.com

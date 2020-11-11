@@ -32,7 +32,7 @@ function Set-PAOrder {
         [Parameter(ParameterSetName='Edit')]
         [switch]$OCSPMustStaple,
         [Parameter(ParameterSetName='Edit')]
-        [int]$DNSSleep,
+        [int]$DnsSleep,
         [Parameter(ParameterSetName='Edit')]
         [int]$ValidationTimeout,
         [Parameter(ParameterSetName='Edit')]
@@ -171,9 +171,9 @@ function Set-PAOrder {
                 $saveChanges = $true
             }
 
-            if ('DNSSleep' -in $psbKeys -and $DNSSleep -ne $order.DNSSleep) {
-                Write-Verbose "Setting DNSSleep to $DNSSleep"
-                $order.DNSSleep = $DNSSleep
+            if ('DnsSleep' -in $psbKeys -and $DnsSleep -ne $order.DnsSleep) {
+                Write-Verbose "Setting DnsSleep to $DnsSleep"
+                $order.DnsSleep = $DnsSleep
                 $saveChanges = $true
             }
 
@@ -328,7 +328,7 @@ function Set-PAOrder {
     .PARAMETER OCSPMustStaple
         If specified, the certificate generated for this order will have the OCSP Must-Staple flag set.
 
-    .PARAMETER DNSSleep
+    .PARAMETER DnsSleep
         Number of seconds to wait for DNS changes to propagate before asking the ACME server to validate DNS challenges.
 
     .PARAMETER ValidationTimeout

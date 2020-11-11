@@ -36,7 +36,7 @@ function New-PACertificate {
         [ValidateScript({Test-WinOnly -ThrowOnFail})]
         [switch]$Install,
         [switch]$Force,
-        [int]$DNSSleep=120,
+        [int]$DnsSleep=120,
         [int]$ValidationTimeout=60,
         [string]$PreferredChain
     )
