@@ -44,6 +44,7 @@ $script:WellKnownDirs = @{
     LE_STAGE = 'https://acme-staging-v02.api.letsencrypt.org/directory'
     BUYPASS_PROD = 'https://api.buypass.com/acme/directory'
     BUYPASS_TEST = 'https://api.test4.buypass.no/acme/directory'
+    ZEROSSL_PROD = 'https://acme.zerossl.com/v2/DV90'
 }
 $script:HEADER_NONCE = 'Replay-Nonce'
 $script:USER_AGENT = "Posh-ACME/4.0.0-alpha PowerShell/$($PSVersionTable.PSVersion)"
