@@ -1,4 +1,4 @@
-## 4.0.0 (????-??-??)
+## 4.0.0-alpha2 (2020-11-12)
 
 ### New Features
 
@@ -31,6 +31,7 @@
   * The data will be used to guide future development decisions in the module.
   * The same User-Agent header is also sent with all calls to the ACME server which is a requirement of the protocol and can't be disabled.
 * BUYPASS_PROD and BUYPASS_TEST are now recognized shortcuts for the the buypass.com CA environments when you use `Set-PAServer`.
+* ZEROSSL_PROD is now a recognized shortcut for the zerossl.com CA when you use `Set-PAServer`.
 * Added tab completion for `DirectoryUrl` in `Set-PAServer`.
 * Added `Quiet` parameter to `Get-PAServer` which will prevent warnings if the specified server was not found.
 * `Remove-PAServer` will now throw a warning instead of an error if the specified server doesn't exist on disk.
