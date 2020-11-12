@@ -1,3 +1,8 @@
+## 3.18.1 (2020-11-12)
+
+* Upgraded BouncyCastle to 1.8.8.2 for version parity with Az.KeyVault to prevent module load errors in PowerShell 6+
+* Fixed DuckDNS plugin file locations in .NET 4.6 fork.
+
 ## 3.18.0 (2020-11-07)
 
 * Added new DNS plugin [DuckDNS](https://www.duckdns.org/). Note that due to provider limitations, this plugin can only normally be used for certs with a single name unless you workaround the limitation with custom scripting. See the [usage guide](https://github.com/rmbolger/Posh-ACME/blob/master/Posh-ACME/DnsPlugins/DuckDNS-Readme.md) for details.

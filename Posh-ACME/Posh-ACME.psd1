@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '3.18.0'
+ModuleVersion = '3.18.1'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -111,11 +111,10 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 3.18.0 (2020-11-07)
+## 3.18.1 (2020-11-12)
 
-* Added new DNS plugin [DuckDNS](https://www.duckdns.org/). Note that due to provider limitations, this plugin can only normally be used for certs with a single name unless you workaround the limitation with custom scripting. See the [usage guide](https://github.com/rmbolger/Posh-ACME/blob/master/Posh-ACME/DnsPlugins/DuckDNS-Readme.md) for details.
-* Fixed an example in `Export-PAAccountKey` help.
-* Added code to detect 4.x configs and gracefully revert in case folks need to downgrade after upgrading to 4.x when it comes out.
+* Upgraded BouncyCastle to 1.8.8.2 for version parity with Az.KeyVault to prevent module load errors in PowerShell 6+
+* Fixed DuckDNS plugin file locations in .NET 4.6 fork.
 '@
 
     } # End of PSData hashtable
