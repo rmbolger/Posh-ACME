@@ -267,12 +267,6 @@
         <member name="T:Org.BouncyCastle.Asn1.BerNull">
             A BER Null object.
         </member>
-        <member name="M:Org.BouncyCastle.Asn1.BerOctetString.ToBytes(System.Collections.IEnumerable)">
-            convert a vector of octet strings into a single byte string
-        </member>
-        <member name="M:Org.BouncyCastle.Asn1.BerOctetString.#ctor(System.Byte[])">
-            <param name="str">The octets making up the octet string.</param>
-        </member>
         <member name="M:Org.BouncyCastle.Asn1.BerOctetString.GetEnumerator">
             return the DER octets that make up this string.
         </member>
@@ -4772,10 +4766,6 @@
                         }
             </pre>
         </member>
-        <member name="M:Org.BouncyCastle.Asn1.Tsp.MessageImprint.GetInstance(System.Object)">
-            @param o
-            @return a MessageImprint object.
-        </member>
         <member name="M:Org.BouncyCastle.Asn1.Tsp.MessageImprint.ToAsn1Object">
             <pre>
                MessageImprint ::= SEQUENCE  {
@@ -5876,6 +5866,30 @@
               
             </pre>
         </member>
+        <member name="T:Org.BouncyCastle.Asn1.X509.OtherName">
+            The OtherName object.
+            <pre>
+            OtherName ::= SEQUENCE {
+                 type-id    OBJECT IDENTIFIER,
+                 value      [0] EXPLICIT ANY DEFINED BY type-id }
+            </pre>
+        </member>
+        <member name="M:Org.BouncyCastle.Asn1.X509.OtherName.GetInstance(System.Object)">
+            OtherName factory method.
+            @param obj the object used to construct an instance of <code>
+            OtherName</code>. It must be an instance of <code>OtherName
+            </code> or <code>ASN1Sequence</code>.
+            @return the instance of <code>OtherName</code> built from the
+            supplied object.
+            @throws java.lang.IllegalArgumentException if the object passed
+            to the factory is not an instance of <code>OtherName</code> or something that
+            can be converted into an appropriate <code>ASN1Sequence</code>.
+        </member>
+        <member name="M:Org.BouncyCastle.Asn1.X509.OtherName.#ctor(Org.BouncyCastle.Asn1.DerObjectIdentifier,Org.BouncyCastle.Asn1.Asn1Encodable)">
+            Base constructor.
+            @param typeID the type of the other name.
+            @param value the ANY object that represents the value.
+        </member>
         <member name="T:Org.BouncyCastle.Asn1.X509.PolicyMappings">
              PolicyMappings V3 extension, described in RFC3280.
              <pre>
@@ -6967,6 +6981,12 @@
             
              @return the extension if it's present, null otherwise.
         </member>
+        <member name="M:Org.BouncyCastle.Asn1.X509.X509Extensions.GetExtensionParsedValue(Org.BouncyCastle.Asn1.DerObjectIdentifier)">
+             return the parsed value of the extension represented by the object identifier
+             passed in.
+            
+             @return the parsed value of the extension if it's present, null otherwise.
+        </member>
         <member name="M:Org.BouncyCastle.Asn1.X509.X509Extensions.ToAsn1Object">
              <pre>
                  Extensions        ::=   SEQUENCE SIZE (1..MAX) OF Extension
@@ -7577,10 +7597,17 @@
             encode the input data producing a base 64 encoded byte array.
         </member>
         <member name="M:Org.BouncyCastle.Bcpg.ArmoredOutputStream.SetHeader(System.String,System.String)">
-             Set an additional header entry. A null value will clear the entry for name.
+            Set an additional header entry. Any current value(s) under the same name will be
+            replaced by the new one. A null value will clear the entry for name.         *
+            @param name the name of the header entry.
+            @param v the value of the header entry.
+        </member>
+        <member name="M:Org.BouncyCastle.Bcpg.ArmoredOutputStream.AddHeader(System.String,System.String)">
+             Set an additional header entry. The current value(s) will continue to exist together
+             with the new one. Adding a null value has no effect.
             
              @param name the name of the header entry.
-             @param v the value of the header entry.
+             @param value the value of the header entry.
         </member>
         <member name="M:Org.BouncyCastle.Bcpg.ArmoredOutputStream.ResetHeaders">
             Reset the headers to only contain a Version string (if one is present).
@@ -8544,6 +8571,13 @@
             </summary>
             <returns>An <c>IList</c> containing all objects from this factory, in order.</returns>
         </member>
+        <member name="M:Org.BouncyCastle.Bcpg.OpenPgp.PgpObjectFactory.FilterPgpObjects(System.Type)">
+            <summary>
+            Read all available objects, returning only those that are assignable to the specified type.
+            </summary>
+            <param name="type">The type of objects to return. All other objects are ignored.</param>
+            <returns>An <c>IList</c> containing the filtered objects from this factory, in order.</returns>
+        </member>
         <member name="T:Org.BouncyCastle.Bcpg.OpenPgp.PgpOnePassSignature">
             <remarks>A one pass signature object.</remarks>
         </member>
@@ -8664,7 +8698,7 @@
             </returns>
         </member>
         <member name="P:Org.BouncyCastle.Bcpg.OpenPgp.PgpPublicKey.IsMasterKey">
-            <summary>True, if this is a master key.</summary>
+            <summary>True, if this could be a master key.</summary>
         </member>
         <member name="P:Org.BouncyCastle.Bcpg.OpenPgp.PgpPublicKey.Algorithm">
             <summary>The algorithm code associated with the public key.</summary>
@@ -10116,6 +10150,11 @@
         <member name="M:Org.BouncyCastle.Cms.CmsSignedData.GetEncoded">
             return the ASN.1 encoded representation of this object.
         </member>
+        <member name="M:Org.BouncyCastle.Cms.CmsSignedData.GetEncoded(System.String)">
+             return the ASN.1 encoded representation of this object using the specified encoding.
+            
+             @param encoding the ASN.1 encoding format to use ("BER" or "DER").
+        </member>
         <member name="M:Org.BouncyCastle.Cms.CmsSignedData.ReplaceSigners(Org.BouncyCastle.Cms.CmsSignedData,Org.BouncyCastle.Cms.SignerInformationStore)">
              Replace the signerinformation store associated with this
              CmsSignedData object with the new one passed in. You would
@@ -10721,7 +10760,7 @@
         <member name="M:Org.BouncyCastle.Cms.SignerInformation.#ctor(Org.BouncyCastle.Cms.SignerInformation)">
              Protected constructor. In some cases clients have their own idea about how to encode
              the signed attributes and calculate the signature. This constructor is to allow developers
-             to deal with that by extending off the class and overridng methods like getSignedAttributes().
+             to deal with that by extending off the class and overriding e.g. SignedAttributes property.
             
              @param baseInfo the SignerInformation to base this one on.
         </member>
@@ -11179,21 +11218,6 @@
         </member>
         <member name="T:Org.BouncyCastle.Crypto.Agreement.DHStandardGroups">
             <summary>Standard Diffie-Hellman groups from various IETF specifications.</summary>
-        </member>
-        <member name="F:Org.BouncyCastle.Crypto.Agreement.DHStandardGroups.rfc5114_1024_160">
-            <remarks>
-            Existence of a "hidden SNFS" backdoor cannot be ruled out. see https://eprint.iacr.org/2016/961.pdf .
-            </remarks>
-        </member>
-        <member name="F:Org.BouncyCastle.Crypto.Agreement.DHStandardGroups.rfc5114_2048_224">
-            <remarks>
-            Existence of a "hidden SNFS" backdoor cannot be ruled out. see https://eprint.iacr.org/2016/961.pdf .
-            </remarks>
-        </member>
-        <member name="F:Org.BouncyCastle.Crypto.Agreement.DHStandardGroups.rfc5114_2048_256">
-            <remarks>
-            Existence of a "hidden SNFS" backdoor cannot be ruled out. see https://eprint.iacr.org/2016/961.pdf .
-            </remarks>
         </member>
         <member name="T:Org.BouncyCastle.Crypto.Agreement.ECDHBasicAgreement">
              P1363 7.2.1 ECSVDP-DH
@@ -13824,11 +13848,6 @@
              @exception ArgumentException if the params argument is
              inappropriate.
         </member>
-        <member name="M:Org.BouncyCastle.Crypto.Engines.NoekeonEngine.setKey(System.Byte[])">
-             Re-key the cipher.
-            
-             @param  key  the key to be used
-        </member>
         <member name="T:Org.BouncyCastle.Crypto.Engines.NullEngine">
             The no-op engine that just copies bytes through, irrespective of whether encrypting and decrypting.
             Provided for the sake of completeness.
@@ -14272,14 +14291,6 @@
             Creates a Salsa20 engine with a specific number of rounds.
             </summary>
             <param name="rounds">the number of rounds (must be an even number).</param>
-        </member>
-        <member name="M:Org.BouncyCastle.Crypto.Engines.Salsa20Engine.R(System.UInt32,System.Int32)">
-             Rotate left
-            
-             @param   x   value to rotate
-             @param   y   amount to rotate x
-            
-             @return  rotated x
         </member>
         <member name="T:Org.BouncyCastle.Crypto.Engines.SeedEngine">
             Implementation of the SEED algorithm as described in RFC 4009
@@ -15568,6 +15579,26 @@
         </member>
         <member name="M:Org.BouncyCastle.Crypto.IDigest.Reset">
             reset the digest back to it's initial state.
+        </member>
+        <member name="T:Org.BouncyCastle.Crypto.IDigestFactory">
+            <summary>
+            Base interface for operator factories that create stream-based digest calculators.
+            </summary>   
+        </member>
+        <member name="P:Org.BouncyCastle.Crypto.IDigestFactory.AlgorithmDetails">
+            <summary>The algorithm details object for calculators made by this factory.</summary>
+        </member>
+        <member name="P:Org.BouncyCastle.Crypto.IDigestFactory.DigestLength">
+            <summary>Return the size of the digest associated with this factory.</summary>
+            <returns>The length of the digest produced by this calculators from this factory in bytes.</returns>
+        </member>
+        <member name="M:Org.BouncyCastle.Crypto.IDigestFactory.CreateCalculator">
+            <summary>
+            Create a stream calculator for the digest associated with this factory. The stream
+            calculator is used for the actual operation of entering the data to be digested
+            and producing the digest block.
+            </summary>
+            <returns>A calculator producing an IBlockResult with the final digest in it.</returns>
         </member>
         <member name="T:Org.BouncyCastle.Crypto.IDsa">
             interface for classes implementing the Digital Signature Algorithm
@@ -20187,6 +20218,15 @@
         <member name="M:Org.BouncyCastle.Crypto.Tls.TlsPeer.Cancel">
             <exception cref="T:System.IO.IOException"/>
         </member>
+        <member name="M:Org.BouncyCastle.Crypto.Tls.TlsPeer.GetHandshakeTimeoutMillis">
+            <summary>
+            Specify the timeout, in milliseconds, to use for the complete handshake process.
+            </summary>
+            <remarks>
+            Negative values are not allowed. A timeout of zero means an infinite timeout (i.e. the
+            handshake will never time out). NOTE: Currently only respected by DTLS protocols.
+            </remarks>
+        </member>
         <member name="M:Org.BouncyCastle.Crypto.Tls.TlsPeer.RequiresExtendedMasterSecret">
             <summary>
             This implementation supports RFC 7627 and will always negotiate the extended_master_secret
@@ -21477,8 +21517,9 @@
             @deprecated per-point compression property will be removed, refer {@link #getEncoded(bool)}
         </member>
         <member name="M:Org.BouncyCastle.Math.EC.ECAlgorithms.ReferenceMultiply(Org.BouncyCastle.Math.EC.ECPoint,Org.BouncyCastle.Math.BigInteger)">
-            Simple shift-and-add multiplication. Serves as reference implementation
-            to verify (possibly faster) implementations, and for very small scalars.
+            Simple shift-and-add multiplication. Serves as reference implementation to verify (possibly
+            faster) implementations, and for very small scalars. CAUTION: This implementation is NOT
+            constant-time in any way. It is only intended to be used for diagnostics.
             
             @param p
                        The point to multiply.
@@ -21534,7 +21575,9 @@
             belong to this <code>ECCurve</code> instance, and MUST already be normalized.
         </member>
         <member name="M:Org.BouncyCastle.Math.EC.ECCurve.GetMultiplier">
-            Sets the default <code>ECMultiplier</code>, unless already set. 
+             Sets the default <code>ECMultiplier</code>, unless already set.
+            
+             We avoid locking for performance reasons, so there is no uniqueness guarantee.
         </member>
         <member name="M:Org.BouncyCastle.Math.EC.ECCurve.DecodePoint(System.Byte[])">
             Decode a point on this curve from its ASN.1 encoding. The different
@@ -23381,6 +23424,16 @@
                      min and max IP address of the first/second IP address and its
                      subnet mask.
         </member>
+        <member name="M:Org.BouncyCastle.Pkix.PkixNameConstraintValidator.IsIPConstrained(System.Byte[],System.Byte[])">
+             Checks if the IP address <code>ip</code> is constrained by
+             <code>constraint</code>.
+            
+             @param constraint The constraint. This is an IP address concatenated with
+                               its subnetmask.
+             @param ip         The IP address.
+             @return <code>true</code> if constrained, <code>false</code>
+                     otherwise.
+        </member>
         <member name="M:Org.BouncyCastle.Pkix.PkixNameConstraintValidator.CheckPermittedIP(Org.BouncyCastle.Utilities.Collections.ISet,System.Byte[])">
              Checks if the IP <code>ip</code> is included in the permitted ISet
              <code>permitted</code>.
@@ -23401,16 +23454,6 @@
              @throws PkixNameConstraintValidatorException
                       if the IP is excluded.
         </member>
-        <member name="M:Org.BouncyCastle.Pkix.PkixNameConstraintValidator.IsIPConstrained(System.Byte[],System.Byte[])">
-             Checks if the IP address <code>ip</code> is constrained by
-             <code>constraint</code>.
-            
-             @param ip         The IP address.
-             @param constraint The constraint. This is an IP address concatenated with
-                               its subnetmask.
-             @return <code>true</code> if constrained, <code>false</code>
-                     otherwise.
-        </member>
         <member name="M:Org.BouncyCastle.Pkix.PkixNameConstraintValidator.UnionEmail(System.String,System.String,Org.BouncyCastle.Utilities.Collections.ISet)">
              The common part of <code>email1</code> and <code>email2</code> is
              added to the union <code>union</code>. If <code>email1</code> and
@@ -23420,7 +23463,7 @@
              @param email2 Email address constraint 2.
              @param union  The union.
         </member>
-        <member name="M:Org.BouncyCastle.Pkix.PkixNameConstraintValidator.intersectEmail(System.String,System.String,Org.BouncyCastle.Utilities.Collections.ISet)">
+        <member name="M:Org.BouncyCastle.Pkix.PkixNameConstraintValidator.IntersectEmail(System.String,System.String,Org.BouncyCastle.Utilities.Collections.ISet)">
              The most restricting part from <code>email1</code> and
              <code>email2</code> is added to the intersection <code>intersect</code>.
             
@@ -24357,6 +24400,11 @@
             
              @throws IOException if encoding fails.
         </member>
+        <member name="M:Org.BouncyCastle.Tsp.TimeStampToken.GetEncoded(System.String)">
+             return the ASN.1 encoded representation of this object using the specified encoding.
+            
+             @param encoding the ASN.1 encoding format to use ("BER" or "DER").
+        </member>
         <member name="M:Org.BouncyCastle.Tsp.TimeStampTokenGenerator.#ctor(Org.BouncyCastle.Crypto.AsymmetricKeyParameter,Org.BouncyCastle.X509.X509Certificate,System.String,System.String)">
             basic creation - only the default attributes will be included here.
         </member>
@@ -24440,15 +24488,28 @@
         <member name="M:Org.BouncyCastle.Utilities.BigIntegers.AsUnsignedByteArray(Org.BouncyCastle.Math.BigInteger)">
              Return the passed in value as an unsigned byte array.
             
-             @param value value to be converted.
+             @param value the value to be converted.
              @return a byte array without a leading zero byte if present in the signed encoding.
         </member>
         <member name="M:Org.BouncyCastle.Utilities.BigIntegers.AsUnsignedByteArray(System.Int32,Org.BouncyCastle.Math.BigInteger)">
-             Return the passed in value as an unsigned byte array of specified length, zero-extended as necessary.
+            Return the passed in value as an unsigned byte array of the specified length, padded with
+            leading zeros as necessary.
+            @param length the fixed length of the result.
+            @param n the value to be converted.
+            @return a byte array padded to a fixed length with leading zeros.
+        </member>
+        <member name="M:Org.BouncyCastle.Utilities.BigIntegers.AsUnsignedByteArray(Org.BouncyCastle.Math.BigInteger,System.Byte[],System.Int32,System.Int32)">
+             Write the passed in value as unsigned bytes to the specified buffer range, padded with
+             leading zeros as necessary.
             
-             @param length desired length of result array.
-             @param n value to be converted.
-             @return a byte array of specified length, with leading zeroes as necessary given the size of n.
+             @param value
+                        the value to be converted.
+             @param buf
+                        the buffer to which the value is written.
+             @param off
+                        the start offset in array <code>buf</code> at which the data is written.
+             @param len
+                        the fixed length of data written (possibly padded with leading zeros).
         </member>
         <member name="M:Org.BouncyCastle.Utilities.BigIntegers.CreateRandomBigInteger(System.Int32,Org.BouncyCastle.Security.SecureRandom)">
             <summary>
