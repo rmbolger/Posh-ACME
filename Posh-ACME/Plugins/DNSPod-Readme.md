@@ -1,16 +1,26 @@
 # How To Use the DNSPod DNS Plugin
 
-This plugin works against the [DNSPod](https://dnspod.com/) provider. It is assumed that you have already setup an account and delegated the domain you will be working against.
+This plugin works against the [DNSPod](https://dnspod.com/) provider. It is assumed that you have already setup an account and created the domain you will be working against.
+
+## Setup
+
+As of November 13, 2020, DNSPod was integrated with Tencent Cloud and slightly changed how their API works. Instead of authenticating with your normal website login credentials, you must create an API token to use instead.
+
+Login to the console and go to the [Key Management](https://console.dnspod.com/account/token) section. Create a new key and make a note of its ID and Token values.
 
 ## Using the Plugin
 
-There is no setup with this plugin. It uses the same email/password you login to the website with. You may supply them in the `DNSPodCredential` parameter as a PSCredential object. But it can only be used from Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). You may also supply them separately in the `DNSPodUsername` and `DNSPodPwdInsecure` parameters and standard strings.
+The API key ID is used with the `DNSPodKeyId` string parameter. The key token can be used with `DNSPodKeyToken` as a SecureString or `DNSPodKeyTokenInsecure` as a standard string. The SecureString version should only be used on Windows or any OS with PowerShell 6.2 or later.
+
+There is also a `DNSPodApiRoot` optional parameter that defaults to the API root for dnspod.com. If you are using dnspod.cn, you may specify `https://dnsapi.cn` instead for this parameter.
 
 ### Windows or PS 6.2+
 
 ```powershell
-$pArgs = @{ DNSPodCredential = (Get-Credential) }
-
+$pArgs = @{
+    DNSPodKeyID = '111'
+    DNSPodToken = (Read-Host 'Enter Token' -AsSecureString)
+}
 New-PACertificate example.com -Plugin DNSPod -PluginArgs $pArgs
 ```
 
@@ -18,9 +28,8 @@ New-PACertificate example.com -Plugin DNSPod -PluginArgs $pArgs
 
 ```powershell
 $pArgs = @{
-    DNSPodUsername = 'your@mail.example'
-    DNSPodPwdInsecure = 'password'
+    DNSPodKeyID = '111'
+    DNSPodTokenInsecure = 'xxxxxxxxxxxx'
 }
-
 New-PACertificate example.com -Plugin DNSPod -PluginArgs $pArgs
 ```
