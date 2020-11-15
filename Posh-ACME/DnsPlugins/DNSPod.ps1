@@ -1,37 +1,43 @@
 function Add-DnsTxtDNSPod {
     [CmdletBinding(DefaultParameterSetName = 'Secure')]
     param(
-        [Parameter(Mandatory, Position = 0)]
+        [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
-        [Parameter(Mandatory, Position = 1)]
+        [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 2)]
+        [Parameter(ParameterSetName='Secure',Mandatory)]
+        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [string]$DNSPodKeyId,
+        [Parameter(ParameterSetName='Secure',Mandatory)]
+        [securestring]$DNSPodKeyToken,
+        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [string]$DNSPodKeyTokenInsecure,
+        [Parameter(ParameterSetName='Secure')]
+        [Parameter(ParameterSetName='Insecure')]
+        [string]$DNSPodApiRoot='https://api.dnspod.com',
+        [Parameter(ParameterSetName='Obsolete_DO_NOT_USE',Mandatory)]
         [pscredential]$DNSPodCredential,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 2)]
+        [Parameter(ParameterSetName='Obsolete_DO_NOT_USE',Mandatory)]
         [string]$DNSPodUsername,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 3)]
+        [Parameter(ParameterSetName='Obsolete_DO_NOT_USE',Mandatory)]
         [string]$DNSPodPwdInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-
-    # grab the cleartext credential if the secure version was used
-    # and make the auth token
-    if (!$script:DNSPodAuthToken) {
-        if ($PSCmdlet.ParameterSetName -eq 'Secure') {
-            Get-DNSPodAuthToken $DNSPodCredential
-        }
-        else {
-            Get-DNSPodAuthToken $DNSPodUsername $DNSPodPwdInsecure
-        }
+    if ('Obsolete_DO_NOT_USE' -eq $PSCmdlet.ParameterSetName) {
+        throw "DNSPod requires updated API Key/Token values. See user guide for details."
     }
 
-    ########
+    # build the login_token value
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $DNSPodKeyTokenInsecure = [pscredential]::new('a',$DNSPodKeyToken).GetNetworkCredential().Password
+    }
+    $authToken = "$DNSPodKeyId%2C$DNSPodKeyTokenInsecure"
 
     try {
         Write-Verbose "Searching for existing TXT record"
-        $zone, $rec = Get-DNSPodTxtRecord $RecordName $TxtValue
+        $zone, $rec = Get-DNSPodTxtRecord $RecordName $TxtValue $authToken $DNSPodApiRoot
     }
     catch { throw }
 
@@ -44,13 +50,18 @@ function Add-DnsTxtDNSPod {
             Write-Verbose "Adding $RecordName with value $TxtValue"
 
             $recShort = ($RecordName -ireplace [regex]::Escape($zone.name), [string]::Empty).TrimEnd('.')
-            $ApiEndpoint = 'https://api.dnspod.com/Record.Create'
-            $body = "user_token=$($script:DNSPodAuthToken)&format=json&domain_id=$($zone.id)&sub_domain=$recShort&record_type=TXT&record_line=default&value=$TxtValue&ttl=1"
-
-            $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body `
-                -UserAgent $script:USER_AGENT -EA Stop @script:UseBasic
+            $addQuery = @{
+                Uri = "$DNSPodApiRoot/Record.Create"
+                Method = 'POST'
+                Body = "domain_id=$($zone.id)&sub_domain=$recShort&record_type=TXT&value=$TxtValue&record_line=%E9%BB%98%E8%AE%A4&login_token=$authToken&format=json&lang=en"
+                UserAgent = $script:USER_AGENT
+                ErrorAction = 'Stop'
+            }
+            #Write-Verbose ($addQuery.Body)
+            $response = Invoke-RestMethod @addQuery @script:UseBasic
 
             if ($response.status.code -ne 1 -and $response.status.code -ne 31) {
+                Write-Verbose ($response | ConvertTo-Json -dep 10)
                 throw $response.status.message
             }
         }
@@ -70,65 +81,82 @@ function Add-DnsTxtDNSPod {
     .PARAMETER TxtValue
         The value of the TXT record.
 
+    .PARAMETER DNSPodKeyId
+        The API Key ID value.
+
+    .PARAMETER DNSPodKeyToken
+        The API Key Token value as a SecureString value. This should only be used on Windows or any OS with PowerShell 6.2+.
+
+    .PARAMETER DNSPodKeyTokenInsecure
+        The API Key Token value as a standard String value.
+
+    .PARAMETER DNSPodApiRoot
+        The root URL for the DNSPod API you are using. Default to "https://api.dnspod.com" but may also be set to "https://dnsapi.cn".
+
     .PARAMETER DNSPodCredential
-        DNSPod account credentials as a PSCredential object. This can only be used on Windows or any OS with PowerShell 6.2+.
+        Obsolete parameter that no longer works with DNSPod API. Do not use.
 
     .PARAMETER DNSPodUsername
-        DNSPod account email address.
+        Obsolete parameter that no longer works with DNSPod API. Do not use.
 
     .PARAMETER DNSPodPwdInsecure
-        DNSPod account password.
+        Obsolete parameter that no longer works with DNSPod API. Do not use.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxtDNSPod '_acme-challenge.example.com' 'txt-value' -DNSPodCredential (Get-Credential)
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -DNSPodKeyId '1' -DnsPodKeyToken (Read-Host -AsSecureString)
 
-        Adds a TXT record for the specified site with the specified value using a PSCredential object.
+        Adds a TXT record for the specified site with the specified value using a secure token value.
 
     .EXAMPLE
-        $creds = @{DNSPodUsername='me@example.com';DNSPodPwdInsecure='xxxxxxxx'}
-        PS C:\>Add-DnsTxtDNSPod '_acme-challenge.example.com' 'txt-value' @creds
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -DNSPodKeyId '1' -DnsPodKeyTokenInsecure 'token-value'
 
-        Adds a TXT record for the specified site with the specified value using plain text credentials.
+        Adds a TXT record for the specified site with the specified value using plain text token.
     #>
 }
 
 function Remove-DnsTxtDNSPod {
     [CmdletBinding(DefaultParameterSetName = 'Secure')]
     param(
-        [Parameter(Mandatory, Position = 0)]
+        [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
-        [Parameter(Mandatory, Position = 1)]
+        [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 2)]
+        [Parameter(ParameterSetName='Secure',Mandatory)]
+        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [string]$DNSPodKeyId,
+        [Parameter(ParameterSetName='Secure',Mandatory)]
+        [securestring]$DNSPodKeyToken,
+        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [string]$DNSPodKeyTokenInsecure,
+        [Parameter(ParameterSetName='Secure')]
+        [Parameter(ParameterSetName='Insecure')]
+        [string]$DNSPodApiRoot='https://api.dnspod.com',
+        [Parameter(ParameterSetName='Obsolete_DO_NOT_USE',Mandatory)]
         [pscredential]$DNSPodCredential,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 2)]
+        [Parameter(ParameterSetName='Obsolete_DO_NOT_USE',Mandatory)]
         [string]$DNSPodUsername,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 3)]
+        [Parameter(ParameterSetName='Obsolete_DO_NOT_USE',Mandatory)]
         [string]$DNSPodPwdInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-
-    # grab the cleartext credential if the secure version was used
-    # and make the auth token
-    if (!$script:DNSPodAuthToken) {
-        if ($PSCmdlet.ParameterSetName -eq 'Secure') {
-            Get-DNSPodAuthToken $DNSPodCredential
-        }
-        else {
-            Get-DNSPodAuthToken $DNSPodUsername $DNSPodPwdInsecure
-        }
+    if ('Obsolete_DO_NOT_USE' -eq $PSCmdlet.ParameterSetName) {
+        throw "DNSPod requires updated API Key/Token values. See user guide for details."
     }
 
-    ########
+    # build the login_token value
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $DNSPodKeyTokenInsecure = [pscredential]::new('a',$DNSPodKeyToken).GetNetworkCredential().Password
+    }
+    $authToken = "$DNSPodKeyId%2C$DNSPodKeyTokenInsecure"
 
     try {
         Write-Verbose "Searching for existing TXT record"
-        $zone, $rec = Get-DNSPodTxtRecord $RecordName $TxtValue
+        $zone, $rec = Get-DNSPodTxtRecord $RecordName $TxtValue $authToken $DNSPodApiRoot
     }
     catch { throw }
 
@@ -137,11 +165,14 @@ function Remove-DnsTxtDNSPod {
         try {
             Write-Verbose "Removing $RecordName with value $TxtValue"
 
-            $ApiEndpoint = 'https://api.dnspod.com/Record.Remove'
-            $body = "user_token=$($script:DNSPodAuthToken)&format=json&domain_id=$($zone.id)&record_id=$($rec.id)"
-
-            $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body `
-                -UserAgent $script:USER_AGENT -EA Stop @script:UseBasic
+            $delQuery = @{
+                Uri = "$DNSPodApiRoot/Record.Remove"
+                Method = 'POST'
+                Body = "domain_id=$($zone.id)&record_id=$($rec.id)&login_token=$authToken&format=json&lang=en"
+                UserAgent = $script:USER_AGENT
+                ErrorAction = 'Stop'
+            }
+            $response = Invoke-RestMethod @delQuery @script:UseBasic
 
             if ($response.status.code -ne 1 -and $response.status.code -ne 8) {
                 throw $response.status.message
@@ -150,7 +181,6 @@ function Remove-DnsTxtDNSPod {
         catch { throw }
     }
     else {
-
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     }
 
@@ -167,28 +197,39 @@ function Remove-DnsTxtDNSPod {
     .PARAMETER TxtValue
         The value of the TXT record.
 
+    .PARAMETER DNSPodKeyId
+        The API Key ID value.
+
+    .PARAMETER DNSPodKeyToken
+        The API Key Token value as a SecureString value. This should only be used on Windows or any OS with PowerShell 6.2+.
+
+    .PARAMETER DNSPodKeyTokenInsecure
+        The API Key Token value as a standard String value.
+
+    .PARAMETER DNSPodApiRoot
+        The root URL for the DNSPod API you are using. Default to "https://api.dnspod.com" but may also be set to "https://dnsapi.cn".
+
     .PARAMETER DNSPodCredential
-        DNSPod account credentials as a PSCredential object. This can only be used on Windows or any OS with PowerShell 6.2+.
+        Obsolete parameter that no longer works with DNSPod API. Do not use.
 
     .PARAMETER DNSPodUsername
-        DNSPod account email address.
+        Obsolete parameter that no longer works with DNSPod API. Do not use.
 
     .PARAMETER DNSPodPwdInsecure
-        DNSPod account password.
+        Obsolete parameter that no longer works with DNSPod API. Do not use.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxtDNSPod '_acme-challenge.example.com' 'txt-value' -DNSPodCredential (Get-Credential)
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -DNSPodKeyId '1' -DnsPodKeyToken (Read-Host -AsSecureString)
 
-        Removes a TXT record for the specified site with the specified value using a PSCredential object.
+        Removes a TXT record for the specified site with the specified value using a secure token value.
 
     .EXAMPLE
-        $creds = @{DNSPodUsername='me@example.com';DNSPodPwdInsecure='xxxxxxxx'}
-        PS C:\>Remove-DnsTxtDNSPod '_acme-challenge.example.com' 'txt-value' @creds
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -DNSPodKeyId '1' -DnsPodKeyTokenInsecure 'token-value'
 
-        Removes a TXT record for the specified site with the specified value using plain text credentials.
+        Removes a TXT record for the specified site with the specified value using plain text token.
     #>
 }
 
@@ -215,15 +256,19 @@ function Save-DnsTxtDNSPod {
 ############################
 
 # API Docs
-# https://www.dnspod.com/docs/info.html
+# https://docs.dnspod.cn/api
 
 function Get-DNSPodTxtRecord {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory, Position = 0)]
+        [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
-        [Parameter(Mandatory, Position = 1)]
-        [string]$TxtValue
+        [Parameter(Mandatory,Position=1)]
+        [string]$TxtValue,
+        [Parameter(Mandatory,Position=2)]
+        [string]$LoginToken,
+        [Parameter(Mandatory,Position=3)]
+        [string]$ApiRoot
     )
 
     # setup a module variable to cache the record to zone mapping
@@ -235,16 +280,18 @@ function Get-DNSPodTxtRecord {
         $zone = $script:DNSPodRecordZones.$RecordName
     }
 
-    if (!$zone) {
+    if (-not $zone) {
 
         try {
             # get zone
-            $ApiEndpoint = 'https://api.dnspod.com/Domain.List'
-
-            $body = "user_token=$($script:DNSPodAuthToken)&format=json"
-
-            $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body `
-                -UserAgent $script:USER_AGENT -EA Stop @script:UseBasic
+            $zoneQuery = @{
+                Uri = "$ApiRoot/Domain.List"
+                Method = 'POST'
+                Body = "login_token=$LoginToken&format=json&lang=en"
+                UserAgent = $script:USER_AGENT
+                ErrorAction = 'Stop'
+            }
+            $response = Invoke-RestMethod @zoneQuery @script:UseBasic
 
             if ($response.status.code -ne 1) {
                 throw $response.status.message
@@ -255,12 +302,12 @@ function Get-DNSPodTxtRecord {
 
             $zone = $hostedZones | Where-Object { $RecordName -match $_.name }
 
-            #save zone to cache
+            # save zone to cache
             $script:DNSPodRecordZones.$RecordName = $zone
         }
         catch { throw }
 
-        if (!$zone) {
+        if (-not $zone) {
             throw "Failed to find hosted zone for $RecordName"
         }
 
@@ -272,63 +319,27 @@ function Get-DNSPodTxtRecord {
         $recShort = ($RecordName -ireplace [regex]::Escape($zone.name), [string]::Empty).TrimEnd('.')
 
         # get record
-        $ApiEndpoint = 'https://api.dnspod.com/Record.List'
-
-        $body = "user_token=$($script:DNSPodAuthToken)&format=json&domain_id=$($zone.id)"
-
-        $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body `
-            -UserAgent $script:USER_AGENT -EA Stop @script:UseBasic
+        $recQuery = @{
+            Uri = "$ApiRoot/Record.List"
+            Method = 'POST'
+            Body = "login_token=$LoginToken&format=json&lang=en&domain_id=$($zone.id)"
+            UserAgent = $script:USER_AGENT
+            ErrorAction = 'Stop'
+        }
+        $response = Invoke-RestMethod @recQuery @script:UseBasic
 
         if ($response.status.code -ne 1) {
             throw $response.status.message
         }
         else {
-            $rec = $response.records | Where-Object { $_.name -eq $recShort -and $_.type -eq 'TXT' -and $_.value -eq $TxtValue }
+            $rec = $response.records | Where-Object {
+                $_.name -eq $recShort -and
+                $_.type -eq 'TXT' -and
+                $_.value -eq $TxtValue
+            }
         }
     }
     catch { throw }
 
     return @($zone, $rec)
-}
-
-function Get-DNSPodAuthToken {
-    [CmdletBinding(DefaultParameterSetName = 'Secure')]
-    param(
-        [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 0)]
-        [pscredential]$DNSPodCredential,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 0)]
-        [string]$DNSPodUsername,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 1)]
-        [string]$DNSPodPwdInsecure
-    )
-
-    if ($PSCmdlet.ParameterSetName -eq 'Secure') {
-        $DNSPodUsername = $DNSPodCredential.UserName
-        $DNSPodPwdInsecure = $DNSPodCredential.GetNetworkCredential().Password
-    }
-
-    # make credentials URL safe
-    $DNSPodUsername = [Web.HTTPUtility]::UrlEncode($DNSPodUsername)
-    $DNSPodPwdInsecure = [Web.HTTPUtility]::UrlEncode($DNSPodPwdInsecure)
-
-    $ApiEndpoint = 'https://api.dnspod.com/Auth'
-
-    $body = "login_email=$DNSPodUsername&login_password=$DNSPodPwdInsecure&format=json"
-    try {
-        $response = Invoke-RestMethod -Method POST -Uri $ApiEndpoint -Body $body `
-            -UserAgent $script:USER_AGENT -EA Stop @script:UseBasic
-
-        # username and password not needed anymore, remove variables for better safety
-        Remove-Variable DNSPodUsername, DNSPodPwdInsecure, body
-    }
-    catch {
-        throw
-    }
-
-    if ($response.status.code -ne 1) {
-        throw $response.status.message
-    }
-    # Set global AuthToken
-    Write-Debug "Auth token = $($response.user_token)"
-    $script:DNSPodAuthToken = $response.user_token
 }
