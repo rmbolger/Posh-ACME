@@ -35,7 +35,7 @@
 * Added tab completion for `DirectoryUrl` in `Set-PAServer`.
 * Added `Quiet` parameter to `Get-PAServer` which will prevent warnings if the specified server was not found.
 * `Remove-PAServer` will now throw a warning instead of an error if the specified server doesn't exist on disk.
-* Orders can now be passed by pipeline to `Submit-ChallengeValidation`.
+* Orders can now be passed by pipeline to `Submit-ChallengeValidation` and `Submit-OrderFinalize`.
 
 ### Breaking Changes
 
@@ -52,6 +52,7 @@
   * `NewKey`/`NewCertKey` have been replaced by `AlwaysNewKey` in `New-PACertificate` and `New-PAOrder`
   * `AlwaysNewKey` has been added to `Set-PAOrder`
   * `DnsPlugin`, `PluginArgs`, `DnsAlias`, `DnsSleep`, `ValidationTimeout` and `Account` parameters have been removed from `Submit-ChallengeValidation`. The account associated with the order must be the currently active account. The rest of the parameters are read directly from the order object and can be modified in advance with `Set-PAOrder` if necessary.
+  * `Account` parameter has been removed from `Submit-OrderFinalize`. The account associated with the order must be the currently active account.
 
 ### Fixes
 

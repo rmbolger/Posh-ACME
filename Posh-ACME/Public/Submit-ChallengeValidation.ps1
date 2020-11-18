@@ -28,32 +28,32 @@ function Submit-ChallengeValidation {
 
     Process {
 
-        # Order validation
-        try {
-            # make sure any order passed in is actually associated with the account
-            # or if no order was specified, that there's a current order.
-            if (-not $Order) {
-                if (-not ($Order = Get-PAOrder)) {
-                    throw "No Order parameter specified and no current order selected. Try running Set-PAOrder first."
-                }
-            } elseif ($Order.MainDomain -notin (Get-PAOrder -List).MainDomain) {
-                throw "Specified order for $($Order.MainDomain) was not found in the current account's order list."
+        # make sure any order passed in is actually associated with the account
+        # or if no order was specified, that there's a current order.
+        if (-not $Order) {
+            if (-not ($Order = Get-PAOrder)) {
+                try { throw "No Order parameter specified and no current order selected. Try running Set-PAOrder first." }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
-
-            # make sure the order has a valid state for this function
-            if ($Order.status -eq 'invalid') {
-                throw "Order status is invalid for $($Order.MainDomain). Unable to continue."
-            }
-            elseif ($Order.status -in 'valid','processing') {
-                Write-Warning "The server has already issued or is processing a certificate for order $($Order.MainDomain)."
-                return
-            }
-            elseif ($Order.status -eq 'ready') {
-                Write-Warning "The order $($Order.MainDomain) has already completed challenge validation and is awaiting finalization."
-                return
-            }
+        } elseif ($Order.MainDomain -notin (Get-PAOrder -List).MainDomain) {
+            Write-Error "Order for $($Order.MainDomain) was not found in the current account's order list."
+            return
         }
-        catch { $PSCmdlet.ThrowTerminatingError($_) }
+
+        # make sure the order has a valid state for this function
+        if ($Order.status -eq 'invalid') {
+            Write-Error "Order status is invalid for $($Order.MainDomain). Unable to continue."
+            return
+        }
+        elseif ($Order.status -in 'valid','processing') {
+            Write-Warning "The server has already issued or is processing a certificate for order $($Order.MainDomain)."
+            return
+        }
+        elseif ($Order.status -eq 'ready') {
+            Write-Warning "The order $($Order.MainDomain) has already completed challenge validation and is awaiting finalization."
+            return
+        }
+
 
         # The only order status left is 'pending'. This means that at least one
         # authorization hasn't been validated yet according to
@@ -190,7 +190,7 @@ function Submit-ChallengeValidation {
     .EXAMPLE
         Submit-ChallengeValidation
 
-        Begin challenge validation on the currently active order.
+        Begin challenge validation on the current order.
 
     .EXAMPLE
         Get-PAOrder 111 | Submit-ChallengeValidation
