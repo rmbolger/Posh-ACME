@@ -231,41 +231,9 @@ function New-PACertificate {
     # The order should now be finalized and the status should be valid. The only
     # thing left to do is download the cert and chain and write the results to
     # disk
-    if ($order.status -eq 'valid' -and !$order.CertExpires) {
-        if ([string]::IsNullOrWhiteSpace($order.certificate)) {
-            try { throw "Order status is valid, but no certificate URL was found." }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
-        }
+    if ($order.status -eq 'valid' -and -not $order.CertExpires) {
 
-        # Download the cert chain, split it up, and generate a PFX files
-        Export-PACertFiles $order
-
-        Write-Verbose "Updating cert expiration and renewal window"
-
-        # Calculate the appropriate renewal window. The generally accepted suggestion
-        # is 1/3 the total lifetime of the cert earlier than its expiration. For
-        # example, 90 day certs renew 30 days before expiration. For longer lived
-        # certs we're going to cap to renewal window at 30 days before renewal.
-        $cert = Import-Pem (Join-Path ($order | Get-OrderFolder) 'cert.cer')
-        $lifetime = $cert.NotAfter - $cert.NotBefore
-        $renewHours = [Math]::Max(720, ($lifetime.TotalHours / 3))
-
-        # Set the CertExpires and RenewAfter fields
-        $script:Order.CertExpires = $cert.NotAfter.ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture)
-        $script:Order.RenewAfter = $cert.NotAfter.AddHours(-$renewHours).ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture)
-        Update-PAOrder -SaveOnly
-
-        Write-Verbose "Successfully created certificate."
-
-        $cert = Get-PACertificate
-
-        # install to local computer store if asked
-        if ($order.Install) {
-            $cert | Install-PACertificate
-        }
-
-        # output cert details
-        Write-Output $cert
+        Complete-PAOrder
 
     } elseif ($order.CertExpires) {
         Write-Warning "This certificate order has already been completed. Use -Force to overwrite the current certificate."

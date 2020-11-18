@@ -20,6 +20,7 @@
   * With a plugin and `-Guide`, opens the default browser to the plugin's online guide
   * With a plugin and `-Params`, displays the plugin-specific parameter sets (#151)
 * Certificate orders can now be configured to always generate a new private key using the `AlwaysNewKey` parameter and the old parameters for key replacement have been removed. (#181)
+* Added `Complete-PAOrder` which does the final processing steps like downloading the signed cert and updating renewal window for an order that has reached the 'ready' state. This avoids the need to use `New-PACertificate` when doing custom certificate workflows.
 * The PfxPass parameter on order objects is now obfuscated when serialized to disk. (#207)
 * Added `PfxPassSecure` (SecureString) parameter to `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder` which takes precedence over `PfxPass` if specified. (#207)
 * Added `DnsAlias` and `OCSPMustStaple` parameters to `Set-PAOrder`. Changing an order's OCSPMustStaple value will throw a warning that it only affects future certificates generated from the order.
