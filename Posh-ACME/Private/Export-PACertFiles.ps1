@@ -7,12 +7,12 @@ function Export-PACertFiles {
     )
 
     # Make sure we have an account configured
-    if (!($acct = Get-PAAccount)) {
+    if (-not ($acct = Get-PAAccount)) {
         throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
     }
 
     # Make sure we have an order
-    if (-not $Order -and !($Order = Get-PAOrder)) {
+    if (-not $Order -and -not ($Order = Get-PAOrder)) {
         throw "No ACME order specified and no current order selected. Run Set-PAOrder or specify an existing order object."
     }
     $orderFolder = $Order | Get-OrderFolder
@@ -74,6 +74,7 @@ function Export-PACertFiles {
         }
         else {
             Write-Warning "Order has expired. Unable to re-download cert/chain files. Using cached copies."
+            $chain0File = Join-Path $orderFolder 'chain0.cer'
         }
 
         # try to find the chain file matching the preferred issuer if specified
