@@ -35,21 +35,23 @@
 * Added tab completion for `DirectoryUrl` in `Set-PAServer`.
 * Added `Quiet` parameter to `Get-PAServer` which will prevent warnings if the specified server was not found.
 * `Remove-PAServer` will now throw a warning instead of an error if the specified server doesn't exist on disk.
+* Orders can now be passed by pipeline to `Submit-ChallengeValidation`.
 
 ### Breaking Changes
 
-* Function Name Changes
+* Function Changes
   * `Publish-DnsChallenge` is now `Publish-Challenge`
   * `Unpublish-DnsChallenge` is now `Unpublish-Challenge`
   * `Save-DnsChallenge` is now `Save-Challenge`
   * `Get-DnsPlugins` and `Get-DnsPluginHelp` have been replaced by `Get-PAPlugin`
   * `Invoke-HttpChallengeListener` should be considered deprecated and may be removed in a future release. Users should migrate to the `WebSelfHost` plugin.
-* Parameter Name Changes
+* Parameter Changes
   * All `DnsPlugin` parameters are now `Plugin` with a `DnsPlugin` alias for backwards compatibility. The alias should be considered deprecated and may be removed in a future release.
   * The `NoPrefix` switch in Publish/Unpublish-Challenge has been replaced with a `DnsAlias` parameter that will override the `Domain` parameter if specified. "_acme-challenge." will not be automatically added to the `DnsAlias` parameter.
   * `NewKey` has been removed from `Submit-Renewal`
   * `NewKey`/`NewCertKey` have been replaced by `AlwaysNewKey` in `New-PACertificate` and `New-PAOrder`
   * `AlwaysNewKey` has been added to `Set-PAOrder`
+  * `DnsPlugin`, `PluginArgs`, `DnsAlias`, `DnsSleep`, `ValidationTimeout` and `Account` parameters have been removed from `Submit-ChallengeValidation`. The account associated with the order must be the currently active account. The rest of the parameters are read directly from the order object and can be modified in advance with `Set-PAOrder` if necessary.
 
 ### Fixes
 

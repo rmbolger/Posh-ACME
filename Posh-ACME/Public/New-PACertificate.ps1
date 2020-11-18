@@ -177,7 +177,7 @@ function New-PACertificate {
 
         # create a new order
         Write-Verbose "Creating a new order for $($Domain -join ', ')"
-        Write-Verbose "New order params: `n$($orderParams | ConvertTo-Json)"
+        Write-Debug "New order params: `n$($orderParams | ConvertTo-Json)"
         $order = New-PAOrder @orderParams -Force
 
     } else {
@@ -202,7 +202,7 @@ function New-PACertificate {
                 $setOrderParams.$_ = $PSBoundParameters.$_
             }
         }
-        Write-Verbose "Set order params: `n$($setOrderParams | ConvertTo-Json)"
+        Write-Debug "Set order params: `n$($setOrderParams | ConvertTo-Json)"
         $order | Set-PAOrder @setOrderParams
         $order = Get-PAOrder
     }
@@ -210,23 +210,7 @@ function New-PACertificate {
     # deal with "pending" orders that may have authorization challenges to prove
     if ($order.status -eq 'pending') {
 
-        # create a hashtable of validation parameters to splat that uses
-        # explicit params backed up by previous order params
-        $chalParams = @{
-            DnsSleep = $order.DnsSleep
-            ValidationTimeout = $order.ValidationTimeout
-        }
-        if ($order.Plugin) {
-            $chalParams.Plugin = $order.Plugin
-        }
-        if ($order.DnsAlias) {
-            $chalParams.DnsAlias = $order.DnsAlias
-        }
-        if ('PluginArgs' -in $psbKeys) {
-            $chalParams.PluginArgs = $PluginArgs
-        }
-
-        Submit-ChallengeValidation @chalParams
+        Submit-ChallengeValidation
 
         # refresh the order status
         $order = Get-PAOrder -Refresh
