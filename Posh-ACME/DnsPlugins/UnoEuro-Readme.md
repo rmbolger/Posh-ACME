@@ -1,5 +1,7 @@
 # How To Use the UnoEuro DNS Plugin
 
+**NOTE: This provider has changed their name from UnoEuro to Simply and this plugin should be considered deprecated. Users should migrate to the Simply plugin as soon as possible. This one will only continue to work as long as Simply keeps the old `api.unoeuro.com` endpoint active.**
+
 This plugin works against the [UnoEuro](https://www.unoeuro.com/) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
 
 ## Finding your information in UnoEuro
