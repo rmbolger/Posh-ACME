@@ -27,7 +27,7 @@ function Export-PACertFiles {
 
     if (-not $PfxOnly) {
 
-        # Re-download the cert/chains if the order has not expired.
+        # Download the cert+chain if the order has not expired.
         if ((Get-DateTimeOffsetNow) -lt [DateTimeOffset]::Parse($order.expires)) {
 
             # build the header for the Post-As-Get request
@@ -45,6 +45,23 @@ function Export-PACertFiles {
             } catch { throw }
 
             $pems = Split-PemChain -ChainBytes $response.Content
+
+            # Do some basic validation to make sure we got what we were expecting.
+            $cert = Import-Pem -InputString ($pems[0] -join "`n")
+            $altNames = $cert.GetSubjectAlternativeNames() |
+                Where-Object { $_[0] -eq [Org.BouncyCastle.Asn1.X509.GeneralName]::DnsName } |
+                ForEach-Object { $_[1] }
+            $orderNames = @($Order.MainDomain) + @($Order.SANs)
+            $orderNames | ForEach-Object {
+                if ($_ -notin $altNames) {
+                    throw "$_ was requested but is not present in the list of Subject Alternative Names in the signed certificate."
+                }
+            }
+            $altNames | ForEach-Object {
+                if ($_ -notin $orderNames) {
+                    throw "An extra name, $_, is present in the list of Subject Alternative Names in the signed certificate, but was not requested as part of the order."
+                }
+            }
 
             # write the lone cert
             Export-Pem $pems[0] $certFile
