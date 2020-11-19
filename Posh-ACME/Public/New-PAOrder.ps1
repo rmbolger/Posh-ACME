@@ -26,6 +26,7 @@ function New-PAOrder {
         [securestring]$PfxPassSecure,
         [Parameter(ParameterSetName='FromScratch')]
         [switch]$Install,
+        [switch]$UseSerialValidation,
         [int]$DnsSleep=120,
         [int]$ValidationTimeout=60,
         [string]$PreferredChain,
@@ -160,21 +161,22 @@ function New-PAOrder {
 
     # add additional members we'll need for later
     $order | Add-Member -NotePropertyMembers @{
-        MainDomain        = $Domain[0]
-        SANs              = $SANs
-        KeyLength         = $KeyLength
-        CertExpires       = $null
-        RenewAfter        = $null
-        OCSPMustStaple    = $OCSPMustStaple.IsPresent
-        Plugin            = @('Manual')
-        DnsAlias          = $null
-        DnsSleep          = $DnsSleep
-        ValidationTimeout = $ValidationTimeout
-        FriendlyName      = $FriendlyName
-        PfxPass           = $PfxPass
-        Install           = $Install.IsPresent
-        PreferredChain    = $PreferredChain
-        AlwaysNewKey      = $AlwaysNewKey.IsPresent
+        MainDomain          = $Domain[0]
+        SANs                = $SANs
+        KeyLength           = $KeyLength
+        CertExpires         = $null
+        RenewAfter          = $null
+        OCSPMustStaple      = $OCSPMustStaple.IsPresent
+        Plugin              = @('Manual')
+        DnsAlias            = $null
+        DnsSleep            = $DnsSleep
+        ValidationTimeout   = $ValidationTimeout
+        FriendlyName        = $FriendlyName
+        PfxPass             = $PfxPass
+        Install             = $Install.IsPresent
+        UseSerialValidation = $UseSerialValidation.IsPresent
+        PreferredChain      = $PreferredChain
+        AlwaysNewKey        = $AlwaysNewKey.IsPresent
     }
 
     # make sure there's a certificate field for later
@@ -294,6 +296,9 @@ function New-PAOrder {
 
     .PARAMETER Install
         If specified, the certificate generated for this order will be imported to the local computer's Personal certificate store.
+
+    .PARAMETER UseSerialValidation
+        If specified, the names in the order will be validated individually rather than all at once. This can significantly increase the time it takes to process validations and should only be used for plugins that require it. The plugin's usage guide should indicate whether it is required.
 
     .PARAMETER DnsSleep
         Number of seconds to wait for DNS changes to propagate before asking the ACME server to validate DNS challenges.

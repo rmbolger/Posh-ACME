@@ -38,7 +38,9 @@ function Set-PAOrder {
         [Parameter(ParameterSetName='Edit')]
         [string]$PreferredChain,
         [Parameter(ParameterSetName='Edit')]
-        [switch]$AlwaysNewKey
+        [switch]$AlwaysNewKey,
+        [Parameter(ParameterSetName='Edit')]
+        [switch]$UseSerialValidation
     )
 
     Begin {
@@ -199,6 +201,14 @@ function Set-PAOrder {
                 $saveChanges = $true
             }
 
+            if ('UseSerialValidation' -in $psbKeys -and
+                (-not $order.UseSerialValidation -or $UseSerialValidation.IsPresent -ne $order.UseSerialValidation)
+            ) {
+                Write-Verbose "Setting UseSerialValidation to $($UseSerialValidation.IsPresent)"
+                $order | Add-Member 'UseSerialValidation' $UseSerialValidation.IsPresent -Force
+                $saveChanges = $true
+            }
+
             if ($saveChanges) {
                 Write-Verbose "Saving order changes"
                 $order | Update-PAOrder -SaveOnly
@@ -339,6 +349,9 @@ function Set-PAOrder {
 
     .PARAMETER AlwaysNewKey
         If specified, the order will be configured to always generate a new private key during each renewal. Otherwise, the old key is re-used if it exists.
+
+    .PARAMETER UseSerialValidation
+        If specified, the names in the order will be validated individually rather than all at once. This can significantly increase the time it takes to process validations and should only be used for plugins that require it. The plugin's usage guide should indicate whether it is required.
 
     .EXAMPLE
         Set-PAOrder site1.example.com

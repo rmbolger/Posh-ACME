@@ -8,6 +8,8 @@ function Save-Challenge {
         [hashtable]$PluginArgs
     )
 
+    Write-Verbose "Saving changes for $Plugin plugin"
+
     # dot source the plugin file
     $pluginDir = Join-Path $MyInvocation.MyCommand.Module.ModuleBase 'Plugins'
     . (Join-Path $pluginDir "$Plugin.ps1")

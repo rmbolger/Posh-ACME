@@ -35,6 +35,7 @@ function New-PACertificate {
         [Parameter(ParameterSetName='FromScratch')]
         [ValidateScript({Test-WinOnly -ThrowOnFail})]
         [switch]$Install,
+        [switch]$UseSerialValidation,
         [switch]$Force,
         [int]$DnsSleep=120,
         [int]$ValidationTimeout=60,
@@ -163,7 +164,8 @@ function New-PACertificate {
             'DnsAlias'
             'DnsSleep'
             'ValidationTimeout'
-            'PreferredChain' ) | ForEach-Object {
+            'PreferredChain'
+            'UseSerialValidation' ) | ForEach-Object {
 
             if ($_ -in $psbKeys) {
                 $orderParams.$_ = $PSBoundParameters.$_
@@ -196,7 +198,8 @@ function New-PACertificate {
             'Install'
             'DnsSleep'
             'ValidationTimeout'
-            'PreferredChain' ) | ForEach-Object {
+            'PreferredChain'
+            'UseSerialValidation' ) | ForEach-Object {
 
             if ($_ -in $psbKeys) {
                 $setOrderParams.$_ = $PSBoundParameters.$_
@@ -297,6 +300,9 @@ function New-PACertificate {
 
     .PARAMETER Install
         If specified, the certificate generated for this order will be imported to the local computer's Personal certificate store. Using this switch requires running the command from an elevated PowerShell session.
+
+    .PARAMETER UseSerialValidation
+        If specified, the names in the order will be validated individually rather than all at once. This can significantly increase the time it takes to process validations and should only be used for plugins that require it. The plugin's usage guide should indicate whether it is required.
 
     .PARAMETER Force
         If specified, a new certificate order will always be created regardless of the status of a previous order for the same primary domain. Otherwise, the previous order still in progress will be used instead.

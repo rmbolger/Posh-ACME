@@ -19,7 +19,8 @@
   * With a plugin and `-Help`, shows the plugin's help
   * With a plugin and `-Guide`, opens the default browser to the plugin's online guide
   * With a plugin and `-Params`, displays the plugin-specific parameter sets (#151)
-* Certificate orders can now be configured to always generate a new private key using the `AlwaysNewKey` parameter and the old parameters for key replacement have been removed. (#181)
+* Added `AlwaysNewKey` switch to `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder`. This flag tells Posh-ACME to always generate a new private key on renewals. The old parameters for key replacement have been removed. (#181)
+* Added `UseSerialValidation` switch to `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder`. This flag tells Posh-ACME to process the order's authorization challenges serially rather than in parallel. This is primarily useful for providers like DuckDNS that only allow a single TXT record to be written at a time.
 * Added `Complete-PAOrder` which does the final processing steps like downloading the signed cert and updating renewal window for an order that has reached the 'ready' state. This avoids the need to use `New-PACertificate` when doing custom certificate workflows.
 * The PfxPass parameter on order objects is now obfuscated when serialized to disk. (#207)
 * Added `PfxPassSecure` (SecureString) parameter to `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder` which takes precedence over `PfxPass` if specified. (#207)
