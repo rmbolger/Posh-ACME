@@ -15,7 +15,11 @@ Before we begin, let's configure our ACME server to be the Let's Encrypt *Stagin
 Set-PAServer LE_STAGE
 ```
 
-`LE_STAGE` is a shortcut for the Let's Encrypt Staging server's directory URL. You could do the same thing by specifying the actual URL which is https://acme-staging-v02.api.letsencrypt.org/directory. The other currently supported server shortcut is `LE_PROD` for the Let's Encrypt Production server. Any ACMEv2 compliant directory URL will work though.
+> **_NOTE:_** `LE_STAGE` is a shortcut for the Let's Encrypt Staging server's directory URL. You could do the same thing by specifying the actual URL which is https://acme-staging-v02.api.letsencrypt.org/directory and this module should work with any ACMEv2 compliant directory URL. Other currently supported shortcuts include
+> - `LE_PROD` (Let's Encrypt Production)
+> - `BUYPASS_PROD` (BuyPass.com Production)
+> - `BUYPASS_TEST` (BuyPass.com Testing)
+> - `ZEROSSL_PROD` (ZeroSSL.com Production)
 
 Once you set a server, the module will continue to perform future actions against that server until you change it with another call to `Set-PAServer`. The first time you connect to a server, a link to its Terms of Service will be displayed. You should review it before continuing.
 
@@ -27,26 +31,29 @@ The bare minimum you need to request a certificate is just the domain name.
 New-PACertificate site1.example.com
 ```
 
-Since you haven't created an ACME account on this server yet, the command will attempt to create one for you using default settings and you'll get an error about having not agreed to the Terms of Service. Assuming you've reviewed the TOS link from before, add `-AcceptTOS` to the original command to proceed. You only need to do this once when creating a new account. You also probably want to associate an email address with this account so you can receive certificate expiration notifications. So let's do that even though it's not required. *Note: Multiple email addresses per account are supported. Just pass it an array of addresses.*
+Since you haven't created an ACME account on this server yet, the command will attempt to create one for you using default settings and you'll get an error about having not agreed to the Terms of Service. Assuming you've reviewed the TOS link from before, add `-AcceptTOS` to the original command to proceed. You only need to do this once when creating a new account. You also probably want to associate an email address with this account so you can receive certificate expiration notifications. So let's do that even though it's not required.
+
+> **_NOTE:_** Multiple email addresses per account are supported. Just pass it an array of addresses.
 
 ```powershell
 New-PACertificate site1.example.com -AcceptTOS -Contact 'admin@example.com'
 ```
 
-The output of this will have a warning message that you didn't specify a DNS plugin and it's defaulting to the `Manual` plugin. That manual plugin will also be prompting you to create a DNS TXT record to answer the ACME server's validation challenge for the domain.
+Because you didn't specify a plugin, it will default to using the `Manual` DNS plugin. That manual plugin will also be prompting you to create a DNS TXT record to answer the ACME server's validation challenge for the domain.
 
-At this point, you can either `Ctrl-C` to cancel the process and modify your command or go ahead and create the requested TXT record and hit any key to continue. We'll cover plugins next, so for now create the record manually and press a key to continue. If you run into problems creating the TXT record, check out the [Troubleshooting DNS Challenge Validation](https://github.com/rmbolger/Posh-ACME/wiki/Troubleshooting-DNS-Challenge-Validation) wiki page.
+At this point, you can either press `Ctrl+C` to cancel the process and modify your command or go ahead and create the requested TXT record and hit any key to continue. We'll cover plugins next, so for now create the record manually and press a key to continue. If you run into problems creating the TXT record, check out the [Troubleshooting DNS Challenge Validation](https://github.com/rmbolger/Posh-ACME/wiki/Troubleshooting-DNS-Challenge-Validation) wiki page.
 
 The command will sleep for 2 minutes by default to allow the DNS changes to propagate. Then if the ACME server is able to properly validate the TXT record, the final certificate files are generated and the command should output the details of your new certificate. Only a subset of the details are displayed by default. To see them all, run `Get-PACertificate | fl`. The files generated in the output folder should contain the following:
 
 - **cert.cer** (Base64 encoded PEM certificate)
 - **cert.key** (Base64 encoded PEM private key)
 - **cert.pfx** (PKCS12 container with cert+key)
-- **chain.cer** (Base64 encoded PEM with the issuing CA certificate chain)
+- **chain.cer** (Base64 encoded PEM with the issuing CA chain)
+- **chainX.cer** (Base64 encoded PEM with alternate issuing CA chains)
 - **fullchain.cer** (Base64 encoded PEM with cert+chain)
 - **fullchain.pfx** (PKCS12 container with cert+key+chain)
 
-Posh-ACME is only really designed to *obtain* certificates, not deploy them to your web server or service. The certificate details are written to the pipeline so you can either save them to a variable or pipe the output to another command. [Posh-ACME.Deploy](https://github.com/rmbolger/Posh-ACME.Deploy) is a sister module containing some example deployment functions for common services to get you started. But ultimately, it's up to you how you want to deploy your certificates.
+Posh-ACME is only designed to *obtain* certificates, not deploy them to your web server or service. The certificate details are written to the pipeline so you can either save them to a variable or pipe the output to another command. [Posh-ACME.Deploy](https://github.com/rmbolger/Posh-ACME.Deploy) is a sister module containing some example deployment functions for common services to get you started. But ultimately, it's up to you how you want to deploy your certificates.
 
 The password on the PFX files is `poshacme` because we didn't override the default with `-PfxPass` or `-PfxPassSecure`. If you're running PowerShell with elevated privileges on Windows, you can also add the `-Install` switch to automatically import the certificate into the local computer's certificate store.
 
@@ -64,11 +71,13 @@ The first thing to do is figure out which DNS plugin to use and how to use it. S
 Get-PAPlugin
 ```
 
-Most plugins have a detailed usage guide in the project wiki. In these examples, we'll use the AWS Route53 plugin. Here's a quick shortcut to get to the usage guide. This will open the default browser to the page on Windows and just display the URL on non-Windows. *(The usage guides are also stored locally with the module in the Plugins folder. They're Markdown formatted and called `<plugin>-Readme.md`.)*
+Most plugins have a detailed usage guide in the project wiki. In these examples, we'll use the AWS Route53 plugin. Here's a quick shortcut to get to the usage guide. This will open the default browser to the page on Windows and just display the URL on non-Windows.
 
 ```powershell
 Get-PAPlugin Route53 -Guide
 ```
+
+> **_NOTE:_** The usage guides are also stored locally with the module in the Plugins folder. They're Markdown formatted and called `<plugin>-Readme.md`.
 
 Using a plugin will almost always require creating a hashtable with required plugin parameters. To see a quick reference of the available parameter sets try this:
 
@@ -109,7 +118,7 @@ R53UseIAMRole SwitchParameter True
 We can see there are four different parameter sets we can use: `Keys`, `KeysInsecure`, `Profile`, and `IAMRole`. The `Keys` set requires `R53AccessKey` and `R53SecretKey`. These are API credentials for AWS and presumably as an AWS user, you already know how to generate them. The access key is just a normal String variable. But the secret key is a `SecureString` which takes a bit more effort to setup. So let's create the hashtable we need.
 
 ```powershell
-$r53Secret = Read-Host Secret -AsSecureString
+$r53Secret = Read-Host 'Enter Secret' -AsSecureString
 $pArgs = @{R53AccessKey='ABCD1234'; R53SecretKey=$r53Secret}
 ```
 
@@ -137,9 +146,9 @@ New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact 'admin@examp
     -PluginArgs $pArgs -Verbose
 ```
 
-*Note: According to current Let's Encrypt [rate limits](https://letsencrypt.org/docs/rate-limits/), a single certificate can have up to 100 names. The only caveat is that wildcard certs may not contain any SANs that would overlap with the wildcard entry. So you'll get an error if you try to put `*.example.com` and `site1.example.com` in the same cert. But `*.example.com` and `example.com` or `site1.sub1.example.com` are just fine.*
+> **_NOTE:_** According to current Let's Encrypt [rate limits](https://letsencrypt.org/docs/rate-limits/), a single certificate can have up to 100 names. The only caveat is that wildcard certs may not contain any SANs that would overlap with the wildcard entry. So you'll get an error if you try to put `*.example.com` and `site1.example.com` in the same cert. But `*.example.com` and `example.com` or `site1.sub1.example.com` are just fine.
 
-We included the `-Verbose` switch again so we can see what's going on. But normally, that wouldn't be necessary. Assuming everything went well, you should now have a fresh new wildcard cert that required no user interaction.
+We included the `-Verbose` switch again so we can see what's going on. But normally, that wouldn't be necessary. Assuming everything went well, you should now have a fresh new wildcard cert that required no user interaction. Keep in mind, HTTP plugins work the exactly the same way as DNS plugins. They just can't be used to validate wildcard names in certs from Let's Encrypt.
 
 ## Renewals and Deployment
 
@@ -241,7 +250,7 @@ site1.sub1.sub2.example.com | _acme-challenge.site1.sub1.sub2.example.com
 
 You may have noticed that a wildcard name and a non-wildcard for the same root domain have the same challenge record. That's not a mistake and the ACME server does actually expect to get two different values for the same TXT record. What it means for you though is that you only have one CNAME to create for both types of names.
 
-Where do you point the CNAMEs to? It doesn't really matter as long as the ACME server can query it from the Internet and Posh-ACME can create the necessary records there. Some people choose to use the same `_acme-challenge.` prefix for clarity. Some people use a different prefix because their provider doesn't allow names to start with a `_` character. Some people just point all of their CNAMEs to the exact same place. **Just don't point the CNAME at the apex of a domain.** Examples:
+Where do you point the CNAMEs to? It doesn't really matter as long as the ACME server can query it from the Internet and Posh-ACME can create the necessary records there. Some choose to use the same `_acme-challenge.` prefix for clarity. Some use a different prefix because their provider doesn't allow names to start with a `_` character. Some just point all of their CNAMEs to the exact same place. **Just don't point the CNAME at the apex of a domain.** Examples:
 
 Challenge Record | CNAME Target
 --- | ---
@@ -251,11 +260,11 @@ _acme-challenge.example.com | _acme-challenge.validation.example.net
 _acme-challenge.example.com<br>_acme-challenge.sub1.example.com<br>_acme-challenge.sub2.example.com | acme.example.net
 _acme-challenge.example.com | **(BAD)** example.net
 
-**Important:** Don't point too many CNAMES at the same record. Let's Encrypt's ACME implementation can only deal with DNS responses [up to 4096 bytes](https://github.com/letsencrypt/boulder/pull/3467) which is roughly 60-70 TXT records depending on your DNS server and query parameters. If your record is too big, the validations will fail.
+> **_IMPORTANT:_** Don't point too many CNAMES at the same record. Let's Encrypt's ACME implementation can only deal with DNS responses [up to 4096 bytes](https://github.com/letsencrypt/boulder/pull/3467) which is roughly 60-70 TXT records depending on your DNS server and query parameters. If your record is too big, the validations will fail.
 
 ### Testing
 
-You should verify your CNAME got created correctly before you try and use it. If you're inside a business with a split-horizon DNS infrastructure, you might need to explicitly query a public external resolver like CloudFlare's 1.1.1.1. However, some modern firewalls can be configured to prevent this ability. So make sure you can successfully query a known-good external record first.
+You should verify your CNAME got created correctly before you try and use it. If you're inside a business with a split-horizon DNS infrastructure, you might need to explicitly query a public external resolver like CloudFlare's 1.1.1.1. However, some modern firewalls can be configured to prevent this ability. So make sure you can successfully query a known-good external record first. There are also web-based resolvers such as https://www.digwebinterface.com/ if necessary.
 
 ```
 C:\>nslookup -q=CNAME _acme-challenge.example.com. 1.1.1.1
