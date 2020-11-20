@@ -16,7 +16,7 @@ function Register-ArgCompleters {
             [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
         }
     }
-    $PluginCommands = 'New-PACertificate','Submit-ChallengeValidation','Publish-Challenge','Unpublish-Challenge','Save-Challenge','Get-PAPlugin','Set-PAOrder'
+    $PluginCommands = 'New-PACertificate','New-PAOrder','Set-PAOrder','Get-PAPlugin','Publish-Challenge','Save-Challenge','Unpublish-Challenge'
     Register-ArgumentCompleter -CommandName $PluginCommands -ParameterName 'Plugin' -ScriptBlock $PluginNameCompleter
 
     # Account ID
@@ -64,11 +64,11 @@ function Register-ArgCompleters {
         }
     }
 
-    $MainDomainCommands = 'Get-PACertificate','Get-PAOrder','Remove-PAOrder','Set-PAOrder','Submit-Renewal'
+    $MainDomainCommands = 'Get-PACertificate','Get-PAOrder','Get-PAPluginArgs','Remove-PAOrder','Set-PAOrder','Submit-Renewal'
     Register-ArgumentCompleter -CommandName $MainDomainCommands -ParameterName 'MainDomain' -ScriptBlock $MainDomainCompleter
 
     # DirectoryUrl
-    $DirectoryUrlCompleter = {
+    $DirUrlCompleter = {
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
         # combine the existing servers with the available shortcuts to cycle through
@@ -83,5 +83,26 @@ function Register-ArgCompleters {
         }
     }
 
-    Register-ArgumentCompleter -CommandName 'Set-PAServer' -ParameterName 'DirectoryUrl' -ScriptBlock $DirectoryUrlCompleter
+    $DirUrlCommands = 'Set-PAServer','New-PACertificate'
+    Register-ArgumentCompleter -CommandName $DirUrlCommands -ParameterName 'DirectoryUrl' -ScriptBlock $DirUrlCompleter
+
+    $DirUrlCompleterExisting = {
+        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+
+        # combine only the existing servers to cycle through
+        $dirJsonPaths = Join-Path (Get-ConfigRoot) '*\dir.json'
+        $choices = $(
+            Get-Content $dirJsonPaths -Raw | ConvertFrom-Json | Select-Object -Expand location
+        )
+
+        $choices | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
+            [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+        }
+    }
+
+    $DirUrlExistingCommands = 'Get-PAServer','Remove-PAServer'
+    Register-ArgumentCompleter -CommandName $DirUrlExistingCommands -ParameterName 'DirectoryUrl' -ScriptBlock $DirUrlCompleterExisting
+
+
+
 }
