@@ -154,7 +154,7 @@ function New-PAAccount {
     if (-not $respObj.ID) {
         # https://acme-staging-v02.api.letsencrypt.org/acme/acct/xxxxxxxx
         # https://acme-v02.api.letsencrypt.org/acme/acct/xxxxxxxx
-        $acctID = $location.Substring($location.LastIndexOf('/')+1)
+        $acctID = ([Uri]$location).Segments[-1]
     } else {
         $acctID = $respObj.ID.ToString()
     }

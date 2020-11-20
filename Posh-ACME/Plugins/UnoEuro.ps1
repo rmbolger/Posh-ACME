@@ -15,6 +15,8 @@ function Add-DnsTxt {
         $ExtraParams
     )
 
+    Write-Warning "UnoEuro has been renamed to Simply. Please migrate to the Simply plugin as soon as possible. This one may stop working at any time."
+
     $UEApiRoot = 'https://api.unoeuro.com/1'
     $UERequestObj = [PSCustomObject]@{
         'name' = $RecordName
@@ -104,6 +106,8 @@ function Remove-DnsTxt {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    Write-Warning "UnoEuro has been renamed to Simply. Please migrate to the Simply plugin as soon as possible. This one may stop working at any time."
 
     $UEApiRoot = 'https://api.unoeuro.com/1'
     $UEDNSExists = $false
