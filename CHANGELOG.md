@@ -40,6 +40,7 @@ There is a 3.x to 4.x [migration guide](https://github.com/rmbolger/Posh-ACME/wi
 * Added `Quiet` parameter to `Get-PAServer` which will prevent warnings if the specified server was not found.
 * `Remove-PAServer` will now throw a warning instead of an error if the specified server doesn't exist on disk.
 * Orders can now be passed by pipeline to `Submit-ChallengeValidation` and `Submit-OrderFinalize`.
+* ACME protocol web request details have been moved from Verbose to Debug output and cleaned up so they're easier to follow. Web requests made from plugins will still be in Verbose output for the time being.
 
 ### Breaking Changes
 
@@ -48,6 +49,7 @@ There is a 3.x to 4.x [migration guide](https://github.com/rmbolger/Posh-ACME/wi
   * `Unpublish-DnsChallenge` is now `Unpublish-Challenge`
   * `Save-DnsChallenge` is now `Save-Challenge`
   * `Get-DnsPlugins` and `Get-DnsPluginHelp` have been replaced by `Get-PAPlugin`
+  * `Get-PAAuthorizations` is now `Get-PAAuthorization`. The plural function name is still avaialble as an alias but is deprecated and may be removed in a future release.
   * `Invoke-HttpChallengeListener` is deprecated and may be removed in a future release. Users should migrate to the `WebSelfHost` plugin.
 * Parameter Changes
   * All `DnsPlugin` parameters are now `Plugin` with a `DnsPlugin` alias for backwards compatibility. The alias should be considered deprecated and may be removed in a future release.
