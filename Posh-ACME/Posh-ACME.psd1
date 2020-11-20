@@ -98,7 +98,7 @@ PrivateData = @{
 
     PSData = @{
 
-        PreRelease = 'alpha2'
+        PreRelease = 'beta'
 
         # Tags applied to this module. These help with module discovery in online galleries.
         Tags = 'LetsEncrypt','ssl','tls','certificates','acme','Linux','Mac'
@@ -114,7 +114,9 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.0.0-alpha2 (2020-11-12)
+## 4.0.0-beta (2020-11-20)
+
+There is a 3.x to 4.x [migration guide](https://github.com/rmbolger/Posh-ACME/wiki/4.x-FAQ#how-do-i-upgrade-from-3x) in the 4.x FAQ on the wiki. But no changes should be necessary for users with existing certs that are renewing using `Submit-Renewal` unless they were also using the `-NewKey` parameter which has been removed. Orders can now be configured to always generate a new private key using `Set-PAOrder -AlwaysNewKey`.
 
 ### New Features
 
@@ -135,7 +137,9 @@ PrivateData = @{
   * With a plugin and `-Help`, shows the plugin's help
   * With a plugin and `-Guide`, opens the default browser to the plugin's online guide
   * With a plugin and `-Params`, displays the plugin-specific parameter sets (#151)
-* Certificate orders can now be configured to always generate a new private key using the `AlwaysNewKey` parameter and the old parameters for key replacement have been removed. (#181)
+* Added `AlwaysNewKey` switch to `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder`. This flag tells Posh-ACME to always generate a new private key on renewals. The old parameters for key replacement have been removed. (#181)
+* Added `UseSerialValidation` switch to `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder`. This flag tells Posh-ACME to process the order's authorization challenges serially rather than in parallel. This is primarily useful for providers like DuckDNS that only allow a single TXT record to be written at a time.
+* Added `Complete-PAOrder` which does the final processing steps like downloading the signed cert and updating renewal window for an order that has reached the 'ready' state. This avoids the need to use `New-PACertificate` when doing custom certificate workflows.
 * The PfxPass parameter on order objects is now obfuscated when serialized to disk. (#207)
 * Added `PfxPassSecure` (SecureString) parameter to `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder` which takes precedence over `PfxPass` if specified. (#207)
 * Added `DnsAlias` and `OCSPMustStaple` parameters to `Set-PAOrder`. Changing an order's OCSPMustStaple value will throw a warning that it only affects future certificates generated from the order.
@@ -151,21 +155,24 @@ PrivateData = @{
 * Added tab completion for `DirectoryUrl` in `Set-PAServer`.
 * Added `Quiet` parameter to `Get-PAServer` which will prevent warnings if the specified server was not found.
 * `Remove-PAServer` will now throw a warning instead of an error if the specified server doesn't exist on disk.
+* Orders can now be passed by pipeline to `Submit-ChallengeValidation` and `Submit-OrderFinalize`.
 
 ### Breaking Changes
 
-* Function Name Changes
+* Function Changes
   * `Publish-DnsChallenge` is now `Publish-Challenge`
   * `Unpublish-DnsChallenge` is now `Unpublish-Challenge`
   * `Save-DnsChallenge` is now `Save-Challenge`
   * `Get-DnsPlugins` and `Get-DnsPluginHelp` have been replaced by `Get-PAPlugin`
-  * `Invoke-HttpChallengeListener` should be considered deprecated and may be removed in a future release. Users should migrate to the `WebSelfHost` plugin.
-* Parameter Name Changes
+  * `Invoke-HttpChallengeListener` is deprecated and may be removed in a future release. Users should migrate to the `WebSelfHost` plugin.
+* Parameter Changes
   * All `DnsPlugin` parameters are now `Plugin` with a `DnsPlugin` alias for backwards compatibility. The alias should be considered deprecated and may be removed in a future release.
   * The `NoPrefix` switch in Publish/Unpublish-Challenge has been replaced with a `DnsAlias` parameter that will override the `Domain` parameter if specified. "_acme-challenge." will not be automatically added to the `DnsAlias` parameter.
   * `NewKey` has been removed from `Submit-Renewal`
   * `NewKey`/`NewCertKey` have been replaced by `AlwaysNewKey` in `New-PACertificate` and `New-PAOrder`
   * `AlwaysNewKey` has been added to `Set-PAOrder`
+  * `DnsPlugin`, `PluginArgs`, `DnsAlias`, `DnsSleep`, `ValidationTimeout` and `Account` parameters have been removed from `Submit-ChallengeValidation`. The account associated with the order must be the currently active account. The rest of the parameters are read directly from the order object and can be modified in advance with `Set-PAOrder` if necessary.
+  * `Account` parameter has been removed from `Submit-OrderFinalize`. The account associated with the order must be the currently active account.
 
 ### Fixes
 

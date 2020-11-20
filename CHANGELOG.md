@@ -1,4 +1,6 @@
-## 4.0.0-alpha2 (2020-11-12)
+## 4.0.0-beta (2020-11-20)
+
+There is a 3.x to 4.x [migration guide](https://github.com/rmbolger/Posh-ACME/wiki/4.x-FAQ#how-do-i-upgrade-from-3x) in the 4.x FAQ on the wiki. But no changes should be necessary for users with existing certs that are renewing using `Submit-Renewal` unless they were also using the `-NewKey` parameter which has been removed. Orders can now be configured to always generate a new private key using `Set-PAOrder -AlwaysNewKey`.
 
 ### New Features
 
@@ -46,7 +48,7 @@
   * `Unpublish-DnsChallenge` is now `Unpublish-Challenge`
   * `Save-DnsChallenge` is now `Save-Challenge`
   * `Get-DnsPlugins` and `Get-DnsPluginHelp` have been replaced by `Get-PAPlugin`
-  * `Invoke-HttpChallengeListener` should be considered deprecated and may be removed in a future release. Users should migrate to the `WebSelfHost` plugin.
+  * `Invoke-HttpChallengeListener` is deprecated and may be removed in a future release. Users should migrate to the `WebSelfHost` plugin.
 * Parameter Changes
   * All `DnsPlugin` parameters are now `Plugin` with a `DnsPlugin` alias for backwards compatibility. The alias should be considered deprecated and may be removed in a future release.
   * The `NoPrefix` switch in Publish/Unpublish-Challenge has been replaced with a `DnsAlias` parameter that will override the `Domain` parameter if specified. "_acme-challenge." will not be automatically added to the `DnsAlias` parameter.
