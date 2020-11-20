@@ -18,7 +18,7 @@ $pArgs = @{
     SimplyAccount = 'S123456'
     SimplyAPIKey = (Read-Host 'Enter Key' -AsSecureString)
 }
-New-PACertificate example.com -DnsPlugin Simply -PluginArgs $pArgs
+New-PACertificate example.com -Plugin Simply -PluginArgs $pArgs
 ```
 
 ### Any OS
@@ -28,5 +28,5 @@ $pArgs = @{
     SimplyAccount = 'S123456'
     SimplyAPIKeyInsecure = 'xxxxxxxxxxxx'
 }
-New-PACertificate example.com -DnsPlugin Simply -PluginArgs $pArgs
+New-PACertificate example.com -Plugin Simply -PluginArgs $pArgs
 ```

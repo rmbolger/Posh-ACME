@@ -1,4 +1,6 @@
-function Add-DnsTxtSimply {
+function Get-CurrentPluginType { 'dns-01' }
+
+function Add-DnsTxt {
     [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
@@ -89,7 +91,7 @@ function Add-DnsTxtSimply {
     #>
 }
 
-function Remove-DnsTxtSimply {
+function Remove-DnsTxt {
     [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
@@ -173,7 +175,7 @@ function Remove-DnsTxtSimply {
     #>
 }
 
-function Save-DnsTxtSimply {
+function Save-DnsTxt {
     [CmdletBinding()]
     param(
         [Parameter(ValueFromRemainingArguments)]
