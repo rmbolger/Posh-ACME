@@ -135,7 +135,11 @@ Be aware how your particular DNS provider represents zone and record names. Some
 
 ## HTTP Specific Tips and Tricks
 
-*TODO*
+### Validation Timing
+
+When DNS plugins are used, there's a user customizable sleep timer between when the TXT records are published and the module asks the ACME server to validate those records because records are not typically available instantaneously worldwide. However, that sleep timer does not exist when an order is only using HTTP plugins because HTTP resources are typically available instantly.
+
+If your particular HTTP provider requires a delay between when the challenges are published and when they are validated, it would be wise to add that delay in the `Save-HttpChallenge` function of your plugin.
 
 ## Migrating DNS Plugins from 3.x to 4.x
 
