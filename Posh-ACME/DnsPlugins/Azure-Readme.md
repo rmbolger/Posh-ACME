@@ -295,6 +295,20 @@ $azParams = @{
 New-PACertificate test.example.com -DnsPlugin Azure -PluginArgs $azParams
 ```
 
+### Azure Cloud Environments
+
+You'll need to specify the `AZEnvironment` if you need to modify zones that are not in the public Azure Cloud. The currently supported cloud environments are `AzureCloud`, `AzureUSGovernment`, `AzureGermanCloud`, and `AzureChinaCloud`.
+
+```powershell
+$azParams = @{
+  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
+  AZEnvironment='AzureUSGovernment';
+}
+
+# issue a cert
+New-PACertificate test.example.com -DnsPlugin Azure -PluginArgs $azParams
+```
+
 
 ## Workaround for Duplicate Public Zones
 
