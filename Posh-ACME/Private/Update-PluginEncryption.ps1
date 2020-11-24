@@ -20,10 +20,10 @@ function Update-PluginEncryption {
         Set-PAAccount $ID
 
         # grab a copy of all the orders and their associated plugins/args
-        $orderData = Get-PAOrder -List |
+        $orderData = @(Get-PAOrder -List |
             Select-Object MainDomain,
                 Plugin,
-                @{L='PluginArgs';E={Get-PAPluginArgs $_.MainDomain}}
+                @{L='PluginArgs';E={Get-PAPluginArgs $_.MainDomain}})
         Write-Debug "Order data found for $($orderData.Count) orders."
 
         # update and save the account with the new key
@@ -38,9 +38,11 @@ function Update-PluginEncryption {
         $script:Acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force -EA Stop
 
         # re-export all the plugin args
-        Write-Debug ($orderData | ConvertTo-Json)
-        $orderData | ForEach-Object {
-            Export-PluginArgs $_.MainDomain -Plugin $_.Plugin -PluginArgs $_.PluginArgs -IgnoreExisting
+        if ($orderData.Count -gt 0) {
+            Write-Debug ($orderData | ConvertTo-Json)
+            $orderData | ForEach-Object {
+                Export-PluginArgs $_.MainDomain -Plugin $_.Plugin -PluginArgs $_.PluginArgs -IgnoreExisting
+            }
         }
 
         # revert the active account if necessary
