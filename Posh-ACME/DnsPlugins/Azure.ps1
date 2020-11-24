@@ -183,7 +183,7 @@ function Remove-DnsTxtAzure {
         [string]$AZAccessToken,
         [Parameter(ParameterSetName='IMDS',Mandatory)]
         [switch]$AZUseIMDS,
-        [ValidateSet('AzureCloud, AzureUSGovernment, AzureGermanCloud, AzureChinaCloud')]
+        [ValidateSet('AzureCloud', 'AzureUSGovernment', 'AzureGermanCloud', 'AzureChinaCloud')]
         [string]$AZEnvironment = 'AzureCloud',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
