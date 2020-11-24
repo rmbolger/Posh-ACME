@@ -30,7 +30,7 @@ function Add-DnsTxtSimply {
     $foundRecord = $false
 
     Write-Verbose "Finding DNS Zone"
-    if (-not ($domain = Find-SimplyZone $RecordName $SimplyAccount $SimplyAPIKey)) {
+    if (-not ($domain = Find-SimplyZone $RecordName $SimplyAccount $SimplyAPIKeyInsecure)) {
         Write-Verbose "Unable to find matching zone for $recordName."
         throw "Unable to find matching zone for $RecordName."
     }
@@ -39,9 +39,9 @@ function Add-DnsTxtSimply {
     Write-Verbose "Accepted domain $domain and record $recShort"
 
     # check for an existing record
-    Write-Verbose "Running: GET $apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/"
+    Write-Verbose "Running: GET $apiRoot/$SimplyAccount/$SimplyAPIKeyInsecure/my/products/$domain/dns/records/"
     try {
-        $response = Invoke-RestMethod "$apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/" -Method Get -ContentType 'application/json' @script:UseBasic
+        $response = Invoke-RestMethod "$apiRoot/$SimplyAccount/$SimplyAPIKeyInsecure/my/products/$domain/dns/records/" -Method Get -ContentType 'application/json' @script:UseBasic
     }
     catch {
         Write-Debug $_
@@ -58,9 +58,9 @@ function Add-DnsTxtSimply {
 
     if (!$foundRecord) {
         Write-Verbose "Record needs to be created."
-        Write-Verbose "Running: POST $apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/"
+        Write-Verbose "Running: POST $apiRoot/$SimplyAccount/$SimplyAPIKeyInsecure/my/products/$domain/dns/records/"
         Write-Verbose "Record POSTed: $reqObj"
-        Invoke-RestMethod "$apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/" -Method Post -Body $reqObj -ContentType 'application/json' @script:UseBasic | Out-Null
+        Invoke-RestMethod "$apiRoot/$SimplyAccount/$SimplyAPIKeyInsecure/my/products/$domain/dns/records/" -Method Post -Body $reqObj -ContentType 'application/json' @script:UseBasic | Out-Null
     } else {
         Write-Verbose "Record $RecordName with value $TxtValue already exists. Nothing to do."
     }
@@ -114,7 +114,7 @@ function Remove-DnsTxtSimply {
     $foundRecord = $false
 
     Write-Verbose "Finding DNS Zone"
-    if (-not ($domain = Find-SimplyZone $RecordName $SimplyAccount $SimplyAPIKey)) {
+    if (-not ($domain = Find-SimplyZone $RecordName $SimplyAccount $SimplyAPIKeyInsecure)) {
         Write-Verbose "Unable to find matching zone for $recordName."
         throw "Unable to find matching zone for $RecordName."
     }
@@ -123,9 +123,9 @@ function Remove-DnsTxtSimply {
     Write-Verbose "Accepted domain $domain and record $recShort"
 
     # check for an existing record
-    Write-Verbose "Running: GET $apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/"
+    Write-Verbose "Running: GET $apiRoot/$SimplyAccount/$SimplyAPIKeyInsecure/my/products/$domain/dns/records/"
     try {
-        $response = Invoke-RestMethod "$apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/" -Method Get -ContentType 'application/json' @script:UseBasic
+        $response = Invoke-RestMethod "$apiRoot/$SimplyAccount/$SimplyAPIKeyInsecure/my/products/$domain/dns/records/" -Method Get -ContentType 'application/json' @script:UseBasic
     }
     catch {
         Write-Debug $_
@@ -143,8 +143,8 @@ function Remove-DnsTxtSimply {
 
     if ($foundRecord) {
         Write-Verbose "Record is being deleted."
-        Write-Verbose "Running: DELETE $apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/$foundRecord"
-        Invoke-RestMethod "$apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/$foundRecord" -Method Delete -ContentType 'application/json' @script:UseBasic | Out-Null
+        Write-Verbose "Running: DELETE $apiRoot/$SimplyAccount/$SimplyAPIKeyInsecure/my/products/$domain/dns/records/$foundRecord"
+        Invoke-RestMethod "$apiRoot/$SimplyAccount/$SimplyAPIKeyInsecure/my/products/$domain/dns/records/$foundRecord" -Method Delete -ContentType 'application/json' @script:UseBasic | Out-Null
     } else {
         Write-Verbose "Record $RecordName with value $TxtValue does not exist. Nothing to do."
     }
@@ -201,7 +201,7 @@ function Find-SimplyZone {
         [Parameter(Mandatory, Position = 1)]
         [string]$SimplyAccount,
         [Parameter(Mandatory, Position = 2)]
-        [string]$SimplyAPIKey
+        [string]$SimplyAPIKeyInsecure
     )
 
     $apiRoot = 'https://api.simply.com/1'
@@ -230,8 +230,8 @@ function Find-SimplyZone {
         Write-Debug "Checking $zoneTest"
 
         try {
-            Write-Debug "Testing domain: $apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$zoneTest/dns/records/"
-            $domain = Invoke-RestMethod "$apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$zoneTest/dns/records/" -Method Get -ContentType 'application/json' @script:UseBasic
+            Write-Debug "Testing domain: $apiRoot/$SimplyAccount/$SimplyAPIKeyInsecure/my/products/$zoneTest/dns/records/"
+            $domain = Invoke-RestMethod "$apiRoot/$SimplyAccount/$SimplyAPIKeyInsecure/my/products/$zoneTest/dns/records/" -Method Get -ContentType 'application/json' @script:UseBasic
         }
         catch {
             Write-Debug "Error was caught: $_"
