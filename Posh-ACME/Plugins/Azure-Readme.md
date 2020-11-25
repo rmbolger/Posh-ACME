@@ -195,6 +195,8 @@ To get a token for the MSI when running in a VM, Azure Function or App Service -
 
 All authentication methods require specifying `AZSubscriptionId` which is the subscription that contains the DNS zones to modify. Password and Certificate based credentials also require `AZTenantId` which is the Azure AD tenant guid. Additional parameters are outlined in each section below.
 
+> **_NOTE:_** The plugin defaults to using the primary public Azure Cloud. But country and government specific Azure clouds are also supported by specifying the `AZEnvironment` parameter. Supported environments include `AzureCloud` (Default), `AzureUSGovernment`, `AzureGermanCloud`, and `AzureChinaCloud`.
+
 ### Password Credential
 
 There are two parameter sets you can use with password based credentials. The first is used with `AZAppCred`, a PSCredential object, and can only be used from Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The second uses `AZAppUsername` and `AZAppPasswordInsecure` as plain text strings and can be used on any OS.
@@ -294,7 +296,6 @@ $azParams = @{
 # issue a cert
 New-PACertificate example.com -Plugin Azure -PluginArgs $azParams
 ```
-
 
 ## Workaround for Duplicate Public Zones
 

@@ -64,6 +64,17 @@ There is a 3.x to 4.x [migration guide](https://github.com/rmbolger/Posh-ACME/wi
 
 * Using `Get-PAOrder` with `-Refresh` will no longer throw a terminating error if the ACME server returns an error. It will warn and return the cached copy of the order instead.
 
+## 3.20.0 (2020-11-25)
+
+* Azure plugin now supports other Azure cloud environments via the `AZEnvironment` parameter. Supported values are `AzureCloud` (Default), `AzureUSGovernment`, `AzureGermanCloud`, and `AzureChinaCloud`. (#293) (Thanks @InKahootz)
+* Fixed parameter binding and other bugs in Simply plugin. (#294)
+
+## 3.19.0 (2020-11-20)
+
+* Added new DNS plugin [Simply](https://www.simply.com/) who recently changed their name from UnoEuro. Existing users of the UnoEuro plugin should migrate to the Simply plugin as soon as possible because the UnoEuro plugin may stop working if they decommission the old API endpoint.
+* Warnings have been added to the UnoEuro plugin to inform users about migrating to Simply.
+* Updated DNSPod plugin to work with their recent API changes. Existing users will need to generate a new API key from the management console and update the plugin args for their orders. See the [usage guide](https://github.com/rmbolger/Posh-ACME/blob/master/Posh-ACME/DnsPlugins/DNSPod-Readme.md) for details.
+* Fixed a bug in `New-PAAccount` when the account location URI had query parameters. (Thanks @KaiWalter)
 
 ## 3.18.1 (2020-11-12)
 

@@ -21,51 +21,41 @@ function Add-DnsTxt {
         $SimplyAPIKeyInsecure = [pscredential]::new('a',$SimplyAPIKey).GetNetworkCredential().Password
     }
 
-    $apiRoot = 'https://api.simply.com/1'
-    $reqObj = @{
-        'name' = $RecordName
-        'type' = 'TXT'
-        'data' = $TxtValue
-        'ttl' = 3600
-        'priority' = 0
-    } | ConvertTo-Json
-    $foundRecord = $false
+    $apiRoot = "https://api.simply.com/1/$SimplyAccount/$SimplyAPIKeyInsecure/my/products"
 
-    Write-Verbose "Finding DNS Zone"
-    if (-not ($domain = Find-SimplyZone $RecordName $SimplyAccount $SimplyAPIKey)) {
-        Write-Verbose "Unable to find matching zone for $recordName."
-        throw "Unable to find matching zone for $RecordName."
-    }
-    Write-Verbose "Found domain $domain."
-    $recShort = ($RecordName -ireplace [regex]::Escape($domain), [string]::Empty).TrimEnd('.')
-    Write-Verbose "Accepted domain $domain and record $recShort"
+    $zone,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $apiRoot
 
-    # check for an existing record
-    Write-Verbose "Running: GET $apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/"
-    try {
-        $response = Invoke-RestMethod "$apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/" -Method Get -ContentType 'application/json' @script:UseBasic
-    }
-    catch {
-        Write-Debug $_
-        throw
-    }
-
-    Write-Verbose "Response: $response"
-    foreach ($rec in $response.records) {
-        Write-Debug "Records loop: $rec looking for $recShort"
-        if ($rec.name -eq $recShort) {
-            $foundRecord = $true
-        }
-    }
-
-    if (!$foundRecord) {
-        Write-Verbose "Record needs to be created."
-        Write-Verbose "Running: POST $apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/"
-        Write-Verbose "Record POSTed: $reqObj"
-        Invoke-RestMethod "$apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/" -Method Post -Body $reqObj -ContentType 'application/json' @script:UseBasic | Out-Null
+    if ($rec) {
+        Write-Verbose "Record $RecordName already contains $TxtValue. Nothing to do."
     } else {
-        Write-Verbose "Record $RecordName with value $TxtValue already exists. Nothing to do."
+
+        # build the new record object
+        $body = @{
+            name = $RecordName # Simply allows FQDNs here even though they return short names
+            type = 'TXT'
+            data = $TxtValue
+            ttl = 60
+        } | ConvertTo-Json
+        Write-Debug "New Record body: `n$body"
+
+        Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
+        try {
+            $postParams = @{
+                Uri = "$apiRoot/$zone/dns/records"
+                Method = 'POST'
+                Body = $body
+                ContentType = 'application/json'
+                ErrorAction = 'Stop'
+            }
+            Invoke-RestMethod @postParams @script:UseBasic | Out-Null
+        }
+        catch {
+            Write-Debug $_
+            throw
+        }
+
     }
+
 
     <#
     .SYNOPSIS
@@ -77,7 +67,7 @@ function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
     .PARAMETER SimplyAccount
-        The accountname of the account used to connect to Simply API (e.g. EU123456)
+        The account name of the account used to connect to Simply API (e.g. S123456)
     .PARAMETER SimplyAPIKey
         The API Key associated with the account as a SecureString value. This should only be used on Windows or any OS with PowerShell 6.2+.
     .PARAMETER SimplyAPIKeyInsecure
@@ -112,56 +102,41 @@ function Remove-DnsTxt {
         $SimplyAPIKeyInsecure = [pscredential]::new('a',$SimplyAPIKey).GetNetworkCredential().Password
     }
 
-    $apiRoot = 'https://api.simply.com/1'
-    $foundRecord = $false
+    $apiRoot = "https://api.simply.com/1/$SimplyAccount/$SimplyAPIKeyInsecure/my/products"
 
-    Write-Verbose "Finding DNS Zone"
-    if (-not ($domain = Find-SimplyZone $RecordName $SimplyAccount $SimplyAPIKey)) {
-        Write-Verbose "Unable to find matching zone for $recordName."
-        throw "Unable to find matching zone for $RecordName."
-    }
-    Write-Verbose "Found $domain."
-    $recShort = ($RecordName -ireplace [regex]::Escape($domain), [string]::Empty).TrimEnd('.')
-    Write-Verbose "Accepted domain $domain and record $recShort"
+    $zone,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $apiRoot
 
-    # check for an existing record
-    Write-Verbose "Running: GET $apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/"
-    try {
-        $response = Invoke-RestMethod "$apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/" -Method Get -ContentType 'application/json' @script:UseBasic
-    }
-    catch {
-        Write-Debug $_
-        throw
-    }
+    if ($rec) {
 
-    Write-Verbose "Response: $response"
-    foreach ($rec in $response.records) {
-        Write-Debug "Records loop: $rec looking for $recShort"
-        if ($rec.name -eq $recShort) {
-            Write-Debug "Found $($rec.name) with id $($rec.record_id)"
-            $foundRecord = $rec.record_id
+        Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
+        try {
+            $delParams = @{
+                Uri = "$apiRoot/$zone/dns/records/$($rec.record_id)"
+                Method = 'DELETE'
+                ErrorAction = 'Stop'
+            }
+            Invoke-RestMethod @delParams @script:UseBasic | Out-Null
         }
-    }
+        catch {
+            Write-Debug $_
+            throw
+        }
 
-    if ($foundRecord) {
-        Write-Verbose "Record is being deleted."
-        Write-Verbose "Running: DELETE $apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/$foundRecord"
-        Invoke-RestMethod "$apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$domain/dns/records/$foundRecord" -Method Delete -ContentType 'application/json' @script:UseBasic | Out-Null
     } else {
-        Write-Verbose "Record $RecordName with value $TxtValue does not exist. Nothing to do."
+        Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     }
 
     <#
     .SYNOPSIS
         Removes a DNS TXT record from Simply.
     .DESCRIPTION
-        Use Simply api to remove a TXT record from a Simply DNS zone.
+        Use Simply API to remove a TXT record from a Simply DNS zone.
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
     .PARAMETER TxtValue
         The value of the TXT record.
     .PARAMETER SimplyAccount
-        The accountname of the account used to connect to Simply API (e.g. EU123456)
+        The account name of the account used to connect to Simply API (e.g. S123456)
     .PARAMETER SimplyAPIKey
         The API Key associated with the account as a SecureString value. This should only be used on Windows or any OS with PowerShell 6.2+.
     .PARAMETER SimplyAPIKeyInsecure
@@ -195,67 +170,83 @@ function Save-DnsTxt {
 # Helper Functions
 ############################
 
-function Find-SimplyZone {
+function Get-SimplyTXTRecord {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory, Position = 0)]
+        [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
-        [Parameter(Mandatory, Position = 1)]
-        [string]$SimplyAccount,
-        [Parameter(Mandatory, Position = 2)]
-        [string]$SimplyAPIKey
+        [Parameter(Mandatory,Position=1)]
+        [string]$TxtValue,
+        [Parameter(Mandatory,Position=2)]
+        [string]$ApiRoot
     )
-
-    $apiRoot = 'https://api.simply.com/1'
 
     # setup a module variable to cache the record to zone mapping
     # so it's quicker to find later
     if (!$script:SimplyRecordZones) { $script:SimplyRecordZones = @{} }
 
     # check for the record in the cache
-    if ($script:SimplyRecordZones.ContainsKey($RecordName)) {
-        Write-Verbose "UEZone test already ran once. Using cache to speed up process."
-        return $script:SimplyRecordZones.$RecordName
-    }
+    $zone = $script:SimplyRecordZones.$RecordName
 
-    # We need to find the closest/deepest
-    # sub-zone that would hold the record rather than just adding it to the apex. So for something
-    # like _acme-challenge.site1.sub1.sub2.example.com, we'd look for zone matches in the following
-    # order:
-    # - site1.sub1.sub2.example.com
-    # - sub1.sub2.example.com
-    # - sub2.example.com
-    # - example.com
-    $pieces = $RecordName.Split('.')
-    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
-        Write-Debug "Checking $zoneTest"
+    if (-not $zone) {
+        # find the zone for the closest/deepest sub-zone that would contain the record.
+        $pieces = $RecordName.Split('.')
+        for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+            $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
+            Write-Debug "Checking $zoneTest"
 
-        try {
-            Write-Debug "Testing domain: $apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$zoneTest/dns/records/"
-            $domain = Invoke-RestMethod "$apiRoot/$SimplyAccount/$SimplyAPIKey/my/products/$zoneTest/dns/records/" -Method Get -ContentType 'application/json' @script:UseBasic
-        }
-        catch {
-            Write-Debug "Error was caught: $_"
-            # re-throw anything except a 404 because it means that something is very wrong.
-            # Simply API returns code 400 no matter if it's wrong APIKey, Account or DNSZone. Therefore it's up to the next if-statement to sort it out.
-            if (404 -eq $_.Exception.Response.StatusCode.value__) {
-                Write-Debug "Error was 404. Throwing error."
-                throw
+            try {
+                $response = Invoke-RestMethod "$apiRoot/$zoneTest/dns" -EA Stop @script:UseBasic
             }
-            Write-Debug "Error was not 404 and will carry on."
-            continue
-        }
+            catch {
+                # We're expecting 404 errors here for zones that aren't actually the main domain.
+                # So ignore them and throw anything else.
+                if (404 -ne $_.Exception.Response.StatusCode.value__) {
+                    Write-Debug "$_"
+                    throw
+                }
+                continue
+            }
 
-        Write-Debug "Test: $domain"
-        if ($domain.status -eq '200') {
-            Write-Verbose "Test complete. Accecpted: $zoneTest"
-            $script:SimplyRecordZones.$RecordName = $zoneTest
-            return $zoneTest
-        } else {
-            Write-Verbose "Found $zoneTest, but status was $($domain.status)"
+            if ($response.status -eq 200) {
+                $script:SimplyRecordZones.$RecordName = $zoneTest
+                $zone = $zoneTest
+            } else {
+                Write-Debug "Simply Response: `n$($response | ConvertTo-Json)"
+                throw "Unexpected response from Simply: $($response.message)."
+            }
         }
     }
 
-    return $null
+    if ($RecordName -eq $zone) {
+        $recShort = '@'
+    } else {
+        $recShort = ($RecordName -ireplace [regex]::Escape($zone), [string]::Empty).TrimEnd('.')
+    }
+
+    # query the zone records and check for the one we care about
+    try {
+        $response = Invoke-RestMethod "$apiRoot/$zone/dns/records" -EA Stop @script:UseBasic
+    }
+    catch {
+        Write-Debug "$_"
+        throw
+    }
+
+    if ($response.status -eq 200) {
+
+        $rec = $response.records | Where-Object {
+            $_.type -eq 'TXT' -and
+            $_.name -eq $recShort -and
+            $_.data -eq $TxtValue
+        }
+
+        # return the zone name and the record
+        return $zone,$rec
+
+    } else {
+        Write-Debug "Simply Response: `n$($response | ConvertTo-Json)"
+        throw "Unexpected response from Simply: $($response.message)."
+    }
+
 }

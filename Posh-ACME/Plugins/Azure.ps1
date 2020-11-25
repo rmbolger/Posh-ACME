@@ -33,6 +33,8 @@ function Add-DnsTxt {
         [string]$AZAccessToken,
         [Parameter(ParameterSetName='IMDS',Mandatory)]
         [switch]$AZUseIMDS,
+        [ValidateSet('AzureCloud', 'AzureUSGovernment', 'AzureGermanCloud', 'AzureChinaCloud')]
+        [string]$AZEnvironment = 'AzureCloud',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -66,7 +68,7 @@ function Add-DnsTxt {
     Write-Verbose "Sending updated $($rec.name)"
     Write-Debug $recBody
     try {
-        $response = Invoke-RestMethod "https://management.azure.com$($rec.id)?api-version=2018-03-01-preview" `
+        $response = Invoke-RestMethod "$($script:AZEnvironment.ResourceManagerUrl)$($rec.id)?api-version=2018-03-01-preview" `
             -Method Put -Body $recBody -Headers $script:AZToken.AuthHeader `
             -ContentType 'application/json' @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
@@ -115,6 +117,9 @@ function Add-DnsTxt {
 
     .PARAMETER AZUseIMDS
         If specified, the module will attempt to authenticate using the Azure Instance Metadata Service (IMDS). This will only work if the system is running within Azure and has been assigned a Managed Service Identity (MSI).
+
+    .PARAMETER AZEnvironment
+        The Azure cloud environment to use. Defaults to AzureCloud.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -180,6 +185,8 @@ function Remove-DnsTxt {
         [string]$AZAccessToken,
         [Parameter(ParameterSetName='IMDS',Mandatory)]
         [switch]$AZUseIMDS,
+        [ValidateSet('AzureCloud', 'AzureUSGovernment', 'AzureGermanCloud', 'AzureChinaCloud')]
+        [string]$AZEnvironment = 'AzureCloud',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -213,7 +220,7 @@ function Remove-DnsTxt {
     if ($txtVals.Count -eq 0) {
         Write-Verbose "Deleting $($rec.name). No values left."
         try {
-            Invoke-RestMethod "https://management.azure.com$($rec.id)?api-version=2018-03-01-preview" `
+            Invoke-RestMethod "$($script:AZEnvironment.ResourceManagerUrl)$($rec.id)?api-version=2018-03-01-preview" `
                 -Method Delete -Headers $script:AZToken.AuthHeader @script:UseBasic | Out-Null
             return
         } catch { throw }
@@ -225,7 +232,7 @@ function Remove-DnsTxt {
     Write-Verbose "Sending updated $($rec.name)"
     Write-Debug $recBody
     try {
-        $response = Invoke-RestMethod "https://management.azure.com$($rec.id)?api-version=2018-03-01-preview" `
+        $response = Invoke-RestMethod "$($script:AZEnvironment.ResourceManagerUrl)$($rec.id)?api-version=2018-03-01-preview" `
             -Method Put -Body $recBody -Headers $script:AZToken.AuthHeader `
             -ContentType 'application/json' @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
@@ -273,6 +280,9 @@ function Remove-DnsTxt {
 
     .PARAMETER AZUseIMDS
         If specified, the module will attempt to authenticate using the Azure Instance Metadata Service (IMDS). This will only work if the system is running within Azure and has been assigned a Managed Service Identity (MSI).
+
+    .PARAMETER AZEnvironment
+        The Azure cloud environment to use. Defaults to AzureCloud.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -344,8 +354,8 @@ function ConvertFrom-AccessToken {
     $claims = $payload | ConvertFrom-Base64Url | ConvertFrom-Json -EA Stop
 
     # make sure the audience claim is correct
-    if (-not $claims.aud -or $claims.aud -ne 'https://management.core.windows.net/') {
-        throw "The provided access token has missing or incorrect audience claim. Expected: https://management.core.windows.net/"
+    if (-not $claims.aud -or $claims.aud -ne "$($script:AZEnvironment.ManagementUrl)/") {
+        throw "The provided access token has missing or incorrect audience claim. Expected: $($script:AZEnvironment.ManagementUrl)/"
     }
 
     # make sure the token hasn't expired
@@ -389,9 +399,13 @@ function Connect-AZTenant {
         [string]$AZAccessToken,
         [Parameter(ParameterSetName='IMDS',Mandatory)]
         [switch]$AZUseIMDS,
+        [ValidateSet('AzureCloud', 'AzureUSGovernment', 'AzureGermanCloud', 'AzureChinaCloud')]
+        [string]$AZEnvironment = 'AzureCloud',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraConnectParams
     )
+
+    Set-AZEnvironment $AZEnvironment
 
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/v1-oauth2-client-creds-grant-flow
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials
@@ -416,7 +430,7 @@ function Connect-AZTenant {
         # https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/how-to-use-vm-token#get-a-token-using-azure-powershell
         try {
             Write-Debug "Authenticating with Instance Metadata Service (IMDS)"
-            $queryString = "api-version=2018-02-01&resource=$([uri]::EscapeDataString('https://management.core.windows.net/'))"
+            $queryString = "api-version=2018-02-01&resource=$([uri]::EscapeDataString(""$($script:AZEnvironment.ManagementUrl)/""))"
             $token = Invoke-RestMethod "http://169.254.169.254/metadata/identity/oauth2/token?$queryString" `
                 -Headers @{Metadata='true'} @script:UseBasic -EA Stop
         } catch { throw }
@@ -431,10 +445,10 @@ function Connect-AZTenant {
         Write-Debug "Authenticating with password based credential"
         $clientId = [uri]::EscapeDataString($AZAppUsername)
         $clientSecret = [uri]::EscapeDataString($AZAppPasswordInsecure)
-        $resource = [uri]::EscapeDataString('https://management.core.windows.net/')
+        $resource = [uri]::EscapeDataString("$($script:AZEnvironment.ManagementUrl)/")
         $authBody = "grant_type=client_credentials&client_id=$clientId&client_secret=$clientSecret&resource=$resource"
         try {
-            $token = Invoke-RestMethod "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token" `
+            $token = Invoke-RestMethod "$($script:AZEnvironment.ActiveDirectoryUrl)/$($AZTenantId)/oauth2/token" `
                 -Method Post -Body $authBody @script:UseBasic -EA Stop
         } catch { throw }
 
@@ -514,7 +528,7 @@ function Connect-AZTenant {
         Write-Debug "Authenticating with certificate based credential"
         $clientId = [uri]::EscapeDataString($AZAppUsername)
         $assertType = [uri]::EscapeDataString('urn:ietf:params:oauth:client-assertion-type:jwt-bearer')
-        $resource = [uri]::EscapeDataString('https://management.core.windows.net/')
+        $resource = [uri]::EscapeDataString("$($script:AZEnvironment.ManagementUrl)/")
 
         # build the JWT
         $jwtHead = @{
@@ -523,7 +537,7 @@ function Connect-AZTenant {
             x5t = ConvertTo-Base64Url -Bytes $cert.GetCertHash()
         }
         $jwtClaim = @{
-            aud = "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token"
+            aud = "$($script:AZEnvironment.ActiveDirectoryUrl)/$($AZTenantId)/oauth2/token"
             nbf = [DateTimeOffset]::Now.ToUnixTimeSeconds().ToString()
             exp = ([DateTimeOffset]::Now.ToUnixTimeSeconds() + 3600).ToString()
             iss = $AZAppUsername
@@ -537,7 +551,7 @@ function Connect-AZTenant {
 
         $authBody = "grant_type=client_credentials&client_id=$clientId&resource=$resource&client_assertion_type=$assertType&client_assertion=$jwt"
         try {
-            $token = Invoke-RestMethod "https://login.microsoftonline.com/$($AZTenantId)/oauth2/token" `
+            $token = Invoke-RestMethod "$($script:AZEnvironment.ActiveDirectoryUrl)/$($AZTenantId)/oauth2/token" `
                 -Method Post -Body $authBody @script:UseBasic -EA Stop
         } catch { throw }
     }
@@ -575,7 +589,7 @@ function Get-AZZoneId {
     # subscription. There's also no way to filter the list server side and the maximum results
     # per query is 100. So we basically have to keep querying until there's no 'nextLink' in
     # the response.
-    $url = "https://management.azure.com/subscriptions/$($AZSubscriptionId)/providers/Microsoft.Network/dnszones?api-version=2018-03-01-preview"
+    $url = "$($script:AZEnvironment.ResourceManagerUrl)/subscriptions/$($AZSubscriptionId)/providers/Microsoft.Network/dnszones?api-version=2018-03-01-preview"
     $zones = @()
     do {
         Write-Debug "Querying zones list page"
@@ -651,7 +665,7 @@ function Get-AZTxtRecord {
     # query the specific record we're looking to modify
     Write-Verbose "Querying $RecordName"
     try {
-        $rec = Invoke-RestMethod "https://management.azure.com$($recID)?api-version=2018-03-01-preview" `
+        $rec = Invoke-RestMethod "$($script:AZEnvironment.ResourceManagerUrl)$($recID)?api-version=2018-03-01-preview" `
             -Headers $script:AZToken.AuthHeader @script:UseBasic
     } catch {}
 
@@ -662,4 +676,47 @@ function Get-AZTxtRecord {
         $rec = @{id=$recID; name=$relName; properties=@{fqdn="$RecordName."; TXTRecords=@()}}
         return $rec
     }
+}
+
+function Set-AZEnvironment {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory,Position=0)]
+        [ValidateSet('AzureCloud', 'AzureUSGovernment', 'AzureGermanCloud', 'AzureChinaCloud')]
+        [string]
+        $azEnvironment
+    )
+    # The documentation for the endpoints is scattered across the developer guides for the different clouds on MSDN
+    # But the most consolidated place was in the azure-cli repo
+    # https://github.com/Azure/azure-cli/blob/dev/src/azure-cli-core/azure/cli/core/cloud.py
+
+    $AzureCloud = @{
+        ManagementUrl = "https://management.core.windows.net"
+        ResourceManagerUrl = "https://management.azure.com"
+        ActiveDirectoryUrl = "https://login.microsoftonline.com"
+    }
+    $AzureUSGovernment = @{
+        ManagementUrl = "https://management.core.usgovcloudapi.net"
+        ResourceManagerUrl = "https://management.usgovcloudapi.net"
+        ActiveDirectoryUrl = "https://login.microsoftonline.us"
+    }
+    $AzureGermanCloud = @{
+        ManagementUrl = "https://management.core.cloudapi.de"
+        ResourceManagerUrl= "https://management.microsoftazure.de"
+        ActiveDirectoryUrl = "https://login.microsoftonline.de"
+    }
+    $AzureChinaCloud = @{
+        ManagementUrl = "https://management.core.chinacloudapi.cn"
+        ResourceManagerUrl = "https://management.chinacloudapi.cn"
+        ActiveDirectoryUrl = "https://login.chinacloudapi.cn"
+    }
+
+    $CloudEnvironments = @{
+        AzureCloud = $AzureCloud
+        AzureUSGovernment = $AzureUSGovernment
+        AzureGerman = $AzureGermanCloud
+        AzureChinaCloud = $AzureChinaCloud
+    }
+    
+    $script:AZEnvironment = $CloudEnvironments[$azEnvironment]
 }
