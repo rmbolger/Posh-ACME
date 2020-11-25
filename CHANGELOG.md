@@ -1,3 +1,8 @@
+## 3.20.0 (2020-11-25)
+
+* Azure plugin now supports other Azure cloud environments via the `AZEnvironment` parameter. Supported values are `AzureCloud` (Default), `AzureUSGovernment`, `AzureGermanCloud`, and `AzureChinaCloud`. (#293) (Thanks @InKahootz)
+* Fixed parameter binding and other bugs in Simply plugin. (#294)
+
 ## 3.19.0 (2020-11-20)
 
 * Added new DNS plugin [Simply](https://www.simply.com/) who recently changed their name from UnoEuro. Existing users of the UnoEuro plugin should migrate to the Simply plugin as soon as possible because the UnoEuro plugin may stop working if they decommission the old API endpoint.
