@@ -677,26 +677,26 @@ function Set-AZEnvironment {
     # But the most consolidated place was in the azure-cli repo
     # https://github.com/Azure/azure-cli/blob/dev/src/azure-cli-core/azure/cli/core/cloud.py
 
-    $AzureCloud = [AZCloud]::new(
-        "https://management.core.windows.net",
-        "https://management.azure.com",
-        "https://login.microsoftonline.com"
-    )
-    $AzureUSGovernment = [AZCloud]::new(
-        "https://management.core.usgovcloudapi.net",
-        "https://management.usgovcloudapi.net",
-        "https://login.microsoftonline.us"
-    )
-    $AzureGermanCloud = [AZCloud]::new(
-        "https://management.core.cloudapi.de",
-        "https://management.microsoftazure.de",
-        "https://login.microsoftonline.de"
-    )
-    $AzureChinaCloud = [AZCloud]::new(
-        "https://management.core.chinacloudapi.cn",
-        "https://management.chinacloudapi.cn",
-        "https://login.chinacloudapi.cn"
-    )
+    $AzureCloud = @{
+        ManagementUrl = "https://management.core.windows.net"
+        ResourceManagerUrl = "https://management.azure.com"
+        ActiveDirectoryUrl = "https://login.microsoftonline.com"
+    }
+    $AzureUSGovernment = @{
+        ManagementUrl = "https://management.core.usgovcloudapi.net"
+        ResourceManagerUrl = "https://management.usgovcloudapi.net"
+        ActiveDirectoryUrl = "https://login.microsoftonline.us"
+    }
+    $AzureGermanCloud = @{
+        ManagementUrl = "https://management.core.cloudapi.de"
+        ResourceManagerUrl= "https://management.microsoftazure.de"
+        ActiveDirectoryUrl = "https://login.microsoftonline.de"
+    }
+    $AzureChinaCloud = @{
+        ManagementUrl = "https://management.core.chinacloudapi.cn"
+        ResourceManagerUrl = "https://management.chinacloudapi.cn"
+        ActiveDirectoryUrl = "https://login.chinacloudapi.cn"
+    }
 
     $CloudEnvironments = @{
         AzureCloud = $AzureCloud
@@ -706,20 +706,4 @@ function Set-AZEnvironment {
     }
     
     $script:AZEnvironment = $CloudEnvironments[$azEnvironment]
-}
-
-class AZCloud {
-    [string]$ManagementUrl
-    [string]$ResourceManagerUrl
-    [string]$ActiveDirectoryUrl
-
-    AZCloud(
-        [string]$management,
-        [string]$resourceManager,
-        [string]$ad
-    ){
-        $this.ManagementUrl = $management
-        $this.ResourceManagerUrl = $resourceManager
-        $this.ActiveDirectoryUrl = $ad
-    }
 }
