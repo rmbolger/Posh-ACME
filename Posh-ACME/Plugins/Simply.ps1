@@ -75,7 +75,7 @@ function Add-DnsTxt {
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
-        Add-DnsTxtSimply '_acme-challenge.example.com' 'txt-value' 'S123456' 'key-value'
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'S123456' 'key-value'
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -144,7 +144,7 @@ function Remove-DnsTxt {
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
-        Remove-DnsTxtSimply '_acme-challenge.example.com' 'txt-value' 'S123456' 'key-value'
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'S123456' 'key-value'
 
         Removes a TXT record from the specified site with the specified value.
     #>
