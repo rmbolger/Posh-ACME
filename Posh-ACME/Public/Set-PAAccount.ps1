@@ -164,7 +164,7 @@ function Set-PAAccount {
                 $response = Invoke-ACME $header $payloadJson $acct -EA Stop
             } catch { throw }
 
-            $respObj = ($response.Content | ConvertFrom-Json -Depth 5)
+            $respObj = ($response.Content | ConvertFrom-Json)
 
             # update the things that could have changed
             $acct.status = $respObj.status
@@ -234,7 +234,7 @@ function Set-PAAccount {
                 $response = Invoke-ACME $header $payloadJson $acct -EA Stop
             } catch { throw }
 
-            $respObj = ($response.Content | ConvertFrom-Json -Depth 5)
+            $respObj = ($response.Content | ConvertFrom-Json)
             if ($respObj.status -eq 'valid') {
                 # update the account with the new key
                 $acct.key = $newKey | ConvertTo-Jwk

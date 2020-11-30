@@ -58,7 +58,7 @@ function Update-PAOrder {
                 return
             }
 
-            $respObj = $response.Content | ConvertFrom-Json -Depth 5
+            $respObj = $response.Content | ConvertFrom-Json
 
             # update the things that could have changed
             $order.status = $respObj.status
@@ -83,7 +83,7 @@ function Update-PAOrder {
 
         # make a copy of the order so we can tweak it without messing up
         # our existing copy and swap PfxPass for PfxPassB64U
-        $orderCopy = $order | ConvertTo-Json -Depth 10 | ConvertFrom-Json -Depth 5
+        $orderCopy = $order | ConvertTo-Json -Depth 10 | ConvertFrom-Json
         $orderCopy | Add-Member 'PfxPassB64U' ($order.PfxPass | ConvertTo-Base64Url)
         $orderCopy.PSObject.Properties.Remove('PfxPass')
 

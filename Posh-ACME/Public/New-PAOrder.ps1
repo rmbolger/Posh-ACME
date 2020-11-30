@@ -124,7 +124,7 @@ function New-PAOrder {
     } catch { throw }
 
     # process the response
-    $order = $response.Content | ConvertFrom-Json -Depth 5
+    $order = $response.Content | ConvertFrom-Json
     $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
 
     # fix any dates that may have been parsed by PSCore's JSON serializer

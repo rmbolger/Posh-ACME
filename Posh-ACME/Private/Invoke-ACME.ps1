@@ -136,7 +136,7 @@ function Invoke-ACME {
         # ACME uses RFC7807, Problem Details for HTTP APIs
         # https://tools.ietf.org/html/rfc7807
         # So a JSON parseable error object should be in the response body.
-        try { $acmeError = $body | ConvertFrom-Json -Depth 5 }
+        try { $acmeError = $body | ConvertFrom-Json }
         catch {
             # Old endpoints won't necessarily throw rfc7807 bodies
             # for 404 errors. So we're going to fake them.

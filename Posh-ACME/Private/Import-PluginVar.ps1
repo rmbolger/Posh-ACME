@@ -16,7 +16,7 @@ function Import-PluginVar {
 
         # import the existing file
         Write-Debug "Loading saved plugin vars"
-        $pVars = Get-Content $pVarFile -Raw | ConvertFrom-Json -Depth 5
+        $pVars = Get-Content $pVarFile -Raw | ConvertFrom-Json
 
         # return the variable requested if it exists
         if ($VarName -in $pVars.PSObject.Properties.Name) {
