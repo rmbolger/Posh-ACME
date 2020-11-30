@@ -24,7 +24,7 @@ function ConvertFrom-Jwk {
 
         if ($PSCmdlet.ParameterSetName -eq 'JSON') {
             try {
-                $Jwk = $JwkJson | ConvertFrom-Json -EA Stop
+                $Jwk = $JwkJson | ConvertFrom-Json -Depth 5 -EA Stop
             } catch { throw }
         }
 

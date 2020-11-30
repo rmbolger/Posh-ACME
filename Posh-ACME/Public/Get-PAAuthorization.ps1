@@ -46,7 +46,7 @@ function Get-PAAuthorization {
             try {
                 $header = @{alg=$Account.alg; kid=$Account.location;nonce=$script:Dir.nonce;url=$AuthUrl}
                 $response = Invoke-ACME $header ([String]::Empty) $Account -EA Stop
-                $auth = $response.Content | ConvertFrom-Json
+                $auth = $response.Content | ConvertFrom-Json -Depth 5
             } catch [AcmeException] {
                 if ($_.Exception.Data.status -eq 404) {
                     Write-Warning "Authorization not found on server. $($_.Exception.Data.detail)"

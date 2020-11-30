@@ -47,7 +47,7 @@ function Update-PAServer {
             try {
                 $response = Invoke-WebRequest $DirectoryUrl -EA Stop -Verbose:$false @script:UseBasic
             } catch { throw }
-            $dirObj = $response.Content | ConvertFrom-Json
+            $dirObj = $response.Content | ConvertFrom-Json -Depth 5
 
             # process the response
             if ($dirObj -is [pscustomobject] -and 'newAccount' -in $dirObj.PSObject.Properties.name) {

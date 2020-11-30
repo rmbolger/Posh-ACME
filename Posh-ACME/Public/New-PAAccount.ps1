@@ -124,7 +124,7 @@ function New-PAAccount {
         $eabPayload = $header.jwk | ConvertTo-Json -Compress
 
         $payload.externalAccountBinding =
-            New-Jws $hmacKey $eabHeader $eabPayload | ConvertFrom-Json
+            New-Jws $hmacKey $eabHeader $eabPayload | ConvertFrom-Json -Depth 5
     }
 
     # convert it to json
@@ -143,7 +143,7 @@ function New-PAAccount {
         catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
-    $respObj = $response.Content | ConvertFrom-Json
+    $respObj = $response.Content | ConvertFrom-Json -Depth 5
 
     # So historically, LE/Boulder returns the raw account ID value as a property in the JSON
     # output for new account requests. But the finalized RFC 8555 does not require this

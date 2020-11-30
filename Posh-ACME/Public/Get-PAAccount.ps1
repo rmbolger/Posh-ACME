@@ -52,7 +52,7 @@ function Get-PAAccount {
             # read the contents of each accounts's acct.json
             Write-Debug "Loading PAAccount list from disk"
             $rawFiles = Get-ChildItem "$((Get-DirFolder))\*\acct.json" | Get-Content -Raw
-            $accts = $rawFiles | ConvertFrom-Json | Sort-Object id | ForEach-Object {
+            $accts = $rawFiles | ConvertFrom-Json -Depth 5 | Sort-Object id | ForEach-Object {
 
                     # insert the type name and send the results to the pipeline
                     $_.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
@@ -92,7 +92,7 @@ function Get-PAAccount {
                 # check if it exists
                 if (Test-Path $acctFile -PathType Leaf) {
                     Write-Debug "Loading PAAccount $ID from disk"
-                    $acct = Get-ChildItem $acctFile | Get-Content -Raw | ConvertFrom-Json
+                    $acct = Get-Content $acctFile -Raw | ConvertFrom-Json -Depth 5
                     $acct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
                 } else {
                     return $null

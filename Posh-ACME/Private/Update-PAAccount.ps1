@@ -54,7 +54,7 @@ function Update-PAAccount {
             $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
         } catch { throw }
 
-        $respObj = $response.Content | ConvertFrom-Json
+        $respObj = $response.Content | ConvertFrom-Json -Depth 5
 
         # update the things that could have changed
         $acct.status = $respObj.status

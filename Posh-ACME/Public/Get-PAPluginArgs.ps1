@@ -43,7 +43,7 @@ function Get-PAPluginArgs {
             # Despite being exported as a hashtable, it comes back in as a PSCustomObject
             # And while there's -AsHashtable in PS 6+, we can't rely on it until we
             # drop support for PS 5.1.
-            $pDataSafe = Get-Content $pDataFile -Raw -Encoding utf8 -EA Ignore | ConvertFrom-Json
+            $pDataSafe = Get-Content $pDataFile -Raw -Encoding utf8 -EA Ignore | ConvertFrom-Json -Depth 5
 
             # determine whether we're using a custom key
             $encParam = @{}

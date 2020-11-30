@@ -31,7 +31,7 @@ function Get-PAOrder {
             # read the contents of each order's order.json
             Write-Debug "Loading PAOrder list from disk"
             $rawOrders = Get-ChildItem "$($script:AcctFolder)\*\order.json" | Get-Content -Raw
-            $orders = $rawOrders | ConvertFrom-Json | Sort-Object MainDomain | ForEach-Object {
+            $orders = $rawOrders | ConvertFrom-Json -Depth 5 | Sort-Object MainDomain | ForEach-Object {
 
                 # fix any dates that may have been parsed by PSCore's JSON serializer
                 $_.expires = Repair-ISODate $_.expires
@@ -69,7 +69,7 @@ function Get-PAOrder {
                 if (Test-Path $orderFile -PathType Leaf) {
 
                     Write-Debug "Loading PAOrder from disk"
-                    $order = Get-ChildItem $orderFile | Get-Content -Raw | ConvertFrom-Json
+                    $order = Get-Content $orderFile -Raw | ConvertFrom-Json -Depth 5
                     $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
 
                     # fix any dates that may have been parsed by PSCore's JSON serializer

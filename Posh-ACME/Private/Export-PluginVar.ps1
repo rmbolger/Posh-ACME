@@ -17,7 +17,7 @@ function Export-PluginVar {
     if (Test-Path -Path $pVarFile -PathType Leaf) {
         # import the existing file
         Write-Debug "Loading saved plugin vars"
-        $pVars = Get-Content $pVarFile -Raw | ConvertFrom-Json
+        $pVars = Get-Content $pVarFile -Raw | ConvertFrom-Json -Depth 5
     } else {
         # create an empty object
         $pVars = [pscustomobject]@{}
