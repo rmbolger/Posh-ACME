@@ -75,13 +75,13 @@ function Update-PAServer {
 
                 # save to disk
                 Write-Debug "Saving PAServer to disk"
-                $dirObj | ConvertTo-Json | Out-File $dirFile -Force -EA Stop
+                $dirObj | ConvertTo-Json -Depth 5 | Out-File $dirFile -Force -EA Stop
 
                 # overwrite the in-memory copy if we're actually updating the current one
                 if ($UpdatingCurrent) { $script:Dir = $dirObj }
 
             } else {
-                Write-Debug ($dirObj | ConvertTo-Json)
+                Write-Debug ($dirObj | ConvertTo-Json -Depth 5)
                 throw "Unexpected ACME response querying directory. Check with -Debug."
             }
 
@@ -100,7 +100,7 @@ function Update-PAServer {
 
             # save to disk
             Write-Debug "Saving PAServer to disk"
-            $dirObj | ConvertTo-Json | Out-File $dirFile -Force -EA Stop
+            $dirObj | ConvertTo-Json -Depth 5 | Out-File $dirFile -Force -EA Stop
 
         }
 

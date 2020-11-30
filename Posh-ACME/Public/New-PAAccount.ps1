@@ -121,14 +121,14 @@ function New-PAAccount {
             url = $script:Dir.newAccount
         }
 
-        $eabPayload = $header.jwk | ConvertTo-Json -Compress
+        $eabPayload = $header.jwk | ConvertTo-Json -Depth 5 -Compress
 
         $payload.externalAccountBinding =
             New-Jws $hmacKey $eabHeader $eabPayload | ConvertFrom-Json
     }
 
     # convert it to json
-    $payloadJson = $payload | ConvertTo-Json -Compress
+    $payloadJson = $payload | ConvertTo-Json -Depth 5 -Compress
 
     # send the request
     try {
@@ -189,7 +189,7 @@ function New-PAAccount {
     if (!(Test-Path $script:AcctFolder -PathType Container)) {
         New-Item -ItemType Directory -Path $script:AcctFolder -Force -EA Stop | Out-Null
     }
-    $acct | ConvertTo-Json | Out-File (Join-Path $script:AcctFolder 'acct.json') -Force -EA Stop
+    $acct | ConvertTo-Json -Depth 5 | Out-File (Join-Path $script:AcctFolder 'acct.json') -Force -EA Stop
 
     return $acct
 

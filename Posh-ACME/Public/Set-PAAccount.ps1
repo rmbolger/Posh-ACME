@@ -157,7 +157,7 @@ function Set-PAAccount {
             }
 
             # convert it to json
-            $payloadJson = $payload | ConvertTo-Json -Compress
+            $payloadJson = $payload | ConvertTo-Json -Depth 5 -Compress
 
             # send the request
             try {
@@ -223,7 +223,7 @@ function Set-PAAccount {
             $innerPayloadJson = @{
                 account = $acct.location;
                 oldKey  = $acct.Key | ConvertFrom-Jwk | ConvertTo-Jwk -PublicOnly
-            } | ConvertTo-Json -Compress
+            } | ConvertTo-Json -Depth 5 -Compress
 
             # build the outer payload by creating a signed JWS from
             # the inner header/payload and new key
@@ -248,7 +248,7 @@ function Set-PAAccount {
         if ($saveAccount) {
             # save it to disk
             $acctFolder = Join-Path (Get-DirFolder) $acct.id
-            $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force -EA Stop
+            $acct | ConvertTo-Json -Depth 5 | Out-File (Join-Path $acctFolder 'acct.json') -Force -EA Stop
         }
     }
 

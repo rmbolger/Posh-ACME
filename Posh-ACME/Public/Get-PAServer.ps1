@@ -51,7 +51,7 @@ function Get-PAServer {
                 # check if it exists
                 if (Test-Path $dirFile -PathType Leaf) {
                     Write-Debug "Loading PAServer from disk"
-                    $dir = Get-Content $dirFile-Raw | ConvertFrom-Json
+                    $dir = Get-Content $dirFile -Raw | ConvertFrom-Json
                     $dir.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
                 } else {
                     if (-not $Quiet) {

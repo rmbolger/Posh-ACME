@@ -28,5 +28,5 @@ function Export-PluginVar {
 
     # save the updated file
     Write-Debug "Saving updated plugin vars"
-    $pVars | ConvertTo-Json | Out-File $pVarFile
+    $pVars | ConvertTo-Json -Depth 5 | Out-File $pVarFile
 }

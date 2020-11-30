@@ -35,11 +35,11 @@ function Update-PluginEncryption {
             $script:Acct | Add-Member 'sskey' $null -Force
         }
         $acctFolder = Join-Path (Get-DirFolder) $ID
-        $script:Acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force -EA Stop
+        $script:Acct | ConvertTo-Json -Depth 5 | Out-File (Join-Path $acctFolder 'acct.json') -Force -EA Stop
 
         # re-export all the plugin args
         if ($orderData.Count -gt 0) {
-            Write-Debug ($orderData | ConvertTo-Json)
+            Write-Debug ($orderData | ConvertTo-Json -Depth 5)
             $orderData | ForEach-Object {
                 Export-PluginArgs $_.MainDomain -Plugin $_.Plugin -PluginArgs $_.PluginArgs -IgnoreExisting
             }

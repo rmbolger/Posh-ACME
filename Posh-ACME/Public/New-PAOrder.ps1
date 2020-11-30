@@ -116,7 +116,7 @@ function New-PAOrder {
     foreach ($d in $Domain) {
         $payload.identifiers += @{type='dns';value=$d}
     }
-    $payloadJson = $payload | ConvertTo-Json -Compress
+    $payloadJson = $payload | ConvertTo-Json -Depth 5 -Compress
 
     # send the request
     try {

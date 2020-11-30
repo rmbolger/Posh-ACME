@@ -87,7 +87,7 @@ function Update-PAOrder {
         $orderCopy | Add-Member 'PfxPassB64U' ($order.PfxPass | ConvertTo-Base64Url)
         $orderCopy.PSObject.Properties.Remove('PfxPass')
 
-        $orderCopy | ConvertTo-Json | Out-File (Join-Path $orderFolder 'order.json') -Force -EA Stop
+        $orderCopy | ConvertTo-Json -Depth 10 | Out-File (Join-Path $orderFolder 'order.json') -Force -EA Stop
     }
 
 }

@@ -85,9 +85,9 @@ function ConvertTo-Jwk {
         }
 
         if ($AsPrettyJson) {
-            return ($jwkObj | ConvertTo-Json)
+            return ($jwkObj | ConvertTo-Json -Depth 5)
         } elseif ($AsJson) {
-            return ($jwkObj | ConvertTo-Json -Compress)
+            return ($jwkObj | ConvertTo-Json -Depth 5 -Compress)
         } else {
             return $jwkObj
         }
