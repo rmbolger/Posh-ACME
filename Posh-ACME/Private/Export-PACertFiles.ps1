@@ -110,6 +110,12 @@ function Export-PACertFiles {
         }
 
         # build the appropriate chain and fullchain files
+        if (-not (Test-Path $certFile -PathType Leaf)) {
+            throw "Cert file not found: $certFile"
+        }
+        if (-not (Test-Path $selectedChainFile -PathType Leaf)) {
+            throw "Chain file not found: $selectedChainFile"
+        }
         Copy-Item $selectedChainFile $chainFile
         $fullchainLines = (Get-Content $certFile) + (Get-Content $selectedChainFile)
         Export-Pem $fullchainLines $fullchainFile
