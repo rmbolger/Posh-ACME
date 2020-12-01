@@ -45,14 +45,14 @@ function Set-CertValidation {
         Write-Debug "Disabling cert validation"
         if ($script:SkipCertSupported) {
             $script:UseBasic.SkipCertificateCheck = $true
-        } elseif ([Net.ServicePointManager]::ServerCertificateValidationCallback) {
+        } elseif (-not [Net.ServicePointManager]::ServerCertificateValidationCallback) {
             [CertValidation]::Ignore()
         }
     } else {
         Write-Debug "Enabling cert validation"
         if ($script:SkipCertSupported) {
             $script:UseBasic.SkipCertificateCheck = $false
-        } else {
+        } elseif ([Net.ServicePointManager]::ServerCertificateValidationCallback) {
             [CertValidation]::Restore()
         }
     }
