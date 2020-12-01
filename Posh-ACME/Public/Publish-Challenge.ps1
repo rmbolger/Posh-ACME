@@ -16,7 +16,7 @@ function Publish-Challenge {
     )
 
     # dot source the plugin file
-    $pluginDetail = $script:Plugins.Plugin
+    $pluginDetail = $script:Plugins.$Plugin
     . $pluginDetail.Path
 
     # All plugins in $script:Plugins should have been validated during module
