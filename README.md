@@ -4,21 +4,20 @@ An [ACME v2 (RFC 8555)](https://tools.ietf.org/html/rfc8555) client implemented 
 
 # Notable Features
 
-- ACME v2 protocol support which allows generating wildcard certificates (*.example.com)
+- RFC 8555 (ACME v2) support which allows generating wildcard certificates (*.example.com)
+- [RFC 8738](https://tools.ietf.org/html/rfc8738) support for generating certificates for IP addresses (if your ACME CA supports it).
 - Single command for new certs, `New-PACertificate`
 - Easy renewals via `Submit-Renewal`
 - RSA and ECC private keys supported for accounts and certificates
+- Built-in validation plugins for [DNS](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) and HTTP based challenges. (pull requests welcome)
 - Support for using existing certificate request (CSR)
-- Account key rollover support
+- PEM and PFX output files
+- No elevated Windows privileges required *(unless using -Install switch)*
+- Cross platform PowerShell support. [(FAQ)](https://github.com/rmbolger/Posh-ACME/wiki/Frequently-Asked-Questions-(FAQ)#does-posh-acme-work-cross-platform-on-powershell-core)- Account key rollover support
 - [OCSP Must-Staple](https://scotthelme.co.uk/ocsp-must-staple/) support
-- DNS challenge plugins for [various DNS providers](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) (pull requests welcome)
 - DNS challenge [CNAME support](https://github.com/rmbolger/Posh-ACME/blob/master/Tutorial.md#advanced-dns-challenge-aliases)
 - Multiple accounts supported per certificate authority which allows different certs to have different contact emails
 - Help system for DNS plugins using `Get-PAPlugin`
-- PEM and PFX output files
-- No elevated Windows privileges required *(unless using -Install switch)*
-- Cross platform PowerShell Core support! [(FAQ)](https://github.com/rmbolger/Posh-ACME/wiki/Frequently-Asked-Questions-(FAQ)#does-posh-acme-work-cross-platform-on-powershell-core)
-- Manual HTTP challenge support ([Guide](https://github.com/rmbolger/Posh-ACME/wiki/%28Advanced%29-Manual-HTTP-Challenge-Validation))
 - External Account Binding support for CAs that require it
 - Preferred Chain support to use alternative CA trust chains
 
