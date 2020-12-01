@@ -1,5 +1,10 @@
 #Requires -Version 5.1
 
+[CmdletBinding()]
+param(
+    $Branch = 'master'
+)
+
 # set the user module path based on edition and platform
 if ('PSEdition' -notin $PSVersionTable.Keys -or $PSVersionTable.PSEdition -eq 'Desktop') {
     $installpath = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules'
@@ -35,7 +40,7 @@ if ([String]::IsNullOrWhiteSpace($PSScriptRoot)) {
     }
 
     # likely running from online, so download
-    $url = 'https://github.com/rmbolger/Posh-ACME/archive/master.zip'
+    $url = "https://github.com/rmbolger/Posh-ACME/archive/$Branch.zip"
     Write-Host "Downloading latest version of Posh-ACME from $url" -ForegroundColor Cyan
     $file = Join-Path ([system.io.path]::GetTempPath()) 'Posh-ACME.zip'
     $webclient = New-Object System.Net.WebClient
@@ -50,8 +55,8 @@ if ([String]::IsNullOrWhiteSpace($PSScriptRoot)) {
     Write-Host "Removing any old copy" -ForegroundColor Cyan
     Remove-Item "$installpath\Posh-ACME" -Recurse -Force -EA Ignore
     Write-Host "Renaming folder" -ForegroundColor Cyan
-    Copy-Item "$installpath\Posh-ACME-master\Posh-ACME" $installpath -Recurse -Force -EA Continue
-    Remove-Item "$installpath\Posh-ACME-master" -recurse -confirm:$false
+    Copy-Item "$installpath\Posh-ACME-$Branch\Posh-ACME" $installpath -Recurse -Force -EA Continue
+    Remove-Item "$installpath\Posh-ACME-$Branch" -recurse -confirm:$false
     Import-Module -Name Posh-ACME -Force
 } else {
     # running locally
