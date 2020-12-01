@@ -21,6 +21,7 @@ function Publish-Challenge {
 
     # All plugins in $script:Plugins should have been validated during module
     # load. So we're not going to do much plugin-specific validation here.
+    Write-Verbose "Publishing challenge for Domain $Domain with Token $Token using Plugin $Plugin and DnsAlias '$DnsAlias'."
 
     # sanitize the $Domain if it was passed in as a wildcard on accident
     if ($Domain -and $Domain.StartsWith('*.')) {
