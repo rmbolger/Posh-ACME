@@ -30,6 +30,8 @@ function Export-PACertFiles {
         # Download the cert+chain if the order has not expired.
         if ((Get-DateTimeOffsetNow) -lt [DateTimeOffset]::Parse($order.expires)) {
 
+            Write-Verbose "Downloading signed certificate"
+
             # build the header for the Post-As-Get request
             $header = @{
                 alg   = $acct.alg
@@ -104,6 +106,8 @@ function Export-PACertFiles {
             if (-not $selectedChainFile) {
                 Write-Warning "The preferred chain issuer, $($order.PreferredChain), was not found. Using the default chain."
                 $selectedChainFile = $chain0File
+            } else {
+                Write-Verbose "Using preferred chain issuer, $($order.PreferredChain)."
             }
         } else {
             $selectedChainFile = $chain0File
