@@ -41,6 +41,7 @@ There is a 3.x to 4.x [migration guide](https://github.com/rmbolger/Posh-ACME/wi
 * `Remove-PAServer` will now throw a warning instead of an error if the specified server doesn't exist on disk.
 * Orders can now be passed by pipeline to `Submit-ChallengeValidation` and `Submit-OrderFinalize`.
 * ACME protocol web request details have been moved from Verbose to Debug output and cleaned up so they're easier to follow. Web requests made from plugins will still be in Verbose output for the time being.
+* Experimental support for IP address identifiers ([RFC 8738](https://tools.ietf.org/html/rfc8738)) in new orders. This allows you to get a cert for an IP address if your ACME server supports it.
 
 ### Breaking Changes
 

@@ -111,10 +111,31 @@ function New-PAOrder {
         url   = $script:Dir.newOrder;
     }
 
+    $reIPv4 = [regex]'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
+
     # build the payload object
     $payload = @{identifiers=@()}
     foreach ($d in $Domain) {
-        $payload.identifiers += @{type='dns';value=$d}
+
+        # IP identifiers (RFC8738) are an extension to the original ACME protocol
+        # https://tools.ietf.org/html/rfc8738
+        #
+        # So we have to distinguish between domain FQDNs and IPv4/v6 addresses
+        # and send the appropriate identifier type for each one. We don't care
+        # if the IP address entered is actually valid or not, only that it is
+        # parsable as an IP address and should be sent as one rather than a
+        # DNS name.
+
+        if ($d -match $reIPv4 -or $d -like '*:*') {
+            Write-Debug "$d identified as IP address. Attempting to parse."
+            $ip = [ipaddress]$d
+
+            $payload.identifiers += @{type='ip';value=$ip.ToString()}
+        }
+        else {
+            $payload.identifiers += @{type='dns';value=$d}
+        }
+
     }
     $payloadJson = $payload | ConvertTo-Json -Depth 5 -Compress
 

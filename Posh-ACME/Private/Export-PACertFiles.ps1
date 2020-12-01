@@ -50,18 +50,25 @@ function Export-PACertFiles {
 
             # Do some basic validation to make sure we got what we were expecting.
             $cert = Import-Pem -InputString ($pems[0] -join "`n")
-            $altNames = $cert.GetSubjectAlternativeNames() |
-                Where-Object { $_[0] -eq [Org.BouncyCastle.Asn1.X509.GeneralName]::DnsName } |
-                ForEach-Object { $_[1] }
+            $altNames = $cert.GetSubjectAlternativeNames() | ForEach-Object {
+                if ($_[0] -eq [Org.BouncyCastle.Asn1.X509.GeneralName]::DnsName) {
+                    $_[1]
+                }
+                elseif ($_[0] -eq [Org.BouncyCastle.Asn1.X509.GeneralName]::IPAddress) {
+                    # gets returns as a hex string like "#01010101" that we need to parse
+                    ([ipaddress]([byte[]] -split ($_[1].Substring(1) -replace '..', '0x$& '))).ToString()
+                }
+            }
+            Write-Debug "SANs in downloaded cert: $(($altNames -join ', '))"
             $orderNames = @($Order.MainDomain) + @($Order.SANs)
             $orderNames | ForEach-Object {
                 if ($_ -notin $altNames) {
-                    throw "$_ was requested but is not present in the list of Subject Alternative Names in the signed certificate."
+                    Write-Error "$_ was requested but is not present in the list of Subject Alternative Names in the signed certificate."
                 }
             }
             $altNames | ForEach-Object {
                 if ($_ -notin $orderNames) {
-                    throw "An extra name, $_, is present in the list of Subject Alternative Names in the signed certificate, but was not requested as part of the order."
+                    Write-Error "An extra name, $_, is present in the list of Subject Alternative Names in the signed certificate, but was not requested as part of the order."
                 }
             }
 
