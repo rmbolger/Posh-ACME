@@ -26,6 +26,10 @@ New-Item -ItemType Directory -Force -Path $installpath | out-null
 
 if ([String]::IsNullOrWhiteSpace($PSScriptRoot)) {
 
+    if ([String]::IsNullOrWhiteSpace($remoteBranch)) {
+        $remoteBranch = 'master'
+    }
+
     # GitHub now requires TLS 1.2
     # https://blog.github.com/2018-02-23-weak-cryptographic-standards-removed/
     $currentMaxTls = [Math]::Max([Net.ServicePointManager]::SecurityProtocol.value__,[Net.SecurityProtocolType]::Tls.value__)
@@ -35,7 +39,7 @@ if ([String]::IsNullOrWhiteSpace($PSScriptRoot)) {
     }
 
     # likely running from online, so download
-    $url = 'https://github.com/rmbolger/Posh-ACME/archive/master.zip'
+    $url = "https://github.com/rmbolger/Posh-ACME/archive/$remoteBranch.zip"
     Write-Host "Downloading latest version of Posh-ACME from $url" -ForegroundColor Cyan
     $file = Join-Path ([system.io.path]::GetTempPath()) 'Posh-ACME.zip'
     $webclient = New-Object System.Net.WebClient
@@ -50,8 +54,8 @@ if ([String]::IsNullOrWhiteSpace($PSScriptRoot)) {
     Write-Host "Removing any old copy" -ForegroundColor Cyan
     Remove-Item "$installpath\Posh-ACME" -Recurse -Force -EA Ignore
     Write-Host "Renaming folder" -ForegroundColor Cyan
-    Copy-Item "$installpath\Posh-ACME-master\Posh-ACME" $installpath -Recurse -Force -EA Continue
-    Remove-Item "$installpath\Posh-ACME-master" -recurse -confirm:$false
+    Copy-Item "$installpath\Posh-ACME-$remoteBranch\Posh-ACME" $installpath -Recurse -Force -EA Continue
+    Remove-Item "$installpath\Posh-ACME-$remoteBranch" -recurse -confirm:$false
     Import-Module -Name Posh-ACME -Force
 } else {
     # running locally
