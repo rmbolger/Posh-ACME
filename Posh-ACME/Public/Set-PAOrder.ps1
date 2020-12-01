@@ -214,11 +214,14 @@ function Set-PAOrder {
                 $order | Update-PAOrder -SaveOnly
             }
 
-            $cert = Get-PACertificate $order.MainDomain
-            if ($rewriteCer -and $cert) {
-                Export-PACertFiles $order
-            } elseif ($rewritePfx -and $cert) {
-                Export-PACertFiles $order -PfxOnly
+            # re-export certs if necessary
+            if ($rewriteCer -or $rewritePfx) {
+                $cert = Get-PACertificate $order.MainDomain
+                if ($rewriteCer -and $cert) {
+                    Export-PACertFiles $order
+                } elseif ($rewritePfx -and $cert) {
+                    Export-PACertFiles $order -PfxOnly
+                }
             }
 
         } else {
