@@ -15,49 +15,30 @@ function Get-PAPlugin {
         [switch]$Params
     )
 
-    $pluginDir = Join-Path $MyInvocation.MyCommand.Module.ModuleBase 'Plugins'
-
     # return the list of plugin details if a specific plugin wasn't specified
     if ([String]::IsNullOrWhiteSpace($Plugin)) {
-
-        $pluginNames = (Get-ChildItem (Join-Path $pluginDir *.ps1) -Exclude '_Example-*.ps1').BaseName | Sort-Object
-        $pluginList = $pluginNames | ForEach-Object {
-            [pscustomobject]@{
-                Plugin = $_
-                ChallengeType = Get-PluginType $_
-            }
-        }
-
-        return $pluginList
+        $script:Plugins.Values | Sort-Object Name
+        return
     }
 
-    $pluginFile = Join-Path $pluginDir "$Plugin.ps1"
+    $pluginDetail = $script:Plugins.$Plugin
 
-    # get the correctly cased file plugin name in case the param isn't correct
-    # so it outputs properly and GitHub guide links work
-    $Plugin = (Get-ChildItem (Join-Path $pluginDir *.ps1) -Include "$Plugin.ps1").BaseName
+    if ('Basic' -eq $PSCmdlet.ParameterSetName) {
+        # return specific plugin details
+        return $pluginDetail
+    }
 
     # dot source the plugin
-    . $pluginFile
+    . $pluginDetail.Path
 
-    # grab the challenge type and the associated add command
-    $chalType = Get-PluginType $Plugin
-    if ('dns-01' -eq $chalType) {
+    # get a reference to the associated add command
+    if ('dns-01' -eq $pluginDetail.ChallengeType) {
         $cmd = Get-Command Add-DnsTxt
     } else {
         $cmd = Get-Command Add-HttpChallenge
     }
 
-    if ('Basic' -eq $PSCmdlet.ParameterSetName) {
-
-        # return specific plugin details
-        [pscustomobject]@{
-            Plugin = $Plugin
-            ChallengeType = $chalType
-        }
-    }
-
-    elseif ('Params' -eq $PSCmdlet.ParameterSetName) {
+    if ('Params' -eq $PSCmdlet.ParameterSetName) {
 
         # define the set of parameter names to ignore
         $ignoreParams = @('RecordName','TxtValue','Domain','Token','Body') + [Management.Automation.PSCmdlet]::CommonParameters +
@@ -98,7 +79,7 @@ function Get-PAPlugin {
         # the future.
         # https://github.com/PowerShell/PowerShell/issues/7201
 
-        $url = "https://github.com/rmbolger/Posh-ACME/blob/master/Posh-ACME/Plugins/$($Plugin)-Readme.md"
+        $url = "https://github.com/rmbolger/Posh-ACME/blob/master/Posh-ACME/Plugins/$($pluginDetail.Name)-Readme.md"
 
         try {
             # launch the browser to the guide
@@ -107,15 +88,17 @@ function Get-PAPlugin {
             # just return the URL
             $url
         }
+        return
     }
 
     elseif ('Help' -eq $PSCmdlet.ParameterSetName) {
 
-        if ('dns-01' -eq $chalType) {
+        if ('dns-01' -eq $pluginDetail.ChallengeType) {
             Get-Help Add-DnsTxt
         } else {
             Get-Help Add-HttpChallenge
         }
+        return
     }
 
 

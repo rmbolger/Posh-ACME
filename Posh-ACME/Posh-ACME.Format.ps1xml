@@ -206,6 +206,26 @@
                 </TableRowEntries>
             </TableControl>
         </View>
+        <View>
+            <Name>PAPluginDetail</Name>
+            <ViewSelectedBy>
+                <TypeName>PoshACME.PAPluginDetail</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader/>
+                    <TableColumnHeader/>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem><PropertyName>Name</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>ChallengeType</PropertyName></TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
     </ViewDefinitions>
 
     <Controls>

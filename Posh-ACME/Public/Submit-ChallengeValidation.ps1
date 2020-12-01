@@ -96,7 +96,7 @@ function Submit-ChallengeValidation {
             if ($auth.status -eq 'pending') {
 
                 # Determine which challenge to publish based on the plugin type
-                $chalType = Get-PluginType $Order.Plugin[$i]
+                $chalType = $script:Plugins.($Order.Plugin[$i]).ChallengeType
                 $challenge = $auth.challenges | Where-Object { $_.type -eq $chalType }
                 if (-not $challenge) {
                     throw "$($auth.fqdn) authorization contains no challenges that match $($Order.Plugin[$i]) plugin type, $chalType"
@@ -176,7 +176,8 @@ function Submit-ChallengeValidation {
                     }
 
                     # sleep while DNS changes propagate if there were DNS challenges published
-                    if ($Order.DnsSleep -gt 0 -and 'dns-01' -in ($uniquePluginsUsed | Get-PluginType)) {
+                    $uniqueChalTypes = $script:Plugins[$uniquePluginsUsed].ChallengeType
+                    if ($Order.DnsSleep -gt 0 -and 'dns-01' -in $uniqueChalTypes) {
                         Write-Verbose "Sleeping for $($Order.DnsSleep) seconds while DNS change(s) propagate"
                         Start-SleepProgress $Order.DnsSleep -Activity "Waiting for DNS to propagate"
                     }

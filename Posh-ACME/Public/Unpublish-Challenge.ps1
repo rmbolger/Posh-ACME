@@ -16,18 +16,11 @@ function Unpublish-Challenge {
     )
 
     # dot source the plugin file
-    $pluginDir = Join-Path $MyInvocation.MyCommand.Module.ModuleBase 'Plugins'
-    . (Join-Path $pluginDir "$Plugin.ps1")
+    $pluginDetail = $script:Plugins.Plugin
+    . $pluginDetail.Path
 
-    # get the validation type
-    if (-not (Get-Command 'Get-CurrentPluginType' -EA Ignore)) {
-        try { throw 'Plugin is missing Get-CurrentPluginType function. Unable to continue.' }
-        catch { $PSCmdlet.ThrowTerminatingError($_) }
-    }
-    if (($chalType = Get-CurrentPluginType) -notin 'dns-01','http-01') {
-        try { throw 'Plugin sent unrecognized challenge type.' }
-        catch { $PSCmdlet.ThrowTerminatingError($_) }
-    }
+    # All plugins in $script:Plugins should have been validated during module
+    # load. So we're not going to do much plugin-specific validation here.
 
     # sanitize the $Domain if it was passed in as a wildcard on accident
     if ($Domain -and $Domain.StartsWith('*.')) {
@@ -36,13 +29,7 @@ function Unpublish-Challenge {
     }
 
     # do stuff appropriate for the challenge type
-    if ('dns-01' -eq $chalType) {
-
-        # check for the Remove command that should exist now from the plugin
-        if (-not (Get-Command 'Remove-DnsTxt' -EA Ignore)) {
-            try { throw "Plugin is missing Remove-DnsTxt function. Unable to continue." }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
-        }
+    if ('dns-01' -eq $pluginDetail.ChallengeType) {
 
         # determine the appropriate record name
         if (-not [String]::IsNullOrWhiteSpace($DnsAlias)) {
@@ -61,12 +48,6 @@ function Unpublish-Challenge {
 
     } else { # http-01 is the only other challenge type we support at the moment
 
-        # check for the Remove command that should exist now from the plugin
-        if (-not (Get-Command 'Remove-HttpChallenge' -EA Ignore)) {
-            try { throw "Plugin is missing Remove-HttpChallenge function. Unable to continue." }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
-        }
-
         $keyAuth = Get-KeyAuthorization $Token $Account
 
         # call the function with the required parameters and splatting the rest
@@ -74,10 +55,6 @@ function Unpublish-Challenge {
         Remove-HttpChallenge -Domain $Domain -Token $Token -Body $keyAuth @PluginArgs
 
     }
-
-
-
-
 
 
 

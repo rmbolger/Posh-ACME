@@ -55,23 +55,21 @@ function Export-PluginArgs {
         $uniquePlugins = @($Plugin | Sort-Object -Unique)
 
         # Get all of the plugin specific parameter names for the current plugin list
-        $pluginDir = Join-Path $MyInvocation.MyCommand.Module.ModuleBase 'Plugins'
         $paramNames = foreach ($p in $uniquePlugins) {
 
             Write-Debug "Attempting to load plugin $p"
 
-            # validate the plugin and get its challenge type
-            try { $chalType = Get-PluginType $p }
-            catch {
-                Write-Error $_.Exception.Message
+            $pluginDetail = $script:Plugins.$p
+            if (-not $pluginDetail) {
+                Write-Error "$p plugin not found or was invalid."
                 continue
             }
 
             # dot source the plugin file
-            . (Join-Path $pluginDir "$p.ps1")
+            . $pluginDetail.Path
 
             # grab a reference to the appropriate Add command
-            if ('dns-01' -eq $chalType) {
+            if ('dns-01' -eq $pluginDetail.ChallengeType) {
                 $cmd = Get-Command Add-DnsTxt
             } else {
                 $cmd = Get-Command Add-HttpChallenge

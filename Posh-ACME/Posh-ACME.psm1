@@ -49,7 +49,6 @@ $script:WellKnownDirs = @{
 $script:HEADER_NONCE = 'Replay-Nonce'
 $script:USER_AGENT = "Posh-ACME/4.0.0-beta PowerShell/$($PSVersionTable.PSVersion)"
 $script:COMMON_HEADERS = @{'Accept-Language'='en-us,en;q=0.5'}
-$script:PluginTypes = @{}
 
 # Add an appropriate platform to the user-agent if possible
 if ($IsWindows -or $PSVersionTable.PSEdition -eq 'Desktop') {
@@ -77,6 +76,8 @@ $script:UseBasic = @{}
 if ('UseBasicParsing' -in (Get-Command Invoke-WebRequest).Parameters.Keys) {
     $script:UseBasic.UseBasicParsing = $true
 }
+
+Import-PluginDetail
 
 Register-ArgCompleters
 

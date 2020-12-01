@@ -11,27 +11,14 @@ function Save-Challenge {
     Write-Verbose "Saving changes for $Plugin plugin"
 
     # dot source the plugin file
-    $pluginDir = Join-Path $MyInvocation.MyCommand.Module.ModuleBase 'Plugins'
-    . (Join-Path $pluginDir "$Plugin.ps1")
+    $pluginDetail = $script:Plugins.Plugin
+    . $pluginDetail.Path
 
-    # get the validation type
-    if (-not (Get-Command 'Get-CurrentPluginType' -EA Ignore)) {
-        try { throw 'Plugin is missing Get-CurrentPluginType function. Unable to continue.' }
-        catch { $PSCmdlet.ThrowTerminatingError($_) }
-    }
-    if (($chalType = Get-CurrentPluginType) -notin 'dns-01','http-01') {
-        try { throw 'Plugin sent unrecognized challenge type.' }
-        catch { $PSCmdlet.ThrowTerminatingError($_) }
-    }
+    # All plugins in $script:Plugins should have been validated during module
+    # load. So we're not going to do much plugin-specific validation here.
 
     # do stuff appropriate for the challenge type
-    if ('dns-01' -eq $chalType) {
-
-        # check for the Save command that should exist now from the plugin
-        if (-not (Get-Command 'Save-DnsTxt' -EA Ignore)) {
-            try { throw "Plugin is missing Save-DnsTxt function. Unable to continue." }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
-        }
+    if ('dns-01' -eq $pluginDetail.ChallengeType) {
 
         Write-Debug "Calling $Plugin plugin to save"
 
@@ -39,12 +26,6 @@ function Save-Challenge {
         Save-DnsTxt @PluginArgs
 
     } else { # http-01 is the only other challenge type we support at the moment
-
-        # check for the Save command that should exist now from the plugin
-        if (-not (Get-Command 'Save-HttpChallenge' -EA Ignore)) {
-            try { throw "Plugin is missing Save-HttpChallenge function. Unable to continue." }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
-        }
 
         Write-Debug "Calling $Plugin plugin to save"
 
