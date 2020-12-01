@@ -13,15 +13,15 @@ function Test-ValidKeyLength {
     # 2020-09-17: LE is now restricting RSA key sizes to only 2048, 3072, and 4096
     # https://community.letsencrypt.org/t/issuing-for-common-rsa-key-sizes-only/133839
 
-    # For EC keys, LE's current Boulder server only supports P-256 and P-384, but may support P-521 by the time ACMEv2 is
-    # production ready.
+    # For EC keys, LE's current Boulder server only supports P-256 and P-384, but we'll
+    # also allow P-521 for other CAs or when Boulder supports it eventually.
 
     # short circuit supported EC keys and common RSA keys
-    if ($KeyLength -in 'ec-256','ec-384','2048','3072','4096') {
+    if ($KeyLength -in 'ec-256','ec-384','ec-521','2048','3072','4096') {
         return $true
     }
 
-    $errorMessage = "Must be 'ec-256','ec-384' for EC keys or between 2048-4096 (divisible by 128) for RSA keys"
+    $errorMessage = "Must be 'ec-256','ec-384','ec-521' for EC keys or between 2048-4096 (divisible by 128) for RSA keys"
 
     # everything else should at least be a parseable integer
     try { $len = [int]::Parse($KeyLength) }

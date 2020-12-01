@@ -6,66 +6,60 @@ Describe "New-Jws" {
     }
 
     Context "Key Validation" {
-        It "Validates RSA Keys" {
-            InModuleScope Posh-ACME {
 
-                # invalid RSA sizes
-                @(1024) | %{
-                    $keypair = [Security.Cryptography.RSACryptoServiceProvider]::new($_)
-                    $header = [ordered]@{
-                        alg   = 'RS256'
-                        jwk   = $keypair | ConvertTo-Jwk -PublicOnly
-                        nonce = 'fakenonce'
-                        url   = 'https://example.com'
-                    }
-                    { New-Jws -Key $keypair -Header $header -Payload '' } | Should -Throw
-                }
+        It "Does not throw with good RSA Keys" -TestCases @(
+            @{ Size = 2048 }
+            @{ Size = 2176 }
+            @{ Size = 3072 }
+            @{ Size = 4096 }
+        ) {
+            InModuleScope Posh-ACME -Parameters @{Size=$Size} {
+                param($Size)
 
-                # valid RSA sizes
-                2048,2176,3072,4096 | %{
-                    $keypair = [Security.Cryptography.RSACryptoServiceProvider]::new($_)
-                    $header = [ordered]@{
-                        alg   = 'RS256'
-                        jwk   = $keypair | ConvertTo-Jwk -PublicOnly
-                        nonce = 'fakenonce'
-                        url   = 'https://example.com'
-                    }
-                    { New-Jws -Key $keypair -Header $header -Payload '' } | Should -Not -Throw
+                $keypair = [Security.Cryptography.RSACryptoServiceProvider]::new($Size)
+                $header = [ordered]@{
+                    alg   = 'RS256'
+                    jwk   = $keypair | ConvertTo-Jwk -PublicOnly
+                    nonce = 'fakenonce'
+                    url   = 'https://example.com'
                 }
+                { New-Jws -Key $keypair -Header $header -Payload '' } | Should -Not -Throw
             }
         }
 
-        It "Validates EC Keys" {
-            InModuleScope Posh-ACME {
+        It "Throws with bad RSA Keys" -TestCases @(
+            @{ Size = 1024 }
+        ) {
+            InModuleScope Posh-ACME -Parameters @{Size=$Size} {
+                param($Size)
 
-                # invalid EC curves
-                @(
-                    [Security.Cryptography.ECCurve+NamedCurves]::nistP521
-                ) | %{
-                    $keypair = [Security.Cryptography.ECDsa]::Create($_)
-                    $header = [ordered]@{
-                        alg   = "ES$($keypair.KeySize)"
-                        jwk   = $keypair | ConvertTo-Jwk -PublicOnly
-                        nonce = 'fakenonce'
-                        url   = 'https://example.com'
-                    }
-                    { New-Jws -Key $keypair -Header $header -Payload '' } | Should -Throw
+                $keypair = [Security.Cryptography.RSACryptoServiceProvider]::new($Size)
+                $header = [ordered]@{
+                    alg   = 'RS256'
+                    jwk   = $keypair | ConvertTo-Jwk -PublicOnly
+                    nonce = 'fakenonce'
+                    url   = 'https://example.com'
                 }
+                { New-Jws -Key $keypair -Header $header -Payload '' } | Should -Throw
+            }
+        }
 
-                # valid EC curves
-                @(
-                    [Security.Cryptography.ECCurve+NamedCurves]::nistP256
-                    [Security.Cryptography.ECCurve+NamedCurves]::nistP384
-                ) | %{
-                    $keypair = [Security.Cryptography.ECDsa]::Create($_)
-                    $header = [ordered]@{
-                        alg   = "ES$($keypair.KeySize)"
-                        jwk   = $keypair | ConvertTo-Jwk -PublicOnly
-                        nonce = 'fakenonce'
-                        url   = 'https://example.com'
-                    }
-                    { New-Jws -Key $keypair -Header $header -Payload '' } | Should -Not -Throw
+        It "Validates EC Keys" -TestCases @(
+            @{ Alg = 'ES256'; Curve = [Security.Cryptography.ECCurve+NamedCurves]::nistP256 }
+            @{ Alg = 'ES384'; Curve = [Security.Cryptography.ECCurve+NamedCurves]::nistP384 }
+            @{ Alg = 'ES512'; Curve = [Security.Cryptography.ECCurve+NamedCurves]::nistP521 }
+        ) {
+            InModuleScope Posh-ACME -Parameters @{Alg=$Alg; Curve=$Curve} {
+                param($Alg,$Curve)
+
+                $keypair = [Security.Cryptography.ECDsa]::Create($Curve)
+                $header = [ordered]@{
+                    alg   = $Alg
+                    jwk   = $keypair | ConvertTo-Jwk -PublicOnly
+                    nonce = 'fakenonce'
+                    url   = 'https://example.com'
                 }
+                { New-Jws -Key $keypair -Header $header -Payload '' } | Should -Not -Throw
             }
         }
     }

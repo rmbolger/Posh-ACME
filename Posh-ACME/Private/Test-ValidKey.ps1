@@ -31,9 +31,9 @@ function Test-ValidKey {
     # until someone finds a contrary example. The alternative is checking $Key.Key.Algorithm, but that's not currently
     # working against PowerShell Core.
 
-    if ($Key -is [Security.Cryptography.ECDsa] -and $Key.KeySize -notin 256,384) {
+    if ($Key -is [Security.Cryptography.ECDsa] -and $Key.KeySize -notin 256,384,521) {
         if ($ThrowOnFail) {
-            throw [Management.Automation.ValidationMetadataException] "EC curve out of range. Must be P-256 or P-384."
+            throw [Management.Automation.ValidationMetadataException] "EC curve out of range. Must be P-256, P-384, or P-521."
         }
         return $false
     }

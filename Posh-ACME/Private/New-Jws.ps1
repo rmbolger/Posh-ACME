@@ -43,8 +43,8 @@ function New-Jws {
         } elseif ($Key -is [Security.Cryptography.ECDsa]) {
 
             # validate the curve size which is exposed via KeySize
-            if ($Key.KeySize -ne 256 -and $Key.KeySize -ne 384) {
-                throw "Unsupported EC curve. Must be P-256 or P-384"
+            if ($Key.KeySize -notin 256,384,521) {
+                throw "Unsupported EC curve. Must be P-256, P-384, or P-521"
             }
 
             # make sure we have a private key to sign with
@@ -60,7 +60,7 @@ function New-Jws {
         # validate the headers
         if (-not $NoHeaderValidation) {
 
-            if ('alg' -notin $Header.Keys -or $Header.alg -notin 'RS256','ES256','ES384') {
+            if ('alg' -notin $Header.Keys -or $Header.alg -notin 'RS256','ES256','ES384','ES512') {
                 throw "Missing or invalid 'alg' in supplied Header"
             }
 
@@ -72,7 +72,7 @@ function New-Jws {
             # Make sure header 'alg' matches key type. EC keys depend on the curve
             # ES256 = P-256 and SHA256 hash
             # ES384 = P-384 and SHA384 hash
-            # ES521 = P-521 and SHA512 hash (note 521 vs 512, very confusing)
+            # ES512 = P-521 and SHA512 hash (note 521 vs 512, very confusing)
             if ($Key -and $Key -is [Security.Cryptography.ECDsa] -and
                 ($Header.alg -notin 'ES256','ES384','ES512' -or
                 ($Header.alg -eq 'ES256' -and $Key.KeySize -ne 256) -or
