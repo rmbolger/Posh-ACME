@@ -59,10 +59,6 @@ function Set-PAServer {
         if ('SkipCertificateCheck' -in $PSBoundParameters.Keys) {
             Write-Debug "Setting SkipCertificateCheck value to $($SkipCertificateCheck.IsPresent)"
             $updateParams.SkipCertificateCheck = $SkipCertificateCheck.IsPresent
-        }
-
-        if ($serverChange) {
-            # deal with cert validation options
             Set-CertValidation $updateParams.SkipCertificateCheck
         }
 
