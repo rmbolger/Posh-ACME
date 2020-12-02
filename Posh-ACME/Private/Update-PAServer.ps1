@@ -5,9 +5,9 @@ function Update-PAServer {
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
         [Alias('location')]
         [string]$DirectoryUrl,
-        [switch]$NonceOnly,
         [switch]$SkipCertificateCheck,
-        [switch]$DisableTelemetry
+        [switch]$DisableTelemetry,
+        [switch]$NoRefresh
     )
 
     Process {
@@ -18,90 +18,100 @@ function Update-PAServer {
                 throw "No ACME server configured. Run Set-PAServer or specify a DirectoryUrl."
             }
             $DirectoryUrl = $script:Dir.location
-            $UpdatingCurrent = $true
-        } else {
-            # even if they specified the directory url explicitly, we may still be updating the
-            # "current" server. So figure that out and set a flag for later.
-            if ($script:Dir -and $script:Dir.location -eq $DirectoryUrl) {
-                $UpdatingCurrent = $true
-            } else {
-                $UpdatingCurrent = $false
-            }
         }
 
         # determine the directory folder/file
         $dirFolder = ConvertTo-DirFolder $DirectoryUrl
         $dirFile = Join-Path $dirFolder 'dir.json'
 
-        # Full refresh
-        if (-not $NonceOnly -or -not (Test-Path $dirFile -PathType Leaf)) {
+        if (Test-Path $dirFile -PathType Leaf) {
+            # grab the existing copy
+            $oldDir = Get-Content $dirFile -Raw | ConvertFrom-Json
+            $oldDir.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
+        }
 
-            # If the caller asked for a NonceOnly refresh but there's no existing dir.json,
-            # we'll just do a full refresh with a warning.
-            if ($NonceOnly) {
-                Write-Warning "Performing full update instead of NonceOnly because existing server details missing."
+        if ($NoRefresh -and $oldDir) {
+            # This is a local settings update only.
+            $dirObj = $oldDir
+
+            # Update the local settings that are changeable
+            if ('SkipCertificateCheck' -in $PSBoundParameters.Keys) {
+                $dirObj | Add-Member 'SkipCertificateCheck' $SkipCertificateCheck.IsPresent -Force
+            }
+            if ('DisableTelemetry' -in $PSBoundParameters.Keys) {
+                $dirObj | Add-Member 'DisableTelemetry' $DisableTelemetry.IsPresent -Force
+            }
+        }
+        else {
+            # Query the ACME server for any updates
+
+            # Warn if they asked not to refresh but there's no cached object
+            if ($NoRefresh) {
+                Write-Warning "Performing full server update because cached server details are missing."
             }
 
             # make the request
             Write-Debug "Updating directory info from $DirectoryUrl"
             try {
-                $response = Invoke-WebRequest $DirectoryUrl -EA Stop -Verbose:$false @script:UseBasic
-            } catch { throw }
-            $dirObj = $response.Content | ConvertFrom-Json
-
-            # process the response
-            if ($dirObj -is [pscustomobject] -and 'newAccount' -in $dirObj.PSObject.Properties.name) {
-
-                # create the directory folder if necessary
-                if (-not (Test-Path $dirFolder -PathType Container)) {
-                    New-Item -ItemType Directory -Path $dirFolder -Force -EA Stop | Out-Null
+                $iwrSplat = @{
+                    Uri = $DirectoryUrl
+                    UserAgent = $script:USER_AGENT
+                    ErrorAction = 'Stop'
+                    Verbose = $false
                 }
-
-                # add location, nonce, and type to the returned directory object
-                $dirObj | Add-Member -NotePropertyMembers @{
-                    location = $DirectoryUrl
-                    nonce = $null
-                    SkipCertificateCheck = $SkipCertificateCheck.IsPresent
-                    DisableTelemetry = $DisableTelemetry.IsPresent
-                }
-                $dirObj.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
-
-                # update the nonce value
-                if ($response.Headers.ContainsKey($script:HEADER_NONCE)) {
-                    $dirObj.nonce = $response.Headers[$script:HEADER_NONCE] | Select-Object -First 1
-                } else {
-                    $dirObj.nonce = Get-Nonce $dirObj.newNonce
-                }
-
-                # save to disk
-                Write-Debug "Saving PAServer to disk"
-                $dirObj | ConvertTo-Json -Depth 5 | Out-File $dirFile -Force -EA Stop
-
-                # overwrite the in-memory copy if we're actually updating the current one
-                if ($UpdatingCurrent) { $script:Dir = $dirObj }
-
-            } else {
-                Write-Debug ($dirObj | ConvertTo-Json -Depth 5)
-                throw "Unexpected ACME response querying directory. Check with -Debug."
+                $response = Invoke-WebRequest @iwrSplat @script:UseBasic
+            } catch {
+                Write-Error -Exception $_.Exception
+                return
+            }
+            try {
+                $dirObj = $response.Content | ConvertFrom-Json
+            } catch {
+                Write-Debug "ACME Response: `n$($response.Content)"
+                Write-Error "ACME response from $DirectoryUrl was not valid JSON. Details are in Debug output."
+                return
             }
 
-        # Nonce only refresh
-        } else {
+            # create the directory folder if necessary
+            if (-not (Test-Path $dirFolder -PathType Container)) {
+                New-Item -ItemType Directory -Path $dirFolder -Force -EA Stop | Out-Null
+            }
 
-            # grab a reference to the object we'll be updating
-            if ($UpdatingCurrent) {
-                $dirObj = $script:Dir
+            # add additional metadata to the returned directory object
+            $dirObj | Add-Member -NotePropertyMembers @{
+                location = $DirectoryUrl
+                nonce = $null
+            }
+            $dirObj.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
+
+            # set preference values to the old values unless they were explicitly specified
+            if ($oldDir -and $oldDir.SkipCertificateCheck -and 'SkipCertificateCheck' -notin $PSBoundParameters.Keys) {
+                $dirObj | Add-Member 'SkipCertificateCheck' $oldDir.SkipCertificateCheck
             } else {
-                $dirObj = Get-PAServer $DirectoryUrl
+                $dirObj | Add-Member 'SkipCertificateCheck' $SkipCertificateCheck.IsPresent
+            }
+            if ($oldDir -and $oldDir.DisableTelemetry -and 'DisableTelemetry' -notin $PSBoundParameters.Keys) {
+                $dirObj | Add-Member 'DisableTelemetry' $oldDir.DisableTelemetry
+            } else {
+                $dirObj | Add-Member 'DisableTelemetry' $DisableTelemetry.IsPresent
             }
 
             # update the nonce value
-            $dirObj.nonce = Get-Nonce $dirObj.newNonce
+            if ($response.Headers.ContainsKey($script:HEADER_NONCE)) {
+                $dirObj.nonce = $response.Headers[$script:HEADER_NONCE] | Select-Object -First 1
+            } else {
+                $dirObj.nonce = Get-Nonce $dirObj.newNonce
+            }
 
-            # save to disk
-            Write-Debug "Saving PAServer to disk"
-            $dirObj | ConvertTo-Json -Depth 5 | Out-File $dirFile -Force -EA Stop
+        }
 
+        # save to disk
+        Write-Debug "Saving PAServer to disk"
+        $dirObj | ConvertTo-Json -Depth 5 | Out-File $dirFile -Force -EA Stop
+
+        # overwrite the in-memory copy if we're actually updating the current one
+        if ($script:Dir -and $script:Dir.location -eq $dirObj.location) {
+            $script:Dir = $dirObj
         }
 
     }

@@ -8,13 +8,14 @@ function Set-PAServer {
         [Parameter(ValueFromPipelineByPropertyName)]
         [switch]$SkipCertificateCheck,
         [Parameter(ValueFromPipelineByPropertyName)]
-        [switch]$DisableTelemetry
+        [switch]$DisableTelemetry,
+        [switch]$NoRefresh
     )
 
     Process {
 
         # make sure we have either a DirectoryUrl or an existing active server
-        if (-not $DirectoryUrl -and -not $script:Dir) {
+        if (-not $DirectoryUrl -and -not ($curDir = Get-PAServer)) {
             try { throw "No DirectoryUrl specified and no active server. Please specify a DirectoryUrl." }
             catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
@@ -26,13 +27,13 @@ function Set-PAServer {
         }
 
         # determine whether we're changing servers
-        if ($DirectoryUrl -and (-not $script:Dir -or $script:Dir.location -ne $DirectoryUrl)) {
+        if ($DirectoryUrl -and (-not $curDir -or $curDir.location -ne $DirectoryUrl)) {
             $serverChange = $true
         }
 
         # use the active server if an explicit one wasn't specified
         if (-not $DirectoryUrl) {
-            $DirectoryUrl = $script:Dir.location
+            $DirectoryUrl = $curDir.location
         }
         $dirFolder = ConvertTo-DirFolder $DirectoryUrl
 
@@ -42,15 +43,9 @@ function Set-PAServer {
         }
 
         # prep the server metadata
-        $dir = Get-PAServer $DirectoryUrl -Quiet
-        $updateParams = @{ DirectoryUrl = $DirectoryUrl }
-        if ($dir) {
-            Write-Debug "Loading existing server metadata."
-            $updateParams.DisableTelemetry = $dir.DisableTelemetry
-            $updateParams.SkipCertificateCheck = $dir.SkipCertificateCheck
-        } else {
-            $updateParams.DisableTelemetry = $false
-            $updateParams.SkipCertificateCheck = $false
+        $updateParams = @{
+            DirectoryUrl = $DirectoryUrl
+            NoRefresh= $NoRefresh.IsPresent
         }
         if ('DisableTelemetry' -in $PSBoundParameters.Keys) {
             Write-Debug "Setting DisableTelemetry value to $($DisableTelemetry.IsPresent)"
@@ -95,6 +90,9 @@ function Set-PAServer {
 
     .PARAMETER DisableTelemetry
         If specified, telemetry data will not be sent to the Posh-ACME team for actions associated with this server. The telemetry data that gets sent by default includes Posh-ACME version, PowerShell version, and generic OS platform (Windows/Linux/MacOS).
+
+    .PARAMETER NoRefresh
+        If specified, the ACME server will not be re-queried for updated endpoints or a fresh nonce. By default, it would be.
 
     .EXAMPLE
         Set-PAServer LE_PROD
