@@ -98,7 +98,7 @@ PrivateData = @{
 
     PSData = @{
 
-        PreRelease = 'beta'
+        PreRelease = 'beta2'
 
         # Tags applied to this module. These help with module discovery in online galleries.
         Tags = 'LetsEncrypt','ssl','tls','certificates','acme','Linux','Mac'
@@ -114,7 +114,7 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.0.0-beta (2020-11-20)
+## 4.0.0-beta2 (2020-12-02)
 
 There is a 3.x to 4.x [migration guide](https://github.com/rmbolger/Posh-ACME/wiki/4.x-FAQ#how-do-i-upgrade-from-3x) in the 4.x FAQ on the wiki. But no changes should be necessary for users with existing certs that are renewing using `Submit-Renewal` unless they were also using the `-NewKey` parameter which has been removed. Orders can now be configured to always generate a new private key using `Set-PAOrder -AlwaysNewKey`.
 
@@ -150,12 +150,16 @@ There is a 3.x to 4.x [migration guide](https://github.com/rmbolger/Posh-ACME/wi
   * This can be disabled per ACME server using a new `DisableTelemetry` parameter in `Set-PAServer`.
   * The data will be used to guide future development decisions in the module.
   * The same User-Agent header is also sent with all calls to the ACME server which is a requirement of the protocol and can't be disabled.
+* Added `NoRefresh` switch to `Set-PAServer` which prevents a request to the ACME server to update endpoint and nonce info. This is useful for updating local preferences without making a server round-trip.
 * BUYPASS_PROD and BUYPASS_TEST are now recognized shortcuts for the the buypass.com CA environments when you use `Set-PAServer`.
 * ZEROSSL_PROD is now a recognized shortcut for the zerossl.com CA when you use `Set-PAServer`.
 * Added tab completion for `DirectoryUrl` in `Set-PAServer`.
 * Added `Quiet` parameter to `Get-PAServer` which will prevent warnings if the specified server was not found.
 * `Remove-PAServer` will now throw a warning instead of an error if the specified server doesn't exist on disk.
 * Orders can now be passed by pipeline to `Submit-ChallengeValidation` and `Submit-OrderFinalize`.
+* ACME protocol web request details have been moved from Verbose to Debug output and cleaned up so they're easier to follow. Web requests made from plugins will still be in Verbose output for the time being.
+* Experimental support for IP address identifiers ([RFC 8738](https://tools.ietf.org/html/rfc8738)) in new orders. This allows you to get a cert for an IP address if your ACME server supports it.
+* Private keys for Accounts and Certificates can now use ECC P-521 (secp521r1) based keys using the `ec-521` key length parameter. *This requires support at the ACME server level as well.*
 
 ### Breaking Changes
 
@@ -164,6 +168,7 @@ There is a 3.x to 4.x [migration guide](https://github.com/rmbolger/Posh-ACME/wi
   * `Unpublish-DnsChallenge` is now `Unpublish-Challenge`
   * `Save-DnsChallenge` is now `Save-Challenge`
   * `Get-DnsPlugins` and `Get-DnsPluginHelp` have been replaced by `Get-PAPlugin`
+  * `Get-PAAuthorizations` is now `Get-PAAuthorization`. The plural function name is still avaialble as an alias but is deprecated and may be removed in a future release.
   * `Invoke-HttpChallengeListener` is deprecated and may be removed in a future release. Users should migrate to the `WebSelfHost` plugin.
 * Parameter Changes
   * All `DnsPlugin` parameters are now `Plugin` with a `DnsPlugin` alias for backwards compatibility. The alias should be considered deprecated and may be removed in a future release.
@@ -177,6 +182,8 @@ There is a 3.x to 4.x [migration guide](https://github.com/rmbolger/Posh-ACME/wi
 ### Fixes
 
 * Using `Get-PAOrder` with `-Refresh` will no longer throw a terminating error if the ACME server returns an error. It will warn and return the cached copy of the order instead.
+* Fixed `Remove-PAServer` not being able to remove a server that is unreachable.
+* `Remove-PAServer` no longer requires confirmation when there are no cached accounts associated with the specified server in the local config.
 '@
 
     } # End of PSData hashtable
