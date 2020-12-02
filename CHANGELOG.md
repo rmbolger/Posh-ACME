@@ -66,6 +66,8 @@ There is a 3.x to 4.x [migration guide](https://github.com/rmbolger/Posh-ACME/wi
 ### Fixes
 
 * Using `Get-PAOrder` with `-Refresh` will no longer throw a terminating error if the ACME server returns an error. It will warn and return the cached copy of the order instead.
+* Fixed `Remove-PAServer` not being able to remove a server that is unreachable.
+* `Remove-PAServer` no longer requires confirmation when there are no cached accounts associated with the specified server in the local config.
 
 
 ## 3.20.0 (2020-11-25)

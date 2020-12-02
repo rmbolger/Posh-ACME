@@ -23,9 +23,12 @@ function Remove-PAServer {
             return
         }
 
-        # confirm deletion unless -Force was used
-        if (!$Force) {
-            $msg = "Deleting a server will also delete all associated accounts, orders, and certificates associated with it."
+        # check for existing accounts
+        $accountFiles = Get-ChildItem (Join-Path $dirFolder '*\acct.json')
+
+        # confirm deletion unless -Force was used or there are no accounts
+        if (-not $Force -and $accountFiles) {
+            $msg = "Deleting a server will also delete the local copies of all associated accounts, orders, and certificates associated with it."
             if ($DeactivateAccounts) {
                 $msg += " You have also chosen to deactivate the associated accounts."
             }
@@ -41,10 +44,10 @@ function Remove-PAServer {
 
         # switch servers if necessary
         if ($oldServer -and $DirectoryUrl -ne $oldServer.location) {
-            Get-PAServer $DirectoryUrl | Set-PAServer
+            Set-PAServer $DirectoryUrl -NoRefresh
             $SwitchBack = $true
         } elseif (-not $oldServer) {
-            Get-PAServer $DirectoryUrl | Set-PAServer
+            Set-PAServer $DirectoryUrl -NoRefresh
         }
 
         # deactivate the accounts if requested
