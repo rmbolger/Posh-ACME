@@ -70,7 +70,7 @@ function Submit-OrderFinalize {
         # send telemetry ping
         $null = Start-Job {
             $papingArgs = @{
-                Uri = 'https://poshacme.dvolve.net/paping/'
+                Uri = 'https://poshac.me/paping/'
                 Method = 'HEAD'
                 UserAgent = $input
                 TimeoutSec = 1
