@@ -55,7 +55,7 @@ if ([String]::IsNullOrWhiteSpace($PSScriptRoot)) {
     Remove-Item "$installpath\Posh-ACME" -Recurse -Force -EA Ignore
     Write-Host "Renaming folder" -ForegroundColor Cyan
     Copy-Item "$installpath\Posh-ACME-$remoteBranch\Posh-ACME" $installpath -Recurse -Force -EA Continue
-    Remove-Item "$installpath\Posh-ACME-$remoteBranch" -recurse -confirm:$false
+    Remove-Item "$installpath\Posh-ACME-$remoteBranch" -Recurse -Force
     Import-Module -Name Posh-ACME -Force
 } else {
     # running locally
