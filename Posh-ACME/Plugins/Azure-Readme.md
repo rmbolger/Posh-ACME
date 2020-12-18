@@ -170,12 +170,16 @@ In addition to the `AZSubscriptionId` plugin parameter that all auth methods mus
 
 Any existing user, application, or managed service principal should work as long as it has been assigned permissions to manage DNS TXT records in the zones you're requesting certificates for.
 
-Here's how to get the token for the context you are currently logged in with using with Powershell.
+Here is how to get the token for the context you are currently logged in with using with Powershell. The method depends on what version of the `Az.Accounts` module you're using.
 
 ```powershell
+# Az.Accounts 1.9.x or earlier
 $ctx = Get-AzContext
 $token = ($ctx.TokenCache.ReadItems() | ?{ $_.TenantId -eq $ctx.Subscription.TenantId -and $_.Resource -eq "https://management.core.windows.net/" } |
     Select -First 1).AccessToken
+
+# Az.Accounts 2.0.x or later
+$token = (Get-AzAccessToken -ResourceUrl "https://management.core.windows.net/" -TenantId $tenantId).Token
 ```
 
 Here's a similar method using Azure CLI 2.0.
