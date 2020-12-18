@@ -9,11 +9,12 @@ An [ACME v2 (RFC 8555)](https://tools.ietf.org/html/rfc8555) client implemented 
 - Single command for new certs, `New-PACertificate`
 - Easy renewals via `Submit-Renewal`
 - RSA and ECC private keys supported for accounts and certificates
-- Built-in validation plugins for [DNS](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) and HTTP based challenges. (pull requests welcome)
+- Built-in validation plugins for [DNS](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) and [HTTP](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-HTTP-Plugins) based challenges. (pull requests welcome)
 - Support for using existing certificate request (CSR)
 - PEM and PFX output files
 - No elevated Windows privileges required *(unless using -Install switch)*
-- Cross platform PowerShell support. [(FAQ)](https://github.com/rmbolger/Posh-ACME/wiki/Frequently-Asked-Questions-(FAQ)#does-posh-acme-work-cross-platform-on-powershell-core)- Account key rollover support
+- Cross platform PowerShell support. [(FAQ)](https://github.com/rmbolger/Posh-ACME/wiki/Frequently-Asked-Questions-(FAQ)#does-posh-acme-work-cross-platform-on-powershell-core)
+- Account key rollover support
 - [OCSP Must-Staple](https://scotthelme.co.uk/ocsp-must-staple/) support
 - DNS challenge [CNAME support](https://github.com/rmbolger/Posh-ACME/blob/main/Tutorial.md#advanced-dns-challenge-aliases)
 - Multiple accounts supported per certificate authority which allows different certs to have different contact emails
