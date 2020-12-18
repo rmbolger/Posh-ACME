@@ -15,7 +15,7 @@ An [ACME v2 (RFC 8555)](https://tools.ietf.org/html/rfc8555) client implemented 
 - No elevated Windows privileges required *(unless using -Install switch)*
 - Cross platform PowerShell support. [(FAQ)](https://github.com/rmbolger/Posh-ACME/wiki/Frequently-Asked-Questions-(FAQ)#does-posh-acme-work-cross-platform-on-powershell-core)- Account key rollover support
 - [OCSP Must-Staple](https://scotthelme.co.uk/ocsp-must-staple/) support
-- DNS challenge [CNAME support](https://github.com/rmbolger/Posh-ACME/blob/master/Tutorial.md#advanced-dns-challenge-aliases)
+- DNS challenge [CNAME support](https://github.com/rmbolger/Posh-ACME/blob/main/Tutorial.md#advanced-dns-challenge-aliases)
 - Multiple accounts supported per certificate authority which allows different certs to have different contact emails
 - Help system for DNS plugins using `Get-PAPlugin`
 - External Account Binding support for CAs that require it
@@ -41,11 +41,11 @@ Install-Module -Name Posh-ACME -Scope CurrentUser
 
 [![Pester Tests badge](https://github.com/rmbolger/Posh-ACME/workflows/Pester%20Tests/badge.svg)](https://github.com/rmbolger/Posh-ACME/actions)
 
-To install the latest *development* version from the git master branch, use the following PowerShell command. This method assumes a default [`PSModulePath`](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath) environment variable.
+To install the latest *development* version from the git main branch, use the following PowerShell command. This method assumes a default [`PSModulePath`](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath) environment variable.
 
 ```powershell
 # install latest dev version
-iex (irm https://raw.githubusercontent.com/rmbolger/Posh-ACME/master/instdev.ps1)
+iex (irm https://raw.githubusercontent.com/rmbolger/Posh-ACME/main/instdev.ps1)
 ```
 
 # Quick Start

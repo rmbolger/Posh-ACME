@@ -1,6 +1,6 @@
-## 4.0.0-beta2 (2020-12-02)
+## 4.0.0 (2020-12-18)
 
-There is a 3.x to 4.x [migration guide](https://github.com/rmbolger/Posh-ACME/wiki/4.x-FAQ#how-do-i-upgrade-from-3x) in the 4.x FAQ on the wiki. But no changes should be necessary for users with existing certs that are renewing using `Submit-Renewal` unless they were also using the `-NewKey` parameter which has been removed. Orders can now be configured to always generate a new private key using `Set-PAOrder -AlwaysNewKey`.
+There is a 3.x to 4.x [migration guide](https://github.com/rmbolger/Posh-ACME/wiki/Frequently-Asked-Questions-%28FAQ%29#how-do-i-upgrade-from-3x-to-4x) in the FAQ on the wiki. But no changes should be necessary for users with existing certs that are renewing using `Submit-Renewal` unless they were also using the `-NewKey` parameter which has been removed. Orders can now be configured to always generate a new private key using `Set-PAOrder -AlwaysNewKey`.
 
 ### New Features
 

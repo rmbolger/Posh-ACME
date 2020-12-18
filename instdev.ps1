@@ -27,7 +27,7 @@ New-Item -ItemType Directory -Force -Path $installpath | out-null
 if ([String]::IsNullOrWhiteSpace($PSScriptRoot)) {
 
     if ([String]::IsNullOrWhiteSpace($remoteBranch)) {
-        $remoteBranch = 'master'
+        $remoteBranch = 'main'
     }
 
     # GitHub now requires TLS 1.2
