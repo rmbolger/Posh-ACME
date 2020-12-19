@@ -7,7 +7,7 @@ function New-PAAccount {
         [Parameter(ParameterSetName='Generate',Position=1)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [Alias('AccountKeyLength')]
-        [string]$KeyLength='ec-256',
+        [string]$KeyLength='2048',
         [Parameter(ParameterSetName='ImportKey',Mandatory)]
         [string]$KeyFile,
         [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
