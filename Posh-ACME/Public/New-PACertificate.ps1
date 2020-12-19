@@ -18,7 +18,7 @@ function New-PACertificate {
         [switch]$AlwaysNewKey,
         [switch]$AcceptTOS,
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
-        [string]$AccountKeyLength='ec-256',
+        [string]$AccountKeyLength='2048',
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
         [Alias('location')]
         [string]$DirectoryUrl='LE_PROD',
