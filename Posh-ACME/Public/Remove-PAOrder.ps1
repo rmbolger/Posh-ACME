@@ -10,7 +10,8 @@ function Remove-PAOrder {
     Begin {
         # Make sure we have an account configured
         if (!(Get-PAAccount)) {
-            throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+            try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     }
 
@@ -40,16 +41,14 @@ function Remove-PAOrder {
         Write-Verbose "Deleting order for $($order.MainDomain)"
 
         # delete the order's folder
-        $orderFolder = Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')
+        $orderFolder = $order | Get-OrderFolder
         Remove-Item $orderFolder -Force -Recurse
 
         # unset the current order if it was this one
         if ($script:Order -and $script:Order.MainDomain -eq $order.MainDomain) {
-            $script:Order = $null
-            $script:OrderFolder = $null
             $order = $null
-
             Remove-Item (Join-Path $script:AcctFolder 'current-order.txt') -Force
+            Import-PAConfig -Level 'Order'
         }
 
     }

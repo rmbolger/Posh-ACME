@@ -53,8 +53,10 @@ function Update-PAOrder {
             # send the request
             try {
                 $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
-            } catch { throw }
-            Write-Debug "Response: $($response.Content)"
+            } catch [AcmeException] {
+                Write-Warning "ACME Exception querying order details for $($order.MainDomain): $($_.Exception.Message)"
+                return
+            }
 
             $respObj = $response.Content | ConvertFrom-Json
 
@@ -71,9 +73,21 @@ function Update-PAOrder {
             Write-Debug "Order $($order.MainDomain) is expired. Skipping server refresh."
         }
 
-        # save it to disk
-        $orderFolder = Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')
-        $order | ConvertTo-Json | Out-File (Join-Path $orderFolder 'order.json') -Force -EA Stop
+        # Save the order to disk
+        # We're going to obfuscate the PfxPass property to satisfy some requests
+        # to not have it in plain text.
+        $orderFolder = $order | Get-OrderFolder
+        if (-not (Test-Path $orderFolder -PathType Container)) {
+            New-Item -ItemType Directory -Path $orderFolder -Force -EA Stop | Out-Null
+        }
+
+        # make a copy of the order so we can tweak it without messing up
+        # our existing copy and swap PfxPass for PfxPassB64U
+        $orderCopy = $order | ConvertTo-Json -Depth 10 | ConvertFrom-Json
+        $orderCopy | Add-Member 'PfxPassB64U' ($order.PfxPass | ConvertTo-Base64Url)
+        $orderCopy.PSObject.Properties.Remove('PfxPass')
+
+        $orderCopy | ConvertTo-Json -Depth 10 | Out-File (Join-Path $orderFolder 'order.json') -Force -EA Stop
     }
 
 }

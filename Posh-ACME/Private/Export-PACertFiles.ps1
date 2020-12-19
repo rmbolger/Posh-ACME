@@ -7,15 +7,15 @@ function Export-PACertFiles {
     )
 
     # Make sure we have an account configured
-    if (!($acct = Get-PAAccount)) {
+    if (-not ($acct = Get-PAAccount)) {
         throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
     }
 
     # Make sure we have an order
-    if (-not $Order -and !($Order = Get-PAOrder)) {
+    if (-not $Order -and -not ($Order = Get-PAOrder)) {
         throw "No ACME order specified and no current order selected. Run Set-PAOrder or specify an existing order object."
     }
-    $orderFolder = Join-Path $script:AcctFolder $Order.MainDomain.Replace('*','!')
+    $orderFolder = $Order | Get-OrderFolder
 
     # build output paths
     $certFile      = Join-Path $orderFolder 'cert.cer'
@@ -27,8 +27,10 @@ function Export-PACertFiles {
 
     if (-not $PfxOnly) {
 
-        # Re-download the cert/chains if the order has not expired.
+        # Download the cert+chain if the order has not expired.
         if ((Get-DateTimeOffsetNow) -lt [DateTimeOffset]::Parse($order.expires)) {
+
+            Write-Verbose "Downloading signed certificate"
 
             # build the header for the Post-As-Get request
             $header = @{
@@ -45,6 +47,30 @@ function Export-PACertFiles {
             } catch { throw }
 
             $pems = Split-PemChain -ChainBytes $response.Content
+
+            # Do some basic validation to make sure we got what we were expecting.
+            $cert = Import-Pem -InputString ($pems[0] -join "`n")
+            $altNames = $cert.GetSubjectAlternativeNames() | ForEach-Object {
+                if ($_[0] -eq [Org.BouncyCastle.Asn1.X509.GeneralName]::DnsName) {
+                    $_[1]
+                }
+                elseif ($_[0] -eq [Org.BouncyCastle.Asn1.X509.GeneralName]::IPAddress) {
+                    # gets returns as a hex string like "#01010101" that we need to parse
+                    ([ipaddress]([byte[]] -split ($_[1].Substring(1) -replace '..', '0x$& '))).ToString()
+                }
+            }
+            Write-Debug "SANs in downloaded cert: $(($altNames -join ', '))"
+            $orderNames = @($Order.MainDomain) + @($Order.SANs)
+            $orderNames | ForEach-Object {
+                if ($_ -notin $altNames) {
+                    Write-Error "$_ was requested but is not present in the list of Subject Alternative Names in the signed certificate."
+                }
+            }
+            $altNames | ForEach-Object {
+                if ($_ -notin $orderNames) {
+                    Write-Error "An extra name, $_, is present in the list of Subject Alternative Names in the signed certificate, but was not requested as part of the order."
+                }
+            }
 
             # write the lone cert
             Export-Pem $pems[0] $certFile
@@ -74,6 +100,7 @@ function Export-PACertFiles {
         }
         else {
             Write-Warning "Order has expired. Unable to re-download cert/chain files. Using cached copies."
+            $chain0File = Join-Path $orderFolder 'chain0.cer'
         }
 
         # try to find the chain file matching the preferred issuer if specified
@@ -86,12 +113,20 @@ function Export-PACertFiles {
             if (-not $selectedChainFile) {
                 Write-Warning "The preferred chain issuer, $($order.PreferredChain), was not found. Using the default chain."
                 $selectedChainFile = $chain0File
+            } else {
+                Write-Verbose "Using preferred chain issuer, $($order.PreferredChain)."
             }
         } else {
             $selectedChainFile = $chain0File
         }
 
         # build the appropriate chain and fullchain files
+        if (-not (Test-Path $certFile -PathType Leaf)) {
+            throw "Cert file not found: $certFile"
+        }
+        if (-not (Test-Path $selectedChainFile -PathType Leaf)) {
+            throw "Chain file not found: $selectedChainFile"
+        }
         Copy-Item $selectedChainFile $chainFile
         $fullchainLines = (Get-Content $certFile) + (Get-Content $selectedChainFile)
         Export-Pem $fullchainLines $fullchainFile

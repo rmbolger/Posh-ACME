@@ -1,0 +1,17 @@
+{
+  "keyChange": "https://acme2.test/acme/key-change",
+  "meta": {
+    "caaIdentities": [
+      "acme2.test"
+    ],
+    "termsOfService": "https://acme2.test/documents/tos.pdf",
+    "website": "https://acme2.test/"
+  },
+  "newAccount": "https://acme2.test/acme/new-acct",
+  "newNonce": "https://acme2.test/acme/new-nonce",
+  "newOrder": "https://acme2.test/acme/new-order",
+  "revokeCert": "https://acme2.test/acme/revoke-cert",
+  "location": "https://acme2.test/directory",
+  "nonce": "1112OzEVvnOQMZb5Wc-TcHuuPt6XiyrAOsD3ixKm7WBDhOk",
+  "SkipCertificateCheck": true
+}

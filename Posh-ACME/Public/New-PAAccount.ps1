@@ -16,13 +16,15 @@ function New-PAAccount {
         [string]$ExtAcctHMACKey,
         [ValidateSet('HS256','HS384','HS512')]
         [string]$ExtAcctAlgorithm = 'HS256',
+        [switch]$UseAltPluginEncryption,
         [Parameter(ValueFromRemainingArguments=$true)]
         $ExtraParams
     )
 
     # make sure we have a server configured
     if (-not ($acmeServer = Get-PAServer)) {
-        throw "No ACME server configured. Run Set-PAServer first."
+        try { throw "No ACME server configured. Run Set-PAServer first." }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     # make sure the external account binding parameters were specified if this ACME
@@ -30,7 +32,8 @@ function New-PAAccount {
     if ($acmeServer.meta -and $acmeServer.meta.externalAccountRequired -and
         (-not $ExtAcctKID -or -not $ExtAcctHMACKey))
     {
-        throw "The current ACME server requires external account credentials to create a new ACME account. Please run New-PAAccount with the ExtAcctKID and ExtAcctHMACKey parameters."
+        try { throw "The current ACME server requires external account credentials to create a new ACME account. Please run New-PAAccount with the ExtAcctKID and ExtAcctHMACKey parameters." }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     # try to decode the HMAC key if specified
@@ -118,26 +121,26 @@ function New-PAAccount {
             url = $script:Dir.newAccount
         }
 
-        $eabPayload = $header.jwk | ConvertTo-Json -Compress
+        $eabPayload = $header.jwk | ConvertTo-Json -Depth 5 -Compress
 
         $payload.externalAccountBinding =
             New-Jws $hmacKey $eabHeader $eabPayload | ConvertFrom-Json
     }
 
     # convert it to json
-    $payloadJson = $payload | ConvertTo-Json -Compress
+    $payloadJson = $payload | ConvertTo-Json -Depth 5 -Compress
 
     # send the request
     try {
         $response = Invoke-ACME $header $payloadJson -Key $acctKey -EA Stop
     } catch { throw }
-    Write-Debug "Response: $($response.Content)"
 
     # grab the Location header
     if ($response.Headers.ContainsKey('Location')) {
         $location = $response.Headers['Location'] | Select-Object -First 1
     } else {
-        throw 'No Location header found in newAccount output'
+        try { throw 'No Location header found in newAccount output' }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     $respObj = $response.Content | ConvertFrom-Json
@@ -171,6 +174,12 @@ function New-PAAccount {
         # But it's not currently implemented in Boulder. Tracking issue is here:
         # https://github.com/letsencrypt/boulder/issues/3335
         orders = $respObj.orders
+        sskey = $null
+    }
+
+    # add a new AES key if specified
+    if ($UseAltPluginEncryption) {
+        $acct.sskey = New-AesKey
     }
 
     # save it to memory and disk
@@ -180,7 +189,7 @@ function New-PAAccount {
     if (!(Test-Path $script:AcctFolder -PathType Container)) {
         New-Item -ItemType Directory -Path $script:AcctFolder -Force -EA Stop | Out-Null
     }
-    $acct | ConvertTo-Json | Out-File (Join-Path $script:AcctFolder 'acct.json') -Force -EA Stop
+    $acct | ConvertTo-Json -Depth 5 | Out-File (Join-Path $script:AcctFolder 'acct.json') -Force -EA Stop
 
     return $acct
 
@@ -217,6 +226,9 @@ function New-PAAccount {
 
     .PARAMETER ExtAcctAlgorithm
         The HMAC algorithm to use. Defaults to 'HS256'.
+
+    .PARAMETER UseAltPluginEncryption
+        If specified, the account will be configured to use a randomly generated AES key to encrypt sensitive plugin parameters on disk instead of using the OS's native encryption methods. This can be useful if the config is being shared across systems or platforms. You can revert to OS native encryption using -UseAltPluginEncryption:$false.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

@@ -1,0 +1,16 @@
+{
+  "id": "11111",
+  "status": "valid",
+  "contact": [],
+  "location": "https://acme.test/acme/acct/11111",
+  "key": {
+    "crv": "P-256",
+    "d": "NjRylQeVhDqQ70ADD2cqWMI91g5griDRUukJS1sJftM",
+    "kty": "EC",
+    "x": "sK3uLNS2mZTTk1DIUqOfEQdLsthFFtDFB9DVWpo5WNk",
+    "y": "leltmmzdavAYd6OEm3zZPRRJehdKboo9l3ImNaUUNlg"
+  },
+  "alg": "ES256",
+  "KeyLength": "ec-256",
+  "orders": null
+}

@@ -12,7 +12,8 @@ function Get-PACertificate {
     Begin {
         # Make sure we have an account configured
         if (!(Get-PAAccount)) {
-            throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+            try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     }
 
@@ -42,7 +43,7 @@ function Get-PACertificate {
             if ($null -eq $order) { return $null }
 
             # build the path to cert.cer
-            $domainFolder = Join-Path $script:AcctFolder $order.MainDomain.Replace('*','!')
+            $domainFolder = $order | Get-OrderFolder
             $certFile = Join-Path $domainFolder 'cert.cer'
 
             # double check the cert exists

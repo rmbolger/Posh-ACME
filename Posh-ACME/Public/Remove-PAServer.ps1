@@ -19,12 +19,16 @@ function Remove-PAServer {
         # Make sure the server exists on disk
         $dirFolder = ConvertTo-DirFolder $DirectoryUrl
         if (-not (Test-Path $dirFolder -PathType Container)) {
-            throw "Server $DirectoryUrl does not have an associated config folder. Nothing to delete."
+            Write-Warning "Server $DirectoryUrl does not have an associated config folder. Nothing to delete."
+            return
         }
 
-        # confirm deletion unless -Force was used
-        if (!$Force) {
-            $msg = "Deleting a server will also delete all associated accounts, orders, and certificates associated with it."
+        # check for existing accounts
+        $accountFiles = Get-ChildItem (Join-Path $dirFolder '*\acct.json')
+
+        # confirm deletion unless -Force was used or there are no accounts
+        if (-not $Force -and $accountFiles) {
+            $msg = "Deleting a server will also delete the local copies of all associated accounts, orders, and certificates associated with it."
             if ($DeactivateAccounts) {
                 $msg += " You have also chosen to deactivate the associated accounts."
             }
@@ -40,10 +44,10 @@ function Remove-PAServer {
 
         # switch servers if necessary
         if ($oldServer -and $DirectoryUrl -ne $oldServer.location) {
-            Get-PAServer $DirectoryUrl | Set-PAServer
+            Set-PAServer $DirectoryUrl -NoRefresh
             $SwitchBack = $true
         } elseif (-not $oldServer) {
-            Get-PAServer $DirectoryUrl | Set-PAServer
+            Set-PAServer $DirectoryUrl -NoRefresh
         }
 
         # deactivate the accounts if requested
@@ -72,7 +76,7 @@ function Remove-PAServer {
         } else {
             # nothing to switch back to, so reload empty config from disk
             Remove-Item (Join-Path (Get-ConfigRoot) 'current-server.txt') -Force
-            Import-PAConfig
+            Import-PAConfig -Level 'Server'
         }
     }
 

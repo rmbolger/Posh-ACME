@@ -33,16 +33,19 @@ function Get-KeyAuthorization {
         # or if no account was specified, that there's a current account.
         if (!$Account) {
             if (!($Account = Get-PAAccount)) {
-                throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first."
+                try { throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first." }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
         } else {
             if ($Account.id -notin (Get-PAAccount -List).id) {
-                throw "Specified account id $($Account.id) was not found in the current server's account list."
+                try { throw "Specified account id $($Account.id) was not found in the current server's account list." }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
         }
         # make sure it's valid
         if ($Account.status -ne 'valid') {
-            throw "Account status is $($Account.status)."
+            try { throw "Account status is $($Account.status)." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         # hydrate the account key
@@ -98,7 +101,7 @@ function Get-KeyAuthorization {
         Get the key authorization for the specified token using the current account.
 
     .EXAMPLE
-        (Get-PAOrder | Get-PAAuthorizations).DNS01Token | Get-KeyAuthorization
+        (Get-PAOrder | Get-PAAuthorization).DNS01Token | Get-KeyAuthorization
 
         Get all key authorizations for the DNS challenges in the current order using the current account.
 
@@ -106,7 +109,7 @@ function Get-KeyAuthorization {
         Project: https://github.com/rmbolger/Posh-ACME
 
     .LINK
-        Get-PAAuthorizations
+        Get-PAAuthorization
 
     .LINK
         Submit-ChallengeValidation

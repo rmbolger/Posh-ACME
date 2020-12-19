@@ -12,7 +12,8 @@ function Get-PAOrder {
     Begin {
         # Make sure we have an account configured
         if (!(Get-PAAccount)) {
-            throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+            try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     }
 
@@ -24,7 +25,7 @@ function Get-PAOrder {
             # update from the server first if requested
             if ($Refresh) {
                 Write-Debug "Refreshing orders"
-                Get-PAOrder -List  | Update-PAOrder
+                Get-PAOrder -List | Update-PAOrder
             }
 
             # read the contents of each order's order.json
@@ -37,13 +38,13 @@ function Get-PAOrder {
                 $_.CertExpires = Repair-ISODate $_.CertExpires
                 $_.RenewAfter = Repair-ISODate $_.RenewAfter
 
-                # convert 4.x Plugin parameter back to 3.x DnsPlugin if found
-                if ('Plugin' -in $_.PSObject.Properties.Name) {
-                    $_ | Add-Member 'DnsPlugin' $_.Plugin
-                    $_.PSObject.Properties.Remove('Plugin')
+                # rename pre-4.x DnsPlugin parameter to Plugin
+                if ('DnsPlugin' -in $_.PSObject.Properties.Name) {
+                    $_ | Add-Member -MemberType NoteProperty -Name 'Plugin' -Value $_.DnsPlugin
+                    $_.PSObject.Properties.Remove('DnsPlugin')
                 }
 
-                # de-obfuscate 4.x PfxPassB64U if found
+                # de-obfuscate PfxPassB64U
                 if ('PfxPassB64U' -in $_.PSObject.Properties.Name) {
                     $_ | Add-Member 'PfxPass' ($_.PfxPassB64U | ConvertFrom-Base64Url)
                     $_.PSObject.Properties.Remove('PfxPassB64U')
@@ -51,7 +52,7 @@ function Get-PAOrder {
 
                 # insert the type name and send the results to the pipeline
                 $_.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
-                $_
+                Write-Output $_
             }
 
             return $orders
@@ -62,14 +63,13 @@ function Get-PAOrder {
             if ($MainDomain) {
 
                 # build the path to order.json
-                $domainFolder = Join-Path $script:AcctFolder $MainDomain.Replace('*','!')
-                $orderFile =  Join-Path $domainFolder 'order.json'
+                $orderFile =  Join-Path ($MainDomain | Get-OrderFolder) 'order.json'
 
                 # check for an order.json
                 if (Test-Path $orderFile -PathType Leaf) {
 
                     Write-Debug "Loading PAOrder from disk"
-                    $order = Get-ChildItem $orderFile | Get-Content -Raw | ConvertFrom-Json
+                    $order = Get-Content $orderFile -Raw | ConvertFrom-Json
                     $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
 
                     # fix any dates that may have been parsed by PSCore's JSON serializer
@@ -77,13 +77,13 @@ function Get-PAOrder {
                     $order.CertExpires = Repair-ISODate $order.CertExpires
                     $order.RenewAfter = Repair-ISODate $order.RenewAfter
 
-                    # convert 4.x Plugin parameter back to 3.x DnsPlugin if found
-                    if ('Plugin' -in $order.PSObject.Properties.Name) {
-                        $order | Add-Member 'DnsPlugin' $order.Plugin
-                        $order.PSObject.Properties.Remove('Plugin')
+                    # rename pre-4.x DnsPlugin parameter to Plugin
+                    if ('DnsPlugin' -in $order.PSObject.Properties.Name) {
+                        $order | Add-Member -MemberType NoteProperty -Name 'Plugin' -Value $order.DnsPlugin
+                        $order.PSObject.Properties.Remove('DnsPlugin')
                     }
 
-                    # de-obfuscate 4.x PfxPassB64U if found
+                    # de-obfuscate PfxPassB64U
                     if ('PfxPassB64U' -in $order.PSObject.Properties.Name) {
                         $order | Add-Member 'PfxPass' ($order.PfxPassB64U | ConvertFrom-Base64Url)
                         $order.PSObject.Properties.Remove('PfxPassB64U')

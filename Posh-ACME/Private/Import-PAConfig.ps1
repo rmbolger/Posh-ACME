@@ -62,21 +62,7 @@ function Import-PAConfig {
             $script:Dir = Get-PAServer $dirUrl
 
             # deal with cert validation options between PS editions
-            if ($script:Dir.SkipCertificateCheck) {
-                Write-Debug "skipping cert validation"
-                if ($script:SkipCertSupported) {
-                    $script:UseBasic.SkipCertificateCheck = $true
-                } else {
-                    [CertValidation]::Ignore()
-                }
-            } else {
-                Write-Debug "restoring cert validation"
-                if ($script:SkipCertSupported) {
-                    $script:UseBasic.SkipCertificateCheck = $false
-                } else {
-                    [CertValidation]::Restore()
-                }
-            }
+            Set-CertValidation $script:Dir.SkipCertificateCheck
 
             $ImportAccount = $true
 
@@ -86,7 +72,6 @@ function Import-PAConfig {
             $script:Dir = $null
             $script:AcctFolder = $null
             $script:Acct = $null
-            $script:OrderFolder = $null
             $script:Order = $null
         }
     }
@@ -102,22 +87,30 @@ function Import-PAConfig {
 
             $ImportOrder = $true
 
-            # Check for a renamed plugindata.xml.v3 file and move it back if
-            # we don't already have one.
-            $pDataV3Backup = Join-Path $script:AcctFolder 'plugindata.xml.v3'
+            # Check for a v3 plugindata.xml file and convert it to order-specific v4
+            # files.
             $pDataV3File = Join-Path $script:AcctFolder 'plugindata.xml'
-            if (-not (Test-Path $pDataV3File -PathType Leaf) -and
-                (Test-Path $pDataV3Backup -PathType Leaf))
-            {
-                Write-Debug "Reverting backed up v3 plugindata.xml"
-                Move-Item $pDataV3Backup $pDataV3File -Force
+            if (Test-Path $pDataV3File -PathType Leaf) {
+                Write-Debug "Migrating v3 plugindata.xml"
+                $pDataV3 = Import-Clixml $pDataV3File
+
+                # Loop through the available orders
+                Get-PAOrder -List -Refresh | ForEach-Object {
+                    if ($_.Plugin) {
+                        Write-Debug "Migrating for $($_.MainDomain)"
+                        Export-PluginArgs $_.MainDomain $_.Plugin $pDataV3
+                    } else {
+                        Write-Debug "No Plugins defined for order $($_.MainDomain)"
+                    }
+                }
+
+                Move-Item $pDataV3File (Join-Path $script:AcctFolder 'plugindata.xml.v3') -Force
             }
 
         } else {
             # wipe references since we have no current account
             $script:AcctFolder = $null
             $script:Acct = $null
-            $script:OrderFolder = $null
             $script:Order = $null
         }
     }
@@ -128,12 +121,10 @@ function Import-PAConfig {
         $domain = [string](Get-Content (Join-Path $script:AcctFolder 'current-order.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($domain)) {
 
-            $script:OrderFolder = Join-Path $script:AcctFolder $domain.Replace('*','!')
             $script:Order = Get-PAOrder $domain
 
         } else {
             # wipe references since we have no current order
-            $script:OrderFolder = $null
             $script:Order = $null
         }
     }

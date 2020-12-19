@@ -40,11 +40,14 @@ Foreach($import in @($Public + $Private))
 
 # setup some module wide variables
 $script:WellKnownDirs = @{
-    LE_PROD = 'https://acme-v02.api.letsencrypt.org/directory';
-    LE_STAGE = 'https://acme-staging-v02.api.letsencrypt.org/directory';
+    LE_PROD = 'https://acme-v02.api.letsencrypt.org/directory'
+    LE_STAGE = 'https://acme-staging-v02.api.letsencrypt.org/directory'
+    BUYPASS_PROD = 'https://api.buypass.com/acme/directory'
+    BUYPASS_TEST = 'https://api.test4.buypass.no/acme/directory'
+    ZEROSSL_PROD = 'https://acme.zerossl.com/v2/DV90'
 }
 $script:HEADER_NONCE = 'Replay-Nonce'
-$script:USER_AGENT = "Posh-ACME/3.20.0 PowerShell/$($PSVersionTable.PSVersion)"
+$script:USER_AGENT = "Posh-ACME/4.0.0 PowerShell/$($PSVersionTable.PSVersion)"
 $script:COMMON_HEADERS = @{'Accept-Language'='en-us,en;q=0.5'}
 
 # Add an appropriate platform to the user-agent if possible
@@ -74,11 +77,13 @@ if ('UseBasicParsing' -in (Get-Command Invoke-WebRequest).Parameters.Keys) {
     $script:UseBasic.UseBasicParsing = $true
 }
 
+Import-PluginDetail
+
 Register-ArgCompleters
 
-# Get-PAAuthorizations is deprecated and will be replaced with the singular
-# version in 4.x. Prepare for that eventual reality by adding it as an alias
-# now.
-Set-Alias Get-PAAuthorization -Value Get-PAAuthorizations
+# Get-PAAuthorizations was renamed to Get-PAAuthorization in 4.x. But we'll add
+# an alias to the old version so that we don't break scripts since it functions
+# the same.
+Set-Alias Get-PAAuthorizations -Value Get-PAAuthorization
 
 Import-PAConfig

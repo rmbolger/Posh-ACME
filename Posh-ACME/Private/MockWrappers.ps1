@@ -37,3 +37,15 @@ function Set-DirFolder {
     )
     $script:DirFolder = $Path
 }
+
+function Get-OrderFolder {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [string]$MainDomain
+    )
+
+    Process {
+        Join-Path $script:AcctFolder $MainDomain.Replace('*','!')
+    }
+}

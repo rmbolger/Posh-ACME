@@ -1,11 +1,13 @@
 function Export-PluginArgs {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
-        [hashtable]$PluginArgs,
+        [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [string]$MainDomain,
         [Parameter(Mandatory,Position=1)]
-        [string[]]$DnsPlugin,
-        [PSTypeName('PoshACME.PAAccount')]$Account
+        [string[]]$Plugin,
+        [Parameter(Mandatory,Position=2)]
+        [hashtable]$PluginArgs,
+        [switch]$IgnoreExisting
     )
 
     # In this function, we're trying to merge the specified plugin args with the existing set
@@ -21,81 +23,114 @@ function Export-PluginArgs {
     # utilize a different plugin than the previous ones and only need to specify the new plugin's
     # parameters in $PluginArgs.
 
-
-    # make sure any account passed in is actually associated with the current server
-    # or if no account was specified, that there's a current account.
-    if (-not $Account) {
-        if (-not ($Account = Get-PAAccount)) {
-            throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first."
-        }
-    } else {
-        if ($Account.id -notin (Get-PAAccount -List).id) {
-            throw "Specified account id $($Account.id) was not found in the current server's account list."
+    Begin {
+        # Make sure we have an account configured
+        if (-not ($acct = Get-PAAccount)) {
+            throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
         }
     }
 
-    # build the path to the existing plugin data file and import it
-    $pDataFile = Join-Path (Join-Path (Get-DirFolder) $Account.id) 'plugindata.xml'
-    if (Test-Path -Path $pDataFile -PathType Leaf) {
-        # import the existing file
-        Write-Debug "Loading saved plugin data"
-        $pData = Import-CliXml $pDataFile -EA Ignore
-    }
-    if ($null -eq $pData -or $pData -isnot [hashtable]) {
-        # The existing file either didn't exist or was corrupt.
-        # Just initialize the old data to an empty hashtable.
+    Process {
+        trap { $PSCmdlet.ThrowTerminatingError($PSItem) }
+
+        Write-Debug "Exporting plugin args for $MainDomain with plugins $(($Plugin -join ','))"
+
+        # throw an error if an order isn't found matching MainDomain
+        if (-not ($order = Get-PAOrder $MainDomain)) {
+            throw "No ACME order found for $MainDomain."
+        }
+
         $pData = @{}
-    }
-
-    # define the set of parameter names to ignore
-    $ignoreParams = @('RecordName','TxtValue') + [Management.Automation.PSCmdlet]::CommonParameters +
-        [Management.Automation.PSCmdlet]::OptionalCommonParameters
-
-    # $DnsPlugin will most often come with duplicates after being called from Submit-ChallengeValidation
-    # So grab just the unique set.
-    $uniquePlugins = $DnsPlugin | Sort-Object -Unique
-
-    # loop through the unique set of plugins
-    foreach ($plugin in $uniquePlugins) {
-        # dot source the plugin file
-        try {
-            . (Join-Path $PSScriptRoot "..\DnsPlugins\$plugin.ps1")
-        } catch { throw }
-
-        # check for the add command that should exist now
-        $addCmdName = "Add-DnsTxt$Plugin"
-        if (-not ($cmd = Get-Command $addCmdName -ErrorAction Ignore)) {
-            throw "Expected plugin command $addCmdName not found."
+        if (-not $IgnoreExisting) {
+            $pData = Get-PAPluginArgs $order.MainDomain
         }
 
-        # grab the set of non-common param names
-        $paramNames = $cmd.Parameters.Keys | Where-Object {
-            ($_ -notin $ignoreParams) -and
-            ($true -notin $cmd.Parameters[$_].Attributes.ValueFromRemainingArguments)
+        # define the set of parameter names to ignore
+        $ignoreParams = @('RecordName','TxtValue','Url','Body') +
+            [Management.Automation.PSCmdlet]::CommonParameters +
+            [Management.Automation.PSCmdlet]::OptionalCommonParameters
+
+        # $Plugin will most often come with duplicates after being called from Submit-ChallengeValidation
+        # So grab just the unique set.
+        $uniquePlugins = @($Plugin | Sort-Object -Unique)
+
+        # Get all of the plugin specific parameter names for the current plugin list
+        $paramNames = foreach ($p in $uniquePlugins) {
+
+            Write-Debug "Attempting to load plugin $p"
+
+            $pluginDetail = $script:Plugins.$p
+            if (-not $pluginDetail) {
+                Write-Error "$p plugin not found or was invalid."
+                continue
+            }
+
+            # dot source the plugin file
+            . $pluginDetail.Path
+
+            # grab a reference to the appropriate Add command
+            if ('dns-01' -eq $pluginDetail.ChallengeType) {
+                $cmd = Get-Command Add-DnsTxt
+            } else {
+                $cmd = Get-Command Add-HttpChallenge
+            }
+
+            # return the set of non-common param names
+            $cmd.Parameters.Keys | Where-Object {
+                ($_ -notin $ignoreParams) -and
+                ($true -notin $cmd.Parameters[$_].Attributes.ValueFromRemainingArguments)
+            }
         }
 
-        $hasNewArgs = $(foreach ($key in $PluginArgs.Keys) { if ($key -in $paramNames) { $true; break; } }) -eq $true
-        if ($hasNewArgs) {
-            Write-Debug "New args for $plugin found."
+        # Remove any old args that may conflict with the new ones
+        foreach ($key in @($pData.Keys)) {
+            if ($key -in $paramNames) {
+                Write-Debug "Removing old value for $key"
+                $pData.Remove($key)
+            }
+        }
 
-            # check for and remove old args
-            foreach ($key in @($pData.Keys)) {
-                if ($key -in $paramNames) {
-                    Write-Debug "Removing old value for $key"
-                    $pData.Remove($key)
+        # Add new args to the old data
+        foreach ($key in ($PluginArgs.Keys | Where-Object { $_ -in $paramNames })) {
+            Write-Debug "Adding new value for $key"
+            $pData.$key = $PluginArgs.$key
+        }
+
+        # Now we need to export the merged object as JSON
+        # but we have to pre-serialize things like SecureString and PSCredential
+        # first because ConvertTo-Json can't deal with those natively.
+
+        # determine whether we're using a custom key
+        $encParam = @{}
+        if (-not [String]::IsNullOrEmpty($acct.sskey)) {
+            $encParam.Key = $acct.sskey | ConvertFrom-Base64Url -AsByteArray
+        }
+
+        $pDataSafe = @{}
+        foreach ($key in $pData.Keys) {
+            if ($pData.$key -is [securestring]) {
+                $pDataSafe.$key = [pscustomobject]@{
+                    origType = 'securestring'
+                    value = $pData.$key | ConvertFrom-SecureString @encParam
                 }
             }
-        } else {
-            Write-Debug "No new args for $plugin"
+            elseif ($pData.$key -is [pscredential]) {
+                $pDataSafe.$key = [pscustomobject]@{
+                    origType = 'pscredential'
+                    user = $pData.$key.Username
+                    pass = $pData.$key.Password | ConvertFrom-SecureString @encParam
+                }
+            }
+            else {
+                # for now, assume everything else is safe to auto serialize
+                $pDataSafe.$key = $pData.$key
+            }
         }
+
+        # build the path to the existing plugin data file and export it
+        $orderFolder = $order | Get-OrderFolder
+        $pDataFile = Join-Path $orderFolder 'pluginargs.json'
+        $pDataSafe | ConvertTo-Json -Depth 10 | Out-File $pDataFile -Encoding utf8
     }
 
-    # merge the new args with old data
-    foreach ($key in $PluginArgs.Keys) {
-        Write-Debug "Adding new value for $key"
-        $pData.$key = $PluginArgs.$key
-    }
-
-    # export the merged object
-    $pData | Export-Clixml $pDataFile -Force -EA Stop
 }

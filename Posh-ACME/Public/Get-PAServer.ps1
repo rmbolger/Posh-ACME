@@ -8,7 +8,8 @@ function Get-PAServer {
         [string]$DirectoryUrl,
         [Parameter(ParameterSetName='List',Mandatory)]
         [switch]$List,
-        [switch]$Refresh
+        [switch]$Refresh,
+        [switch]$Quiet
     )
 
     Process {
@@ -50,10 +51,12 @@ function Get-PAServer {
                 # check if it exists
                 if (Test-Path $dirFile -PathType Leaf) {
                     Write-Debug "Loading PAServer from disk"
-                    $dir = Get-ChildItem $dirFile | Get-Content -Raw | ConvertFrom-Json
+                    $dir = Get-Content $dirFile -Raw | ConvertFrom-Json
                     $dir.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
                 } else {
-                    Write-Warning "Unable to find cached PAServer info for $DirectoryUrl. Try using Set-PAServer first."
+                    if (-not $Quiet) {
+                        Write-Warning "Unable to find cached PAServer info for $DirectoryUrl. Try using Set-PAServer first."
+                    }
                     return $null
                 }
 
@@ -95,6 +98,9 @@ function Get-PAServer {
 
     .PARAMETER Refresh
         If specified, any server details returned will be freshly queried from the ACME server. Otherwise, cached details will be returned.
+
+    .PARAMETER Quiet
+        If specified, no warning will be thrown if a specified server is not found.
 
     .EXAMPLE
         Get-PAServer

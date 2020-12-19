@@ -15,16 +15,19 @@ function Revoke-PAAuthorization {
         # or if no account was specified, that there's a current account.
         if (!$Account) {
             if (!($Account = Get-PAAccount)) {
-                throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first."
+                try { throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first." }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
         } else {
             if ($Account.id -notin (Get-PAAccount -List).id) {
-                throw "Specified account id $($Account.id) was not found in the current server's account list."
+                try { throw "Specified account id $($Account.id) was not found in the current server's account list." }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
         }
         # make sure it's valid
         if ($Account.status -ne 'valid') {
-            throw "Account status is $($Account.status)."
+            try { throw "Account status is $($Account.status)." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         # build the header template
@@ -56,7 +59,7 @@ function Revoke-PAAuthorization {
         # Remove any duplicates that might exist
         $urls = $urls | Select-Object -Unique
 
-        $auths = $urls | Get-PAAuthorizations -Account $Account
+        $auths = $urls | Get-PAAuthorization -Account $Account
 
         # loop through the URLs and request deactivation
         foreach ($auth in $auths) {
@@ -81,8 +84,7 @@ function Revoke-PAAuthorization {
 
             Write-Verbose "Revoking authorization for $($auth.fqdn)"
             try {
-                $response = Invoke-ACME $header $payload $Account -EA Stop
-                Write-Debug "Response: $($response.Content)"
+                Invoke-ACME $header $payload $Account -EA Stop | Out-Null
             } catch [AcmeException] {
                 Write-Error $_.Exception.Data.detail
             }
@@ -130,7 +132,7 @@ function Revoke-PAAuthorization {
         Project: https://github.com/rmbolger/Posh-ACME
 
     .LINK
-        Get-PAAuthorizations
+        Get-PAAuthorization
 
     .LINK
         Get-PAOrder

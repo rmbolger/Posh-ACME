@@ -12,16 +12,19 @@ function Send-ChallengeAck {
         # or if no account was specified, that there's a current account.
         if (!$Account) {
             if (!($Account = Get-PAAccount)) {
-                throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first."
+                try { throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first." }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
         } else {
             if ($Account.id -notin (Get-PAAccount -List).id) {
-                throw "Specified account id $($Account.id) was not found in the current server's account list."
+                try { throw "Specified account id $($Account.id) was not found in the current server's account list." }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
         }
         # make sure it's valid
         if ($Account.status -ne 'valid') {
-            throw "Account status is $($Account.status)."
+            try { throw "Account status is $($Account.status)." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     }
 
@@ -37,8 +40,7 @@ function Send-ChallengeAck {
 
         # send the notification
         try {
-            $response = Invoke-ACME $header '{}' $Account -EA Stop
-            Write-Debug "Response: $($response.Content)"
+            Invoke-ACME $header '{}' $Account -EA Stop | Out-Null
         } catch { throw }
 
     }
@@ -60,14 +62,14 @@ function Send-ChallengeAck {
         The ACME account associated with the challenge.
 
     .EXAMPLE
-        $auths = Get-PAOrder | Get-PAAuthorizations
+        $auths = Get-PAOrder | Get-PAAuthorization
 
         PS C:\>Send-ChallengeAck $auths[0].DNS01Url
 
         Tell the ACME server to validate the first DNS challenge in the current order.
 
     .EXAMPLE
-        $auths = Get-PAOrder | Get-PAAuthorizations
+        $auths = Get-PAOrder | Get-PAAuthorization
 
         PS C:\>$httpUrls = ($auths | ?{ $_.status -eq 'pending' }).HTTP01Url
         PS C:\>$httpUrls | Send-ChallengeAck
@@ -78,7 +80,7 @@ function Send-ChallengeAck {
         Project: https://github.com/rmbolger/Posh-ACME
 
     .LINK
-        Get-PAAuthorizations
+        Get-PAAuthorization
 
     .LINK
         Submit-ChallengeValidation
