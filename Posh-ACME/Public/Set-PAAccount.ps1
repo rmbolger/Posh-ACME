@@ -24,7 +24,7 @@ function Set-PAAccount {
         [Parameter(ParameterSetName='Rollover')]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [Alias('AccountKeyLength')]
-        [string]$KeyLength='ec-256',
+        [string]$KeyLength='2048',
         [Parameter(ParameterSetName='RolloverImportKey',Mandatory)]
         [string]$KeyFile,
         [switch]$NoSwitch
