@@ -52,7 +52,7 @@ function Submit-Renewal {
                     return
                 }
 
-                # skip orders with no DNS plugin (likely because they were created using custom processes or HTTP validation)
+                # skip orders with no plugin (likely because they were created using custom processes)
                 if ($null -eq $order.Plugin) {
                     Write-Warning "Skipping renewal for order $($order.MainDomain) due to null plugin."
                     return
@@ -100,13 +100,8 @@ function Submit-Renewal {
 
             'AllOrders' {
 
-                # get the list of all completed orders which should have a non-null RenewAfter property
-                $orders = @(Get-PAOrder -List -Refresh | Where-Object { $null -ne $_.RenewAfter })
-
-                # remove the ones that aren't ready for renewal unless -Force was used
-                if (!$Force) {
-                    $orders = @($orders | Where-Object { (Get-DateTimeOffsetNow) -ge ([DateTimeOffset]::Parse($_.RenewAfter)) })
-                }
+                # get all existing orders on this account
+                $orders = @(Get-PAOrder -List -Refresh)
 
                 if ($orders.Count -gt 0) {
 
@@ -124,7 +119,7 @@ function Submit-Renewal {
                     $orders | Submit-Renewal @renewParams
 
                 } else {
-                    Write-Verbose "No renewable orders found for account $($script:Acct.id)."
+                    Write-Verbose "No orders found for account $($script:Acct.id)."
                 }
 
                 break
