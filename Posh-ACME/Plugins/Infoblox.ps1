@@ -35,14 +35,17 @@ function Add-DnsTxt {
         if ($IBIgnoreCert) { Set-IBCertIgnoreOn }
 
         # check if the record already exists
-        $response = Invoke-RestMethod -Uri $recUrl -Method Get -Credential $IBCred @script:UseBasic
+        Write-Debug "GET $recUrl"
+        $response = Invoke-RestMethod -Uri $recUrl -Method Get -Credential $IBCred -Verbose:$false @script:UseBasic
 
         if ($response -and $response.'_ref') {
             Write-Debug "Record $RecordName with value $TxtValue already exists. Nothing to do."
         } else {
             # add the record
+            $recUrl += "&ttl=0"
             Write-Verbose "Adding $RecordName with value $TxtValue"
-            Invoke-RestMethod -Uri "$recUrl&ttl=0" -Method Post -Credential $IBCred @script:UseBasic | Out-Null
+            Write-Debug "POST $recUrl"
+            Invoke-RestMethod -Uri $recUrl -Method Post -Credential $IBCred -Verbose:$false @script:UseBasic | Out-Null
         }
 
     } finally {
@@ -133,13 +136,15 @@ function Remove-DnsTxt {
 
         # query the _ref for the txt record object we want to delete
         $recUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&view=$IBView"
-        $response = Invoke-RestMethod -Uri $recUrl -Method Get -Credential $IBCred @script:UseBasic
+        Write-Debug "GET $recUrl"
+        $response = Invoke-RestMethod -Uri $recUrl -Method Get -Credential $IBCred -Verbose:$false @script:UseBasic
 
         if ($response -and $response.'_ref') {
             # delete the record
             $delUrl = "https://$IBServer/wapi/v1.0/$($response.'_ref')"
             Write-Verbose "Removing $RecordName with value $TxtValue"
-            Invoke-RestMethod -Uri $delUrl -Method Delete -Credential $IBCred @script:UseBasic | Out-Null
+            Write-Debug "DELETE $delUrl"
+            Invoke-RestMethod -Uri $delUrl -Method Delete -Credential $IBCred -Verbose:$false @script:UseBasic | Out-Null
         } else {
             Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
         }
