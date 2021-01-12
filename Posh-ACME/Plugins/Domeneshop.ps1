@@ -273,9 +273,15 @@ function Find-DomeneshopZone {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug ("Checking {0}" -f $zoneTest)
         try {
+            # Be aware: this query returns partial zone name matches so domain=example.com will return
+            # both example.com and myexample.com
             $querystring = ("?domain={0}" -f $zoneTest)
-            $response = Invoke-DomeneshopAPI -apiAuthorization $apiAuthorization -QueryAdditions $querystring | `
-                Where-Object -FilterScript { $_.Status -ieq 'active' -and $_.services.dns }
+            $response = Invoke-DomeneshopAPI -apiAuthorization $apiAuthorization -QueryAdditions $querystring |
+                Where-Object {
+                    $_.Status -ieq 'active' -and
+                    $_.services.dns -and
+                    $_.domain -eq $zoneTest
+                }
 
             # check for results
             if ($response) {
