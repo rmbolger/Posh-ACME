@@ -264,10 +264,15 @@ function Send-DynamicTXTUpdate {
 
     try {
         $answerLines = $input | & $NSUpdatePath 2>&1
+        $exitCode = $LASTEXITCODE
     } catch { throw }
 
-    if ($true -notin ($answerLines | ForEach-Object { $_ -like '* status: NOERROR,*' })) {
-        $answerLines | ForEach-Object { Write-Verbose $_ }
-        throw "Unexpected output from nsupdate command. Use -Verbose for details."
+    if ($exitCode -ne 0) {
+        Write-Verbose "nsupdate output:`n$($answerLines -join "`n")"
+        throw "nsupdate returned non-zero exit code which indicates failure. Check -Verbose output for details."
+    } else {
+        # write the nsupdate output to Debug just in case
+        Write-Debug "nsupdate output:`n$($answerLines -join "`n")"
     }
+
 }
