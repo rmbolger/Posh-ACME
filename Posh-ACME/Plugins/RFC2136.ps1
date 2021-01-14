@@ -18,6 +18,7 @@ function Add-DnsTxt {
         [Parameter(ParameterSetName='Insecure')]
         [string]$DDNSKeyValueInsecure,
         [string]$DDNSExePath='nsupdate',
+        [string[]]$DDNSZone,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -46,6 +47,15 @@ function Add-DnsTxt {
         $updateParams.TsigKeyName = $DDNSKeyName
         $updateParams.TsigKeyType = $DDNSKeyType
         $updateParams.TsigKeyValue = $DDNSKeyValueInsecure
+    }
+
+    # determine the correct zone if a zone list was specified
+    $DDNSZone | Sort-Object -Descending { $_.Length } | ForEach-Object {
+        if ($RecordName -like "*.$_") {
+            Write-Debug "Matched $_ from zone list"
+            $updateParams.Zone = "$_."
+            return
+        }
     }
 
     Write-Verbose "Adding $RecordName with value $TxtValue"
@@ -86,6 +96,9 @@ function Add-DnsTxt {
     .PARAMETER DDNSExePath
         The path to the nsupdate executable. The default is just 'nsupdate' which will use the first copy found in the PATH environment variable.
 
+    .PARAMETER DDNSZone
+        The zone(s) that contain the record being updated. Normally, nsupdate does a TSIG authenticated SOA query to determine the zone. But in some environments, the SOA query fails and this allows you to bypass it.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -120,6 +133,7 @@ function Remove-DnsTxt {
         [Parameter(ParameterSetName='Insecure')]
         [string]$DDNSKeyValueInsecure,
         [string]$DDNSExePath='nsupdate',
+        [string[]]$DDNSZone,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -148,6 +162,15 @@ function Remove-DnsTxt {
         $updateParams.TsigKeyName = $DDNSKeyName
         $updateParams.TsigKeyType = $DDNSKeyType
         $updateParams.TsigKeyValue = $DDNSKeyValueInsecure
+    }
+
+    # determine the correct zone if a zone list was specified
+    $DDNSZone | Sort-Object -Descending { $_.Length } | ForEach-Object {
+        if ($RecordName -like "*.$_") {
+            Write-Debug "Matched $_ from zone list"
+            $updateParams.Zone = "$_."
+            return
+        }
     }
 
     Write-Verbose "Removing $RecordName with value $TxtValue"
@@ -186,6 +209,9 @@ function Remove-DnsTxt {
 
     .PARAMETER DDNSExePath
         The path to the nsupdate executable. The default is just 'nsupdate' which will use the first copy found in the PATH environment variable.
+
+    .PARAMETER DDNSZone
+        The zone(s) that contain the record being updated. Normally, nsupdate does a TSIG authenticated SOA query to determine the zone. But in some environments, the SOA query fails and this allows you to bypass it.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -242,28 +268,37 @@ function Send-DynamicTXTUpdate {
         [ValidateSet('hmac-md5','hmac-sha1','hmac-sha224','hmac-sha256','hmac-sha384','hmac-sha512')]
         [string]$TsigKeyType,
         [string]$TsigKeyValue,
-        [string]$NSUpdatePath='nsupdate'
+        [string]$NSUpdatePath='nsupdate',
+        [string]$Zone
     )
 
     # build the input array we're going to send to nsupdate via stdin
-    $input = @(
-        "server $Nameserver $Port"
-        "key $($TsigKeyType):$TsigKeyName $TsigKeyValue"
+    $cmds = @("server $Nameserver $Port")
+
+    # add the zone if specified
+    if ($Zone) {
+        $cmds += @("zone $Zone")
+    }
+
+    # add the TSIG key if specified
+    if ($TsigKeyName -and $TsigKeyType -and $TsigKeyValue) {
+        Write-Debug "Using TSIG authentication with key $TsigKeyName"
+        $cmds += @("key $($TsigKeyType):$TsigKeyName $TsigKeyValue")
+    } else {
+        Write-Debug "Using unauthenticated update"
+    }
+
+    # add the rest
+    $cmds += @(
         "update $Action $RecordName 60 TXT `"$TxtValue`""
         'send'
         'answer'
     )
 
-    # remove the "key" line if those variables were empty
-    if (-not $TsigKeyName -or -not $TsigKeyType -or -not $TsigKeyValue) {
-        Write-Debug "Using unauthenticated update"
-        $input = $input[0,2,3,4,5]
-    } else {
-        Write-Debug "Using TSIG authentication with key $TsigKeyName"
-    }
+    Write-Debug "Sending the following to nsupdate:`n$(($cmds -join "`n").Replace($TsigKeyValue,'************'))"
 
     try {
-        $answerLines = $input | & $NSUpdatePath 2>&1
+        $answerLines = $cmds | & $NSUpdatePath 2>&1
         $exitCode = $LASTEXITCODE
     } catch { throw }
 
