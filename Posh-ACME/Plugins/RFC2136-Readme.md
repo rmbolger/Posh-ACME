@@ -21,6 +21,8 @@ When using a TSIG key, you will typically have 3 values; a key name, a key type 
 
 Due to the inexplicable lack of good native DNS libraries within PowerShell/.NET, this plugin relies on the `nsupdate` utility which is part of the ISC BIND distribution. Most modern Linux distributions will have this installed by default, but double check to be sure. **On Windows, you will need to download and install the utility.** Go to the [ISC BIND Downloads](https://www.isc.org/download/) page and download the current stable version for Windows. You don't actually need to run the installer. It is sufficient to simply unzip the archive and either add that folder to your `PATH` environment variable or specify the full path to `nsupdate.exe` in the plugin arguments. *(Adding the folder to your PATH also gives you easy access to the `dig` utility which many DNS admins prefer over nslookup)*
 
+> **_NOTE:_** Some users have reported needing to install Visual C++ Redistributable libraries in order for the unzip-and-run method to work. Many systems will already have these installed. But if not, among the files unzipped should be a `vcredist_x64.exe` installer you can use. You can test by running `nsupdate -V` to check the version.
+
 ## Using the Plugin
 
 When using unauthenticated updates, the only required parameter is `DDNSNameserver` which is the IP or hostname of the authoritative DNS server that will accept dynamic updates for the zone your TXT record lives in. You may also provide `DDNSPort` if your server is not listening on the standard port 53.
@@ -28,6 +30,8 @@ When using unauthenticated updates, the only required parameter is `DDNSNameserv
 When using TSIG authenticated updates, in addition to the previous parameters you must also supply `DDNSKeyName`, `DDNSKeyType`, and one of two methods to provide the key value. The `DDNSKeyValue` parameter is a SecureString object which can only be used from Windows or any OS with PowerShell 6.2 or later. The other option is `DDNSKeyValueInsecure` which is a standard String.
 
 If the `nsupdate` utility is not in your PATH environment variable, you must also supply the full path to it using the `DDNSExePath` parameter.
+
+There is an optional `DDNSZone` parameter which allows you to specify the zone(s) the records will be added to. But this shouldn't normally be necessary. See [issue #307](https://github.com/rmbolger/Posh-ACME/issues/307) for more info.
 
 Here are a few examples using different combinations of parameters.
 
