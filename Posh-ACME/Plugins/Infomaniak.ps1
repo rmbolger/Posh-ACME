@@ -226,7 +226,10 @@ Function Find-InfomaniakZone {
     # - sub1.sub2.example.com
     # - sub2.example.com
     # - example.com
-    $zoneTest = $RecordName;
+
+    # remove _acme-challenge. from requested RecordName to get the zone
+    $zone = $RecordName.Split('.',2)[1];
+    $zoneTest = $zone;
     while($zoneTest.Contains('.'))
     {
         Write-Debug "Checking $zoneTest"
@@ -248,8 +251,6 @@ Function Find-InfomaniakZone {
         $zoneTest = $zoneTest.Split('.',2)[1]
     }
 
-    # remove _acme-challenge. from requested zone
-    $zone = $RecordName.Split('.',2)[1]
     Write-Debug "Zone $zone does not exist ..."
     return $null
 }
