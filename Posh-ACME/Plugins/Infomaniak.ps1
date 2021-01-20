@@ -70,6 +70,7 @@ Function Add-DnsTxt {
             {
                 Write-Verbose "Record $RecordName added with value $TxtValue."
             }
+            else
             {
                 throw "Record $RecordName with value $TxtValue could not be added."
             }
@@ -255,8 +256,6 @@ Function Find-InfomaniakZone {
         $zoneTest = $zoneTest.Split('.',2)[1]
     }
 
-    # remove _acme-challenge. from requested zone
-    $zone = $RecordName.Split('.',2)[1]
     Write-Debug "Zone $zone does not exist ..."
     return $null
 }
