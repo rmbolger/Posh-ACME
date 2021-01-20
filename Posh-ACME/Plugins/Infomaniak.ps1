@@ -70,6 +70,9 @@ Function Add-DnsTxt {
             {
                 Write-Verbose "Record $RecordName added with value $TxtValue."
             }
+            {
+                throw "Record $RecordName with value $TxtValue could not be added."
+            }
         } catch { throw }
     }
 
@@ -150,6 +153,10 @@ Function Remove-DnsTxt {
             if($response.result -eq 'success')
             {
                 Write-Verbose "Record $RecordName deleted."
+            }
+            else
+            {
+                throw "Record $RecordName could not be deleted."
             }
         } catch { throw }
     } else {
