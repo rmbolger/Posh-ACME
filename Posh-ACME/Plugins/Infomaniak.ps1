@@ -216,6 +216,8 @@ Function Find-InfomaniakZone {
         [hashtable]$RestParameters
     )
 
+    $apiRoot = 'https://api.infomaniak.com'
+
     # setup a module variable to cache the record to zone mapping
     # so it's quicker to find later
     if (!$script:InfomaniakRecordZones) { $script:InfomaniakRecordZones = @{} }
