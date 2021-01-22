@@ -47,8 +47,8 @@ Function Add-DnsTxt {
     # check for a matching record
     $rec = $recs.data | Where-Object {
         $_.type -eq 'TXT' -and
-        $_.source -eq $recShort -and
-        $_.target -eq $TxtValue
+        $_.source_idn -eq $RecordName -and
+        $_.target_idn -eq $TxtValue
     }
 
     if ($rec) {
