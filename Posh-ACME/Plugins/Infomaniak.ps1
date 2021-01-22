@@ -1,4 +1,4 @@
-function Get-CurrentPluginType { 'dns-01' }
+Function Get-CurrentPluginType { 'dns-01' }
 
 Function Add-DnsTxt {
     [CmdletBinding(DefaultParameterSetName='Secure')]
@@ -222,7 +222,7 @@ Function Find-InfomaniakZone {
 
     # check for the record in the cache
     if ($script:InfomaniakRecordZones.ContainsKey($RecordName)) {
-        Write-Debug "Result from Cache $($script:InfomaniakRecordZones.$RecordName.name)"
+        Write-Debug "Result from Cache $($script:InfomaniakRecordZones.$RecordName.name) (ID $($script:InfomaniakRecordZones.$RecordName.id))"
         return $script:InfomaniakRecordZones.$RecordName
     }
 
@@ -256,6 +256,6 @@ Function Find-InfomaniakZone {
         $zoneTest = $zoneTest.Split('.',2)[1]
     }
 
-    Write-Debug "Zone $zone does not exist ..."
+    Write-Debug "Zone for $RecordName does not exist ..."
     return $null
 }
