@@ -9,6 +9,7 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$ACMEServer,
+        [switch]$HTTP,
         [string[]]$ACMEAllowFrom,
         [hashtable]$ACMERegistration,
         [Parameter(ValueFromRemainingArguments)]
@@ -60,10 +61,17 @@ function Add-DnsTxt {
     # create the update body
     $updateBody = @{subdomain=$regVals[0];txt=$TxtValue} | ConvertTo-Json -Compress
 
+    # Use http if explicitly requested
+    $protocol = "https"
+    if ($HTTP) {
+        $protocol = "http"
+    }
+
+
     # send the update
     try {
         Write-Verbose "Updating $($regVals[3]) with $TxtValue"
-        $response = Invoke-RestMethod "https://$ACMEServer/update" -Method Post `
+        $response = Invoke-RestMethod "$($protocol)://$ACMEServer/update" -Method Post `
             -Headers $authHead -Body $updateBody @script:UseBasic
         Write-Debug ($response | ConvertTo-Json)
     } catch { throw }
@@ -83,6 +91,9 @@ function Add-DnsTxt {
 
     .PARAMETER ACMEServer
         The FQDN of the acme-dns server instance.
+
+    .PARAMETER HTTP
+        Use HTTP when connecting to the ACME-DNS endpoint.
 
     .PARAMETER ACMEAllowFrom
         A list of networks in CIDR notation that the acme-dns server should allow updates from. If not specified, the acme-dns server will not block any updates based on IP address.
@@ -181,7 +192,8 @@ function New-AcmeDnsRegistration {
         [Parameter(Mandatory,Position=0)]
         [string]$ACMEServer,
         [Parameter(Position=1)]
-        [string[]]$ACMEAllowFrom
+        [string[]]$ACMEAllowFrom,
+        [switch]$HTTP
     )
 
     # build the registration body
@@ -191,10 +203,16 @@ function New-AcmeDnsRegistration {
         $regBody = '{}'
     }
 
+    # Use http if explicitly requested
+    $protocol = "https"
+    if ($HTTP) {
+        $protocol = "http"
+    }
+
     # do the registration
     try {
         Write-Verbose "Registering new subdomain on $ACMEServer"
-        $reg = Invoke-RestMethod "https://$ACMEServer/register" -Method POST -Body $regBody `
+        $reg = Invoke-RestMethod "$($protocol)://$ACMEServer/register" -Method POST -Body $regBody `
             -ContentType 'application/json' @script:UseBasic
         Write-Debug ($reg | ConvertTo-Json)
     } catch { throw }
