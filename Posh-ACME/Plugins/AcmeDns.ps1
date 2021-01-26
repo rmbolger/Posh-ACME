@@ -92,6 +92,9 @@ function Add-DnsTxt {
     .PARAMETER ACMEServer
         The FQDN of the acme-dns server instance.
 
+    .PARAMETER HTTP
+        Use HTTP when connecting to the ACME-DNS endpoint.
+
     .PARAMETER ACMEAllowFrom
         A list of networks in CIDR notation that the acme-dns server should allow updates from. If not specified, the acme-dns server will not block any updates based on IP address.
 
