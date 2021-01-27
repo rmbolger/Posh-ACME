@@ -7,9 +7,14 @@ function Add-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName = "Server",Mandatory,Position=2)]
         [string]$ACMEServer,
-        [switch]$HTTP,
+        [parameter(ParameterSetName = "URI",Mandatory,Position = 2)]
+        [ValidateScript({
+            if ($_.IsAbsoluteUri) {$true} else {throw "That's not a valid URI"}
+            if ($_.Scheme -notmatch "http[s]?") {throw "We only support http/s"}
+        })]
+        [uri]$ACMEUri,
         [string[]]$ACMEAllowFrom,
         [hashtable]$ACMERegistration,
         [Parameter(ValueFromRemainingArguments)]
@@ -61,17 +66,17 @@ function Add-DnsTxt {
     # create the update body
     $updateBody = @{subdomain=$regVals[0];txt=$TxtValue} | ConvertTo-Json -Compress
 
-    # Use http if explicitly requested
-    $protocol = "https"
-    if ($HTTP) {
-        $protocol = "http"
+    # Compose the URI.
+    if ($PSCmdlet.ParameterSetName -eq "URI") {
+        $URI = "$($ACMEUri.AbsoluteUri)update"
+    } else {
+        $URI = "https://$ACMEServer/update"
     }
-
 
     # send the update
     try {
         Write-Verbose "Updating $($regVals[3]) with $TxtValue"
-        $response = Invoke-RestMethod "$($protocol)://$ACMEServer/update" -Method Post `
+        $response = Invoke-RestMethod $URI -Method Post `
             -Headers $authHead -Body $updateBody @script:UseBasic
         Write-Debug ($response | ConvertTo-Json)
     } catch { throw }
@@ -92,8 +97,8 @@ function Add-DnsTxt {
     .PARAMETER ACMEServer
         The FQDN of the acme-dns server instance.
 
-    .PARAMETER HTTP
-        Use HTTP when connecting to the ACME-DNS endpoint.
+    .PARAMETER URI
+        Use the URI parameter when you have a non standard setup like a custom port, using http, or a custom path.
 
     .PARAMETER ACMEAllowFrom
         A list of networks in CIDR notation that the acme-dns server should allow updates from. If not specified, the acme-dns server will not block any updates based on IP address.
@@ -189,8 +194,17 @@ function Save-DnsTxt {
 function New-AcmeDnsRegistration {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(ParameterSetName = "Server",Mandatory,Position=0)]
         [string]$ACMEServer,
+        [parameter(ParameterSetName = "URI",Mandatory,Position = 0)]
+        [ValidateScript({
+            if ($_.IsAbsoluteUri) {
+                $true
+            } else {
+                throw "That's not a valid URI"
+            }
+        })]
+        [uri]$ACMEUri,
         [Parameter(Position=1)]
         [string[]]$ACMEAllowFrom,
         [switch]$HTTP
@@ -203,16 +217,17 @@ function New-AcmeDnsRegistration {
         $regBody = '{}'
     }
 
-    # Use http if explicitly requested
-    $protocol = "https"
-    if ($HTTP) {
-        $protocol = "http"
+    # Compose the URI.
+    if ($PSCmdlet.ParameterSetName -eq "URI") {
+        $URI = "$($ACMEUri.AbsoluteUri)register"
+    } else {
+        $URI = "https://$ACMEServer/register"
     }
 
     # do the registration
     try {
         Write-Verbose "Registering new subdomain on $ACMEServer"
-        $reg = Invoke-RestMethod "$($protocol)://$ACMEServer/register" -Method POST -Body $regBody `
+        $reg = Invoke-RestMethod $uri -Method POST -Body $regBody `
             -ContentType 'application/json' @script:UseBasic
         Write-Debug ($reg | ConvertTo-Json)
     } catch { throw }
