@@ -42,10 +42,19 @@ function Add-DnsTxt {
         Export-PluginVar ACMEReg $ACMEReg
     }
 
+    # Create URI
+    if ($PSCmdlet.ParameterSetName -eq "URI") {
+        $URI = $ACMEUri.AbsoluteUri.Trim("/")
+    } else {
+        $URI = "https://$ACMEServer"
+    }
+
+
     # create a new subdomain registration if necessary
     if ($RecordName -notin $ACMEReg.PSObject.Properties.Name) {
-        $reg = New-AcmeDnsRegistration $ACMEServer $ACMEAllowFrom
-
+        
+        $reg = New-AcmeDnsRegistration -ACMEUri $URI -ACMEAllowFrom $ACMEAllowFrom
+        
         $ACMEReg | Add-Member $RecordName @($reg.subdomain,$reg.username,$reg.password,$reg.fulldomain)
 
         # we need to notify the user to create a CNAME for this registration
@@ -66,18 +75,10 @@ function Add-DnsTxt {
     # create the update body
     $updateBody = @{subdomain=$regVals[0];txt=$TxtValue} | ConvertTo-Json -Compress
 
-    # Compose the URI.
-    if ($PSCmdlet.ParameterSetName -eq "URI") {
-        $URI = "$($ACMEUri.AbsoluteUri)update"
-    } else {
-        $URI = "https://$ACMEServer/update"
-    }
-
     # send the update
     try {
         Write-Verbose "Updating $($regVals[3]) with $TxtValue"
-        $response = Invoke-RestMethod $URI -Method Post `
-            -Headers $authHead -Body $updateBody @script:UseBasic
+        $response = Invoke-RestMethod "$URI/update" -Method Post -Headers $authHead -Body $updateBody @script:UseBasic
         Write-Debug ($response | ConvertTo-Json)
     } catch { throw }
 
@@ -97,7 +98,7 @@ function Add-DnsTxt {
     .PARAMETER ACMEServer
         The FQDN of the acme-dns server instance.
 
-    .PARAMETER URI
+    .PARAMETER ACMEUri
         Use the URI parameter when you have a non standard setup like a custom port, using http, or a custom path.
 
     .PARAMETER ACMEAllowFrom
@@ -194,20 +195,10 @@ function Save-DnsTxt {
 function New-AcmeDnsRegistration {
     [CmdletBinding()]
     param(
-        [Parameter(ParameterSetName = "Server",Mandatory,Position=0)]
-        [string]$ACMEServer,
-        [parameter(ParameterSetName = "URI",Mandatory,Position = 0)]
-        [ValidateScript({
-            if ($_.IsAbsoluteUri) {
-                $true
-            } else {
-                throw "That's not a valid URI"
-            }
-        })]
-        [uri]$ACMEUri,
+        [Parameter(Mandatory,Position=0)]
+        [string]$ACMEUri,
         [Parameter(Position=1)]
-        [string[]]$ACMEAllowFrom,
-        [switch]$HTTP
+        [string[]]$ACMEAllowFrom
     )
 
     # build the registration body
@@ -217,18 +208,10 @@ function New-AcmeDnsRegistration {
         $regBody = '{}'
     }
 
-    # Compose the URI.
-    if ($PSCmdlet.ParameterSetName -eq "URI") {
-        $URI = "$($ACMEUri.AbsoluteUri)register"
-    } else {
-        $URI = "https://$ACMEServer/register"
-    }
-
     # do the registration
     try {
         Write-Verbose "Registering new subdomain on $ACMEServer"
-        $reg = Invoke-RestMethod $uri -Method POST -Body $regBody `
-            -ContentType 'application/json' @script:UseBasic
+        $reg = Invoke-RestMethod "$ACMEUri/register" -Method POST -Body $regBody -ContentType 'application/json' @script:UseBasic
         Write-Debug ($reg | ConvertTo-Json)
     } catch { throw }
 
