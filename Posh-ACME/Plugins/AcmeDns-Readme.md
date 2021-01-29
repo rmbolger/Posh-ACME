@@ -10,7 +10,7 @@ Once you have your instance running, it needs to be accessible via HTTPS to your
 
 ## Using the Plugin
 
-The only required parameter for the plugin is `ACMEServer` which is the hostname of the acme-dns instance you are using. If you have a setup that is different than the default acme-dns config, if you customized your acme-dns deployment you might want to use the `ACMEUri` parameter instead that allows you to provide the full URI to the server including http/s, port and custom path.
+If your acme-dns instance is using the default configuration running with TLS on port 443, the only required parameter for the plugin is `ACMEServer` which is the hostname of your instance. If you are not using TLS, using an alternate port, or require additional uri path segments, you will need to specify the full URI using `ACMEUri` instead.
 
 There is also an optional `ACMEAllowFrom` parameter which takes an array of strings with networks specified in CIDR notation. If included, these networks will be the only ones that can send TXT record updates to the server for the registrations that get created as part of the certificate request. In some environments, it may make more sense to control network access via standard firewalls.
 

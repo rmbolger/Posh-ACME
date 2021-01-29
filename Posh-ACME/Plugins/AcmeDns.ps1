@@ -1,19 +1,15 @@
 function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Server')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(ParameterSetName = "Server",Mandatory,Position=2)]
+        [Parameter(ParameterSetName="Server",Mandatory,Position=2)]
         [string]$ACMEServer,
-        [parameter(ParameterSetName = "URI",Mandatory,Position = 2)]
-        [ValidateScript({
-            if ($_.IsAbsoluteUri) {$true} else {throw "That's not a valid URI"}
-            if ($_.Scheme -notmatch "http[s]?") {throw "We only support http/s"}
-        })]
+        [parameter(ParameterSetName="URI",Mandatory,Position=2)]
         [uri]$ACMEUri,
         [string[]]$ACMEAllowFrom,
         [hashtable]$ACMERegistration,
@@ -52,9 +48,9 @@ function Add-DnsTxt {
 
     # create a new subdomain registration if necessary
     if ($RecordName -notin $ACMEReg.PSObject.Properties.Name) {
-        
+
         $reg = New-AcmeDnsRegistration -ACMEUri $URI -ACMEAllowFrom $ACMEAllowFrom
-        
+
         $ACMEReg | Add-Member $RecordName @($reg.subdomain,$reg.username,$reg.password,$reg.fulldomain)
 
         # we need to notify the user to create a CNAME for this registration
@@ -78,7 +74,14 @@ function Add-DnsTxt {
     # send the update
     try {
         Write-Verbose "Updating $($regVals[3]) with $TxtValue"
-        $response = Invoke-RestMethod "$URI/update" -Method Post -Headers $authHead -Body $updateBody @script:UseBasic
+        $updateParams = @{
+            Uri = "$URI/update"
+            Method = 'POST'
+            Headers = $authHead
+            Body = $updateBody
+            ErrorAction = 'Stop'
+        }
+        $response = Invoke-RestMethod @updateParams @script:UseBasic
         Write-Debug ($response | ConvertTo-Json)
     } catch { throw }
 
@@ -211,7 +214,14 @@ function New-AcmeDnsRegistration {
     # do the registration
     try {
         Write-Verbose "Registering new subdomain on $ACMEServer"
-        $reg = Invoke-RestMethod "$ACMEUri/register" -Method POST -Body $regBody -ContentType 'application/json' @script:UseBasic
+        $regParams = @{
+            Uri = "$ACMEUri/register"
+            Method = 'POST'
+            Body = $regBody
+            ContentType = 'application/json'
+            ErrorAction = 'Stop'
+        }
+        $reg = Invoke-RestMethod @regParams @script:UseBasic
         Write-Debug ($reg | ConvertTo-Json)
     } catch { throw }
 
