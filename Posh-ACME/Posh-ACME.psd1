@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.1.0'
+ModuleVersion = '4.2.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -78,15 +78,12 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.1.0 (2020-01-18)
+## 4.2.0 (2020-02-01)
 
-* Compatibility updates for RFC2136 plugin (#308)
-  * Now uses exit code from nsupdate instead of output parsing to determine success and avoid possible language inconsistencies (#307)
-  * Added optional DDNSZone param to avoid initial SOA lookup that breaks in some environments (#307)
-* Removed UnoEuro plugin because API endpoint is no longer functional. Users should switch to the Simply plugin. (#303)
-* Moved HTTP call detail from Verbose to Debug output for Infoblox plugin
-* Fixed partial zone matching bug for Domeneshop plugin (#305)
-* Fixed `Submit-Renewal -AllOrders` so it no longer skips invalid or pending orders
+* Added new DNS plugins
+  * Infomaniak (Thanks @Sundypha)
+  * Zilore
+* Added `ACMEUri` option to AcmeDns plugin which allows specifying the complete URI instead of just the hostname. (Thanks @AvrumFeldman)
 '@
 
     }
