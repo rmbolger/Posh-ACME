@@ -10,7 +10,9 @@ Once you have your instance running, it needs to be accessible via HTTPS to your
 
 ## Using the Plugin
 
-The only required parameter for the plugin is `ACMEServer` which is the hostname of the acme-dns instance you are using. There is also an optional `ACMEAllowFrom` parameter which takes an array of strings with networks specified in CIDR notation. If included, these networks will be the only ones that can send TXT record updates to the server for the registrations that get created as part of the certificate request. In some environments, it may make more sense to control network access via standard firewalls.
+If your acme-dns instance is using the default configuration running with TLS on port 443, the only required parameter for the plugin is `ACMEServer` which is the hostname of your instance. If you are not using TLS, using an alternate port, or require additional uri path segments, you will need to specify the full URI using `ACMEUri` instead.
+
+There is also an optional `ACMEAllowFrom` parameter which takes an array of strings with networks specified in CIDR notation. If included, these networks will be the only ones that can send TXT record updates to the server for the registrations that get created as part of the certificate request. In some environments, it may make more sense to control network access via standard firewalls.
 
 This plugin is ultimately using CNAME aliases for DNS challenges under the hood. The first time you use it, you will be prompted to create the necessary CNAME records for each new name included in a cert.
 
@@ -25,7 +27,7 @@ _acme-challenge.example.com -> xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.auth.acme-dn
 Press any key to continue.:
 ```
 
-For each CNAME in the list, you need to create the associated record on your DNS server before continuing. Assuming the records get created properly, the process should complete succesfully. Future renewals will complete without additional prompting as long as no new names are added to the cert.
+For each CNAME in the list, you need to create the associated record on your DNS server before continuing. Assuming the records get created properly, the process should complete successfully. Future renewals will complete without additional prompting as long as no new names are added to the cert.
 
 ## (Advanced) Pre-registration and CNAME creation
 

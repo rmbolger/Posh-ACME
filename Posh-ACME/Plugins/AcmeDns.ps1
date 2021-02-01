@@ -1,14 +1,16 @@
 function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Server')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName="Server",Mandatory,Position=2)]
         [string]$ACMEServer,
+        [parameter(ParameterSetName="URI",Mandatory,Position=2)]
+        [uri]$ACMEUri,
         [string[]]$ACMEAllowFrom,
         [hashtable]$ACMERegistration,
         [Parameter(ValueFromRemainingArguments)]
@@ -36,9 +38,18 @@ function Add-DnsTxt {
         Export-PluginVar ACMEReg $ACMEReg
     }
 
+    # Create URI
+    if ($PSCmdlet.ParameterSetName -eq "URI") {
+        $URI = $ACMEUri.AbsoluteUri.Trim("/")
+    } else {
+        $URI = "https://$ACMEServer"
+    }
+
+
     # create a new subdomain registration if necessary
     if ($RecordName -notin $ACMEReg.PSObject.Properties.Name) {
-        $reg = New-AcmeDnsRegistration $ACMEServer $ACMEAllowFrom
+
+        $reg = New-AcmeDnsRegistration -ACMEUri $URI -ACMEAllowFrom $ACMEAllowFrom
 
         $ACMEReg | Add-Member $RecordName @($reg.subdomain,$reg.username,$reg.password,$reg.fulldomain)
 
@@ -63,8 +74,14 @@ function Add-DnsTxt {
     # send the update
     try {
         Write-Verbose "Updating $($regVals[3]) with $TxtValue"
-        $response = Invoke-RestMethod "https://$ACMEServer/update" -Method Post `
-            -Headers $authHead -Body $updateBody @script:UseBasic
+        $updateParams = @{
+            Uri = "$URI/update"
+            Method = 'POST'
+            Headers = $authHead
+            Body = $updateBody
+            ErrorAction = 'Stop'
+        }
+        $response = Invoke-RestMethod @updateParams @script:UseBasic
         Write-Debug ($response | ConvertTo-Json)
     } catch { throw }
 
@@ -83,6 +100,9 @@ function Add-DnsTxt {
 
     .PARAMETER ACMEServer
         The FQDN of the acme-dns server instance.
+
+    .PARAMETER ACMEUri
+        Use the URI parameter when you have a non standard setup like a custom port, using http, or a custom path.
 
     .PARAMETER ACMEAllowFrom
         A list of networks in CIDR notation that the acme-dns server should allow updates from. If not specified, the acme-dns server will not block any updates based on IP address.
@@ -179,7 +199,7 @@ function New-AcmeDnsRegistration {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [string]$ACMEServer,
+        [string]$ACMEUri,
         [Parameter(Position=1)]
         [string[]]$ACMEAllowFrom
     )
@@ -194,8 +214,14 @@ function New-AcmeDnsRegistration {
     # do the registration
     try {
         Write-Verbose "Registering new subdomain on $ACMEServer"
-        $reg = Invoke-RestMethod "https://$ACMEServer/register" -Method POST -Body $regBody `
-            -ContentType 'application/json' @script:UseBasic
+        $regParams = @{
+            Uri = "$ACMEUri/register"
+            Method = 'POST'
+            Body = $regBody
+            ContentType = 'application/json'
+            ErrorAction = 'Stop'
+        }
+        $reg = Invoke-RestMethod @regParams @script:UseBasic
         Write-Debug ($reg | ConvertTo-Json)
     } catch { throw }
 
