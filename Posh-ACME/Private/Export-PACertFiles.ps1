@@ -105,8 +105,11 @@ function Export-PACertFiles {
 
         # try to find the chain file matching the preferred issuer if specified
         if (-not ([String]::IsNullOrWhiteSpace($order.PreferredChain))) {
-            $selectedChainFile = Get-ChainIssuers $orderFolder |
+            $chainIssuers = Get-ChainIssuers $orderFolder
+            Write-Debug ($chainIssuers | ConvertTo-Json)
+            $selectedChainFile = $chainIssuers |
                 Where-Object { $_.issuer -eq $order.PreferredChain } |
+                Sort-Object { $_.index } -Descending |
                 Select-Object -First 1 -Expand filePath
             Write-Debug "Preferred chain, $($order.PreferredChain), matched: $selectedChainFile"
 
