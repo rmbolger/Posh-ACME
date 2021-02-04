@@ -49,6 +49,19 @@ Describe "Get-CsrDetails" {
         }
     }
 
+    Context "RSA 2048 CSR no attributes" {
+        It "Reads properly" {
+            Copy-Item "$PSScriptRoot\TestFiles\rsa-2048-onlyCN-no-attrs.csr" 'TestDrive:\test.csr'
+            InModuleScope Posh-ACME {
+                { Get-CsrDetails -CSRPath 'TestDrive:\test.csr' } | Should -Not -Throw
+                $result = Get-CsrDetails -CSRPath 'TestDrive:\test.csr'
+                $result.Domain         | Should -BeExactly @('example.com')
+                $result.KeyLength      | Should -BeExactly '2048'
+                { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
+            }
+        }
+    }
+
     Context "RSA 2048 CSR" {
         It "Reads properly" {
             Copy-Item "$PSScriptRoot\TestFiles\rsa-2048-noCN-singleSAN.csr" 'TestDrive:\test.csr'
