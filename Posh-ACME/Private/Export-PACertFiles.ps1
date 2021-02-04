@@ -28,7 +28,7 @@ function Export-PACertFiles {
     if (-not $PfxOnly) {
 
         # Download the cert+chain if the order has not expired.
-        if ((Get-DateTimeOffsetNow) -lt [DateTimeOffset]::Parse($order.expires)) {
+        if ((Get-DateTimeOffsetNow) -lt [DateTimeOffset]::Parse($Order.expires)) {
 
             Write-Verbose "Downloading signed certificate"
 
