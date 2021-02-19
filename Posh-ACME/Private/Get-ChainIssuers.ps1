@@ -14,9 +14,12 @@ function Get-ChainIssuers {
     $issuers = foreach ($f in $files) {
 
         $filePath = $f.FullName
-        $lines = Get-Content $f
-        $certIndex = 0
+        $lines = Get-Content $filePath
 
+        # check how many are in this chain
+        $caCount = ($lines | Where-Object { $_ -eq '-----BEGIN CERTIFICATE-----' }).Count
+
+        $certIndex = $caCount - 1
         $iBegin = 0
         $inCert = $false
         for ($i=0; $i -lt $lines.Count; $i++) {
@@ -35,7 +38,7 @@ function Get-ChainIssuers {
                     filePath = $filePath
                     index = $certIndex
                 }
-                $certIndex++
+                $certIndex--
                 continue
             }
         }
