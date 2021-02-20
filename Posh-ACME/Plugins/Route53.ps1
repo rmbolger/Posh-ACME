@@ -545,7 +545,14 @@ function Get-R53ZoneId {
     # Since there's no good way to query the existence of a single zone, we have to fetch all of them
     if ($script:AwsUseModule) {
         # fetch via Module
-        $zones = Get-R53HostedZoneList @script:AwsCredParam | Where-Object { $_.Config.PrivateZone -eq $false }
+        if (Get-Command Get-R53HostedZoneList -EA Ignore) {
+            # use the function from the newer AWS.Tools.Route53 module
+            $zones = Get-R53HostedZoneList @script:AwsCredParam | Where-Object { $_.Config.PrivateZone -eq $false }
+        } else {
+            # they must be on the older AWSPowerShell module
+            $zones = Get-R53HostedZones @script:AwsCredParam | Where-Object { $_.Config.PrivateZone -eq $false }
+        }
+
     } else {
         # fetch via REST
         $zones = @()
