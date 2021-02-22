@@ -9,7 +9,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run Pester tests
       run: |
-        Import-Module Pester -MinimumVersion 5.0
+        Import-Module Pester -MinimumVersion 5.1
         $cfg = [PesterConfiguration]@{Run=@{Exit=$true}}
         Invoke-Pester -Configuration $cfg
       shell: powershell
@@ -22,7 +22,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run Pester tests
       run: |
-        Import-Module Pester -MinimumVersion 5.0
+        Import-Module Pester -MinimumVersion 5.1
         $cfg = [PesterConfiguration]@{Run=@{Exit=$true}}
         Invoke-Pester -Configuration $cfg
       shell: pwsh
