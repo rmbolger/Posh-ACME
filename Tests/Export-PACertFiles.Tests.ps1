@@ -20,7 +20,10 @@ Describe "Export-PACertFiles" {
         # pretend there's no current order
         BeforeAll {
             Mock Write-Warning {}
-            InModuleScope Posh-ACME { $script:Order = $null }
+            InModuleScope Posh-ACME {
+                Import-PAConfig
+                $script:Order = $null
+            }
         }
 
         It "No params - Throws" {
