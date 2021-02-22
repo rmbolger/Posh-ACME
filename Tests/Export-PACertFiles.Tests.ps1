@@ -28,24 +28,74 @@ Describe "Export-PACertFiles" {
                 { Export-PACertFiles } | Should -Throw "*No ACME order*"
             }
         }
-
-
     }
 
-    # It "Returns chain file issuer data" {
-    #     InModuleScope Posh-ACME {
-    #         $issuers = Get-ChainIssuers -OrderFolder 'TestDrive:\'
-    #         $issuers | Should -HaveCount 3
-    #         $issuers[0].issuer | Should -Be 'Fake ISRG Root X1'
-    #         $issuers[0].filepath | Should -BeLike '*\chain0.cer'
-    #         $issuers[0].index | Should -Be 0
-    #         $issuers[1].issuer | Should -Be 'Fake DST Root CA X3'
-    #         $issuers[1].filepath | Should -BeLike '*\chain0.cer'
-    #         $issuers[1].index | Should -Be 1
-    #         $issuers[2].issuer | Should -Be 'Fake ISRG Root X1'
-    #         $issuers[2].filepath | Should -BeLike '*\chain1.cer'
-    #         $issuers[2].index | Should -Be 0
-    #     }
-    # }
+    Context "Expired Order" {
+
+        # An expired order should use cached cert/chain files and our test
+        # chain0.cer and chain1.cer are copies of the new default chains
+        # in Staging that highlight issue #315:
+        # https://github.com/rmbolger/Posh-ACME/issues/315
+        #
+        # chain0 = (STAGING) Pretend Pear X1 <- (STAGING) Doctored Durian Root CA X3
+        # chain1 = (STAGING) Pretend Pear X1
+
+        BeforeAll {
+            Mock Write-Warning {}
+            Mock Copy-Item {}
+            Mock -ModuleName Posh-ACME Export-Pem {}
+            Mock -ModuleName Posh-ACME Export-CertPfx {}
+            InModuleScope Posh-ACME {
+                Import-PAConfig
+                $script:Order.expires = [DateTime]::Now.AddDays(-1).ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture)
+            }
+        }
+
+        It "Uses chain0 when no PreferredChain" {
+            InModuleScope Posh-ACME {
+                $script:Order | Add-Member PreferredChain $null -Force
+                { Export-PACertFiles } | Should -Not -Throw
+            }
+            Should -Invoke Write-Warning
+            Should -Invoke Copy-Item -Times 1 -Exactly -ParameterFilter {
+                $Path -like '*chain0.cer' -and $Destination -like '*chain.cer'
+            }
+            Should -Invoke Export-Pem -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
+                $OutputFile -like '*fullchain.cer'
+            }
+            Should -Invoke Export-CertPfx -ModuleName Posh-ACME -Times 2 -Exactly
+        }
+
+        It "Uses chain0 when PreferredChain (STAGING) Doctored Durian Root CA X3" {
+            InModuleScope Posh-ACME {
+                $script:Order | Add-Member PreferredChain "(STAGING) Doctored Durian Root CA X3" -Force
+                { Export-PACertFiles } | Should -Not -Throw
+            }
+            Should -Invoke Write-Warning
+            Should -Invoke Copy-Item -Times 1 -Exactly -ParameterFilter {
+                $Path -like '*chain0.cer' -and $Destination -like '*chain.cer'
+            }
+            Should -Invoke Export-Pem -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
+                $OutputFile -like '*fullchain.cer'
+            }
+            Should -Invoke Export-CertPfx -ModuleName Posh-ACME -Times 2 -Exactly
+        }
+
+        It "Uses chain1 when PreferredChain (STAGING) Pretend Pear X1" {
+            InModuleScope Posh-ACME {
+                $script:Order | Add-Member PreferredChain "(STAGING) Pretend Pear X1" -Force
+                { Export-PACertFiles } | Should -Not -Throw
+            }
+            Should -Invoke Write-Warning
+            Should -Invoke Copy-Item -Times 1 -Exactly -ParameterFilter {
+                $Path -like '*chain1.cer' -and $Destination -like '*chain.cer'
+            }
+            Should -Invoke Export-Pem -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
+                $OutputFile -like '*fullchain.cer'
+            }
+            Should -Invoke Export-CertPfx -ModuleName Posh-ACME -Times 2 -Exactly
+        }
+
+    }
 
 }
