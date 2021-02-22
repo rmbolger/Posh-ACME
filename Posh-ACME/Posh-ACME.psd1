@@ -78,7 +78,7 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.2.0 (2020-02-01)
+## 4.2.0 (2021-02-01)
 
 * Added new DNS plugins
   * Infomaniak (Thanks @Sundypha)

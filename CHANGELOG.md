@@ -1,11 +1,11 @@
-## 4.2.0 (2020-02-01)
+## 4.2.0 (2021-02-01)
 
 * Added new DNS plugins
   * Infomaniak (Thanks @Sundypha)
   * Zilore
 * Added `ACMEUri` option to AcmeDns plugin which allows specifying the complete URI instead of just the hostname. (Thanks @AvrumFeldman)
 
-## 4.1.0 (2020-01-18)
+## 4.1.0 (2021-01-18)
 
 * Compatibility updates for RFC2136 plugin (#308)
   * Now uses exit code from nsupdate instead of output parsing to determine success and avoid possible language inconsistencies (#307)
