@@ -40,7 +40,7 @@ function Export-PACertFiles {
                 url   = $Order.certificate
             }
 
-            # download the cert+chain which is what ACMEv2 delivers by default
+            # download the cert+chain which is what ACME delivers by default
             # https://tools.ietf.org/html/rfc8555#section-7.4.2
             try {
                 $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
