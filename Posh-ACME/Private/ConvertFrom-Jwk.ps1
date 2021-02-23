@@ -13,8 +13,7 @@ function ConvertFrom-Jwk {
     # RFC 7515 - JSON Web Key (JWK)
     # https://tools.ietf.org/html/rfc7517
 
-    # Support enough of a subset of RFC 7515 to implement the ACME v2
-    # protocol (RFC 8555).
+    # Support enough of a subset of RFC 7515 to implement the ACME protocol (RFC 8555).
     # https://tools.ietf.org/html/rfc8555
 
     # This basically includes RSA keys 2048-4096 bits and EC keys utilizing

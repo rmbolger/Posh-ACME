@@ -20,7 +20,7 @@ function New-Jws {
     # https://tools.ietf.org/html/rfc7518#section-3.1
 
     # This is not a general JWS implementation. It will specifically
-    # cater to making JWS messages for the ACME v2 protocol.
+    # cater to making JWS messages for the ACME protocol.
     # https://tools.ietf.org/html/rfc8555
 
     if ('Asymmetric' -eq $PSCmdlet.ParameterSetName) {
