@@ -1,3 +1,15 @@
+## 4.3.0 (2021-02-24)
+
+* PreferredChain selection logic has been updated to consider "distance from root" as a way to break ties when the specified CA subject is found in multiple chains. Chains with the CA closer to the root take precedence over ones with it further away. (#315)
+* `CFTokenReadAll` and `CFTokenReadAllInsecure` have been removed from the Cloudflare plugin because they are no longer needed. Cloudflare fixed the API bug that made them necessary when using edit tokens scoped to a specific zone or zones. No user action is required if you were previously using these parameters. They will simply be ignored.
+* HTTP call detail has been changed from Verbose to Debug output in Cloudflare and Route53 plugins.
+* Fixed CSR handing for CSRs that have no attributes (#317) (Thanks @methorpe)
+* Fixed Route53 plugin compatibility with older versions of the AWSPowerShell module (#318)
+
+### Deprecation Notice
+
+Many plugins have optional parameter sets that use "Insecure" versions of the primary SecureString or PSCredential parameters due to bugs in early versions of PowerShell 6 that prevented using them on non-Windows OSes. Those bugs have been fixed since PowerShell 6.2 and the insecure parameter sets should be considered deprecated and will likely be removed in the next major version (5.x) of Posh-ACME. Individual plugin usage guides will slowly be updated over the course of 4.x to warn about the specific parameter deprecations.
+
 ## 4.2.0 (2021-02-01)
 
 * Added new DNS plugins
