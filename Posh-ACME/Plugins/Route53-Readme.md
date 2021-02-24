@@ -1,16 +1,16 @@
 # How To Use the Route53 DNS Plugin
 
-This plugin works against the [AWS Route53](https://aws.amazon.com/route53/) DNS provider. It is assumed that you already have an AWS account with at least one DNS zone. The setup portion of this guide also assumes you have access to create IAM users/roles. If you have been given access credentials by your AWS admin, you may need them to create the IAM policies necessary for you to edit the zone TXT records.
+This plugin works against the [AWS Route53](https://aws.amazon.com/route53/) DNS provider. It is assumed that you already have an AWS account with at least one DNS zone. The setup portion of this guide also assumes you have access to create IAM users/roles. If you have been given access credentials by your AWS admin, you may need the admin to create the IAM policies necessary for you to edit the zone TXT records.
 
-Using this plugin does not require external module dependencies *unless* you use the profile name authentication method. In that case, you will either need the [Aws.Tools.Route53](https://www.powershellgallery.com/packages/AWS.Tools.Route53/) or the older [AWSPowerShell](https://www.powershellgallery.com/packages/AWSPowerShell) or [AWSPowerShell.NetCore](https://www.powershellgallery.com/packages/AWSPowerShell.NetCore) module depending on your environment. More details can be found in the [AWS PowerShell documentation](https://docs.aws.amazon.com/powershell/).
+> **_NOTE:_** You may use this plugin without the AWS PowerShell module installed *unless* you use the profile name authentication method. In that case, you will either need the [Aws.Tools.Route53](https://www.powershellgallery.com/packages/AWS.Tools.Route53/) or the older [AWSPowerShell](https://www.powershellgallery.com/packages/AWSPowerShell) or [AWSPowerShell.NetCore](https://www.powershellgallery.com/packages/AWSPowerShell.NetCore) module depending on your environment. More details can be found in the [AWS PowerShell documentation](https://docs.aws.amazon.com/powershell/).
 
 ## Setup
-
-*NOTE: The examples in this section require either the [AWS.Tools.IdentityManagement](https://www.powershellgallery.com/packages/AWS.Tools.IdentityManagement) module or the older [AWSPowerShell](https://www.powershellgallery.com/packages/AWSPowerShell) or [AWSPowerShell.NetCore](https://www.powershellgallery.com/packages/AWSPowerShell.NetCore) module depending on your environment.*
 
 There are generally two different ways to use this plugin depending on whether you are running it from outside AWS or inside from something like an EC2 instance. When outside, you need to specify explicit credentials for an IAM account that has permissions to modify a zone. When inside, you may instead choose to authenticate using an [IAM Role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html). When using explicit credentials, a personal high-level account will work, but it's a better idea to create a dedicated user with the minimum necessary privileges to create the TXT records necessary for ACME challenges.
 
 If you already have your policies, users, groups, and roles setup, skip the rest of this section. Otherwise, read on for examples.
+
+> **_NOTE:_** These examples require either the [AWS.Tools.IdentityManagement](https://www.powershellgallery.com/packages/AWS.Tools.IdentityManagement) module or the older [AWSPowerShell](https://www.powershellgallery.com/packages/AWSPowerShell) or [AWSPowerShell.NetCore](https://www.powershellgallery.com/packages/AWSPowerShell.NetCore) module depending on your environment.
 
 ### Setup Admin Credentials
 
@@ -103,28 +103,19 @@ Now you'd need to attach the role with your EC2 instance or launch a new instanc
 
 ## Using the Plugin
 
-If you are using explicit credentials, you may send them directly to the plugin via `R53AccessKey` and `R53SecretKey`/`R53SecretKeyInsecure` parameters. A SecureString value is required for `R53SecretKey` which will only work on Windows or any OS with PowerShell 6.2 or later. The "insecure" version of the secret parameter can be used on any OS. If you lost the keys, you can re-generate them from the AWS IAM console. But there's no way to retrieve an existing secret key value.
+If you are using explicit credentials, you may send them directly to the plugin via `R53AccessKey` and `R53SecretKey` parameters. A SecureString value is required for `R53SecretKey`. If you lost the keys, you can re-generate them from the AWS IAM console. But there's no way to retrieve an existing secret key value.
 
-### Windows or PS 6.2+
+*NOTE: The `R53SecretKeyInsecure` parameter is still supported but should be considered deprecated and may be removed in a future major release.*
 
-```powershell
-# store the secret key as a SecureString
-$sec = Read-Host -Prompt "Secret Key" -AsSecureString
-
-# set the params and generate the cert
-$r53Params = @{R53AccessKey='xxxxxxxx';R53SecretKey=$sec}
-New-PACertificate example.com -Plugin Route53 -PluginArgs $r53Params
-```
-
-### Any OS
+### Explicit Credentials
 
 ```powershell
-# set the params and generate the cert
-$r53Params = @{R53AccessKey='xxxxxxxx';R53SecretKeyInsecure='yyyyyyyy'}
-New-PACertificate example.com -Plugin Route53 -PluginArgs $r53Params
+$secKey = Read-Host -Prompt "Secret Key" -AsSecureString
+$pArgs = @{R53AccessKey='xxxxxxxx';R53SecretKey=$secKey}
+New-PACertificate example.com -Plugin Route53 -PluginArgs $pArgs
 ```
 
-### AWS Powershell Module Profile (any OS)
+### AWS Powershell Module Profile
 
 You may also use the `R53ProfileName` parameter to specify the profile name of an existing credential stored with `Set-AwsCredential` from an AWS powershell module. Remember that the module must remain installed for renewals when using this method.
 
@@ -133,11 +124,11 @@ You may also use the `R53ProfileName` parameter to specify the profile name of a
 Set-AWSCredential -StoreAs 'poshacme' -AccessKey 'xxxxxxxx' -SecretKey 'yyyyyyyy'
 
 # set the params and generate the cert
-$r53Params = @{R53ProfileName='poshacme'}
-New-PACertificate example.com -Plugin Route53 -PluginArgs $r53Params
+$pArgs = @{R53ProfileName='poshacme'}
+New-PACertificate example.com -Plugin Route53 -PluginArgs $pArgs
 ```
 
-### IAM Role (any OS)
+### IAM Role
 
 When using an IAM Role, the only thing you need to specify is a switch called `R53UseIAMRole`.
 
