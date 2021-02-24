@@ -13,21 +13,16 @@ function Add-DnsTxt {
         [string]$CFAuthKey,
         [Parameter(ParameterSetName='Bearer',Mandatory,Position=2)]
         [securestring]$CFToken,
-        [Parameter(ParameterSetName='Bearer',Position=3)]
-        [securestring]$CFTokenReadAll,
         [Parameter(ParameterSetName='BearerInsecure',Mandatory,Position=2)]
         [string]$CFTokenInsecure,
-        [Parameter(ParameterSetName='BearerInsecure',Position=3)]
-        [string]$CFTokenReadAllInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     $apiRoot = 'https://api.cloudflare.com/client/v4/zones'
     $authHeader = Get-CFAuthHeader @PSBoundParameters
-    $authHeaderZoneSearch = Get-CFAuthHeader @PSBoundParameters -ForZoneSearch
 
-    if (-not ($zoneID = Find-CFZone $RecordName $authHeaderZoneSearch)) {
+    if (-not ($zoneID = Find-CFZone $RecordName $authHeader)) {
         throw "Unable to find Cloudflare hosted zone for $RecordName"
     }
 
@@ -91,14 +86,8 @@ function Add-DnsTxt {
     .PARAMETER CFToken
         The scoped API Token that has been given read/write permissions to the necessary zones. This SecureString version can only be used from Windows or any OS with PowerShell Core 6.2+.
 
-    .PARAMETER CFTokenReadAll
-        The scoped API Token that has been given read-only permissions to all zones on the account. This is only required if the primary read/write token has been limited to a subset of zones. This SecureString version can only be used from Windows or any OS with PowerShell Core 6.2+.
-
     .PARAMETER CFTokenInsecure
         The scoped API Token that has been given read/write permissions to the necessary zones. This standard String version may be used with any OS.
-
-    .PARAMETER CFTokenReadAllInsecure
-        The scoped API Token that has been given read-only permissions to all zones on the account. This is only required if the primary read/write token has been limited to a subset of zones. This standard String version may be used with any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -131,9 +120,8 @@ function Remove-DnsTxt {
 
     $apiRoot = 'https://api.cloudflare.com/client/v4/zones'
     $authHeader = Get-CFAuthHeader @PSBoundParameters
-    $authHeaderZoneSearch = Get-CFAuthHeader @PSBoundParameters -ForZoneSearch
 
-    if (!($zoneID = Find-CFZone $RecordName $authHeaderZoneSearch)) {
+    if (-not ($zoneID = Find-CFZone $RecordName $authHeader)) {
         throw "Unable to find Cloudflare hosted zone for $RecordName"
     }
 
@@ -194,14 +182,8 @@ function Remove-DnsTxt {
     .PARAMETER CFToken
         The scoped API Token that has been given read/write permissions to the necessary zones. This SecureString version can only be used from Windows or any OS with PowerShell Core 6.2+.
 
-    .PARAMETER CFTokenReadAll
-        The scoped API Token that has been given read-only permissions to all zones on the account. This is only required if the primary read/write token has been limited to a subset of zones. This SecureString version can only be used from Windows or any OS with PowerShell Core 6.2+.
-
     .PARAMETER CFTokenInsecure
         The scoped API Token that has been given read/write permissions to the necessary zones. This standard String version may be used with any OS.
-
-    .PARAMETER CFTokenReadAllInsecure
-        The scoped API Token that has been given read-only permissions to all zones on the account. This is only required if the primary read/write token has been limited to a subset of zones. This standard String version may be used with any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -247,46 +229,29 @@ function Get-CFAuthHeader {
         [string]$CFAuthKey,
         [Parameter(ParameterSetName='Bearer',Mandatory,Position=0)]
         [securestring]$CFToken,
-        [Parameter(ParameterSetName='Bearer',Position=1)]
-        [securestring]$CFTokenReadAll,
         [Parameter(ParameterSetName='BearerInsecure',Mandatory,Position=0)]
         [string]$CFTokenInsecure,
-        [Parameter(ParameterSetName='BearerInsecure',Position=1)]
-        [string]$CFTokenReadAllInsecure,
-        [switch]$ForZoneSearch,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraConnectParams
     )
 
     if ('Email' -eq $PSCmdlet.ParameterSetName) {
-        $authHeader = @{
+        return @{
             'X-Auth-Email' = $CFAuthEmail
             'X-Auth-Key'   = $CFAuthKey
         }
     } elseif ('Bearer' -eq $PSCmdlet.ParameterSetName) {
-        if ($ForZoneSearch -and $CFTokenReadAll) {
-            $CFTokenInsecure = (New-Object PSCredential "user",$CFTokenReadAll).GetNetworkCredential().Password
-        } else {
-            $CFTokenInsecure = (New-Object PSCredential "user",$CFToken).GetNetworkCredential().Password
-        }
-        $authHeader = @{
-            Authorization = "Bearer $CFTokenInsecure"
-        }
+
+        $CFTokenInsecure = [pscredential]::new('a',$CFToken).GetNetworkCredential().Password
+        return @{ Authorization = "Bearer $CFTokenInsecure" }
+
     } elseif ('BearerInsecure' -eq $PSCmdlet.ParameterSetName) {
-        if ($ForZoneSearch -and $CFTokenReadAllInsecure) {
-            $authHeader = @{
-                Authorization = "Bearer $CFTokenReadAllInsecure"
-            }
-        } else {
-            $authHeader = @{
-                Authorization = "Bearer $CFTokenInsecure"
-            }
-        }
+
+        return @{ Authorization = "Bearer $CFTokenInsecure" }
+
     } else {
         throw "Unable to determine valid auth headers."
     }
-
-    return $authHeader
 }
 
 function Find-CFZone {
@@ -330,15 +295,13 @@ function Find-CFZone {
             Write-Debug "GET $($getParams.Uri)"
             $response = Invoke-RestMethod @getParams @script:UseBasic
         } catch {
-            # When using limited scope API tokens, the API currently throws an
-            # HTTP 403 error when a zone we're checking doesn't exist rather than
-            # an empty result like it did with the Global Key or something reasonable
-            # like a 404 even when you've given read permissions to all zones on the account.
-            # Since we have no way of knowing whether the 403 is legitimate or just an indication
-            # that the zone doesn't exist, we'll catch it and throw a warning and just
-            # re-throw any other errors.
+            # UPDATE: As of Feb 2021, Cloudflare seems to have fixed the bug where
+            # querying a zone that doesn't exist with a limited scope API token
+            # throws an HTTP 403 error. It now works the same way it does with
+            # the global key and just returns an empty result set. 403 errors now
+            # only seem to be thrown on legitimate permission problems.
             if (403 -eq $_.Exception.Response.StatusCode.value__) {
-                Write-Warning "There was a permissions error checking the existence of $zoneTest. This either indicates the zone doesn't exist or the supplied credentials are invalid. If this is the domain apex and you know the zone exists, check your token permissions. Otherwise, ignore this message."
+                Write-Warning "There was a permissions error checking the existence of $zoneTest. This indicates the supplied credentials are invalid. Please double check your token permissions."
             } else { throw }
         }
 
