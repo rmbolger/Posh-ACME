@@ -14,9 +14,26 @@ Depending on how you want to use the plugin, you can either [add the values to a
 
 Akamai is one of the few DNS providers with an API to check whether changes have propagated to the authoritative nameservers for your zones and this plugin will use it automatically. What this means is that if all of the names in your certificate are using the Akamai plugin, you may want to decrease the default `DNSSleep` parameter from 120 seconds down to something small like 10 seconds because the changes should be propagated by the time the sleep timer would normally start. The examples below will demonstrate.
 
-If your API client values are stored in a `.edgerc` file, you can use the `AKUseEdgeRC` parameter rather than specifying all the values explicitly. Use the `AKEdgeRCFile` and `AKEdgeRCSection` parameters if your file is not in the default `~\.edgerc` location or the `[default]` section. Make sure the user who will be running the commands has read access to this file.
+### Explicit API Options
+
+Specify API values individually using `AKHost`, `AKClientToken`, and `AKAccessToken` as string values and `AKClientSecret` as a SecureString value
+
+*NOTE: The `AKClientSecretInsecure` parameter is still supported but should be considered deprecated and may be removed in a future major release.*
+
+```powershell
+$secret = Read-Host "Client Secret" -AsSecureString
+$pArgs = @{
+    AKHost = 'myhost.akamaiapis.net'
+    AKClientToken = 'xxxxxxxxxxxx'
+    AKClientSecret = $secret
+    AKAccessToken = 'yyyyyyyyyyyy'
+}
+New-PACertificate example.com -Plugin Akamai -PluginArgs $pArgs -DNSSleep 10
+```
 
 ### .edgerc Options
+
+If your API client values are stored in a `.edgerc` file, you can use the `AKUseEdgeRC` parameter rather than specifying all the values explicitly. Use the `AKEdgeRCFile` and `AKEdgeRCSection` parameters if your file is not in the default `~\.edgerc` location or the `[default]` section. Make sure the user who will be running the commands has read access to this file.
 
 ```powershell
 # default location and section
@@ -26,32 +43,5 @@ New-PACertificate example.com -Plugin Akamai -PluginArgs @{AKUseEdgeRC=$true} -D
 ```powershell
 # alternate location and section
 $pArgs = @{AKUseEdgeRC=$true; AKEdgeRCFile='C:\ProgramData\.edgerc'; AKEdgeRCSection='poshacme' }
-New-PACertificate example.com -Plugin Akamai -PluginArgs $pArgs -DNSSleep 10
-```
-
-There are also two parameter sets you can use to specify the values directly. They differ only in how you supply the client secret value. Both require `AKHost`, `AKClientToken`, and `AKAccessToken` as string values. The first uses `AKClientSecret` as a SecureString value and can only be used from Windows or any OS with PowerShell 6.2 or later. The second uses `AKClientSecretInsecure` as a normal string value.
-
-### Windows or PS 6.2+
-
-```powershell
-$secret = Read-Host "Client Secret" -AsSecureString
-$pArgs = @{
-    AKHost = 'myhost.akamaiapis.net'
-    AKClientToken = 'xxxxxx'
-    AKClientSecret = $secret
-    AKAccessToken = 'xxxxxx'
-}
-New-PACertificate example.com -Plugin Akamai -PluginArgs $pArgs -DNSSleep 10
-```
-
-### Any OS
-
-```powershell
-$pArgs = @{
-    AKHost = 'myhost.akamaiapis.net'
-    AKClientToken = 'xxxxxx'
-    AKClientSecretInsecure = 'xxxxxx'
-    AKAccessToken = 'xxxxxx'
-}
 New-PACertificate example.com -Plugin Akamai -PluginArgs $pArgs -DNSSleep 10
 ```
