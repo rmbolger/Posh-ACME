@@ -203,37 +203,17 @@ All authentication methods require specifying `AZSubscriptionId` which is the su
 
 ### Password Credential
 
-There are two parameter sets you can use with password based credentials. The first is used with `AZAppCred`, a PSCredential object, and can only be used from Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The second uses `AZAppUsername` and `AZAppPasswordInsecure` as plain text strings and can be used on any OS.
+Subscription and Tenant values are passed as standard strings using `AZSubscriptionId` and `AZTenantId`. The credential is passed as a PSCredential object using `AZAppCred`. PSCredential objects require a username and password. For a service principal, the username is the its `ApplicationId` guid and the password is whatever was originally set for it. If you've been following the setup instructions, you may have `$subscriptionID`, `$tenantID`, and `$appCred` variables you can use instead of the sample values below.
 
-#### PSCredential (Windows or PS 6.2+)
-
-PSCredential objects require a username and password. For a service principal, the username is the its `ApplicationId` guid and the password is whatever was originally set for it. If you've been following the setup instructions, you may have `$subscriptionID`, `$tenantID`, and `$appCred` variables you can use instead of the sample values below.
+*NOTE: The `AZAppUsername` and `AZAppPasswordInsecure` parameters are still supported but should be considered deprecated and may be removed in a future major release.*
 
 ```powershell
-$azParams = @{
-  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-  AZTenantId='yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
-  AZAppCred=(Get-Credential)
+$pArgs = @{
+  AZSubscriptionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+  AZTenantId = 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
+  AZAppCred = (Get-Credential)
 }
-
-# issue a cert
-New-PACertificate example.com -Plugin Azure -PluginArgs $azParams
-```
-
-#### Plain text credentials (Any OS)
-
-For a service principal, the username is its `ApplicationId` guid and the password is whatever was originally set for it. If you've been following the setup instructions, you may have `$subscriptionID`, `$tenantID`, `$appUser`, and `$appPass` variables you can use instead of the sample values below.
-
-```powershell
-$azParams = @{
-  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-  AZTenantId='yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
-  AZAppUsername='myuser'
-  AZAppPasswordInsecure='xxxxxxxxxxxxxxxxxx'
-}
-
-# issue a cert
-New-PACertificate example.com -Plugin Azure -PluginArgs $azParams
+New-PACertificate example.com -Plugin Azure -PluginArgs $pArgs
 ```
 
 ### Certificate Credential
@@ -245,15 +225,13 @@ As of PowerShell 6.2.3 (November 2019), support for the certificate store abstra
 You'll need to specify the service principal username which is its `ApplicationId` guid and the certificate thumbprint value. If you've been following the setup instructions, you may have `$subscriptionID`, `$tenantID`, `$appUser`, and `$thumbprint` variables you can use instead of the sample values below.
 
 ```powershell
-$azParams = @{
-  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-  AZTenantId='yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
-  AZAppUsername='zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz'
-  AZCertThumbprint='1A2B3C4D5E6F1A2B3C4D5E6F1A2B3C4D5E6F1A2B'
+$pArgs = @{
+  AZSubscriptionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+  AZTenantId = 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
+  AZAppUsername = 'zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz'
+  AZCertThumbprint = '1A2B3C4D5E6F1A2B3C4D5E6F1A2B3C4D5E6F1A2B'
 }
-
-# issue a cert
-New-PACertificate example.com -Plugin Azure -PluginArgs $azParams
+New-PACertificate example.com -Plugin Azure -PluginArgs $pArgs
 ```
 
 #### Non-Windows Certificate
@@ -261,16 +239,14 @@ New-PACertificate example.com -Plugin Azure -PluginArgs $azParams
 You'll need to specify the service principal username which is its `ApplicationId` guid, the path to the PFX file, and the PFX password. If you've been following the setup instructions, you may have `$subscriptionID`, `$tenantID`, `$appUser`, `$certPfx`, and `$pfxPass` variables you can use instead of the sample values below.
 
 ```powershell
-$azParams = @{
-  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-  AZTenantId='yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
-  AZAppUsername='zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz'
-  AZCertPfx='/home/certuser/poshacme.pfx'
-  AZPfxPass='poshacme'
+$pArgs = @{
+  AZSubscriptionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+  AZTenantId = 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
+  AZAppUsername = 'zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz'
+  AZCertPfx = '/home/certuser/poshacme.pfx'
+  AZPfxPass = 'poshacme'
 }
-
-# issue a cert
-New-PACertificate example.com -Plugin Azure -PluginArgs $azParams
+New-PACertificate example.com -Plugin Azure -PluginArgs $pArgs
 ```
 
 ### Existing Access Token
@@ -278,13 +254,11 @@ New-PACertificate example.com -Plugin Azure -PluginArgs $azParams
 Only the subscription guid and the access token you previously retrieved are required for this method.
 
 ```powershell
-$azParams = @{
-  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-  AZAccessToken=$token
+$pArgs = @{
+  AZSubscriptionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+  AZAccessToken = $token
 }
-
-# issue a cert
-New-PACertificate example.com -Plugin Azure -PluginArgs $azParams
+New-PACertificate example.com -Plugin Azure -PluginArgs $pArgs
 ```
 
 ### Instance Metadata Service (IMDS)
@@ -292,13 +266,11 @@ New-PACertificate example.com -Plugin Azure -PluginArgs $azParams
 Only the subscription guid and the `AZUseIMDS` switch are required for this method.
 
 ```powershell
-$azParams = @{
-  AZSubscriptionId='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
-  AZUseIMDS=$true;
+$pArgs = @{
+  AZSubscriptionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+  AZUseIMDS = $true
 }
-
-# issue a cert
-New-PACertificate example.com -Plugin Azure -PluginArgs $azParams
+New-PACertificate example.com -Plugin Azure -PluginArgs $pArgs
 ```
 
 ## Workaround for Duplicate Public Zones
