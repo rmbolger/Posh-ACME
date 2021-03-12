@@ -67,18 +67,23 @@ function Submit-OrderFinalize {
             Invoke-ACME $header $body $acct -EA Stop | Out-Null
         } catch { throw }
 
-        # send telemetry ping
-        $null = Start-Job {
-            $papingArgs = @{
-                Uri = 'https://poshac.me/paping/'
-                Method = 'HEAD'
-                UserAgent = $input
-                TimeoutSec = 1
-                Verbose = $false
-                ErrorAction = 'Ignore'
-            }
-            Invoke-RestMethod @papingArgs | Out-Null
-        } -InputObject $script:USER_AGENT -EA Ignore
+        # send telemetry ping if not disabled
+        if (-not $script:Dir.DisableTelemetry) {
+            Write-Debug "Sending Telemetry Ping"
+            try {
+                $null = Start-Job {
+                    $papingArgs = @{
+                        Uri = 'https://poshac.me/paping/'
+                        Method = 'HEAD'
+                        UserAgent = $input
+                        TimeoutSec = 1
+                        Verbose = $false
+                        ErrorAction = 'Ignore'
+                    }
+                    Invoke-RestMethod @papingArgs | Out-Null
+                } -InputObject $script:USER_AGENT -EA Ignore
+            } catch {}
+        }
 
         # Boulder's ACME implementation (at least on Staging) currently doesn't
         # quite follow the spec at this point. What I've observed is that the
