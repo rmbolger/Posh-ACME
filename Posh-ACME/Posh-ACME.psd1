@@ -11,7 +11,10 @@ PowerShellVersion = '5.1'
 DotNetFrameworkVersion = '4.7.1'
 
 # Assemblies that must be loaded prior to importing this module
-RequiredAssemblies = @('lib\BC.Crypto.1.8.8.2-netstandard2.0.dll')
+RequiredAssemblies = @(
+    'lib\BC.Crypto.1.8.8.2-netstandard2.0.dll'
+    'System.Net.Http'
+)
 
 # Format files (.ps1xml) to be loaded when importing this module
 FormatsToProcess = 'Posh-ACME.Format.ps1xml'
