@@ -1,3 +1,9 @@
+## 4.3.1 (2021-03-12)
+
+* Fixed Route53 plugin to check for pre-imported AWS module (#324)
+* Fixed telemetry ping not respecting DisableTelemetry option in `Set-PAServer`
+* Telemetry ping no longer uses `Start-Job` which should avoid errors when running in Azure functions and other scenarios where PowerShell is hosted within another application.
+
 ## 4.3.0 (2021-02-24)
 
 * PreferredChain selection logic has been updated to consider "distance from root" as a way to break ties when the specified CA subject is found in multiple chains. Chains with the CA closer to the root take precedence over ones with it further away. (#315)
