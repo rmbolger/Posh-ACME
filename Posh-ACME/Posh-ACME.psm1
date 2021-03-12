@@ -61,6 +61,11 @@ if ($IsWindows -or $PSVersionTable.PSEdition -eq 'Desktop') {
     $script:USER_AGENT += " Platform/Unknown"
 }
 
+# create an HttpClient object we can use for async telemetry pings that won't
+# block waiting for a timeout if the server is unreachable.
+$script:TelemetryClient = [System.Net.Http.HttpClient]::new()
+$script:TelemetryClient.DefaultRequestHeaders.Add('User-Agent', $script:USER_AGENT)
+
 # Invoke-WebRequest and Invoke-RestMethod on PowerShell 5.1 both use
 # IE's DOM parser by default which gives you some nice things that we
 # don't use like html/form parsing. The problem is that it can generate
