@@ -345,21 +345,27 @@ function Initialize-R53Config {
     # you were on. Both were single monolithic modules. In version 4, they've
     # split all the features into sub-modules, but there are no distinctions
     # between editions anymore. For Route53 specifically, we care about
-    # AWS.Tools.Route53. Thankfully, everything in 4 is backwards compatible with
-    # 3, so we don't need to do any special casing depending on which module is
-    # installed.
+    # AWS.Tools.Route53.
 
     # check for AWS module availability
-    if ($null -ne (Get-Module -ListAvailable 'AWS.Tools.Route53')) {
+    $awsModules = Get-Module -ListAvailable 'AWS*' | Select-Object -ExpandProperty Name
+    if (Get-Command 'Get-R53ResourceRecordSet' -EA Ignore)
+    {
+        # one of the module functions is already available, so we don't need to import
+        $script:AwsUseModule = $true
+    }
+    elseif ('AWS.Tools.Route53' -in $awsModules)
+    {
         Import-Module 'AWS.Tools.Route53' -Verbose:$false
         $script:AwsUseModule = $true
     }
-    elseif ($PSEdition -eq 'Core' -and
-            $null -ne (Get-Module -ListAvailable 'AWSPowerShell.Netcore')) {
+    elseif ($PSEdition -eq 'Core' -and 'AWSPowerShell.Netcore' -in $awsModules)
+    {
         Import-Module 'AWSPowerShell.NetCore' -Verbose:$false
         $script:AwsUseModule = $true
     }
-    elseif ($null -ne (Get-Module -ListAvailable 'AWSPowerShell')) {
+    elseif ('AWSPowerShell' -in $awsModules)
+    {
         Import-Module 'AWSPowerShell' -Verbose:$false
         $script:AwsUseModule = $true
     }
