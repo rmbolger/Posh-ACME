@@ -74,6 +74,7 @@ function Submit-Renewal {
                     $certParams.OCSPMustStaple = $order.OCSPMustStaple
                     $certParams.FriendlyName = $order.FriendlyName
                     $certParams.PfxPass = $order.PfxPass
+                    $certParams.CertKeyLength = $order.KeyLength
                     if (Test-WinOnly) { $certParams.Install = $order.Install }
                 } else {
                     $reqPath = Join-Path ($order | Get-OrderFolder) "request.csr"
