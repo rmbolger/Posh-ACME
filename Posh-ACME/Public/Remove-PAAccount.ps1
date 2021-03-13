@@ -10,13 +10,17 @@ function Remove-PAAccount {
     Begin {
         # make sure we have a server configured
         if (!(Get-PAServer)) {
-            throw "No ACME server configured. Run Set-PAServer first."
+            try { throw "No ACME server configured. Run Set-PAServer first." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     }
 
     Process {
-        # grab a copy of the account which also verifies its existence
-        $acct = Get-PAAccount $ID
+        # grab a copy of the account
+        if (!($acct = Get-PAAccount $ID)) {
+            Write-Warning "Specified account ID ($ID) was not found."
+            return
+        }
 
         # deactivate first, if asked
         if ($Deactivate -and $acct.status -eq 'valid') {
@@ -36,18 +40,14 @@ function Remove-PAAccount {
         Write-Verbose "Deleting account $($acct.id)"
 
         # delete the account's folder
-        $acctFolder = Join-Path $script:DirFolder $acct.id
+        $acctFolder = Join-Path (Get-DirFolder) $acct.id
         Remove-Item $acctFolder -Force -Recurse
 
         # unset the current account if it was this one
         if ($script:Acct -and $script:Acct.id -eq $acct.id) {
-            $script:Acct = $null
-            $script:AcctFolder = $null
             $acct = $null
-            $script:Order = $null
-            $script:OrderFolder = $null
-
-            Remove-Item (Join-Path $script:DirFolder 'current-account.txt') -Force
+            Remove-Item (Join-Path (Get-DirFolder) 'current-account.txt') -Force
+            Import-PAConfig -Level 'Account'
         }
 
     }

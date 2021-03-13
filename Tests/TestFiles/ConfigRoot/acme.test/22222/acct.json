@@ -1,0 +1,16 @@
+{
+  "id": "22222",
+  "status": "valid",
+  "contact": [],
+  "location": "https://acme.test/acme/acct/22222",
+  "key": {
+    "crv": "P-384",
+    "d": "BEeJW0ltfMZxnMloDFC9zNlh1aZp7_-n6oOLyunwR6foD-pZNEra5D0GTfIdFjld",
+    "kty": "EC",
+    "x": "map4Lsdkx8TJABeGkewfLAFxpgDBqKOsUO9LX3vDfjNa1rXvhbxMdYF4qwfB6kv1",
+    "y": "VZx5-jpO_lpuPz-g_jHBPFuvX2VDRhSaUzhWJ3o0J1m9QnkfL5q0N-_AiN_2y0fC"
+  },
+  "alg": "ES384",
+  "KeyLength": "ec-384",
+  "orders": null
+}

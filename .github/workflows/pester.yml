@@ -1,0 +1,28 @@
+name: Pester Tests
+on:
+  push:
+    branches: [ main ]
+jobs:
+  Test-DesktopEdition:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run Pester tests
+      run: |
+        Import-Module Pester -MinimumVersion 5.1
+        $cfg = [PesterConfiguration]@{Run=@{Exit=$true}}
+        Invoke-Pester -Configuration $cfg
+      shell: powershell
+  Test-CoreEdition:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run Pester tests
+      run: |
+        Import-Module Pester -MinimumVersion 5.1
+        $cfg = [PesterConfiguration]@{Run=@{Exit=$true}}
+        Invoke-Pester -Configuration $cfg
+      shell: pwsh

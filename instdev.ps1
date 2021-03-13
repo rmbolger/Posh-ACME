@@ -2,24 +2,33 @@
 
 # set the user module path based on edition and platform
 if ('PSEdition' -notin $PSVersionTable.Keys -or $PSVersionTable.PSEdition -eq 'Desktop') {
-    $installpath = "$($env:USERPROFILE)\Documents\WindowsPowerShell\Modules"
+    $installpath = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules'
 } else {
     if ($IsWindows) {
-        $installpath = "$($env:HOME)\Documents\PowerShell\Modules"
+        $installpath = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Modules'
     } else {
-        $installpath = "$($env:HOME)/.local/share/powershell/Modules"
+        $installpath = Join-Path ([Environment]::GetFolderPath('MyDocuments')) '.local/share/powershell/Modules'
     }
+}
+
+# deal with execution policy on Windows
+if (('PSEdition' -notin $PSVersionTable.Keys -or
+     $PSVersionTable.PSEdition -eq 'Desktop' -or
+     $IsWindows) -and
+     (Get-ExecutionPolicy) -notin 'Unrestricted','RemoteSigned','Bypass')
+{
+    Write-Host "Setting user execution policy to RemoteSigned" -ForegroundColor Cyan
+    Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 }
 
 # create user-specific modules folder if it doesn't exist
 New-Item -ItemType Directory -Force -Path $installpath | out-null
 
 if ([String]::IsNullOrWhiteSpace($PSScriptRoot)) {
-    # likely running from online, so download
-    $webclient = New-Object System.Net.WebClient
-    $url = 'https://github.com/rmbolger/Posh-ACME/archive/master.zip'
-    Write-Host "Downloading latest version of Posh-ACME from $url" -ForegroundColor Cyan
-    $file = Join-Path ([system.io.path]::GetTempPath()) 'Posh-ACME.zip'
+
+    if ([String]::IsNullOrWhiteSpace($remoteBranch)) {
+        $remoteBranch = 'main'
+    }
 
     # GitHub now requires TLS 1.2
     # https://blog.github.com/2018-02-23-weak-cryptographic-standards-removed/
@@ -29,7 +38,13 @@ if ([String]::IsNullOrWhiteSpace($PSScriptRoot)) {
         [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor $_
     }
 
-    $webclient.DownloadFile($url,$file)
+    # likely running from online, so download
+    $url = "https://github.com/rmbolger/Posh-ACME/archive/$remoteBranch.zip"
+    Write-Host "Downloading latest version of Posh-ACME from $url" -ForegroundColor Cyan
+    $file = Join-Path ([system.io.path]::GetTempPath()) 'Posh-ACME.zip'
+    $webclient = New-Object System.Net.WebClient
+    try { $webclient.DownloadFile($url,$file) }
+    catch { throw }
     Write-Host "File saved to $file" -ForegroundColor Green
 
     # extract the zip
@@ -37,15 +52,15 @@ if ([String]::IsNullOrWhiteSpace($PSScriptRoot)) {
     Expand-Archive $file -DestinationPath $installpath
 
     Write-Host "Removing any old copy" -ForegroundColor Cyan
-    Remove-Item "$installpath\Posh-ACME" -Recurse -Force -EA SilentlyContinue
+    Remove-Item "$installpath\Posh-ACME" -Recurse -Force -EA Ignore
     Write-Host "Renaming folder" -ForegroundColor Cyan
-    Copy-Item "$installpath\Posh-ACME-master\Posh-ACME" $installpath -Recurse -Force
-    Remove-Item "$installpath\Posh-ACME-master" -recurse -confirm:$false
+    Copy-Item "$installpath\Posh-ACME-$remoteBranch\Posh-ACME" $installpath -Recurse -Force -EA Continue
+    Remove-Item "$installpath\Posh-ACME-$remoteBranch" -Recurse -Force
     Import-Module -Name Posh-ACME -Force
 } else {
     # running locally
-    Remove-Item "$installpath\Posh-ACME" -Recurse -Force -EA SilentlyContinue
-    Copy-Item "$PSScriptRoot\Posh-ACME" $installpath -Recurse -Force
+    Remove-Item "$installpath\Posh-ACME" -Recurse -Force -EA Ignore
+    Copy-Item "$PSScriptRoot\Posh-ACME" $installpath -Recurse -Force -EA Continue
     # force re-load the module (assuming you're editing locally and want to see changes)
     Import-Module -Name Posh-ACME -Force
 }

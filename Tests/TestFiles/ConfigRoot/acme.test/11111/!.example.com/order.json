@@ -1,0 +1,39 @@
+{
+  "status": "pending",
+  "expires": "2030-01-01T00:00:00Z",
+  "identifiers": [
+    {
+      "type": "dns",
+      "value": "example.com"
+    },
+    {
+      "type": "dns",
+      "value": "*.example.com"
+    }
+  ],
+  "authorizations": [
+    "https://acme.test/acme/authz/22222",
+    "https://acme.test/acme/authz/33333"
+  ],
+  "finalize": "https://acme.test/acme/finalize/11111",
+  "MainDomain": "*.example.com",
+  "SANs": [
+    "example.com"
+  ],
+  "KeyLength": "2048",
+  "CertExpires": null,
+  "RenewAfter": null,
+  "OCSPMustStaple": false,
+  "DnsAlias": null,
+  "DnsSleep": 120,
+  "ValidationTimeout": 60,
+  "FriendlyName": "*.example.com",
+  "PfxPass": "poshacme",
+  "Install": false,
+  "certificate": null,
+  "location": "https://acme.test/acme/order/22222",
+  "Plugin": [
+    "DOcean",
+    "DNSimple"
+  ]
+}

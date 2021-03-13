@@ -7,7 +7,7 @@ function Get-Nonce {
         [string]$NewNonceUrl
     )
 
-    # https://tools.ietf.org/html/draft-ietf-acme-acme-10#section-7.2
+    # https://tools.ietf.org/html/rfc8555#section-7.2
 
     Process {
 
@@ -23,12 +23,14 @@ function Get-Nonce {
         # make the request
         Write-Debug "Requesting nonce from $NewNonceUrl"
         try {
-            $response = Invoke-WebRequest $NewNonceUrl -Method Head -UserAgent $script:USER_AGENT -Headers $script:COMMON_HEADERS -EA Stop -Verbose:$false
+            $response = Invoke-WebRequest $NewNonceUrl -Method Head `
+                -UserAgent $script:USER_AGENT -Headers $script:COMMON_HEADERS `
+                -EA Stop -Verbose:$false @script:UseBasic
         } catch { throw }
 
         # return the value from the response
         if ($response.Headers.ContainsKey($script:HEADER_NONCE)) {
-            return $response.Headers.$script:HEADER_NONCE
+            return $response.Headers[$script:HEADER_NONCE] | Select-Object -First 1
         } else {
             throw "$($script:HEADER_NONCE) not found in response headers."
         }

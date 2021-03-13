@@ -1,661 +1,782 @@
-Get-Module Posh-ACME | Remove-Module -Force
-Import-Module Posh-ACME -Force
-
 Describe "ConvertTo-Jwk" {
-    InModuleScope Posh-ACME {
 
-        Context "Generic Bad Input Errors" {
-            It "should throw on string input" {
-                { ConvertTo-Jwk 'asdf' } | Should -Throw
-            }
-            It "should throw on null input" {
-                { ConvertTo-Jwk $null } | Should -Throw
-            }
-            It "should throw on int input" {
-                { ConvertTo-Jwk 1234 } | Should -Throw
-            }
-        }
-
-        # create some known good RSA keys
-        $rsa2048Priv = New-Object Security.Cryptography.RSACryptoServiceProvider 2048
-        $rsa2048Pub = New-Object Security.Cryptography.RSACryptoServiceProvider
-        $rsa2048Pub.ImportParameters($rsa2048Priv.ExportParameters($false))
-        $rsa3072Priv = New-Object Security.Cryptography.RSACryptoServiceProvider 3072
-        $rsa3072Pub = New-Object Security.Cryptography.RSACryptoServiceProvider
-        $rsa3072Pub.ImportParameters($rsa3072Priv.ExportParameters($false))
-        $rsa4096Priv = New-Object Security.Cryptography.RSACryptoServiceProvider 4096
-        $rsa4096Pub = New-Object Security.Cryptography.RSACryptoServiceProvider
-        $rsa4096Pub.ImportParameters($rsa4096Priv.ExportParameters($false))
-
-        Context "RSA 2048 Pub/Priv Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $rsa2048Priv } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $rsa2048Priv
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'RSA'
-            }
-            $origParams = $rsa2048Priv.ExportParameters($true)
-            It "has correct 'e'" {
-                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
-            }
-            It "has correct 'n'" {
-                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
-            }
-            It "has correct 'd'" {
-                $result.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
-            }
-            It "has correct 'p'" {
-                $result.p | Should -BeExactly (ConvertTo-Base64Url $origParams.P)
-            }
-            It "has correct 'q'" {
-                $result.q | Should -BeExactly (ConvertTo-Base64Url $origParams.Q)
-            }
-            It "has correct 'dp'" {
-                $result.dp | Should -BeExactly (ConvertTo-Base64Url $origParams.DP)
-            }
-            It "has correct 'dq'" {
-                $result.dq | Should -BeExactly (ConvertTo-Base64Url $origParams.DQ)
-            }
-            It "has correct 'qi'" {
-                $result.qi | Should -BeExactly (ConvertTo-Base64Url $origParams.InverseQ)
-            }
-
-        }
-
-        Context "RSA 2048 Pub/Priv -PublicOnly Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $rsa2048Priv -PublicOnly } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $rsa2048Priv -PublicOnly
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'RSA'
-            }
-            $origParams = $rsa2048Priv.ExportParameters($false)
-            It "has correct 'e'" {
-                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
-            }
-            It "has correct 'n'" {
-                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
-            }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
-
-        }
-
-        Context "RSA 2048 Public Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $rsa2048Pub } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $rsa2048Pub
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'RSA'
-            }
-            $origParams = $rsa2048Pub.ExportParameters($false)
-            It "has correct 'e'" {
-                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
-            }
-            It "has correct 'n'" {
-                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
-            }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
-
-        }
-
-        Context "RSA 2048 Public -PublicOnly Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $rsa2048Pub -PublicOnly } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $rsa2048Pub -PublicOnly
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'RSA'
-            }
-            $origParams = $rsa2048Pub.ExportParameters($false)
-            It "has correct 'e'" {
-                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
-            }
-            It "has correct 'n'" {
-                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
-            }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
-
-        }
-
-        Context "RSA 3072 Pub/Priv Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $rsa3072Priv } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $rsa3072Priv
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'RSA'
-            }
-            $origParams = $rsa3072Priv.ExportParameters($true)
-            It "has correct 'e'" {
-                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
-            }
-            It "has correct 'n'" {
-                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
-            }
-            It "has correct 'd'" {
-                $result.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
-            }
-            It "has correct 'p'" {
-                $result.p | Should -BeExactly (ConvertTo-Base64Url $origParams.P)
-            }
-            It "has correct 'q'" {
-                $result.q | Should -BeExactly (ConvertTo-Base64Url $origParams.Q)
-            }
-            It "has correct 'dp'" {
-                $result.dp | Should -BeExactly (ConvertTo-Base64Url $origParams.DP)
-            }
-            It "has correct 'dq'" {
-                $result.dq | Should -BeExactly (ConvertTo-Base64Url $origParams.DQ)
-            }
-            It "has correct 'qi'" {
-                $result.qi | Should -BeExactly (ConvertTo-Base64Url $origParams.InverseQ)
-            }
-
-        }
-
-        Context "RSA 3072 Pub/Priv -PublicOnly Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $rsa3072Priv -PublicOnly } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $rsa3072Priv -PublicOnly
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'RSA'
-            }
-            $origParams = $rsa3072Priv.ExportParameters($false)
-            It "has correct 'e'" {
-                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
-            }
-            It "has correct 'n'" {
-                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
-            }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
-
-        }
-
-        Context "RSA 3072 Public Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $rsa3072Pub } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $rsa3072Pub
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'RSA'
-            }
-            $origParams = $rsa3072Pub.ExportParameters($false)
-            It "has correct 'e'" {
-                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
-            }
-            It "has correct 'n'" {
-                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
-            }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
-
-        }
-
-        Context "RSA 3072 Public -PublicOnly Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $rsa3072Pub -PublicOnly } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $rsa3072Pub -PublicOnly
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'RSA'
-            }
-            $origParams = $rsa3072Pub.ExportParameters($false)
-            It "has correct 'e'" {
-                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
-            }
-            It "has correct 'n'" {
-                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
-            }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
-
-        }
-
-        Context "RSA 4096 Pub/Priv Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $rsa4096Priv } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $rsa4096Priv
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'RSA'
-            }
-            $origParams = $rsa4096Priv.ExportParameters($true)
-            It "has correct 'e'" {
-                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
-            }
-            It "has correct 'n'" {
-                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
-            }
-            It "has correct 'd'" {
-                $result.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
-            }
-            It "has correct 'p'" {
-                $result.p | Should -BeExactly (ConvertTo-Base64Url $origParams.P)
-            }
-            It "has correct 'q'" {
-                $result.q | Should -BeExactly (ConvertTo-Base64Url $origParams.Q)
-            }
-            It "has correct 'dp'" {
-                $result.dp | Should -BeExactly (ConvertTo-Base64Url $origParams.DP)
-            }
-            It "has correct 'dq'" {
-                $result.dq | Should -BeExactly (ConvertTo-Base64Url $origParams.DQ)
-            }
-            It "has correct 'qi'" {
-                $result.qi | Should -BeExactly (ConvertTo-Base64Url $origParams.InverseQ)
-            }
-
-        }
-
-        Context "RSA 4096 Pub/Priv -PublicOnly Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $rsa4096Priv -PublicOnly } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $rsa4096Priv -PublicOnly
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'RSA'
-            }
-            $origParams = $rsa4096Priv.ExportParameters($false)
-            It "has correct 'e'" {
-                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
-            }
-            It "has correct 'n'" {
-                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
-            }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
-
-        }
-
-        Context "RSA 4096 Public Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $rsa4096Pub } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $rsa4096Pub
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'RSA'
-            }
-            $origParams = $rsa4096Pub.ExportParameters($false)
-            It "has correct 'e'" {
-                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
-            }
-            It "has correct 'n'" {
-                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
-            }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
-
-        }
-
-        Context "RSA 4096 Public -PublicOnly Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $rsa4096Pub -PublicOnly } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $rsa4096Pub -PublicOnly
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'RSA'
-            }
-            $origParams = $rsa4096Pub.ExportParameters($false)
-            It "has correct 'e'" {
-                $result.e | Should -BeExactly (ConvertTo-Base64Url $origParams.Exponent)
-            }
-            It "has correct 'n'" {
-                $result.n | Should -BeExactly (ConvertTo-Base64Url $origParams.Modulus)
-            }
-            It "has no 'd'"  { 'd'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'p'"  { 'p'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'q'"  { 'q'  | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dp'" { 'dp' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'dq'" { 'dq' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has no 'qi'" { 'qi' | Should -Not -BeIn $result.PSObject.Properties.Name }
-
-        }
-
-
-        # create some known good EC keys
-        $ec256Priv = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve]::CreateFromValue('1.2.840.10045.3.1.7'))
-        $ec256Pub = [Security.Cryptography.ECDsa]::Create()
-        $ec256Pub.ImportParameters($ec256Priv.ExportParameters($false))
-        $ec384Priv = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.34'))
-        $ec384Pub = [Security.Cryptography.ECDsa]::Create()
-        $ec384Pub.ImportParameters($ec384Priv.ExportParameters($false))
-        $ec521Priv = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.35'))
-        $ec521Pub = [Security.Cryptography.ECDsa]::Create()
-        $ec521Pub.ImportParameters($ec521Priv.ExportParameters($false))
-
-        Context "EC 256 Pub/Priv Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $ec256Priv } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $ec256Priv
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'EC'
-            }
-            It "has correct 'crv'" {
-                $result.crv | Should -BeExactly 'P-256'
-            }
-            $origParams = $ec256Priv.ExportParameters($true)
-            It "has correct 'd'" {
-                $result.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
-            }
-            It "has correct 'x'" {
-                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
-            }
-            It "has correct 'y'" {
-                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
-            }
-
-        }
-
-        Context "EC 256 Pub/Priv -PublicOnly Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $ec256Priv -PublicOnly } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $ec256Priv -PublicOnly
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'EC'
-            }
-            It "has correct 'crv'" {
-                $result.crv | Should -BeExactly 'P-256'
-            }
-            $origParams = $ec256Priv.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has correct 'x'" {
-                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
-            }
-            It "has correct 'y'" {
-                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
-            }
-
-        }
-
-        Context "EC 256 Public Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $ec256Pub } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $ec256Pub
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'EC'
-            }
-            It "has correct 'crv'" {
-                $result.crv | Should -BeExactly 'P-256'
-            }
-            $origParams = $ec256Pub.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has correct 'x'" {
-                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
-            }
-            It "has correct 'y'" {
-                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
-            }
-
-        }
-
-        Context "EC 256 Public -PublicOnly Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $ec256Pub -PublicOnly } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $ec256Pub -PublicOnly
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'EC'
-            }
-            It "has correct 'crv'" {
-                $result.crv | Should -BeExactly 'P-256'
-            }
-            $origParams = $ec256Pub.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has correct 'x'" {
-                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
-            }
-            It "has correct 'y'" {
-                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
-            }
-
-        }
-
-        Context "EC 384 Pub/Priv Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $ec384Priv } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $ec384Priv
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'EC'
-            }
-            It "has correct 'crv'" {
-                $result.crv | Should -BeExactly 'P-384'
-            }
-            $origParams = $ec384Priv.ExportParameters($true)
-            It "has correct 'd'" {
-                $result.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
-            }
-            It "has correct 'x'" {
-                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
-            }
-            It "has correct 'y'" {
-                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
-            }
-
-        }
-
-        Context "EC 384 Pub/Priv -PublicOnly Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $ec384Priv -PublicOnly } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $ec384Priv -PublicOnly
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'EC'
-            }
-            It "has correct 'crv'" {
-                $result.crv | Should -BeExactly 'P-384'
-            }
-            $origParams = $ec384Priv.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has correct 'x'" {
-                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
-            }
-            It "has correct 'y'" {
-                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
-            }
-
-        }
-
-        Context "EC 384 Public Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $ec384Pub } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $ec384Pub
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'EC'
-            }
-            It "has correct 'crv'" {
-                $result.crv | Should -BeExactly 'P-384'
-            }
-            $origParams = $ec384Pub.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has correct 'x'" {
-                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
-            }
-            It "has correct 'y'" {
-                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
-            }
-
-        }
-
-        Context "EC 384 Public -PublicOnly Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $ec384Pub -PublicOnly } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $ec384Pub -PublicOnly
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'EC'
-            }
-            It "has correct 'crv'" {
-                $result.crv | Should -BeExactly 'P-384'
-            }
-            $origParams = $ec384Pub.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has correct 'x'" {
-                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
-            }
-            It "has correct 'y'" {
-                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
-            }
-
-        }
-
-        Context "EC 521 Pub/Priv Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $ec521Priv } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $ec521Priv
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'EC'
-            }
-            It "has correct 'crv'" {
-                $result.crv | Should -BeExactly 'P-521'
-            }
-            $origParams = $ec521Priv.ExportParameters($true)
-            It "has correct 'd'" {
-                $result.d | Should -BeExactly (ConvertTo-Base64Url $origParams.D)
-            }
-            It "has correct 'x'" {
-                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
-            }
-            It "has correct 'y'" {
-                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
-            }
-
-        }
-
-        Context "EC 521 Pub/Priv -PublicOnly Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $ec521Priv -PublicOnly } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $ec521Priv -PublicOnly
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'EC'
-            }
-            It "has correct 'crv'" {
-                $result.crv | Should -BeExactly 'P-521'
-            }
-            $origParams = $ec521Priv.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has correct 'x'" {
-                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
-            }
-            It "has correct 'y'" {
-                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
-            }
-
-        }
-
-        Context "EC 521 Public Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $ec521Pub } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $ec521Pub
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'EC'
-            }
-            It "has correct 'crv'" {
-                $result.crv | Should -BeExactly 'P-521'
-            }
-            $origParams = $ec521Pub.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has correct 'x'" {
-                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
-            }
-            It "has correct 'y'" {
-                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
-            }
-
-        }
-
-        Context "EC 521 Public -PublicOnly Tests" {
-
-            It "should not throw" {
-                { ConvertTo-Jwk $ec521Pub -PublicOnly } | Should -Not -Throw
-            }
-            $result = ConvertTo-Jwk $ec521Pub -PublicOnly
-            It "has correct 'kty'" {
-                $result.kty | Should -BeExactly 'EC'
-            }
-            It "has correct 'crv'" {
-                $result.crv | Should -BeExactly 'P-521'
-            }
-            $origParams = $ec521Pub.ExportParameters($false)
-            It "has no 'd'" { 'd' | Should -Not -BeIn $result.PSObject.Properties.Name }
-            It "has correct 'x'" {
-                $result.x | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.X)
-            }
-            It "has correct 'y'" {
-                $result.y | Should -BeExactly (ConvertTo-Base64Url $origParams.Q.Y)
-            }
-
-        }
-
+    BeforeAll {
+        $env:POSHACME_HOME = 'TestDrive:\'
+        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+
+        # create sample keys
+        $rsa2048 = [Security.Cryptography.RSACryptoServiceProvider]::new(2048)
+        $rsa3072 = [Security.Cryptography.RSACryptoServiceProvider]::new(3072)
+        $rsa4096 = [Security.Cryptography.RSACryptoServiceProvider]::new(4096)
+        $ec256 = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve]::CreateFromValue('1.2.840.10045.3.1.7'))
+        $ec384 = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.34'))
+        $ec521 = [Security.Cryptography.ECDsa]::Create([Security.Cryptography.ECCurve]::CreateFromValue('1.3.132.0.35'))
     }
+
+    Context "Bad Input" {
+        It "Should throw" {
+            InModuleScope Posh-ACME {
+                { ConvertTo-Jwk 'asdf' } | Should -Throw
+                { ConvertTo-Jwk $null }  | Should -Throw
+                { ConvertTo-Jwk 1234 }   | Should -Throw
+            }
+        }
+    }
+
+    Context "RSA 2048 Pub/Priv" {
+
+        BeforeAll {
+            Mock -ModuleName Posh-ACME TestData { $rsa2048 }
+        }
+
+        It "Converts Properly (no params)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($true)
+
+                { ConvertTo-Jwk $keypair } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair
+
+                $result.kty | Should -BeExactly 'RSA'
+                $result.e   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Exponent)
+                $result.n   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Modulus)
+                $result.d   | Should -BeExactly (ConvertTo-Base64Url $keyParam.D)
+                $result.p   | Should -BeExactly (ConvertTo-Base64Url $keyParam.P)
+                $result.q   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q)
+                $result.dp  | Should -BeExactly (ConvertTo-Base64Url $keyParam.DP)
+                $result.dq  | Should -BeExactly (ConvertTo-Base64Url $keyParam.DQ)
+                $result.qi  | Should -BeExactly (ConvertTo-Base64Url $keyParam.InverseQ)
+            }
+        }
+
+        It "Converts Properly (-PublicOnly)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($true)
+
+                { ConvertTo-Jwk $keypair -PublicOnly } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair -PublicOnly
+
+                $result.kty | Should -BeExactly 'RSA'
+                $result.e   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Exponent)
+                $result.n   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Modulus)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'p'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'q'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dp' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dq' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'qi' | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+
+        It "Converts Properly (-AsJson)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+
+                # other tests already take care of the key conversion specifics
+                # so here we just care about making sure it's parseable JSON
+
+                { ConvertTo-Jwk $keypair -AsJson } | Should -Not -Throw
+                $result = ConvertTo-Jwk $keypair -AsJson
+                $result | Should -BeOfType [string]
+                { $result | ConvertFrom-Json } | Should -Not -Throw
+            }
+        }
+
+        It "Converts Properly (-AsPrettyJson)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+
+                # other tests already take care of the key conversion specifics
+                # so here we just care about making sure it's parseable JSON
+
+                { ConvertTo-Jwk $keypair -AsPrettyJson } | Should -Not -Throw
+                $result = ConvertTo-Jwk $keypair -AsPrettyJson
+                $result | Should -BeOfType [string]
+                { $result | ConvertFrom-Json } | Should -Not -Throw
+
+                # pretty means multiple lines
+                $result.Split([Environment]::NewLine).Count | Should -BeGreaterThan 1
+            }
+        }
+    }
+
+    Context "RSA 2048 Public" {
+
+        BeforeAll {
+            Mock -ModuleName Posh-ACME TestData {
+                # return a public-only RSA 2048 key
+                $pubkey = [Security.Cryptography.RSACryptoServiceProvider]::new()
+                $pubkey.ImportParameters($rsa2048.ExportParameters($false))
+                return $pubkey
+            }
+        }
+
+        It "Converts Properly (no params)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($false)
+
+                { ConvertTo-Jwk $keypair } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair
+
+                $result.kty | Should -BeExactly 'RSA'
+                $result.e   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Exponent)
+                $result.n   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Modulus)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'p'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'q'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dp' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dq' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'qi' | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+
+        It "Converts Properly (-PublicOnly)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($false)
+
+                { ConvertTo-Jwk $keypair -PublicOnly } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair -PublicOnly
+
+                $result.kty | Should -BeExactly 'RSA'
+                $result.e   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Exponent)
+                $result.n   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Modulus)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'p'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'q'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dp' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dq' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'qi' | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+    }
+
+    Context "RSA 3072 Pub/Priv" {
+
+        BeforeAll {
+            Mock -ModuleName Posh-ACME TestData { $rsa3072 }
+        }
+
+        It "Converts Properly (no params)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($true)
+
+                { ConvertTo-Jwk $keypair } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair
+
+                $result.kty | Should -BeExactly 'RSA'
+                $result.e   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Exponent)
+                $result.n   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Modulus)
+                $result.d   | Should -BeExactly (ConvertTo-Base64Url $keyParam.D)
+                $result.p   | Should -BeExactly (ConvertTo-Base64Url $keyParam.P)
+                $result.q   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q)
+                $result.dp  | Should -BeExactly (ConvertTo-Base64Url $keyParam.DP)
+                $result.dq  | Should -BeExactly (ConvertTo-Base64Url $keyParam.DQ)
+                $result.qi  | Should -BeExactly (ConvertTo-Base64Url $keyParam.InverseQ)
+            }
+        }
+
+        It "Converts Properly (-PublicOnly)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($true)
+
+                { ConvertTo-Jwk $keypair -PublicOnly } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair -PublicOnly
+
+                $result.kty | Should -BeExactly 'RSA'
+                $result.e   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Exponent)
+                $result.n   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Modulus)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'p'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'q'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dp' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dq' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'qi' | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+
+        It "Converts Properly (-AsJson)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+
+                # other tests already take care of the key conversion specifics
+                # so here we just care about making sure it's parseable JSON
+
+                { ConvertTo-Jwk $keypair -AsJson } | Should -Not -Throw
+                $result = ConvertTo-Jwk $keypair -AsJson
+                $result | Should -BeOfType [string]
+                { $result | ConvertFrom-Json } | Should -Not -Throw
+            }
+        }
+
+        It "Converts Properly (-AsPrettyJson)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+
+                # other tests already take care of the key conversion specifics
+                # so here we just care about making sure it's parseable JSON
+
+                { ConvertTo-Jwk $keypair -AsPrettyJson } | Should -Not -Throw
+                $result = ConvertTo-Jwk $keypair -AsPrettyJson
+                $result | Should -BeOfType [string]
+                { $result | ConvertFrom-Json } | Should -Not -Throw
+
+                # pretty means multiple lines
+                $result.Split([Environment]::NewLine).Count | Should -BeGreaterThan 1
+            }
+        }
+    }
+
+    Context "RSA 3072 Public" {
+
+        BeforeAll {
+            Mock -ModuleName Posh-ACME TestData {
+                # return a public-only RSA 3072 key
+                $pubkey = [Security.Cryptography.RSACryptoServiceProvider]::new()
+                $pubkey.ImportParameters($rsa3072.ExportParameters($false))
+                return $pubkey
+            }
+        }
+
+        It "Converts Properly (no params)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($false)
+
+                { ConvertTo-Jwk $keypair } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair
+
+                $result.kty | Should -BeExactly 'RSA'
+                $result.e   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Exponent)
+                $result.n   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Modulus)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'p'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'q'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dp' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dq' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'qi' | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+
+        It "Converts Properly (-PublicOnly)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($false)
+
+                { ConvertTo-Jwk $keypair -PublicOnly } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair -PublicOnly
+
+                $result.kty | Should -BeExactly 'RSA'
+                $result.e   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Exponent)
+                $result.n   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Modulus)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'p'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'q'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dp' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dq' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'qi' | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+    }
+
+    Context "RSA 4096 Pub/Priv" {
+
+        BeforeAll {
+            Mock -ModuleName Posh-ACME TestData { $rsa4096 }
+        }
+
+        It "Converts Properly (no params)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($true)
+
+                { ConvertTo-Jwk $keypair } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair
+
+                $result.kty | Should -BeExactly 'RSA'
+                $result.e   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Exponent)
+                $result.n   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Modulus)
+                $result.d   | Should -BeExactly (ConvertTo-Base64Url $keyParam.D)
+                $result.p   | Should -BeExactly (ConvertTo-Base64Url $keyParam.P)
+                $result.q   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q)
+                $result.dp  | Should -BeExactly (ConvertTo-Base64Url $keyParam.DP)
+                $result.dq  | Should -BeExactly (ConvertTo-Base64Url $keyParam.DQ)
+                $result.qi  | Should -BeExactly (ConvertTo-Base64Url $keyParam.InverseQ)
+            }
+        }
+
+        It "Converts Properly (-PublicOnly)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($true)
+
+                { ConvertTo-Jwk $keypair -PublicOnly } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair -PublicOnly
+
+                $result.kty | Should -BeExactly 'RSA'
+                $result.e   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Exponent)
+                $result.n   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Modulus)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'p'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'q'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dp' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dq' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'qi' | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+
+        It "Converts Properly (-AsJson)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+
+                # other tests already take care of the key conversion specifics
+                # so here we just care about making sure it's parseable JSON
+
+                { ConvertTo-Jwk $keypair -AsJson } | Should -Not -Throw
+                $result = ConvertTo-Jwk $keypair -AsJson
+                $result | Should -BeOfType [string]
+                { $result | ConvertFrom-Json } | Should -Not -Throw
+            }
+        }
+
+        It "Converts Properly (-AsPrettyJson)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+
+                # other tests already take care of the key conversion specifics
+                # so here we just care about making sure it's parseable JSON
+
+                { ConvertTo-Jwk $keypair -AsPrettyJson } | Should -Not -Throw
+                $result = ConvertTo-Jwk $keypair -AsPrettyJson
+                $result | Should -BeOfType [string]
+                { $result | ConvertFrom-Json } | Should -Not -Throw
+
+                # pretty means multiple lines
+                $result.Split([Environment]::NewLine).Count | Should -BeGreaterThan 1
+            }
+        }
+    }
+
+    Context "RSA 4096 Public" {
+
+        BeforeAll {
+            Mock -ModuleName Posh-ACME TestData {
+                # return a public-only RSA 4096 key
+                $pubkey = [Security.Cryptography.RSACryptoServiceProvider]::new()
+                $pubkey.ImportParameters($rsa4096.ExportParameters($false))
+                return $pubkey
+            }
+        }
+
+        It "Converts Properly (no params)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($false)
+
+                { ConvertTo-Jwk $keypair } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair
+
+                $result.kty | Should -BeExactly 'RSA'
+                $result.e   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Exponent)
+                $result.n   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Modulus)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'p'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'q'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dp' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dq' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'qi' | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+
+        It "Converts Properly (-PublicOnly)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($false)
+
+                { ConvertTo-Jwk $keypair -PublicOnly } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair -PublicOnly
+
+                $result.kty | Should -BeExactly 'RSA'
+                $result.e   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Exponent)
+                $result.n   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Modulus)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'p'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'q'  | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dp' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'dq' | Should -Not -BeIn $result.PSObject.Properties.Name
+                'qi' | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+    }
+
+    Context "EC P-256 Pub/Priv" {
+
+        BeforeAll {
+            Mock -ModuleName Posh-ACME TestData { $ec256 }
+        }
+
+        It "Converts Properly (no params)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($true)
+
+                { ConvertTo-Jwk $keypair } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair
+
+                $result.kty | Should -BeExactly 'EC'
+                $result.crv | Should -BeExactly 'P-256'
+                $result.x   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.X)
+                $result.y   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.Y)
+                $result.d   | Should -BeExactly (ConvertTo-Base64Url $keyParam.D)
+            }
+        }
+
+        It "Converts Properly (-PublicOnly)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($true)
+
+                { ConvertTo-Jwk $keypair -PublicOnly } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair -PublicOnly
+
+                $result.kty | Should -BeExactly 'EC'
+                $result.crv | Should -BeExactly 'P-256'
+                $result.x   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.X)
+                $result.y   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.Y)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+
+        It "Converts Properly (-AsJson)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+
+                # other tests already take care of the key conversion specifics
+                # so here we just care about making sure it's parseable JSON
+
+                { ConvertTo-Jwk $keypair -AsJson } | Should -Not -Throw
+                $result = ConvertTo-Jwk $keypair -AsJson
+                $result | Should -BeOfType [string]
+                { $result | ConvertFrom-Json } | Should -Not -Throw
+            }
+        }
+
+        It "Converts Properly (-AsPrettyJson)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+
+                # other tests already take care of the key conversion specifics
+                # so here we just care about making sure it's parseable JSON
+
+                { ConvertTo-Jwk $keypair -AsPrettyJson } | Should -Not -Throw
+                $result = ConvertTo-Jwk $keypair -AsPrettyJson
+                $result | Should -BeOfType [string]
+                { $result | ConvertFrom-Json } | Should -Not -Throw
+
+                # pretty means multiple lines
+                $result.Split([Environment]::NewLine).Count | Should -BeGreaterThan 1
+            }
+        }
+    }
+
+    Context "EC P-256 Public" {
+
+        BeforeAll {
+            Mock -ModuleName Posh-ACME TestData {
+                # return a public-only EC P-256 key
+                $pubkey = [Security.Cryptography.ECDsa]::Create()
+                $pubkey.ImportParameters($ec256.ExportParameters($false))
+                return $pubkey
+            }
+        }
+
+        It "Converts Properly (no params)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($false)
+
+                { ConvertTo-Jwk $keypair } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair
+
+                $result.kty | Should -BeExactly 'EC'
+                $result.crv | Should -BeExactly 'P-256'
+                $result.x   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.X)
+                $result.y   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.Y)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+
+        It "Converts Properly (-PublicOnly)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($false)
+
+                { ConvertTo-Jwk $keypair -PublicOnly } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair -PublicOnly
+
+                $result.kty | Should -BeExactly 'EC'
+                $result.crv | Should -BeExactly 'P-256'
+                $result.x   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.X)
+                $result.y   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.Y)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+    }
+
+    Context "EC P-384 Pub/Priv" {
+
+        BeforeAll {
+            Mock -ModuleName Posh-ACME TestData { $ec384 }
+        }
+
+        It "Converts Properly (no params)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($true)
+
+                { ConvertTo-Jwk $keypair } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair
+
+                $result.kty | Should -BeExactly 'EC'
+                $result.crv | Should -BeExactly 'P-384'
+                $result.x   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.X)
+                $result.y   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.Y)
+                $result.d   | Should -BeExactly (ConvertTo-Base64Url $keyParam.D)
+            }
+        }
+
+        It "Converts Properly (-PublicOnly)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($true)
+
+                { ConvertTo-Jwk $keypair -PublicOnly } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair -PublicOnly
+
+                $result.kty | Should -BeExactly 'EC'
+                $result.crv | Should -BeExactly 'P-384'
+                $result.x   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.X)
+                $result.y   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.Y)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+
+        It "Converts Properly (-AsJson)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+
+                # other tests already take care of the key conversion specifics
+                # so here we just care about making sure it's parseable JSON
+
+                { ConvertTo-Jwk $keypair -AsJson } | Should -Not -Throw
+                $result = ConvertTo-Jwk $keypair -AsJson
+                $result | Should -BeOfType [string]
+                { $result | ConvertFrom-Json } | Should -Not -Throw
+            }
+        }
+
+        It "Converts Properly (-AsPrettyJson)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+
+                # other tests already take care of the key conversion specifics
+                # so here we just care about making sure it's parseable JSON
+
+                { ConvertTo-Jwk $keypair -AsPrettyJson } | Should -Not -Throw
+                $result = ConvertTo-Jwk $keypair -AsPrettyJson
+                $result | Should -BeOfType [string]
+                { $result | ConvertFrom-Json } | Should -Not -Throw
+
+                # pretty means multiple lines
+                $result.Split([Environment]::NewLine).Count | Should -BeGreaterThan 1
+            }
+        }
+    }
+
+    Context "EC P-384 Public" {
+
+        BeforeAll {
+            Mock -ModuleName Posh-ACME TestData {
+                # return a public-only EC P-384 key
+                $pubkey = [Security.Cryptography.ECDsa]::Create()
+                $pubkey.ImportParameters($ec384.ExportParameters($false))
+                return $pubkey
+            }
+        }
+
+        It "Converts Properly (no params)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($false)
+
+                { ConvertTo-Jwk $keypair } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair
+
+                $result.kty | Should -BeExactly 'EC'
+                $result.crv | Should -BeExactly 'P-384'
+                $result.x   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.X)
+                $result.y   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.Y)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+
+        It "Converts Properly (-PublicOnly)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($false)
+
+                { ConvertTo-Jwk $keypair -PublicOnly } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair -PublicOnly
+
+                $result.kty | Should -BeExactly 'EC'
+                $result.crv | Should -BeExactly 'P-384'
+                $result.x   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.X)
+                $result.y   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.Y)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+    }
+
+    Context "EC P-521 Pub/Priv" {
+
+        BeforeAll {
+            Mock -ModuleName Posh-ACME TestData { $ec521 }
+        }
+
+        It "Converts Properly (no params)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($true)
+
+                { ConvertTo-Jwk $keypair } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair
+
+                $result.kty | Should -BeExactly 'EC'
+                $result.crv | Should -BeExactly 'P-521'
+                $result.x   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.X)
+                $result.y   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.Y)
+                $result.d   | Should -BeExactly (ConvertTo-Base64Url $keyParam.D)
+            }
+        }
+
+        It "Converts Properly (-PublicOnly)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($true)
+
+                { ConvertTo-Jwk $keypair -PublicOnly } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair -PublicOnly
+
+                $result.kty | Should -BeExactly 'EC'
+                $result.crv | Should -BeExactly 'P-521'
+                $result.x   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.X)
+                $result.y   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.Y)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+
+        It "Converts Properly (-AsJson)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+
+                # other tests already take care of the key conversion specifics
+                # so here we just care about making sure it's parseable JSON
+
+                { ConvertTo-Jwk $keypair -AsJson } | Should -Not -Throw
+                $result = ConvertTo-Jwk $keypair -AsJson
+                $result | Should -BeOfType [string]
+                { $result | ConvertFrom-Json } | Should -Not -Throw
+            }
+        }
+
+        It "Converts Properly (-AsPrettyJson)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+
+                # other tests already take care of the key conversion specifics
+                # so here we just care about making sure it's parseable JSON
+
+                { ConvertTo-Jwk $keypair -AsPrettyJson } | Should -Not -Throw
+                $result = ConvertTo-Jwk $keypair -AsPrettyJson
+                $result | Should -BeOfType [string]
+                { $result | ConvertFrom-Json } | Should -Not -Throw
+
+                # pretty means multiple lines
+                $result.Split([Environment]::NewLine).Count | Should -BeGreaterThan 1
+            }
+        }
+    }
+
+    Context "EC P-521 Public" {
+
+        BeforeAll {
+            Mock -ModuleName Posh-ACME TestData {
+                # return a public-only EC P-521 key
+                $pubkey = [Security.Cryptography.ECDsa]::Create()
+                $pubkey.ImportParameters($ec521.ExportParameters($false))
+                return $pubkey
+            }
+        }
+
+        It "Converts Properly (no params)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($false)
+
+                { ConvertTo-Jwk $keypair } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair
+
+                $result.kty | Should -BeExactly 'EC'
+                $result.crv | Should -BeExactly 'P-521'
+                $result.x   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.X)
+                $result.y   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.Y)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+
+        It "Converts Properly (-PublicOnly)" {
+            InModuleScope Posh-ACME {
+                $keypair = TestData
+                $keyParam = $keypair.ExportParameters($false)
+
+                { ConvertTo-Jwk $keypair -PublicOnly } | Should -Not -Throw
+
+                $result = ConvertTo-Jwk $keypair -PublicOnly
+
+                $result.kty | Should -BeExactly 'EC'
+                $result.crv | Should -BeExactly 'P-521'
+                $result.x   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.X)
+                $result.y   | Should -BeExactly (ConvertTo-Base64Url $keyParam.Q.Y)
+                'd'  | Should -Not -BeIn $result.PSObject.Properties.Name
+            }
+        }
+    }
+
 }

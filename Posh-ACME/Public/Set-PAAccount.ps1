@@ -1,19 +1,35 @@
 function Set-PAAccount {
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding(SupportsShouldProcess,DefaultParameterSetName='Edit')]
     param(
         [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$ID,
-        [Parameter(Position=1)]
+        [Parameter(ParameterSetName='Edit',Position=1)]
         [string[]]$Contact,
+        [Parameter(ParameterSetName='Edit')]
+        [switch]$UseAltPluginEncryption,
+        [Parameter(ParameterSetName='Edit')]
+        [switch]$ResetAltPluginEncryption,
+        [Parameter(ParameterSetName='Edit')]
         [switch]$Deactivate,
-        [switch]$NoSwitch,
-        [switch]$Force
+        [Parameter(ParameterSetName='Edit')]
+        [switch]$Force,
+        [Parameter(ParameterSetName='Rollover',Mandatory)]
+        [Parameter(ParameterSetName='RolloverImportKey',Mandatory)]
+        [switch]$KeyRollover,
+        [Parameter(ParameterSetName='Rollover')]
+        [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
+        [Alias('AccountKeyLength')]
+        [string]$KeyLength='ec-256',
+        [Parameter(ParameterSetName='RolloverImportKey',Mandatory)]
+        [string]$KeyFile,
+        [switch]$NoSwitch
     )
 
     Begin {
         # make sure we have a server configured
-        if (!(Get-PAServer)) {
-            throw "No ACME server configured. Run Set-PAServer first."
+        if (-not (Get-PAServer)) {
+            try { throw "No ACME server configured. Run Set-PAServer first." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         # make sure all Contacts have a mailto: prefix which is the only
@@ -31,8 +47,9 @@ function Set-PAAccount {
 
         # throw an error if there's no current account and no ID
         # passed in
-        if (!$script:Acct -and !$ID) {
-            throw "No ACME account configured. Run New-PAAccount or specify an account ID."
+        if (-not $script:Acct -and -not $ID) {
+            try { throw "No ACME account configured. Run New-PAAccount or specify an account ID." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         # There are 3 types of calls the user might be making here.
@@ -49,7 +66,12 @@ function Set-PAAccount {
             # account specified
             $acct = Get-PAAccount $ID
 
-        } elseif (!$script:Acct -or ($ID -and ($ID -ne $script:Acct.id))) {
+            if ($null -eq $acct) {
+                Write-Warning "Specified account ID ($ID) was not found. No changes made."
+                return
+            }
+
+        } elseif (-not $script:Acct -or ($ID -and ($ID -ne $script:Acct.id))) {
             # This is a definite account switch
 
             # refresh the cached copy
@@ -58,14 +80,13 @@ function Set-PAAccount {
             Write-Debug "Switching to account $ID"
 
             # save it as current
-            $ID | Out-File (Join-Path $script:DirFolder 'current-account.txt') -Force
+            $ID | Out-File (Join-Path (Get-DirFolder) 'current-account.txt') -Force -EA Stop
 
             # reset child object references
             $script:Order = $null
-            $script:OrderFolder = $null
 
             # reload the cache from disk
-            Import-PAConfig 'Account'
+            Import-PAConfig -Level 'Account'
 
             # grab a local reference to the newly current account
             $acct = $script:Acct
@@ -76,11 +97,34 @@ function Set-PAAccount {
             $acct = $script:Acct
         }
 
-        # check if there's anything to change
-        if ('Contact' -in $PSBoundParameters.Keys -or $Deactivate) {
+        $saveAccount = $false
 
-            # hydrate the account key
-            $acctKey = $acct.key | ConvertFrom-Jwk
+        # deal with local changes
+        if ('UseAltPluginEncryption' -in $PSBoundParameters.Keys -or $ResetAltPluginEncryption) {
+
+            # UseAltPluginEncryption takes precedence over ResetAltPluginEncryption
+            # So if Use:$false + Reset is specified, the key is removed rather than rotated
+
+            if ([String]::IsNullOrEmpty($acct.sskey) -and $UseAltPluginEncryption)
+            {
+                Write-Verbose "Adding new sskey for account $($acct.ID)"
+                Update-PluginEncryption $acct.ID -NewKey (New-AesKey)
+            }
+            elseif (-not [String]::IsNullOrEmpty($acct.sskey) -and
+                    'UseAltPluginEncryption' -in $PSBoundParameters.Keys -and
+                    -not $UseAltPluginEncryption)
+            {
+                Write-Verbose "Removing sskey for account $($acct.ID)"
+                Update-PluginEncryption $acct.ID -NewKey $null
+            }
+            elseif (-not [String]::IsNullOrEmpty($acct.sskey) -and $ResetAltPluginEncryption) {
+                Write-Verbose "Changing sskey for account $($acct.ID)"
+                Update-PluginEncryption $acct.ID -NewKey (New-AesKey)
+            }
+        }
+
+        # deal with server side changes
+        if ('Contact' -in $PSBoundParameters.Keys -or $Deactivate) {
 
             # build the header
             $header = @{
@@ -105,7 +149,7 @@ function Set-PAAccount {
                 if (!$Force) {
                     if (!$PSCmdlet.ShouldContinue("Are you sure you wish to deactivate account $($acct.id)?",
                     "Deactivating an account is irreversible and will prevent modifications or renewals for associated orders and certificates.")) {
-                        Write-Verbose "Modification aborted for account $($acct.id)."
+                        Write-Verbose "Deactivation aborted for account $($acct.id)."
                         return
                     }
                 }
@@ -113,13 +157,12 @@ function Set-PAAccount {
             }
 
             # convert it to json
-            $payloadJson = $payload | ConvertTo-Json -Compress
+            $payloadJson = $payload | ConvertTo-Json -Depth 5 -Compress
 
             # send the request
             try {
-                $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
+                $response = Invoke-ACME $header $payloadJson $acct -EA Stop
             } catch { throw }
-            Write-Debug "Response: $($response.Content)"
 
             $respObj = ($response.Content | ConvertFrom-Json)
 
@@ -127,11 +170,86 @@ function Set-PAAccount {
             $acct.status = $respObj.status
             $acct.contact = $respObj.contact
 
-            # save it to disk
-            $acctFolder = Join-Path $script:DirFolder $acct.id
-            $acct | ConvertTo-Json | Out-File (Join-Path $acctFolder 'acct.json') -Force
+            $saveAccount = $true
         }
 
+        # deal with key rollover
+        if ($KeyRollover) {
+
+            # We've been asked to rollover the account key which effectively means replace it
+            # with a new one. The spec describes the process in the following link.
+            # https://tools.ietf.org/html/rfc8555#section-7.3.5
+
+            # build the standard outer header
+            $header = @{
+                alg   = $acct.alg;
+                kid   = $acct.location;
+                nonce = $script:Dir.nonce;
+                url   = $script:Dir.keyChange;
+            }
+
+            if ($KeyFile) {
+                # attempt to use the specified key as the new account key
+                try {
+                    $kLength = [string]::Empty
+                    $newKey = New-PAKey -KeyFile $KeyFile -ParsedLength ([ref]$kLength)
+                    $KeyLength = $kLength
+                }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
+
+            } else {
+                # generate a new account key
+                $newKey = New-PAKey $KeyLength
+            }
+
+            # create the algorithm identifier as described by
+            # https://tools.ietf.org/html/rfc7518#section-3.1
+            # and what we know LetsEncrypt supports today which includes
+            # RS256 for all RSA keys
+            # ES256 for P-256 keys, ES384 for P-384 keys, ES512 for P-521 keys
+            $alg = 'RS256'
+            if     ($KeyLength -eq 'ec-256') { $alg = 'ES256' }
+            elseif ($KeyLength -eq 'ec-384') { $alg = 'ES384' }
+            elseif ($KeyLength -eq 'ec-521') { $alg = 'ES512' }
+
+            # build the inner header
+            $innerHead = @{
+                alg  = $alg;
+                jwk  = ($newKey | ConvertTo-Jwk -PublicOnly);
+                url  = $script:Dir.keyChange;
+            }
+
+            # build the inner payload
+            $innerPayloadJson = @{
+                account = $acct.location;
+                oldKey  = $acct.Key | ConvertFrom-Jwk | ConvertTo-Jwk -PublicOnly
+            } | ConvertTo-Json -Depth 5 -Compress
+
+            # build the outer payload by creating a signed JWS from
+            # the inner header/payload and new key
+            $payloadJson = New-Jws $newKey $innerHead $innerPayloadJson -NoHeaderValidation
+
+            # send the request
+            try {
+                $response = Invoke-ACME $header $payloadJson $acct -EA Stop
+            } catch { throw }
+
+            $respObj = ($response.Content | ConvertFrom-Json)
+            if ($respObj.status -eq 'valid') {
+                # update the account with the new key
+                $acct.key = $newKey | ConvertTo-Jwk
+                $acct.alg = $alg
+                $acct.KeyLength = $KeyLength
+
+                $saveAccount = $true
+            }
+        }
+
+        if ($saveAccount) {
+            # save it to disk
+            $acctFolder = Join-Path (Get-DirFolder) $acct.id
+            $acct | ConvertTo-Json -Depth 5 | Out-File (Join-Path $acctFolder 'acct.json') -Force -EA Stop
+        }
     }
 
 
@@ -143,7 +261,7 @@ function Set-PAAccount {
         Set the current ACME account and/or update account details.
 
     .DESCRIPTION
-        This function allows you to switch between ACME accounts for a particular server. It also allows you to update the contact information associated with an account or deactivate the account.
+        This function allows you to switch between ACME accounts for a particular server. It also allows you to update the contact information associated with an account, deactivate the account, or replace the account key with a new one.
 
     .PARAMETER ID
         The account id value as returned by the ACME server. If not specified, the function will attempt to use the currently active account.
@@ -151,14 +269,29 @@ function Set-PAAccount {
     .PARAMETER Contact
         One or more email addresses to associate with this account. These addresses will be used by the ACME server to send certificate expiration notifications or other important account notices.
 
+    .PARAMETER UseAltPluginEncryption
+        If specified, the account will be configured to use a randomly generated AES key to encrypt sensitive plugin parameters on disk instead of using the OS's native encryption methods. This can be useful if the config is being shared across systems or platforms. You can revert to OS native encryption using -UseAltPluginEncryption:$false.
+
+    .PARAMETER ResetAltPluginEncryption
+        If specified, the existing AES key will be replaced with a new one and existing plugin parameters on disk will be re-encrypted with the new key. If there is no existing key, this parameter is ignored.
+
     .PARAMETER Deactivate
         If specified, a request will be sent to the associated ACME server to deactivate the account. Clients may wish to do this if the account key is compromised or decommissioned.
 
-    .PARAMETER NoSwitch
-        If specified, the currently active account will not change. Useful primarily for bulk updating contact information across accounts. This switch is ignored if no ID is specified.
-
     .PARAMETER Force
         If specified, confirmation prompts for account deactivation will be skipped.
+
+    .PARAMETER KeyRollover
+        If specified, generate a new account key and replace the current one with it. Clients may choose to do this to recover from a key compromise or proactively mitigate the impact of an unnoticed key compromise.
+
+    .PARAMETER KeyLength
+        The type and size of private key to use. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to 'ec-256'.
+
+    .PARAMETER KeyFile
+        The path to an existing EC or RSA private key file. This will attempt to use the specified key as the new ACME account key.
+
+    .PARAMETER NoSwitch
+        If specified, the currently active account will not change. Useful primarily for bulk updating contact information across accounts. This switch is ignored if no ID is specified.
 
     .EXAMPLE
         Set-PAAccount -ID 1234567
@@ -184,6 +317,16 @@ function Set-PAAccount {
         Set-PAAccount -Deactivate
 
         Deactivate the current account.
+
+    .EXAMPLE
+        Set-PAAccount -KeyRollover -KeyLength ec-384
+
+        Replace the current account key with a new ECC key using P-384 curve.
+
+    .EXAMPLE
+        Set-PAAccount -KeyRollover -KeyFile .\mykey.key
+
+        Replace the current account key with a pre-generated private key.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME

@@ -12,14 +12,14 @@ function New-Csr {
     }
 
     # Order verification should have already been taken care of
-    $orderFolder = Join-Path $script:AcctFolder $Order.MainDomain.Replace('*','!')
+    $orderFolder = $Order | Get-OrderFolder
     $keyFile = Join-Path $orderFolder 'cert.key'
     $reqFile = Join-Path $orderFolder 'request.csr'
 
     # Check for an existing key
     if (Test-Path $keyFile -PathType Leaf) {
 
-        $keyPair = Import-Pem $keyFile
+        $keyPair = Import-Pem -InputFile $keyFile
 
         if ($Order.KeyLength -notlike 'ec-*') {
             $sigAlgo = 'SHA256WITHRSA'
@@ -86,11 +86,22 @@ function New-Csr {
     $basicConstraints = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.BasicConstraints($false))))
     $keyUsage = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($true, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.KeyUsage([Org.BouncyCastle.Asn1.X509.KeyUsage]::DigitalSignature -bor [Org.BouncyCastle.Asn1.X509.KeyUsage]::KeyEncipherment))))
     $extKeyUsage = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.ExtendedKeyUsage([Org.BouncyCastle.Asn1.X509.KeyPurposeID]::IdKPServerAuth, [Org.BouncyCastle.Asn1.X509.KeyPurposeID]::IdKPClientAuth))))
-    $genNames = @()
-    $allSANs = @($Order.MainDomain); if ($Order.SANs.Count -gt 0) { $allSANs += @($Order.SANs) }
-    foreach ($name in $allSANs) { $genNames += New-Object Org.BouncyCastle.Asn1.X509.GeneralName([Org.BouncyCastle.Asn1.X509.GeneralName]::DnsName, $name) }
-    $sans = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.GeneralNames(@(,$genNames)))))
     $ski = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.X509.Extension.SubjectKeyIdentifierStructure($keyPair.Public))))
+
+    # create SANs based on the identifier types
+    $genNames = @()
+    $Order.identifiers | ForEach-Object {
+        if ($_.type -eq 'dns') {
+            $genNames += New-Object Org.BouncyCastle.Asn1.X509.GeneralName([Org.BouncyCastle.Asn1.X509.GeneralName]::DnsName, $_.value)
+        }
+        elseif ($_.type -eq 'ip') {
+            $genNames += New-Object Org.BouncyCastle.Asn1.X509.GeneralName([Org.BouncyCastle.Asn1.X509.GeneralName]::IPAddress, $_.value)
+        }
+        else {
+            Write-Warning "Skipping unexpected identifier type '$($_.type)' with value '$($_.value)'."
+        }
+    }
+    $sans = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.GeneralNames(@(,$genNames)))))
 
     # add them to a DerSet object
     $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::BasicConstraints, $basicConstraints)
@@ -103,7 +114,7 @@ function New-Csr {
     if ($Order.OCSPMustStaple) {
         Write-Debug "Adding OCSP Must-Staple"
         $mustStaple = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(@(,[byte[]](0x30,0x03,0x02,0x01,0x05)))))
-        $extDict.Add((New-Object DerObjectIdentifier('1.3.6.1.5.5.7.1.24')), $mustStaple)
+        $extDict.Add((New-Object Org.BouncyCastle.Asn1.DerObjectIdentifier('1.3.6.1.5.5.7.1.24')), $mustStaple)
     }
 
     # build the extensions DerSet

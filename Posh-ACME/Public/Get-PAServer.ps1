@@ -8,7 +8,8 @@ function Get-PAServer {
         [string]$DirectoryUrl,
         [Parameter(ParameterSetName='List',Mandatory)]
         [switch]$List,
-        [switch]$Refresh
+        [switch]$Refresh,
+        [switch]$Quiet
     )
 
     Process {
@@ -23,7 +24,7 @@ function Get-PAServer {
 
             # read the contents of each server's dir.json
             Write-Debug "Loading PAServer list from disk"
-            $rawFiles = Get-ChildItem "$($script:ConfigRoot)\*\dir.json" | Get-Content -Raw
+            $rawFiles = Get-ChildItem (Join-Path (Get-ConfigRoot) '\*\dir.json') | Get-Content -Raw
             $rawFiles | ConvertFrom-Json | Sort-Object location | ForEach-Object {
 
                     # insert the type name so it displays properly
@@ -44,17 +45,18 @@ function Get-PAServer {
                 }
 
                 # build the path to dir.json
-                $dirFile = $DirectoryUrl.Replace('https://','').Replace(':','_')
-                $dirFile = Join-Path $script:ConfigRoot $dirFile.Substring(0,$dirFile.IndexOf('/'))
-                $dirFile = Join-Path $dirFile 'dir.json'
+                $dirFolder = ConvertTo-DirFolder $DirectoryUrl
+                $dirFile = Join-Path $dirFolder 'dir.json'
 
                 # check if it exists
                 if (Test-Path $dirFile -PathType Leaf) {
                     Write-Debug "Loading PAServer from disk"
-                    $dir = Get-ChildItem $dirFile | Get-Content -Raw | ConvertFrom-Json
+                    $dir = Get-Content $dirFile -Raw | ConvertFrom-Json
                     $dir.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
                 } else {
-                    Write-Warning "Unable to find cached PAServer info for $DirectoryUrl. Try using Set-PAServer first."
+                    if (-not $Quiet) {
+                        Write-Warning "Unable to find cached PAServer info for $DirectoryUrl. Try using Set-PAServer first."
+                    }
                     return $null
                 }
 
@@ -96,6 +98,9 @@ function Get-PAServer {
 
     .PARAMETER Refresh
         If specified, any server details returned will be freshly queried from the ACME server. Otherwise, cached details will be returned.
+
+    .PARAMETER Quiet
+        If specified, no warning will be thrown if a specified server is not found.
 
     .EXAMPLE
         Get-PAServer

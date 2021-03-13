@@ -1,22 +1,49 @@
 function New-PAAccount {
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding(SupportsShouldProcess,DefaultParameterSetName='Generate')]
     [OutputType('PoshACME.PAAccount')]
     param(
         [Parameter(Position=0)]
         [string[]]$Contact,
-        [Parameter(Position=1)]
+        [Parameter(ParameterSetName='Generate',Position=1)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [Alias('AccountKeyLength')]
         [string]$KeyLength='ec-256',
+        [Parameter(ParameterSetName='ImportKey',Mandatory)]
+        [string]$KeyFile,
         [switch]$AcceptTOS,
         [switch]$Force,
+        [string]$ExtAcctKID,
+        [string]$ExtAcctHMACKey,
+        [ValidateSet('HS256','HS384','HS512')]
+        [string]$ExtAcctAlgorithm = 'HS256',
+        [switch]$UseAltPluginEncryption,
         [Parameter(ValueFromRemainingArguments=$true)]
         $ExtraParams
     )
 
     # make sure we have a server configured
-    if (!(Get-PAServer)) {
-        throw "No ACME server configured. Run Set-PAServer first."
+    if (-not ($acmeServer = Get-PAServer)) {
+        try { throw "No ACME server configured. Run Set-PAServer first." }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
+    }
+
+    # make sure the external account binding parameters were specified if this ACME
+    # server requires them.
+    if ($acmeServer.meta -and $acmeServer.meta.externalAccountRequired -and
+        (-not $ExtAcctKID -or -not $ExtAcctHMACKey))
+    {
+        try { throw "The current ACME server requires external account credentials to create a new ACME account. Please run New-PAAccount with the ExtAcctKID and ExtAcctHMACKey parameters." }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
+    }
+
+    # try to decode the HMAC key if specified
+    if ($ExtAcctHMACKey) {
+        $keyBytes = ConvertFrom-Base64Url $ExtAcctHMACKey -AsByteArray
+        $hmacKey = switch ($ExtAcctAlgorithm) {
+            'HS256' { [Security.Cryptography.HMACSHA256]::new($keyBytes); break; }
+            'HS384' { [Security.Cryptography.HMACSHA384]::new($keyBytes); break; }
+            'HS512' { [Security.Cryptography.HMACSHA512]::new($keyBytes); break; }
+        }
     }
 
     # make sure the Contact emails have a "mailto:" prefix
@@ -31,28 +58,38 @@ function New-PAAccount {
         Write-Warning "No email contacts specified for this account. Certificate expiration warnings will not be sent unless you add at least one with Set-PAAccount."
     }
 
-    # There's a chance we may be creating effectively a duplicate account. So check
-    # for confirmation if there's already one with the same contacts and keylength.
-    if (!$Force) {
-        $accts = @(Get-PAAccount -List -Refresh -Contact $Contact -KeyLength $KeyLength -Status 'valid')
-        if ($accts.Count -gt 0) {
-            if (!$PSCmdlet.ShouldContinue("Do you wish to duplicate?",
-                "Existing account with matching contacts and key length.")) { return }
+    if ('Generate' -eq $PSCmdlet.ParameterSetName) {
+
+        # There's a chance we may be creating effectively a duplicate account. So check
+        # for confirmation if there's already one with the same contacts and keylength.
+        if (!$Force) {
+            $accts = @(Get-PAAccount -List -Refresh -Contact $Contact -KeyLength $KeyLength -Status 'valid')
+            if ($accts.Count -gt 0) {
+                if (!$PSCmdlet.ShouldContinue("Do you wish to duplicate?",
+                    "Existing account with matching contacts and key length.")) { return }
+            }
         }
+
+        Write-Debug "Creating new $KeyLength account with contact: $($Contact -join ', ')"
+
+        # create the account key
+        $acctKey = New-PAKey $KeyLength
+
+    } else { # ImportKey parameter set
+
+        try {
+            $kLength = [string]::Empty
+            $acctKey = New-PAKey -KeyFile $KeyFile -ParsedLength ([ref]$kLength)
+            $KeyLength = $kLength
+        }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
-
-    Write-Debug "Creating new $KeyLength account with contact: $($Contact -join ', ')"
-
-    # create the account key
-    $acctKey = New-PAKey $KeyLength
 
     # create the algorithm identifier as described by
     # https://tools.ietf.org/html/rfc7518#section-3.1
     # and what we know LetsEncrypt supports today which includes
     # RS256 for all RSA keys
-    # ES256 for P-256 keys
-    # ES384 for P-384 keys
-    # ES512 for P-521 keys (not a typo, 521 is the curve, 512 is the SHA512 hash algorithm)
+    # ES256 for P-256 keys, ES384 for P-384 keys, ES512 for P-521 keys
     $alg = 'RS256'
     if     ($KeyLength -eq 'ec-256') { $alg = 'ES256' }
     elseif ($KeyLength -eq 'ec-384') { $alg = 'ES384' }
@@ -60,10 +97,10 @@ function New-PAAccount {
 
     # build the protected header for the request
     $header = @{
-        alg   = $alg;
-        jwk   = ($acctKey | ConvertTo-Jwk -PublicOnly);
-        nonce = $script:Dir.nonce;
-        url   = $script:Dir.newAccount;
+        alg   = $alg
+        jwk   = ($acctKey | ConvertTo-Jwk -PublicOnly)
+        nonce = $script:Dir.nonce
+        url   = $script:Dir.newAccount
     }
 
     # init the payload
@@ -75,48 +112,84 @@ function New-PAAccount {
         $payload.termsOfServiceAgreed = $true
     }
 
+    # add external account binding if specified
+    if ($ExtAcctKID -and $ExtAcctHMACKey) {
+
+        $eabHeader = @{
+            alg = $ExtAcctAlgorithm
+            kid = $ExtAcctKID
+            url = $script:Dir.newAccount
+        }
+
+        $eabPayload = $header.jwk | ConvertTo-Json -Depth 5 -Compress
+
+        $payload.externalAccountBinding =
+            New-Jws $hmacKey $eabHeader $eabPayload | ConvertFrom-Json
+    }
+
     # convert it to json
-    $payloadJson = $payload | ConvertTo-Json -Compress
+    $payloadJson = $payload | ConvertTo-Json -Depth 5 -Compress
 
     # send the request
     try {
-        $response = Invoke-ACME $header.url $acctKey $header $payloadJson -EA Stop
+        $response = Invoke-ACME $header $payloadJson -Key $acctKey -EA Stop
     } catch { throw }
-    Write-Debug "Response: $($response.Content)"
 
     # grab the Location header
     if ($response.Headers.ContainsKey('Location')) {
-        $location = $response.Headers['Location']
+        $location = $response.Headers['Location'] | Select-Object -First 1
     } else {
-        throw 'No Location header found in newAccount output'
+        try { throw 'No Location header found in newAccount output' }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
+    }
+
+    $respObj = $response.Content | ConvertFrom-Json
+
+    # So historically, LE/Boulder returns the raw account ID value as a property in the JSON
+    # output for new account requests. But the finalized RFC 8555 does not require this
+    # and Boulder will be removing it. But it's still a useful value to have for referencing
+    # accounts. So if it's not returned, we're going to try and parse it from the location
+    # header. This may come back to haunt us if other ACME providers use different location
+    # schemes in the future.
+    if (-not $respObj.ID) {
+        # https://acme-staging-v02.api.letsencrypt.org/acme/acct/xxxxxxxx
+        # https://acme-v02.api.letsencrypt.org/acme/acct/xxxxxxxx
+        $acctID = ([Uri]$location).Segments[-1]
+    } else {
+        $acctID = $respObj.ID.ToString()
     }
 
     # build the return value
-    $respObj = $response.Content | ConvertFrom-Json
     $acct = [pscustomobject]@{
-        PSTypeName = 'PoshACME.PAAccount';
-        id = $respObj.ID.ToString();    # Boulder currently returns ID as an integer
-        status = $respObj.status;
-        contact = $respObj.contact;
-        location = $location;
-        key = ($acctKey | ConvertTo-Jwk);
-        alg = $alg;
-        KeyLength = $KeyLength;
+        PSTypeName = 'PoshACME.PAAccount'
+        id = $acctID
+        status = $respObj.status
+        contact = $respObj.contact
+        location = $location
+        key = ($acctKey | ConvertTo-Jwk)
+        alg = $alg
+        KeyLength = $KeyLength
         # The orders field is supposed to exist according to
-        # https://tools.ietf.org/html/draft-ietf-acme-acme-11#section-7.1.2
+        # https://tools.ietf.org/html/rfc8555#section-7.1.2
         # But it's not currently implemented in Boulder. Tracking issue is here:
         # https://github.com/letsencrypt/boulder/issues/3335
-        orders = $respObj.orders;
+        orders = $respObj.orders
+        sskey = $null
+    }
+
+    # add a new AES key if specified
+    if ($UseAltPluginEncryption) {
+        $acct.sskey = New-AesKey
     }
 
     # save it to memory and disk
-    $acct.id | Out-File (Join-Path $script:DirFolder 'current-account.txt') -Force
+    $acct.id | Out-File (Join-Path (Get-DirFolder) 'current-account.txt') -Force -EA Stop
     $script:Acct = $acct
-    $script:AcctFolder = Join-Path $script:DirFolder $acct.id
+    $script:AcctFolder = Join-Path (Get-DirFolder) $acct.id
     if (!(Test-Path $script:AcctFolder -PathType Container)) {
-        New-Item -ItemType Directory -Path $script:AcctFolder -Force | Out-Null
+        New-Item -ItemType Directory -Path $script:AcctFolder -Force -EA Stop | Out-Null
     }
-    $acct | ConvertTo-Json | Out-File (Join-Path $script:AcctFolder 'acct.json') -Force
+    $acct | ConvertTo-Json -Depth 5 | Out-File (Join-Path $script:AcctFolder 'acct.json') -Force -EA Stop
 
     return $acct
 
@@ -136,11 +209,26 @@ function New-PAAccount {
     .PARAMETER KeyLength
         The type and size of private key to use. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to 'ec-256'.
 
+    .PARAMETER KeyFile
+        The path to an existing EC or RSA private key file. This will attempt to create the account using the specified key as the ACME account key. This can be used to recover/import an existing ACME account if one is already associated with the key.
+
     .PARAMETER AcceptTOS
         If not specified, the ACME server will throw an error with a link to the current Terms of Service. Using this switch indicates acceptance of those Terms of Service and is required for successful account creation.
 
     .PARAMETER Force
         If specified, confirmation prompts that may have been generated will be skipped.
+
+    .PARAMETER ExtAcctKID
+        The external account key identifier supplied by the CA. This is required for ACME CAs that require external account binding.
+
+    .PARAMETER ExtAcctHMACKey
+        The external account HMAC key supplied by the CA and encoded as Base64Url. This is required for ACME CAs that require external account binding.
+
+    .PARAMETER ExtAcctAlgorithm
+        The HMAC algorithm to use. Defaults to 'HS256'.
+
+    .PARAMETER UseAltPluginEncryption
+        If specified, the account will be configured to use a randomly generated AES key to encrypt sensitive plugin parameters on disk instead of using the OS's native encryption methods. This can be useful if the config is being shared across systems or platforms. You can revert to OS native encryption using -UseAltPluginEncryption:$false.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -164,6 +252,11 @@ function New-PAAccount {
         New-PAAccount -KeyLength 'ec-384' -AcceptTOS -Force
 
         Create a new account with no contact email and an ECC key using P-384 curve that ignores any confirmations.
+
+    .Example
+        New-PAAccount -KeyFile .\mykey.key -AcceptTOS
+
+        Create a new account using a pre-generated private key file.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME

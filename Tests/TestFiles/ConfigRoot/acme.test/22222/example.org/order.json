@@ -1,0 +1,31 @@
+{
+  "status": "invalid",
+  "expires": "2030-01-01T00:00:00Z",
+  "identifiers": [
+    {
+      "value": "example.org",
+      "type": "dns"
+    }
+  ],
+  "authorizations": [
+    "https://acme.test/acme/authz/11111"
+  ],
+  "finalize": "https://acme.test/acme/finalize/11111",
+  "MainDomain": "example.org",
+  "SANs": [],
+  "KeyLength": "2048",
+  "CertExpires": null,
+  "RenewAfter": null,
+  "OCSPMustStaple": false,
+  "DnsAlias": null,
+  "DnsSleep": 120,
+  "ValidationTimeout": 60,
+  "FriendlyName": "example.org",
+  "PfxPass": "poshacme",
+  "Install": false,
+  "certificate": null,
+  "location": "https://acme.test/acme/order/11111",
+  "Plugin": [
+    "Route53"
+  ]
+}

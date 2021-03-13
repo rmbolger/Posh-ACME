@@ -11,9 +11,8 @@ function ConvertTo-Jwk {
     # RFC 7517 - JSON Web Key (JWK)
     # https://tools.ietf.org/html/rfc7517
 
-    # Support enough of a subset of RFC 7517 to implement the ACME v2
-    # protocol.
-    # https://tools.ietf.org/html/draft-ietf-acme-acme-10
+    # Support enough of a subset of RFC 7517 to implement the ACME protocol (RFC 8555).
+    # https://tools.ietf.org/html/rfc8555
 
     # This basically includes RSA keys 2048-4096 bits and EC keys utilizing
     # P-256, P-384, or P-521 curves.
@@ -85,9 +84,9 @@ function ConvertTo-Jwk {
         }
 
         if ($AsPrettyJson) {
-            return ($jwkObj | ConvertTo-Json)
+            return ($jwkObj | ConvertTo-Json -Depth 5)
         } elseif ($AsJson) {
-            return ($jwkObj | ConvertTo-Json -Compress)
+            return ($jwkObj | ConvertTo-Json -Depth 5 -Compress)
         } else {
             return $jwkObj
         }
