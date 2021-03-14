@@ -66,32 +66,39 @@ function Submit-Renewal {
 
                 Write-Verbose "Renewing certificate for order $($order.MainDomain)"
 
-                # Build the parameter list we're going to send to New-PACertificate
-                $certParams = @{}
-                if ([String]::IsNullOrWhiteSpace($order.CSRBase64Url)) {
-                    $certParams.Domain = @($order.MainDomain);
-                    if ($order.SANs.Count -gt 0) { $certParams.Domain += @($order.SANs) }
-                    $certParams.OCSPMustStaple = $order.OCSPMustStaple
-                    $certParams.FriendlyName = $order.FriendlyName
-                    $certParams.PfxPass = $order.PfxPass
-                    $certParams.CertKeyLength = $order.KeyLength
-                    if (Test-WinOnly) { $certParams.Install = $order.Install }
-                } else {
-                    $reqPath = Join-Path ($order | Get-OrderFolder) "request.csr"
-                    $certParams.CSRPath = $reqPath
-                }
-                $certParams.Plugin = $order.Plugin
-
                 # If new PluginArgs were specified, store these now.
                 if ($PluginArgs) {
                     Export-PluginArgs $order.MainDomain $order.Plugin $PluginArgs
                 }
 
-                $certParams.PluginArgs = Get-PAPluginArgs $order.MainDomain
-                $certParams.DnsAlias = $order.DnsAlias
-                $certParams.Force = $Force.IsPresent
-                $certParams.DnsSleep = $order.DnsSleep
-                $certParams.ValidationTimeout = $order.ValidationTimeout
+                # Build the parameter list we're going to send to New-PACertificate
+                $certParams = @{}
+
+                if ([String]::IsNullOrWhiteSpace($order.CSRBase64Url)) {
+                    # FromScratch param set
+                    $certParams.Domain         = @($order.MainDomain);
+                    if ($order.SANs.Count -gt 0) { $certParams.Domain += @($order.SANs) }
+                    $certParams.CertKeyLength  = $order.KeyLength
+                    $certParams.AlwaysNewKey   = $order.AlwaysNewKey
+                    $certParams.OCSPMustStaple = $order.OCSPMustStaple
+                    $certParams.FriendlyName   = $order.FriendlyName
+                    $certParams.PfxPass        = $order.PfxPass
+                    if (Test-WinOnly) { $certParams.Install = $order.Install }
+                } else {
+                    # FromCSR param set
+                    $reqPath = Join-Path ($order | Get-OrderFolder) "request.csr"
+                    $certParams.CSRPath = $reqPath
+                }
+
+                # common params
+                $certParams.Plugin              = $order.Plugin
+                $certParams.PluginArgs          = Get-PAPluginArgs $order.MainDomain
+                $certParams.DnsAlias            = $order.DnsAlias
+                $certParams.UseSerialValidation = $order.UseSerialValidation
+                $certParams.Force               = $Force.IsPresent
+                $certParams.DnsSleep            = $order.DnsSleep
+                $certParams.ValidationTimeout   = $order.ValidationTimeout
+                $certParams.PreferredChain      = $order.PreferredChain
 
                 # now we just have to request a new cert using all of the old parameters
                 New-PACertificate @certParams
