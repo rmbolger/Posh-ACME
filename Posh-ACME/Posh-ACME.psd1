@@ -84,7 +84,7 @@ PrivateData = @{
 ## 4.3.2 (2021-03-13)
 
 * Fixed New-PACertificate not using the previous order's KeyLength value if it exists and wasn't overridden by an explicit parameter value. (#326)
-* Fixed `Submit-Renewal` not sending all previous order parameters to `New-PACertificate` (#326)
+* Fixed `Submit-Renewal` not sending all previous order parameters to `New-PACertificate` (#326) (Thanks @juliansiebert)
 * Fixed module load errors for some environment with older .NET Framework versions.
 '@
 
