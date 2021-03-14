@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.3.1'
+ModuleVersion = '4.3.2'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -81,11 +81,11 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.3.1 (2021-03-12)
+## 4.3.2 (2021-03-13)
 
-* Fixed Route53 plugin to check for pre-imported AWS module (#324)
-* Fixed telemetry ping not respecting DisableTelemetry option in `Set-PAServer`
-* Telemetry ping no longer uses `Start-Job` which should avoid errors when running in Azure functions and other scenarios where PowerShell is hosted within another application.
+* Fixed New-PACertificate not using the previous order's KeyLength value if it exists and wasn't overridden by an explicit parameter value. (#326)
+* Fixed `Submit-Renewal` not sending all previous order parameters to `New-PACertificate` (#326)
+* Fixed module load errors for some environment with older .NET Framework versions.
 '@
 
     }
