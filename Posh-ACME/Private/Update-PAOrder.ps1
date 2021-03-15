@@ -75,9 +75,8 @@ function Update-PAOrder {
         }
 
         # Make sure the order folder exists
-        $orderFolder = $order | Get-OrderFolder
-        if (-not (Test-Path $orderFolder -PathType Container)) {
-            New-Item -ItemType Directory -Path $orderFolder -Force -EA Stop | Out-Null
+        if (-not (Test-Path $order.Folder -PathType Container)) {
+            New-Item -ItemType Directory -Path $order.Folder -Force -EA Stop | Out-Null
         }
 
         # Obfuscate the PfxPass property to satisfy some requests for it to not
@@ -93,7 +92,7 @@ function Update-PAOrder {
         }
 
         # Save the copy to disk
-        $orderCopy | ConvertTo-Json -Depth 10 | Out-File (Join-Path $orderFolder 'order.json') -Force -EA Stop
+        $orderCopy | ConvertTo-Json -Depth 10 | Out-File (Join-Path $order.Folder 'order.json') -Force -EA Stop
     }
 
 }

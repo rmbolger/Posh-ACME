@@ -12,9 +12,8 @@ function New-Csr {
     }
 
     # Order verification should have already been taken care of
-    $orderFolder = $Order | Get-OrderFolder
-    $keyFile = Join-Path $orderFolder 'cert.key'
-    $reqFile = Join-Path $orderFolder 'request.csr'
+    $keyFile = Join-Path $Order.Folder 'cert.key'
+    $reqFile = Join-Path $Order.Folder 'request.csr'
 
     # Check for an existing key
     if (Test-Path $keyFile -PathType Leaf) {

@@ -128,8 +128,7 @@ function Export-PluginArgs {
         }
 
         # build the path to the existing plugin data file and export it
-        $orderFolder = $order | Get-OrderFolder
-        $pDataFile = Join-Path $orderFolder 'pluginargs.json'
+        $pDataFile = Join-Path $order.Folder 'pluginargs.json'
         $pDataSafe | ConvertTo-Json -Depth 10 | Out-File $pDataFile -Encoding utf8
     }
 

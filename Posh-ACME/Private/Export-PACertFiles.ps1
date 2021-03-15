@@ -15,15 +15,14 @@ function Export-PACertFiles {
     if (-not $Order -and -not ($Order = Get-PAOrder)) {
         throw "No ACME order specified and no current order selected. Run Set-PAOrder or specify an existing order object."
     }
-    $orderFolder = $Order | Get-OrderFolder
 
     # build output paths
-    $certFile      = Join-Path $orderFolder 'cert.cer'
-    $keyFile       = Join-Path $orderFolder 'cert.key'
-    $chainFile     = Join-Path $orderFolder 'chain.cer'
-    $fullchainFile = Join-Path $orderFolder 'fullchain.cer'
-    $pfxFile       = Join-Path $orderFolder 'cert.pfx'
-    $pfxFullFile   = Join-Path $orderFolder 'fullchain.pfx'
+    $certFile      = Join-Path $Order.Folder 'cert.cer'
+    $keyFile       = Join-Path $Order.Folder 'cert.key'
+    $chainFile     = Join-Path $Order.Folder 'chain.cer'
+    $fullchainFile = Join-Path $Order.Folder 'fullchain.cer'
+    $pfxFile       = Join-Path $Order.Folder 'cert.pfx'
+    $pfxFullFile   = Join-Path $Order.Folder 'fullchain.pfx'
 
     if (-not $PfxOnly) {
 
@@ -76,7 +75,7 @@ function Export-PACertFiles {
             Export-Pem $pems[0] $certFile
 
             # write the primary chain as chain0.cer
-            $chain0File = Join-Path $orderFolder 'chain0.cer'
+            $chain0File = Join-Path $Order.Folder 'chain0.cer'
             Export-Pem ($pems[1..($pems.Count-1)] | ForEach-Object {$_}) $chain0File
 
             # check for alternate chain header links
@@ -94,18 +93,18 @@ function Export-PACertFiles {
                 $pems = Split-PemChain -ChainBytes $response.Content
 
                 # write additional chain files as chain1.cer,chain2.cer,etc.
-                $altChainFile = Join-Path $orderFolder "chain$($i+1).cer"
+                $altChainFile = Join-Path $Order.Folder "chain$($i+1).cer"
                 Export-Pem ($pems[1..($pems.Count-1)] | ForEach-Object {$_}) $altChainFile
             }
         }
         else {
             Write-Warning "Order has expired. Unable to re-download cert/chain files. Using cached copies."
-            $chain0File = Join-Path $orderFolder 'chain0.cer'
+            $chain0File = Join-Path $Order.Folder 'chain0.cer'
         }
 
         # try to find the chain file matching the preferred issuer if specified
         if (-not ([String]::IsNullOrWhiteSpace($order.PreferredChain))) {
-            $chainIssuers = Get-ChainIssuers $orderFolder
+            $chainIssuers = Get-ChainIssuers $Order.Folder
             Write-Debug ($chainIssuers | ConvertTo-Json)
             $selectedChainFile = $chainIssuers |
                 Where-Object { $_.issuer -eq $order.PreferredChain } |

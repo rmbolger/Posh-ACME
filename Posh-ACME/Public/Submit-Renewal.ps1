@@ -86,7 +86,7 @@ function Submit-Renewal {
                     if (Test-WinOnly) { $certParams.Install = $order.Install }
                 } else {
                     # FromCSR param set
-                    $reqPath = Join-Path ($order | Get-OrderFolder) "request.csr"
+                    $reqPath = Join-Path $order.Folder "request.csr"
                     $certParams.CSRPath = $reqPath
                 }
 

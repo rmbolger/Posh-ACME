@@ -43,8 +43,7 @@ function Get-PACertificate {
             if ($null -eq $order) { return $null }
 
             # build the path to cert.cer
-            $domainFolder = $order | Get-OrderFolder
-            $certFile = Join-Path $domainFolder 'cert.cer'
+            $certFile = Join-Path $order.Folder 'cert.cer'
 
             # double check the cert exists
             if (!(Test-Path $certFile -PathType Leaf)) {
@@ -79,12 +78,12 @@ function Get-PACertificate {
                 AllSANs = $allSANs
 
                 # add the associated files
-                CertFile      = Join-Path $domainFolder 'cert.cer'
-                KeyFile       = Join-Path $domainFolder 'cert.key'
-                ChainFile     = Join-Path $domainFolder 'chain.cer'
-                FullChainFile = Join-Path $domainFolder 'fullchain.cer'
-                PfxFile       = Join-Path $domainFolder 'cert.pfx'
-                PfxFullChain  = Join-Path $domainFolder 'fullchain.pfx'
+                CertFile      = Join-Path $order.Folder 'cert.cer'
+                KeyFile       = Join-Path $order.Folder 'cert.key'
+                ChainFile     = Join-Path $order.Folder 'chain.cer'
+                FullChainFile = Join-Path $order.Folder 'fullchain.cer'
+                PfxFile       = Join-Path $order.Folder 'cert.pfx'
+                PfxFullChain  = Join-Path $order.Folder 'fullchain.pfx'
 
                 PfxPass = $( if ($order.PfxPass) {
                                 ConvertTo-SecureString $order.PfxPass -AsPlainText -Force
