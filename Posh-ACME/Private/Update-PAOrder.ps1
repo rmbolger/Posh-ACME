@@ -87,6 +87,11 @@ function Update-PAOrder {
         $orderCopy | Add-Member 'PfxPassB64U' ($order.PfxPass | ConvertTo-Base64Url)
         $orderCopy.PSObject.Properties.Remove('PfxPass')
 
+        # Don't save the folder property to disk in case the config gets moved
+        if ($orderCopy.Folder) {
+            $orderCopy.PSObject.Properties.Remove('Folder')
+        }
+
         # Save the copy to disk
         $orderCopy | ConvertTo-Json -Depth 10 | Out-File (Join-Path $orderFolder 'order.json') -Force -EA Stop
     }

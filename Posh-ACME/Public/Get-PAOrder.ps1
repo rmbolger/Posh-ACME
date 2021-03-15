@@ -50,6 +50,9 @@ function Get-PAOrder {
                     $_.PSObject.Properties.Remove('PfxPassB64U')
                 }
 
+                # add the order folder
+                $_ | Add-Member 'Folder' (Get-OrderFolder $_.MainDomain) -Force
+
                 # insert the type name and send the results to the pipeline
                 $_.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
                 Write-Output $_
@@ -88,6 +91,9 @@ function Get-PAOrder {
                         $order | Add-Member 'PfxPass' ($order.PfxPassB64U | ConvertFrom-Base64Url)
                         $order.PSObject.Properties.Remove('PfxPassB64U')
                     }
+
+                    # add the order folder
+                    $order | Add-Member 'Folder' (Get-OrderFolder $order.MainDomain) -Force
 
                 } else {
                     return $null
