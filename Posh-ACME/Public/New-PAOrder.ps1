@@ -228,11 +228,13 @@ function New-PAOrder {
         catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
-    # save it to memory and disk
+    # save it to disk
     $order.MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force -EA Stop
-    $script:Order = $order
-    $orderFolder = $order | Get-OrderFolder
     Update-PAOrder -SaveOnly
+
+    # update the memory copy
+    $order | Add-Member 'Folder' (Get-OrderFolder $order.MainDomain) -Force
+    $script:Order = $order
 
     # export plugin args now they the order exists on disk
     if ('PluginArgs' -in $PSBoundParameters.Keys) {
@@ -241,7 +243,7 @@ function New-PAOrder {
 
     # Make a local copy of the specified CSR file
     if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
-        $csrDest = Join-Path $orderFolder 'request.csr'
+        $csrDest = Join-Path $order.Folder 'request.csr'
         if ($CSRPath -ne $csrDest) {
             Copy-Item -Path $CSRPath -Destination $csrDest
         }
@@ -249,7 +251,7 @@ function New-PAOrder {
 
     # Determine whether to remove the old private key. This is necessary if it exists
     # and we're using a CSR or it's explicitly requested or the new KeyLength doesn't match the old one.
-    $keyPath = Join-Path $orderFolder 'cert.key'
+    $keyPath = Join-Path $order.Folder 'cert.key'
     $removeOldKey = ( (Test-Path $keyPath -PathType Leaf) -and
                       ($order.AlwaysNewKey -or $ForceNewKey -or 'FromCSR' -eq $PSCmdlet.ParameterSetName) )
 
@@ -261,11 +263,11 @@ function New-PAOrder {
     }
 
     # backup any old certs/requests that might exist
-    $oldFiles = Get-ChildItem (Join-Path $orderFolder *) -Include cert.cer,cert.pfx,chain.cer,fullchain.cer,fullchain.pfx
+    $oldFiles = Get-ChildItem (Join-Path $order.Folder *) -Include cert.cer,cert.pfx,chain.cer,fullchain.cer,fullchain.pfx
     $oldFiles | Move-Item -Destination { "$($_.FullName).bak" } -Force
 
     # remove old chain files
-    Get-ChildItem (Join-Path $orderFolder 'chain*.cer') -Exclude chain.cer |
+    Get-ChildItem (Join-Path $order.Folder 'chain*.cer') -Exclude chain.cer |
         Remove-Item -Force
 
     return $order
