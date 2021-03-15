@@ -66,6 +66,7 @@ function Update-PAOrder {
             if ($respObj.certificate) {
                 $order.certificate = $respObj.certificate
             }
+
         } elseif (-not $SaveOnly) {
             # Let's Encrypt no longer returns order details for expired orders
             # https://github.com/letsencrypt/boulder/commit/83aafd18842e093483d6701b92419ca8f7f1855b
@@ -73,20 +74,20 @@ function Update-PAOrder {
             Write-Debug "Order $($order.MainDomain) is expired. Skipping server refresh."
         }
 
-        # Save the order to disk
-        # We're going to obfuscate the PfxPass property to satisfy some requests
-        # to not have it in plain text.
+        # Make sure the order folder exists
         $orderFolder = $order | Get-OrderFolder
         if (-not (Test-Path $orderFolder -PathType Container)) {
             New-Item -ItemType Directory -Path $orderFolder -Force -EA Stop | Out-Null
         }
 
-        # make a copy of the order so we can tweak it without messing up
-        # our existing copy and swap PfxPass for PfxPassB64U
+        # Obfuscate the PfxPass property to satisfy some requests for it to not
+        # be in plain text. Make a copy of the order so we can tweak it without
+        # messing up our existing copy and swap PfxPass for PfxPassB64U
         $orderCopy = $order | ConvertTo-Json -Depth 10 | ConvertFrom-Json
         $orderCopy | Add-Member 'PfxPassB64U' ($order.PfxPass | ConvertTo-Base64Url)
         $orderCopy.PSObject.Properties.Remove('PfxPass')
 
+        # Save the copy to disk
         $orderCopy | ConvertTo-Json -Depth 10 | Out-File (Join-Path $orderFolder 'order.json') -Force -EA Stop
     }
 
