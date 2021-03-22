@@ -12,6 +12,8 @@ function Repair-ISODate {
     # we need to un-parse the DateTime objects back to ISO 8601 strings so that the code
     # that assumes they're strings doesn't break.
 
+    # https://github.com/PowerShell/PowerShell/issues/13592
+
     # Basically any input that's *not* a DateTime, we're going to return as-is. Otherwise,
     # we're sending back the ISO 8601 string for the specified DateTime object.
     if ($InputDate -and $InputDate -is [DateTime]) {
