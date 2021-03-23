@@ -7,14 +7,14 @@ function Add-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
+        <#
+        Add plugin specific parameters here. Make sure their names are
+        unique across all existing plugins. But make sure common ones
+        across this plugin are the same.
+        #>
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Add DNS provider specific parameters after $TxtValue and
-    # before $ExtraParams. Make sure their names are unique across all
-    # existing plugins. But make sure common ones across this
-    # plugin are the same.
 
     # Do work here to add the TXT record. Remember to add @script:UseBasic
     # to all calls to Invoke-RestMethod or Invoke-WebRequest.
@@ -49,14 +49,14 @@ function Remove-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
+        <#
+        Add plugin specific parameters here. Make sure their names are
+        unique across all existing plugins. But make sure common ones
+        across this plugin are the same.
+        #>
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Add DNS provider specific parameters after $TxtValue and
-    # before $ExtraParams. Make sure their names are unique across all
-    # existing plugins. But make sure common ones across this
-    # plugin are the same.
 
     # Do work here to remove the TXT record. Remember to add @script:UseBasic
     # to all calls to Invoke-RestMethod or Invoke-WebRequest.
@@ -87,13 +87,14 @@ function Remove-DnsTxt {
 function Save-DnsTxt {
     [CmdletBinding()]
     param(
+        <#
+        Add plugin specific parameters here. Make sure their names are
+        unique across all existing plugins. But make sure common ones
+        across this plugin are the same.
+        #>
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Add DNS provider specific parameters before $ExtraParams. Make sure
-    # their names are unique across all existing plugins. But make
-    # sure common ones across this plugin are the same.
 
     # If necessary, do work here to save or finalize changes performed by
     # Add/Remove functions. It is not uncommon for this function to have
@@ -114,7 +115,6 @@ function Save-DnsTxt {
         Save-DnsTxt
 
         Commits changes for pending DNS TXT record modifications.
-
     #>
 }
 
@@ -122,9 +122,9 @@ function Save-DnsTxt {
 # Helper Functions
 ############################
 
+# Add a commented link to API docs if they exist.
+
 # Add additional functions here if necessary.
 
 # Try to follow verb-noun naming guidelines.
 # https://msdn.microsoft.com/en-us/library/ms714428
-
-# Add a commented link to API docs if they exist.

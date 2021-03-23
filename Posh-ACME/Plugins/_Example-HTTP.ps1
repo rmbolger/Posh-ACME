@@ -9,14 +9,14 @@ function Add-HttpChallenge {
         [string]$Token,
         [Parameter(Mandatory,Position=2)]
         [string]$Body,
+        <#
+        Add plugin specific parameters here. Make sure their names are
+        unique across all existing plugins. But make sure common ones
+        across this plugin are the same.
+        #>
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Add plugin specific parameters after $Body and before
-    # $ExtraParams. Make sure their names are unique across all
-    # existing plugins. But make sure common ones across this
-    # plugin are the same.
 
     # Do work here to publish the specified $Body text at the appropriate
     # URL using the $Domain and $Token values. If needed, you can build
@@ -62,14 +62,14 @@ function Remove-HttpChallenge {
         [string]$Token,
         [Parameter(Mandatory,Position=2)]
         [string]$Body,
+        <#
+        Add plugin specific parameters here. Make sure their names are
+        unique across all existing plugins. But make sure common ones
+        across this plugin are the same.
+        #>
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Add plugin specific parameters after $Body and before
-    # $ExtraParams. Make sure their names are unique across all
-    # existing plugins. But make sure common ones across this
-    # plugin are the same.
 
     # Do work here to unpublish the specified $Body text from the appropriate
     # URL using the $Domain and $Token values. If needed, you can build
@@ -109,14 +109,14 @@ function Remove-HttpChallenge {
 function Save-HttpChallenge {
     [CmdletBinding()]
     param(
+        <#
+        Add plugin specific parameters here. Make sure their names are
+        unique across all existing plugins. But make sure common ones
+        across this plugin are the same.
+        #>
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # Add plugin specific parameters before $ExtraParams.
-    # Make sure their names are unique across all existing
-    # plugins. But make sure common ones across this plugin
-    # are the same.
 
     # If necessary, do work here to save or finalize changes performed by
     # Add/Remove functions. It is not uncommon for this function to have
@@ -144,9 +144,9 @@ function Save-HttpChallenge {
 # Helper Functions
 ############################
 
+# Add a commented link to API docs if they exist.
+
 # Add additional functions here if necessary.
 
 # Try to follow verb-noun naming guidelines.
 # https://msdn.microsoft.com/en-us/library/ms714428
-
-# Add a commented link to API docs if they exist.
