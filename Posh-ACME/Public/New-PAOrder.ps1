@@ -255,13 +255,13 @@ function New-PAOrder {
         catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
-    # save it to disk
-    $order.MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force -EA Stop
-    Update-PAOrder -SaveOnly
-
-    # update the memory copy
+    # add the Folder property
     $order | Add-Member 'Folder' (Get-OrderFolder $order.MainDomain) -Force
+
+    # save it to memory and disk
+    $order.MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force -EA Stop
     $script:Order = $order
+    Update-PAOrder -SaveOnly
 
     # export plugin args now that the order exists on disk
     if ('PluginArgs' -in $PSBoundParameters.Keys) {
