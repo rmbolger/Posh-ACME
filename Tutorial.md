@@ -192,6 +192,8 @@ if ($cert = Submit-Renewal) {
 
 For a job that is renewing multiple certificates, it might look more like this.
 
+Be aware that renewals are treated specially: they don’t count against your Certificates per Registered Domain limit, but they are subject to a [Duplicate Certificate limit of 5 per week](https://letsencrypt.org/docs/rate-limits/)
+
 ```powershell
 Submit-Renewal -AllOrders | ForEach-Object {
     $cert = $_
