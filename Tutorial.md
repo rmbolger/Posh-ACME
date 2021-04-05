@@ -177,6 +177,8 @@ Submit-Renewal -AllAccounts
 # The -Force parameter works with these as well.
 ```
 
+**_NOTE:_** Be aware that renewals are treated specially: they don’t count against your Certificates per Registered Domain limit, but they are subject to a [Duplicate Certificate limit of 5 per week](https://letsencrypt.org/docs/rate-limits/)
+
 Because PowerShell has no native way to run recurring tasks, you'll need to set something up using whatever job scheduling utility your OS provides like Task Scheduler on Windows or cron on Linux. It is suggested to run the job once or twice a day at ideally randomized times. At the very least, try not to run them directly on any hour marks to avoid potential load spikes on the ACME server. Generally, **the task must run as the same user you're currently logged in as** because the Posh-ACME config is stored in your local user profile. However, it's possible to [change the default config location](https://github.com/rmbolger/Posh-ACME/wiki/%28Advanced%29-Using-an-Alternate-Config-Location).
 
 As mentioned earlier, Posh-ACME doesn't handle certificate deployment. So you'll likely want to create a script to both renew the cert and deploy it to your service/application. All the details you should need to deploy the cert are in the PACertificate object that is returned by `Submit-Renewal`. It's also the same object returned by `New-PACertificate` and `Get-PACertificate`; the latter being useful to test deployment scripts with.
@@ -191,8 +193,6 @@ if ($cert = Submit-Renewal) {
 ```
 
 For a job that is renewing multiple certificates, it might look more like this.
-
-Be aware that renewals are treated specially: they don’t count against your Certificates per Registered Domain limit, but they are subject to a [Duplicate Certificate limit of 5 per week](https://letsencrypt.org/docs/rate-limits/)
 
 ```powershell
 Submit-Renewal -AllOrders | ForEach-Object {
