@@ -160,6 +160,8 @@ Submit-Renewal
 
 The module saves all of the parameters associated with an order and re-uses the same values to renew it. It will throw a warning right now because the cert hasn't reached the suggested renewal window. But you can use `-Force` to do it anyway if you want to try it. Let's Encrypt currently caches authorizations for roughly 30 days, so the forced renewal won't need to go through validating the challenges again. But you can de-authorize your existing challenges using the following command if you want to test the validation process again.
 
+> **_NOTE:_** Be aware that renewals don’t count against your Certificates per Registered Domain limit, but they are subject to a [Duplicate Certificate limit of 5 per week](https://letsencrypt.org/docs/rate-limits/)
+
 ```powershell
 # deauthorize the validations associated with the current order
 Get-PAOrder | Revoke-PAAuthorization
