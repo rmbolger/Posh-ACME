@@ -12,15 +12,12 @@ function Add-DnsTxt {
         $ExtraParams
     )
 
-    if (-not (New-EasynameWebSession $EasynameCredential)) {
-        throw "Unknown error creating Easyname.com session with the provided credentials"
-    }
-
-    if (-not ($zoneID,$zoneName = Find-EasynameDomain $RecordName)) {
+    $zoneID,$zoneName = Find-EasynameDomain $RecordName $EasynameCredential
+    if (-not $zoneID -or -not $zoneName) {
         throw "No domain match found for record $RecordName"
     }
 
-    if (Get-EasynameTxtRecord $RecordName $TxtValue $zoneID) {
+    if (Get-EasynameTxtRecord $RecordName $TxtValue $zoneID $EasynameCredential) {
         # nothing to do
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
 
@@ -41,17 +38,13 @@ function Add-DnsTxt {
                 priority = '0'
                 ttl      = '300'
             }
-            WebSession = $script:EasynameSession
-            ErrorAction = 'Stop'
-            Verbose = $false
+            Credential = $EasynameCredential
         }
-        Write-Debug "POST $($addParams.Uri)"
-        Write-Debug "Body:`n$($addParams.Body | ConvertTo-Json)"
-        $response = Invoke-WebRequest @addParams @script:UseBasic
+        $src = Invoke-EasynameRequest @addParams
 
-        if ($response.Content -notlike '*feedback-message--success*') {
+        if ($src -notlike '*feedback-message--success*') {
             # Try to parse the error message from the response
-            if ($response.Content -match '(?smi)class="feedback-message__text">(?<msg>[^<]+)<') {
+            if ($src -match '(?smi)class="feedback-message__text">(?<msg>[^<]+)<') {
                 throw "Easyname error: $([Net.WebUtility]::HtmlDecode($matches.msg))"
             } else {
                 throw "Unknown Easyname error adding record"
@@ -100,31 +93,25 @@ function Remove-DnsTxt {
         $ExtraParams
     )
 
-    if (-not (New-EasynameWebSession $EasynameCredential)) {
-        throw "Unknown error creating Easyname.com session with the provided credentials"
-    }
-
-    if (-not ($zoneID,$zoneName = Find-EasynameDomain $RecordName)) {
+    $zoneID,$zoneName = Find-EasynameDomain $RecordName $EasynameCredential
+    if (-not $zoneID -or -not $zoneName) {
         throw "No domain match found for record $RecordName"
     }
 
-    if ($rec = Get-EasynameTxtRecord $RecordName $TxtValue $zoneID) {
+    if ($rec = Get-EasynameTxtRecord $RecordName $TxtValue $zoneID $EasynameCredential) {
 
         Write-Verbose "Deleting TXT record for $RecordName with value $TxtValue"
 
         $delParams = @{
             Uri = "https://my.easyname.com/en/domain/dns/delete/domain/$zoneID/id/$($rec.ID)/confirm/1"
             Method = 'Post'
-            WebSession = $script:EasynameSession
-            ErrorAction = 'Stop'
-            Verbose = $false
+            Credential = $EasynameCredential
         }
-        Write-Debug "POST $($delParams.Uri)"
-        $response = Invoke-WebRequest @delParams @script:UseBasic
+        $src = Invoke-EasynameRequest @delParams
 
-        if ($response.Content -notlike '*feedback-message--success*') {
+        if ($src -notlike '*feedback-message--success*') {
             # Try to parse the error message from the response
-            if ($response.Content -match '(?smi)class="feedback-message__text">(?<msg>[^<]+)<') {
+            if ($src -match '(?smi)class="feedback-message__text">(?<msg>[^<]+)<') {
                 throw "Easyname error: $([Net.WebUtility]::HtmlDecode($matches.msg))"
             } else {
                 throw "Unknown Easyname error removing record"
@@ -188,14 +175,8 @@ function New-EasynameWebSession {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [pscredential]$EasynameCredential,
-        [switch]$Force
+        [pscredential]$EasynameCredential
     )
-
-    if (-not $Force -and $script:EasynameSession) {
-        # use the existing session
-        return $script:EasynameSession
-    }
 
     # make an unauthenticated request to create a session object
     $loginUrl = 'https://my.easyname.com/en/login'
@@ -206,7 +187,7 @@ function New-EasynameWebSession {
     $cookies = $session.Cookies.GetCookies($loginUrl)
     $session.Headers["X-CSRF-TOKEN"] = $cookies['CSRF-TOKEN'].Value
 
-    # attempt to login using the specified credentials
+    # attempt to login using the specified credentials (which is oddly a JSON endpoint)
     $loginParams = @{
         Uri = 'https://my.easyname.com/en/authentication-api/login'
         Method = 'Post'
@@ -225,29 +206,80 @@ function New-EasynameWebSession {
 
     if ($response.userId) {
         $script:EasynameSession = $session
-        return $script:EasynameSession
     }
+    else { throw "Unexpected Easyname login response. No user ID found." }
 }
 
-Function Get-EasynameDomains {
+function Invoke-EasynameRequest {
     [CmdletBinding()]
-    param()
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [string]$Uri,
+        [string]$Method = 'GET',
+        [hashtable]$Body,
+        [Parameter(Mandatory)]
+        [pscredential]$Credential
+    )
 
-    <#
-        The REST API technically supports getting this domain/ID data. But since
-        we can't do everything via the API (yet?), it doesn't make sense right
-        now to make the users provide API credentials as well as their regular
-        login credentials just to avoid web scraping for one thing.
-    #>
+    # This is a wrapper for web-scraping requests to the Easyname.com website
+    # so we can check for session expiration and re-login/re-try if necessary.
 
+    # create a session if it doesn't exist
+    if (-not $script:EasynameSession) {
+        New-EasynameWebSession $Credential
+    }
+
+    # build the param set
     $reqParams = @{
-        Uri = 'https://my.easyname.com/domains/'
+        Uri = $Uri
+        Method = $Method
         WebSession = $script:EasynameSession
         ErrorAction = 'Stop'
         Verbose = $false
     }
-    Write-Debug "GET $($reqParams.Uri)"
-    $src = (Invoke-WebRequest @reqParams @script:UseBasic).Content
+    Write-Debug "$Method $Uri"
+
+    # add the body if there is one
+    if ($Body) {
+        $reqParams.Body = $Body
+        Write-Debug "Body:`n$($Body | ConvertTo-Json)"
+    }
+
+    # send the request
+    try { $response = Invoke-WebRequest @reqParams @script:UseBasic }
+    catch { throw }
+
+    # check for a login page response which means our session is either invalid
+    # or expired
+    if ($response.Content -like '*class="login-panel__main"*') {
+        # create a new session and try again
+        Write-Debug "Response contains login page, attempting to re-login and try again."
+        New-EasynameWebSession $Credential
+        try { $response = Invoke-WebRequest @reqParams @script:UseBasic }
+        catch { throw }
+    }
+    else { return $response.Content }
+
+    # error if we get a login page response again
+    if ($response.Content -like '*class="login-panel__main"*') {
+        throw "Response contains login page. Easyname authentication failing."
+    }
+    else { return $response.Content }
+}
+
+Function Get-EasynameDomains {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [pscredential]$Credential
+    )
+
+    # The REST API technically supports getting this domain/ID data. But since
+    # we can't do everything via the API (yet?), it doesn't make sense right
+    # now to make the users provide API credentials as well as their regular
+    # login credentials just to avoid web scraping for one thing.
+
+    $src = Invoke-EasynameRequest 'https://my.easyname.com/domains/' -Cred $Credential
 
     # Parse the domain/ID values from the HTML source.
     # Right now, this assumes all domains on the account a returned and may
@@ -265,7 +297,9 @@ function Find-EasynameDomain {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [string]$RecordName
+        [string]$RecordName,
+        [Parameter(Mandatory,Position=1)]
+        [pscredential]$Credential
     )
 
     # setup a module variable to cache the record to domain ID mapping
@@ -278,7 +312,7 @@ function Find-EasynameDomain {
 
     Write-Debug "Searching for domains that match $RecordName"
 
-    $domains = Get-EasynameDomains
+    $domains = Get-EasynameDomains $Credential
 
     # find the domain that matches the record
     $pieces = $RecordName.Split('.')
@@ -289,7 +323,7 @@ function Find-EasynameDomain {
             $id = ($domains | Where-Object { $zoneTest -eq $_.domain }).id
             $script:EasynameRecordZones.$RecordName = $id,$zoneTest
             Write-Debug "Found record match in domain $zoneTest with id $id"
-            return $id,$zoneTest
+            return $script:EasynameRecordZones.$RecordName
         }
     }
 }
@@ -302,17 +336,12 @@ function Get-EasynameTxtRecord {
         [Parameter(Mandatory, Position=1)]
         [string]$TxtValue,
         [Parameter(Mandatory, Position=2)]
-        [string]$ZoneID
+        [string]$ZoneID,
+        [Parameter(Mandatory,Position=3)]
+        [pscredential]$Credential
     )
 
-    $reqParams = @{
-        Uri = "https://my.easyname.com/en/domain/dns/index/domain/$ZoneID"
-        WebSession = $script:EasynameSession
-        ErrorAction = 'Stop'
-        Verbose = $false
-    }
-    Write-Debug "GET $($reqParams.Uri)"
-    $src = (Invoke-WebRequest @reqParams @script:UseBasic).Content
+    $src = Invoke-EasynameRequest "https://my.easyname.com/en/domain/dns/index/domain/$ZoneID" -Cred $Credential
 
     # Parse the specific record ID from the source if it exists
     $recNameEscaped = [regex]::Escape($RecordName)
