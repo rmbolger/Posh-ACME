@@ -284,7 +284,10 @@ Function Get-EasynameDomains {
     # Parse the domain/ID values from the HTML source.
     # Right now, this assumes all domains on the account a returned and may
     # break if the UI starts paging once you reach a certain domain count.
-    $reDomains = [regex]'(?smi)<span class="domainname">(\S+)</span>.*?<a href="/en/domain/dns/index/domain/(\d+)">DNS'
+	# 
+	# For some reason, the Invoke-WebRequest Response in my Powershell Session is "German", even if the Headers["Accept-Language"] = "en-US" is added to the WebSession.
+	# Regex is updated for dealing with both circumstances
+    $reDomains = [regex]'(?smi)<span class="domainname">(\S+)</span>.*?<a href="/de/domain/dns/index/domain/(\d+)">DNS|<a href="/en/domain/dns/index/domain/(\d+)">DNS'
     $reDomains.Matches($src) | ForEach-Object {
         [pscustomobject]@{
             id = $_.Groups[2].Value
@@ -320,7 +323,10 @@ function Find-EasynameDomain {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         if ($zoneTest -in $domains.domain) {
-            $id = ($domains | Where-Object { $zoneTest -eq $_.domain }).id
+			# Sometimes duplicate IDs are found
+            #$id = ($domains | Where-Object { $zoneTest -eq $_.domain }).id
+            # Remove duplicates
+            $id = ($domains | Where-Object { $zoneTest -eq $_.domain } | Sort-Object -unique ).id
             $script:EasynameRecordZones.$RecordName = $id,$zoneTest
             Write-Debug "Found record match in domain $zoneTest with id $id"
             return $script:EasynameRecordZones.$RecordName
