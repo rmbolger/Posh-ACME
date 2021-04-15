@@ -251,17 +251,18 @@ function Invoke-EasynameRequest {
 
     # check for a login page response which means our session is either invalid
     # or expired
-    if ($response.Content -like '*class="login-panel__main"*') {
+    if ($response.Content -like '*id="react-auth-page"*') {
         # create a new session and try again
         Write-Debug "Response contains login page, attempting to re-login and try again."
         New-EasynameWebSession $Credential
+        $reqParams.WebSession = $script:EasynameSession
         try { $response = Invoke-WebRequest @reqParams @script:UseBasic }
         catch { throw }
     }
     else { return $response.Content }
 
     # error if we get a login page response again
-    if ($response.Content -like '*class="login-panel__main"*') {
+    if ($response.Content -like '*id="react-auth-page"*') {
         throw "Response contains login page. Easyname authentication failing."
     }
     else { return $response.Content }
@@ -284,10 +285,7 @@ Function Get-EasynameDomains {
     # Parse the domain/ID values from the HTML source.
     # Right now, this assumes all domains on the account a returned and may
     # break if the UI starts paging once you reach a certain domain count.
-	# 
-	# For some reason, the Invoke-WebRequest Response in my Powershell Session is "German", even if the Headers["Accept-Language"] = "en-US" is added to the WebSession.
-	# Regex is updated for dealing with both circumstances
-    $reDomains = [regex]'(?smi)<span class="domainname">(\S+)</span>.*?<a href="/de/domain/dns/index/domain/(\d+)">DNS|<a href="/en/domain/dns/index/domain/(\d+)">DNS'
+    $reDomains = [regex]'(?smi)<span class="domainname">(\S+)</span>.*?<a href="/\w+/domain/dns/index/domain/(\d+)">DNS'
     $reDomains.Matches($src) | ForEach-Object {
         [pscustomobject]@{
             id = $_.Groups[2].Value
@@ -323,10 +321,9 @@ function Find-EasynameDomain {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         if ($zoneTest -in $domains.domain) {
-			# Sometimes duplicate IDs are found
-            #$id = ($domains | Where-Object { $zoneTest -eq $_.domain }).id
-            # Remove duplicates
-            $id = ($domains | Where-Object { $zoneTest -eq $_.domain } | Sort-Object -unique ).id
+            $id = ($domains |
+                Where-Object { $zoneTest -eq $_.domain } |
+                Select-Object -First 1).id
             $script:EasynameRecordZones.$RecordName = $id,$zoneTest
             Write-Debug "Found record match in domain $zoneTest with id $id"
             return $script:EasynameRecordZones.$RecordName
@@ -351,7 +348,7 @@ function Get-EasynameTxtRecord {
 
     # Parse the specific record ID from the source if it exists
     $recNameEscaped = [regex]::Escape($RecordName)
-    $reTemplate = '(?smi)class="entity__name">\s*{0}\s*</td>.*?class="entity__type">.*?TXT.*?</abbr>.*?class="entity__content">.*?{1}</code>\s*</td>.*?href="https://my.easyname.com/en/domain/dns/edit/domain/{2}/id/(?<recID>\d+)"'
+    $reTemplate = '(?smi)class="entity__name">\s*{0}\s*</td>.*?class="entity__type">.*?TXT.*?</abbr>.*?class="entity__content">.*?{1}</code>\s*</td>.*?href="https://my.easyname.com/\w+/domain/dns/edit/domain/{2}/id/(?<recID>\d+)"'
     $reRecord = [regex]($reTemplate -f $recNameEscaped,$TxtValue,$ZoneID)
 
     if ($src -match $reRecord) {
