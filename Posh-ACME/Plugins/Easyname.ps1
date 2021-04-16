@@ -29,7 +29,7 @@ function Add-DnsTxt {
 
         $addParams = @{
             Uri = "https://my.easyname.com/en/domain/dns/create/domain/$zoneID"
-            Method = 'Post'
+            Method = 'POST'
             Body = @{
                 id       = [string]::Empty
                 name     = $recShort
@@ -104,7 +104,7 @@ function Remove-DnsTxt {
 
         $delParams = @{
             Uri = "https://my.easyname.com/en/domain/dns/delete/domain/$zoneID/id/$($rec.ID)/confirm/1"
-            Method = 'Post'
+            Method = 'POST'
             Credential = $EasynameCredential
         }
         $src = Invoke-EasynameRequest @delParams
@@ -190,7 +190,7 @@ function New-EasynameWebSession {
     # attempt to login using the specified credentials (which is oddly a JSON endpoint)
     $loginParams = @{
         Uri = 'https://my.easyname.com/en/authentication-api/login'
-        Method = 'Post'
+        Method = 'POST'
         Body = @{
             emailAddress = $EasynameCredential.UserName
             password = $EasynameCredential.GetNetworkCredential().Password
