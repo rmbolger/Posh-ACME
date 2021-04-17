@@ -57,7 +57,7 @@ function Add-DnsTxt {
     }
     $kasAPIResponse = Invoke-KasApiAction $loginData 'add_dns_settings' $addDnsSettingsParameters
     
-    Write-Debug $kasAPIResponse
+    Write-Debug $kasAPIResponse.OuterXml
 
     <#
     .SYNOPSIS
@@ -146,7 +146,7 @@ function Remove-DnsTxt {
     }
     $kasAPIResponse = Invoke-KasApiAction $loginData 'delete_dns_settings' $removeDnsSettingsParameters
 
-    Write-Debug $kasAPIResponse
+    Write-Debug $kasAPIResponse.OuterXml
 
     <#
     .SYNOPSIS
@@ -300,11 +300,17 @@ function Get-KASDNSSettings {
         
         # Search for the zone from longest to shortest set of FQDN pieces.
         $pieces = $RecordName.Split('.')
-        for ($i=1; $i -lt ($pieces.Count-1); $i++) {
+        for ($i=0; $i -lt ($pieces.Count-1); $i++) {
             $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
 
             Write-Debug "Checking zone $zoneTest"
             
+            # skip calling KAS API for _acme-challenge.*
+            # The API would return an error zone_syntax_incorrect anyway
+            if ($zoneTest.StartsWith("_acme-challenge.")) {
+                continue;
+            }
+
             try {
                 $kasAPIResponse = Invoke-KASAPIGetDNSSettings $loginData $zoneTest
 
