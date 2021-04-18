@@ -26,20 +26,15 @@ function Add-DnsTxt {
     $settingsObj = Get-KASDNSSettings $loginData $RecordName
 
     # remove zone from record name
-    $zoneIdx = $RecordName.LastIndexOf($settingsObj.zone) - 1 # -1 for also removing the .
-    if ($zoneIdx -ge 1) { # at least one character should be left after removing, so check against 1 and not 0
-        $recNameWithoutZone = $RecordName.Remove($zoneIdx)
-    } else {
-        $recNameWithoutZone = $RecordName
-    }
-    
+    $recNameWithoutZone = ($RecordName -ireplace [regex]::Escape($settingsObj.zone), [string]::Empty).TrimEnd('.')
+
     # search for existing DNS settings for the record
     $existingSettingsItem = Find-KASDNSSettingsItemInList $settingsObj.dnsSettings $recNameWithoutZone $TxtValue
     if ($existingSettingsItem) {
         Write-Verbose "Record $RecordName already contains $TxtValue. Nothing to do."
         return
     }
-    
+
     # get zone_host for adding
     if ($settingsObj.zone.EndsWith(".")) {
         $zoneHost = $settingsObj.zone
@@ -56,7 +51,7 @@ function Add-DnsTxt {
         'record_aux'='0'
     }
     $kasAPIResponse = Invoke-KasApiAction $loginData 'add_dns_settings' $addDnsSettingsParameters
-    
+
     Write-Debug $kasAPIResponse.OuterXml
 
     <#
@@ -71,26 +66,26 @@ function Add-DnsTxt {
 
     .PARAMETER TxtValue
         The value of the TXT record.
-    
+
     .PARAMETER KasUsername
         The KAS authentication user
-        
+
     .PARAMETER KasPwd
         The password for your All-Inkl KAS account.
-    
+
     .PARAMETER KasPwdHash
         The sha1 hash of the password for your All-Inkl KAS account.
-    
+
     .PARAMETER KasSession
         The session id of an open session on the KAS API. Use this parameter if you want to handle authentication on your own.
-        
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
         $pass = Read-Host "Password" -AsSecureString
         Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -KasUsername 'userName' -KasPwd $pass
-        
+
         Adds a TXT record for the specified site with the specified value.
     #>
 }
@@ -113,7 +108,7 @@ function Remove-DnsTxt {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-    
+
     # get effective KAS login data from parameter sets
     $loginData = Get-KasLoginDataFromParameters $PSCmdlet.ParameterSetName $KasUsername $KasPwd $KasPwdHash $KasSession
 
@@ -121,13 +116,8 @@ function Remove-DnsTxt {
     $settingsObj = Get-KASDNSSettings $loginData $RecordName
 
     # remove zone from record name
-    $zoneIdx = $RecordName.LastIndexOf($settingsObj.zone) - 1 # -1 for also removing the .
-    if ($zoneIdx -ge 1) { # at least one character should be left after removing, so check against 1 and not 0
-        $recNameWithoutZone = $RecordName.Remove($zoneIdx)
-    } else {
-        $recNameWithoutZone = $RecordName
-    }
-    
+    $recNameWithoutZone = ($RecordName -ireplace [regex]::Escape($settingsObj.zone), [string]::Empty).TrimEnd('.')
+
     # search for existing DNS settings for the record
     $existingSettingsItem = Find-KASDNSSettingsItemInList $settingsObj.dnsSettings $recNameWithoutZone $TxtValue
     if ((-not $existingSettingsItem) -or (-not $existingSettingsItem.Node)) {
@@ -160,19 +150,19 @@ function Remove-DnsTxt {
 
     .PARAMETER TxtValue
         The value of the TXT record.
-    
+
     .PARAMETER KasUsername
         The KAS authentication user
-        
+
     .PARAMETER KasPwd
         The password for your All-Inkl KAS account.
-    
+
     .PARAMETER KasPwdHash
         The sha1 hash of the password for your All-Inkl KAS account.
-    
+
     .PARAMETER KasSession
         The session id of an open session on the KAS API. Use this parameter if you want to handle authentication on your own.
-        
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -218,7 +208,7 @@ function Get-KasLoginDataFromParameters {
         [securestring]$KasPwdHash,
         [securestring]$KasSession
     )
-    
+
     # check which parameter to use and set KAS auth type accordingly
     if ('plain' -eq $paramSetName) {
         $secureAuthData = $KasPwd
@@ -297,14 +287,14 @@ function Get-KASDNSSettings {
             dnsSettings = $kasAPIResponse
         }
     } else {
-        
+
         # Search for the zone from longest to shortest set of FQDN pieces.
         $pieces = $RecordName.Split('.')
         for ($i=0; $i -lt ($pieces.Count-1); $i++) {
             $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
 
             Write-Debug "Checking zone $zoneTest"
-            
+
             # skip calling KAS API for _acme-challenge.*
             # The API would return an error zone_syntax_incorrect anyway
             if ($zoneTest.StartsWith("_acme-challenge.")) {
@@ -326,10 +316,10 @@ function Get-KASDNSSettings {
                     zone = $zoneTest
                     dnsSettings = $kasAPIResponse
                 }
-                
+
             }
             catch {
-                # Ignore "zone_not_found" and try the next set of FQDN pieces. Throw all other errors 
+                # Ignore "zone_not_found" and try the next set of FQDN pieces. Throw all other errors
                 if (!$_.Exception.Message.Contains("zone_not_found")) {
                     throw
                 }
@@ -346,7 +336,7 @@ function Get-KASDNSSettings {
     .DESCRIPTION
         tries to find the correct zone for the given record name and loads the
         corresponding DNS settings
-        
+
     .PARAMETER loginData
         a hashtable containing the login data
 
@@ -368,7 +358,7 @@ function Invoke-KASAPIGetDNSSettings {
     $getDnsSettingsParameters = @{
         'zone_host'=$zoneHost
     }
-    
+
     # call API
     $responseDocument = Invoke-KasApiAction $loginData 'get_dns_settings' $getDnsSettingsParameters
 
@@ -379,20 +369,20 @@ function Invoke-KASAPIGetDNSSettings {
 
     # find ReturnInfo in result
     $returnInfo = Select-XmlFromKASResult $responseDocument "./return/item[contains(key, 'Response')]/value/item[contains(key,'ReturnInfo')]/value"
-    
+
     if ($returnInfo -and $returnInfo.Node) {
         return $returnInfo.Node
     } else {
         return $null
     }
-    
+
     <#
     .SYNOPSIS
         invokes the action 'get_dns_settings' on the KAS API
 
     .DESCRIPTION
         calls the KAS SOAP API, invokes the 'get_dns_settings' action and returns the result
-        
+
     .PARAMETER loginData
         a hashtable containing the login data
 
@@ -435,7 +425,7 @@ function Invoke-KasApiAction {
 
     # convert parameters to JSON
     $paramJson = $paramData | ConvertTo-Json -Depth 2
-    
+
     # put parameters in SOAP envelope
     $envelopeXml=@'
 <?xml version="1.0" encoding="utf-8"?>
@@ -454,7 +444,7 @@ function Invoke-KasApiAction {
     </soap:Body>
 </soap:Envelope>
 '@
-    
+
     try {
         # wait for KAS flood delay if necessary
         $slpFor = (New-TimeSpan -End $script:KASNextRequestTime).TotalMilliseconds
@@ -465,10 +455,10 @@ function Invoke-KasApiAction {
 
         # invoke KAS API
         $response = Invoke-WebRequest "$kasAPIUri" -Body "$envelopeXml" -contentType "text/xml; charset=utf-8" -method POST @Script:UseBasic
-        
+
         # parse result content as xml
         [xml]$xmlDocument = $response.Content
-        
+
         # find body element
         $bdy = Select-XmlFromKASResult $xmlDocument '/envelopeNS:Envelope/envelopeNS:Body'
 
@@ -479,14 +469,14 @@ function Invoke-KasApiAction {
         # check for a 'Fault' element and throw an error if necessary
         $faultElement = Select-XmlFromKASResult $bdy.Node './envelopeNS:Fault'
         if ($faultElement) {
-            
+
             if (-not $faultElement.Node) {
                 throw "Unexpected error: Fault elementin KAS API response found but Node property was empty."
             }
 
             $faultString = Select-XmlFromKASResult $faultElement.Node './faultstring'
             $faultDetail = Select-XmlFromKASResult $faultElement.Node './detail'
-            
+
             if ($faultString -and $faultString.Node) {
                 if ($faultDetail -and $faultDetail.Node) {
                     $errorMsg = "KAS API error: " + $faultString.Node.InnerText + " (" + $faultDetail.Node.InnerText + ")"
@@ -500,7 +490,7 @@ function Invoke-KasApiAction {
                     $errorMsg = "KAS API error: unknown error"
                 }
             }
-            
+
             Set-KASFloodDelay $faultElement.Node
 
             throw $errorMsg
@@ -510,7 +500,7 @@ function Invoke-KasApiAction {
         $result = Select-XmlFromKASResult $bdy.Node './resultNS:KasApiResponse'
         if ($result -and $result.Node) {
             Set-KASFloodDelay $result.Node
-            
+
             return $result.Node
         } else {
             throw "KAS API error: 'KasApiResponse' not found"
@@ -518,24 +508,24 @@ function Invoke-KasApiAction {
     }
     catch {
         Set-KASFloodDelay
-        
+
         throw "An error occured: " + $_.Exception.Message
     }
-    
+
     <#
     .SYNOPSIS
         invokes an action on the KAS API
 
     .DESCRIPTION
         calls the KAS SOAP API, invokes an action and returns the result
-        
+
     .PARAMETER loginData
         a hashtable containing the login data
 
     .PARAMETER kasAPIAction
         the action that should be invoked on the KAS API
         available actions: https://kasapi.kasserver.com/dokumentation/phpdoc/packages/API%20Funktionen.html
-    
+
     .PARAMETER kasParameters
         a hashtable that contains the parameters for the called API action
     #>
@@ -557,14 +547,14 @@ function Set-KASFloodDelay {
     # when a XmlNode was specified search it for the flood delay key/value pair
     if ($elementToSearchIn) {
         $floodDelayElement = Select-XmlFromKASResult $elementToSearchIn ".//item[contains(key, 'KasFloodDelay')]/value"
-        
+
         if ($floodDelayElement -and $floodDelayElement.Node -and ($floodDelayElement.Node.InnerText -gt 0)) {
             $script:KASNextRequestTime = (Get-Date).AddSeconds($floodDelayElement.Node.InnerText)
             return
         }
-        
+
         $floodDelayElement = Select-XmlFromKASResult $elementToSearchIn ".//kasflooddelay"
-        
+
         if ($floodDelayElement -and $floodDelayElement.Node -and ($floodDelayElement.Node.InnerText -gt 0)) {
             $script:KASNextRequestTime = (Get-Date).AddSeconds($floodDelayElement.Node.InnerText)
             return
@@ -597,7 +587,7 @@ function Select-XmlFromKASResult {
         [Parameter(Mandatory,Position=1)]
         [string]$xPathStr
     )
-    
+
     $xmlNamespaces = @{
         envelopeNS = "http://schemas.xmlsoap.org/soap/envelope/"
         resultNS = "https://kasapi.kasserver.com/soap/KasApi.php"
@@ -609,7 +599,7 @@ function Select-XmlFromKASResult {
 
     <#
     .SYNOPSIS
-        executes a given xpath on a given XmlNode 
+        executes a given xpath on a given XmlNode
 
     .DESCRIPTION
         Takes a XmlNode and executes a xpath on it.
@@ -628,6 +618,7 @@ function Find-KASDNSSettingsItemInList {
         [Parameter(Mandatory,Position=0)]
         [System.Xml.XmlNode]$parentDNSSettingsElement,
         [Parameter(Mandatory,Position=1)]
+        [AllowEmptyString()]
         [string]$recordNameWithoutZone,
         [Parameter(Mandatory,Position=2)]
         [string]$TxtValue
@@ -649,13 +640,13 @@ function Find-KASDNSSettingsItemInList {
 
     .DESCRIPTION
         takes a XmlNode with child items and searches for the correct child by matching record_name, record_type and record_data
-        
+
     .PARAMETER parentDNSSettingsElement
         the parent XmlNode to search in (search root)
 
     .PARAMETER recordNameWithoutZone
         the record_name to search for already truncated by the zone
-    
+
     .PARAMETER TxtValue
         the value of the TXT record
     #>
