@@ -10,23 +10,9 @@ For further documentation on working with API keys, please visit the [UKFast Dev
 
 ## Using the Plugin
 
-The API key will be used with either the `ApiKey` or `ApiKeyClearText` parameter. 
-- `ApiKey` will use SecureString. 
-- `ApiKeyClearText` will use a standard cleartext string.
-
-The SecureString version can only be used from Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654).
-
-Non-Windows OSs running older PowerShell versions will need to use the `ApiKeyClearText` parameter to pass in the API key as a standard string. 
-
-### Windows or PS 6.2+
+The API key will be used with the `UKFastApiKey` parameter. This is a SecureString. 
 
 ```powershell
-$pArgs = @{ApiKey=(Read-Host "Enter API Key:" -AsSecureString)}
+$pArgs = @{UKFastApiKey=(Read-Host "Enter API Key" -AsSecureString)}
 New-PACertificate example.com -Plugin UKFast -PluginArgs $pArgs
-```
-
-### Any OS
-
-```powershell
-New-PACertificate example.com -Plugin UKFast -PluginArgs @{ApiKeyClearText='xxxxxxxxxxxxxxxx'}
 ```

@@ -7,18 +7,13 @@ function Add-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
-        [securestring]$ApiKey,
-        [Parameter(ParameterSetName='ClearText',Mandatory,Position=2)]
-        [string]$ApiKeyClearText,
+        [Parameter(Mandatory,Position=2)]
+        [securestring]$UKFastApiKey,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # if secure - grab cleartext
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $ApiKeyClearText = [pscredential]::new('a',$ApiKey).GetNetworkCredential().Password
-    }
+    $ApiKeyClearText = [pscredential]::new('a',$UKFastApiKey).GetNetworkCredential().Password
 
     $apiRoot = "https://api.ukfast.io/safedns/v1"
     
@@ -40,7 +35,7 @@ function Add-DnsTxt {
     $recRoot = "$apiRoot/zones/$zoneName/records"
 
     try {
-        $rec = (Invoke-RestMethod $recRoot @restParams -UseBasicParsing).Data |
+        $rec = (Invoke-RestMethod $recRoot @restParams @script:UseBasic).Data |
                 Where-Object { $_.type -eq 'TXT' -and $_.name -eq $RecordName -and $_.content -eq '"'+$TxtValue+'"' }
     }
     catch { throw }
@@ -55,7 +50,7 @@ function Add-DnsTxt {
             ttl = 60
         } | ConvertTo-Json
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
-        Invoke-RestMethod $recRoot -Method Post @restParams -Body $recBody -UseBasicParsing | Out-Null
+        Invoke-RestMethod $recRoot -Method Post @restParams -Body $recBody @script:UseBasic | Out-Null
     } else {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
     }
@@ -74,25 +69,17 @@ function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER ApiKey
-        An API Application Key generated on the UKFast website with Read/Write access. SecureString version.
-
-    .PARAMETER ApiKeyClearText
-        An API Application Key generated on the UKFast website with Read/Write access. String version.
+    .PARAMETER UKFastApiKey
+        An API Application Key generated on the UKFast website with Read/Write access.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
         $key = Read-Host -AsSecureString
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -ApiKey $key
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -UKFastApiKey $key
 
         Adds a TXT record for the specified site with the specified value. Key passed in as securestring.
-
-    .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -ApiKeyClearText "API_KEY"
-
-        Adds a TXT record for the specified site with the specified value. Key passed in as clear text value.
     #>
 }
 
@@ -103,18 +90,13 @@ function Remove-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
-        [securestring]$ApiKey,
-        [Parameter(ParameterSetName='ClearText',Mandatory,Position=2)]
-        [string]$ApiKeyClearText,
+        [Parameter(Mandatory,Position=2)]
+        [securestring]$UKFastApiKey,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # if secure - grab cleartext
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $ApiKeyClearText = [pscredential]::new('a',$ApiKey).GetNetworkCredential().Password
-    }
+    $ApiKeyClearText = [pscredential]::new('a',$UKFastApiKey).GetNetworkCredential().Password
 
     $apiRoot = "https://api.ukfast.io/safedns/v1"
     
@@ -136,7 +118,7 @@ function Remove-DnsTxt {
     $recRoot = "$apiRoot/zones/$zoneName/records"
 
     try {
-        $rec = (Invoke-RestMethod $recRoot @restParams -UseBasicParsing).Data |
+        $rec = (Invoke-RestMethod $recRoot @restParams @script:UseBasic).Data |
                 Where-Object { $_.type -eq 'TXT' -and $_.name -eq $RecordName -and ($_.content -eq '"'+$TxtValue+'"')}
     }
     catch { throw }
@@ -144,7 +126,7 @@ function Remove-DnsTxt {
     if ($rec) {
         #if record exists, delete it
         Write-Verbose "Deleting $RecordName with value $TxtValue"
-        Invoke-RestMethod "$recRoot/$($rec.id)" -Method Delete @restParams -UseBasicParsing | Out-Null
+        Invoke-RestMethod "$recRoot/$($rec.id)" -Method Delete @restParams @script:UseBasic | Out-Null
     } else {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     }
@@ -162,25 +144,17 @@ function Remove-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER ApiKey
-        An API Application Key generated on the UKFast website with Read/Write access. SecureString version.
-
-    .PARAMETER ApiKeyClearText
-        An API Application Key generated on the UKFast website with Read/Write access. String version.
+    .PARAMETER UKFastApiKey
+        An API Application Key generated on the UKFast website with Read/Write access.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
         $key = Read-Host -AsSecureString
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -ApiKey $key
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -UKFastApiKey $key
 
         Removes a TXT record for the specified site with the specified value. Key passed in as securestring.
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -ApiKeyClearText "API_KEY"
-
-        Removes a TXT record for the specified site with the specified value. Key passed in as clear text value.
     #>
 }
 
@@ -231,7 +205,7 @@ function Find-UKFastZone {
     }
 
     try {
-        $zones = (Invoke-RestMethod "$ApiRoot/zones" @RestParams -UseBasicParsing).Data
+        $zones = (Invoke-RestMethod "$ApiRoot/zones" @RestParams @script:UseBasic).Data
     } catch { throw }
 
     # Since UKFast could be hosting both apex and sub-zones, we need to find the closest/deepest
