@@ -1,17 +1,20 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.2.0'
+ModuleVersion = '4.3.2'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
-Description = 'ACMEv2 protocol client for generating certificates using Let''s Encrypt (or other ACMEv2 compliant CA)'
+Description = 'ACME protocol client for obtaining certificates using Let''s Encrypt (or other ACME compliant CA)'
 CompatiblePSEditions = @('Desktop','Core')
 PowerShellVersion = '5.1'
 DotNetFrameworkVersion = '4.7.1'
 
 # Assemblies that must be loaded prior to importing this module
-RequiredAssemblies = @('lib\BC.Crypto.1.8.8.2-netstandard2.0.dll')
+RequiredAssemblies = @(
+    'lib\BC.Crypto.1.8.8.2-netstandard2.0.dll'
+    'System.Net.Http'
+)
 
 # Format files (.ps1xml) to be loaded when importing this module
 FormatsToProcess = 'Posh-ACME.Format.ps1xml'
@@ -78,12 +81,11 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.2.0 (2020-02-01)
+## 4.3.2 (2021-03-13)
 
-* Added new DNS plugins
-  * Infomaniak (Thanks @Sundypha)
-  * Zilore
-* Added `ACMEUri` option to AcmeDns plugin which allows specifying the complete URI instead of just the hostname. (Thanks @AvrumFeldman)
+* Fixed New-PACertificate not using the previous order's KeyLength value if it exists and wasn't overridden by an explicit parameter value. (#326)
+* Fixed `Submit-Renewal` not sending all previous order parameters to `New-PACertificate` (#326) (Thanks @juliansiebert)
+* Fixed module load errors for some environment with older .NET Framework versions.
 '@
 
     }

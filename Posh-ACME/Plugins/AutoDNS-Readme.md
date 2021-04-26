@@ -8,29 +8,17 @@ In addition to your username and password, you will also need a "Context" value 
 
 ## Using the Plugin
 
-There are two parameter sets you can use with this plugin. One requires being on Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The other can be used from any OS.
+`AutoDNSUser`, `AutoDNSContext`, and `AutoDNSGateway` are specified using regular string values. `AutoDNSPassword` is a SecureString value.
 
-### Windows or PS 6.2+
+*NOTE: The `AutoDNSPasswordInsecure` parameter is still supported but should be considered deprecated and may be removed in a future major release.*
 
 ```powershell
 $pass = Read-Host -Prompt "Password" -AsSecureString
-$params = @{
-    AutoDNSUser='myusername'
-    AutoDNSPassword=$pass
-    AutoDNSContext='4'
-    AutoDNSGateway='gateway.autodns.com'
+$pArgs = @{
+    AutoDNSUser = 'myusername'
+    AutoDNSPassword = $pass
+    AutoDNSContext = '4'
+    AutoDNSGateway = 'gateway.autodns.com'
 }
-New-PACertificate example.com -Plugin AutoDNS -PluginArgs $params
-```
-
-### Any OS
-
-```powershell
-$params = @{
-    AutoDNSUser='myusername'
-    AutoDNSPasswordInsecure='mypassword'
-    AutoDNSContext='4'
-    AutoDNSGateway='gateway.autodns.com'
-}
-New-PACertificate example.com -Plugin AutoDNS -PluginArgs $params
+New-PACertificate example.com -Plugin AutoDNS -PluginArgs $pArgs
 ```

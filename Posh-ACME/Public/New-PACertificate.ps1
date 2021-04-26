@@ -140,8 +140,7 @@ function New-PACertificate {
             # add values from the old order if they exist and weren't overrridden
             # by explicit parameters
             if ($oldOrder) {
-                @(  'CertKeyLength'
-                    'OCSPMustStaple'
+                @(  'OCSPMustStaple'
                     'AlwaysNewKey'
                     'FriendlyName'
                     'PfxPass'
@@ -150,6 +149,9 @@ function New-PACertificate {
                     if ($oldOrder.$_ -and $_ -notin $psbKeys) {
                         $orderParams.$_ = $oldOrder.$_
                     }
+                }
+                if ($oldOrder.KeyLength -and 'CertKeyLength' -notin $psbKeys) {
+                    $orderParams.KeyLength = $oldOrder.KeyLength
                 }
             }
 

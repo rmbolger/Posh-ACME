@@ -1,10 +1,10 @@
 # Posh-ACME
 
-An [ACME v2 (RFC 8555)](https://tools.ietf.org/html/rfc8555) client implemented as a Windows PowerShell module that enables you to generate publicly trusted SSL/TLS certificates from an ACME capable certificate authority such as [Let's Encrypt](https://letsencrypt.org/).
+An [ACME (RFC 8555)](https://tools.ietf.org/html/rfc8555) client implemented as a Windows PowerShell module that enables you to generate publicly trusted SSL/TLS certificates from an ACME capable certificate authority such as [Let's Encrypt](https://letsencrypt.org/).
 
 # Notable Features
 
-- RFC 8555 (ACME v2) support which allows generating wildcard certificates (*.example.com)
+- Multi-domain (SAN) and wildcard (*.example.com) certificates supported.
 - [RFC 8738](https://tools.ietf.org/html/rfc8738) support for generating certificates for IP addresses (if your ACME CA supports it).
 - Single command for new certs, `New-PACertificate`
 - Easy renewals via `Submit-Renewal`

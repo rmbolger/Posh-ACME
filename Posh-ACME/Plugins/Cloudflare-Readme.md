@@ -4,46 +4,22 @@ This plugin works against the [Cloudflare](https://www.cloudflare.com/dns) DNS p
 
 ## Setup
 
-There are two choices for authentication against the Cloudflare API. The old way uses your account email address and a "Global API Key" that has complete access to your account. Cloudflare now also supports API Tokens that can be limited to only certain permissions within the account. This is the recommended method to use. Open the [API Tokens](https://dash.cloudflare.com/profile/api-tokens) page to get started.
+There are two choices for authentication against the Cloudflare API. The old way uses your account email address and a "Global API Key" that has complete access to your account. Cloudflare also supports API Tokens that can be limited to only certain permissions within the account. This is the recommended method to use. Open the [API Tokens](https://dash.cloudflare.com/profile/api-tokens) page to get started.
 
 ### API Token
 
-Cloudflare allows you to associate a token with all zones on the account or one specific zone. If you want to restrict `DNS - Edit` permissions to a single zone, you'll need to create a primary token with those permissions and a secondary token that has `Zone - Read` permissions to all zones in order for the plugin to successfully find the zone ID. Alternatively, you can create a single token that has both permissions on all zones.
+The API token will need `Zone - DNS - Edit` permissions on the zone(s) you will be requesting a certificate for. Many find it easiest to use `All zones` or `All zones from an account` in the Zone Resources section. But you may also limit the token to a subset of the account's zones using one or more instances of `Specific zone`.
 
-**Primary/Secondary Example**
-
-* In the API Tokens section, click `Create Token`
-* Give it a name such as 'example.com edit'
-* Add the following permission:
-  * **Zone - DNS - Edit**
-* Set the following Zone Resources:
-  * **Include - Specific Zone - example.com**
+* Click `Create Token`
+* Find the `Edit zone DNS` token template and click `Use template`
+* (Optional) Click the pencil icon to rename the token
+* The Permissions list should already contain **Zone - DNS - Edit**
+* Set Zone Resources to **Include - All zones** (or whatever alternative scope you like)
+* (Optional) Add IP address filtering to limit where API requests can come from for this token
+* (Optional) Set a TTL Start/End date. **NOTE: Setting a TTL will require generating a new token when it expires and updating your Posh-ACME config with the new value.**
 * Click `Continue to summary`
 * Click `Create Token`
-* This is your primary token. Copy it for later because it can't be retrieved after leaving this page. You must generate a new value if you forget the old one.
-* Click `View all API Tokens`
-* In the API Tokens section, click `Create Token`
-* Give it a name such as 'read all zones'
-* Add the following permission:
-  * **Zone - Zone - Read**
-* Set the following Zone Resources:
-  * **Include - All Zones**
-* Click `Continue to summary`
-* Click `Create Token`
-* This is your secondary token. Copy it for later because it can't be retrieved after leaving this page. You must generate a new value if you forget the old one.
-
-**Single Token Example**
-
-* In the API Tokens section, click `Create Token`
-* Give it a name such as 'DNS edit all zones'
-* Add the following permissions:
-  * **Zone - DNS - Edit**
-  * **Zone - Zone - Read**
-* Set the following Zone Resources:
-  * **Include - All Zones**
-* Click `Continue to summary`
-* Click `Create Token`
-* This is your token. Copy it for later because it can't be retrieved after leaving this page. You must generate a new value if you forget the old one.
+* Copy the token value from the summary screen  because it can't be retrieved after leaving this page. You must generate a new value if you forget or lose the old one.
 
 ### Global API Key
 
@@ -53,28 +29,19 @@ Cloudflare allows you to associate a token with all zones on the account or one 
 
 ## Using the Plugin
 
-If you're using the newer API Token method, you'll use your primary token value with either `CFToken` or `CFTokenInsecure`. The former requires a SecureString value which can only be used on Windows OSes or any OS with PowerShell 6.2 or later. If you have a secondary token, you'll use it with either `CFTokenReadAll` or `CFTokenReadAllInsecure`, whichever version matches the primary token. If you're using the Global API Key method, you'll need to use the `CFAuthEmail` and `CFAuthKey` parameters with the account's email address and previously retrieved Global API Key.
+If you're using the newer API Token method, you'll use it with the `CFToken` SecureString parameter. If you're using the Global API Key method, you'll need to use the `CFAuthEmail` and `CFAuthKey` parameters with the account's email address and previously retrieved Global API Key.
 
-### API Token Secure (Windows or PS 6.2+)
+*NOTE: The `CFTokenInsecure` parameter is still supported but should be considered deprecated and may be removed in a future major release.*
+
+### API Token
 
 ```powershell
 $secToken = Read-Host -AsSecureString -Prompt 'API Token'
 $pArgs = @{ CFToken = $secToken }
-# (Optional) Only specify the ReadAll token if you generated one
-$pArgs.CFTokenReadAll = Read-Host -AsSecureString -Prompt 'Secondary Token'
 New-PACertificate example.com -Plugin Cloudflare -PluginArgs $pArgs
 ```
 
-### API Token Insecure (Any OS)
-
-```powershell
-$pArgs = @{ CFTokenInsecure = 'xxxxxxxxxx' }
-# (Optional) Only specify the ReadAll token if you generated one
-$pArgs.CFTokenReadAllInsecure = 'yyyyyyyyyy'
-New-PACertificate example.com -Plugin Cloudflare -PluginArgs $pArgs
-```
-
-### Global API Key (Any OS)
+### Global API Key
 
 ```powershell
 $pArgs = @{ CFAuthEmail='xxxx@example.com'; CFAuthKey='xxxxxxxx' }

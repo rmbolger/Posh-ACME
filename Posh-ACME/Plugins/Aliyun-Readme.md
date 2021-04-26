@@ -10,19 +10,15 @@ First, login to your account and go to the [Security Management](https://usercen
 
 ## Using the Plugin
 
-There are two parameter sets you can use with this plugin. One requires being on Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The other can be used from any OS.
+The Key ID is specified as a string using `AliKeyId` and the secret is specified as a SecureString using `AliSecret`.
 
-### Windows or PS 6.2+
+*NOTE: The `AliSecretInsecure` parameter is still supported but should be considered deprecated and may be removed in a future major release.*
 
 ```powershell
 $secret = Read-Host "Secret" -AsSecureString
-$aliParams = @{AliKeyId='asdf1234';AliSecret=$secret}
-New-PACertificate example.com -Plugin Aliyun -PluginArgs $aliParams
-```
-
-### Any OS
-
-```powershell
-$aliParams = @{AliKeyId='asdf1234';AliSecretInsecure='xxxxxxxx'}
-New-PACertificate example.com -Plugin Aliyun -PluginArgs $aliParams
+$pArgs = @{
+    AliKeyId = 'asdf1234'
+    AliSecret = $secret
+}
+New-PACertificate example.com -Plugin Aliyun -PluginArgs $pArgs
 ```

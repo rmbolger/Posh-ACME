@@ -3,28 +3,37 @@ function New-PAOrder {
     [OutputType('PoshACME.PAOrder')]
     param(
         [Parameter(ParameterSetName='FromScratch',Mandatory,Position=0)]
+        [Parameter(ParameterSetName='ImportKey',Mandatory,Position=0)]
         [string[]]$Domain,
         [Parameter(ParameterSetName='FromCSR',Mandatory,Position=0)]
         [string]$CSRPath,
         [Parameter(ParameterSetName='FromScratch',Position=1)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$KeyLength='2048',
+        [Parameter(ParameterSetName='ImportKey',Mandatory)]
+        [string]$KeyFile,
         [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
         [string[]]$Plugin,
         [hashtable]$PluginArgs,
         [string[]]$DnsAlias,
         [Parameter(ParameterSetName='FromScratch')]
+        [Parameter(ParameterSetName='ImportKey')]
         [switch]$OCSPMustStaple,
         [Parameter(ParameterSetName='FromScratch')]
+        [Parameter(ParameterSetName='ImportKey')]
         [switch]$AlwaysNewKey,
         [Parameter(ParameterSetName='FromScratch')]
+        [Parameter(ParameterSetName='ImportKey')]
         [string]$FriendlyName,
         [Parameter(ParameterSetName='FromScratch')]
+        [Parameter(ParameterSetName='ImportKey')]
         [string]$PfxPass='poshacme',
         [Parameter(ParameterSetName='FromScratch')]
+        [Parameter(ParameterSetName='ImportKey')]
         [ValidateScript({Test-SecureStringNotNullOrEmpty $_ -ThrowOnFail})]
         [securestring]$PfxPassSecure,
         [Parameter(ParameterSetName='FromScratch')]
+        [Parameter(ParameterSetName='ImportKey')]
         [switch]$Install,
         [switch]$UseSerialValidation,
         [int]$DnsSleep=120,
@@ -47,6 +56,18 @@ function New-PAOrder {
         $Domain = $csrDetails.Domain
         $KeyLength = $csrDetails.KeyLength
         $OCSPMustStaple = New-Object Management.Automation.SwitchParameter($csrDetails.OCSPMustStaple)
+    }
+
+    # If importing a key, make sure it's valid so we can set the appropriate KeyLength
+    if ('ImportKey' -eq $PSCmdlet.ParameterSetName) {
+        $KeyFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($KeyFile)
+        try {
+            $kLength = [string]::Empty
+            # we don't actually care about the key object, just the parsed length
+            $null = New-PAKey -KeyFile $KeyFile -ParsedLength ([ref]$kLength)
+            $KeyLength = $kLength
+        }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     # PfxPassSecure takes precedence over PfxPass if both are specified but we
@@ -200,6 +221,12 @@ function New-PAOrder {
         AlwaysNewKey        = $AlwaysNewKey.IsPresent
     }
 
+    # override AlwaysNewKey if they're importing the private key
+    if ($order.AlwaysNewKey -and 'ImportKey' -eq $PSCmdlet.ParameterSetName) {
+        Write-Warning "AlwaysNewKey was disabled because private key was imported using the KeyFile parameter."
+        $order.AlwaysNewKey = $false
+    }
+
     # make sure there's a certificate field for later
     if ('certificate' -notin $order.PSObject.Properties.Name) {
         $order | Add-Member 'certificate' $null
@@ -228,20 +255,22 @@ function New-PAOrder {
         catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
+    # add the Folder property
+    $order | Add-Member 'Folder' (Get-OrderFolder $order.MainDomain) -Force
+
     # save it to memory and disk
     $order.MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force -EA Stop
     $script:Order = $order
-    $orderFolder = $order | Get-OrderFolder
     Update-PAOrder -SaveOnly
 
-    # export plugin args now they the order exists on disk
+    # export plugin args now that the order exists on disk
     if ('PluginArgs' -in $PSBoundParameters.Keys) {
         Export-PluginArgs $order.MainDomain $order.Plugin $PluginArgs
     }
 
     # Make a local copy of the specified CSR file
     if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
-        $csrDest = Join-Path $orderFolder 'request.csr'
+        $csrDest = Join-Path $order.Folder 'request.csr'
         if ($CSRPath -ne $csrDest) {
             Copy-Item -Path $CSRPath -Destination $csrDest
         }
@@ -249,7 +278,7 @@ function New-PAOrder {
 
     # Determine whether to remove the old private key. This is necessary if it exists
     # and we're using a CSR or it's explicitly requested or the new KeyLength doesn't match the old one.
-    $keyPath = Join-Path $orderFolder 'cert.key'
+    $keyPath = Join-Path $order.Folder 'cert.key'
     $removeOldKey = ( (Test-Path $keyPath -PathType Leaf) -and
                       ($order.AlwaysNewKey -or $ForceNewKey -or 'FromCSR' -eq $PSCmdlet.ParameterSetName) )
 
@@ -261,12 +290,19 @@ function New-PAOrder {
     }
 
     # backup any old certs/requests that might exist
-    $oldFiles = Get-ChildItem (Join-Path $orderFolder *) -Include cert.cer,cert.pfx,chain.cer,fullchain.cer,fullchain.pfx
+    $oldFiles = Get-ChildItem (Join-Path $order.Folder *) -Include cert.cer,cert.pfx,chain.cer,fullchain.cer,fullchain.pfx
     $oldFiles | Move-Item -Destination { "$($_.FullName).bak" } -Force
 
     # remove old chain files
-    Get-ChildItem (Join-Path $orderFolder 'chain*.cer') -Exclude chain.cer |
+    Get-ChildItem (Join-Path $order.Folder 'chain*.cer') -Exclude chain.cer |
         Remove-Item -Force
+
+    # Make a local copy of the private key if it was specified.
+    if ('ImportKey' -eq $PSCmdlet.ParameterSetName) {
+        if ($keyPath -ne $KeyFile) {
+            Copy-Item -Path $KeyFile -Destination $keyPath
+        }
+    }
 
     return $order
 
@@ -290,6 +326,9 @@ function New-PAOrder {
 
     .PARAMETER KeyLength
         The type and size of private key to use. For RSA keys, specify a number between 2048-4096 (divisible by 128). For ECC keys, specify either 'ec-256' or 'ec-384'. Defaults to '2048'.
+
+    .PARAMETER KeyFile
+        The path to an existing EC or RSA private key file. This will attempt to create the order using the specified key as the certificate's private key.
 
     .PARAMETER Plugin
         One or more validation plugin names to use for this order's challenges. If no plugin is specified, the DNS "Manual" plugin will be used. If the same plugin is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many plugin names as there are domains in the order and in the same sequence as the order.

@@ -2,10 +2,10 @@ PSTOPIC
     about_Posh-ACME
 
 SHORT DESCRIPTION
-    ACMEv2 protocol client
+    ACME protocol client
 
 LONG DESCRIPTION
-    ACMEv2 protocol client for generating certificates using Let's Encrypt (or other ACMEv2 compliant CA)
+    ACME protocol client for obtaining certificates using Let's Encrypt (or other ACME compliant CA)
 
 DETAILED DESCRIPTION
-    This module should enable users to generate certificates from the Let's Encrypt Certificate Authority or any other CA that implements the ACMEv2 protocol.
+    This module should enable users to obtain certificates from the Let's Encrypt Certificate Authority or any other CA that implements the ACME protocol.

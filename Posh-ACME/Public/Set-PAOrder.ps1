@@ -238,7 +238,7 @@ function Set-PAOrder {
             }
 
             # make sure the cert file actually exists
-            $certFile = Join-Path ($order | Get-OrderFolder) 'cert.cer'
+            $certFile = Join-Path $order.Folder 'cert.cer'
             if (!(Test-Path $certFile -PathType Leaf)) {
                 Write-Warning "Unable to revoke certificate. $certFile not found."
                 return

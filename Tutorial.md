@@ -15,7 +15,7 @@ Before we begin, let's configure our ACME server to be the Let's Encrypt *Stagin
 Set-PAServer LE_STAGE
 ```
 
-> **_NOTE:_** `LE_STAGE` is a shortcut for the Let's Encrypt Staging server's directory URL. You could do the same thing by specifying the actual URL which is https://acme-staging-v02.api.letsencrypt.org/directory and this module should work with any ACMEv2 compliant directory URL. Other currently supported shortcuts include
+> **_NOTE:_** `LE_STAGE` is a shortcut for the Let's Encrypt Staging server's directory URL. You could do the same thing by specifying the actual URL which is https://acme-staging-v02.api.letsencrypt.org/directory and this module should work with any ACME compliant directory URL. Other currently supported shortcuts include
 > - `LE_PROD` (Let's Encrypt Production)
 > - `BUYPASS_PROD` (BuyPass.com Production)
 > - `BUYPASS_TEST` (BuyPass.com Testing)
@@ -159,6 +159,8 @@ Submit-Renewal
 ```
 
 The module saves all of the parameters associated with an order and re-uses the same values to renew it. It will throw a warning right now because the cert hasn't reached the suggested renewal window. But you can use `-Force` to do it anyway if you want to try it. Let's Encrypt currently caches authorizations for roughly 30 days, so the forced renewal won't need to go through validating the challenges again. But you can de-authorize your existing challenges using the following command if you want to test the validation process again.
+
+> **_NOTE:_** Be aware that renewals don’t count against your Certificates per Registered Domain limit, but they are subject to a [Duplicate Certificate limit of 5 per week](https://letsencrypt.org/docs/rate-limits/)
 
 ```powershell
 # deauthorize the validations associated with the current order

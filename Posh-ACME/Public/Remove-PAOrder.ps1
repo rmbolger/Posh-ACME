@@ -41,8 +41,7 @@ function Remove-PAOrder {
         Write-Verbose "Deleting order for $($order.MainDomain)"
 
         # delete the order's folder
-        $orderFolder = $order | Get-OrderFolder
-        Remove-Item $orderFolder -Force -Recurse
+        Remove-Item $order.Folder -Force -Recurse
 
         # unset the current order if it was this one
         if ($script:Order -and $script:Order.MainDomain -eq $order.MainDomain) {

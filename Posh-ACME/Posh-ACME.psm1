@@ -47,7 +47,7 @@ $script:WellKnownDirs = @{
     ZEROSSL_PROD = 'https://acme.zerossl.com/v2/DV90'
 }
 $script:HEADER_NONCE = 'Replay-Nonce'
-$script:USER_AGENT = "Posh-ACME/4.2.0 PowerShell/$($PSVersionTable.PSVersion)"
+$script:USER_AGENT = "Posh-ACME/4.3.2 PowerShell/$($PSVersionTable.PSVersion)"
 $script:COMMON_HEADERS = @{'Accept-Language'='en-us,en;q=0.5'}
 
 # Add an appropriate platform to the user-agent if possible
@@ -60,6 +60,11 @@ if ($IsWindows -or $PSVersionTable.PSEdition -eq 'Desktop') {
 } else {
     $script:USER_AGENT += " Platform/Unknown"
 }
+
+# create an HttpClient object we can use for async telemetry pings that won't
+# block waiting for a timeout if the server is unreachable.
+$script:TelemetryClient = [System.Net.Http.HttpClient]::new()
+$script:TelemetryClient.DefaultRequestHeaders.Add('User-Agent', $script:USER_AGENT)
 
 # Invoke-WebRequest and Invoke-RestMethod on PowerShell 5.1 both use
 # IE's DOM parser by default which gives you some nice things that we

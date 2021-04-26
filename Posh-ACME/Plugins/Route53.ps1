@@ -345,21 +345,27 @@ function Initialize-R53Config {
     # you were on. Both were single monolithic modules. In version 4, they've
     # split all the features into sub-modules, but there are no distinctions
     # between editions anymore. For Route53 specifically, we care about
-    # AWS.Tools.Route53. Thankfully, everything in 4 is backwards compatible with
-    # 3, so we don't need to do any special casing depending on which module is
-    # installed.
+    # AWS.Tools.Route53.
 
     # check for AWS module availability
-    if ($null -ne (Get-Module -ListAvailable 'AWS.Tools.Route53')) {
+    $awsModules = Get-Module -ListAvailable 'AWS*' | Select-Object -ExpandProperty Name
+    if (Get-Command 'Get-R53ResourceRecordSet' -EA Ignore)
+    {
+        # one of the module functions is already available, so we don't need to import
+        $script:AwsUseModule = $true
+    }
+    elseif ('AWS.Tools.Route53' -in $awsModules)
+    {
         Import-Module 'AWS.Tools.Route53' -Verbose:$false
         $script:AwsUseModule = $true
     }
-    elseif ($PSEdition -eq 'Core' -and
-            $null -ne (Get-Module -ListAvailable 'AWSPowerShell.Netcore')) {
+    elseif ($PSEdition -eq 'Core' -and 'AWSPowerShell.Netcore' -in $awsModules)
+    {
         Import-Module 'AWSPowerShell.NetCore' -Verbose:$false
         $script:AwsUseModule = $true
     }
-    elseif ($null -ne (Get-Module -ListAvailable 'AWSPowerShell')) {
+    elseif ('AWSPowerShell' -in $awsModules)
+    {
         Import-Module 'AWSPowerShell' -Verbose:$false
         $script:AwsUseModule = $true
     }
@@ -371,7 +377,7 @@ function Initialize-R53Config {
     # build and save the credential parameter(s)
     switch ($PSCmdlet.ParameterSetName) {
         'Keys' {
-            $secPlain = (New-Object PSCredential "user",$R53SecretKey).GetNetworkCredential().Password
+            $secPlain = [pscredential]::new('a',$R53SecretKey).GetNetworkCredential().Password
             $script:AwsCredParam = @{AccessKey=$R53AccessKey; SecretKey=$secPlain}
             break
         }
@@ -386,11 +392,15 @@ function Initialize-R53Config {
             } else {
                 # retrieve keys+token from the metadata service for the IAMRole
                 $credBase = "http://169.254.169.254/latest/meta-data/iam/security-credentials"
-                try { $role = Invoke-RestMethod "$credBase" @script:UseBasic } catch {}
+                try {
+                    Write-Debug "GET $credBase"
+                    $role = Invoke-RestMethod "$credBase" -Verbose:$false @script:UseBasic
+                } catch {}
                 if (-not $role) {
                     throw "No IAM Role found in the metadata service."
                 }
-                $cred = Invoke-RestMethod "$credBase/$role" @script:UseBasic
+                Write-Debug "GET $credBase/$role"
+                $cred = Invoke-RestMethod "$credBase/$role" -Verbose:$false @script:UseBasic
 
                 $script:AwsCredParam = @{
                     AccessKey = $cred.AccessKeyId
@@ -509,10 +519,12 @@ function Invoke-R53RestMethod {
 
     $irmArgs = @{
         Uri = $uri
+        Method = 'GET'
         Headers = $headers
+        Verbose = $false
     }
     if ($UsePost) {
-        $irmArgs.Method = 'Post'
+        $irmArgs.Method = 'POST'
         $irmArgs.Body = $Data
     }
     if ('SkipHeaderValidation' -in (Get-Command Invoke-RestMethod).Parameters.Keys) {
@@ -522,6 +534,10 @@ function Invoke-R53RestMethod {
     }
 
     try {
+        Write-Debug "$($irmArgs.Method) $($irmArgs.Uri)"
+        if ($UsePost) {
+            Write-Debug "Body:`n$($irmArgs.Body)"
+        }
         return (Invoke-RestMethod @irmArgs @script:UseBasic)
     } catch { throw }
 }
@@ -545,7 +561,14 @@ function Get-R53ZoneId {
     # Since there's no good way to query the existence of a single zone, we have to fetch all of them
     if ($script:AwsUseModule) {
         # fetch via Module
-        $zones = Get-R53HostedZoneList @script:AwsCredParam | Where-Object { $_.Config.PrivateZone -eq $false }
+        if (Get-Command Get-R53HostedZoneList -EA Ignore) {
+            # use the function from the newer AWS.Tools.Route53 module
+            $zones = Get-R53HostedZoneList @script:AwsCredParam | Where-Object { $_.Config.PrivateZone -eq $false }
+        } else {
+            # they must be on the older AWSPowerShell module
+            $zones = Get-R53HostedZones @script:AwsCredParam | Where-Object { $_.Config.PrivateZone -eq $false }
+        }
+
     } else {
         # fetch via REST
         $zones = @()
