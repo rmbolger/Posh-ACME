@@ -104,14 +104,14 @@ function Remove-DnsTxt {
 
     $apiRoot = "https://api.simply.com/1/$SimplyAccount/$SimplyAPIKeyInsecure/my/products"
 
-    $zone,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $apiRoot
+    $zoneUni,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $apiRoot
 
     if ($rec) {
 
         Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
         try {
             $delParams = @{
-                Uri = "$apiRoot/$zone/dns/records/$($rec.record_id)"
+                Uri = "$apiRoot/$zoneUni/dns/records/$($rec.record_id)"
                 Method = 'DELETE'
                 ErrorAction = 'Stop'
             }
@@ -186,17 +186,18 @@ function Get-SimplyTXTRecord {
     if (!$script:SimplyRecordZones) { $script:SimplyRecordZones = @{} }
 
     # check for the record in the cache
-    $zone = $script:SimplyRecordZones.$RecordName
+    $zone,$zoneUni = $script:SimplyRecordZones.$RecordName
 
     if (-not $zone) {
         # find the zone for the closest/deepest sub-zone that would contain the record.
         $pieces = $RecordName.Split('.')
         for ($i=0; $i -lt ($pieces.Count-1); $i++) {
             $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
+            $zoneTestUni = HandleIDN $zoneTest
             Write-Debug "Checking $zoneTest"
 
             try {
-                $response = Invoke-RestMethod "$apiRoot/$zoneTest/dns" -EA Stop @script:UseBasic
+                $response = Invoke-RestMethod "$apiRoot/$zoneTestUni/dns" -EA Stop @script:UseBasic
             }
             catch {
                 # We're expecting 404 errors here for zones that aren't actually the main domain.
@@ -209,8 +210,8 @@ function Get-SimplyTXTRecord {
             }
 
             if ($response.status -eq 200) {
-                $script:SimplyRecordZones.$RecordName = $zoneTest
-                $zone = $zoneTest
+                $script:SimplyRecordZones.$RecordName = $zoneTest,$zoneTestUni
+                $zone,$zoneUni = $zoneTest,$zoneTestUni
             } else {
                 Write-Debug "Simply Response: `n$($response | ConvertTo-Json)"
                 throw "Unexpected response from Simply: $($response.message)."
@@ -226,7 +227,7 @@ function Get-SimplyTXTRecord {
 
     # query the zone records and check for the one we care about
     try {
-        $response = Invoke-RestMethod "$apiRoot/$zone/dns/records" -EA Stop @script:UseBasic
+        $response = Invoke-RestMethod "$apiRoot/$zoneUni/dns/records" -EA Stop @script:UseBasic
     }
     catch {
         Write-Debug "$_"
@@ -242,11 +243,26 @@ function Get-SimplyTXTRecord {
         }
 
         # return the zone name and the record
-        return $zone,$rec
+        return $zoneUni,$rec
 
     } else {
         Write-Debug "Simply Response: `n$($response | ConvertTo-Json)"
         throw "Unexpected response from Simply: $($response.message)."
     }
 
+}
+
+# Check if domain is an internationalized domain name (IDN) and convert to unicode if it is
+function HandleIDN {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory,Position=0)]
+        [string]$Zone
+    )
+    if ($Zone.StartsWith('xn--')) {
+        Write-Debug "Converting $Zone to unicode"
+        $Idn = New-Object System.Globalization.IdnMapping
+        return $Idn.GetUnicode("$Zone")
+    }
+    return $Zone
 }
