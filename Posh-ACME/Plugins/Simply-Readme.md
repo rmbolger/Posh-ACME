@@ -1,10 +1,10 @@
-# How To Use the Simply DNS Plugin
+# How To Use the Simply.com DNS Plugin
 
-This plugin works against the [Simply](https://www.simply.com/) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
+This plugin works against the [Simply.com](https://www.simply.com/) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
 
 ## Setup
 
-Using Simply API requires only your account name or account number and API Key which can be found on the [account](https://www.simply.com/en/controlpanel/account/) page.
+Using Simply.com API requires only your account name or account number and API Key which can be found on the [account](https://www.simply.com/en/controlpanel/account/) page.
 
 ## Using the Plugin
 
