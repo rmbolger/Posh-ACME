@@ -1,3 +1,12 @@
+## 4.4.0 (2021-05-03)
+
+* Added new DNS plugins
+  * [Constellix](https://constellix.com/)
+  * [All-Inkl](https://all-inkl.com/) (Thanks @astaerk)
+  * [Easyname](https://www.easyname.com/) (Thanks @codemanat)
+* Added `Folder` property to Get-PAOrder output
+* Added `KeyFile` parameter to New-PAOrder to allow importing an existing private key
+
 ## 4.3.2 (2021-03-13)
 
 * Fixed New-PACertificate not using the previous order's KeyLength value if it exists and wasn't overridden by an explicit parameter value. (#326)

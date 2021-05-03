@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.3.2'
+ModuleVersion = '4.4.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -81,11 +81,14 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.3.2 (2021-03-13)
+## 4.4.0 (2021-05-03)
 
-* Fixed New-PACertificate not using the previous order's KeyLength value if it exists and wasn't overridden by an explicit parameter value. (#326)
-* Fixed `Submit-Renewal` not sending all previous order parameters to `New-PACertificate` (#326) (Thanks @juliansiebert)
-* Fixed module load errors for some environment with older .NET Framework versions.
+* Added new DNS plugins
+  * [Constellix](https://constellix.com/)
+  * [All-Inkl](https://all-inkl.com/) (Thanks @astaerk)
+  * [Easyname](https://www.easyname.com/) (Thanks @codemanat)
+* Added `Folder` property to Get-PAOrder output
+* Added `KeyFile` parameter to New-PAOrder to allow importing an existing private key
 '@
 
     }
