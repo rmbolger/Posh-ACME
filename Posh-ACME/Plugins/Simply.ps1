@@ -262,7 +262,7 @@ function ConvertFrom-PunyCode {
         [Parameter(Mandatory,Position=0)]
         [string]$Zone
     )
-    if ($Zone.StartsWith('xn--')) {
+    if ($Zone -match '(?:\.)?xn--') {
         Write-Debug "Converting $Zone to unicode"
         $Idn = New-Object System.Globalization.IdnMapping
         return $Idn.GetUnicode("$Zone")
