@@ -23,7 +23,7 @@ function Add-DnsTxt {
 
     $apiRoot = "https://api.simply.com/1/$SimplyAccount/$SimplyAPIKeyInsecure/my/products"
 
-    $zone,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $apiRoot
+    $zoneUni,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $apiRoot
 
     if ($rec) {
         Write-Verbose "Record $RecordName already contains $TxtValue. Nothing to do."
@@ -41,7 +41,7 @@ function Add-DnsTxt {
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
         try {
             $postParams = @{
-                Uri = "$apiRoot/$zone/dns/records"
+                Uri = "$apiRoot/$zoneUni/dns/records"
                 Method = 'POST'
                 Body = $body
                 ContentType = 'application/json'
@@ -170,6 +170,9 @@ function Save-DnsTxt {
 # Helper Functions
 ############################
 
+# API Docs:
+# https://www.simply.com/en/docs/api/
+
 function Get-SimplyTXTRecord {
     [CmdletBinding()]
     param(
@@ -193,8 +196,8 @@ function Get-SimplyTXTRecord {
         $pieces = $RecordName.Split('.')
         for ($i=0; $i -lt ($pieces.Count-1); $i++) {
             $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
-            $zoneTestUni = HandleIDN $zoneTest
-            Write-Debug "Checking $zoneTest"
+            $zoneTestUni = ConvertFrom-PunyCode $zoneTest
+            Write-Debug "Checking $zoneTestUni"
 
             try {
                 $response = Invoke-RestMethod "$apiRoot/$zoneTestUni/dns" -EA Stop @script:UseBasic
@@ -253,7 +256,7 @@ function Get-SimplyTXTRecord {
 }
 
 # Check if domain is an internationalized domain name (IDN) and convert to unicode if it is
-function HandleIDN {
+function ConvertFrom-PunyCode {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory,Position=0)]
