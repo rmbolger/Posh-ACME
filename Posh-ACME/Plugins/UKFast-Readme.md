@@ -4,7 +4,7 @@ This plugin works against the [UKFast](https://ukfast.co.uk/) provider. It is as
 
 ## Setup
 
-Authentication against the UKFast SafeDNS API requires an `API Application Key`, which can be obtained from the [MyUKFast](https://my.ukfast.co.uk/applications/index.php) portal. Additionally the key must be given 'READ/WRITE' permission for the SafeDNS service. 
+Authentication against the UKFast SafeDNS API requires an `API Application Key`, which can be obtained from the [API Applications](https://my.ukfast.co.uk/applications/index.php) portal. Additionally the key must be given `READ/WRITE` permission for the SafeDNS service.
 
 For further documentation on working with API keys, please visit the [UKFast Developer Centre](https://developers.ukfast.io/getting-started#registering-applications).
 

@@ -16,13 +16,14 @@ function Add-DnsTxt {
     $ApiKeyClearText = [pscredential]::new('a',$UKFastApiKey).GetNetworkCredential().Password
 
     $apiRoot = "https://api.ukfast.io/safedns/v1"
-    
+
     $restParams = @{
         Headers = @{
             Accept = 'application/json'
             Authorization = $ApiKeyClearText
         }
         ContentType = 'application/json'
+        Verbose = $false
     }
 
     # find the closest zone for our record
@@ -35,8 +36,9 @@ function Add-DnsTxt {
     $recRoot = "$apiRoot/zones/$zoneName/records"
 
     try {
+        Write-Debug "GET $recRoot"
         $rec = (Invoke-RestMethod $recRoot @restParams @script:UseBasic).Data |
-                Where-Object { $_.type -eq 'TXT' -and $_.name -eq $RecordName -and $_.content -eq '"'+$TxtValue+'"' }
+                Where-Object { $_.type -eq 'TXT' -and $_.name -eq $RecordName -and $_.content -eq "`"$TxtValue`"" }
     }
     catch { throw }
 
@@ -46,10 +48,11 @@ function Add-DnsTxt {
         $recBody = @{
             type = 'TXT'
             name = $RecordName
-            content = '"' + $TxtValue + '"'
+            content = "`"$TxtValue`""
             ttl = 60
         } | ConvertTo-Json
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
+        Write-Debug "POST $recRoot`n$recBody"
         Invoke-RestMethod $recRoot -Method Post @restParams -Body $recBody @script:UseBasic | Out-Null
     } else {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
@@ -99,13 +102,14 @@ function Remove-DnsTxt {
     $ApiKeyClearText = [pscredential]::new('a',$UKFastApiKey).GetNetworkCredential().Password
 
     $apiRoot = "https://api.ukfast.io/safedns/v1"
-    
+
     $restParams = @{
         Headers = @{
             Accept = 'application/json'
             Authorization = $ApiKeyClearText
         }
         ContentType = 'application/json'
+        Verbose = $false
     }
 
     # find the closest zone for our record
@@ -118,14 +122,16 @@ function Remove-DnsTxt {
     $recRoot = "$apiRoot/zones/$zoneName/records"
 
     try {
+        Write-Debug "GET $recRoot"
         $rec = (Invoke-RestMethod $recRoot @restParams @script:UseBasic).Data |
-                Where-Object { $_.type -eq 'TXT' -and $_.name -eq $RecordName -and ($_.content -eq '"'+$TxtValue+'"')}
+                Where-Object { $_.type -eq 'TXT' -and $_.name -eq $RecordName -and $_.content -eq "`"$TxtValue`"" }
     }
     catch { throw }
 
     if ($rec) {
         #if record exists, delete it
         Write-Verbose "Deleting $RecordName with value $TxtValue"
+        Write-Debug "DELETE $recRoot/$($rec.id)"
         Invoke-RestMethod "$recRoot/$($rec.id)" -Method Delete @restParams @script:UseBasic | Out-Null
     } else {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
@@ -133,10 +139,10 @@ function Remove-DnsTxt {
 
     <#
     .SYNOPSIS
-        Remove a DNS TXT record from UKFast SafeDNS 
+        Remove a DNS TXT record from UKFast SafeDNS
 
     .DESCRIPTION
-        Remove a DNS TXT record from UKFast SafeDNS 
+        Remove a DNS TXT record from UKFast SafeDNS
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -205,6 +211,7 @@ function Find-UKFastZone {
     }
 
     try {
+        Write-Debug "GET $ApiRoot/zones"
         $zones = (Invoke-RestMethod "$ApiRoot/zones" @RestParams @script:UseBasic).Data
     } catch { throw }
 
