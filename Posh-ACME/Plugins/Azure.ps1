@@ -659,6 +659,9 @@ function Get-AZTxtRecord {
     # to get the relativeRecordSetName
     $zoneName = $ZoneID.Substring($ZoneID.LastIndexOf('/')+1)
     $relName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    if ($relName -eq [string]::Empty) {
+        $relName = '@'
+    }
 
     $recID = "$ZoneID/TXT/$($relName)"
 
@@ -717,6 +720,6 @@ function Set-AZEnvironment {
         AzureGerman = $AzureGermanCloud
         AzureChinaCloud = $AzureChinaCloud
     }
-    
+
     $script:AZEnvironment = $CloudEnvironments[$azEnvironment]
 }
