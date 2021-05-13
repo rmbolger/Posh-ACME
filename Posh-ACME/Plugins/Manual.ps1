@@ -7,6 +7,8 @@ function Add-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
+		[Parameter(Mandatory=$false)]
+		[Switch]$ManualNonInteractive = $false,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -14,6 +16,7 @@ function Add-DnsTxt {
     Write-Verbose "Saving TXT record to display when Save-DnsTxt is called."
     if (!$script:ManualTxtAdd) { $script:ManualTxtAdd = @() }
     $script:ManualTxtAdd += [pscustomobject]@{Record=$RecordName;TxtValue=$TxtValue}
+	$script:ManualNonInteractive = $ManualNonInteractive
 
     <#
     .SYNOPSIS
@@ -27,6 +30,9 @@ function Add-DnsTxt {
 
     .PARAMETER TxtValue
         The value of the TXT record.
+
+    .PARAMETER ManualNonInteractive
+        A flag that, if set, prevents user-prompts. Useful i.e. for automation scenarios where user input is not possible.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -96,8 +102,14 @@ function Save-DnsTxt {
 
         # clear out the variable so we don't notify twice
         Remove-Variable ManualTxtAdd -Scope Script
-
-        Read-Host -Prompt "Press any key to continue." | Out-Null
+		
+		if (-not $script:ManualNonInteractive) {
+			Read-Host -Prompt "Press any key to continue." | Out-Null
+		}
+		else {
+			Write-Host "Non-interactive mode, starting wait."
+			Write-Host
+		}
     }
 
     if ($script:ManualTxtRemove -and $script:ManualTxtRemove.Count -gt 0) {
