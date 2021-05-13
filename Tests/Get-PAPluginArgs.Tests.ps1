@@ -21,13 +21,13 @@ Describe "Get-PAPluginArgs" {
     Context "Active order" {
 
         BeforeAll {
-            Mock Write-Warning {}
+            Mock -ModuleName Posh-ACME Write-Warning {}
             InModuleScope Posh-ACME { Import-PAConfig }
         }
 
         It "No params - returns active args" {
             { Get-PAPluginArgs } | Should -Not -Throw
-            Should -Not -Invoke Write-Warning
+            Should -Not -Invoke Write-Warning -ModuleName Posh-ACME
 
             $result = Get-PAPluginArgs
             $result                      | Should -BeOfType [hashtable]
@@ -38,7 +38,7 @@ Describe "Get-PAPluginArgs" {
 
         It "Fake domain - returns nothing" {
             { Get-PAPluginArgs 'fakedomain' } | Should -Not -Throw
-            Should -Invoke Write-Warning
+            Should -Invoke Write-Warning -ModuleName Posh-ACME
 
             $result = Get-PAPluginArgs 'fakedomain'
             $result      | Should -BeOfType [hashtable]
@@ -47,7 +47,7 @@ Describe "Get-PAPluginArgs" {
 
         It "Valid domain - returns correct args" {
             { Get-PAPluginArgs '*.example.com' } | Should -Not -Throw
-            Should -Not -Invoke Write-Warning
+            Should -Not -Invoke Write-Warning -ModuleName Posh-ACME
 
             $result = Get-PAPluginArgs '*.example.com'
             $result                 | Should -BeOfType [hashtable]
@@ -60,7 +60,7 @@ Describe "Get-PAPluginArgs" {
     Context "No current order" {
         # pretend there's no current order
         BeforeAll {
-            Mock Write-Warning {}
+            Mock -ModuleName Posh-ACME Write-Warning {}
             InModuleScope Posh-ACME { $script:Order = $null }
         }
 
@@ -70,7 +70,7 @@ Describe "Get-PAPluginArgs" {
 
         It "Valid domain - returns correct args" {
             { Get-PAPluginArgs 'example.com' } | Should -Not -Throw
-            Should -Not -Invoke Write-Warning
+            Should -Not -Invoke Write-Warning -ModuleName Posh-ACME
 
             $result = Get-PAPluginArgs 'example.com'
             $result                      | Should -BeOfType [hashtable]
@@ -81,7 +81,7 @@ Describe "Get-PAPluginArgs" {
 
         It "Fake domain - returns nothing" {
             { Get-PAPluginArgs 'fakedomain' } | Should -Not -Throw
-            Should -Invoke Write-Warning
+            Should -Invoke Write-Warning -ModuleName Posh-ACME
 
             $result = Get-PAPluginArgs 'fakedomain'
             $result      | Should -BeOfType [hashtable]

@@ -44,8 +44,8 @@ Describe "Export-PACertFiles" {
         # chain1 = (STAGING) Pretend Pear X1
 
         BeforeAll {
-            Mock Write-Warning {}
-            Mock Copy-Item {}
+            Mock -ModuleName Posh-ACME Write-Warning {}
+            Mock -ModuleName Posh-ACME Copy-Item {}
             Mock -ModuleName Posh-ACME Export-Pem {}
             Mock -ModuleName Posh-ACME Export-CertPfx {}
             InModuleScope Posh-ACME {
@@ -59,8 +59,8 @@ Describe "Export-PACertFiles" {
                 $script:Order | Add-Member PreferredChain $null -Force
                 { Export-PACertFiles } | Should -Not -Throw
             }
-            Should -Invoke Write-Warning
-            Should -Invoke Copy-Item -Times 1 -Exactly -ParameterFilter {
+            Should -Invoke Write-Warning -ModuleName Posh-ACME
+            Should -Invoke Copy-Item -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
                 $Path -like '*chain0.cer' -and $Destination -like '*chain.cer'
             }
             Should -Invoke Export-Pem -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
@@ -74,8 +74,8 @@ Describe "Export-PACertFiles" {
                 $script:Order | Add-Member PreferredChain "(STAGING) Doctored Durian Root CA X3" -Force
                 { Export-PACertFiles } | Should -Not -Throw
             }
-            Should -Invoke Write-Warning
-            Should -Invoke Copy-Item -Times 1 -Exactly -ParameterFilter {
+            Should -Invoke Write-Warning -ModuleName Posh-ACME
+            Should -Invoke Copy-Item -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
                 $Path -like '*chain0.cer' -and $Destination -like '*chain.cer'
             }
             Should -Invoke Export-Pem -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
@@ -89,8 +89,8 @@ Describe "Export-PACertFiles" {
                 $script:Order | Add-Member PreferredChain "(STAGING) Pretend Pear X1" -Force
                 { Export-PACertFiles } | Should -Not -Throw
             }
-            Should -Invoke Write-Warning
-            Should -Invoke Copy-Item -Times 1 -Exactly -ParameterFilter {
+            Should -Invoke Write-Warning -ModuleName Posh-ACME
+            Should -Invoke Copy-Item -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
                 $Path -like '*chain1.cer' -and $Destination -like '*chain.cer'
             }
             Should -Invoke Export-Pem -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
