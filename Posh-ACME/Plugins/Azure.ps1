@@ -428,11 +428,31 @@ function Connect-AZTenant {
         # If the module is running from an Azure resource utilizing Managed Service Identity (MSI),
         # we can get an access token via the Instance Metadata Service (IMDS):
         # https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/how-to-use-vm-token#get-a-token-using-azure-powershell
+        # Azure Automation apparently requires a different metadata endpoint as described here:
+        # https://docs.microsoft.com/en-us/azure/automation/enable-managed-identity-for-automation#sample-get-request
+        Write-Debug "Authenticating with Instance Metadata Service (IMDS)"
+
+        $body = @{ resource = [uri]::EscapeDataString("$($script:AZEnvironment.ManagementUrl)/") }
+        $headers = @{ Metadata='true' }
+
+        # check for the IDENTITY_ENDPOINT environment variable
+        if (-not [String]::IsNullOrWhiteSpace($env:IDENTITY_ENDPOINT)) {
+            Write-Verbose "Found env IDENTITY_ENPOINT: $($env:IDENTITY_ENDPOINT)"
+            $metadataUri = $env:IDENTITY_ENDPOINT
+
+            # check for the IDENTITY_HEADER environment variable
+            if (-not [String]::IsNullOrWhiteSpace($env:IDENTITY_HEADER)) {
+                Write-Verbose "Found env IDENTITY_HEADER: $($env:IDENTITY_HEADER)"
+                $headers.'X-IDENTITY-HEADER' = $env:IDENTITY_HEADER
+            }
+        } else {
+            # use the default metadata endpoint
+            $metadataUri = 'http://169.254.169.254/metadata/identity/oauth2/token'
+            $body.'api-version' = '2018-02-01'
+        }
+
         try {
-            Write-Debug "Authenticating with Instance Metadata Service (IMDS)"
-            $queryString = "api-version=2018-02-01&resource=$([uri]::EscapeDataString(""$($script:AZEnvironment.ManagementUrl)/""))"
-            $token = Invoke-RestMethod "http://169.254.169.254/metadata/identity/oauth2/token?$queryString" `
-                -Headers @{Metadata='true'} @script:UseBasic -EA Stop
+            $token = Invoke-RestMethod $metadataUri -Body $body -Headers $headers @script:UseBasic -EA Stop
         } catch { throw }
 
     } elseif ($PSCmdlet.ParameterSetName -in 'Credential','CredentialInsecure') {
