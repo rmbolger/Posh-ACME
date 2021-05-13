@@ -432,7 +432,7 @@ function Connect-AZTenant {
         # https://docs.microsoft.com/en-us/azure/automation/enable-managed-identity-for-automation#sample-get-request
         Write-Debug "Authenticating with Instance Metadata Service (IMDS)"
 
-        $body = @{ resource = [uri]::EscapeDataString("$($script:AZEnvironment.ManagementUrl)/") }
+        $body = @{ resource = "$($script:AZEnvironment.ManagementUrl)/" }
         $headers = @{ Metadata='true' }
 
         # check for the IDENTITY_ENDPOINT environment variable
@@ -446,7 +446,7 @@ function Connect-AZTenant {
                 $headers.'X-IDENTITY-HEADER' = $env:IDENTITY_HEADER
             }
         } else {
-            # use the default metadata endpoint
+            # use the default/VM metadata endpoint
             $metadataUri = 'http://169.254.169.254/metadata/identity/oauth2/token'
             $body.'api-version' = '2018-02-01'
         }
