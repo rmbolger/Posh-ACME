@@ -165,19 +165,14 @@ function Revoke-PACertificate {
         If specified, the revocation confirmation prompt will be skipped.
 
     .EXAMPLE
-        Revoke-PACertificate
-
-        Revokes the current certificate.
-
-    .EXAMPLE
         Revoke-PACertificate example.com
 
         Revokes the certificate for the specified domain.
 
     .EXAMPLE
-        Get-PAOrder example.com | Revoke-PACertificate -Force
+        Get-PAOrder | Revoke-PACertificate -Force
 
-        Revokes the certificate associated with the specified order and skips the confirmation prompt.
+        Revokes the certificate associated with the current order and skips the confirmation prompt.
 
     .EXAMPLE
         Get-PACertificate | Revoke-PACertificate -Reason keyCompromise
