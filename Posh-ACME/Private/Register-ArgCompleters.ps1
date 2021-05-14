@@ -64,7 +64,7 @@ function Register-ArgCompleters {
         }
     }
 
-    $MainDomainCommands = 'Get-PACertificate','Get-PAOrder','Get-PAPluginArgs','Remove-PAOrder','Set-PAOrder','Submit-Renewal'
+    $MainDomainCommands = 'Get-PACertificate','Get-PAOrder','Get-PAPluginArgs','Remove-PAOrder','Set-PAOrder','Submit-Renewal','Revoke-PACertificate'
     Register-ArgumentCompleter -CommandName $MainDomainCommands -ParameterName 'MainDomain' -ScriptBlock $MainDomainCompleter
 
     # DirectoryUrl

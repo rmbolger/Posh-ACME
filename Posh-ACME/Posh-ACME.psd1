@@ -41,6 +41,7 @@ FunctionsToExport = @(
     'Remove-PAOrder'
     'Remove-PAServer'
     'Revoke-PAAuthorization'
+    'Revoke-PACertificate'
     'Save-Challenge'
     'Send-ChallengeAck'
     'Set-PAAccount'
