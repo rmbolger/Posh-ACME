@@ -421,7 +421,7 @@ function Connect-AZTenant {
 
     if ('Token' -eq $PSCmdlet.ParameterSetName) {
         # decode the token payload so we can check its expiration
-        Write-Debug "Authenticating with provided access token"
+        Write-Verbose "Authenticating with provided access token"
         $token = ConvertFrom-AccessToken $AZAccessToken
 
     } elseif ('IMDS' -eq $PSCmdlet.ParameterSetName) {
@@ -430,23 +430,24 @@ function Connect-AZTenant {
         # https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/how-to-use-vm-token#get-a-token-using-azure-powershell
         # Azure Automation apparently requires a different metadata endpoint as described here:
         # https://docs.microsoft.com/en-us/azure/automation/enable-managed-identity-for-automation#sample-get-request
-        Write-Debug "Authenticating with Instance Metadata Service (IMDS)"
+        Write-Verbose "Authenticating with Instance Metadata Service (IMDS)"
 
         $body = @{ resource = "$($script:AZEnvironment.ManagementUrl)/" }
         $headers = @{ Metadata='true' }
 
         # check for the IDENTITY_ENDPOINT environment variable
         if (-not [String]::IsNullOrWhiteSpace($env:IDENTITY_ENDPOINT)) {
-            Write-Verbose "Found env IDENTITY_ENPOINT: $($env:IDENTITY_ENDPOINT)"
+            Write-Debug "Found env IDENTITY_ENPOINT: $($env:IDENTITY_ENDPOINT)"
             $metadataUri = $env:IDENTITY_ENDPOINT
 
             # check for the IDENTITY_HEADER environment variable
             if (-not [String]::IsNullOrWhiteSpace($env:IDENTITY_HEADER)) {
-                Write-Verbose "Found env IDENTITY_HEADER: $($env:IDENTITY_HEADER)"
+                Write-Debug "Found env IDENTITY_HEADER: $($env:IDENTITY_HEADER)"
                 $headers.'X-IDENTITY-HEADER' = $env:IDENTITY_HEADER
             }
         } else {
             # use the default/VM metadata endpoint
+            Write-Debug "Using default/VM metadata endpoint"
             $metadataUri = 'http://169.254.169.254/metadata/identity/oauth2/token'
             $body.'api-version' = '2018-02-01'
         }
@@ -462,7 +463,7 @@ function Connect-AZTenant {
             $AZAppPasswordInsecure = $AZAppCred.GetNetworkCredential().Password
         }
 
-        Write-Debug "Authenticating with password based credential"
+        Write-Verbose "Authenticating with password based credential"
         $clientId = [uri]::EscapeDataString($AZAppUsername)
         $clientSecret = [uri]::EscapeDataString($AZAppPasswordInsecure)
         $resource = [uri]::EscapeDataString("$($script:AZEnvironment.ManagementUrl)/")
@@ -545,7 +546,7 @@ function Connect-AZTenant {
             $privKey.ImportParameters($keyParams)
         }
 
-        Write-Debug "Authenticating with certificate based credential"
+        Write-Verbose "Authenticating with certificate based credential"
         $clientId = [uri]::EscapeDataString($AZAppUsername)
         $assertType = [uri]::EscapeDataString('urn:ietf:params:oauth:client-assertion-type:jwt-bearer')
         $resource = [uri]::EscapeDataString("$($script:AZEnvironment.ManagementUrl)/")
