@@ -154,8 +154,10 @@ Many of the existing plugins have a helper function to handle this. Copy and mod
 Don't forget to test your functions against the domain apex which can happen when users are using DNS challenge aliases. There's often a special way to represent records in the domain apex from an API perspective, commonly with the `@` character or an empty string instead of a record short name.
 
 ```powershell
-Publish-Challenge my.cname.record (Get-PAAccount) test1 MyPlugin $pArgs -DnsAlias example.com -Verbose
-Unpublish-Challenge my.cname.record (Get-PAAccount) test1 MyPlugin $pArgs -DnsAlias example.com -Verbose
+# The my.cname.tld record doesn't actually need to exist for the test to work.
+# The plugin will only be writing to example.com
+Publish-Challenge my.cname.tld (Get-PAAccount) test1 MyPlugin $pArgs -DnsAlias example.com -Verbose
+Unpublish-Challenge my.cname.tld (Get-PAAccount) test1 MyPlugin $pArgs -DnsAlias example.com -Verbose
 ```
 
 ### Deriving Object IDs
