@@ -6,6 +6,9 @@ function Set-PAServer {
         [Alias('location')]
         [string]$DirectoryUrl,
         [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [string]$Name,
+        [Parameter(ValueFromPipelineByPropertyName)]
         [switch]$SkipCertificateCheck,
         [Parameter(ValueFromPipelineByPropertyName)]
         [switch]$DisableTelemetry,

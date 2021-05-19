@@ -6,9 +6,13 @@ function Get-PAServer {
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
         [Alias('location')]
         [string]$DirectoryUrl,
+        [Parameter(ParameterSetName='SpecificName',Mandatory,ValueFromPipelineByPropertyName)]
+        [string]$Name,
         [Parameter(ParameterSetName='List',Mandatory)]
         [switch]$List,
         [switch]$Refresh,
+        [Parameter(ParameterSetName='Specific')]
+        [Parameter(ParameterSetName='SpecificName')]
         [switch]$Quiet
     )
 
@@ -24,56 +28,63 @@ function Get-PAServer {
 
             # read the contents of each server's dir.json
             Write-Debug "Loading PAServer list from disk"
-            $rawFiles = Get-ChildItem (Join-Path (Get-ConfigRoot) '\*\dir.json') | Get-Content -Raw
-            $rawFiles | ConvertFrom-Json | Sort-Object location | ForEach-Object {
+            Get-ChildItem (Join-Path (Get-ConfigRoot) '\*\dir.json') | ForEach-Object {
 
-                    # insert the type name so it displays properly
-                    $_.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
+                # parse the json
+                $dirObj = $_ | Get-Content -Raw | ConvertFrom-Json
 
-                    # send the result to the pipeline
-                    Write-Output $_
+                # insert the type name so it displays properly
+                $dirObj.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
+
+                # add the friendly name and folder
+                $dirObj | Add-Member 'Name' $_.Directory.Name -Force
+                $dirObj | Add-Member 'Folder' $_.Directory.FullName -Force
+
+                # send the result to the pipeline
+                Write-Output $dirObj
             }
 
         # Specific mode
         } else {
 
-            if ($DirectoryUrl) {
+            if ('Specific' -eq $PSCmdlet.ParameterSetName) {
 
-                # convert WellKnown names to their associated Url
-                if ($DirectoryUrl -notlike 'https://*') {
-                    $DirectoryUrl = $script:WellKnownDirs.$DirectoryUrl
-                }
+                if ($DirectoryUrl) {
+                    # convert WellKnown names to their associated Url
+                    if ($DirectoryUrl -notlike 'https://*') {
+                        $DirectoryUrl = $script:WellKnownDirs.$DirectoryUrl
+                    }
 
-                # build the path to dir.json
-                $dirFolder = ConvertTo-DirFolder $DirectoryUrl
-                $dirFile = Join-Path $dirFolder 'dir.json'
+                    $dir = Get-PAServer -List | Where-Object { $_.location -eq $DirectoryUrl }
 
-                # check if it exists
-                if (Test-Path $dirFile -PathType Leaf) {
-                    Write-Debug "Loading PAServer from disk"
-                    $dir = Get-Content $dirFile -Raw | ConvertFrom-Json
-                    $dir.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
-                } else {
-                    if (-not $Quiet) {
+                    if (-not $dir -and -not $Quiet) {
                         Write-Warning "Unable to find cached PAServer info for $DirectoryUrl. Try using Set-PAServer first."
                     }
-                    return $null
+                }
+                else {
+                    # just use the current one
+                    $dir = $script:Dir
+                }
+            }
+            elseif ('SpecificName' -eq $PSCmdlet.ParameterSetName) {
+
+                # get the server by name
+                $dir = Get-PAServer -List | Where-Object { $_.Name -eq $Name }
+
+                if (-not $dir -and -not $Quiet) {
+                    Write-Warning "Unable to find cached PAServer info for $Name. Try using Set-PAServer first."
                 }
 
-            } else {
-                # just use the current one
-                $dir = $script:Dir
             }
 
             if ($dir -and $Refresh) {
 
                 # update and then recurse to return the updated data
                 Update-PAServer $dir.location
-                return (Get-PAServer $dir.location)
+                Get-PAServer $dir.location
 
             } else {
-
-                # just return whatever we've got
+                # return whatever we've got
                 return $dir
             }
         }

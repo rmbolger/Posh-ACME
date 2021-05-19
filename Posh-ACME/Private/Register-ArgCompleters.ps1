@@ -103,6 +103,19 @@ function Register-ArgCompleters {
     $DirUrlExistingCommands = 'Get-PAServer','Remove-PAServer'
     Register-ArgumentCompleter -CommandName $DirUrlExistingCommands -ParameterName 'DirectoryUrl' -ScriptBlock $DirUrlCompleterExisting
 
+    # PAServer Name
+    $DirNameCompleter = {
+        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
+        # grab the existing server folders to sort through
+        $dirJsonPaths = Join-Path (Get-ConfigRoot) '*\dir.json'
+        $choices = Get-ChildItem $dirJsonPaths | ForEach-Object { $_.Directory.BaseName }
+        $choices | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
+            [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+        }
+    }
+
+    $DirNameCommands = 'Get-PAServer'
+    Register-ArgumentCompleter -CommandName $DirNameCommands -ParameterName 'Name' -ScriptBlock $DirNameCompleter
 
 }
