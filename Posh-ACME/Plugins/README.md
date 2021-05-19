@@ -81,11 +81,25 @@ When testing your module, use `-Verbose` to see your verbose messages. And run `
 
 Do not output any objects to the pipeline from your plugin. This will interfere with scripts and workflows that use the normal output of public functions. You can use `Out-Null` on internal calls that would normally output to the pipeline when you don't care about that data.
 
+### UseBasicParsing
+
+Any time you call `Invoke-WebRequest` or `Invoke-RestMethod`, you should always add `@script:UseBasic` to the end.
+
+By default in PowerShell 5.1, those two functions use Internet Explorer's DOM parser to process the response body which can cause errors in cases where IE is not installed or hasn't gone through its first-run sequence yet. Both functions have a `-UseBasicParsing` parameter that switches the parser to a PowerShell native parser and is the new default functionality in PowerShell 6+. The parameter is also deprecated because they don't plan on bringing back IE DOM parsing in future PowerShell versions. So the module creates a variable when it is first loaded that checks whether `-UseBasicParsing` is still available or not and adds it to the `$script:UseBasic` hashtable. That way, you can just [splat](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting) it on all your calls to those two functions which will future proof your plugin.
+
 ### Testing Plugins
 
-You don't need to actually request a certificate in order to test a plugin. All you need is a valid ACME account via `New-PAAccount`.
+As mentioned earlier, the plugin file must reside in the module's `Plugins` folder prior to running `Import-Module` implicitly or explicitly. If the module is already loaded in the session, you will need to re-import it using `Import-Module -Force`. There is a helper script called `instdev.ps1` in the root of the git repository that can make this process a lot easier as you are developing the plugin.
 
-Plugins can be tested using `Publish-Challenge`, `Unpublish-Challenge`, and `Save-Challenge`. They call the Add, Remove, and Save functions respectively. Here are some examples of how I generally call them while testing.
+First make sure any existing copies of the module are uninstalled (or at least don't reside in your `$env:PSModulePath`). Clone the git repository (or your fork) to a folder on your local system and add your plugin file to the `Posh-Acme\Plugins` folder if it's not already there. Open a new PowerShell session to the repository root folder and run `.\instdev.ps1` which will do the following:
+
+- Copy the module files to the current user's default PowerShell modules folder.
+- Run `Import-Module Posh-ACME -Force`
+- Display the available module commands
+
+If there are no problems, your plugin should now be listed in the output of `Get-PAPlugin`.
+
+Testing a plugin can be done without requesting a new certificate. All you need is an existing ACME account created with `New-PAAccount` and the `Publish-Challenge`, `Unpublish-Challenge`, and `Save-Challenge` functions. They call the Add, Remove, and Save functions from the plugin. Here are some examples of how I generally call them while testing.
 
 ```powershell
 $DebugPreference = 'Continue'
@@ -107,13 +121,7 @@ Unpublish-Challenge example.com (Get-PAAccount) test3 MyPlugin $pArgs -Verbose
 Save-Challenge MyPlugin $pArgs -Verbose
 ```
 
-You can also [dot source](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_scripts?view=powershell-5.1#script-scope-and-dot-sourcing) the plugin file and call the functions directly. But this can be troublesome if the functions depend on module-scoped variables like `$script:UseBasic`. Also, remember to dot source again each time you make a change to the plugin.
-
-### -UseBasicParsing
-
-Any time you call `Invoke-WebRequest` or `Invoke-RestMethod`, you should always add `@script:UseBasic` to the end.
-
-By default in PowerShell 5.1, those two functions use Internet Explorer's DOM parser to process the response body which can cause errors in cases where IE is not installed or hasn't gone through its first-run sequence yet. Both functions have a `-UseBasicParsing` parameter that switches the parser to a PowerShell native parser and is the new default functionality in PowerShell Core 6+. The parameter is also deprecated because they don't plan on bringing back IE DOM parsing in future PowerShell versions. So the module creates a variable when it's first loaded that checks whether `-UseBasicParsing` is still available or not and adds it to the `$script:UseBasic` hashtable. That way, you can just splat it on all your calls to those two functions which will future proof your plugin.
+Alternatively, you can [dot source](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_scripts?view=powershell-5.1#script-scope-and-dot-sourcing) the plugin file and call the functions directly. But this can be difficult if the functions depend on module-scoped variables like `$script:UseBasic` or internal module functions. Also, remember to dot source again each time you make a change to the plugin.
 
 ## DNS Specific Tips and Tricks
 
@@ -141,10 +149,41 @@ _acme-challenge.site1.sub3.sub2.sub1.example.com | sub1.example.com
 
 Many of the existing plugins have a helper function to handle this. Copy and modify their code where it makes sense but make sure helper function names are unique.
 
+### DNS Aliases and Domain Apex
+
+Don't forget to test your functions against the domain apex which can happen when users are using DNS challenge aliases. There's often a special way to represent records in the domain apex from an API perspective, commonly with the `@` character or an empty string instead of a record short name.
+
+```powershell
+Publish-Challenge my.cname.record (Get-PAAccount) test1 MyPlugin $pArgs -DnsAlias example.com -Verbose
+Unpublish-Challenge my.cname.record (Get-PAAccount) test1 MyPlugin $pArgs -DnsAlias example.com -Verbose
+```
+
+### Deriving Object IDs
+
+Many providers assign ID values to object types like zones and records that you need to use to manipulate those objects. A user should ideally not have to know or provide any zone, record, or object IDs in order to use the plugin. All of that should be discovered by the plugin code and the only thing the user should need to provide is whatever credentials or tokens the API requires for authentication.
+
+In the rare cases that you do need the user to provide something like a zone ID, make sure you allow for multiple values. A single certificate can contain names from many different zones and the plugin parameters that get passed to the plugin are the same for each TXT record that needs to be created.
+
 ### Trailing Dots
 
 Be aware how your particular DNS provider represents zone and record names. Some include the trailing dot (`example.com.`). Others don't. This can affect string matching when finding zones and existing records.
 
+### Internationalized Domain Name (IDN)
+
+Many DNS providers and registrars support [IDN domains](https://en.wikipedia.org/wiki/Internationalized_domain_name) which contain non-ascii unicode characters (or even emojis). When using IDN domains with ACME, the IDN names must be specified as [Punycode](https://en.wikipedia.org/wiki/Punycode). But the DNS providers may still send or receive the unicode version of the name. Particularly if your provider is not US-based, be aware of and try to account for how the provider handles IDN names.
+
+The .NET [System.Globalization.IdnMapping](https://docs.microsoft.com/en-us/dotnet/api/system.globalization.idnmapping) class can help convert back and for between IDN and punycode names like this:
+
+```powershell
+# create an instance of the class
+$idn = [System.Globalization.IdnMapping]::new()
+
+# convert an IDN name to punycode
+$idn.GetAscii('bücher.example')
+
+# convert a punycode name back to IDN
+$idn.GetUnicode('xn--bcher-kva.example')
+```
 
 ## HTTP Specific Tips and Tricks
 
@@ -152,7 +191,7 @@ Be aware how your particular DNS provider represents zone and record names. Some
 
 When DNS plugins are used, there's a user customizable sleep timer between when the TXT records are published and the module asks the ACME server to validate those records because records are not typically available instantaneously worldwide. However, that sleep timer does not exist when an order is only using HTTP plugins because HTTP resources are typically available instantly.
 
-If your particular HTTP provider requires a delay between when the challenges are published and when they are validated, it would be wise to add that delay in the `Save-HttpChallenge` function of your plugin.
+If your particular HTTP provider requires a delay between when the challenges are published and when they are validated, you should add that delay in the `Save-HttpChallenge` function of your plugin.
 
 ## Migrating DNS Plugins from 3.x to 4.x
 
