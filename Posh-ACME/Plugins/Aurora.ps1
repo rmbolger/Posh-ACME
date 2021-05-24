@@ -1,7 +1,7 @@
 function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName = 'Secure')]
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory, Position = 0)]
         [String]$RecordName,
@@ -9,21 +9,13 @@ function Add-DnsTxt {
         [Parameter(Mandatory, Position = 1)]
         [String]$TxtValue,
         
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 2)]
-        [ValidateNotNullOrEmpty()]
-        [String]$Key,
-        
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 3)]
-        [ValidateNotNullOrEmpty()]
-        [String]$Secret,
-                
-        [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 2)]
+        [Parameter(Mandatory, Position = 2)]
         [System.Management.Automation.PSCredential]
-        [System.Management.Automation.Credential()]$Credential = [System.Management.Automation.PSCredential]::Empty,
+        [System.Management.Automation.Credential()]$AuroraCredential = [System.Management.Automation.PSCredential]::Empty,
         
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String]$Api = 'api.auroradns.eu',
+        [String]$AuroraApi = 'api.auroradns.eu',
         
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
@@ -33,16 +25,9 @@ function Add-DnsTxt {
     } else {
         $UseBasicParsing = $true
     }
-    if ($PSCmdlet.ParameterSetName -eq 'Secure') {
-        Write-Debug "convert the Credential to normal String values"
-        $auroraAuthorization = @{ Api = $Api; Key = $Credential.UserName; Secret = $Credential.GetNetworkCredential().Password; UseBasicParsing = $UseBasicParsing }
-        $Key = $Credential.UserName
-        $Secret = $Credential.GetNetworkCredential().Password
-    }
-    if ($PSCmdlet.ParameterSetName -eq 'Insecure') {
-        $auroraAuthorization = @{ Api = $Api; Key = $Key; Secret = $Secret; UseBasicParsing = $UseBasicParsing }   
-    }
-   
+    Write-Debug "convert the Credential to normal String values"
+    $auroraAuthorization = @{ Api = $AuroraApi; Key = $AuroraCredential.UserName; Secret = $AuroraCredential.GetNetworkCredential().Password; UseBasicParsing = $UseBasicParsing }
+ 
     Write-Debug "Attempting to find hosted zone for $RecordName"
     try {
         $zone = Invoke-AuroraFindZone -RecordName $RecordName @auroraAuthorization
@@ -101,7 +86,7 @@ function Add-DnsTxt {
 }
 
 function Remove-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName = 'Secure')]
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory, Position = 0)]
         [String]$RecordName,
@@ -109,21 +94,13 @@ function Remove-DnsTxt {
         [Parameter(Mandatory, Position = 1)]
         [String]$TxtValue,
         
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 2)]
-        [ValidateNotNullOrEmpty()]
-        [String]$Key,
-        
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 3)]
-        [ValidateNotNullOrEmpty()]
-        [String]$Secret,
-                
-        [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 2)]
+        [Parameter(Mandatory, Position = 2)]
         [System.Management.Automation.PSCredential]
-        [System.Management.Automation.Credential()]$Credential = [System.Management.Automation.PSCredential]::Empty,
+        [System.Management.Automation.Credential()]$AuroraCredential = [System.Management.Automation.PSCredential]::Empty,
         
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String]$Api = 'api.auroradns.eu',
+        [String]$AuroraApi = 'api.auroradns.eu',
         
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
@@ -133,15 +110,8 @@ function Remove-DnsTxt {
     } else {
         $UseBasicParsing = $true
     }
-    if ($PSCmdlet.ParameterSetName -eq 'Secure') {
-        Write-Debug "convert the Credential to normal String values"
-        $auroraAuthorization = @{ Api = $Api; Key = $Credential.UserName; Secret = $Credential.GetNetworkCredential().Password; UseBasicParsing = $UseBasicParsing }
-        $Key = $Credential.UserName
-        $Secret = $Credential.GetNetworkCredential().Password
-    }
-    if ($PSCmdlet.ParameterSetName -eq 'Insecure') {
-        $auroraAuthorization = @{ Api = $Api; Key = $Key; Secret = $Secret; UseBasicParsing = $UseBasicParsing }   
-    }
+    Write-Debug "convert the Credential to normal String values"
+    $auroraAuthorization = @{ Api = $AuroraApi; Key = $AuroraCredential.UserName; Secret = $AuroraCredential.GetNetworkCredential().Password; UseBasicParsing = $UseBasicParsing }
 
     Write-Debug "Attempting to find hosted zone for $RecordName"
     try {
