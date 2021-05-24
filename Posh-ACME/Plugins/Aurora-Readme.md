@@ -8,15 +8,15 @@ If you haven't done it already, you need to generate API Credentials for your ac
 
 ## Using the Plugin
 
-With your API key and secret, you'll need to pass them with the `Key` and `Secret` parameter  (insecure) or `Credential` parameter (secure). The Credential parameter only currently works properly on Windows. For non-Windows, use the `Key` and `Secret` parameter.
+With your API key and secret, you'll need to pass them with the `Credential` parameter.
 
 ```powershell
-# On Windows, prompt for the credential
+# Prompt for the credential
 $auroraCredential = Get-Credential -Message "Aurora Username:Key / Password:Secret"
-$auroraParams = @{ Api='api.auroradns.eu'; Credential=$AuroraCredential }
+$auroraParams = @{ ApiAurora='api.auroradns.eu'; CredentialAurora=$auroraCredential }
 
-# On non-Windows, just use a regular string
-$auroraParams = @{ Api='api.auroradns.eu'; Key='XXXXXXXXXX'; Secret='YYYYYYYYYYYYYYYY' }
+# Or entering the key and secret
+$auroraParams = @{ ApiAurora='api.auroradns.eu'; CredentialAurora=$((New-Object PSCredential 'KEYKEYKEY',$(ConvertTo-SecureString -String 'SECRETSECRETSECRET' -AsPlainText -Force))) }
 
 # Request the cert
 New-PACertificate example.com -Plugin Aurora -PluginArgs $auroraParams
