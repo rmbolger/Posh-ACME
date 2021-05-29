@@ -13,10 +13,10 @@ With your API key and secret, you'll need to pass them with the `Credential` par
 ```powershell
 # Prompt for the credential
 $auroraCredential = Get-Credential -Message "Aurora Username:Key / Password:Secret"
-$auroraParams = @{ ApiAurora='api.auroradns.eu'; CredentialAurora=$auroraCredential }
+$auroraParams = @{ AuroraApi='api.auroradns.eu'; AuroraCredential=$auroraCredential }
 
 # Or entering the key and secret
-$auroraParams = @{ ApiAurora='api.auroradns.eu'; CredentialAurora=$((New-Object PSCredential 'KEYKEYKEY',$(ConvertTo-SecureString -String 'SECRETSECRETSECRET' -AsPlainText -Force))) }
+$auroraParams = @{ AuroraApi='api.auroradns.eu'; AuroraCredential=$((New-Object PSCredential 'KEYKEYKEY',$(ConvertTo-SecureString -String 'SECRETSECRETSECRET' -AsPlainText -Force))) }
 
 # Request the cert
 New-PACertificate example.com -Plugin Aurora -PluginArgs $auroraParams

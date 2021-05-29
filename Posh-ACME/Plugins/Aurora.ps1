@@ -20,13 +20,8 @@ function Add-DnsTxt {
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
-    if (($null -ne $script:UseBasic) -and ($script:UseBasic['UseBasicParsing'] -is [bool])) {
-        $UseBasicParsing = [bool]::Parse($script:UseBasic['UseBasicParsing'])
-    } else {
-        $UseBasicParsing = $true
-    }
     Write-Debug "convert the Credential to normal String values"
-    $auroraAuthorization = @{ Api = $AuroraApi; Key = $AuroraCredential.UserName; Secret = $AuroraCredential.GetNetworkCredential().Password; UseBasicParsing = $UseBasicParsing }
+    $auroraAuthorization = @{ Api = $AuroraApi; Key = $AuroraCredential.UserName; Secret = $AuroraCredential.GetNetworkCredential().Password }
  
     Write-Debug "Attempting to find hosted zone for $RecordName"
     try {
@@ -41,6 +36,7 @@ function Add-DnsTxt {
     
     Write-Debug "Separate the portion of the name that doesn't contain the zone name"
     $recordPath = ($RecordName -ireplace [regex]::Escape($zoneName), [String]::Empty).TrimEnd('.')
+    Write-Debug "[recordPath:$recordPath][RecordName:$RecordName]"
 
     Write-Debug "Query the existing record(s)"
     try {
@@ -105,13 +101,8 @@ function Remove-DnsTxt {
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
-    if (($null -ne $script:UseBasic) -and ($script:UseBasic['UseBasicParsing'] -is [bool])) {
-        $UseBasicParsing = [bool]::Parse($script:UseBasic['UseBasicParsing'])
-    } else {
-        $UseBasicParsing = $true
-    }
     Write-Debug "convert the Credential to normal String values"
-    $auroraAuthorization = @{ Api = $AuroraApi; Key = $AuroraCredential.UserName; Secret = $AuroraCredential.GetNetworkCredential().Password; UseBasicParsing = $UseBasicParsing }
+    $auroraAuthorization = @{ Api = $AuroraApi; Key = $AuroraCredential.UserName; Secret = $AuroraCredential.GetNetworkCredential().Password }
 
     Write-Debug "Attempting to find hosted zone for $RecordName"
     try {
@@ -126,6 +117,7 @@ function Remove-DnsTxt {
     
     Write-Debug "Separate the portion of the name that doesn't contain the zone name"
     $recordPath = ($RecordName -ireplace [regex]::Escape($zoneName), [String]::Empty).TrimEnd('.')
+    Write-Debug "[recordPath:$recordPath][RecordName:$RecordName]"
 
     Write-Debug "Query the existing record(s)"
     try {
@@ -217,7 +209,7 @@ function Get-AuroraDNSAuthorizationHeader {
     $authorizationHeader = Get-AuroraDNSAuthorizationHeader -Key XXXXXXXXXX -Secret YYYYYYYYYYYYYYYY -Method GET -Uri /zones
 .NOTES
     Function Name : Invoke-AuroraFindZone
-    Version       : v2021.0522.1930
+    Version       : v2021.0527.2140
     Author        : John Billekens
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
@@ -299,7 +291,7 @@ function Invoke-AuroraAddRecord {
     Create an 'TXT' for the domain (no record name) and content 'v=spf1 include:_spf.google.com'
 .NOTES
     Function Name : Invoke-AuroraAddRecord
-    Version       : v2021.0522.1930
+    Version       : v2021.0529.1215
     Author        : John Billekens
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
@@ -319,7 +311,6 @@ function Invoke-AuroraAddRecord {
         [ValidateNotNullOrEmpty()]
         [GUID[]]$ZoneID,
         
-        [Parameter(Mandatory)]
         [String]$Name = '',
         
         [String]$Content = '',
@@ -332,18 +323,12 @@ function Invoke-AuroraAddRecord {
         [Parameter()]
         [String]$Api = 'api.auroradns.eu',
         
-        [Parameter(DontShow)]
-        [Switch]$UseBasicParsing,
-        
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
-    if ($PSBoundParameters.ContainsKey('UseBasicParsing')) {
-        $UseBasicParsing = [bool]::Parse($UseBasicParsing)
-    } elseif (($null -ne $script:UseBasic) -and ($script:UseBasic['UseBasicParsing'] -is [bool])) {
-        $UseBasicParsing = [bool]::Parse($script:UseBasic['UseBasicParsing'])
-    } else {
-        $UseBasicParsing = $true
+    $UseBasic = @{ }
+    if ('UseBasicParsing' -in (Get-Command Invoke-RestMethod).Parameters.Keys) {
+        $UseBasic.UseBasicParsing = $true
     }
     $Method = 'POST'
     $Uri = '/zones/{0}/records' -f $ZoneID.Guid
@@ -360,7 +345,7 @@ function Invoke-AuroraAddRecord {
     $Body = $Payload | ConvertTo-Json
     Write-Debug "$Method URI: `"$ApiUrl`""
     try {
-        $result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -Body $Body -UseBasicParsing:$UseBasicParsing -ErrorVariable restError
+        $result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -Body $Body -ErrorVariable restError @UseBasic
     } catch {
         $result = $null
         $OutError = $restError[0].Message | ConvertFrom-Json -ErrorAction SilentlyContinue
@@ -398,7 +383,7 @@ function Invoke-AuroraDeleteRecord {
     Delete a record with the ID 'vvvvvvvv-wwww-xxxx-yyyy-zzzzzzzzzzzz' in zone 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
 .NOTES
     Function Name : Invoke-AuroraDeleteRecord
-    Version       : v2021.0522.1930
+    Version       : v2021.0527.2140
     Author        : John Billekens
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
@@ -421,18 +406,12 @@ function Invoke-AuroraDeleteRecord {
         [Parameter()]
         [String]$Api = 'api.auroradns.eu',
         
-        [Parameter(DontShow)]
-        [Switch]$UseBasicParsing,
-        
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
-    if ($PSBoundParameters.ContainsKey('UseBasicParsing')) {
-        $UseBasicParsing = [bool]::Parse($UseBasicParsing)
-    } elseif (($null -ne $script:UseBasic) -and ($script:UseBasic['UseBasicParsing'] -is [bool])) {
-        $UseBasicParsing = [bool]::Parse($script:UseBasic['UseBasicParsing'])
-    } else {
-        $UseBasicParsing = $true
+    $UseBasic = @{ }
+    if ('UseBasicParsing' -in (Get-Command Invoke-RestMethod).Parameters.Keys) {
+        $UseBasic.UseBasicParsing = $true
     }
     $Method = 'DELETE'
     $Uri = '/zones/{0}/records/{1}' -f $ZoneID.Guid, $RecordId.Guid
@@ -442,7 +421,7 @@ function Invoke-AuroraDeleteRecord {
     
     Write-Debug "$Method URI: `"$ApiUrl`""
     try {
-        $result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -UseBasicParsing:$UseBasicParsing -ErrorVariable restError
+        $result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -ErrorVariable restError @UseBasic
     } catch {
         $result = $null
         $OutError = $restError[0].Message | ConvertFrom-Json -ErrorAction SilentlyContinue
@@ -475,7 +454,7 @@ function Invoke-AuroraFindZone {
     PS C:\>$zone = Invoke-AuroraFindZone -RecordName www.domain.com @auroraAuthorization
 .NOTES
     Function Name : Invoke-AuroraFindZone
-    Version       : v2021.0522.1930
+    Version       : v2021.0527.2140
     Author        : John Billekens
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
@@ -498,20 +477,10 @@ function Invoke-AuroraFindZone {
         [ValidateNotNullOrEmpty()]
         [String]$Api = 'api.auroradns.eu',
         
-        [Parameter(DontShow)]
-        [Switch]$UseBasicParsing,
-        
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
-    if ($PSBoundParameters.ContainsKey('UseBasicParsing')) {
-        $UseBasicParsing = [bool]::Parse($UseBasicParsing)
-    } elseif (($null -ne $script:UseBasic) -and ($script:UseBasic['UseBasicParsing'] -is [bool])) {
-        $UseBasicParsing = [bool]::Parse($script:UseBasic['UseBasicParsing'])
-    } else {
-        $UseBasicParsing = $true
-    }
-    $auroraAuthorization = @{ Api = $Api; Key = $Key; Secret = $Secret; UseBasicParsing = $UseBasicParsing }
+    $auroraAuthorization = @{ Api = $Api; Key = $Key; Secret = $Secret }
     try {
         $zones = Invoke-AuroraGetZones @auroraAuthorization
     } catch { Write-Debug "Caught an error, $($_.Exception.Message)"; throw }
@@ -564,7 +533,7 @@ function Invoke-AuroraGetRecord {
     Get record with ID 'vvvvvvvv-wwww-xxxx-yyyy-zzzzzzzzzzzz' in zone 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
 .NOTES
     Function Name : Invoke-AuroraGetRecord
-    Version       : v2021.0522.1930
+    Version       : v2021.0529.1215
     Author        : John Billekens
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
@@ -585,40 +554,36 @@ function Invoke-AuroraGetRecord {
         [GUID[]]$ZoneID,
 
         [Parameter(ParameterSetName = 'GUID', Mandatory)]
-        [GUID[]]$RecordID = $null,
+        [GUID[]]$RecordID,
         
-        [Parameter(ParameterSetName = 'Named', Mandatory)]
-        [String]$RecordName = $null,
+        [Parameter(ParameterSetName = 'Named')]
+        [String]$RecordName,
         
         [Parameter()]
         [String]$Api = 'api.auroradns.eu',
         
-        [Parameter(DontShow)]
-        [Switch]$UseBasicParsing,
-        
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
-    if ($PSBoundParameters.ContainsKey('UseBasicParsing')) {
-        $UseBasicParsing = [bool]::Parse($UseBasicParsing)
-    } elseif (($null -ne $script:UseBasic) -and ($script:UseBasic['UseBasicParsing'] -is [bool])) {
-        $UseBasicParsing = [bool]::Parse($script:UseBasic['UseBasicParsing'])
-    } else {
-        $UseBasicParsing = $true
+    $UseBasic = @{ }
+    if ('UseBasicParsing' -in (Get-Command Invoke-RestMethod).Parameters.Keys) {
+        $UseBasic.UseBasicParsing = $true
     }
     $Method = 'GET'
-    if ([String]::IsNullOrEmpty($($RecordID.Guid))) {
-        $Uri = '/zones/{0}/records' -f $ZoneID.Guid
-    } else {
+    if ($PSCmdlet.ParameterSetName -like "GUID") {
         $Uri = '/zones/{0}/records/{1}' -f $ZoneID.Guid, $RecordID.Guid
+    } else {
+        $Uri = '/zones/{0}/records' -f $ZoneID.Guid
     }
     $ApiUrl = 'https://{0}{1}' -f $Api, $Uri
     $AuthorizationHeader = Get-AuroraDNSAuthorizationHeader -Key $Key -Secret $Secret -Method $Method -Uri $Uri
     $restError = ''
     try {
         Write-Debug "$Method URI: `"$ApiUrl`""
-        [Object[]]$result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -UseBasicParsing:$UseBasicParsing -ErrorVariable restError
-        if (-Not [String]::IsNullOrEmpty($RecordName)) {
+        [Object[]]$result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -ErrorVariable restError @UseBasic
+        if ($PSBoundParameters.ContainsKey('distributionalgorithm')) { $Payload.Add('distributionalgorithm', $distributionalgorithm) }
+
+        if ($PSCmdlet.ParameterSetName -like "Named") {
             [Object[]]$result = $result | Where-Object { $_.name -eq $RecordName }
         }
     } catch {
@@ -638,6 +603,7 @@ function Invoke-AuroraGetRecord {
         Write-Output $result
     }
 }
+
 function Invoke-AuroraGetZones {
     <#
 .SYNOPSIS
@@ -656,7 +622,7 @@ function Invoke-AuroraGetZones {
     PS C:\>$zones = Invoke-AuroraGetZones @auroraAuthorization
 .NOTES
     Function Name : Invoke-AuroraGetZones
-    Version       : v2021.0522.1930
+    Version       : v2021.0527.2140
     Author        : John Billekens
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
@@ -676,18 +642,12 @@ function Invoke-AuroraGetZones {
         [ValidateNotNullOrEmpty()]
         [String]$Api = 'api.auroradns.eu',
         
-        [Parameter(DontShow)]
-        [Switch]$UseBasicParsing,
-        
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
-    if ($PSBoundParameters.ContainsKey('UseBasicParsing')) {
-        $UseBasicParsing = [bool]::Parse($UseBasicParsing)
-    } elseif (($null -ne $script:UseBasic) -and ($script:UseBasic['UseBasicParsing'] -is [bool])) {
-        $UseBasicParsing = [bool]::Parse($script:UseBasic['UseBasicParsing'])
-    } else {
-        $UseBasicParsing = $true
+    $UseBasic = @{ }
+    if ('UseBasicParsing' -in (Get-Command Invoke-RestMethod).Parameters.Keys) {
+        $UseBasic.UseBasicParsing = $true
     }
     $Method = 'GET'
     $Uri = '/zones'
@@ -696,7 +656,7 @@ function Invoke-AuroraGetZones {
     $restError = ''
     Write-Debug "$Method URI: `"$ApiUrl`""
     try {
-        $result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -UseBasicParsing:$UseBasicParsing -ErrorVariable restError
+        $result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -ErrorVariable restError @UseBasic
     } catch {
         $result = $null
         $OutError = $restError[0].Message | ConvertFrom-Json -ErrorAction SilentlyContinue
@@ -710,6 +670,7 @@ function Invoke-AuroraGetZones {
         Write-Output $result
     }
 }
+
 
 function Invoke-AuroraSetRecord {
     <#
@@ -745,7 +706,7 @@ function Invoke-AuroraSetRecord {
     Set an existing record with new content '198.51.100.85'
 .NOTES
     Function Name : Invoke-AuroraAddRecord
-    Version       : v2021.0522.1930
+    Version       : v2021.0527.2140
     Author        : John Billekens
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
@@ -777,18 +738,12 @@ function Invoke-AuroraSetRecord {
         [Parameter()]
         [String]$Api = 'api.auroradns.eu',
         
-        [Parameter(DontShow)]
-        [Switch]$UseBasicParsing,
-        
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
-    if ($PSBoundParameters.ContainsKey('UseBasicParsing')) {
-        $UseBasicParsing = [bool]::Parse($UseBasicParsing)
-    } elseif (($null -ne $script:UseBasic) -and ($script:UseBasic['UseBasicParsing'] -is [bool])) {
-        $UseBasicParsing = [bool]::Parse($script:UseBasic['UseBasicParsing'])
-    } else {
-        $UseBasicParsing = $true
+    $UseBasic = @{ }
+    if ('UseBasicParsing' -in (Get-Command Invoke-RestMethod).Parameters.Keys) {
+        $UseBasic.UseBasicParsing = $true
     }
     $Method = 'PUT'
     $Uri = '/zones/{0}/records/{1}' -f $ZoneId.Guid, $RecordId.Guid
@@ -806,7 +761,7 @@ function Invoke-AuroraSetRecord {
 
     Write-Debug "$Method URI: `"$ApiUrl`""
     try {
-        $result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -Body $Body -UseBasicParsing:$UseBasicParsing -ErrorVariable restError
+        $result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -Body $Body -ErrorVariable restError @UseBasic
     } catch {
         $result = $null
         $OutError = $restError[0].Message | ConvertFrom-Json -ErrorAction SilentlyContinue
