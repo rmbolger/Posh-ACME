@@ -1,3 +1,17 @@
+## 4.5.0 (2021-05-29)
+
+* Added new DNS plugins
+  * Aurora for [PCExtreme](https://pcextreme.nl/) (Thanks @j81blog)
+  * [UKFast](https://ukfast.co.uk/) (Thanks @Overglazed)
+* Added new function `Revoke-PACertificate` which provides more options for cert revocation including the ability to revoke certs not created with other clients or ACME accounts if you have the private key.
+* Added `ManualNonInteractive` switch to the Manual plugin to suppress the interactive prompt after showing the TXT record details that need to be created. (Thanks @hhhuut)
+* Added additional guidance in the plugin dev guide.
+* Optimized module load time by pre-caching native plugin details.
+* Fixed support for IDN domains in Simply plugin (Thanks @Norskov)
+* Fixed Azure plugin bug when DnsAlias matches the zone apex. (#348)
+* Fixed Azure plugin to support IMDS auth within Azure Automation. (#349)
+* Fixed tests for Pester 5.2
+
 ## 4.4.0 (2021-05-03)
 
 * Added new DNS plugins
