@@ -4,20 +4,18 @@ This plugin works against the [PCExtreme](https://pcextreme.nl/) provider, Auror
 
 ## Setup
 
-If you haven't done it already, you need to generate API Credentials for your account from the [DNS - Health Checks Users](https://cp.pcextreme.nl/auroradns/users) page. You should end up with an `API URL`, `Key` and `Secret` value. These are what we will use with the plugin.
+If you haven't done it already, you need to generate API Credentials for your account from the [DNS - Health Checks Users](https://cp.pcextreme.nl/auroradns/users) page. When you open the user details, you should be provided with an `API URL`, `Key` and `Secret` value. These are what we will use with the plugin.
 
 ## Using the Plugin
 
-With your API key and secret, you'll need to pass them with the `Credential` parameter.
+The API Key and Secret are passed as the username and password in a PSCredential object to the `AuroraCredential` parameter.
+
+There is also an optional `AuroraApi` parameter for the hostname provided in API URL which defaults to `api.auroradns.eu`. So if your API URL is the same, you can ignore that parameter.
 
 ```powershell
-# Prompt for the credential
-$auroraCredential = Get-Credential -Message "Aurora Username:Key / Password:Secret"
-$auroraParams = @{ AuroraApi='api.auroradns.eu'; AuroraCredential=$auroraCredential }
-
-# Or entering the key and secret
-$auroraParams = @{ AuroraApi='api.auroradns.eu'; AuroraCredential=$((New-Object PSCredential 'KEYKEYKEY',$(ConvertTo-SecureString -String 'SECRETSECRETSECRET' -AsPlainText -Force))) }
-
-# Request the cert
-New-PACertificate example.com -Plugin Aurora -PluginArgs $auroraParams
+$cred = Get-Credential -Message "Aurora Username:Key / Password:Secret"
+$pArgs = @{
+    AuroraCredential = $cred
+}
+New-PACertificate example.com -Plugin Aurora -PluginArgs $pArgs
 ```
