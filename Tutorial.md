@@ -252,7 +252,7 @@ site1.sub1.sub2.example.com | _acme-challenge.site1.sub1.sub2.example.com
 
 You may have noticed that a wildcard name and a non-wildcard for the same root domain have the same challenge record. That's not a mistake and the ACME server does actually expect to get two different values for the same TXT record. What it means for you though is that you only have one CNAME to create for both types of names.
 
-Where do you point the CNAMEs to? It doesn't really matter as long as the ACME server can query it from the Internet and Posh-ACME can create the necessary records there. Some choose to use the same `_acme-challenge.` prefix for clarity. Some use a different prefix because their provider doesn't allow names to start with a `_` character. Some just point all of their CNAMEs to the exact same place. **Just don't point the CNAME at the apex of a domain.** Examples:
+Where do you point the CNAMEs to? It doesn't really matter as long as the ACME server can query it from the Internet and Posh-ACME can create the necessary records there. Some choose to use the same `_acme-challenge.` prefix for clarity. Some use a different prefix because their provider doesn't allow names to start with a `_` character. Some just point all of their CNAMEs to the exact same place. Examples:
 
 Challenge Record | CNAME Target
 --- | ---
@@ -260,13 +260,13 @@ _acme-challenge.example.com | _acme-challenge.example.net
 _acme-challenge.example.com | acme.example.net
 _acme-challenge.example.com | _acme-challenge.validation.example.net
 _acme-challenge.example.com<br>_acme-challenge.sub1.example.com<br>_acme-challenge.sub2.example.com | acme.example.net
-_acme-challenge.example.com | **(BAD)** example.net
+_acme-challenge.example.com | example.net
 
-> **_IMPORTANT:_** Don't point too many CNAMES at the same record. Let's Encrypt's ACME implementation can only deal with DNS responses [up to 4096 bytes](https://github.com/letsencrypt/boulder/pull/3467) which is roughly 60-70 TXT records depending on your DNS server and query parameters. If your record is too big, the validations will fail.
+> **_IMPORTANT:_** Don't point too many CNAMES at the same target. Let's Encrypt's ACME implementation can only deal with DNS responses [up to 4096 bytes](https://github.com/letsencrypt/boulder/pull/3467) which is roughly 60-70 TXT records depending on your DNS server and query parameters. If your record is too big, the validations will fail.
 
 ### Testing
 
-You should verify your CNAME got created correctly before you try and use it. If you're inside a business with a split-horizon DNS infrastructure, you might need to explicitly query a public external resolver like CloudFlare's 1.1.1.1. However, some modern firewalls can be configured to prevent this ability. So make sure you can successfully query a known-good external record first. There are also web-based resolvers such as https://www.digwebinterface.com/ if necessary.
+You should verify your CNAME was created correctly before you try and use it. If you're inside a business with a split-horizon DNS infrastructure, you might need to explicitly query a public external resolver like CloudFlare's 1.1.1.1. However, some modern firewalls can be configured to prevent this ability. So make sure you can successfully query a known-good external record first. There are also web-based resolvers such as https://www.digwebinterface.com/ if necessary.
 
 ```
 C:\>nslookup -q=CNAME _acme-challenge.example.com. 1.1.1.1
