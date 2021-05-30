@@ -209,7 +209,7 @@ function Get-AuroraDNSAuthorizationHeader {
     $authorizationHeader = Get-AuroraDNSAuthorizationHeader -Key XXXXXXXXXX -Secret YYYYYYYYYYYYYYYY -Method GET -Uri /zones
 .NOTES
     Function Name : Invoke-AuroraFindZone
-    Version       : v2021.0527.2140
+    Version       : v2021.0530.1330
     Author        : John Billekens
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
@@ -291,7 +291,7 @@ function Invoke-AuroraAddRecord {
     Create an 'TXT' for the domain (no record name) and content 'v=spf1 include:_spf.google.com'
 .NOTES
     Function Name : Invoke-AuroraAddRecord
-    Version       : v2021.0529.1215
+    Version       : v2021.0530.1330
     Author        : John Billekens
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
@@ -345,18 +345,18 @@ function Invoke-AuroraAddRecord {
     $Body = $Payload | ConvertTo-Json
     Write-Debug "$Method URI: `"$ApiUrl`""
     try {
-        $result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -Body $Body -ErrorVariable restError @UseBasic
+        [Object[]]$result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -Body $Body -ErrorVariable restError @UseBasic
     } catch {
         $result = $null
         $OutError = $restError[0].Message | ConvertFrom-Json -ErrorAction SilentlyContinue
         Write-Debug $($OutError | Out-String)
         Throw ($OutError.errormsg)
     }
-    if ([String]::IsNullOrEmpty($($result.id))) {
+    if ( ($result.Count -gt 0) -and ($null -ne $result[0].id) -and (-not [String]::IsNullOrEmpty($($result[0].id))) ) {
+        Write-Output $result
+    } else {
         Write-Debug "The function generated no data"
         Write-Output $null
-    } else {
-        Write-Output $result
     }
 }
 
@@ -383,7 +383,7 @@ function Invoke-AuroraDeleteRecord {
     Delete a record with the ID 'vvvvvvvv-wwww-xxxx-yyyy-zzzzzzzzzzzz' in zone 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
 .NOTES
     Function Name : Invoke-AuroraDeleteRecord
-    Version       : v2021.0527.2140
+    Version       : v2021.0530.1330
     Author        : John Billekens
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
@@ -428,7 +428,7 @@ function Invoke-AuroraDeleteRecord {
         Write-Debug $($OutError | Out-String)
         Throw ($OutError.errormsg)
     }
-    if ([String]::IsNullOrEmpty($($result.id))) {
+    if ([String]::IsNullOrWhiteSpace($($result.id))) {
         Write-Debug "The function generated no data"
         Write-Output $null
     } else {
@@ -454,7 +454,7 @@ function Invoke-AuroraFindZone {
     PS C:\>$zone = Invoke-AuroraFindZone -RecordName www.domain.com @auroraAuthorization
 .NOTES
     Function Name : Invoke-AuroraFindZone
-    Version       : v2021.0527.2140
+    Version       : v2021.0530.1330
     Author        : John Billekens
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
@@ -482,7 +482,7 @@ function Invoke-AuroraFindZone {
     )
     $auroraAuthorization = @{ Api = $Api; Key = $Key; Secret = $Secret }
     try {
-        $zones = Invoke-AuroraGetZones @auroraAuthorization
+        [Object[]]$zones = Invoke-AuroraGetZones @auroraAuthorization
     } catch { Write-Debug "Caught an error, $($_.Exception.Message)"; throw }
          
     Write-Debug "Search for the zone from longest to shortest set of FQDN pieces"
@@ -491,12 +491,15 @@ function Invoke-AuroraFindZone {
         $zoneTest = $pieces[$i..($pieces.Count - 1)] -join '.'
         Write-Debug "Checking $zoneTest"
         try {
-            ## check for results
-            $result = @($Zones | Where-Object { $_.name -eq $zoneTest })
+            Write-Debug "Check for results"
+            [Object[]]$result = @($Zones | Where-Object { $_.name -eq $zoneTest })
             if ($result.Count -gt 0) {
                 Write-Output $result
             }
-        } catch { Write-Debug "Caught an error, $($_.Exception.Message)"; throw }
+        } catch {
+            Write-Debug "Caught an error, $($_.Exception.Message)"
+            throw
+        }
     }
 }
 
@@ -533,7 +536,7 @@ function Invoke-AuroraGetRecord {
     Get record with ID 'vvvvvvvv-wwww-xxxx-yyyy-zzzzzzzzzzzz' in zone 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
 .NOTES
     Function Name : Invoke-AuroraGetRecord
-    Version       : v2021.0529.1215
+    Version       : v2021.0530.1330
     Author        : John Billekens
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
@@ -559,6 +562,9 @@ function Invoke-AuroraGetRecord {
         [Parameter(ParameterSetName = 'Named')]
         [String]$RecordName,
         
+        [Parameter(ParameterSetName = 'Named')]
+        [String]$Co,
+        
         [Parameter()]
         [String]$Api = 'api.auroradns.eu',
         
@@ -575,6 +581,7 @@ function Invoke-AuroraGetRecord {
     } else {
         $Uri = '/zones/{0}/records' -f $ZoneID.Guid
     }
+    Write-Verbose "$Uri"
     $ApiUrl = 'https://{0}{1}' -f $Api, $Uri
     $AuthorizationHeader = Get-AuroraDNSAuthorizationHeader -Key $Key -Secret $Secret -Method $Method -Uri $Uri
     $restError = ''
@@ -595,12 +602,12 @@ function Invoke-AuroraGetRecord {
         } else {
             Throw ($OutError.errormsg)
         }
-    }
-    if ([String]::IsNullOrEmpty($($result.id))) {
+    } 
+    if ( ($result.Count -gt 0) -and ($null -ne $result[0].id) -and (-not [String]::IsNullOrEmpty($($result[0].id))) ) {
+        Write-Output $result
+    } else {
         Write-Debug "The function generated no data"
         Write-Output $null
-    } else {
-        Write-Output $result
     }
 }
 
@@ -622,7 +629,7 @@ function Invoke-AuroraGetZones {
     PS C:\>$zones = Invoke-AuroraGetZones @auroraAuthorization
 .NOTES
     Function Name : Invoke-AuroraGetZones
-    Version       : v2021.0527.2140
+    Version       : v2021.0530.1330
     Author        : John Billekens
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
@@ -656,21 +663,20 @@ function Invoke-AuroraGetZones {
     $restError = ''
     Write-Debug "$Method URI: `"$ApiUrl`""
     try {
-        $result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -ErrorVariable restError @UseBasic
+        [Object[]]$result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -ErrorVariable restError @UseBasic
     } catch {
         $result = $null
         $OutError = $restError[0].Message | ConvertFrom-Json -ErrorAction SilentlyContinue
         Write-Debug $($OutError | Out-String)
         Throw ($OutError.errormsg)
     }
-    if ([String]::IsNullOrEmpty($($result.id))) {
+    if ( ($result.Count -gt 0) -and ($null -ne $result[0].id) -and (-not [String]::IsNullOrEmpty($($result[0].id))) ) {
+        Write-Output $result
+    } else {
         Write-Debug "The function generated no data"
         Write-Output $null
-    } else {
-        Write-Output $result
     }
 }
-
 
 function Invoke-AuroraSetRecord {
     <#
@@ -706,7 +712,7 @@ function Invoke-AuroraSetRecord {
     Set an existing record with new content '198.51.100.85'
 .NOTES
     Function Name : Invoke-AuroraAddRecord
-    Version       : v2021.0527.2140
+    Version       : v2021.0530.1330
     Author        : John Billekens
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
@@ -737,6 +743,8 @@ function Invoke-AuroraSetRecord {
 
         [Parameter()]
         [String]$Api = 'api.auroradns.eu',
+
+        [Switch]$PassThru,
         
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
@@ -761,17 +769,20 @@ function Invoke-AuroraSetRecord {
 
     Write-Debug "$Method URI: `"$ApiUrl`""
     try {
-        $result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -Body $Body -ErrorVariable restError @UseBasic
+        [Object[]]$result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -Body $Body -ErrorVariable restError @UseBasic
+        if ($PassThru -and (($result.Count -eq 0) -or ([string]::IsNullOrWhiteSpace($result)))) {
+            [Object[]]$result = Invoke-AuroraGetRecord -ZoneID $ZoneID -RecordID $RecordID -Key $Key -Secret $Secret -Api $Api
+        }
     } catch {
         $result = $null
         $OutError = $restError[0].Message | ConvertFrom-Json -ErrorAction SilentlyContinue
         Write-Debug $($OutError | Out-String)
         Throw ($OutError.errormsg)
     }
-    if ([String]::IsNullOrEmpty($($result.id))) {
+    if ( ($result.Count -gt 0) -and ($null -ne $result[0].id) -and (-not [String]::IsNullOrEmpty($($result[0].id))) ) {
+        Write-Output $result
+    } else {
         Write-Debug "The function generated no data"
         Write-Output $null
-    } else {
-        Write-Output $result
     }
 }
