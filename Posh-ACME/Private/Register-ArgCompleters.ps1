@@ -74,7 +74,7 @@ function Register-ArgCompleters {
         # combine the existing servers with the available shortcuts to cycle through
         $dirJsonPaths = Join-Path (Get-ConfigRoot) '*\dir.json'
         $choices = $(
-            Get-Content $dirJsonPaths -Raw | ConvertFrom-Json | Select-Object -Expand location
+            Get-ChildItem $dirJsonPaths | Get-Content -Raw | ConvertFrom-Json | Select-Object -Expand location
             $script:WellKnownDirs.Keys
         )
 
@@ -92,7 +92,7 @@ function Register-ArgCompleters {
         # combine only the existing servers to cycle through
         $dirJsonPaths = Join-Path (Get-ConfigRoot) '*\dir.json'
         $choices = $(
-            Get-Content $dirJsonPaths -Raw | ConvertFrom-Json | Select-Object -Expand location
+            Get-ChildItem $dirJsonPaths | Get-Content -Raw | ConvertFrom-Json | Select-Object -Expand location
         )
 
         $choices | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
