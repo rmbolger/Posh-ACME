@@ -20,10 +20,9 @@ function Add-DnsTxt {
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
         $SimplyAPIKeyInsecure = [pscredential]::new('a',$SimplyAPIKey).GetNetworkCredential().Password
     }
-
     $apiRoot = "https://api.simply.com/1/$SimplyAccount/$SimplyAPIKeyInsecure/my/products"
 
-    $zoneUni,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $apiRoot
+    $zoneID,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $apiRoot
 
     if ($rec) {
         Write-Verbose "Record $RecordName already contains $TxtValue. Nothing to do."
@@ -36,17 +35,18 @@ function Add-DnsTxt {
             data = $TxtValue
             ttl = 60
         } | ConvertTo-Json
-        Write-Debug "New Record body: `n$body"
 
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
         try {
             $postParams = @{
-                Uri = "$apiRoot/$zoneUni/dns/records"
+                Uri = "$apiRoot/$zoneID/dns/records"
                 Method = 'POST'
                 Body = $body
                 ContentType = 'application/json'
                 ErrorAction = 'Stop'
+                Verbose = $false
             }
+            Write-Debug "POST $(SimplyRedactKey $postParams.Uri)`n$body"
             Invoke-RestMethod @postParams @script:UseBasic | Out-Null
         }
         catch {
@@ -101,20 +101,21 @@ function Remove-DnsTxt {
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
         $SimplyAPIKeyInsecure = [pscredential]::new('a',$SimplyAPIKey).GetNetworkCredential().Password
     }
-
     $apiRoot = "https://api.simply.com/1/$SimplyAccount/$SimplyAPIKeyInsecure/my/products"
 
-    $zoneUni,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $apiRoot
+    $zoneID,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $apiRoot
 
     if ($rec) {
 
         Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
         try {
             $delParams = @{
-                Uri = "$apiRoot/$zoneUni/dns/records/$($rec.record_id)"
+                Uri = "$apiRoot/$zoneID/dns/records/$($rec.record_id)"
                 Method = 'DELETE'
                 ErrorAction = 'Stop'
+                Verbose = $false
             }
+            Write-Debug "DELETE $(SimplyRedactKey $delParams.Uri)"
             Invoke-RestMethod @delParams @script:UseBasic | Out-Null
         }
         catch {
@@ -189,48 +190,57 @@ function Get-SimplyTXTRecord {
     if (!$script:SimplyRecordZones) { $script:SimplyRecordZones = @{} }
 
     # check for the record in the cache
-    $zone,$zoneUni = $script:SimplyRecordZones.$RecordName
+    #$zone,$zoneID = $script:SimplyRecordZones.$RecordName
+    $zoneID,$recShort = $script:SimplyRecordZones.$RecordName
 
-    if (-not $zone) {
+    if (-not $zoneID) {
+
+        # query all of the domains on the account
+        try {
+            $getParams = @{
+                Uri = $ApiRoot
+                ErrorAction = 'Stop'
+                Verbose = $false
+            }
+            Write-Debug "GET $(SimplyRedactKey $getParams.Uri)"
+            $products = (Invoke-RestMethod @getParams @script:UseBasic).products
+        } catch { throw }
+
         # find the zone for the closest/deepest sub-zone that would contain the record.
         $pieces = $RecordName.Split('.')
         for ($i=0; $i -lt ($pieces.Count-1); $i++) {
             $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
-            $zoneTestUni = ConvertFrom-PunyCode $zoneTest
-            Write-Debug "Checking $zoneTestUni"
+            Write-Debug "Checking $zoneTest"
 
-            try {
-                $response = Invoke-RestMethod "$apiRoot/$zoneTestUni/dns" -EA Stop @script:UseBasic
-            }
-            catch {
-                # We're expecting 404 errors here for zones that aren't actually the main domain.
-                # So ignore them and throw anything else.
-                if (404 -ne $_.Exception.Response.StatusCode.value__) {
-                    Write-Debug "$_"
-                    throw
+            $match = $products | Where-Object { $zoneTest -eq $_.domain.name_idn }
+            if ($match) {
+                # To query the records, we need the "object" id of the zone which is currently
+                # the non-punycode version of the domain name. But that's not guaranteed to always
+                # be the case. So just treat it like an arbitrary ID value.
+                $zoneID = $match.object
+
+                # derive the short record name
+                if ($RecordName -eq $match.domain.name_idn) {
+                    $recShort = '@'
+                } else {
+                    $recShort = ($RecordName -ireplace [regex]::Escape($match.domain.name_idn), [string]::Empty).TrimEnd('.')
                 }
-                continue
-            }
 
-            if ($response.status -eq 200) {
-                $script:SimplyRecordZones.$RecordName = $zoneTest,$zoneTestUni
-                $zone,$zoneUni = $zoneTest,$zoneTestUni
-            } else {
-                Write-Debug "Simply Response: `n$($response | ConvertTo-Json)"
-                throw "Unexpected response from Simply: $($response.message)."
+                $script:SimplyRecordZones.$RecordName = $zoneID,$recShort
+                break
             }
         }
     }
 
-    if ($RecordName -eq $zone) {
-        $recShort = '@'
-    } else {
-        $recShort = ($RecordName -ireplace [regex]::Escape($zone), [string]::Empty).TrimEnd('.')
-    }
-
     # query the zone records and check for the one we care about
     try {
-        $response = Invoke-RestMethod "$apiRoot/$zoneUni/dns/records" -EA Stop @script:UseBasic
+        $getParams = @{
+            Uri = "$ApiRoot/$zoneID/dns/records"
+            ErrorAction = 'Stop'
+            Verbose = $false
+        }
+        Write-Debug "GET $(SimplyRedactKey $getParams.Uri)"
+        $response = Invoke-RestMethod @getParams @script:UseBasic
     }
     catch {
         Write-Debug "$_"
@@ -246,7 +256,7 @@ function Get-SimplyTXTRecord {
         }
 
         # return the zone name and the record
-        return $zoneUni,$rec
+        return $zoneID,$rec
 
     } else {
         Write-Debug "Simply Response: `n$($response | ConvertTo-Json)"
@@ -255,17 +265,19 @@ function Get-SimplyTXTRecord {
 
 }
 
-# Check if domain is an internationalized domain name (IDN) and convert to unicode if it is
-function ConvertFrom-PunyCode {
+function SimplyRedactKey {
     [CmdletBinding()]
-    param (
+    param(
         [Parameter(Mandatory,Position=0)]
-        [string]$Zone
+        [string]$Uri
     )
-    if ($Zone -match '(?:\.)?xn--') {
-        Write-Debug "Converting $Zone to unicode"
-        $Idn = New-Object System.Globalization.IdnMapping
-        return $Idn.GetUnicode("$Zone")
-    }
-    return $Zone
+
+    # Simply's API auth puts the API secret right in the URL which makes logging what we're
+    # doing unintentionally expose that secret in the logs. We're going to try and redact
+    # the value before we log it.
+    # https://api.simply.com/1/S012345/ABCDEFGHIJKLMNOP/my/products"
+    #                                  [  5th index   ]
+    $pieces = $Uri.Split('/')
+    $pieces[5] = 'XXXXXXXX'
+    return ($pieces -join '/')
 }
