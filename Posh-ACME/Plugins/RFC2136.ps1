@@ -295,7 +295,11 @@ function Send-DynamicTXTUpdate {
         'answer'
     )
 
-    Write-Debug "Sending the following to nsupdate:`n$(($cmds -join "`n").Replace($TsigKeyValue,'************'))"
+    if (-not $TsigKeyValue) {
+        Write-Debug "Sending the following to nsupdate:`n$(($cmds -join "`n"))"
+    } else {
+        Write-Debug "Sending the following to nsupdate:`n$(($cmds -join "`n").Replace($TsigKeyValue,'************'))"
+    }
 
     try {
         $answerLines = $cmds | & $NSUpdatePath 2>&1
