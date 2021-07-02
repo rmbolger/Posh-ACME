@@ -16,11 +16,8 @@ function Revoke-PACertificate {
     )
 
     Begin {
-        # Make sure we have an account configured
-        if (!(Get-PAAccount)) {
-            try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
-        }
+        # grab a reference to the current account if it exists
+        $acct = Get-PAAccount
 
         if ($Force){
             $ConfirmPreference = 'None'
@@ -110,6 +107,10 @@ function Revoke-PACertificate {
 
             # set the key
             $acmeParams.Key = $certKey
+
+        } elseif (-not $acct) {
+            try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
 
         } else {
             Write-Debug "Attempting to use account key"
