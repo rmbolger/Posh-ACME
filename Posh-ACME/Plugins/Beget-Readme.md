@@ -6,7 +6,7 @@ This plugin works against the [Beget.com](https://beget.com/) provider. It is as
 
 There is no special setup required to use this plugin. The API uses the same credentials that are used to login to the web control panel.
 
-**IMPORTANT:** There are some limitations with how the Beget API works that make it risky to use when using [DNS Challenge Aliases](https://github.com/rmbolger/Posh-ACME/blob/main/Tutorial.md#advanced-dns-challenge-aliases). If you need to use this plugin with challenge aliases, the value for the DnsAlias must not contain any other record types of TXT values because they will likely be deleted when the plugin attempts to create the TXT records.
+**IMPORTANT:** There are some limitations with how the Beget API works that make it risky to use when using [DNS Challenge Aliases](https://github.com/rmbolger/Posh-ACME/blob/main/Tutorial.md#advanced-dns-challenge-aliases). If you need to use this plugin with challenge aliases, the value for the DnsAlias must not contain any other record types or TXT values because they will likely be deleted when the plugin attempts to create the TXT records.
 
 ## Using the Plugin
 
