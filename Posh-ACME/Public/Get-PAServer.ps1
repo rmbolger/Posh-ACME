@@ -1,18 +1,17 @@
 function Get-PAServer {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Specific')]
     [OutputType('PoshACME.PAServer')]
     param(
         [Parameter(ParameterSetName='Specific',Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
         [Alias('location')]
         [string]$DirectoryUrl,
-        [Parameter(ParameterSetName='SpecificName',Mandatory,ValueFromPipelineByPropertyName)]
+        [Parameter(ParameterSetName='Specific',ValueFromPipelineByPropertyName)]
         [string]$Name,
         [Parameter(ParameterSetName='List',Mandatory)]
         [switch]$List,
         [switch]$Refresh,
         [Parameter(ParameterSetName='Specific')]
-        [Parameter(ParameterSetName='SpecificName')]
         [switch]$Quiet
     )
 
@@ -47,34 +46,33 @@ function Get-PAServer {
         # Specific mode
         } else {
 
-            if ('Specific' -eq $PSCmdlet.ParameterSetName) {
+            if ($DirectoryUrl) {
+                # DirectoryUrl gets priority
 
-                if ($DirectoryUrl) {
-                    # convert WellKnown names to their associated Url
-                    if ($DirectoryUrl -notlike 'https://*') {
-                        $DirectoryUrl = $script:WellKnownDirs.$DirectoryUrl
-                    }
-
-                    $dir = Get-PAServer -List | Where-Object { $_.location -eq $DirectoryUrl }
-
-                    if (-not $dir -and -not $Quiet) {
-                        Write-Warning "Unable to find cached PAServer info for $DirectoryUrl. Try using Set-PAServer first."
-                    }
+                # convert WellKnown names to their associated Url
+                if ($DirectoryUrl -notlike 'https://*') {
+                    $DirectoryUrl = $script:WellKnownDirs.$DirectoryUrl
                 }
-                else {
-                    # just use the current one
-                    $dir = $script:Dir
+
+                $dir = Get-PAServer -List | Where-Object { $_.location -eq $DirectoryUrl }
+
+                if (-not $dir -and -not $Quiet) {
+                    Write-Warning "Unable to find cached PAServer info for $DirectoryUrl. Try using Set-PAServer first."
                 }
             }
-            elseif ('SpecificName' -eq $PSCmdlet.ParameterSetName) {
+            elseif ($Name) {
 
-                # get the server by name
+                # get the server by Name
                 $dir = Get-PAServer -List | Where-Object { $_.Name -eq $Name }
 
                 if (-not $dir -and -not $Quiet) {
                     Write-Warning "Unable to find cached PAServer info for $Name. Try using Set-PAServer first."
                 }
 
+            }
+            # Use the current one
+            else {
+                $dir = $script:Dir
             }
 
             if ($dir -and $Refresh) {
@@ -102,7 +100,10 @@ function Get-PAServer {
         The primary use for this function is checking which ACME server is currently configured. New Account and Cert requests will be directed to this server. It may also be used to refresh server details and list additional servers that have previously been used.
 
     .PARAMETER DirectoryUrl
-        Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production v2) and LE_STAGE (LetsEncrypt Staging v2).
+        Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production v2), LE_STAGE (LetsEncrypt Staging v2), BUYPASS_PROD (BuyPass.com Production), and BUYPASS_TEST (BuyPass.com Testing).
+
+    .PARAMETER Name
+        The friendly name of the ACME server.
 
     .PARAMETER List
         If specified, the details for all previously used servers will be returned.
