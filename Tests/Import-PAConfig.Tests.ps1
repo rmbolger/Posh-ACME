@@ -13,7 +13,6 @@ Describe "Import-PAConfig" {
                 Mock Set-CertValidation {}
                 Import-PAConfig
 
-                $script:DirFolder        | Should -Be (Join-Path 'TestDrive:' 'acme.test')
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
                 $script:AcctFolder       | Should -Be (Join-Path 'TestDrive:' 'acme.test\11111')
                 $script:Acct.id          | Should -Be 11111
@@ -34,7 +33,6 @@ Describe "Import-PAConfig" {
                 Mock Set-CertValidation {}
                 Import-PAConfig
 
-                $script:DirFolder        | Should -Be (Join-Path 'TestDrive:' 'acme.test')
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
                 $script:AcctFolder       | Should -Be (Join-Path 'TestDrive:' 'acme.test\11111')
                 $script:Acct.id          | Should -Be 11111
@@ -55,7 +53,6 @@ Describe "Import-PAConfig" {
                 Mock Set-CertValidation {}
                 Import-PAConfig
 
-                $script:DirFolder        | Should -Be (Join-Path 'TestDrive:' 'acme.test')
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
                 $script:AcctFolder       | Should -BeNullOrEmpty
                 $script:Acct             | Should -BeNullOrEmpty
@@ -76,7 +73,6 @@ Describe "Import-PAConfig" {
                 Mock Set-CertValidation {}
                 Import-PAConfig
 
-                $script:DirFolder        | Should -BeNullOrEmpty
                 $script:Dir              | Should -BeNullOrEmpty
                 $script:AcctFolder       | Should -BeNullOrEmpty
                 $script:Acct             | Should -BeNullOrEmpty
@@ -106,7 +102,6 @@ Describe "Import-PAConfig" {
 
                 Import-PAConfig -Level 'Order'
 
-                $script:DirFolder        | Should -Be (Join-Path 'TestDrive:' 'acme.test')
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
                 $script:AcctFolder       | Should -Be (Join-Path 'TestDrive:' 'acme.test\11111')
                 $script:Acct.id          | Should -Be 11111
@@ -136,7 +131,6 @@ Describe "Import-PAConfig" {
 
                 Import-PAConfig -Level 'Account'
 
-                $script:DirFolder        | Should -Be (Join-Path 'TestDrive:' 'acme.test')
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
                 $script:AcctFolder       | Should -Be (Join-Path 'TestDrive:' 'acme.test\22222')
                 $script:Acct.id          | Should -Be 22222
@@ -166,7 +160,6 @@ Describe "Import-PAConfig" {
 
                 Import-PAConfig -Level 'Server'
 
-                $script:DirFolder        | Should -Be (Join-Path 'TestDrive:' 'acme2.test')
                 $script:Dir.location     | Should -Be 'https://acme2.test/directory'
                 $script:AcctFolder       | Should -BeNullOrEmpty
                 $script:Acct             | Should -BeNullOrEmpty

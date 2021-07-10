@@ -58,7 +58,6 @@ function Import-PAConfig {
         $dirUrl = [string](Get-Content (Join-Path (Get-ConfigRoot) 'current-server.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($dirUrl)) {
 
-            Set-DirFolder (ConvertTo-DirFolder $dirUrl)
             $script:Dir = Get-PAServer $dirUrl
 
             # deal with cert validation options between PS editions
@@ -68,7 +67,6 @@ function Import-PAConfig {
 
         } else {
             # wipe references since we have no current server
-            $script:DirFolder = $null
             $script:Dir = $null
             $script:AcctFolder = $null
             $script:Acct = $null

@@ -51,7 +51,7 @@ function New-PACertificate {
         Set-PAServer $DirectoryUrl
     } else {
         # refresh the directory info (which should also get a fresh nonce)
-        Update-PAServer
+        Set-PAServer
     }
     Write-Verbose "Using ACME Server $($script:Dir.location)"
 

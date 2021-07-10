@@ -22,7 +22,7 @@ function Get-PAServer {
 
             # update from the server first if requested
             if ($Refresh) {
-                Get-PAServer -List | Update-PAServer
+                Get-PAServer -List | Set-PAServer -NoSwitch
             }
 
             # read the contents of each server's dir.json
@@ -77,9 +77,9 @@ function Get-PAServer {
 
             if ($dir -and $Refresh) {
 
-                # update and then recurse to return the updated data
-                Update-PAServer $dir.location
-                Get-PAServer $dir.location
+                # update and the server then recurse to return the updated data
+                Set-PAServer -DirectoryUrl $dir.location -NoSwitch
+                Get-PAServer -DirectoryUrl $dir.location
 
             } else {
                 # return whatever we've got
@@ -103,7 +103,7 @@ function Get-PAServer {
         Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production v2), LE_STAGE (LetsEncrypt Staging v2), BUYPASS_PROD (BuyPass.com Production), and BUYPASS_TEST (BuyPass.com Testing).
 
     .PARAMETER Name
-        The friendly name of the ACME server.
+        The friendly name of the ACME server. The parameter is ignored if DirectoryUrl is specified.
 
     .PARAMETER List
         If specified, the details for all previously used servers will be returned.

@@ -26,16 +26,7 @@ function Set-ConfigRoot {
 }
 
 function Get-DirFolder {
-    $script:DirFolder
-}
-
-function Set-DirFolder {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory,Position=0)]
-        [string]$Path
-    )
-    $script:DirFolder = $Path
+    $script:Dir.Folder
 }
 
 function Get-OrderFolder {
