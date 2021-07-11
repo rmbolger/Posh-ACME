@@ -3,6 +3,7 @@ function Get-PAAccount {
     [OutputType('PoshACME.PAAccount')]
     param(
         [Parameter(ParameterSetName='Specific',Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [Alias('Name')]
         [string]$ID,
         [Parameter(ParameterSetName='List',Mandatory)]
         [switch]$List,
@@ -22,7 +23,7 @@ function Get-PAAccount {
 
     Begin {
         # make sure we have a server configured
-        if (!(Get-PAServer)) {
+        if (!($server = Get-PAServer)) {
             try { throw "No ACME server configured. Run Set-PAServer first." }
             catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
@@ -51,12 +52,21 @@ function Get-PAAccount {
 
             # read the contents of each accounts's acct.json
             Write-Debug "Loading PAAccount list from disk"
-            $rawFiles = Get-ChildItem "$((Get-DirFolder))\*\acct.json" | Get-Content -Raw
-            $accts = $rawFiles | ConvertFrom-Json | Sort-Object id | ForEach-Object {
 
-                    # insert the type name and send the results to the pipeline
-                    $_.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
-                    $_
+            $accts = Get-ChildItem (Join-Path $server.Folder '\*\acct.json') | ForEach-Object {
+
+                # parse the json
+                $acct = $_ | Get-Content -Raw | ConvertFrom-Json
+
+                # insert the type name
+                $acct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
+
+                # add the dynamic id (Name) and Folder property
+                $acct | Add-Member 'id' $_.Directory.Name -Force
+                $acct | Add-Member 'Folder' $_.Directory.FullName -Force
+
+                # send the result to the pipeline
+                Write-Output $acct
             }
 
             # filter by Status if specified
@@ -71,7 +81,7 @@ function Get-PAAccount {
 
             # filter by Contact if specified
             if ('Contact' -in $PSBoundParameters.Keys) {
-                if (!$Contact) {
+                if (-not $Contact) {
                     $accts = $accts | Where-Object { $_.contact.count -eq 0 }
                 } else {
                     $accts = $accts | Where-Object { $_.contact.count -gt 0 -and $null -eq (Compare-Object $Contact $_.contact) }
@@ -86,7 +96,7 @@ function Get-PAAccount {
             if ($ID) {
 
                 # build the path to acct.json
-                $acctFolder = Join-Path (Get-DirFolder) $ID
+                $acctFolder = Join-Path $server.Folder $ID
                 $acctFile = Join-Path $acctFolder 'acct.json'
 
                 # check if it exists
@@ -94,6 +104,11 @@ function Get-PAAccount {
                     Write-Debug "Loading PAAccount $ID from disk"
                     $acct = Get-Content $acctFile -Raw | ConvertFrom-Json
                     $acct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
+
+                    # add the dynamic id (Name) and Folder property
+                    $acct | Add-Member 'id' (Get-Item $acctFolder).Name
+                    $acct | Add-Member 'Folder' $acctFolder -Force
+
                 } else {
                     return $null
                 }
@@ -128,7 +143,7 @@ function Get-PAAccount {
         Returns details such as Email, key length, and status for one or more ACME accounts previously created.
 
     .PARAMETER ID
-        The account id value as returned by the ACME server.
+        The account id value as returned by the ACME server. 'Name' is also an alias for this parameter.
 
     .PARAMETER List
         If specified, the details for all accounts will be returned.
