@@ -2,6 +2,8 @@ function Remove-PAAccount {
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [Alias('Name')]
         [string]$ID,
         [switch]$Deactivate,
         [switch]$Force

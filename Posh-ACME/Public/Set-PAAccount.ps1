@@ -2,9 +2,14 @@ function Set-PAAccount {
     [CmdletBinding(SupportsShouldProcess,DefaultParameterSetName='Edit')]
     param(
         [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [Alias('Name')]
         [string]$ID,
         [Parameter(ParameterSetName='Edit',Position=1)]
         [string[]]$Contact,
+        [Parameter(ParameterSetName='Edit')]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [string]$NewName,
         [Parameter(ParameterSetName='Edit')]
         [switch]$UseAltPluginEncryption,
         [Parameter(ParameterSetName='Edit')]
@@ -27,7 +32,7 @@ function Set-PAAccount {
 
     Begin {
         # make sure we have a server configured
-        if (-not (Get-PAServer)) {
+        if (-not ($server = Get-PAServer)) {
             try { throw "No ACME server configured. Run Set-PAServer first." }
             catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
@@ -45,13 +50,6 @@ function Set-PAAccount {
 
     Process {
 
-        # throw an error if there's no current account and no ID
-        # passed in
-        if (-not $script:Acct -and -not $ID) {
-            try { throw "No ACME account configured. Run New-PAAccount or specify an account ID." }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
-        }
-
         # There are 3 types of calls the user might be making here.
         # - account switch
         # - account switch and modification
@@ -61,40 +59,41 @@ function Set-PAAccount {
         # to use it for a bulk update. For now, we'll just let it happen and switch
         # to whatever account came through the pipeline last.
 
-        if ($NoSwitch -and $ID) {
-            # This is a non-switching modification, so grab a cached reference to the
-            # account specified
-            $acct = Get-PAAccount $ID
-
-            if ($null -eq $acct) {
+        # make sure there's an account associated with the specified ID or
+        # a current account
+        if ($ID) {
+            if (-not ($acct = Get-PAAccount $ID)) {
                 Write-Warning "Specified account ID ($ID) was not found. No changes made."
                 return
             }
+            # check if we're switching
+            $oldAcct = Get-PAAccount
+            if ($oldAcct -and $oldAcct.id -eq $acct.id) {
+                $NoSwitch = $true
+            }
+        } else {
+            if (-not ($acct = Get-PAAccount)) {
+                try { throw "No ACME account configured. Run New-PAAccount or specify an account ID." }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
+            }
+            $NoSwitch = $true
+        }
 
-        } elseif (-not $script:Acct -or ($ID -and ($ID -ne $script:Acct.id))) {
-            # This is a definite account switch
-
+        # switch the current account unless told not to or it's not changing
+        if (-not $NoSwitch) {
             # refresh the cached copy
-            Update-PAAccount $ID
+            Update-PAAccount $acct.id
 
-            Write-Debug "Switching to account $ID"
+            Write-Debug "Switching to account $($acct.id)"
 
             # save it as current
-            $ID | Out-File (Join-Path (Get-DirFolder) 'current-account.txt') -Force -EA Stop
-
-            # reset child object references
-            $script:Order = $null
+            $acct.id | Out-File (Join-Path $server.Folder 'current-account.txt') -Force -EA Stop
 
             # reload the cache from disk
             Import-PAConfig -Level 'Account'
 
             # grab a local reference to the newly current account
-            $acct = $script:Acct
-
-        } else {
-            # This is effectively a non-switching modification because they didn't
-            # specify an ID. So just use the current account.
-            $acct = $script:Acct
+            $acct = Get-PAAccount
         }
 
         $saveAccount = $false
@@ -139,15 +138,15 @@ function Set-PAAccount {
             if ('Contact' -in $PSBoundParameters.Keys) {
                 # We want to allow people to clear their contact field either by specifying $null or an empty array @()
                 # But currently, Boulder only works by sending the empty array. So use that if they sent $null.
-                if (!$Contact) {
+                if (-not $Contact) {
                     $payload.contact = @()
                 } else {
                     $payload.contact = $Contact
                 }
             }
             if ($Deactivate) {
-                if (!$Force) {
-                    if (!$PSCmdlet.ShouldContinue("Are you sure you wish to deactivate account $($acct.id)?",
+                if (-not $Force) {
+                    if (-not $PSCmdlet.ShouldContinue("Are you sure you wish to deactivate account $($acct.id)?",
                     "Deactivating an account is irreversible and will prevent modifications or renewals for associated orders and certificates.")) {
                         Write-Verbose "Deactivation aborted for account $($acct.id)."
                         return
@@ -245,11 +244,36 @@ function Set-PAAccount {
             }
         }
 
+        # Deal with potential name change
+        if ($NewName -and $NewName -ne $acct.id) {
+
+            $newFolder = Join-Path $server.Folder $NewName
+            if (Test-Path $newFolder) {
+                Write-Error "Failed to rename PAAccount $($acct.id). The path '$newFolder' already exists."
+            } else {
+                # rename the dir folder
+                Write-Debug "Renaming $($acct.id) account folder to $newFolder"
+                Rename-Item $acct.Folder $newFolder
+
+                # update the current account ref if necessary
+                $curAcctFile = (Join-Path $server.Folder 'current-account.txt')
+                if ($acct.id -eq (Get-Content $curAcctFile)) {
+                    Write-Debug "Updating current-account.txt"
+                    $NewName | Out-File $curAcctFile -Force -EA Stop
+                }
+
+                # update the id/Folder in memory
+                $acct.id = $NewName
+                $acct.Folder = $newFolder
+            }
+        }
+
         if ($saveAccount) {
             # save it to disk
-            $acctFolder = Join-Path (Get-DirFolder) $acct.id
-            $acct | ConvertTo-Json -Depth 5 | Out-File (Join-Path $acctFolder 'acct.json') -Force -EA Stop
+            $acctFile = Join-Path $server.Folder "$($acct.id)\acct.json"
+            $acct | Select-Object -Exclude id,Folder | ConvertTo-Json -Depth 5 | Out-File $acctFile -Force -EA Stop
         }
+
     }
 
 
@@ -268,6 +292,9 @@ function Set-PAAccount {
 
     .PARAMETER Contact
         One or more email addresses to associate with this account. These addresses will be used by the ACME server to send certificate expiration notifications or other important account notices.
+
+    .PARAMETER NewName
+        Use this to change the friendly name (id) of this ACME account.
 
     .PARAMETER UseAltPluginEncryption
         If specified, the account will be configured to use a randomly generated AES key to encrypt sensitive plugin parameters on disk instead of using the OS's native encryption methods. This can be useful if the config is being shared across systems or platforms. You can revert to OS native encryption using -UseAltPluginEncryption:$false.
