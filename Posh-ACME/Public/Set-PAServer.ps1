@@ -28,12 +28,6 @@ function Set-PAServer {
             catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
-        # convert WellKnown names to their associated Url
-        if ($DirectoryUrl -and $DirectoryUrl -notlike 'https://*') {
-            $DirectoryUrl = $script:WellKnownDirs.$DirectoryUrl
-            Write-Debug "Using DirectoryUrl $DirectoryUrl"
-        }
-
         # try to find an existing server that matches DirectoryUrl/Name
         if ($DirectoryUrl) {
 
