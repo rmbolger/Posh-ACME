@@ -3,6 +3,7 @@ function Get-PAAccount {
     [OutputType('PoshACME.PAAccount')]
     param(
         [Parameter(ParameterSetName='Specific',Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
         [Alias('Name')]
         [string]$ID,
         [Parameter(ParameterSetName='List',Mandatory)]
@@ -106,7 +107,7 @@ function Get-PAAccount {
                     $acct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
 
                     # add the dynamic id (Name) and Folder property
-                    $acct | Add-Member 'id' (Get-Item $acctFolder).Name
+                    $acct | Add-Member 'id' (Get-Item $acctFolder).Name -Force
                     $acct | Add-Member 'Folder' $acctFolder -Force
 
                 } else {
