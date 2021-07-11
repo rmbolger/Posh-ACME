@@ -52,6 +52,12 @@ function Set-PAServer {
                     $Name = if ($shortcutName) { $shortcutName } else { ([uri]$DirectoryUrl).Host }
                 }
 
+                # make sure another server doesn't exist with this name already
+                if (Get-PAServer -Name $Name -Quiet) {
+                    try { throw "Another server already exists with Name '$Name'. Please specify a unique value." }
+                    catch { $PSCmdlet.ThrowTerminatingError($_) }
+                }
+
                 $newDir = [pscustomobject]@{
                     PSTypeName = 'PoshACME.PAServer'
                     location = $DirectoryUrl
