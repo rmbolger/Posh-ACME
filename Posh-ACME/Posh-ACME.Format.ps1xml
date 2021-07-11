@@ -11,6 +11,7 @@
                     <TableColumnHeader/>
                     <TableColumnHeader/>
                     <TableColumnHeader/>
+                    <TableColumnHeader/>
                 </TableHeaders>
                 <TableRowEntries>
                     <TableRowEntry>
@@ -18,6 +19,7 @@
                             <TableColumnItem><PropertyName>Name</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>location</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>SkipCertificateCheck</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>DisableTelemetry</PropertyName></TableColumnItem>
                         </TableColumnItems>
                     </TableRowEntry>
                 </TableRowEntries>
