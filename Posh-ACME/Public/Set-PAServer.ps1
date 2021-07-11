@@ -33,6 +33,8 @@ function Set-PAServer {
 
             # convert WellKnown names to their associated Url
             if ($DirectoryUrl -notlike 'https://*') {
+                # save the shortcut to use as the default name
+                $shortcutName = $DirectoryUrl
                 Write-Debug "$DirectoryUrl converted to $($script:WellKnownDirs.$DirectoryUrl)"
                 $DirectoryUrl = $script:WellKnownDirs.$DirectoryUrl
             }
@@ -45,8 +47,9 @@ function Set-PAServer {
             if (-not $newDir) {
 
                 if (-not $Name) {
-                    # generate a default name using the Host value of the URL
-                    $Name = ([uri]$DirectoryUrl).Host
+                    # generate a default name using the shortcut if it was specified,
+                    # otherwise the Host value of the URL
+                    $Name = if ($shortcutName) { $shortcutName } else { ([uri]$DirectoryUrl).Host }
                 }
 
                 $newDir = [pscustomobject]@{
