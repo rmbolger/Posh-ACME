@@ -115,7 +115,7 @@ function Register-ArgCompleters {
         }
     }
 
-    $DirNameCommands = 'Get-PAServer','Set-PAServer'
+    $DirNameCommands = 'Get-PAServer','Set-PAServer','Remove-PAServer'
     Register-ArgumentCompleter -CommandName $DirNameCommands -ParameterName 'Name' -ScriptBlock $DirNameCompleter
 
 }
