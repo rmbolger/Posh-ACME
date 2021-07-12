@@ -13,9 +13,9 @@ Describe "Import-PAConfig" {
                 Mock Set-CertValidation {}
                 Import-PAConfig
 
-                $script:Dir.Folder       | Should -Be (Join-Path 'TestDrive:' 'acme.test')
+                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'acme.test')
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
-                $script:Acct.Folder      | Should -Be (Join-Path 'TestDrive:' 'acme.test\11111')
+                $script:Acct.Folder      | Should -Be (Join-Path $TestDrive 'acme.test\11111')
                 $script:Acct.id          | Should -Be 11111
                 $script:Order.MainDomain | Should -Be 'example.com'
                 Should -Invoke Set-CertValidation -ParameterFilter { $Skip -eq $false }
@@ -34,9 +34,9 @@ Describe "Import-PAConfig" {
                 Mock Set-CertValidation {}
                 Import-PAConfig
 
-                $script:Dir.Folder       | Should -Be (Join-Path 'TestDrive:' 'acme.test')
+                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'acme.test')
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
-                $script:Acct.Folder      | Should -Be (Join-Path 'TestDrive:' 'acme.test\11111')
+                $script:Acct.Folder      | Should -Be (Join-Path $TestDrive 'acme.test\11111')
                 $script:Acct.id          | Should -Be 11111
                 $script:Order            | Should -BeNullOrEmpty
                 Should -Invoke Set-CertValidation -ParameterFilter { $Skip -eq $false }
@@ -55,7 +55,7 @@ Describe "Import-PAConfig" {
                 Mock Set-CertValidation {}
                 Import-PAConfig
 
-                $script:Dir.Folder       | Should -Be (Join-Path 'TestDrive:' 'acme.test')
+                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'acme.test')
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
                 $script:Acct.Folder      | Should -BeNullOrEmpty
                 $script:Acct             | Should -BeNullOrEmpty
@@ -106,9 +106,9 @@ Describe "Import-PAConfig" {
 
                 Import-PAConfig -Level 'Order'
 
-                $script:Dir.Folder       | Should -Be (Join-Path 'TestDrive:' 'acme.test')
+                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'acme.test')
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
-                $script:Acct.Folder      | Should -Be (Join-Path 'TestDrive:' 'acme.test\11111')
+                $script:Acct.Folder      | Should -Be (Join-Path $TestDrive 'acme.test\11111')
                 $script:Acct.id          | Should -Be 11111
                 $script:Order.MainDomain | Should -Be '*.example.com'
                 Should -Not -Invoke Set-CertValidation
@@ -136,9 +136,9 @@ Describe "Import-PAConfig" {
 
                 Import-PAConfig -Level 'Account'
 
-                $script:Dir.Folder       | Should -Be (Join-Path 'TestDrive:' 'acme.test')
+                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'acme.test')
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
-                $script:Acct.Folder      | Should -Be (Join-Path 'TestDrive:' 'acme.test\22222')
+                $script:Acct.Folder      | Should -Be (Join-Path $TestDrive 'acme.test\22222')
                 $script:Acct.id          | Should -Be 22222
                 $script:Order.MainDomain | Should -Be '*.example.org'
                 Should -Not -Invoke Set-CertValidation
@@ -166,7 +166,7 @@ Describe "Import-PAConfig" {
 
                 Import-PAConfig -Level 'Server'
 
-                $script:Dir.Folder       | Should -Be (Join-Path 'TestDrive:' 'acme2.test')
+                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'acme2.test')
                 $script:Dir.location     | Should -Be 'https://acme2.test/directory'
                 $script:Acct.Folder      | Should -BeNullOrEmpty
                 $script:Acct             | Should -BeNullOrEmpty
