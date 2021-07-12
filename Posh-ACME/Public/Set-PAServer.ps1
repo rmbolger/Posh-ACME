@@ -49,7 +49,12 @@ function Set-PAServer {
                 if (-not $Name) {
                     # generate a default name using the shortcut if it was specified,
                     # otherwise the Host value of the URL
-                    $Name = if ($shortcutName) { $shortcutName } else { ([uri]$DirectoryUrl).Host }
+                    $uri = [uri]$DirectoryUrl
+                    $Name = if ($shortcutName) {
+                        $shortcutName
+                    } else {
+                        ('{0}_{1}' -f $uri.Host,$uri.Port).Replace('_443','')
+                    }
                 }
 
                 # make sure another server doesn't exist with this name already
