@@ -259,7 +259,7 @@ function New-PAOrder {
     $order | Add-Member 'Folder' (Get-OrderFolder $order.MainDomain) -Force
 
     # save it to memory and disk
-    $order.MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force -EA Stop
+    $order.MainDomain | Out-File (Join-Path $script:Acct.Folder 'current-order.txt') -Force -EA Stop
     $script:Order = $order
     Update-PAOrder -SaveOnly
 

@@ -68,7 +68,6 @@ function Import-PAConfig {
         } else {
             # wipe references since we have no current server
             $script:Dir = $null
-            $script:AcctFolder = $null
             $script:Acct = $null
             $script:Order = $null
         }
@@ -77,17 +76,16 @@ function Import-PAConfig {
     if ($ImportAccount -or $Level -eq 'Account') {
 
         # load the current account into memory if it exists on disk
-        $acctID = [string](Get-Content (Join-Path (Get-DirFolder) 'current-account.txt') -EA Ignore)
+        $acctID = [string](Get-Content (Join-Path $script:Dir.Folder 'current-account.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($acctID)) {
 
-            $script:AcctFolder = Join-Path (Get-DirFolder) $acctID
             $script:Acct = Get-PAAccount $acctID
 
             $ImportOrder = $true
 
             # Check for a v3 plugindata.xml file and convert it to order-specific v4
             # files.
-            $pDataV3File = Join-Path $script:AcctFolder 'plugindata.xml'
+            $pDataV3File = Join-Path $script:Acct.Folder 'plugindata.xml'
             if (Test-Path $pDataV3File -PathType Leaf) {
                 Write-Debug "Migrating v3 plugindata.xml"
                 $pDataV3 = Import-Clixml $pDataV3File
@@ -102,12 +100,11 @@ function Import-PAConfig {
                     }
                 }
 
-                Move-Item $pDataV3File (Join-Path $script:AcctFolder 'plugindata.xml.v3') -Force
+                Move-Item $pDataV3File (Join-Path $script:Acct.Folder 'plugindata.xml.v3') -Force
             }
 
         } else {
             # wipe references since we have no current account
-            $script:AcctFolder = $null
             $script:Acct = $null
             $script:Order = $null
         }
@@ -116,7 +113,7 @@ function Import-PAConfig {
     if ($ImportOrder -or $Level -eq 'Order') {
 
         # load the current order into memory if it exists on disk
-        $domain = [string](Get-Content (Join-Path $script:AcctFolder 'current-order.txt') -EA Ignore)
+        $domain = [string](Get-Content (Join-Path $script:Acct.Folder 'current-order.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($domain)) {
 
             $script:Order = Get-PAOrder $domain

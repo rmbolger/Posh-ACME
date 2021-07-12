@@ -46,7 +46,7 @@ function Remove-PAOrder {
         # unset the current order if it was this one
         if ($script:Order -and $script:Order.MainDomain -eq $order.MainDomain) {
             $order = $null
-            Remove-Item (Join-Path $script:AcctFolder 'current-order.txt') -Force
+            Remove-Item (Join-Path $script:Acct.Folder 'current-order.txt') -Force
             Import-PAConfig -Level 'Order'
         }
 

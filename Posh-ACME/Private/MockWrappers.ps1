@@ -25,10 +25,6 @@ function Set-ConfigRoot {
     $script:ConfigRoot = $Path
 }
 
-function Get-DirFolder {
-    $script:Dir.Folder
-}
-
 function Get-OrderFolder {
     [CmdletBinding()]
     param(
@@ -37,6 +33,6 @@ function Get-OrderFolder {
     )
 
     Process {
-        Join-Path $script:AcctFolder $MainDomain.Replace('*','!')
+        Join-Path $script:Acct.Folder $MainDomain.Replace('*','!')
     }
 }

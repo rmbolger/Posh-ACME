@@ -25,9 +25,9 @@ function Register-ArgCompleters {
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
         # nothing to auto complete if we don't have a server selected
-        if ([String]::IsNullOrWhiteSpace((Get-DirFolder))) { return }
+        if ([String]::IsNullOrWhiteSpace($script:Dir.Folder)) { return }
 
-        $ids = (Get-ChildItem -Path (Get-DirFolder) | Where-Object { $_ -is [IO.DirectoryInfo] }).BaseName
+        $ids = (Get-ChildItem -Path $script:Dir.Folder | Where-Object { $_ -is [IO.DirectoryInfo] }).BaseName
         $ids | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
             [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
         }
@@ -53,9 +53,9 @@ function Register-ArgCompleters {
         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
 
         # nothing to auto complete if we don't have an account selected
-        if ([String]::IsNullOrWhiteSpace($script:AcctFolder)) { return }
+        if ([String]::IsNullOrWhiteSpace($script:Acct.Folder)) { return }
 
-        $names = (Get-ChildItem -Path $script:AcctFolder -Directory).BaseName.Replace('!','*')
+        $names = (Get-ChildItem -Path $script:Acct.Folder -Directory).BaseName.Replace('!','*')
         if ($wordToComplete -ne [String]::Empty) {
             $wordToComplete = "^$($wordToComplete.Replace('*','\*').Replace('.','\.'))"
         }

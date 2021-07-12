@@ -8,7 +8,7 @@ function Update-PluginEncryption {
 
     Begin {
         # make sure we have a server configured
-        if (!(Get-PAServer)) {
+        if (-not ($server = Get-PAServer)) {
             throw "No ACME server configured. Run Set-PAServer first."
         }
     }
@@ -34,8 +34,8 @@ function Update-PluginEncryption {
             Write-Debug "Saving account $ID json with null sskey."
             $script:Acct | Add-Member 'sskey' $null -Force
         }
-        $acctFolder = Join-Path (Get-DirFolder) $ID
-        $script:Acct | ConvertTo-Json -Depth 5 | Out-File (Join-Path $acctFolder 'acct.json') -Force -EA Stop
+        $acctFile = Join-Path $server.Folder "$ID\acct.json"
+        $script:Acct | Select-Object -Exclude id,Folder | ConvertTo-Json -Depth 5 | Out-File $acctFile -Force -EA Stop
 
         # re-export all the plugin args
         if ($orderData.Count -gt 0) {
