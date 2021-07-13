@@ -2,6 +2,7 @@ function Export-PAAccountKey {
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Position=0)]
+        [Alias('Name')]
         [string]$ID,
         [Parameter(Mandatory)]
         [string]$OutputFile,

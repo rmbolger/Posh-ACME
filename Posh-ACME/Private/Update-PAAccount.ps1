@@ -2,6 +2,7 @@ function Update-PAAccount {
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [Alias('Name')]
         [string]$ID
     )
 

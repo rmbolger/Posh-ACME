@@ -2,6 +2,7 @@ function Update-PluginEncryption {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [Alias('Name')]
         [string]$ID,
         [string]$NewKey
     )
