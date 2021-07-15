@@ -4,7 +4,9 @@ This plugin works against the [Beget.com](https://beget.com/) provider. It is as
 
 ## Setup
 
-There is no special setup required to use this plugin. The API uses the same credentials that are used to login to the web control panel.
+It is possible to use this plugin using the same credentials that are used to login to the web control panel. However, it is recommended to setup a separate password for API access and also limit the permissions.
+
+To do this, go to your [Beget API settings](https://cp.beget.com/settings/access/api) and select "Use separate password". After setting the password, uncheck all of the Permitted Methods except for "DNS management" and click the `Apply` button.
 
 **IMPORTANT:** There are some limitations with how the Beget API works that make it risky to use when using [DNS Challenge Aliases](https://github.com/rmbolger/Posh-ACME/blob/main/Tutorial.md#advanced-dns-challenge-aliases). If you need to use this plugin with challenge aliases, the value for the DnsAlias must not contain any other record types or TXT values because they will likely be deleted when the plugin attempts to create the TXT records.
 
