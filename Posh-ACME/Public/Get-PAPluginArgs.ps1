@@ -3,7 +3,9 @@ function Get-PAPluginArgs {
     [CmdletBinding()]
     param(
         [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
-        [string]$MainDomain
+        [string]$MainDomain,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]$Name
     )
 
     Begin {
@@ -17,26 +19,20 @@ function Get-PAPluginArgs {
     Process {
         trap { $PSCmdlet.ThrowTerminatingError($PSItem) }
 
-        # throw an error if there's no current order and no MainDomain passed in
-        if (-not $script:Order -and -not $MainDomain) {
-            throw "No ACME order configured. Run Set-PAOrder, New-PAOrder, or specify a MainDomain."
+        # try to find an order using the specified parameters
+        $order = Get-PAOrder @PSBoundParameters
+
+        if (-not $order) {
+            if (-not $MainDomain -and -not $Name) {
+                Write-Warning "No ACME order configured. Run Set-PAOrder or New-PAOrder first."
+            } else {
+                Write-Warning "No ACME order found using the specified parameters."
+            }
+            return
         }
 
-        # use the current order if something else wasn't specified
-        if (-not $MainDomain) {
-            $MainDomain = $script:Order.MainDomain
-        } else {
-            $WarnOnMissing = $true
-        }
-
-        $orderFolder = $MainDomain | Get-OrderFolder
-        $pDataFile = Join-Path $orderFolder 'pluginargs.json'
+        $pDataFile = Join-Path $order.Folder 'pluginargs.json'
         $pData = @{}
-
-        # write a warning if they specified an order and it doesn't exist
-        if ($WarnOnMissing -and -not (Test-Path $orderFolder -PathType Container)) {
-            Write-Warning "No order found for $MainDomain in $orderFolder"
-        }
 
         if (Test-Path $pDataFile -PathType Leaf) {
 
@@ -88,5 +84,35 @@ function Get-PAPluginArgs {
     <#
     .SYNOPSIS
         Retrieve the plugin args for the current or specified order.
+
+    .DESCRIPTION
+        An easy way to recall the plugin args used for a given order.
+
+    .PARAMETER MainDomain
+        The primary domain for the order. For a SAN order, this was the first domain in the list when creating the order.
+
+    .PARAMETER Name
+        The friendly name of the order.
+
+    .EXAMPLE
+        Get-PAPluginArgs
+
+        Retrieve the plugin args for the current order.
+
+    .EXAMPLE
+        Get-PAPluginArgs -Name myorder
+
+        Retrieve the plugin args for the specified order.
+
+    .EXAMPLE
+        Get-PAOrder -Name myorder | Get-PAPluginArgs
+
+        Retrieve the plugin args for the order passed via the pipeline.
+
+    .LINK
+        Project: https://github.com/rmbolger/Posh-ACME
+
+    .LINK
+        Gew-PAOrder
     #>
 }

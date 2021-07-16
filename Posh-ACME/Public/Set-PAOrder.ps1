@@ -288,7 +288,7 @@ function Set-PAOrder {
             } catch { throw }
 
             # refresh the order
-            Update-PAOrder $order.MainDomain
+            Update-PAOrder $order.Name
 
         }
 

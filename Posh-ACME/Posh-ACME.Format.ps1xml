@@ -69,11 +69,11 @@
                 <TableRowEntries>
                     <TableRowEntry>
                         <TableColumnItems>
+                            <TableColumnItem><PropertyName>Name</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>MainDomain</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>status</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>KeyLength</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>SANs</PropertyName></TableColumnItem>
-                            <TableColumnItem><PropertyName>OCSPMustStaple</PropertyName></TableColumnItem>
                             <TableColumnItem>
                                 <ScriptBlock>
                                     if ($_.CertExpires) { Get-Date $_.CertExpires } else { $_.CertExpires }

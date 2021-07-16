@@ -113,10 +113,10 @@ function Import-PAConfig {
     if ($ImportOrder -or $Level -eq 'Order') {
 
         # load the current order into memory if it exists on disk
-        $domain = [string](Get-Content (Join-Path $script:Acct.Folder 'current-order.txt') -EA Ignore)
-        if (![string]::IsNullOrWhiteSpace($domain)) {
+        $orderName = [string](Get-Content (Join-Path $script:Acct.Folder 'current-order.txt') -EA Ignore)
+        if (-not [string]::IsNullOrWhiteSpace($orderName)) {
 
-            $script:Order = Get-PAOrder $domain
+            $script:Order = Get-PAOrder -Name $orderName
 
         } else {
             # wipe references since we have no current order
