@@ -116,6 +116,10 @@ function Import-PAConfig {
         $orderName = [string](Get-Content (Join-Path $script:Acct.Folder 'current-order.txt') -EA Ignore)
         if (-not [string]::IsNullOrWhiteSpace($orderName)) {
 
+            # replace wildcard characters to filesystem friendly ! characters
+            # for 4.5 and earlier compatibility
+            $orderName = $orderName.Replace('*','!')
+
             $script:Order = Get-PAOrder -Name $orderName
 
         } else {
