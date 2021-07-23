@@ -257,7 +257,7 @@ function Set-PAAccount {
 
                 # update the current account ref if necessary
                 $curAcctFile = (Join-Path $server.Folder 'current-account.txt')
-                if ($acct.id -eq (Get-Content $curAcctFile)) {
+                if ($acct.id -ne (Get-Content $curAcctFile -EA Ignore)) {
                     Write-Debug "Updating current-account.txt"
                     $NewName | Out-File $curAcctFile -Force -EA Stop
                 }
