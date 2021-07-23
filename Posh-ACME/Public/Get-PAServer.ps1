@@ -27,7 +27,9 @@ function Get-PAServer {
 
             # read the contents of each server's dir.json
             Write-Debug "Loading PAServer list from disk"
-            Get-ChildItem (Join-Path (Get-ConfigRoot) '\*\dir.json') | ForEach-Object {
+            Get-ChildItem (Join-Path (Get-ConfigRoot) '\*\dir.json') |
+                Sort-Object {$_.Directory.Name} |
+                ForEach-Object {
 
                 # parse the json
                 $dirObj = $_ | Get-Content -Raw | ConvertFrom-Json
