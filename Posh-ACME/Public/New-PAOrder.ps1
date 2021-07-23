@@ -12,6 +12,7 @@ function New-PAOrder {
         [string]$KeyLength='2048',
         [Parameter(ParameterSetName='ImportKey',Mandatory)]
         [string]$KeyFile,
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
         [string]$Name,
         [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
         [string[]]$Plugin,
@@ -273,7 +274,7 @@ function New-PAOrder {
     # save it to memory and disk
     $order.Name | Out-File (Join-Path $acct.Folder 'current-order.txt') -Force -EA Stop
     $script:Order = $order
-    Update-PAOrder -SaveOnly
+    Update-PAOrder $order -SaveOnly
 
     # export plugin args now that the order exists on disk
     if ('PluginArgs' -in $PSBoundParameters.Keys) {

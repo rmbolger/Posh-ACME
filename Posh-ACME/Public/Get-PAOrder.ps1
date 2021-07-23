@@ -5,6 +5,7 @@ function Get-PAOrder {
         [Parameter(ParameterSetName='Specific',Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$MainDomain,
         [Parameter(ParameterSetName='Specific',ValueFromPipelineByPropertyName)]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
         [string]$Name,
         [Parameter(ParameterSetName='List',Mandatory)]
         [switch]$List,
@@ -93,7 +94,7 @@ function Get-PAOrder {
             if ($order -and $Refresh) {
 
                 # update and then recurse to return the updated data
-                Update-PAOrder $order.Name
+                Update-PAOrder $order
                 Get-PAOrder -List | Where-Object { $_.Name -eq $order.Name }
 
             } else {

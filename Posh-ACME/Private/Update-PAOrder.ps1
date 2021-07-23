@@ -1,8 +1,8 @@
 function Update-PAOrder {
     [CmdletBinding(SupportsShouldProcess)]
     param(
-        [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
-        [string]$Name,
+        [Parameter(Mandatory,Position=0,ValueFromPipeline)]
+        [PSTypeName('PoshACME.PAOrder')]$Order,
         [switch]$SaveOnly
     )
 
@@ -14,27 +14,6 @@ function Update-PAOrder {
     }
 
     Process {
-
-        # grab the order from explicit parameters or the current memory copy
-        if (-not $Name) {
-            if (-not $script:Order) {
-                Write-Warning "No ACME order configured. Run Set-PAOrder or specify a Name."
-                return
-            }
-            $order = $script:Order
-        } else {
-            # return the current order if it matches the specified Name
-            if ($script:Order -and $script:Order.Name -eq $Name) {
-                $order = $script:Order
-            } else {
-                # or try and find it
-                $order = Get-PAOrder -Name $Name
-                if ($null -eq $order) {
-                    Write-Warning "Specified order '$Name' was not found. Nothing to update."
-                    return
-                }
-            }
-        }
 
         if (-not $SaveOnly -and
             (-not $order.expires -or (Get-DateTimeOffsetNow) -lt ([DateTimeOffset]::Parse($order.expires))) )
@@ -61,10 +40,10 @@ function Update-PAOrder {
             $respObj = $response.Content | ConvertFrom-Json
 
             # update the things that could have changed
-            $order.status = $respObj.status
-            $order.expires = Repair-ISODate $respObj.expires
+            $order | Add-Member 'status' $respObj.status -Force
+            $order | Add-Member 'expires' (Repair-ISODate $respObj.expires) -Force
             if ($respObj.certificate) {
-                $order.certificate = $respObj.certificate
+                $order | Add-Member 'certificate' $respObj.certificate -Force
             }
 
         } elseif (-not $SaveOnly) {
