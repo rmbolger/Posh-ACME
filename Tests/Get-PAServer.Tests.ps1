@@ -27,16 +27,16 @@ Describe "Get-PAServer" {
         It "Returns No Results for Specific Server" -ForEach @(
             @{ splat = @{ DirectoryUrl='LE_STAGE'                                                             } }
             @{ splat = @{ DirectoryUrl='https://acme.test/directory'                                          } }
-            @{ splat = @{ DirectoryUrl='https://acme.test/directory'; Name='test1'                            } }
-            @{ splat = @{                                             Name='test1'                            } }
+            @{ splat = @{ DirectoryUrl='https://acme.test/directory'; Name='srvr1'                            } }
+            @{ splat = @{                                             Name='srvr1'                            } }
             @{ splat = @{ DirectoryUrl='LE_STAGE';                                  Quiet=$true               } }
             @{ splat = @{ DirectoryUrl='https://acme.test/directory';               Quiet=$true               } }
-            @{ splat = @{ DirectoryUrl='https://acme.test/directory'; Name='test1'; Quiet=$true               } }
-            @{ splat = @{                                             Name='test1'; Quiet=$true               } }
+            @{ splat = @{ DirectoryUrl='https://acme.test/directory'; Name='srvr1'; Quiet=$true               } }
+            @{ splat = @{                                             Name='srvr1'; Quiet=$true               } }
             @{ splat = @{ DirectoryUrl='LE_STAGE';                                              Refresh=$true } }
             @{ splat = @{ DirectoryUrl='https://acme.test/directory';                           Refresh=$true } }
-            @{ splat = @{ DirectoryUrl='https://acme.test/directory'; Name='test1';             Refresh=$true } }
-            @{ splat = @{                                             Name='test1';             Refresh=$true } }
+            @{ splat = @{ DirectoryUrl='https://acme.test/directory'; Name='srvr1';             Refresh=$true } }
+            @{ splat = @{                                             Name='srvr1';             Refresh=$true } }
         ) {
             Get-PAServer @splat | Should -BeNullOrEmpty
             if ($splat.Quiet) {
@@ -67,8 +67,8 @@ Describe "Get-PAServer" {
 
             $dir                       | Should -Not -BeNullOrEmpty
             $dir.PSObject.TypeNames[0] | Should -Be 'PoshACME.PAServer'
-            $dir.Name                  | Should -Be 'test1'
-            $dir.Folder                | Should -Be (Join-Path $TestDrive 'test1')
+            $dir.Name                  | Should -Be 'srvr1'
+            $dir.Folder                | Should -Be (Join-Path $TestDrive 'srvr1')
             $dir.location              | Should -Be 'https://acme.test/directory'
             $dir.SkipCertificateCheck  | Should -BeFalse
             $dir.DisableTelemetry      | Should -BeFalse
@@ -101,15 +101,15 @@ Describe "Get-PAServer" {
 
         It "Returns Specific Server" -ForEach @(
             @{ splat = @{ DirectoryUrl='LE_STAGE'                                                 }; Name='le-stage' }
-            @{ splat = @{ DirectoryUrl='https://acme.test/directory'                              }; Name='test1'    }
-            @{ splat = @{ DirectoryUrl='https://acme.test/directory'; Name='test1'                }; Name='test1'    }
-            @{ splat = @{                                             Name='test1'                }; Name='test1'    }
+            @{ splat = @{ DirectoryUrl='https://acme.test/directory'                              }; Name='srvr1'    }
+            @{ splat = @{ DirectoryUrl='https://acme.test/directory'; Name='srvr1'                }; Name='srvr1'    }
+            @{ splat = @{                                             Name='srvr1'                }; Name='srvr1'    }
             @{ splat = @{ DirectoryUrl='LE_STAGE';                                  Refresh=$true }; Name='le-stage' }
-            @{ splat = @{ DirectoryUrl='https://acme.test/directory';               Refresh=$true }; Name='test1'    }
-            @{ splat = @{ DirectoryUrl='https://acme.test/directory'; Name='test1'; Refresh=$true }; Name='test1'    }
-            @{ splat = @{                                             Name='test1'; Refresh=$true }; Name='test1'    }
-            @{ splat = @{ DirectoryUrl='https://acme2.test/directory'                             }; Name='test2'    }
-            @{ splat = @{                                             Name='test2';               }; Name='test2'    }
+            @{ splat = @{ DirectoryUrl='https://acme.test/directory';               Refresh=$true }; Name='srvr1'    }
+            @{ splat = @{ DirectoryUrl='https://acme.test/directory'; Name='srvr1'; Refresh=$true }; Name='srvr1'    }
+            @{ splat = @{                                             Name='srvr1'; Refresh=$true }; Name='srvr1'    }
+            @{ splat = @{ DirectoryUrl='https://acme2.test/directory'                             }; Name='srvr2'    }
+            @{ splat = @{                                             Name='srvr2';               }; Name='srvr2'    }
         ) {
             $dir = Get-PAServer @splat
 
@@ -123,6 +123,12 @@ Describe "Get-PAServer" {
                 Should -Invoke Set-PAServer -Exactly 1 -ModuleName Posh-ACME
             } else {
                 Should -Not -Invoke Set-PAServer -ModuleName Posh-ACME
+            }
+
+            # make sure flag values are true on srvr2
+            if ($Name -eq 'srvr2') {
+                $dir.SkipCertificateCheck | Should -BeTrue
+                $dir.DisableTelemetry     | Should -BeTrue
             }
 
         }
