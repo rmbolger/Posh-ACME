@@ -29,6 +29,12 @@ function Update-PAAccount {
             }
         }
 
+        # skip refreshing non-valid accounts
+        if ($acct.status -ne 'valid') {
+            Write-Warning "Account '$($acct.id)' has status '$($acct.status)'. Skipping server refresh."
+            return
+        }
+
         Write-Debug "Refreshing account $($acct.id)"
 
         # build the header

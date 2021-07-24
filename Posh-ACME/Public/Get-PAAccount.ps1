@@ -24,7 +24,7 @@ function Get-PAAccount {
 
     Begin {
         # make sure we have a server configured
-        if (!($server = Get-PAServer)) {
+        if (-not ($server = Get-PAServer)) {
             try { throw "No ACME server configured. Run Set-PAServer first." }
             catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
@@ -83,9 +83,9 @@ function Get-PAAccount {
             # filter by Contact if specified
             if ('Contact' -in $PSBoundParameters.Keys) {
                 if (-not $Contact) {
-                    $accts = $accts | Where-Object { $_.contact.count -eq 0 }
+                    $accts = $accts | Where-Object { $_.contact.Count -eq 0 }
                 } else {
-                    $accts = $accts | Where-Object { $_.contact.count -gt 0 -and $null -eq (Compare-Object $Contact $_.contact) }
+                    $accts = $accts | Where-Object { $_.contact.Count -gt 0 -and $null -eq (Compare-Object $Contact $_.contact) }
                 }
             }
 
@@ -119,7 +119,7 @@ function Get-PAAccount {
                 $acct = $script:Acct
             }
 
-            if ($acct -and $Refresh) {
+            if ($acct -and $Refresh -and $acct.status -eq 'valid') {
 
                 # update and then recurse to return the updated data
                 Update-PAAccount $acct.id

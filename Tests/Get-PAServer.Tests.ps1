@@ -90,6 +90,8 @@ Describe "Get-PAServer" {
             $dirs                          | Should -Not -BeNullOrEmpty
             $dirs.Count                    | Should -Be 3
             $dirs[0].PSObject.TypeNames[0] | Should -Be 'PoshACME.PAServer'
+            $dirs[1].PSObject.TypeNames[0] | Should -Be 'PoshACME.PAServer'
+            $dirs[2].PSObject.TypeNames[0] | Should -Be 'PoshACME.PAServer'
 
             Should -Not -Invoke Write-Warning -ModuleName Posh-ACME
             if ($splat.Refresh) {
