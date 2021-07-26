@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.5.0'
+ModuleVersion = '4.6.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -82,19 +82,17 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.5.0 (2021-05-29)
+## 4.6.0 (2021-07-25)
 
 * Added new DNS plugins
-  * Aurora for [PCExtreme](https://pcextreme.nl/) (Thanks @j81blog)
-  * [UKFast](https://ukfast.co.uk/) (Thanks @Overglazed)
-* Added new function `Revoke-PACertificate` which provides more options for cert revocation including the ability to revoke certs not created with other clients or ACME accounts if you have the private key.
-* Added `ManualNonInteractive` switch to the Manual plugin to suppress the interactive prompt after showing the TXT record details that need to be created. (Thanks @hhhuut)
-* Added additional guidance in the plugin dev guide.
-* Optimized module load time by pre-caching native plugin details.
-* Fixed support for IDN domains in Simply plugin (Thanks @Norskov)
-* Fixed Azure plugin bug when DnsAlias matches the zone apex. (#348)
-* Fixed Azure plugin to support IMDS auth within Azure Automation. (#349)
-* Fixed tests for Pester 5.2
+  * [HostingDe](https://hosting.de/)
+  * [Beget](https://beget.com/)
+* Revoke-PACertificate no longer requires a configured account when using an explicit cert/key (#361)
+* Fixed Aurora plugin for edge case bug with PowerShell Core (#353)
+* Fixed DirectoryUrl completers in PS 5.1 when no servers currently exist.
+* Fixed unauthenticated updates with RFC2136 plugin (#360) (Thanks @dsbibby)
+* Refactored Simply plugin to be IDN agnostic and redact API keys from logging (#352)
+* ACME errors from New-PAAccount should be less ugly now.
 '@
 
     }

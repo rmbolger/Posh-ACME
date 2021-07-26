@@ -1,3 +1,15 @@
+## 4.6.0 (2021-07-25)
+
+* Added new DNS plugins
+  * [HostingDe](https://hosting.de/)
+  * [Beget](https://beget.com/)
+* Revoke-PACertificate no longer requires a configured account when using an explicit cert/key (#361)
+* Fixed Aurora plugin for edge case bug with PowerShell Core (#353)
+* Fixed DirectoryUrl completers in PS 5.1 when no servers currently exist.
+* Fixed unauthenticated updates with RFC2136 plugin (#360) (Thanks @dsbibby)
+* Refactored Simply plugin to be IDN agnostic and redact API keys from logging (#352)
+* ACME errors from New-PAAccount should be less ugly now.
+
 ## 4.5.0 (2021-05-29)
 
 * Added new DNS plugins
