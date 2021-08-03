@@ -228,7 +228,7 @@ function Invoke-HttpChallengeListener {
         The primary domain associated with an order.
 
     .PARAMETER Name
-        The friendly name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
+        The name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
 
     .PARAMETER ListenerTimeout
         The timeout in seconds for the webserver. When reached, the http listener stops regardless of challenge status.

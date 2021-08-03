@@ -206,10 +206,10 @@ function Set-PAServer {
         Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production v2), LE_STAGE (LetsEncrypt Staging v2), BUYPASS_PROD (BuyPass.com Production), and BUYPASS_TEST (BuyPass.com Testing).
 
     .PARAMETER Name
-        The friendly name for this ACME server. The parameter is ignored if DirectoryUrl is specified.
+        The name of the ACME server. The parameter is ignored if DirectoryUrl is specified.
 
     .PARAMETER NewName
-        Use this to change the friendly name of this ACME server.
+        The new name of this ACME server.
 
     .PARAMETER SkipCertificateCheck
         If specified, disable certificate validation while using this server. This should not be necessary except in development environments where you are connecting to a self-hosted ACME server.

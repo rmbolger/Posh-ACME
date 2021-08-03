@@ -110,7 +110,7 @@ function Get-PACertificate {
         The primary domain associated with the certificate. This is the domain that goes in the certificate's subject.
 
     .PARAMETER Name
-        The friendly name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
+        The name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
 
     .PARAMETER List
         If specified, the details for all completed certificates will be returned for the current account.

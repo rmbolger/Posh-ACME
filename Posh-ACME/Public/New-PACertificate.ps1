@@ -6,6 +6,8 @@ function New-PACertificate {
         [string[]]$Domain,
         [Parameter(ParameterSetName='FromCSR',Mandatory,Position=0)]
         [string]$CSRPath,
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [string]$Name,
         [string[]]$Contact,
         [Parameter(ParameterSetName='FromScratch')]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
@@ -260,6 +262,9 @@ function New-PACertificate {
 
     .PARAMETER CSRPath
         The path to a pre-made certificate request file in PEM (Base64) format. This is useful for appliances that need to generate their own keys and cert requests.
+
+    .PARAMETER Name
+        The name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
 
     .PARAMETER Contact
         One or more email addresses to associate with this certificate. These addresses will be used by the ACME server to send certificate expiration notifications or other important account notices.

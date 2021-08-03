@@ -109,7 +109,7 @@ function Remove-PAServer {
         Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production v2) and LE_STAGE (LetsEncrypt Staging v2).
 
     .PARAMETER Name
-        The friendly name for this ACME server. The parameter is ignored if DirectoryUrl is specified.
+        The name of the ACME server. The parameter is ignored if DirectoryUrl is specified.
 
     .PARAMETER DeactivateAccounts
         If specified, an attempt will be made to deactivate the accounts in this profile before deletion. Clients may wish to do this if the account key is compromised or being decommissioned.

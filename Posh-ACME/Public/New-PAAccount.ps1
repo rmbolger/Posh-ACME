@@ -153,7 +153,7 @@ function New-PAAccount {
     # not require this and Boulder will be removing it. But it's still a useful value to have
     # as a simpler identifier/name for referencing accounts than a full URL. So if it's not
     # returned and the user didn't provide an explicit ID value to use, we're going to try
-    # and parse it from the location header. This may come back to haunt us if other ACME 
+    # and parse it from the location header. This may come back to haunt us if other ACME
     # providers use different location schemes in the future.
 
     if (-not $respObj.ID) {
@@ -229,7 +229,7 @@ function New-PAAccount {
         The path to an existing EC or RSA private key file. This will attempt to create the account using the specified key as the ACME account key. This can be used to recover/import an existing ACME account if one is already associated with the key.
 
     .PARAMETER ID
-        The friendly name for this acccount.
+        The name of the ACME acccount.
 
     .PARAMETER AcceptTOS
         If not specified, the ACME server will throw an error with a link to the current Terms of Service. Using this switch indicates acceptance of those Terms of Service and is required for successful account creation.

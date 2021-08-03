@@ -331,7 +331,7 @@ function Set-PAOrder {
         The primary domain for the order. For a SAN order, this was the first domain in the list when creating the order.
 
     .PARAMETER Name
-        The friendly name for this order. This can be useful to distinguish between two orders that have the same MainDomain. If not specified and there are more than one order matching MainDomain, an error is thrown.
+        The name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
 
     .PARAMETER RevokeCert
         If specified, a request will be sent to the associated ACME server to revoke the certificate on this order. Clients may wish to do this if the certificate is decommissioned or the private key has been compromised. A warning will be displayed if the order is not currently valid or the existing certificate file can't be found.
@@ -352,16 +352,16 @@ function Set-PAOrder {
         One or more FQDNs that DNS challenges should be published to instead of the certificate domain's zone. This is used in advanced setups where a CNAME in the certificate domain's zone has been pre-created to point to the alias's FQDN which makes the ACME server check the alias domain when validation challenge TXT records. If the same alias is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many alias FQDNs as there are domains in the order and in the same sequence as the order.
 
     .PARAMETER NewName
-        A new friendly name for this order.
+        The new name for this ACME order.
 
     .PARAMETER FriendlyName
-        Modify the friendly name for the certificate and subsequent renewals. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Must not be an empty string.
+        The friendly name for the certificate and subsequent renewals. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Must not be an empty string.
 
     .PARAMETER PfxPass
-        Modify the PFX password for the certificate and subsequent renewals. When the PfxPassSecure parameter is specified, this parameter is ignored.
+        The PFX password for the certificate and subsequent renewals. When the PfxPassSecure parameter is specified, this parameter is ignored.
 
     .PARAMETER PfxPassSecure
-        Modify the PFX password for the certificate and subsequent renewals using a SecureString value. When this parameter is specified, the PfxPass parameter is ignored.
+        The PFX password for the certificate and subsequent renewals using a SecureString value. When this parameter is specified, the PfxPass parameter is ignored.
 
     .PARAMETER Install
         Enables the Install switch for the order. Use -Install:$false to disable the switch on the order. This affects whether the module will automatically import the certificate to the Windows certificate store on subsequent renewals. It will not import the current certificate if it exists. Use Install-PACertificate for that purpose.

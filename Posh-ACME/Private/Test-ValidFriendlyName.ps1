@@ -6,7 +6,7 @@ function Test-ValidFriendlyName {
         [switch]$ThrowOnFail
     )
 
-    # Since our friendly names ultimately correspond to filesystem paths,
+    # Since our object names ultimately correspond to filesystem paths,
     # we want to be overly cautious with the characters we allow so things
     # remain cross-platform friendly. We're also going to exclude some
     # characters that are technically cross-platform friendly but have special

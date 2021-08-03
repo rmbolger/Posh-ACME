@@ -294,7 +294,7 @@ function Set-PAAccount {
         One or more email addresses to associate with this account. These addresses will be used by the ACME server to send certificate expiration notifications or other important account notices.
 
     .PARAMETER NewName
-        Use this to change the friendly name (id) of this ACME account.
+        The new name (id) of this ACME account.
 
     .PARAMETER UseAltPluginEncryption
         If specified, the account will be configured to use a randomly generated AES key to encrypt sensitive plugin parameters on disk instead of using the OS's native encryption methods. This can be useful if the config is being shared across systems or platforms. You can revert to OS native encryption using -UseAltPluginEncryption:$false.

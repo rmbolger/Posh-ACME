@@ -37,7 +37,7 @@ function Get-PAServer {
                 # insert the type name so it displays properly
                 $dirObj.PSObject.TypeNames.Insert(0,'PoshACME.PAServer')
 
-                # add the friendly name and folder
+                # add the name and folder
                 $dirObj | Add-Member 'Name' $_.Directory.Name -Force
                 $dirObj | Add-Member 'Folder' $_.Directory.FullName -Force
 
@@ -105,7 +105,7 @@ function Get-PAServer {
         Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production v2), LE_STAGE (LetsEncrypt Staging v2), BUYPASS_PROD (BuyPass.com Production), and BUYPASS_TEST (BuyPass.com Testing).
 
     .PARAMETER Name
-        The friendly name of the ACME server. The parameter is ignored if DirectoryUrl is specified.
+        The name of the ACME server. The parameter is ignored if DirectoryUrl is specified.
 
     .PARAMETER List
         If specified, the details for all previously used servers will be returned.

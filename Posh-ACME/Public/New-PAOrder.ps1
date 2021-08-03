@@ -344,7 +344,7 @@ function New-PAOrder {
         The path to an existing EC or RSA private key file. This will attempt to create the order using the specified key as the certificate's private key.
 
     .PARAMETER Name
-        The friendly name for this order. If not specified, defaults to the first domain in the order.
+        The name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain. If not specified, defaults to the first domain in the order.
 
     .PARAMETER Plugin
         One or more validation plugin names to use for this order's challenges. If no plugin is specified, the DNS "Manual" plugin will be used. If the same plugin is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many plugin names as there are domains in the order and in the same sequence as the order.

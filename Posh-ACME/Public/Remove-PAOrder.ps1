@@ -69,7 +69,7 @@ function Remove-PAOrder {
         The primary domain for the order. For a SAN order, this was the first domain in the list when creating the order.
 
     .PARAMETER Name
-        The friendly name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
+        The name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
 
     .PARAMETER RevokeCert
         If specified and there is a currently valid certificate associated with the order, the certificate will be revoked before deleting the order. This is not required, but generally a good practice if the certificate is no longer being used.
