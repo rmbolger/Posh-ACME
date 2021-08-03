@@ -3,13 +3,15 @@ function Remove-PAOrder {
     param(
         [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$MainDomain,
+        [Parameter(Position=1,ValueFromPipelineByPropertyName)]
+        [string]$Name,
         [switch]$RevokeCert,
         [switch]$Force
     )
 
     Begin {
         # Make sure we have an account configured
-        if (!(Get-PAAccount)) {
+        if (-not ($acct = Get-PAAccount)) {
             try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
             catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
@@ -18,8 +20,11 @@ function Remove-PAOrder {
     Process {
 
         # grab a copy of the order
-        if (!($order = Get-PAOrder $MainDomain)) {
-            Write-Warning "Specified order for $MainDomain was not found."
+        $orderArgs = @{}
+        if ($MainDomain) { $orderArgs.MainDomain = $MainDomain }
+        if ($Name)       { $orderArgs.Name       = $Name }
+        if (-not ($order = Get-PAOrder @orderArgs)) {
+            Write-Warning "No order found for the specified parameters."
             return
         }
 
@@ -29,24 +34,24 @@ function Remove-PAOrder {
         }
 
         # confirm deletion unless -Force was used
-        if (!$Force) {
+        if (-not $Force) {
             $msg = "Deleting an order will also delete the certificate and key if they exist."
-            $question = "Are you sure you wish to delete $($order.MainDomain)?"
-            if (!$PSCmdlet.ShouldContinue($question,$msg)) {
-                Write-Verbose "Order deletion aborted for $($order.MainDomain)."
+            $question = "Are you sure you wish to delete order '$($order.Name)'?"
+            if (-not $PSCmdlet.ShouldContinue($question,$msg)) {
+                Write-Verbose "Order deletion aborted for '$($order.Name)'."
                 return
             }
         }
 
-        Write-Verbose "Deleting order for $($order.MainDomain)"
+        Write-Verbose "Deleting order '$($order.Name)'"
 
         # delete the order's folder
         Remove-Item $order.Folder -Force -Recurse
 
         # unset the current order if it was this one
-        if ($script:Order -and $script:Order.MainDomain -eq $order.MainDomain) {
+        if ($script:Order -and $script:Order.Name -eq $order.Name) {
             $order = $null
-            Remove-Item (Join-Path $script:Acct.Folder 'current-order.txt') -Force
+            Remove-Item (Join-Path $acct.Folder 'current-order.txt') -Force
             Import-PAConfig -Level 'Order'
         }
 
@@ -61,6 +66,9 @@ function Remove-PAOrder {
 
     .PARAMETER MainDomain
         The primary domain for the order. For a SAN order, this was the first domain in the list when creating the order.
+
+    .PARAMETER Name
+        The friendly name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
 
     .PARAMETER RevokeCert
         If specified and there is a currently valid certificate associated with the order, the certificate will be revoked before deleting the order. This is not required, but generally a good practice if the certificate is no longer being used.
