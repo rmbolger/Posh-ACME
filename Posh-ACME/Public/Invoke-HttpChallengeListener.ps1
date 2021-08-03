@@ -2,9 +2,11 @@ function Invoke-HttpChallengeListener {
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType('PoshACME.PAAuthorization')]
     param (
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [Alias('domain', 'fqdn')]
         [string]$MainDomain,
+        [Parameter(Position=1,ValueFromPipelineByPropertyName)]
+        [string]$Name,
         [Parameter()]
         [Alias('TTL')]
         [ValidateRange(0, [int]::MaxValue)]
@@ -46,17 +48,12 @@ function Invoke-HttpChallengeListener {
         $prevRunTime = 0
 
         # get a reference to the order we're going to use
-        if (-not $MainDomain) {
-            # grab the current order and set $MainDomain
-            $order = Get-PAOrder
-            $MainDomain = $order.MainDomain
-        }
-        else {
-            # try to get the order specified by $MainDomain
-            if (-not ($order = Get-PAOrder -MainDomain $MainDomain)) {
-                try { throw "No order found for domain $MainDomain" }
-                catch { $PSCmdlet.ThrowTerminatingError($_) }
-            }
+        $orderArgs = @{}
+        if ($MainDomain) { $orderArgs.MainDomain = $MainDomain }
+        if ($Name)       { $orderArgs.Name       = $Name }
+        if (-not ($order = Get-PAOrder @orderArgs)) {
+            try { throw "No order found for the specified parameters." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         # get pending authorizations for the order
@@ -65,7 +62,7 @@ function Invoke-HttpChallengeListener {
 
         # return if there's nothing to do
         if ($openAuthorizations.Count -eq 0) {
-            Write-Warning "No pending authorizations found for Domain `"$MainDomain`""
+            Write-Warning "No pending authorizations found for order '$($order.Name)'"
             return
         }
         Write-Verbose ('Authorizations found with HTTP01Status pending: {0}' -f $openAuthorizations.Count)
@@ -210,7 +207,7 @@ function Invoke-HttpChallengeListener {
                 $httpListener.Dispose()
             }
 
-            # return PAAuthorizations for MainDomain if output may be used in a variable/pipe
+            # return PAAuthorizations for the order if output may be used in a variable/pipe
             $order | Get-PAAuthorization -Verbose:$false
         }
     }
@@ -228,6 +225,9 @@ function Invoke-HttpChallengeListener {
 
     .PARAMETER MainDomain
         The primary domain associated with an order.
+
+    .PARAMETER Name
+        The friendly name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
 
     .PARAMETER ListenerTimeout
         The timeout in seconds for the webserver. When reached, the http listener stops regardless of challenge status.
