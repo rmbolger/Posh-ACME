@@ -3,6 +3,8 @@ function Submit-Renewal {
     param(
         [Parameter(ParameterSetName='Specific',Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$MainDomain,
+        [Parameter(ParameterSetName='Specific',Position=1,ValueFromPipelineByPropertyName)]
+        [string]$Name,
         [Parameter(ParameterSetName='AllOrders',Mandatory)]
         [switch]$AllOrders,
         [Parameter(ParameterSetName='AllAccounts',Mandatory)]
@@ -28,43 +30,34 @@ function Submit-Renewal {
 
             'Specific' {
 
-                # grab the order from explicit parameters or the current memory copy
-                if (!$MainDomain) {
-                    if (!$script:Order -or !$script:Order.MainDomain) {
-                        try { throw "No ACME order configured. Run Set-PAOrder or specify a MainDomain." }
-                        catch { $PSCmdlet.ThrowTerminatingError($_) }
-                    }
-                    $order = $script:Order
-                } else {
-                    # even if they specified the order explicitly, we may still be updating the
-                    # "current" order. So figure that out because we don't want to read from disk
-                    # if we don't have to
-                    if ($script:Order -and $script:Order.MainDomain -and $script:Order.MainDomain -eq $MainDomain) {
-                        $order = $script:Order
-                    } else {
-                        $order = Get-PAOrder $MainDomain
-                    }
+                # grab the order object
+                $orderArgs = @{}
+                if ($MainDomain) { $orderArgs.MainDomain = $MainDomain }
+                if ($Name)       { $orderArgs.Name       = $Name }
+                if (-not ($order = Get-PAOrder @orderArgs)) {
+                    try { throw "No order found for the specified parameters." }
+                    catch { $PSCmdlet.ThrowTerminatingError($_) }
                 }
 
                 # skip if the renewal window hasn't been reached and no -Force
                 if (!$Force -and $null -ne $order.RenewAfter -and (Get-DateTimeOffsetNow) -lt ([DateTimeOffset]::Parse($order.RenewAfter))) {
-                    Write-Warning "Order for $($order.MainDomain) is not recommended for renewal yet. Use -Force to override."
+                    Write-Warning "Order '$($order.Name)' is not recommended for renewal yet. Use -Force to override."
                     return
                 }
 
                 # skip orders with no plugin (likely because they were created using custom processes)
                 if ($null -eq $order.Plugin) {
-                    Write-Warning "Skipping renewal for order $($order.MainDomain) due to null plugin."
+                    Write-Warning "Skipping renewal for order '$($order.Name)' due to null plugin."
                     return
                 }
 
                 # skip orders with a Manual DNS plugin by default because they require interactivity
                 if (!$NoSkipManualDns -and 'Manual' -in @($order.Plugin)) {
-                    Write-Warning "Skipping renewal for order $($order.MainDomain) due to Manual DNS plugin. Use -NoSkipManualDns to avoid this."
+                    Write-Warning "Skipping renewal for order '$($order.Name)' due to Manual DNS plugin. Use -NoSkipManualDns to avoid this."
                     return
                 }
 
-                Write-Verbose "Renewing certificate for order $($order.MainDomain)"
+                Write-Verbose "Renewing certificate for order '$($order.Name)'"
 
                 # If new PluginArgs were specified, store these now.
                 if ($PluginArgs) {
@@ -92,7 +85,7 @@ function Submit-Renewal {
 
                 # common params
                 $certParams.Plugin              = $order.Plugin
-                $certParams.PluginArgs          = Get-PAPluginArgs $order.MainDomain
+                $certParams.PluginArgs          = $order | Get-PAPluginArgs
                 $certParams.DnsAlias            = $order.DnsAlias
                 $certParams.UseSerialValidation = $order.UseSerialValidation
                 $certParams.Force               = $Force.IsPresent
