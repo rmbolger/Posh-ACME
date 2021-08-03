@@ -116,44 +116,6 @@ function Set-PAOrder {
         # check if the specified order matches the current order
         $modCurrentOrder = ($script:Order -and $script:Order.Name -eq $order.Name)
 
-
-        # if ($NoSwitch -and $MainDomain) {
-        #     # This is an explicit non-switching edit, so grab a cached reference
-        #     # to the specified order
-        #     $order = Get-PAOrder $MainDomain
-
-        #     if ($null -eq $order) {
-        #         Write-Warning "Specified order for $MainDomain was not found. No changes made."
-        #         return
-        #     }
-
-        # } elseif (!$script:Order -or ($MainDomain -and ($MainDomain -ne $script:Order.MainDomain))) {
-        #     # This is a definite order switch
-
-        #     # refresh the cached copy
-        #     try {
-        #         Update-PAOrder $MainDomain
-        #     } catch [AcmeException] {
-        #         Write-Warning "Error refreshing order status from ACME server: $($_.Exception.Data.detail)"
-        #     }
-
-        #     Write-Debug "Switching to order $MainDomain"
-
-        #     # save it as current
-        #     $MainDomain | Out-File (Join-Path $script:Acct.Folder 'current-order.txt') -Force -EA Stop
-
-        #     # reload the cache from disk
-        #     Import-PAConfig -Level 'Order'
-
-        #     # grab a local reference to the newly current order
-        #     $order = $script:Order
-
-        # } else {
-        #     # This is a defacto non-switching edit because they didn't
-        #     # specify a MainDomain. So just use the current order.
-        #     $order = $script:Order
-        # }
-
         # Edit or Revoke?
         if ('Edit' -eq $PSCmdlet.ParameterSetName) {
 
@@ -250,7 +212,7 @@ function Set-PAOrder {
 
             # re-export certs if necessary
             if ($rewriteCer -or $rewritePfx) {
-                $cert = Get-PACertificate $order.MainDomain
+                $cert = $order | Get-PACertificate
                 if ($rewriteCer -and $cert) {
                     Export-PACertFiles $order
                 } elseif ($rewritePfx -and $cert) {
@@ -279,7 +241,8 @@ function Set-PAOrder {
             $curOrderFile = (Join-Path $acct.Folder 'current-order.txt')
             if (($modCurrentOrder -or -not $NoSwitch) -and $order.Name -ne (Get-Content $curOrderFile -EA Ignore)) {
                 Write-Debug "Updating current-order.txt"
-                $NewName | Out-File $curOrderFile -Force -EA Stop
+                $order.Name | Out-File $curOrderFile -Force -EA Stop
+                $script:Order = $order
             }
 
 
