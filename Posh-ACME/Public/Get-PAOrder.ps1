@@ -72,7 +72,8 @@ function Get-PAOrder {
             if ($MainDomain) {
 
                 # filter the normal list output
-                $matchingOrders = Get-PAOrder -List | Sort-Object -Descending expires | Where-Object { $_.MainDomain -eq $MainDomain }
+                $matchingOrders = Get-PAOrder -List | Sort-Object -Descending expires |
+                    Where-Object { $_.MainDomain -eq $MainDomain }
 
                 # if Name was also specified, there should only ever be 0 or 1 match, otherwise
                 # pick the first match to retain script compatibility with 4.5 and earlier.
