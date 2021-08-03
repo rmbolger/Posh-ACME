@@ -228,9 +228,9 @@ function Submit-ChallengeValidation {
         Begin challenge validation on the current order.
 
     .EXAMPLE
-        Get-PAOrder 111 | Submit-ChallengeValidation
+        Get-PAOrder | Submit-ChallengeValidation
 
-        Begin challenge validation on the specified order.
+        Begin challenge validation on the current order.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME

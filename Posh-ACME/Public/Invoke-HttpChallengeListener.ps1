@@ -6,6 +6,7 @@ function Invoke-HttpChallengeListener {
         [Alias('domain', 'fqdn')]
         [string]$MainDomain,
         [Parameter(Position=1,ValueFromPipelineByPropertyName)]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
         [string]$Name,
         [Parameter()]
         [Alias('TTL')]

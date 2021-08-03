@@ -5,6 +5,7 @@ function Get-PAPluginArgs {
         [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$MainDomain,
         [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
         [string]$Name
     )
 

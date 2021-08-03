@@ -4,6 +4,7 @@ function Remove-PAOrder {
         [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$MainDomain,
         [Parameter(Position=1,ValueFromPipelineByPropertyName)]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
         [string]$Name,
         [switch]$RevokeCert,
         [switch]$Force

@@ -4,6 +4,7 @@ function Submit-Renewal {
         [Parameter(ParameterSetName='Specific',Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$MainDomain,
         [Parameter(ParameterSetName='Specific',Position=1,ValueFromPipelineByPropertyName)]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
         [string]$Name,
         [Parameter(ParameterSetName='AllOrders',Mandatory)]
         [switch]$AllOrders,

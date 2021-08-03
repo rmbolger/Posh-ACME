@@ -21,8 +21,8 @@ function Get-PAAuthorization {
     Begin {
         # make sure any account passed in is actually associated with the current server
         # or if no account was specified, that there's a current account.
-        if (!$Account) {
-            if (!($Account = Get-PAAccount)) {
+        if (-not $Account) {
+            if (-not ($Account = Get-PAAccount)) {
                 try { throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first." }
                 catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
