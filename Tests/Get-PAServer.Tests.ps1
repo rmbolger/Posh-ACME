@@ -13,7 +13,7 @@ Describe "Get-PAServer" {
             Mock -ModuleName Posh-ACME Set-PAServer {}
         }
 
-        It "Returns No Current or List Results" -ForEach @(
+        It "Returns No Current or List Results" -TestCases @(
             @{ splat = @{                           } }
             @{ splat = @{             Refresh=$true } }
             @{ splat = @{ List=$true                } }
@@ -24,7 +24,7 @@ Describe "Get-PAServer" {
             Should -Not -Invoke Set-PAServer -ModuleName Posh-ACME
         }
 
-        It "Returns No Results for Specific Server" -ForEach @(
+        It "Returns No Results for Specific Server" -TestCases @(
             @{ splat = @{ DirectoryUrl='LE_STAGE'                                                             } }
             @{ splat = @{ DirectoryUrl='https://acme.test/directory'                                          } }
             @{ splat = @{ DirectoryUrl='https://acme.test/directory'; Name='srvr1'                            } }
@@ -59,7 +59,7 @@ Describe "Get-PAServer" {
             Mock -ModuleName Posh-ACME Set-PAServer {}
         }
 
-        It "Returns Current Server" -ForEach @(
+        It "Returns Current Server" -TestCases @(
             @{ splat = @{               } }
             @{ splat = @{ Refresh=$true } }
         ) {
@@ -81,7 +81,7 @@ Describe "Get-PAServer" {
             }
         }
 
-        It "Returns Server List" -ForEach @(
+        It "Returns Server List" -TestCases @(
             @{ splat = @{ List=$true;               } }
             @{ splat = @{ List=$true; Refresh=$true } }
         ) {
@@ -101,7 +101,7 @@ Describe "Get-PAServer" {
             }
         }
 
-        It "Returns Specific Server" -ForEach @(
+        It "Returns Specific Server" -TestCases @(
             @{ splat = @{ DirectoryUrl='LE_STAGE'                                                 }; Name='le-stage' }
             @{ splat = @{ DirectoryUrl='https://acme.test/directory'                              }; Name='srvr1'    }
             @{ splat = @{ DirectoryUrl='https://acme.test/directory'; Name='srvr1'                }; Name='srvr1'    }

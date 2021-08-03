@@ -12,7 +12,7 @@ Describe "Get-PAAccount" {
             Mock -ModuleName Posh-ACME Get-PAServer {}
         }
 
-        It "Throws Error" -ForEach @(
+        It "Throws Error" -TestCases @(
             @{ splat = @{                           } }
             @{ splat = @{             Refresh=$true } }
             @{ splat = @{ ID='acct1';               } }
@@ -36,7 +36,7 @@ Describe "Get-PAAccount" {
             InModuleScope Posh-ACME { Import-PAConfig }
         }
 
-        It "Returns No Results" -ForEach @(
+        It "Returns No Results" -TestCases @(
             @{ splat = @{                           } }
             @{ splat = @{             Refresh=$true } }
             @{ splat = @{ ID='acct1';               } }
@@ -60,7 +60,7 @@ Describe "Get-PAAccount" {
             InModuleScope Posh-ACME { Import-PAConfig }
         }
 
-        It "Returns No Current Results" -ForEach @(
+        It "Returns No Current Results" -TestCases @(
             @{ splat = @{                           } }
             @{ splat = @{             Refresh=$true } }
         ) {
@@ -79,7 +79,7 @@ Describe "Get-PAAccount" {
             Mock -ModuleName Posh-ACME Update-PAAccount {}
         }
 
-        It "Returns Current and Specific Accounts" -ForEach @(
+        It "Returns Current and Specific Accounts" -TestCases @(
             @{ splat = @{                           }; ID='acct1' }
             @{ splat = @{             Refresh=$true }; ID='acct1' }
             @{ splat = @{ ID='acct1';               }; ID='acct1' }
@@ -96,10 +96,10 @@ Describe "Get-PAAccount" {
                 Should -Invoke Update-PAAccount -Exactly 1 -ModuleName Posh-ACME
             } else {
                 Should -Not -Invoke Update-PAAccount -ModuleName Posh-ACME
-            }            
+            }
         }
 
-        It "Returns Correct Account Details" -ForEach @(
+        It "Returns Correct Account Details" -TestCases @(
             @{ id='acct1'; status='valid';       alg='ES256'; KeyLength='ec-256'; location='https://acme.test/acme/acct/11111' }
             @{ id='acct2'; status='valid';       alg='ES384'; KeyLength='ec-384'; location='https://acme.test/acme/acct/22222' }
             @{ id='acct3'; status='deactivated'; alg='ES512'; KeyLength='ec-521'; location='https://acme.test/acme/acct/33333' }
@@ -113,7 +113,7 @@ Describe "Get-PAAccount" {
             $acct.location  | Should -Be $location
         }
 
-        It "Returns List Results" -ForEach @(
+        It "Returns List Results" -TestCases @(
             @{ splat = @{ List=$true                } }
             @{ splat = @{ List=$true; Refresh=$true } }
         ) {
@@ -133,7 +133,7 @@ Describe "Get-PAAccount" {
             }
         }
 
-        It "Returns Filtered List Results" -ForEach @(
+        It "Returns Filtered List Results" -TestCases @(
             @{ splat = @{ List=$true; Status='valid'                                                 }; ResultCount=2 }
             @{ splat = @{ List=$true; Status='deactivated'                                           }; ResultCount=1 }
             @{ splat = @{ List=$true; Status='revoked'                                               }; ResultCount=0 }

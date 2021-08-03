@@ -12,7 +12,7 @@ Describe "Get-PAOrder" {
             Mock -ModuleName Posh-ACME Get-PAServer {}
         }
 
-        It "Throws Error" -ForEach @(
+        It "Throws Error" -TestCases @(
             @{ splat = @{                                                         } }
             @{ splat = @{                                           Refresh=$true } }
             @{ splat = @{ MainDomain='example.com';                               } }
@@ -40,7 +40,7 @@ Describe "Get-PAOrder" {
             InModuleScope Posh-ACME { Import-PAConfig }
         }
 
-        It "Throws Error" -ForEach @(
+        It "Throws Error" -TestCases @(
             @{ splat = @{                                                         } }
             @{ splat = @{                                           Refresh=$true } }
             @{ splat = @{ MainDomain='example.com';                               } }
@@ -68,7 +68,7 @@ Describe "Get-PAOrder" {
             InModuleScope Posh-ACME { Import-PAConfig }
         }
 
-        It "Throws Error" -ForEach @(
+        It "Throws Error" -TestCases @(
             @{ splat = @{                                                         } }
             @{ splat = @{                                           Refresh=$true } }
             @{ splat = @{ MainDomain='example.com';                               } }
@@ -97,7 +97,7 @@ Describe "Get-PAOrder" {
             Mock -ModuleName Posh-ACME Update-PAOrder {}
         }
 
-        It "Returns Nothing for Current" -ForEach @(
+        It "Returns Nothing for Current" -TestCases @(
             @{ splat = @{               } }
             @{ splat = @{ Refresh=$true } }
         ) {
@@ -121,7 +121,7 @@ Describe "Get-PAOrder" {
             Mock -ModuleName Posh-ACME Update-PAOrder {}
         }
 
-        It "Returns Correct Data" -ForEach @(
+        It "Returns Correct Data" -TestCases @(
             @{ splat = @{               } }
             @{ splat = @{ Refresh=$true } }
         ) {
@@ -155,7 +155,7 @@ Describe "Get-PAOrder" {
             Mock -ModuleName Posh-ACME Update-PAOrder {}
         }
 
-        It "Returns Correct Data" -ForEach @(
+        It "Returns Correct Data" -TestCases @(
             @{ splat = @{               } }
             @{ splat = @{ Refresh=$true } }
         ) {
@@ -186,7 +186,7 @@ Describe "Get-PAOrder" {
             Mock -ModuleName Posh-ACME Update-PAOrder {}
         }
 
-        It "Returns Nothing on No Match" -ForEach @(
+        It "Returns Nothing on No Match" -TestCases @(
             @{ splat = @{ MainDomain='fake.test';                                } }
             @{ splat = @{ MainDomain='fake.test';                  Refresh=$true } }
             @{ splat = @{                         Name='fakename';               } }
@@ -199,7 +199,7 @@ Describe "Get-PAOrder" {
             Should -Not -Invoke Update-PAOrder -ModuleName Posh-ACME
         }
 
-        It "Returns Current and Specific Accounts" -ForEach @(
+        It "Returns Current and Specific Accounts" -TestCases @(
             @{ splat = @{                                                         }; Name='example.com'   }
             @{ splat = @{                                           Refresh=$true }; Name='example.com'   }
             @{ splat = @{ MainDomain='example.com';                               }; Name='example.com'   }
@@ -223,7 +223,7 @@ Describe "Get-PAOrder" {
             }
         }
 
-        It "Returns Correct Order Details" -ForEach @(
+        It "Returns Correct Order Details" -TestCases @(
             @{ Name='!.example.com'; idCount=2; MainDomain='*.example.com'; location='https://acme.test/acme/order/22222' }
             @{ Name='altname';       idCount=1; MainDomain='example.com';   location='https://acme.test/acme/order/44444' }
             @{ Name='example.com';   idCount=1; MainDomain='example.com';   location='https://acme.test/acme/order/11111' }
@@ -245,7 +245,7 @@ Describe "Get-PAOrder" {
 
         }
 
-        It "Returns List Results" -ForEach @(
+        It "Returns List Results" -TestCases @(
             @{ splat = @{ List=$true                } }
             @{ splat = @{ List=$true; Refresh=$true } }
         ) {
