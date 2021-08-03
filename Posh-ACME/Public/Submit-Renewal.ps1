@@ -68,7 +68,7 @@ function Submit-Renewal {
 
                 # If new PluginArgs were specified, store these now.
                 if ($PluginArgs) {
-                    Export-PluginArgs $order.MainDomain $order.Plugin $PluginArgs
+                    Export-PluginArgs -Order $order -PluginArgs $PluginArgs
                 }
 
                 # Build the parameter list we're going to send to New-PACertificate

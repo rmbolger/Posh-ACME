@@ -28,7 +28,7 @@ function Get-PAPluginArgs {
             } else {
                 Write-Warning "No ACME order found using the specified parameters."
             }
-            return
+            return @{}
         }
 
         $pDataFile = Join-Path $order.Folder 'pluginargs.json'

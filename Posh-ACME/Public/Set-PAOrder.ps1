@@ -171,7 +171,7 @@ function Set-PAOrder {
 
             if ('PluginArgs' -in $psbKeys) {
                 Write-Verbose "Updating plugin args for plugin(s) $(($order.Plugin -join ','))"
-                Export-PluginArgs $order.MainDomain $order.Plugin $PluginArgs
+                Export-PluginArgs -Order $order -PluginArgs $PluginArgs
             }
 
             if ('DnsAlias' -in $psbKeys) {
@@ -268,7 +268,7 @@ function Set-PAOrder {
                     # rename the dir folder
                     Write-Debug "Renaming '$($order.Name)' order folder to $newFolder"
                     Rename-Item $order.Folder $newFolder
-    
+
                     # update the id/Folder in memory
                     $order.Name = $NewName
                     $order.Folder = $newFolder

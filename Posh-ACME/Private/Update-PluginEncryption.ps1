@@ -20,12 +20,9 @@ function Update-PluginEncryption {
         $revertToAccount = Get-PAAccount
         Set-PAAccount $ID
 
-        # grab a copy of all the orders and their associated plugins/args
-        $orderData = @(Get-PAOrder -List |
-            Select-Object MainDomain,
-                Plugin,
-                @{L='PluginArgs';E={Get-PAPluginArgs $_.MainDomain}})
-        Write-Debug "Order data found for $($orderData.Count) orders."
+        # grab a copy of all the orders
+        $orders = Get-PAOrder -List
+        Write-Debug "Order data found for $($orders.Count) orders."
 
         # update and save the account with the new key
         if ($NewKey) {
@@ -36,14 +33,14 @@ function Update-PluginEncryption {
             $script:Acct | Add-Member 'sskey' $null -Force
         }
         $acctFile = Join-Path $server.Folder "$ID\acct.json"
-        $script:Acct | Select-Object -Exclude id,Folder | ConvertTo-Json -Depth 5 | Out-File $acctFile -Force -EA Stop
+        $script:Acct | Select-Object -Exclude id,Folder | ConvertTo-Json -Depth 5 |
+            Out-File $acctFile -Force -EA Stop
 
         # re-export all the plugin args
-        if ($orderData.Count -gt 0) {
-            Write-Debug ($orderData | ConvertTo-Json -Depth 5)
-            $orderData | ForEach-Object {
-                Export-PluginArgs $_.MainDomain -Plugin $_.Plugin -PluginArgs $_.PluginArgs -IgnoreExisting
-            }
+        $orders | ForEach-Object {
+            $pArgs = $_ | Get-PAPluginArgs
+            Write-Debug "Re-exporting plugin args for order '$($_.Name)' with plugins $($_.Plugin -join ',') and data $($pArgs | ConvertTo-Json -Depth 5)"
+            Export-PluginArgs -Order $_ -PluginArgs $pArgs -IgnoreExisting
         }
 
         # revert the active account if necessary

@@ -278,7 +278,7 @@ function New-PAOrder {
 
     # export plugin args now that the order exists on disk
     if ('PluginArgs' -in $PSBoundParameters.Keys) {
-        Export-PluginArgs $order.MainDomain $order.Plugin $PluginArgs
+        Export-PluginArgs -Order $order -PluginArgs $PluginArgs
     }
 
     # Make a local copy of the specified CSR file

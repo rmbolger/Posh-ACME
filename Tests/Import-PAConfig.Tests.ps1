@@ -13,11 +13,13 @@ Describe "Import-PAConfig" {
                 Mock Set-CertValidation {}
                 Import-PAConfig
 
-                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'acme.test')
+                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'srvr1')
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
-                $script:Acct.Folder      | Should -Be (Join-Path $TestDrive 'acme.test\11111')
-                $script:Acct.id          | Should -Be 11111
+                $script:Acct.Folder      | Should -Be (Join-Path $TestDrive 'srvr1\acct1')
+                $script:Acct.id          | Should -Be 'acct1'
+                $script:Order.Name       | Should -Be 'example.com'
                 $script:Order.MainDomain | Should -Be 'example.com'
+                $script:Order.Folder     | Should -Be (Join-Path $TestDrive 'srvr1\acct1\example.com')
                 Should -Invoke Set-CertValidation -ParameterFilter { $Skip -eq $false }
             }
         }
@@ -26,7 +28,7 @@ Describe "Import-PAConfig" {
     Context "Module Load - No Order" {
 
         BeforeAll {
-            Get-ChildItem 'TestDrive:\acme.test\11111\' -Exclude 'acct.json' | Remove-Item -Force -Recurse
+            Get-ChildItem 'TestDrive:\srvr1\acct1\' -Exclude 'acct.json' | Remove-Item -Force -Recurse
         }
 
         It "Sets Script Variables" {
@@ -34,10 +36,10 @@ Describe "Import-PAConfig" {
                 Mock Set-CertValidation {}
                 Import-PAConfig
 
-                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'acme.test')
+                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'srvr1')
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
-                $script:Acct.Folder      | Should -Be (Join-Path $TestDrive 'acme.test\11111')
-                $script:Acct.id          | Should -Be 11111
+                $script:Acct.Folder      | Should -Be (Join-Path $TestDrive 'srvr1\acct1')
+                $script:Acct.id          | Should -Be 'acct1'
                 $script:Order            | Should -BeNullOrEmpty
                 Should -Invoke Set-CertValidation -ParameterFilter { $Skip -eq $false }
             }
@@ -47,7 +49,7 @@ Describe "Import-PAConfig" {
     Context "Module Load - No Account" {
 
         BeforeAll {
-            Get-ChildItem 'TestDrive:\acme.test' -Exclude 'dir.json' | Remove-Item -Force -Recurse
+            Get-ChildItem 'TestDrive:\srvr1' -Exclude 'dir.json' | Remove-Item -Force -Recurse
         }
 
         It "Sets Script Variables" {
@@ -55,7 +57,7 @@ Describe "Import-PAConfig" {
                 Mock Set-CertValidation {}
                 Import-PAConfig
 
-                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'acme.test')
+                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'srvr1')
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
                 $script:Acct.Folder      | Should -BeNullOrEmpty
                 $script:Acct             | Should -BeNullOrEmpty
@@ -99,18 +101,20 @@ Describe "Import-PAConfig" {
         It "Sets Script Variables" {
 
             # mimic the result of a Set-PAOrder to the non-default order
-            '*.example.com' | Out-File 'TestDrive:\acme.test\11111\current-order.txt' -Force
+            '!.example.com' | Out-File 'TestDrive:\srvr1\acct1\current-order.txt' -Force
 
             InModuleScope Posh-ACME {
                 Mock Set-CertValidation {}
 
                 Import-PAConfig -Level 'Order'
 
-                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'acme.test')
+                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'srvr1')
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
-                $script:Acct.Folder      | Should -Be (Join-Path $TestDrive 'acme.test\11111')
-                $script:Acct.id          | Should -Be 11111
+                $script:Acct.Folder      | Should -Be (Join-Path $TestDrive 'srvr1\acct1')
+                $script:Acct.id          | Should -Be 'acct1'
+                $script:Order.Name       | Should -Be '!.example.com'
                 $script:Order.MainDomain | Should -Be '*.example.com'
+                $script:Order.Folder     | Should -Be (Join-Path $TestDrive 'srvr1\acct1\!.example.com')
                 Should -Not -Invoke Set-CertValidation
             }
         }
@@ -129,18 +133,20 @@ Describe "Import-PAConfig" {
         It "Sets Script Variables" {
 
             # mimic the result of a Set-PAAccount to the non-default account
-            '22222' | Out-File 'TestDrive:\acme.test\current-account.txt' -Force
+            'acct2' | Out-File 'TestDrive:\srvr1\current-account.txt' -Force
 
             InModuleScope Posh-ACME {
                 Mock Set-CertValidation {}
 
                 Import-PAConfig -Level 'Account'
 
-                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'acme.test')
+                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'srvr1')
                 $script:Dir.location     | Should -Be 'https://acme.test/directory'
-                $script:Acct.Folder      | Should -Be (Join-Path $TestDrive 'acme.test\22222')
-                $script:Acct.id          | Should -Be 22222
+                $script:Acct.Folder      | Should -Be (Join-Path $TestDrive 'srvr1\acct2')
+                $script:Acct.id          | Should -Be 'acct2'
+                $script:Order.Name       | Should -Be '!.example.org'
                 $script:Order.MainDomain | Should -Be '*.example.org'
+                $script:Order.Folder     | Should -Be (Join-Path $TestDrive 'srvr1\acct2\!.example.org')
                 Should -Not -Invoke Set-CertValidation
             }
         }
@@ -166,7 +172,7 @@ Describe "Import-PAConfig" {
 
                 Import-PAConfig -Level 'Server'
 
-                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'acme2.test')
+                $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'srvr2')
                 $script:Dir.location     | Should -Be 'https://acme2.test/directory'
                 $script:Acct.Folder      | Should -BeNullOrEmpty
                 $script:Acct             | Should -BeNullOrEmpty
@@ -183,7 +189,7 @@ Describe "Import-PAConfig" {
             Get-ChildItem "$PSScriptRoot\TestFiles\ConfigRoot\" | Copy-Item -Dest 'TestDrive:\' -Recurse
 
             # add a v3 plugindata.xml file to the account folder
-            $xmlPath = 'TestDrive:\acme.test\11111\plugindata.xml'
+            $xmlPath = 'TestDrive:\srvr1\acct1\plugindata.xml'
             @{R53ProfileName='myprofile'; DOToken='xxxxx'} | Export-CliXml $xmlPath
             $xmlContent = Get-Content $xmlPath -Raw
         }
@@ -191,14 +197,14 @@ Describe "Import-PAConfig" {
         It "Extracts order specific args to JSON" {
             InModuleScope Posh-ACME {
                 Mock Get-PAOrder { @(
-                    [pscustomobject]@{MainDomain='example.com';Plugin=@('Route53')}
-                    [pscustomobject]@{MainDomain='*.example.com';Plugin=@('DOcean')}
+                    [pscustomobject]@{PSTypeName='PoshACME.PAOrder';Name='example.com';MainDomain='example.com';Plugin=@('Route53');Folder='TestDrive:\srvr1\acct1\example.com'}
+                    [pscustomobject]@{PSTypeName='PoshACME.PAOrder';Name='!.example.com';MainDomain='*.example.com';Plugin=@('DOcean');Folder='TestDrive:\srvr1\acct1\!.example.com'}
                 )}
                 Mock Export-PluginArgs {}
                 Import-PAConfig
                 Should -Invoke Export-PluginArgs -Exactly 2 -ParameterFilter {
-                    $MainDomain -in 'example.com','*.example.com' -and
-                    $Plugin -in 'Route53','DOcean'
+                    $Order.Name -in 'example.com','!.example.com' -and
+                    $Order.Plugin -in 'Route53','DOcean'
                 }
             }
         }

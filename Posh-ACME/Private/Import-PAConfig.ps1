@@ -93,10 +93,10 @@ function Import-PAConfig {
                 # Loop through the available orders
                 Get-PAOrder -List -Refresh | ForEach-Object {
                     if ($_.Plugin) {
-                        Write-Debug "Migrating for $($_.MainDomain)"
-                        Export-PluginArgs $_.MainDomain $_.Plugin $pDataV3
+                        Write-Debug "Migrating for order '$($_.Name)'"
+                        Export-PluginArgs -Order $_ -PluginArgs $pDataV3
                     } else {
-                        Write-Debug "No Plugins defined for order $($_.MainDomain)"
+                        Write-Debug "No Plugins defined for order '$($_.Name)'"
                     }
                 }
 
