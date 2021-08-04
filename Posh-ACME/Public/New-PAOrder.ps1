@@ -92,8 +92,8 @@ function New-PAOrder {
     } else {
         $order = Get-PAOrder -MainDomain $Domain[0]
 
-        # set the default Name to the first domain
-        $Name = $Domain[0]
+        # set the default Name to a filesystem friendly version of the first domain
+        $Name = $Domain[0].Replace('*','!')
     }
 
     # separate the SANs
