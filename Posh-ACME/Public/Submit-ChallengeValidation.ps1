@@ -36,21 +36,21 @@ function Submit-ChallengeValidation {
                 catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
         } elseif ($Order.MainDomain -notin (Get-PAOrder -List).MainDomain) {
-            Write-Error "Order for $($Order.MainDomain) was not found in the current account's order list."
+            Write-Error "Order '$($Order.Name)' was not found in the current account's order list."
             return
         }
 
         # make sure the order has a valid state for this function
         if ($Order.status -eq 'invalid') {
-            Write-Error "Order status is invalid for $($Order.MainDomain). Unable to continue."
+            Write-Error "Order '$($Order.Name)' status is invalid. Unable to continue."
             return
         }
         elseif ($Order.status -in 'valid','processing') {
-            Write-Warning "The server has already issued or is processing a certificate for order $($Order.MainDomain)."
+            Write-Warning "The server has already issued or is processing a certificate for order '$($Order.Name)'."
             return
         }
         elseif ($Order.status -eq 'ready') {
-            Write-Warning "The order $($Order.MainDomain) has already completed challenge validation and is awaiting finalization."
+            Write-Warning "Order '$($Order.Name)' has already completed challenge validation and is awaiting finalization."
             return
         }
 
