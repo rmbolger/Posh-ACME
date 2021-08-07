@@ -49,7 +49,7 @@ function Wait-AuthValidation {
         }
     }
 
-    if (!$allValid) {
+    if (-not $allValid) {
         throw "Timed out waiting $ValidationTimeout seconds for authorizations to become valid."
     }
 

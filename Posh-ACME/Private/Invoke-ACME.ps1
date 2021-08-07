@@ -15,7 +15,7 @@ function Invoke-ACME {
     )
 
     # make sure we have a server configured
-    if (!(Get-PAServer)) {
+    if (-not (Get-PAServer)) {
         throw "No ACME server configured. Run Set-PAServer first."
     }
 
@@ -155,7 +155,7 @@ function Invoke-ACME {
         }
 
         # check for badNonce and retry once
-        if (!$NoRetry -and $freshNonce -and $acmeError.type -and $acmeError.type -like '*:badNonce') {
+        if (-not $NoRetry -and $freshNonce -and $acmeError.type -and $acmeError.type -like '*:badNonce') {
             $Header.nonce = $script:Dir.nonce
             Write-Verbose "Nonce rejected by ACME server. Retrying with updated nonce."
             return (Invoke-ACME $Header $PayloadJson -Key $acctKey -NoRetry)

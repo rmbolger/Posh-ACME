@@ -41,7 +41,7 @@ function Submit-Renewal {
                 }
 
                 # skip if the renewal window hasn't been reached and no -Force
-                if (!$Force -and $null -ne $order.RenewAfter -and (Get-DateTimeOffsetNow) -lt ([DateTimeOffset]::Parse($order.RenewAfter))) {
+                if (-not $Force -and $null -ne $order.RenewAfter -and (Get-DateTimeOffsetNow) -lt ([DateTimeOffset]::Parse($order.RenewAfter))) {
                     Write-Warning "Order '$($order.Name)' is not recommended for renewal yet. Use -Force to override."
                     return
                 }
@@ -53,7 +53,7 @@ function Submit-Renewal {
                 }
 
                 # skip orders with a Manual DNS plugin by default because they require interactivity
-                if (!$NoSkipManualDns -and 'Manual' -in @($order.Plugin)) {
+                if (-not $NoSkipManualDns -and 'Manual' -in @($order.Plugin)) {
                     Write-Warning "Skipping renewal for order '$($order.Name)' due to Manual DNS plugin. Use -NoSkipManualDns to avoid this."
                     return
                 }

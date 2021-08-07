@@ -19,12 +19,12 @@ function Import-PfxCertInternal {
     # So we're going to use the raw .NET cert libraries to do what we need to do.
     # and should work "everywhere" we care about.
 
-    if (!$PfxPass) {
+    if (-not $PfxPass) {
         # create an empty secure string
         $PfxPass = New-Object Security.SecureString
     }
 
-    if ($PSVersionTable.PSEdition -eq 'Core' -and !$IsWindows) {
+    if ($PSVersionTable.PSEdition -eq 'Core' -and -not $IsWindows) {
         # This is a non-Windows version of PowerShell Core
         throw "Certificate import is not currently supported on non-Windows OSes"
 

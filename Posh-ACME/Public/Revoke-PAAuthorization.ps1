@@ -13,8 +13,8 @@ function Revoke-PAAuthorization {
     Begin {
         # make sure any account passed in is actually associated with the current server
         # or if no account was specified, that there's a current account.
-        if (!$Account) {
-            if (!($Account = Get-PAAccount)) {
+        if (-not $Account) {
+            if (-not ($Account = Get-PAAccount)) {
                 try { throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first." }
                 catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
@@ -70,10 +70,10 @@ function Revoke-PAAuthorization {
                 continue
             }
 
-            if (!$Force) {
+            if (-not $Force) {
                 $msg = "Revoking an authorization prevents ordering a certificate for the identifier without proving ownership again on this account."
                 $question = "Are you sure you wish to revoke the authorization for $($auth.fqdn)?"
-                if (!$PSCmdlet.ShouldContinue($question,$msg)) {
+                if (-not $PSCmdlet.ShouldContinue($question,$msg)) {
                     Write-Verbose "Aborted authorization revocation for $($auth.fqdn)."
                     continue
                 }

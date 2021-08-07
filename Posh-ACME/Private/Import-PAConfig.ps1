@@ -52,7 +52,7 @@ function Import-PAConfig {
     }
 
     # start at the server level if nothing was specified or specifically requested
-    if (!$Level -or $Level -eq 'Server') {
+    if (-not $Level -or $Level -eq 'Server') {
 
         # load the current ACME directory into memory if it exists on disk
         $dirUrl = [string](Get-Content (Join-Path (Get-ConfigRoot) 'current-server.txt') -EA Ignore)

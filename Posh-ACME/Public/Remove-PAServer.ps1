@@ -48,7 +48,7 @@ function Remove-PAServer {
                 $msg += " You have also chosen to deactivate the associated accounts."
             }
             $question = "Are you sure you wish to delete server $($server.location)?"
-            if (!$PSCmdlet.ShouldContinue($question,$msg)) {
+            if (-not $PSCmdlet.ShouldContinue($question,$msg)) {
                 Write-Verbose "Delete aborted for server $($server.location)"
                 return
             }

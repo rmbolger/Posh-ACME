@@ -115,7 +115,7 @@ function New-PAOrder {
         # confirm if previous order is still in progress
         } elseif ($order -and $order.status -in 'pending','ready','processing') {
 
-            if (!$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
+            if (-not $PSCmdlet.ShouldContinue("Do you wish to overwrite?",
                 "Existing order with status $($order.status).")) { return }
 
         # confirm if previous order not up for renewal
