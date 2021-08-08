@@ -167,7 +167,7 @@ function New-PAAccount {
     # if an explicit ID was provided, make sure it doesn't conflict with
     # another account
     if ($ID) {
-        if (Get-PAAccount $ID) {
+        if (Get-PAAccount -ID $ID) {
             Write-Warning "Account ID '$ID' is already in use. Falling back to the default ID value."
             $ID = $fallbackID
         }

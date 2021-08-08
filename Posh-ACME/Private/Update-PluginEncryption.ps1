@@ -18,7 +18,7 @@ function Update-PluginEncryption {
 
         # set the specified account as current and prepare to revert when we're done
         $revertToAccount = Get-PAAccount
-        Set-PAAccount $ID
+        Set-PAAccount -ID $ID
 
         # grab a copy of all the orders
         $orders = Get-PAOrder -List
@@ -46,7 +46,7 @@ function Update-PluginEncryption {
         # revert the active account if necessary
         if ($revertToAccount -and $revertToAccount.id -ne $ID) {
             Write-Debug "Reverting to previously active account"
-            Set-PAAccount $revertToAccount.id
+            Set-PAAccount -ID $revertToAccount.id
         }
     }
 }

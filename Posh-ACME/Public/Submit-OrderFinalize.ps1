@@ -32,7 +32,7 @@ function Submit-OrderFinalize {
                 try { throw "No Order parameter specified and no current order selected. Try running Set-PAOrder first." }
                 catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
-        } elseif ($Order.MainDomain -notin (Get-PAOrder -List).MainDomain) {
+        } elseif ($Order.Name -notin (Get-PAOrder -List).Name) {
             Write-Error "Order '$($Order.Name)' was not found in the current account's order list."
             return
         }

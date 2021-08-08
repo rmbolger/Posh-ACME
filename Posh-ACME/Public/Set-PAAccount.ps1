@@ -62,7 +62,7 @@ function Set-PAAccount {
         # make sure there's an account associated with the specified ID or
         # a current account
         if ($ID) {
-            if (-not ($acct = Get-PAAccount $ID)) {
+            if (-not ($acct = Get-PAAccount -ID $ID)) {
                 Write-Warning "Specified account ID ($ID) was not found. No changes made."
                 return
             }

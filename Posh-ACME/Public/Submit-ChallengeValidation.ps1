@@ -35,7 +35,7 @@ function Submit-ChallengeValidation {
                 try { throw "No Order parameter specified and no current order selected. Try running Set-PAOrder first." }
                 catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
-        } elseif ($Order.MainDomain -notin (Get-PAOrder -List).MainDomain) {
+        } elseif ($Order.Name -notin (Get-PAOrder -List).Name) {
             Write-Error "Order '$($Order.Name)' was not found in the current account's order list."
             return
         }
@@ -87,7 +87,7 @@ function Submit-ChallengeValidation {
         Write-Debug "DnsAlias: $($Order.DnsAlias -join ',')"
 
         # import existing args
-        $PluginArgs = Get-PAPluginArgs $Order.MainDomain
+        $PluginArgs = Get-PAPluginArgs -Name $Order.Name
 
         # loop through the authorizations looking for challenges to validate
         for ($i=0; $i -lt $allAuths.Count; $i++) {

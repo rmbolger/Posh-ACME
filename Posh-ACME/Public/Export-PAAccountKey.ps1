@@ -31,7 +31,7 @@ function Export-PAAccountKey {
         }
 
         # make sure the ID is valid if specified
-        if ($ID -and -not ($acct = Get-PAAccount $ID)) {
+        if ($ID -and -not ($acct = Get-PAAccount -ID $ID)) {
             throw "Invalid account ID: $ID"
         }
 

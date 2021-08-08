@@ -19,7 +19,7 @@ function Remove-PAAccount {
 
     Process {
         # grab a copy of the account
-        if (-not ($acct = Get-PAAccount $ID)) {
+        if (-not ($acct = Get-PAAccount -ID $ID)) {
             Write-Warning "Specified account ID ($ID) was not found."
             return
         }

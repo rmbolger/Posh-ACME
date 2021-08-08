@@ -118,7 +118,7 @@ function Remove-PAServer {
         If specified, interactive confirmation prompts will be skipped.
 
     .EXAMPLE
-        Remove-PAAccount LE_STAGE
+        Remove-PAServer LE_STAGE
 
         Remove the staging server without deactivating accounts.
 

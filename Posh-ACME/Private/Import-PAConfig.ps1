@@ -58,7 +58,7 @@ function Import-PAConfig {
         $dirUrl = [string](Get-Content (Join-Path (Get-ConfigRoot) 'current-server.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($dirUrl)) {
 
-            $script:Dir = Get-PAServer $dirUrl
+            $script:Dir = Get-PAServer -DirectoryUrl $dirUrl
 
             # deal with cert validation options between PS editions
             Set-CertValidation $script:Dir.SkipCertificateCheck
@@ -79,7 +79,7 @@ function Import-PAConfig {
         $acctID = [string](Get-Content (Join-Path $script:Dir.Folder 'current-account.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($acctID)) {
 
-            $script:Acct = Get-PAAccount $acctID
+            $script:Acct = Get-PAAccount -ID $acctID
 
             $ImportOrder = $true
 

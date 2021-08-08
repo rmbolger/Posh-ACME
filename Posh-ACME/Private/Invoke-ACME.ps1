@@ -19,14 +19,14 @@ function Invoke-ACME {
         throw "No ACME server configured. Run Set-PAServer first."
     }
 
-    # Because we're not refreshing the server on module load, we may not have a
-    # NextNonce set yet. So check the header, and grab a fresh one if it's empty.
+    # Because we're not refreshing the server on module load, we may not have
+    # fetched a nonce yet. So check the header, and grab a fresh one if it's empty.
     if ([string]::IsNullOrWhiteSpace($Header.nonce)) {
         $Header.nonce = Get-Nonce
     }
 
     # set the account key based on the parameter set
-    if ($PSCmdlet.ParameterSetName -eq 'Account') {
+    if ('Account' -eq $PSCmdlet.ParameterSetName) {
         # hydrate the account key
         $acctKey = $Account.key | ConvertFrom-Jwk
     } else {

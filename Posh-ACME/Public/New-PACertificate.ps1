@@ -50,7 +50,7 @@ function New-PACertificate {
     # Make sure we have a server set. But don't override the current
     # one unless explicitly specified.
     if (-not (Get-PAServer) -or 'DirectoryUrl' -in $psbKeys) {
-        Set-PAServer $DirectoryUrl
+        Set-PAServer -DirectoryUrl $DirectoryUrl
     } else {
         # refresh the directory info (which should also get a fresh nonce)
         Set-PAServer
@@ -72,7 +72,7 @@ function New-PACertificate {
         # we got matches, but there's no current account or the current one doesn't match
         # so set the first match as current
         $acct = $accts[0]
-        Set-PAAccount $acct.id
+        Set-PAAccount -ID $acct.id
     }
     Write-Verbose "Using account $($acct.id)"
 

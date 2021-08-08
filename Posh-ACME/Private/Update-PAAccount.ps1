@@ -23,7 +23,7 @@ function Update-PAAccount {
 
         # get a reference to the specified account if it exists
         if ($ID -and $ID -ne $acct.id) {
-            if (-not ($acct = Get-PAAccount $ID)) {
+            if (-not ($acct = Get-PAAccount -ID $ID)) {
                 Write-Warning "Specified account id ($ID) not found. Nothing to update."
                 return
             }

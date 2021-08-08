@@ -76,7 +76,7 @@ function Get-PAOrder {
                     Where-Object { $_.MainDomain -eq $MainDomain }
 
                 # if Name was also specified, there should only ever be 0 or 1 match, otherwise
-                # pick the first match to retain script compatibility with 4.5 and earlier.
+                # pick the first match to retain script compatibility with 4.6 and earlier.
                 if ($Name) {
                     $order = $matchingOrders | Where-Object { $_.Name -eq $Name }
                 } else {
