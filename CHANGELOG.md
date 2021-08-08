@@ -1,3 +1,30 @@
+## (IN DEVELOPMENT) 4.7.0 (????-??-??)
+
+* Servers, Accounts, and Orders all now have configurable Names that also determine the name of their associated folders in the config on the filesystem. (#345) This is a fairly large change, but significant effort has been spent implementing it so that dependent scripts will not break.
+  * Please backup your current config before customizing your object names. Previous Posh-ACME versions will break trying to read configs with custom names.
+  * All customized names may only use the following characters to prevent cross-platform filesystem compatibility issues: `0-9`, `a-z`, `A-Z`, `-`, `.`, `_`, and `!`.
+  * A `NewName` parameter has been added to `Set-PAServer`, `Set-PAAccount`, and `Set-PAOrder` to change the name of each type of object.
+  * Server related functions now have an optional `Name` parameter which can be used instead of or in addition to the `DirectoryUrl` parameter. This includes `Get/Remove/Set-PAServer`.
+  * If a server doesn't already exist, `Set-PAServer` will use the `-Name` parameter for the new server's name. If the server already exists, it is ignored.
+  * Returned server objects now have `Name` and `Folder` properties.
+  * Despite being able to customize Server names, you may still only have a single instance of each unique ACME server in your config. This may be changed in future major versions.
+  * Account related functions that have an `ID` parameter now have a `Name` parameter alias. This includes `Get/New/Remove/Set-PAAccount` and `Export-PAAccountKey`. The ID parameter should be considered deprecated and in future major versions will be replaced by `Name`.
+  * The `ID` parameter was added to `New-PAAccount` to allow setting the customized ID on creation instead of using the server provided default value.
+  * Returned account objects now have a `Folder` property and the `id` property now reflects the customizable Name. The `id` property is deprecated and will be changed to `Name` in a future major version.
+  * Order related functions now have an optional `Name` parameter to distinguish between multiple orders that may have the same `MainDomain`. This includes `Get/Revoke/New-PACertificate`, `Get/New/Set/Remove/Complete-PAOrder`, `Get-PAPluginArgs`, `Invoke-HttpChallengeListener`, and `Submit-Renewal`. In most cases, the `Name` parameter can also be used by itself as a guaranteed unique identifier for orders.
+  * The `Name` parameter on `New-PACertificate` and `New-PAOrder` allows setting the customized order name on creation instead of using the MainDomain default value.
+  * Returned order objects now have a `Name` property (not to be confused with `FriendlyName` which only affects the certificate associated with the order).
+  * Order related error messages that previously mentioned the order's MainDomain have been changed to use the order's Name instead.
+  * To retain backwards compatibility with existing 4.x dependent scripts, `Get-PAOrder` will return the single, most recent order when used with `-MainDomain` even if there are multiple matching orders. This also affects `Get-PACertificate` which uses Get-PAOrder under the hood.
+  * `Set-PAOrder`, `Revoke-PACertificate`, and `Remove-PAOrder` will throw an error if only `MainDomain` is specified and it matches multiple orders. Specify the `Name` parameter as well to ensure a unique order match.
+* A `NoSwitch` parameter has been added to `Set-PAServer` so you can modify the active server without switching to it.
+* The `AllSANs` field on PACertificate objects now reflects the SAN list on the actual certificate instead of its associated ACME order (just in case the two lists have divered for some strange reason).
+* Added missing help on `Get-PAPluginArgs`.
+* Default formatting for PAServer objects has been tweaked to show more useful info.
+* Default formatting for PAOrder object now includes Name and has removed OSCPMustStaple.
+* The `Get-PAServer -List` parameter set no longer includes the optional `-Quiet` parameter.
+* Fixed an example in `Remove-PAServer` help.
+
 ## 4.6.0 (2021-07-25)
 
 * Added new DNS plugins
