@@ -20,12 +20,26 @@ function Remove-PAOrder {
 
     Process {
 
-        # grab a copy of the order
-        $orderArgs = @{}
-        if ($MainDomain) { $orderArgs.MainDomain = $MainDomain }
-        if ($Name)       { $orderArgs.Name       = $Name }
-        if (-not ($order = Get-PAOrder @orderArgs)) {
-            Write-Warning "No order found for the specified parameters."
+        # check for a unique matching order
+        $matchingOrders = Get-PAOrder -List | Sort-Object -Descending expires |
+            Where-Object { $_.MainDomain -eq $MainDomain }
+        if ($matchingOrders.Count -eq 1) {
+            $order = $matchingOrders
+        } elseif ($matchingOrders.Count -ge 2) {
+            # further filter on Name if specified
+            if ($Name) {
+                $order = $matchingOrders | Where-Object { $_.Name -eq $Name }
+                if (-not $order) {
+                    Write-Error "No order found matching Name '$Name' and MainDomain '$MainDomain'."
+                    return
+                }
+            } else {
+                # error because we can't be sure which object to affect
+                Write-Error "Multiple orders found for MainDomain '$MainDomain'. Please specify Name as well."
+                return
+            }
+        } else {
+            Write-Error "No order found matching MainDomain '$MainDomain'."
             return
         }
 

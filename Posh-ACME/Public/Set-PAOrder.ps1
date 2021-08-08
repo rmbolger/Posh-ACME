@@ -86,8 +86,8 @@ function Set-PAOrder {
         if ($Name) {
             $order = Get-PAOrder -Name $Name
             if (-not $order) {
-                try { throw "No order found matching Name '$Name'" }
-                catch { $PSCmdlet.ThrowTerminatingError($_) }
+                Write-Error "No order found matching Name '$Name'"
+                return
             }
         }
         elseif ($MainDomain) {
@@ -96,20 +96,20 @@ function Set-PAOrder {
             # there are multiple matches.
             $order = Get-PAOrder -List | Where-Object { $_.MainDomain -eq $MainDomain }
             if (-not $order) {
-                try { throw "No order found matching MainDomain '$MainDomain'." }
-                catch { $PSCmdlet.ThrowTerminatingError($_) }
+                Write-Error "No order found matching MainDomain '$MainDomain'."
+                return
             }
             elseif ($order -and $order.Count -gt 1) {
-                try { throw "Multiple orders found for MainDomain '$MainDomain'. Please specify Name as well." }
-                catch { $PSCmdlet.ThrowTerminatingError($_) }
+                Write-Error "Multiple orders found for MainDomain '$MainDomain'. Please specify Name as well."
+                return
             }
         }
         else {
             # get the current order if it exists
             $order = Get-PAOrder
             if (-not $order) {
-                try { throw "No ACME order configured. Run New-PAOrder or specify a Name or MainDomain." }
-                catch { $PSCmdlet.ThrowTerminatingError($_) }
+                Write-Error "No ACME order configured. Run New-PAOrder or specify a Name or MainDomain."
+                return
             }
         }
 

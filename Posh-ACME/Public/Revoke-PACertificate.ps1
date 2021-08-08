@@ -37,22 +37,24 @@ function Revoke-PACertificate {
             # check for a unique matching order
             $matchingOrders = Get-PAOrder -List | Sort-Object -Descending expires |
                 Where-Object { $_.MainDomain -eq $MainDomain }
-
             if ($matchingOrders.Count -eq 1) {
                 $order = $matchingOrders
-
             } elseif ($matchingOrders.Count -ge 2) {
                 # further filter on Name if specified
                 if ($Name) {
                     $order = $matchingOrders | Where-Object { $_.Name -eq $Name }
+                    if (-not $order) {
+                        Write-Error "No order found matching Name '$Name' and MainDomain '$MainDomain'."
+                        return
+                    }
                 } else {
-                    # error because we don't want to accidentally revoke the wrong cert.
-                    try { throw "Multiple orders found for MainDomain '$MainDomain'. Please specify Name as well." }
-                    catch { $PSCmdlet.ThrowTerminatingError($_) }
+                    # error because we can't be sure which object to affect
+                    Write-Error "Multiple orders found for MainDomain '$MainDomain'. Please specify Name as well."
+                    return
                 }
             } else {
-                try { throw "No order found matching MainDomain '$MainDomain'." }
-                catch { $PSCmdlet.ThrowTerminatingError($_) }
+                Write-Error "No order found matching MainDomain '$MainDomain'."
+                return
             }
 
             # check for an existing certificate
