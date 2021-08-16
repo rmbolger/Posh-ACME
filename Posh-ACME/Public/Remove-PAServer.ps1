@@ -1,12 +1,11 @@
 function Remove-PAServer {
     [CmdletBinding(SupportsShouldProcess,DefaultParameterSetName='DirUrl')]
     param(
-        [Parameter(ParameterSetName='DirUrl',Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
         [Alias('location')]
         [string]$DirectoryUrl,
-        [Parameter(ParameterSetName='Name',Mandatory)]
-        [Parameter(ParameterSetName='DirUrl',ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
         [string]$Name,
         [switch]$DeactivateAccounts,
@@ -14,6 +13,11 @@ function Remove-PAServer {
     )
 
     Process {
+
+        if (-not $DirectoryUrl -and -not $Name) {
+            try { throw "DirectoryUrl and/or Name must be specified." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
+        }
 
         # try to find an existing server that matches DirectoryUrl/Name
         if ($DirectoryUrl) {
