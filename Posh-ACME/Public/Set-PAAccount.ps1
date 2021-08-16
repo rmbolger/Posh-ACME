@@ -253,18 +253,23 @@ function Set-PAAccount {
             } else {
                 # rename the dir folder
                 Write-Debug "Renaming $($acct.id) account folder to $newFolder"
-                Rename-Item $acct.Folder $newFolder
+                try {
+                    Rename-Item $acct.Folder $newFolder -EA Stop
 
-                # update the current account ref if necessary
-                $curAcctFile = (Join-Path $server.Folder 'current-account.txt')
-                if ($acct.id -ne (Get-Content $curAcctFile -EA Ignore)) {
-                    Write-Debug "Updating current-account.txt"
-                    $NewName | Out-File $curAcctFile -Force -EA Stop
+                    # update the current account ref if necessary
+                    $curAcctFile = (Join-Path $server.Folder 'current-account.txt')
+                    if ($acct.id -ne (Get-Content $curAcctFile -EA Ignore)) {
+                        Write-Debug "Updating current-account.txt"
+                        $NewName | Out-File $curAcctFile -Force -EA Stop
+                    }
+
+                    # update the id/Folder in memory
+                    $acct.id = $NewName
+                    $acct.Folder = $newFolder
                 }
-
-                # update the id/Folder in memory
-                $acct.id = $NewName
-                $acct.Folder = $newFolder
+                catch {
+                    Write-Error $_
+                }
             }
         }
 
