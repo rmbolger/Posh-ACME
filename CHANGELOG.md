@@ -22,7 +22,7 @@
 * The `AllSANs` field on PACertificate objects now reflects the SAN list on the actual certificate instead of its associated ACME order (just in case the two lists have divered for some strange reason).
 * Added missing help on `Get-PAPluginArgs`.
 * Default formatting for PAServer objects has been tweaked to show more useful info.
-* Default formatting for PAOrder object now includes Name and has removed OSCPMustStaple.
+* Default formatting for PAOrder object now includes `Name` and has removed `OSCPMustStaple`.
 * The `Get-PAServer -List` parameter set no longer includes the optional `-Quiet` parameter.
 * Fixed an example in `Remove-PAServer` help.
 
