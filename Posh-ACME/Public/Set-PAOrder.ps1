@@ -227,13 +227,18 @@ function Set-PAOrder {
                 if (Test-Path $newFolder) {
                     Write-Error "Failed to rename PAOrder '$($order.Name)'. The path '$newFolder' already exists."
                 } else {
-                    # rename the dir folder
-                    Write-Debug "Renaming '$($order.Name)' order folder to $newFolder"
-                    Rename-Item $order.Folder $newFolder
+                    try {
+                        # rename the dir folder
+                        Write-Debug "Renaming '$($order.Name)' order folder to $newFolder"
+                        Rename-Item $order.Folder $newFolder -EA Stop
 
-                    # update the id/Folder in memory
-                    $order.Name = $NewName
-                    $order.Folder = $newFolder
+                        # update the id/Folder in memory
+                        $order.Name = $NewName
+                        $order.Folder = $newFolder
+                    }
+                    catch {
+                        Write-Error $_
+                    }
                 }
             }
 
