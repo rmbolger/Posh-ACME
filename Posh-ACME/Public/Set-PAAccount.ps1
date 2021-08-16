@@ -256,6 +256,10 @@ function Set-PAAccount {
                 try {
                     Rename-Item $acct.Folder $newFolder -EA Stop
 
+                    # update the id/Folder in memory
+                    $acct.id = $NewName
+                    $acct.Folder = $newFolder
+
                     # update the current account ref if necessary
                     $curAcctFile = (Join-Path $server.Folder 'current-account.txt')
                     if ($acct.id -ne (Get-Content $curAcctFile -EA Ignore)) {
@@ -263,9 +267,7 @@ function Set-PAAccount {
                         $NewName | Out-File $curAcctFile -Force -EA Stop
                     }
 
-                    # update the id/Folder in memory
-                    $acct.id = $NewName
-                    $acct.Folder = $newFolder
+                    $saveAccount = $true
                 }
                 catch {
                     Write-Error $_
@@ -277,6 +279,9 @@ function Set-PAAccount {
             # save it to disk
             $acctFile = Join-Path $server.Folder "$($acct.id)\acct.json"
             $acct | Select-Object -Exclude id,Folder | ConvertTo-Json -Depth 5 | Out-File $acctFile -Force -EA Stop
+
+            # reload config from disk
+            Import-PAConfig -Level Account
         }
 
     }
