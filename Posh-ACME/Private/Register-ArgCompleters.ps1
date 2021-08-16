@@ -55,17 +55,39 @@ function Register-ArgCompleters {
         # nothing to auto complete if we don't have an account selected
         if ([String]::IsNullOrWhiteSpace($script:Acct.Folder)) { return }
 
-        $names = (Get-ChildItem -Path $script:Acct.Folder -Directory).BaseName.Replace('!','*')
+        # grab the list of MainDomains in this account
+        $jsonPaths = Join-Path $script:Acct.Folder '*\order.json'
+        $names = Get-ChildItem $jsonPaths | Get-Content -Raw | ConvertFrom-Json | Select-Object -ExpandProperty MainDomain
+
         if ($wordToComplete -ne [String]::Empty) {
-            $wordToComplete = "^$($wordToComplete.Replace('*','\*').Replace('.','\.'))"
+            $wordToComplete = "^$([regex]::Escape($wordToComplete))"
         }
         $names | Where-Object { $_ -match $wordToComplete } | ForEach-Object {
             [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
         }
     }
 
-    $MainDomainCommands = 'Get-PACertificate','Get-PAOrder','Get-PAPluginArgs','Remove-PAOrder','Set-PAOrder','Submit-Renewal','Revoke-PACertificate'
+    $MainDomainCommands = 'Get-PAOrder','Set-PAOrder','Remove-PAOrder','Get-PACertificate','Revoke-PACertificate','Get-PAPluginArgs','Invoke-HttpChallengeListener','Submit-Renewal'
     Register-ArgumentCompleter -CommandName $MainDomainCommands -ParameterName 'MainDomain' -ScriptBlock $MainDomainCompleter
+
+    # Order Name
+    $OrderNameCompleter = {
+        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+
+        # nothing to auto complete if we don't have an account selected
+        if ([String]::IsNullOrWhiteSpace($script:Acct.Folder)) { return }
+
+        $names = (Get-ChildItem -Path $script:Acct.Folder -Directory).BaseName
+        if ($wordToComplete -ne [String]::Empty) {
+            $wordToComplete = "^$([regex]::Escape($wordToComplete))"
+        }
+        $names | Where-Object { $_ -match $wordToComplete } | ForEach-Object {
+            [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+        }
+    }
+
+    $OrderNameCommands = 'Get-PAOrder','New-PAOrder','Set-PAOrder','Remove-PAOrder','Get-PACertificate','New-PACertificate','Revoke-PACertificate','Get-PAPluginArgs','Invoke-HttpChallengeListener','Submit-Renewal'
+    Register-ArgumentCompleter -CommandName $OrderNameCommands -ParameterName 'Name' -ScriptBlock $OrderNameCompleter
 
     # DirectoryUrl
     $DirUrlCompleter = {

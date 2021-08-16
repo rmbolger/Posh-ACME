@@ -12,7 +12,7 @@
   * The `ID` parameter was added to `New-PAAccount` to allow setting the customized ID on creation instead of using the server provided default value.
   * Returned account objects now have a `Folder` property and the `id` property now reflects the customizable value.
   * The `id` property on account objects is deprecated and will be changed to `Name` in a future major version.
-  * Order related functions now have an optional `Name` parameter to distinguish between multiple orders that may have the same `MainDomain`. This includes `Get/Revoke/New-PACertificate`, `Get/New/Set/Remove/Complete-PAOrder`, `Get-PAPluginArgs`, `Invoke-HttpChallengeListener`, and `Submit-Renewal`. In most cases, the `Name` parameter can also be used by itself as a unique identifier for orders.
+  * Order related functions now have an optional `Name` parameter to distinguish between multiple orders that may have the same `MainDomain`. This includes `Get/Revoke/New-PACertificate`, `Get/New/Set/Remove-PAOrder`, `Get-PAPluginArgs`, `Invoke-HttpChallengeListener`, and `Submit-Renewal`. In most cases, the `Name` parameter can also be used by itself as a unique identifier for orders.
   * The `Name` parameter on `New-PACertificate` and `New-PAOrder` allows setting the customized order name on creation instead of using the MainDomain default value.
   * Returned order objects now have a `Name` property (not to be confused with `FriendlyName` which only affects the certificate associated with the order).
   * Order related error and log messages that previously mentioned the order's MainDomain have been changed to use the order's Name instead.
