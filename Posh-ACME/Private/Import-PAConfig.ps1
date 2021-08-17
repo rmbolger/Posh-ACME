@@ -36,7 +36,7 @@ function Import-PAConfig {
         }
 
         # allow overriding the default config location with a custom path
-        # based on an the POSHACME_HOME environment variable
+        # based on the POSHACME_HOME environment variable
         if (-not [string]::IsNullOrWhiteSpace($env:POSHACME_HOME)) {
             if (Test-Path $env:POSHACME_HOME -PathType Container) {
                 Set-ConfigRoot $env:POSHACME_HOME

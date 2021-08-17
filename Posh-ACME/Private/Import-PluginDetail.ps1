@@ -71,10 +71,21 @@ function Import-PluginDetail {
         'Zonomi'            = [pscustomobject]@{PSTypeName = 'PoshACME.PAPluginDetail'; ChallengeType = 'dns-01'; Path = ''; Name = 'Zonomi'}
     }
 
-    $pluginDir = Join-Path $MyInvocation.MyCommand.Module.ModuleBase 'Plugins'
-    Write-Debug "Loading plugin details from $pluginDir"
 
-    $allPluginFiles = Get-ChildItem (Join-Path $pluginDir '*.ps1') -Exclude '_Example*'
+    $pluginDir = Join-Path $MyInvocation.MyCommand.Module.ModuleBase 'Plugins'
+    Write-Debug "Loading default plugin details from $pluginDir"
+
+    $allPluginFiles = @(Get-ChildItem (Join-Path $pluginDir '*.ps1') -Exclude '_Example*')
+
+    # check for external plugin folder based on the POSHACME_PLUGINS environment variable
+    if (-not [string]::IsNullOrWhiteSpace($env:POSHACME_PLUGINS)) {
+        if (Test-Path $env:POSHACME_PLUGINS -PathType Container) {
+            Write-Debug "Loading external plugin details from $($env:POSHACME_PLUGINS)"
+            $allPluginFiles += @(Get-ChildItem (Join-Path $env:POSHACME_PLUGINS '*.ps1'))
+        } else {
+            Write-Warning "The POSHACME_PLUGINS environment variable exists but the path it points to, $($env:POSHACME_PLUGINS), does not. External plugins will not be loaded."
+        }
+    }
 
     $functionNames = @(
         'Function:Get-CurrentPluginType'
