@@ -18,6 +18,7 @@
   * Order related error and log messages that previously mentioned the order's MainDomain have been changed to use the order's Name instead.
   * To retain backwards compatibility with existing 4.x dependent scripts, `Get-PAOrder` will return the single, most recent order when used with `-MainDomain` even if there are multiple matching orders. This also affects `Get-PACertificate` which uses Get-PAOrder under the hood.
   * `Set-PAOrder`, `Revoke-PACertificate`, and `Remove-PAOrder` will throw an error if only `MainDomain` is specified and it matches multiple orders. Specify the `Name` parameter as well to ensure a unique order match.
+* Custom plugins can now be loaded from an alternate filesystem location by creating a `POSHACME_PLUGINS` environment variable before the module is loaded. The value should be a folder path that contains uniquely named .ps1 plugin files. If any custom plugins have the same name as native plugins, a warning will be thrown and they will not be loaded.
 * A `NoSwitch` parameter has been added to `Set-PAServer` so you can modify the active server without switching to it.
 * The `AllSANs` field on PACertificate objects now reflects the SAN list on the actual certificate instead of its associated ACME order (just in case the two lists have divered for some strange reason).
 * Added missing help on `Get-PAPluginArgs`.

@@ -71,7 +71,6 @@ function Import-PluginDetail {
         'Zonomi'            = [pscustomobject]@{PSTypeName = 'PoshACME.PAPluginDetail'; ChallengeType = 'dns-01'; Path = ''; Name = 'Zonomi'}
     }
 
-
     $pluginDir = Join-Path $MyInvocation.MyCommand.Module.ModuleBase 'Plugins'
     Write-Debug "Loading default plugin details from $pluginDir"
 
@@ -106,63 +105,68 @@ function Import-PluginDetail {
         $pName = $pFile.BaseName
 
         if ($script:Plugins.$pName) {
-            # this is a built-in plugin we've pre-cached the details for so we
-            # can skip the dot sourcing and just add the filesystem path.
-            $script:Plugins.$pName.Path = $pFile.FullName
-        }
-        else {
-
-            Write-Debug "Found non-native potential plugin file $($pFile.Name)"
-
-            # dot source it
-            . $pFile.FullName
-
-            # make sure it has the type function
-            if (-not (Get-Command 'Get-CurrentPluginType' -EA Ignore)) {
-                Write-Warning "$pName plugin is missing Get-CurrentPluginType function. Will not use."
-                continue
-            }
-
-            # make sure it has type specific functions
-            $chalType = Get-CurrentPluginType
-            if ('dns-01' -eq $chalType) {
-                if (-not (Get-Command 'Add-DnsTxt' -EA Ignore)) {
-                    Write-Warning "$pName plugin is missing Add-DnsTxt function. Will not use."
-                    continue
-                }
-                if (-not (Get-Command 'Remove-DnsTxt' -EA Ignore)) {
-                    Write-Warning "$pName plugin is missing Remove-DnsTxt function. Will not use."
-                    continue
-                }
-                if (-not (Get-Command 'Save-DnsTxt' -EA Ignore)) {
-                    Write-Warning "$pName plugin is missing Save-DnsTxt function. Will not use."
-                    continue
-                }
-            } elseif ('http-01' -eq $chalType) {
-                if (-not (Get-Command 'Add-HttpChallenge' -EA Ignore)) {
-                    Write-Warning "$pName plugin is missing Add-HttpChallenge function. Will not use."
-                    continue
-                }
-                if (-not (Get-Command 'Remove-HttpChallenge' -EA Ignore)) {
-                    Write-Warning "$pName plugin is missing Remove-HttpChallenge function. Will not use."
-                    continue
-                }
-                if (-not (Get-Command 'Save-HttpChallenge' -EA Ignore)) {
-                    Write-Warning "$pName plugin is missing Save-HttpChallenge function. Will not use."
-                    continue
-                }
+            if ($script:Plugins.$pName.Path -eq [String]::Empty) {
+                # this is a built-in plugin we've pre-cached the details for so we
+                # can skip the dot sourcing and just add the filesystem path.
+                $script:Plugins.$pName.Path = $pFile.FullName
             } else {
-                Write-Warning "$pName plugin sent unrecognized challenge type. Will not use."
+                # This is a custom plugin that has name conflict with a native plugin
+                # Skip it
+                Write-Warning "Skipped loading external plugin that has name conflict with native plugin. $($pFile.FullName)"
+            }
+            continue
+        }
+
+        Write-Debug "Found non-native potential plugin file $($pFile.Name)"
+
+        # dot source it
+        . $pFile.FullName
+
+        # make sure it has the type function
+        if (-not (Get-Command 'Get-CurrentPluginType' -EA Ignore)) {
+            Write-Warning "$pName plugin is missing Get-CurrentPluginType function. Will not use."
+            continue
+        }
+
+        # make sure it has type specific functions
+        $chalType = Get-CurrentPluginType
+        if ('dns-01' -eq $chalType) {
+            if (-not (Get-Command 'Add-DnsTxt' -EA Ignore)) {
+                Write-Warning "$pName plugin is missing Add-DnsTxt function. Will not use."
                 continue
             }
-
-            # add it to the module variable
-            $script:Plugins.$pName = [pscustomobject]@{
-                PSTypeName = 'PoshACME.PAPluginDetail'
-                Name = $pName
-                ChallengeType = $chalType
-                Path = $pFile.FullName
+            if (-not (Get-Command 'Remove-DnsTxt' -EA Ignore)) {
+                Write-Warning "$pName plugin is missing Remove-DnsTxt function. Will not use."
+                continue
             }
+            if (-not (Get-Command 'Save-DnsTxt' -EA Ignore)) {
+                Write-Warning "$pName plugin is missing Save-DnsTxt function. Will not use."
+                continue
+            }
+        } elseif ('http-01' -eq $chalType) {
+            if (-not (Get-Command 'Add-HttpChallenge' -EA Ignore)) {
+                Write-Warning "$pName plugin is missing Add-HttpChallenge function. Will not use."
+                continue
+            }
+            if (-not (Get-Command 'Remove-HttpChallenge' -EA Ignore)) {
+                Write-Warning "$pName plugin is missing Remove-HttpChallenge function. Will not use."
+                continue
+            }
+            if (-not (Get-Command 'Save-HttpChallenge' -EA Ignore)) {
+                Write-Warning "$pName plugin is missing Save-HttpChallenge function. Will not use."
+                continue
+            }
+        } else {
+            Write-Warning "$pName plugin sent unrecognized challenge type. Will not use."
+            continue
+        }
+
+        # add it to the module variable
+        $script:Plugins.$pName = [pscustomobject]@{
+            PSTypeName = 'PoshACME.PAPluginDetail'
+            Name = $pName
+            ChallengeType = $chalType
+            Path = $pFile.FullName
         }
 
     }
