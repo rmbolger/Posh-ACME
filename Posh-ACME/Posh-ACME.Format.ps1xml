@@ -9,51 +9,17 @@
             <TableControl>
                 <TableHeaders>
                     <TableColumnHeader/>
-                    <TableColumnHeader><Label>newNonce</Label></TableColumnHeader>
-                    <TableColumnHeader><Label>newAccount</Label></TableColumnHeader>
-                    <TableColumnHeader><Label>newOrder</Label></TableColumnHeader>
-                    <TableColumnHeader><Label>revokeCert</Label></TableColumnHeader>
-                    <TableColumnHeader><Label>keyChange</Label></TableColumnHeader>
+                    <TableColumnHeader/>
+                    <TableColumnHeader/>
+                    <TableColumnHeader/>
                 </TableHeaders>
                 <TableRowEntries>
                     <TableRowEntry>
                         <TableColumnItems>
+                            <TableColumnItem><PropertyName>Name</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>location</PropertyName></TableColumnItem>
-                            <TableColumnItem>
-                                <ScriptBlock>
-                                    if ($_.newNonce) {
-                                        $_.newNonce.Substring($_.newNonce.LastIndexOf('/'))
-                                    } else { $_.newNonce }
-                                </ScriptBlock>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <ScriptBlock>
-                                    if ($_.newAccount) {
-                                        $_.newAccount.Substring($_.newAccount.LastIndexOf('/'))
-                                    } else { $_.newAccount }
-                                </ScriptBlock>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <ScriptBlock>
-                                    if ($_.newOrder) {
-                                        $_.newOrder.Substring($_.newOrder.LastIndexOf('/'))
-                                    } else { $_.newOrder }
-                                </ScriptBlock>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <ScriptBlock>
-                                    if ($_.revokeCert) {
-                                        $_.revokeCert.Substring($_.revokeCert.LastIndexOf('/'))
-                                    } else { $_.revokeCert }
-                                </ScriptBlock>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <ScriptBlock>
-                                    if ($_.keyChange) {
-                                        $_.keyChange.Substring($_.keyChange.LastIndexOf('/'))
-                                    } else { $_.keyChange }
-                                </ScriptBlock>
-                            </TableColumnItem>
+                            <TableColumnItem><PropertyName>SkipCertificateCheck</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>DisableTelemetry</PropertyName></TableColumnItem>
                         </TableColumnItems>
                     </TableRowEntry>
                 </TableRowEntries>
@@ -103,11 +69,11 @@
                 <TableRowEntries>
                     <TableRowEntry>
                         <TableColumnItems>
+                            <TableColumnItem><PropertyName>Name</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>MainDomain</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>status</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>KeyLength</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>SANs</PropertyName></TableColumnItem>
-                            <TableColumnItem><PropertyName>OCSPMustStaple</PropertyName></TableColumnItem>
                             <TableColumnItem>
                                 <ScriptBlock>
                                     if ($_.CertExpires) { Get-Date $_.CertExpires } else { $_.CertExpires }

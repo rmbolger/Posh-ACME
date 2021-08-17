@@ -6,6 +6,8 @@ function New-PACertificate {
         [string[]]$Domain,
         [Parameter(ParameterSetName='FromCSR',Mandatory,Position=0)]
         [string]$CSRPath,
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [string]$Name,
         [string[]]$Contact,
         [Parameter(ParameterSetName='FromScratch')]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
@@ -48,10 +50,10 @@ function New-PACertificate {
     # Make sure we have a server set. But don't override the current
     # one unless explicitly specified.
     if (-not (Get-PAServer) -or 'DirectoryUrl' -in $psbKeys) {
-        Set-PAServer $DirectoryUrl
+        Set-PAServer -DirectoryUrl $DirectoryUrl
     } else {
         # refresh the directory info (which should also get a fresh nonce)
-        Update-PAServer
+        Set-PAServer
     }
     Write-Verbose "Using ACME Server $($script:Dir.location)"
 
@@ -64,12 +66,13 @@ function New-PACertificate {
     if (-not $accts -or $accts.Count -eq 0) {
         # no matches for the set of filters, so create new
         Write-Verbose "Creating a new $AccountKeyLength account with contact: $($Contact -join ', ')"
-        $acct = New-PAAccount @PSBoundParameters
+        try { $acct = New-PAAccount @PSBoundParameters -EA Stop }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     } elseif ($accts.Count -gt 0 -and (-not $acct -or $acct.id -notin $accts.id)) {
         # we got matches, but there's no current account or the current one doesn't match
         # so set the first match as current
         $acct = $accts[0]
-        Set-PAAccount $acct.id
+        Set-PAAccount -ID $acct.id
     }
     Write-Verbose "Using account $($acct.id)"
 
@@ -96,8 +99,14 @@ function New-PACertificate {
         $PSBoundParameters.PfxPass = $PfxPass
     }
 
-    # Check for an existing order from the MainDomain for this call and create a new
-    # one if:
+    # Generate an appropriate name if one wasn't specified
+    if (-not $Name) {
+        $Name = $Domain[0].Replace('*','!')
+        Write-Verbose "Order name not specified, using '$Name'"
+    }
+
+    # Check for an existing order from the MainDomain/Name for this call and
+    # create a new one if:
     # - Force was used
     # - it doesn't exist
     # - is invalid or deactivated
@@ -106,7 +115,7 @@ function New-PACertificate {
     # - has different KeyLength
     # - has different SANs
     # - has different CSR
-    $order = Get-PAOrder $Domain[0] -Refresh
+    $order = Get-PAOrder -Name $Name -Refresh
     $oldOrder = $null
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
     if ($Force -or -not $order -or
@@ -123,12 +132,16 @@ function New-PACertificate {
         # Create a hashtable of order parameters to splat
         if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
             # most values will be pulled from the CSR
-            $orderParams = @{ CSRPath = $CSRPath }
+            $orderParams = @{
+                CSRPath = $CSRPath
+                Name = $Name
+            }
         }
         else {
             # set the defaults based on what was passed in
             $orderParams = @{
                 Domain         = $Domain
+                Name           = $Name
                 KeyLength      = $CertKeyLength
                 OCSPMustStaple = $OCSPMustStaple
                 AlwaysNewKey   = $AlwaysNewKey
@@ -180,14 +193,14 @@ function New-PACertificate {
         }
 
         # create a new order
-        Write-Verbose "Creating a new order for $($Domain -join ', ')"
+        Write-Verbose "Creating a new order '$($Name)' for $($Domain -join ', ')"
         Write-Debug "New order params: `n$($orderParams | ConvertTo-Json -Depth 5)"
         $order = New-PAOrder @orderParams -Force
 
     } else {
         # set the existing order as active and override explicit order properties that
         # don't need to trigger a new order
-        Write-Verbose "Using existing order for $($order.MainDomain) with status $($order.status)"
+        Write-Verbose "Using existing order '$($order.Name)' with status $($order.status)"
 
         $setOrderParams = @{}
         @(  'AlwaysNewKey'
@@ -260,6 +273,9 @@ function New-PACertificate {
 
     .PARAMETER CSRPath
         The path to a pre-made certificate request file in PEM (Base64) format. This is useful for appliances that need to generate their own keys and cert requests.
+
+    .PARAMETER Name
+        The name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
 
     .PARAMETER Contact
         One or more email addresses to associate with this certificate. These addresses will be used by the ACME server to send certificate expiration notifications or other important account notices.

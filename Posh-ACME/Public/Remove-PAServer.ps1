@@ -1,30 +1,49 @@
 function Remove-PAServer {
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding(SupportsShouldProcess,DefaultParameterSetName='DirUrl')]
     param(
-        [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
         [Alias('location')]
         [string]$DirectoryUrl,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [string]$Name,
         [switch]$DeactivateAccounts,
         [switch]$Force
     )
 
     Process {
 
-        # convert WellKnown names to their associated Url
-        if ($DirectoryUrl -notlike 'https://*') {
-            $DirectoryUrl = $script:WellKnownDirs.$DirectoryUrl
+        if (-not $DirectoryUrl -and -not $Name) {
+            try { throw "DirectoryUrl and/or Name must be specified." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
-        Write-Debug "Using DirectoryUrl $DirectoryUrl"
 
-        # Make sure the server exists on disk
-        $dirFolder = ConvertTo-DirFolder $DirectoryUrl
-        if (-not (Test-Path $dirFolder -PathType Container)) {
-            Write-Warning "Server $DirectoryUrl does not have an associated config folder. Nothing to delete."
-            return
+        # try to find an existing server that matches DirectoryUrl/Name
+        if ($DirectoryUrl) {
+
+            # convert WellKnown names to their associated Url
+            if ($DirectoryUrl -notlike 'https://*') {
+                Write-Debug "$DirectoryUrl converted to $($script:WellKnownDirs.$DirectoryUrl)"
+                $DirectoryUrl = $script:WellKnownDirs.$DirectoryUrl
+            }
+
+            # ignore the Name parameter when DirectoryUrl is specified
+            $server = Get-PAServer -DirectoryUrl $DirectoryUrl -Quiet
+        }
+        else {
+            # Try to find a server that matches Name instead
+            $server = Get-PAServer -Name $Name -Quiet
+        }
+
+        # make sure we found something
+        if (-not $server) {
+            try { throw "No matching PAServer found on disk." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
         # check for existing accounts
-        $accountFiles = Get-ChildItem (Join-Path $dirFolder '*\acct.json')
+        $accountFiles = Get-ChildItem (Join-Path $server.Folder '*\acct.json')
 
         # confirm deletion unless -Force was used or there are no accounts
         if (-not $Force -and $accountFiles) {
@@ -32,9 +51,9 @@ function Remove-PAServer {
             if ($DeactivateAccounts) {
                 $msg += " You have also chosen to deactivate the associated accounts."
             }
-            $question = "Are you sure you wish to delete server $DirectoryUrl?"
-            if (!$PSCmdlet.ShouldContinue($question,$msg)) {
-                Write-Verbose "Delete aborted for server $DirectoryUrl"
+            $question = "Are you sure you wish to delete server $($server.location)?"
+            if (-not $PSCmdlet.ShouldContinue($question,$msg)) {
+                Write-Verbose "Delete aborted for server $($server.location)"
                 return
             }
         }
@@ -43,11 +62,11 @@ function Remove-PAServer {
         $oldServer = Get-PAServer
 
         # switch servers if necessary
-        if ($oldServer -and $DirectoryUrl -ne $oldServer.location) {
-            Set-PAServer $DirectoryUrl -NoRefresh
+        if ($oldServer -and $server.location -ne $oldServer.location) {
+            Set-PAServer -DirectoryUrl $server.location -NoRefresh
             $SwitchBack = $true
         } elseif (-not $oldServer) {
-            Set-PAServer $DirectoryUrl -NoRefresh
+            Set-PAServer -DirectoryUrl $server.location -NoRefresh
         }
 
         # deactivate the accounts if requested
@@ -64,11 +83,10 @@ function Remove-PAServer {
             }
         }
 
-        Write-Verbose "Deleting server $DirectoryUrl"
+        Write-Verbose "Deleting server $($server.location)"
 
-        $dirFolder = Get-DirFolder
-        Write-Debug "Folder located at $dirFolder"
-        Remove-Item $dirFolder -Force -Recurse
+        Write-Debug "Folder located at $($server.Folder)"
+        Remove-Item $server.Folder -Force -Recurse
 
         if ($SwitchBack) {
             # switch back to previous server
@@ -94,6 +112,9 @@ function Remove-PAServer {
     .PARAMETER DirectoryUrl
         Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production v2) and LE_STAGE (LetsEncrypt Staging v2).
 
+    .PARAMETER Name
+        The name of the ACME server. The parameter is ignored if DirectoryUrl is specified.
+
     .PARAMETER DeactivateAccounts
         If specified, an attempt will be made to deactivate the accounts in this profile before deletion. Clients may wish to do this if the account key is compromised or being decommissioned.
 
@@ -101,7 +122,7 @@ function Remove-PAServer {
         If specified, interactive confirmation prompts will be skipped.
 
     .EXAMPLE
-        Remove-PAAccount LE_STAGE
+        Remove-PAServer LE_STAGE
 
         Remove the staging server without deactivating accounts.
 

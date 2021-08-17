@@ -9,7 +9,7 @@ Describe "Get-ChainIssuers" {
 
     It "Returns chain file issuer data" {
         InModuleScope Posh-ACME {
-            $issuers = Get-ChainIssuers -OrderFolder 'TestDrive:\acme.test\11111\example.com'
+            $issuers = Get-ChainIssuers -OrderFolder 'TestDrive:\srvr1\acct1\example.com'
             $issuers | Should -HaveCount 3
             $issuers[0].issuer | Should -Be '(STAGING) Pretend Pear X1'
             $issuers[0].filepath | Should -BeLike '*chain0.cer'

@@ -36,18 +36,18 @@ function Complete-PAOrder {
                 try { throw "No Order parameter specified and no current order selected. Try running Set-PAOrder first." }
                 catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
-        } elseif ($Order.MainDomain -notin (Get-PAOrder -List).MainDomain) {
-            Write-Error "Order for $($Order.MainDomain) was not found in the current account's order list."
+        } elseif ($Order.Name -notin (Get-PAOrder -List).Name) {
+            Write-Error "Order '$($Order.Name)' was not found in the current account's order list."
             return
         }
 
         # make sure the order has a valid state for this function
         if ($Order.status -ne 'valid') {
-            Write-Error "Order status is '$($Order.status)' for $($Order.MainDomain). It must be 'valid' to complete. Unable to continue."
+            Write-Error "Order '$($Order.Name)' status is '$($Order.status)'. It must be 'valid' to complete. Unable to continue."
             return
         }
         if ([string]::IsNullOrWhiteSpace($Order.certificate)) {
-            try { throw "Order status is valid, but no certificate URL was found." }
+            try { throw "Order '$($Order.Name)' status is valid, but no certificate URL was found." }
             catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
@@ -65,9 +65,9 @@ function Complete-PAOrder {
         $renewHours = [Math]::Max(720, ($lifetime.TotalHours / 3))
 
         # Set the CertExpires and RenewAfter fields
-        $script:Order.CertExpires = $cert.NotAfter.ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture)
-        $script:Order.RenewAfter = $cert.NotAfter.AddHours(-$renewHours).ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture)
-        Update-PAOrder -SaveOnly
+        $Order | Add-Member 'CertExpires' $cert.NotAfter.ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture) -Force
+        $Order | Add-Member 'RenewAfter' $cert.NotAfter.AddHours(-$renewHours).ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture) -Force
+        Update-PAOrder $Order -SaveOnly
 
         Write-Verbose "Successfully created certificate."
 

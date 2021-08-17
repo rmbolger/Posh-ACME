@@ -24,28 +24,3 @@ function Set-ConfigRoot {
     )
     $script:ConfigRoot = $Path
 }
-
-function Get-DirFolder {
-    $script:DirFolder
-}
-
-function Set-DirFolder {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory,Position=0)]
-        [string]$Path
-    )
-    $script:DirFolder = $Path
-}
-
-function Get-OrderFolder {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
-        [string]$MainDomain
-    )
-
-    Process {
-        Join-Path $script:AcctFolder $MainDomain.Replace('*','!')
-    }
-}

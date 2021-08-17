@@ -35,22 +35,22 @@ function Submit-ChallengeValidation {
                 try { throw "No Order parameter specified and no current order selected. Try running Set-PAOrder first." }
                 catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
-        } elseif ($Order.MainDomain -notin (Get-PAOrder -List).MainDomain) {
-            Write-Error "Order for $($Order.MainDomain) was not found in the current account's order list."
+        } elseif ($Order.Name -notin (Get-PAOrder -List).Name) {
+            Write-Error "Order '$($Order.Name)' was not found in the current account's order list."
             return
         }
 
         # make sure the order has a valid state for this function
         if ($Order.status -eq 'invalid') {
-            Write-Error "Order status is invalid for $($Order.MainDomain). Unable to continue."
+            Write-Error "Order '$($Order.Name)' status is invalid. Unable to continue."
             return
         }
         elseif ($Order.status -in 'valid','processing') {
-            Write-Warning "The server has already issued or is processing a certificate for order $($Order.MainDomain)."
+            Write-Warning "The server has already issued or is processing a certificate for order '$($Order.Name)'."
             return
         }
         elseif ($Order.status -eq 'ready') {
-            Write-Warning "The order $($Order.MainDomain) has already completed challenge validation and is awaiting finalization."
+            Write-Warning "Order '$($Order.Name)' has already completed challenge validation and is awaiting finalization."
             return
         }
 
@@ -87,7 +87,7 @@ function Submit-ChallengeValidation {
         Write-Debug "DnsAlias: $($Order.DnsAlias -join ',')"
 
         # import existing args
-        $PluginArgs = Get-PAPluginArgs $Order.MainDomain
+        $PluginArgs = Get-PAPluginArgs -Name $Order.Name
 
         # loop through the authorizations looking for challenges to validate
         for ($i=0; $i -lt $allAuths.Count; $i++) {
@@ -228,9 +228,9 @@ function Submit-ChallengeValidation {
         Begin challenge validation on the current order.
 
     .EXAMPLE
-        Get-PAOrder 111 | Submit-ChallengeValidation
+        Get-PAOrder | Submit-ChallengeValidation
 
-        Begin challenge validation on the specified order.
+        Begin challenge validation on the current order.
 
     .LINK
         Project: https://github.com/rmbolger/Posh-ACME

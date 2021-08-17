@@ -1,11 +1,9 @@
 function Export-PluginArgs {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
-        [string]$MainDomain,
-        [Parameter(Mandatory,Position=1)]
-        [string[]]$Plugin,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(Mandatory,Position=0)]
+        [PSTypeName('PoshACME.PAOrder')]$Order,
+        [Parameter(Mandatory)]
         [hashtable]$PluginArgs,
         [switch]$IgnoreExisting
     )
@@ -33,16 +31,11 @@ function Export-PluginArgs {
     Process {
         trap { $PSCmdlet.ThrowTerminatingError($PSItem) }
 
-        Write-Debug "Exporting plugin args for $MainDomain with plugins $(($Plugin -join ','))"
-
-        # throw an error if an order isn't found matching MainDomain
-        if (-not ($order = Get-PAOrder $MainDomain)) {
-            throw "No ACME order found for $MainDomain."
-        }
+        Write-Debug "Exporting plugin args for order '$($Order.Name)' with plugins $($Order.Plugin -join ',')"
 
         $pData = @{}
         if (-not $IgnoreExisting) {
-            $pData = Get-PAPluginArgs $order.MainDomain
+            $pData = $Order | Get-PAPluginArgs
         }
 
         # define the set of parameter names to ignore
@@ -50,9 +43,9 @@ function Export-PluginArgs {
             [Management.Automation.PSCmdlet]::CommonParameters +
             [Management.Automation.PSCmdlet]::OptionalCommonParameters
 
-        # $Plugin will most often come with duplicates after being called from Submit-ChallengeValidation
+        # $Order.Plugin will most often come with duplicates after being called from Submit-ChallengeValidation
         # So grab just the unique set.
-        $uniquePlugins = @($Plugin | Sort-Object -Unique)
+        $uniquePlugins = @($Order.Plugin | Sort-Object -Unique)
 
         # Get all of the plugin specific parameter names for the current plugin list
         $paramNames = foreach ($p in $uniquePlugins) {
@@ -128,7 +121,7 @@ function Export-PluginArgs {
         }
 
         # build the path to the existing plugin data file and export it
-        $pDataFile = Join-Path $order.Folder 'pluginargs.json'
+        $pDataFile = Join-Path $Order.Folder 'pluginargs.json'
         $pDataSafe | ConvertTo-Json -Depth 10 | Out-File $pDataFile -Encoding utf8
     }
 

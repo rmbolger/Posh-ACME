@@ -2,6 +2,8 @@ function Remove-PAAccount {
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [Alias('Name')]
         [string]$ID,
         [switch]$Deactivate,
         [switch]$Force
@@ -9,7 +11,7 @@ function Remove-PAAccount {
 
     Begin {
         # make sure we have a server configured
-        if (!(Get-PAServer)) {
+        if (-not ($server = Get-PAServer)) {
             try { throw "No ACME server configured. Run Set-PAServer first." }
             catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
@@ -17,7 +19,7 @@ function Remove-PAAccount {
 
     Process {
         # grab a copy of the account
-        if (!($acct = Get-PAAccount $ID)) {
+        if (-not ($acct = Get-PAAccount -ID $ID)) {
             Write-Warning "Specified account ID ($ID) was not found."
             return
         }
@@ -28,10 +30,10 @@ function Remove-PAAccount {
         }
 
         # confirm deletion unless -Force was used
-        if (!$Force) {
-            $msg = "Deleting an account will also delete all associated orders and certificates."
+        if (-not $Force) {
+            $msg = "Deleting an account will also delete all local copies of orders and certificates. But they may still exist on the ACME server."
             $question = "Are you sure you wish to delete account $($acct.id)?"
-            if (!$PSCmdlet.ShouldContinue($question,$msg)) {
+            if (-not $PSCmdlet.ShouldContinue($question,$msg)) {
                 Write-Verbose "Deletion aborted for account $($acct.id)."
                 return
             }
@@ -40,13 +42,13 @@ function Remove-PAAccount {
         Write-Verbose "Deleting account $($acct.id)"
 
         # delete the account's folder
-        $acctFolder = Join-Path (Get-DirFolder) $acct.id
+        $acctFolder = Join-Path $server.Folder $acct.id
         Remove-Item $acctFolder -Force -Recurse
 
         # unset the current account if it was this one
         if ($script:Acct -and $script:Acct.id -eq $acct.id) {
             $acct = $null
-            Remove-Item (Join-Path (Get-DirFolder) 'current-account.txt') -Force
+            Remove-Item (Join-Path $server.Folder 'current-account.txt') -Force
             Import-PAConfig -Level 'Account'
         }
 

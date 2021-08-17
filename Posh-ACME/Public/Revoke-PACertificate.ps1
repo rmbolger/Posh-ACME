@@ -5,8 +5,11 @@ function Revoke-PACertificate {
         ConfirmImpact='High'
     )]
     param(
-        [Parameter(ParameterSetName='MainDomain',Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [Parameter(ParameterSetName='MainDomain',Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$MainDomain,
+        [Parameter(ParameterSetName='MainDomain',ValueFromPipelineByPropertyName)]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [string]$Name,
         [Parameter(ParameterSetName='CertFile',Mandatory,ValueFromPipelineByPropertyName)]
         [string]$CertFile,
         [Parameter(ParameterSetName='CertFile',ValueFromPipelineByPropertyName)]
@@ -22,14 +25,38 @@ function Revoke-PACertificate {
         if ($Force){
             $ConfirmPreference = 'None'
         }
+
+        $pemHeader = '-----BEGIN CERTIFICATE-----'
+        $pemFooter = '-----END CERTIFICATE-----'
     }
 
     Process {
 
         if ('MainDomain' -eq $PSCmdlet.ParameterSetName) {
 
-            # check for an existing certificate associated with the name
-            if (-not ($paCert = $MainDomain | Get-PACertificate)) {
+            # check for a unique matching order
+            if ($Name) {
+                $order = Get-PAOrder -Name $Name
+                if (-not $order) {
+                    Write-Error "No order found matching Name '$Name'."
+                    return
+                }
+            } else {
+                $matchingOrders = Get-PAOrder -List | Where-Object { $_.MainDomain -eq $MainDomain }
+                if ($matchingOrders.Count -eq 1) {
+                    $order = $matchingOrders
+                } elseif ($matchingOrders.Count -ge 2) {
+                    # error because we can't be sure which object to affect
+                    Write-Error "Multiple orders found for MainDomain '$MainDomain'. Please specify Name as well."
+                    return
+                } else {
+                    Write-Error "No order found matching MainDomain '$MainDomain'."
+                    return
+                }
+            }
+
+            # check for an existing certificate
+            if (-not ($paCert = $order | Get-PACertificate)) {
                 try { throw "No existing certificate found for $MainDomain." }
                 catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
@@ -38,9 +65,6 @@ function Revoke-PACertificate {
             $CertFile = $paCert.CertFile
             $KeyFile = $paCert.KeyFile
         }
-
-        $pemHeader = '-----BEGIN CERTIFICATE-----'
-        $pemFooter = '-----END CERTIFICATE-----'
 
         # do some minimal sanity checking on the cert file contents
         try {

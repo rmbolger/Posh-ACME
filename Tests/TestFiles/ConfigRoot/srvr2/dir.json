@@ -13,5 +13,6 @@
   "revokeCert": "https://acme2.test/acme/revoke-cert",
   "location": "https://acme2.test/directory",
   "nonce": "1112OzEVvnOQMZb5Wc-TcHuuPt6XiyrAOsD3ixKm7WBDhOk",
-  "SkipCertificateCheck": true
+  "SkipCertificateCheck": true,
+  "DisableTelemetry": true
 }

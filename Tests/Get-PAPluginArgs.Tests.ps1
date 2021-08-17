@@ -64,10 +64,6 @@ Describe "Get-PAPluginArgs" {
             InModuleScope Posh-ACME { $script:Order = $null }
         }
 
-        It "No params - Throws" {
-            { Get-PAPluginArgs } | Should -Throw "*No ACME order*"
-        }
-
         It "Valid domain - returns correct args" {
             { Get-PAPluginArgs 'example.com' } | Should -Not -Throw
             Should -Not -Invoke Write-Warning -ModuleName Posh-ACME
@@ -115,7 +111,7 @@ Describe "Get-PAPluginArgs" {
                     'domain1' = @('d','e','f')
                     'domain2' = @('g','h','i')
                 }
-            } | ConvertTo-Json -Depth 10 | Out-File 'TestDrive:\acme.test\11111\example.com\pluginargs.json' -Encoding utf8
+            } | ConvertTo-Json -Depth 10 | Out-File 'TestDrive:\srvr1\acct1\example.com\pluginargs.json' -Encoding utf8
         }
 
         It "Returns args properly" {

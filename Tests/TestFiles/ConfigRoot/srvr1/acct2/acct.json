@@ -1,7 +1,9 @@
 {
   "id": "22222",
   "status": "valid",
-  "contact": [],
+  "contact": [
+    "mailto:me@ex.test"
+  ],
   "location": "https://acme.test/acme/acct/22222",
   "key": {
     "crv": "P-384",

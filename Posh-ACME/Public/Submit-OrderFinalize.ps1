@@ -32,14 +32,14 @@ function Submit-OrderFinalize {
                 try { throw "No Order parameter specified and no current order selected. Try running Set-PAOrder first." }
                 catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
-        } elseif ($Order.MainDomain -notin (Get-PAOrder -List).MainDomain) {
-            Write-Error "Order for $($Order.MainDomain) was not found in the current account's order list."
+        } elseif ($Order.Name -notin (Get-PAOrder -List).Name) {
+            Write-Error "Order '$($Order.Name)' was not found in the current account's order list."
             return
         }
 
         # make sure the order has a valid state for this function
         if ($Order.status -ne 'ready') {
-            Write-Error "Order status is '$($Order.status)' for $($Order.MainDomain). It must be 'ready' to finalize. Unable to continue."
+            Write-Error "Order '$($Order.Name)' status is '$($Order.status)'. It must be 'ready' to finalize. Unable to continue."
             return
         }
 
@@ -94,7 +94,7 @@ function Submit-OrderFinalize {
             $Order = Get-PAOrder $Order.MainDomain -Refresh
 
             if ($Order.status -eq 'invalid') {
-                try { throw "Order status for $($Order.MainDomain) is invalid." }
+                try { throw "Order '$($Order.Name)' status is invalid." }
                 catch { $PSCmdlet.ThrowTerminatingError($_) }
             } elseif ($Order.status -eq 'valid' -and ![string]::IsNullOrWhiteSpace($Order.certificate)) {
                 return

@@ -10,6 +10,9 @@ function New-PAAccount {
         [string]$KeyLength='ec-256',
         [Parameter(ParameterSetName='ImportKey',Mandatory)]
         [string]$KeyFile,
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [Alias('Name')]
+        [string]$ID,
         [switch]$AcceptTOS,
         [switch]$Force,
         [string]$ExtAcctKID,
@@ -22,14 +25,14 @@ function New-PAAccount {
     )
 
     # make sure we have a server configured
-    if (-not ($acmeServer = Get-PAServer)) {
+    if (-not ($server = Get-PAServer)) {
         try { throw "No ACME server configured. Run Set-PAServer first." }
         catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     # make sure the external account binding parameters were specified if this ACME
     # server requires them.
-    if ($acmeServer.meta -and $acmeServer.meta.externalAccountRequired -and
+    if ($server.meta -and $server.meta.externalAccountRequired -and
         (-not $ExtAcctKID -or -not $ExtAcctHMACKey))
     {
         try { throw "The current ACME server requires external account credentials to create a new ACME account. Please run New-PAAccount with the ExtAcctKID and ExtAcctHMACKey parameters." }
@@ -62,11 +65,11 @@ function New-PAAccount {
 
         # There's a chance we may be creating effectively a duplicate account. So check
         # for confirmation if there's already one with the same contacts and keylength.
-        if (!$Force) {
+        if (-not $Force) {
             $accts = @(Get-PAAccount -List -Refresh -Contact $Contact -KeyLength $KeyLength -Status 'valid')
             if ($accts.Count -gt 0) {
-                if (!$PSCmdlet.ShouldContinue("Do you wish to duplicate?",
-                    "Existing account with matching contacts and key length.")) { return }
+                if (-not $PSCmdlet.ShouldContinue("Do you wish to duplicate?",
+                    "An account exists with matching contacts and key length.")) { return }
             }
         }
 
@@ -145,24 +148,37 @@ function New-PAAccount {
 
     $respObj = $response.Content | ConvertFrom-Json
 
-    # So historically, LE/Boulder returns the raw account ID value as a property in the JSON
-    # output for new account requests. But the finalized RFC 8555 does not require this
-    # and Boulder will be removing it. But it's still a useful value to have for referencing
-    # accounts. So if it's not returned, we're going to try and parse it from the location
-    # header. This may come back to haunt us if other ACME providers use different location
-    # schemes in the future.
+    # Before RFC8555 was finalized, LE/Boulder used to return the raw account ID value as a
+    # property in the JSON output for new account requests. But the finalized RFC 8555 does
+    # not require this and Boulder will be removing it. But it's still a useful value to have
+    # as a simpler identifier/name for referencing accounts than a full URL. So if it's not
+    # returned and the user didn't provide an explicit ID value to use, we're going to try
+    # and parse it from the location header. This may come back to haunt us if other ACME
+    # providers use different location schemes in the future.
+
     if (-not $respObj.ID) {
         # https://acme-staging-v02.api.letsencrypt.org/acme/acct/xxxxxxxx
         # https://acme-v02.api.letsencrypt.org/acme/acct/xxxxxxxx
-        $acctID = ([Uri]$location).Segments[-1]
+        $fallbackID = ([Uri]$location).Segments[-1]
     } else {
-        $acctID = $respObj.ID.ToString()
+        $fallbackID = $respObj.ID.ToString()
+    }
+
+    # if an explicit ID was provided, make sure it doesn't conflict with
+    # another account
+    if ($ID) {
+        if (Get-PAAccount -ID $ID) {
+            Write-Warning "Account ID '$ID' is already in use. Falling back to the default ID value."
+            $ID = $fallbackID
+        }
+    } else {
+        $ID = $fallbackID
     }
 
     # build the return value
     $acct = [pscustomobject]@{
         PSTypeName = 'PoshACME.PAAccount'
-        id = $acctID
+        id = $ID
         status = $respObj.status
         contact = $respObj.contact
         location = $location
@@ -175,6 +191,7 @@ function New-PAAccount {
         # https://github.com/letsencrypt/boulder/issues/3335
         orders = $respObj.orders
         sskey = $null
+        Folder = Join-Path $server.Folder $ID
     }
 
     # add a new AES key if specified
@@ -183,13 +200,12 @@ function New-PAAccount {
     }
 
     # save it to memory and disk
-    $acct.id | Out-File (Join-Path (Get-DirFolder) 'current-account.txt') -Force -EA Stop
+    $acct.id | Out-File (Join-Path $server.Folder 'current-account.txt') -Force -EA Stop
     $script:Acct = $acct
-    $script:AcctFolder = Join-Path (Get-DirFolder) $acct.id
-    if (!(Test-Path $script:AcctFolder -PathType Container)) {
-        New-Item -ItemType Directory -Path $script:AcctFolder -Force -EA Stop | Out-Null
+    if (-not (Test-Path $acct.Folder -PathType Container)) {
+        New-Item -ItemType Directory -Path $acct.Folder -Force -EA Stop | Out-Null
     }
-    $acct | ConvertTo-Json -Depth 5 | Out-File (Join-Path $script:AcctFolder 'acct.json') -Force -EA Stop
+    $acct | Select-Object -Exclude id,Folder | ConvertTo-Json -Depth 5 | Out-File (Join-Path $acct.Folder 'acct.json') -Force -EA Stop
 
     return $acct
 
@@ -211,6 +227,9 @@ function New-PAAccount {
 
     .PARAMETER KeyFile
         The path to an existing EC or RSA private key file. This will attempt to create the account using the specified key as the ACME account key. This can be used to recover/import an existing ACME account if one is already associated with the key.
+
+    .PARAMETER ID
+        The name of the ACME acccount.
 
     .PARAMETER AcceptTOS
         If not specified, the ACME server will throw an error with a link to the current Terms of Service. Using this switch indicates acceptance of those Terms of Service and is required for successful account creation.

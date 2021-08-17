@@ -5,12 +5,12 @@ function Import-PluginVar {
         [string]$VarName
     )
 
-    if (-not ($Account = Get-PAAccount)) {
+    if (-not ($acct = Get-PAAccount)) {
         throw "No current account selected. Try running Set-PAAccount first."
     }
 
     # build the path to the plugin vars file and import it
-    $pVarFile = Join-Path (Join-Path (Get-DirFolder) $Account.id) 'pluginvars.json'
+    $pVarFile = Join-Path $acct.Folder 'pluginvars.json'
 
     if (Test-Path -Path $pVarFile -PathType Leaf) {
 

@@ -12,6 +12,8 @@ function New-PAOrder {
         [string]$KeyLength='2048',
         [Parameter(ParameterSetName='ImportKey',Mandatory)]
         [string]$KeyFile,
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [string]$Name,
         [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
         [string[]]$Plugin,
         [hashtable]$PluginArgs,
@@ -43,7 +45,7 @@ function New-PAOrder {
     )
 
     # Make sure we have an account configured
-    if (!($acct = Get-PAAccount)) {
+    if (-not ($acct = Get-PAAccount)) {
         try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
         catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
@@ -85,34 +87,42 @@ function New-PAOrder {
     }
 
     # check for an existing order
-    $order = Get-PAOrder $Domain[0] -Refresh
+    if ($Name) {
+        $order = Get-PAOrder -Name $Name
+    } else {
+        $order = Get-PAOrder -MainDomain $Domain[0]
+
+        # set the default Name to a filesystem friendly version of the first domain
+        $Name = $Domain[0].Replace('*','!')
+    }
 
     # separate the SANs
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] })
 
     # There's a chance we may be overwriting an existing order here. So check for
     # confirmation if certain conditions are true
-    if (!$Force) {
+    if (-not $Force) {
 
-        # skip confirmation if the SANs or KeyLength are different
-        # regardless of the original order status
-        # or if the order is pending but expired
+        $oldDomains = (@($order.MainDomain) + @($order.SANs) | Sort-Object) -join ','
+
+        # skip confirmation if the Domains or KeyLength are different regardless
+        # of the original order status or if the order is pending but expired
         if ( ($order -and ($KeyLength -ne $order.KeyLength -or
-             (($SANs | Sort-Object) -join ',') -ne (($order.SANs | Sort-Object) -join ',') -or
+             ($oldDomains -ne ($Domain | Sort-Object) -join ',') -or
              ($order.status -eq 'pending' -and (Get-DateTimeOffsetNow) -gt ([DateTimeOffset]::Parse($order.expires))) ))) {
             # do nothing
 
         # confirm if previous order is still in progress
         } elseif ($order -and $order.status -in 'pending','ready','processing') {
 
-            if (!$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
+            if (-not $PSCmdlet.ShouldContinue("Do you wish to overwrite?",
                 "Existing order with status $($order.status).")) { return }
 
         # confirm if previous order not up for renewal
         } elseif ($order -and $order.status -eq 'valid' -and
                     (Get-DateTimeOffsetNow) -lt ([DateTimeOffset]::Parse($order.RenewAfter))) {
 
-            if (!$PSCmdlet.ShouldContinue("Do you wish to overwrite?",
+            if (-not $PSCmdlet.ShouldContinue("Do you wish to overwrite?",
                 "Existing order has not reached suggested renewal window.")) { return }
         }
     }
@@ -132,6 +142,8 @@ function New-PAOrder {
         url   = $script:Dir.newOrder;
     }
 
+    # super lazy IPv4 address regex, but we just need to be able to
+    # distinguish from an FQDN
     $reIPv4 = [regex]'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
 
     # build the payload object
@@ -255,17 +267,18 @@ function New-PAOrder {
         catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
-    # add the Folder property
-    $order | Add-Member 'Folder' (Get-OrderFolder $order.MainDomain) -Force
+    # add the Name and Folder properties
+    $order | Add-Member 'Name' $Name -Force
+    $order | Add-Member 'Folder' (Join-Path $acct.Folder $Name) -Force
 
     # save it to memory and disk
-    $order.MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force -EA Stop
+    $order.Name | Out-File (Join-Path $acct.Folder 'current-order.txt') -Force -EA Stop
     $script:Order = $order
-    Update-PAOrder -SaveOnly
+    Update-PAOrder $order -SaveOnly
 
     # export plugin args now that the order exists on disk
     if ('PluginArgs' -in $PSBoundParameters.Keys) {
-        Export-PluginArgs $order.MainDomain $order.Plugin $PluginArgs
+        Export-PluginArgs -Order $order -PluginArgs $PluginArgs
     }
 
     # Make a local copy of the specified CSR file
@@ -329,6 +342,9 @@ function New-PAOrder {
 
     .PARAMETER KeyFile
         The path to an existing EC or RSA private key file. This will attempt to create the order using the specified key as the certificate's private key.
+
+    .PARAMETER Name
+        The name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain. If not specified, defaults to the first domain in the order.
 
     .PARAMETER Plugin
         One or more validation plugin names to use for this order's challenges. If no plugin is specified, the DNS "Manual" plugin will be used. If the same plugin is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many plugin names as there are domains in the order and in the same sequence as the order.

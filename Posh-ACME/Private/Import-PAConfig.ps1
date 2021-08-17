@@ -52,14 +52,13 @@ function Import-PAConfig {
     }
 
     # start at the server level if nothing was specified or specifically requested
-    if (!$Level -or $Level -eq 'Server') {
+    if (-not $Level -or $Level -eq 'Server') {
 
         # load the current ACME directory into memory if it exists on disk
         $dirUrl = [string](Get-Content (Join-Path (Get-ConfigRoot) 'current-server.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($dirUrl)) {
 
-            Set-DirFolder (ConvertTo-DirFolder $dirUrl)
-            $script:Dir = Get-PAServer $dirUrl
+            $script:Dir = Get-PAServer -DirectoryUrl $dirUrl
 
             # deal with cert validation options between PS editions
             Set-CertValidation $script:Dir.SkipCertificateCheck
@@ -68,9 +67,7 @@ function Import-PAConfig {
 
         } else {
             # wipe references since we have no current server
-            $script:DirFolder = $null
             $script:Dir = $null
-            $script:AcctFolder = $null
             $script:Acct = $null
             $script:Order = $null
         }
@@ -79,17 +76,16 @@ function Import-PAConfig {
     if ($ImportAccount -or $Level -eq 'Account') {
 
         # load the current account into memory if it exists on disk
-        $acctID = [string](Get-Content (Join-Path (Get-DirFolder) 'current-account.txt') -EA Ignore)
+        $acctID = [string](Get-Content (Join-Path $script:Dir.Folder 'current-account.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($acctID)) {
 
-            $script:AcctFolder = Join-Path (Get-DirFolder) $acctID
-            $script:Acct = Get-PAAccount $acctID
+            $script:Acct = Get-PAAccount -ID $acctID
 
             $ImportOrder = $true
 
             # Check for a v3 plugindata.xml file and convert it to order-specific v4
             # files.
-            $pDataV3File = Join-Path $script:AcctFolder 'plugindata.xml'
+            $pDataV3File = Join-Path $script:Acct.Folder 'plugindata.xml'
             if (Test-Path $pDataV3File -PathType Leaf) {
                 Write-Debug "Migrating v3 plugindata.xml"
                 $pDataV3 = Import-Clixml $pDataV3File
@@ -97,19 +93,18 @@ function Import-PAConfig {
                 # Loop through the available orders
                 Get-PAOrder -List -Refresh | ForEach-Object {
                     if ($_.Plugin) {
-                        Write-Debug "Migrating for $($_.MainDomain)"
-                        Export-PluginArgs $_.MainDomain $_.Plugin $pDataV3
+                        Write-Debug "Migrating for order '$($_.Name)'"
+                        Export-PluginArgs -Order $_ -PluginArgs $pDataV3
                     } else {
-                        Write-Debug "No Plugins defined for order $($_.MainDomain)"
+                        Write-Debug "No Plugins defined for order '$($_.Name)'"
                     }
                 }
 
-                Move-Item $pDataV3File (Join-Path $script:AcctFolder 'plugindata.xml.v3') -Force
+                Move-Item $pDataV3File (Join-Path $script:Acct.Folder 'plugindata.xml.v3') -Force
             }
 
         } else {
             # wipe references since we have no current account
-            $script:AcctFolder = $null
             $script:Acct = $null
             $script:Order = $null
         }
@@ -118,10 +113,14 @@ function Import-PAConfig {
     if ($ImportOrder -or $Level -eq 'Order') {
 
         # load the current order into memory if it exists on disk
-        $domain = [string](Get-Content (Join-Path $script:AcctFolder 'current-order.txt') -EA Ignore)
-        if (![string]::IsNullOrWhiteSpace($domain)) {
+        $orderName = [string](Get-Content (Join-Path $script:Acct.Folder 'current-order.txt') -EA Ignore)
+        if (-not [string]::IsNullOrWhiteSpace($orderName)) {
 
-            $script:Order = Get-PAOrder $domain
+            # replace wildcard characters to filesystem friendly ! characters
+            # for 4.5 and earlier compatibility
+            $orderName = $orderName.Replace('*','!')
+
+            $script:Order = Get-PAOrder -Name $orderName
 
         } else {
             # wipe references since we have no current order

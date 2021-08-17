@@ -4,7 +4,7 @@ Describe "Get-PAAuthorization" {
         $env:POSHACME_HOME = 'TestDrive:\'
         Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
 
-        $fakeAcct = Get-Content "$PSScriptRoot\TestFiles\ConfigRoot\acme.test\11111\acct.json" -Raw | ConvertFrom-Json
+        $fakeAcct = Get-Content "$PSScriptRoot\TestFiles\ConfigRoot\srvr1\acct1\acct.json" -Raw | ConvertFrom-Json
         $fakeAcct.PSObject.TypeNames.Insert(0,'PoshACME.PAAccount')
         Mock -ModuleName Posh-ACME Get-PAAccount { return $fakeAcct }
     }

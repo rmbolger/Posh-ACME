@@ -7,7 +7,7 @@ function New-Csr {
     )
 
     # Make sure we have an account configured
-    if (!(Get-PAAccount)) {
+    if (-not (Get-PAAccount)) {
         throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
     }
 
@@ -40,7 +40,6 @@ function New-Csr {
 
             # EC key
             Write-Debug "Creating BC EC keypair of type $($Order.KeyLength)"
-            $isRSA = $false
             $keySize = [int]$Order.KeyLength.Substring(3)
             $curveOid = [Org.BouncyCastle.Asn1.Nist.NistNamedCurves]::GetOid("P-$keySize")
 
@@ -57,7 +56,6 @@ function New-Csr {
 
             # RSA key
             Write-Debug "Creating BC RSA keypair of type $($Order.KeyLength)"
-            $isRSA = $true
             $keySize = [int]$Order.KeyLength
             $sigAlgo = 'SHA256WITHRSA'
 

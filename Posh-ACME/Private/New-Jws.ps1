@@ -82,7 +82,7 @@ function New-Jws {
                 throw "Supplied EC Key (P-$($Key.KeySize)) does not match 'alg' ($($Header.alg)) in supplied header or alg is not supported."
             }
 
-            if (!('jwk' -in $Header.Keys -xor 'kid' -in $Header.Keys)) {
+            if (-not ('jwk' -in $Header.Keys -xor 'kid' -in $Header.Keys)) {
                 if ('jwk' -in $Header.Keys) {
                     throw "Conflicting key entries. Both 'jwk' and 'kid' found in supplied Header"
                 } else {

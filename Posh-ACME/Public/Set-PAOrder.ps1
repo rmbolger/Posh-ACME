@@ -3,6 +3,9 @@ function Set-PAOrder {
     param(
         [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$MainDomain,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [string]$Name,
         [Parameter(ParameterSetName='Revoke', Mandatory)]
         [switch]$RevokeCert,
         [Parameter(ParameterSetName='Revoke')]
@@ -18,6 +21,9 @@ function Set-PAOrder {
         [hashtable]$PluginArgs,
         [Parameter(ParameterSetName='Edit')]
         [string[]]$DnsAlias,
+        [Parameter(ParameterSetName='Edit')]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [string]$NewName,
         [Parameter(ParameterSetName='Edit')]
         [ValidateNotNullOrEmpty()]
         [string]$FriendlyName,
@@ -45,7 +51,7 @@ function Set-PAOrder {
 
     Begin {
         # Make sure we have an account configured
-        if (!(Get-PAAccount)) {
+        if (-not ($acct = Get-PAAccount)) {
             try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
             catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
@@ -67,13 +73,6 @@ function Set-PAOrder {
 
     Process {
 
-        # throw an error if there's no current order and no MainDomain
-        # passed in
-        if (!$script:Order -and !$MainDomain) {
-            try { throw "No ACME order configured. Run New-PAOrder or specify a MainDomain." }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
-        }
-
         # There are 3 types of calls the user might be making here.
         # - order switch
         # - order switch and edit/revoke
@@ -83,42 +82,39 @@ function Set-PAOrder {
         # to use it for a bulk update. For now, we'll just let it happen and switch
         # to whatever order came through the pipeline last.
 
-        if ($NoSwitch -and $MainDomain) {
-            # This is an explicit non-switching edit, so grab a cached reference
-            # to the specified order
-            $order = Get-PAOrder $MainDomain
-
-            if ($null -eq $order) {
-                Write-Warning "Specified order for $MainDomain was not found. No changes made."
+        # Make sure we have a distinct order to work with
+        if ($Name) {
+            $order = Get-PAOrder -Name $Name
+            if (-not $order) {
+                Write-Error "No order found matching Name '$Name'"
                 return
             }
-
-        } elseif (!$script:Order -or ($MainDomain -and ($MainDomain -ne $script:Order.MainDomain))) {
-            # This is a definite order switch
-
-            # refresh the cached copy
-            try {
-                Update-PAOrder $MainDomain
-            } catch [AcmeException] {
-                Write-Warning "Error refreshing order status from ACME server: $($_.Exception.Data.detail)"
-            }
-
-            Write-Debug "Switching to order $MainDomain"
-
-            # save it as current
-            $MainDomain | Out-File (Join-Path $script:AcctFolder 'current-order.txt') -Force -EA Stop
-
-            # reload the cache from disk
-            Import-PAConfig -Level 'Order'
-
-            # grab a local reference to the newly current order
-            $order = $script:Order
-
-        } else {
-            # This is a defacto non-switching edit because they didn't
-            # specify a MainDomain. So just use the current order.
-            $order = $script:Order
         }
+        elseif ($MainDomain) {
+            # They only specified MainDomain which means there could be multiple matches. But
+            # we want to avoid letting users accidentally modify the wrong order. So error if
+            # there are multiple matches.
+            $order = Get-PAOrder -List | Where-Object { $_.MainDomain -eq $MainDomain }
+            if (-not $order) {
+                Write-Error "No order found matching MainDomain '$MainDomain'."
+                return
+            }
+            elseif ($order -and $order.Count -gt 1) {
+                Write-Error "Multiple orders found for MainDomain '$MainDomain'. Please specify Name as well."
+                return
+            }
+        }
+        else {
+            # get the current order if it exists
+            $order = Get-PAOrder
+            if (-not $order) {
+                Write-Error "No ACME order configured. Run New-PAOrder or specify a Name or MainDomain."
+                return
+            }
+        }
+
+        # check if the specified order matches the current order
+        $modCurrentOrder = ($script:Order -and $script:Order.Name -eq $order.Name)
 
         # Edit or Revoke?
         if ('Edit' -eq $PSCmdlet.ParameterSetName) {
@@ -137,7 +133,7 @@ function Set-PAOrder {
 
             if ('PluginArgs' -in $psbKeys) {
                 Write-Verbose "Updating plugin args for plugin(s) $(($order.Plugin -join ','))"
-                Export-PluginArgs $order.MainDomain $order.Plugin $PluginArgs
+                Export-PluginArgs -Order $order -PluginArgs $PluginArgs
             }
 
             if ('DnsAlias' -in $psbKeys) {
@@ -211,12 +207,12 @@ function Set-PAOrder {
 
             if ($saveChanges) {
                 Write-Verbose "Saving order changes"
-                $order | Update-PAOrder -SaveOnly
+                Update-PAOrder $order -SaveOnly
             }
 
             # re-export certs if necessary
             if ($rewriteCer -or $rewritePfx) {
-                $cert = Get-PACertificate $order.MainDomain
+                $cert = $order | Get-PACertificate
                 if ($rewriteCer -and $cert) {
                     Export-PACertFiles $order
                 } elseif ($rewritePfx -and $cert) {
@@ -224,36 +220,67 @@ function Set-PAOrder {
                 }
             }
 
+            # deal with potential name change
+            if ($NewName -and $NewName -ne $order.Name) {
+
+                $newFolder = Join-Path $acct.Folder $NewName
+                if (Test-Path $newFolder) {
+                    Write-Error "Failed to rename PAOrder '$($order.Name)'. The path '$newFolder' already exists."
+                } else {
+                    try {
+                        # rename the dir folder
+                        Write-Debug "Renaming '$($order.Name)' order folder to $newFolder"
+                        Rename-Item $order.Folder $newFolder -EA Stop
+
+                        # update the id/Folder in memory
+                        $order.Name = $NewName
+                        $order.Folder = $newFolder
+                    }
+                    catch {
+                        Write-Error $_
+                    }
+                }
+            }
+
+            # update the current order ref if necessary
+            $curOrderFile = (Join-Path $acct.Folder 'current-order.txt')
+            if (($modCurrentOrder -or -not $NoSwitch) -and $order.Name -ne (Get-Content $curOrderFile -EA Ignore)) {
+                Write-Debug "Updating current-order.txt"
+                $order.Name | Out-File $curOrderFile -Force -EA Stop
+                $script:Order = $order
+            }
+
+
         } else {
             # RevokeCert was specified
 
             # make sure the order has a cert to revoke and that it's not already expired
             if (-not $order.CertExpires) {
-                Write-Warning "Unable to revoke certificate for $($order.MainDomain). No cert found to revoke."
+                Write-Warning "Unable to revoke certificate for order '$($order.Name)'. No cert found to revoke."
                 return
             }
             if ((Get-DateTimeOffsetNow) -ge ([DateTimeOffset]::Parse($order.CertExpires))) {
-                Write-Warning "Unable to revoke certificate for $($order.MainDomain). Cert already expired."
+                Write-Warning "Unable to revoke certificate for order '$($order.Name)'. Cert already expired."
                 return
             }
 
             # make sure the cert file actually exists
             $certFile = Join-Path $order.Folder 'cert.cer'
-            if (!(Test-Path $certFile -PathType Leaf)) {
+            if (-not (Test-Path $certFile -PathType Leaf)) {
                 Write-Warning "Unable to revoke certificate. $certFile not found."
                 return
             }
 
             # confirm revocation unless -Force was used
-            if (!$Force) {
-                if (!$PSCmdlet.ShouldContinue("Are you sure you wish to revoke $($order.MainDomain)?",
-                "Revoking a certificate is irreversible and will immediately break any services using it.")) {
-                    Write-Verbose "Revocation aborted for $($order.MainDomain)."
+            if (-not $Force) {
+                if (-not $PSCmdlet.ShouldContinue("Are you sure you wish to revoke the certificate for order '$($order.Name)'?",
+                "Revoking a certificate is irreversible and may immediately break any services using it.")) {
+                    Write-Verbose "Revocation aborted for order '$($order.Name)'."
                     return
                 }
             }
 
-            Write-Verbose "Revoking certificate $($order.MainDomain)."
+            Write-Verbose "Revoking certificate for order '$($order.Name)'."
 
             # grab the cert file contents, strip the headers, and join the lines
             $certStart = -1; $certEnd = -1;
@@ -288,7 +315,7 @@ function Set-PAOrder {
             } catch { throw }
 
             # refresh the order
-            Update-PAOrder $order.MainDomain
+            Update-PAOrder $order
 
         }
 
@@ -308,6 +335,9 @@ function Set-PAOrder {
     .PARAMETER MainDomain
         The primary domain for the order. For a SAN order, this was the first domain in the list when creating the order.
 
+    .PARAMETER Name
+        The name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
+
     .PARAMETER RevokeCert
         If specified, a request will be sent to the associated ACME server to revoke the certificate on this order. Clients may wish to do this if the certificate is decommissioned or the private key has been compromised. A warning will be displayed if the order is not currently valid or the existing certificate file can't be found.
 
@@ -326,14 +356,17 @@ function Set-PAOrder {
     .PARAMETER DnsAlias
         One or more FQDNs that DNS challenges should be published to instead of the certificate domain's zone. This is used in advanced setups where a CNAME in the certificate domain's zone has been pre-created to point to the alias's FQDN which makes the ACME server check the alias domain when validation challenge TXT records. If the same alias is used for all domains in the order, you can just specify it once. Otherwise, you should specify as many alias FQDNs as there are domains in the order and in the same sequence as the order.
 
+    .PARAMETER NewName
+        The new name for this ACME order.
+
     .PARAMETER FriendlyName
-        Modify the friendly name for the certificate and subsequent renewals. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Must not be an empty string.
+        The friendly name for the certificate and subsequent renewals. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Must not be an empty string.
 
     .PARAMETER PfxPass
-        Modify the PFX password for the certificate and subsequent renewals. When the PfxPassSecure parameter is specified, this parameter is ignored.
+        The PFX password for the certificate and subsequent renewals. When the PfxPassSecure parameter is specified, this parameter is ignored.
 
     .PARAMETER PfxPassSecure
-        Modify the PFX password for the certificate and subsequent renewals using a SecureString value. When this parameter is specified, the PfxPass parameter is ignored.
+        The PFX password for the certificate and subsequent renewals using a SecureString value. When this parameter is specified, the PfxPass parameter is ignored.
 
     .PARAMETER Install
         Enables the Install switch for the order. Use -Install:$false to disable the switch on the order. This affects whether the module will automatically import the certificate to the Windows certificate store on subsequent renewals. It will not import the current certificate if it exists. Use Install-PACertificate for that purpose.

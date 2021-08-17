@@ -14,7 +14,7 @@ function ConvertTo-Base64Url {
 
     Process {
 
-        if (!$FromBase64) {
+        if (-not $FromBase64) {
 
             # get a byte array from the input string
             if ($PSCmdlet.ParameterSetName -eq 'String') {

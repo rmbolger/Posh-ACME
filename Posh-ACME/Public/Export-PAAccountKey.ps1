@@ -2,18 +2,28 @@ function Export-PAAccountKey {
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Position=0)]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [Alias('Name')]
         [string]$ID,
         [Parameter(Mandatory)]
         [string]$OutputFile,
         [switch]$Force
     )
 
-    try {
-
+    Begin {
         # make sure we have a server configured
         if (-not (Get-PAServer)) {
-            throw "No ACME server configured. Run Set-PAServer first."
+            try { throw "No ACME server configured. Run Set-PAServer first." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
+
+        if ($Force) {
+            $ConfirmPreference = 'None'
+        }
+    }
+
+    Process {
+        trap { $PSCmdlet.ThrowTerminatingError($PSItem) }
 
         # throw an error if there's no current account and no ID passed in
         if (-not $ID -and -not ($acct = Get-PAAccount)) {
@@ -21,14 +31,17 @@ function Export-PAAccountKey {
         }
 
         # make sure the ID is valid if specified
-        if ($ID -and -not ($acct = Get-PAAccount $ID)) {
+        if ($ID -and -not ($acct = Get-PAAccount -ID $ID)) {
             throw "Invalid account ID: $ID"
         }
 
+        # check if the output file exists
+        $fileExists = Test-Path $OutputFile -PathType Leaf
+
         # confirm overwrite unless -Force was specified
-        if (-not $Force -and (Test-Path $OutputFile -PathType Leaf) -and
-            -not $PSCmdlet.ShouldContinue("Overwrite?","$OutputFile already exists.")
-        ) {
+        if ($fileExists -and -not $Force -and
+            -not $PSCmdlet.ShouldContinue("Overwrite?","File already exists: $OutputFile"))
+        {
             Write-Verbose "Export account key aborted."
             return
         }
@@ -41,9 +54,6 @@ function Export-PAAccountKey {
         # export it
         Export-Pem $keypair $OutputFile
 
-    }
-    catch {
-        $PSCmdlet.ThrowTerminatingError($_)
     }
 
 

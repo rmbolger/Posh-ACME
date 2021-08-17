@@ -1,6 +1,6 @@
 {
   "status": "pending",
-  "expires": "2030-01-01T00:00:00Z",
+  "expires": "2030-05-01T00:00:00Z",
   "identifiers": [
     {
       "type": "dns",
@@ -15,7 +15,7 @@
     "https://acme.test/acme/authz/22222",
     "https://acme.test/acme/authz/33333"
   ],
-  "finalize": "https://acme.test/acme/finalize/11111",
+  "finalize": "https://acme.test/acme/finalize/22222",
   "MainDomain": "*.example.com",
   "SANs": [
     "example.com"
@@ -28,7 +28,7 @@
   "DnsSleep": 120,
   "ValidationTimeout": 60,
   "FriendlyName": "*.example.com",
-  "PfxPass": "poshacme",
+  "PfxPassB64U": "cG9zaGFjbWU",
   "Install": false,
   "certificate": null,
   "location": "https://acme.test/acme/order/22222",

@@ -1,6 +1,6 @@
 {
   "status": "invalid",
-  "expires": "2030-01-01T00:00:00Z",
+  "expires": "2030-06-01T00:00:00Z",
   "identifiers": [
     {
       "value": "example.com",
@@ -25,7 +25,7 @@
   "Install": false,
   "certificate": null,
   "location": "https://acme.test/acme/order/11111",
-  "Plugin": [
+  "DnsPlugin": [
     "Route53"
   ]
 }
