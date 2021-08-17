@@ -145,7 +145,7 @@ Describe "Get-PAAccount" {
             @{ splat = @{ List=$true;                                          Contact='me@ex.test','me2@ex.test' }; ResultCount=1 }
             @{ splat = @{ List=$true; Status='valid';      KeyLength='ec-384'; Contact='me@ex.test'  }; ResultCount=1 }
         ) {
-            $accts = Get-PAAccount @splat
+            $accts = @(Get-PAAccount @splat)
 
             $accts.Count | Should -Be $ResultCount
         }
