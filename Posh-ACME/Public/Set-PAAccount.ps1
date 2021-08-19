@@ -201,6 +201,8 @@ function Set-PAAccount {
                 $newKey = New-PAKey $KeyLength
             }
 
+            Write-Debug "New Key:`n$($newKey | ConvertTo-Jwk)"
+
             # create the algorithm identifier as described by
             # https://tools.ietf.org/html/rfc7518#section-3.1
             # and what we know LetsEncrypt supports today which includes
@@ -230,18 +232,22 @@ function Set-PAAccount {
 
             # send the request
             try {
-                $response = Invoke-ACME $header $payloadJson $acct -EA Stop
-            } catch { throw }
+                Invoke-ACME $header $payloadJson $acct -EA Stop | Out-Null
 
-            $respObj = ($response.Content | ConvertFrom-Json)
-            if ($respObj.status -eq 'valid') {
-                # update the account with the new key
+                # https://datatracker.ietf.org/doc/html/rfc8555#section-7.3.5
+                # Success is indicated by an HTTP 200 response. No response body
+                # is required even though Let's Encrypt sends one.
+
+                # So if we haven't caught an error, update the account with the
+                # new key
                 $acct.key = $newKey | ConvertTo-Jwk
                 $acct.alg = $alg
                 $acct.KeyLength = $KeyLength
 
                 $saveAccount = $true
-            }
+
+            } catch { throw }
+
         }
 
         # Deal with potential name change
