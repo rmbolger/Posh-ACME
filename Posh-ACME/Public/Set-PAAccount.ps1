@@ -201,8 +201,6 @@ function Set-PAAccount {
                 $newKey = New-PAKey $KeyLength
             }
 
-            Write-Debug "New Key:`n$($newKey | ConvertTo-Jwk)"
-
             # create the algorithm identifier as described by
             # https://tools.ietf.org/html/rfc7518#section-3.1
             # and what we know LetsEncrypt supports today which includes
