@@ -75,44 +75,4 @@ function Get-KeyAuthorization {
             return $keyAuth
         }
     }
-
-
-
-
-    <#
-    .SYNOPSIS
-        Calculate a key authorization string for a challenge token.
-
-    .DESCRIPTION
-        A key authorization is a string that expresses a domain holder's authorization for a specified key to satisfy a specified challenge, by concatenating the token for the challenge with a key fingerprint.
-
-    .PARAMETER Token
-        The token string for an ACME challenge.
-
-    .PARAMETER Account
-        The ACME account associated with the challenge.
-
-    .PARAMETER ForDNS
-        Enable this switch if you're using the key authorization value for the 'dns-01' challenge type. It will do a few additional manipulation steps on the value that are required for a DNS TXT record.
-
-    .EXAMPLE
-        Get-KeyAuthorization 'XxXxXxXxXxXx'
-
-        Get the key authorization for the specified token using the current account.
-
-    .EXAMPLE
-        (Get-PAOrder | Get-PAAuthorization).DNS01Token | Get-KeyAuthorization
-
-        Get all key authorizations for the DNS challenges in the current order using the current account.
-
-    .LINK
-        Project: https://github.com/rmbolger/Posh-ACME
-
-    .LINK
-        Get-PAAuthorization
-
-    .LINK
-        Submit-ChallengeValidation
-
-    #>
 }

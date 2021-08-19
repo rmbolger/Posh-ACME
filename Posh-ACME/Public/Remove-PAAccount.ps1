@@ -53,45 +53,4 @@ function Remove-PAAccount {
         }
 
     }
-
-
-
-
-
-    <#
-    .SYNOPSIS
-        Remove an ACME account and all associated orders and certificates from the local profile.
-
-    .DESCRIPTION
-        This function removes the ACME account from the local profile which also removes any associated orders and certificates. It will not remove or cleanup copies of certificates that have been exported or installed elsewhere. It will also not deactivate the account on the ACME server without using -Deactivate. However, with the account's private key it can't be recovered from the server.
-
-    .PARAMETER ID
-        The account id value as returned by the ACME server.
-
-    .PARAMETER Deactivate
-        If specified, a request will be sent to the associated ACME server to deactivate the account. Clients may wish to do this if the account key is compromised or decommissioned.
-
-    .PARAMETER Force
-        If specified, interactive confirmation prompts will be skipped.
-
-    .EXAMPLE
-        Remove-PAAccount 12345
-
-        Remove the specified account without deactivation.
-
-    .EXAMPLE
-        Get-PAAccount | Remove-PAAccount -Deactivate -Force
-
-        Remove the current account after deactivating it and skip confirmation prompts.
-
-    .LINK
-        Project: https://github.com/rmbolger/Posh-ACME
-
-    .LINK
-        Get-PAAccount
-
-    .LINK
-        New-PAAccount
-
-    #>
 }

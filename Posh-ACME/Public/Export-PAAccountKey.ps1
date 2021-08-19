@@ -55,48 +55,4 @@ function Export-PAAccountKey {
         Export-Pem $keypair $OutputFile
 
     }
-
-
-    <#
-    .SYNOPSIS
-        Export an ACME account private key.
-
-    .DESCRIPTION
-        The account key is saved as an unencrypted Base64 encoded PEM file.
-
-    .PARAMETER ID
-        The ACME account ID value.
-
-    .PARAMETER OutputFile
-        The path to the file to write the key data to.
-
-    .PARAMETER Force
-        If specified and the output file already exists, it will be overwritten. Without the switch, a confirmation prompt will be presented.
-
-    .EXAMPLE
-        Export-PAAccountKey -OutputFile .\mykey.pem
-
-        Exports the current ACME account's key to the specified file.
-
-    .EXAMPLE
-        Export-PAAccountKey 12345 -OutputFile .\mykey.pem -Force
-
-        Exports the specified ACME account's key to the specified file and overwrites it if necessary.
-
-    .EXAMPLE
-        $fldr = Join-Path ([Environment]::GetFolderPath('Desktop')) 'AcmeAccountKeys'
-        PS C:\>New-Item -ItemType Directory -Force -Path $fldr | Out-Null
-        PS C:\>Get-PAAccount -List | %{
-        PS C:\>    Export-PAAccountKey $_.ID -OutputFile "$fldr\$($_.ID).key" -Force
-        PS C:\>}
-
-        Backup all account keys for this ACME server to a folder on the desktop.
-
-    .LINK
-        Project: https://github.com/rmbolger/Posh-ACME
-
-    .LINK
-        Get-PAAccount
-
-    #>
 }

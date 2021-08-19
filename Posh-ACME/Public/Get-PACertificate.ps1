@@ -94,47 +94,4 @@ function Get-PACertificate {
         }
 
     }
-
-
-
-
-
-    <#
-    .SYNOPSIS
-        Get ACME certificate details.
-
-    .DESCRIPTION
-        Returns details such as Thumbprint, Subject, Validity, SANs, and file locations for one or more ACME certificates previously created.
-
-    .PARAMETER MainDomain
-        The primary domain associated with the certificate. This is the domain that goes in the certificate's subject.
-
-    .PARAMETER Name
-        The name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
-
-    .PARAMETER List
-        If specified, the details for all completed certificates will be returned for the current account.
-
-    .EXAMPLE
-        Get-PACertificate
-
-        Get cached ACME order details for the currently selected order.
-
-    .EXAMPLE
-        Get-PACertificate site.example.com
-
-        Get cached ACME order details for the specified domain.
-
-    .EXAMPLE
-        Get-PACertificate -List
-
-        Get all cached ACME order details.
-
-    .LINK
-        Project: https://github.com/rmbolger/Posh-ACME
-
-    .LINK
-        New-PACertificate
-
-    #>
 }

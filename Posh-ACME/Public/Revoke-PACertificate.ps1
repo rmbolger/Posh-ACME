@@ -165,59 +165,6 @@ function Revoke-PACertificate {
         }
 
     }
-
-    <#
-    .SYNOPSIS
-        Revoke an ACME certificate
-
-    .DESCRIPTION
-        Revokes a previously created ACME certificate.
-
-    .PARAMETER MainDomain
-        The primary domain associated with the certificate to be revoked.
-
-    .PARAMETER Name
-        The name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
-
-    .PARAMETER CertFile
-        A PEM-encoded certificate file to be revoked.
-
-    .PARAMETER KeyFile
-        The PEM-encoded private key associated with CertFile. If not specified, the current ACME account will be used to sign the request.
-
-    .PARAMETER Reason
-        The reason for cert revocation. This must be one of the reasons defined in RFC 5280 including keyCompromise, cACompromise, affiliationChanged, superseded, cessationOfOperation, certificateHold, removeFromCRL, privilegeWithdrawn, and aACompromise. NOTE: Not all reason codes are supported by all ACME certificate authorities.
-
-    .PARAMETER Force
-        If specified, the revocation confirmation prompt will be skipped.
-
-    .EXAMPLE
-        Revoke-PACertificate example.com
-
-        Revokes the certificate for the specified domain.
-
-    .EXAMPLE
-        Get-PAOrder | Revoke-PACertificate -Force
-
-        Revokes the certificate associated with the current order and skips the confirmation prompt.
-
-    .EXAMPLE
-        Get-PACertificate | Revoke-PACertificate -Reason keyCompromise
-
-        Revokes the current certificate with the specified reason.
-
-    .EXAMPLE
-       Revoke-PACertificate -CertFile mycert.crt -KeyFile mycert.key
-
-       Revokes the specified cert using the specified private key.
-
-    .LINK
-        Project: https://github.com/rmbolger/Posh-ACME
-
-    .LINK
-        New-PACertificate
-
-    #>
 }
 
 # Define an enum to represent the revocations reasons defined in RFC 5280

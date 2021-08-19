@@ -207,39 +207,4 @@ function Submit-ChallengeValidation {
         }
 
     }
-
-
-
-
-
-    <#
-    .SYNOPSIS
-        Respond to authorization challenges for an ACME order and wait for the ACME server to validate them.
-
-    .DESCRIPTION
-        An ACME order contains an authorization object for each domain in the order. The client must complete at least one of a set of challenges for each authorization in order to prove they own the domain. Once complete, the client asks the server to validate each challenge and waits for the server to do so and update the authorization status.
-
-    .PARAMETER Order
-        The ACME order to perform the validations against. The order object must be associated with the currently active ACME account.
-
-    .EXAMPLE
-        Submit-ChallengeValidation
-
-        Begin challenge validation on the current order.
-
-    .EXAMPLE
-        Get-PAOrder | Submit-ChallengeValidation
-
-        Begin challenge validation on the current order.
-
-    .LINK
-        Project: https://github.com/rmbolger/Posh-ACME
-
-    .LINK
-        Get-PAOrder
-
-    .LINK
-        New-PAOrder
-
-    #>
 }
