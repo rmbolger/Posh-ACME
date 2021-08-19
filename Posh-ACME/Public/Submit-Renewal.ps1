@@ -179,6 +179,9 @@ function Submit-Renewal {
     .PARAMETER MainDomain
         The primary domain associated with an order. This is the domain that goes in the certificate's subject.
 
+    .PARAMETER Name
+        The name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
+
     .PARAMETER AllOrders
         If specified, renew all valid orders on the current account. Orders that have not reached the renewal window will be skipped unless -Force is used.
 

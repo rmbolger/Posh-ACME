@@ -177,6 +177,9 @@ function Revoke-PACertificate {
     .PARAMETER MainDomain
         The primary domain associated with the certificate to be revoked.
 
+    .PARAMETER Name
+        The name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
+
     .PARAMETER CertFile
         A PEM-encoded certificate file to be revoked.
 
