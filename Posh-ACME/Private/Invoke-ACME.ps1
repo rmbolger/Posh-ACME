@@ -56,7 +56,7 @@ function Invoke-ACME {
             Verbose = $false
         }
 
-        Write-Debug "POST $($iwrSplat.Uri)"
+        Write-Debug "POST $($iwrSplat.Uri)`n$Jws"
         $response = Invoke-WebRequest @iwrSplat @script:UseBasic
 
         if ($response -and $response.Content) {
@@ -100,7 +100,7 @@ function Invoke-ACME {
             $sr.BaseStream.Position = 0
             $sr.DiscardBufferedData()
             $body = $sr.ReadToEnd()
-            Write-Debug "ACME Error Body: `n$body"
+            Write-Debug "Response Code $($response.StatusCode.value__), Body: `n$body"
 
         } elseif ('Microsoft.PowerShell.Commands.HttpResponseException' -eq $exType) {
 
@@ -129,7 +129,7 @@ function Invoke-ACME {
             # tags. And since our body should be JSON, there shouldn't be any tags to remove.
             # So we'll just go with it for now until someone reports a problem.
             $body = $_.ErrorDetails.Message
-            Write-Debug "ACME Error Body: `n$body"
+            Write-Debug "Response Code $($response.StatusCode.value__), Body: `n$body"
 
         } else { throw }
 
