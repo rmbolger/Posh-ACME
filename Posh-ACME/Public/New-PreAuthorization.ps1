@@ -65,6 +65,14 @@ function New-PreAuthorization {
         # inject the type name
         $auth.PSObject.TypeNames.Insert(0,'PoshACME.PAAuthorization')
 
+        # grab the location from the header
+        if ($response.Headers.ContainsKey('Location')) {
+            $location = $response.Headers['Location'] | Select-Object -First 1
+        } else {
+            try { throw 'No Location header found in newAuthz output' }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
+        }
+
         # Workaround non-compliant ACME servers such as Nexus CM that don't include
         # the status field on challenge objects. Just copy the auth's status to
         # each challenge.
@@ -93,7 +101,7 @@ function New-PreAuthorization {
         $auth | Add-Member -NotePropertyMembers @{
             DNSId        = $auth.identifier.value
             fqdn         = "$(if ($auth.wildcard) {'*.'})$($auth.identifier.value)"
-            location     = $AuthUrl
+            location     = $location
             DNS01Status  = $null
             DNS01Url     = $null
             DNS01Token   = $null
