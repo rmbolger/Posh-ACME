@@ -14,6 +14,8 @@ function New-PAAccount {
         [Alias('Name')]
         [string]$ID,
         [switch]$AcceptTOS,
+        [Parameter(ParameterSetName='ImportKey')]
+        [switch]$OnlyReturnExisting,
         [switch]$Force,
         [string]$ExtAcctKID,
         [string]$ExtAcctHMACKey,
@@ -113,6 +115,9 @@ function New-PAAccount {
     }
     if ($AcceptTOS) {
         $payload.termsOfServiceAgreed = $true
+    }
+    if ($OnlyReturnExisting) {
+        $payload.onlyReturnExisting = $true
     }
 
     # add external account binding if specified
@@ -233,6 +238,9 @@ function New-PAAccount {
 
     .PARAMETER AcceptTOS
         If not specified, the ACME server will throw an error with a link to the current Terms of Service. Using this switch indicates acceptance of those Terms of Service and is required for successful account creation.
+
+    .PARAMETER OnlyReturnExisting
+        If specified, the ACME server will only return the account details if they already exist for the given private key. Otherwise, an error will be thrown. This can be useful to check whether an existing private key is associated with an ACME acount and recover the account details without creating a new account.
 
     .PARAMETER Force
         If specified, confirmation prompts that may have been generated will be skipped.
