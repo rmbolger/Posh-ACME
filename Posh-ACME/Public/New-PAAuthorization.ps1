@@ -1,4 +1,4 @@
-function New-PreAuthorization {
+function New-PAAuthorization {
     [CmdletBinding()]
     [OutputType('PoshACME.PAAuthorization')]
     param(

@@ -36,7 +36,7 @@ FunctionsToExport = @(
     'New-PAAccount'
     'New-PACertificate'
     'New-PAOrder'
-    'New-PreAuthorization'
+    'New-PAAuthorization'
     'Publish-Challenge'
     'Remove-PAAccount'
     'Remove-PAOrder'
