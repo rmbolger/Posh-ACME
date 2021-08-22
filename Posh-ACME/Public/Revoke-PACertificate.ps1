@@ -61,9 +61,8 @@ function Revoke-PACertificate {
                 catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
 
-            # set the cert/key file paths
+            # set the cert file path
             $CertFile = $paCert.CertFile
-            $KeyFile = $paCert.KeyFile
         }
 
         # do some minimal sanity checking on the cert file contents
@@ -86,8 +85,8 @@ function Revoke-PACertificate {
         # the cert.
         #     https://datatracker.ietf.org/doc/html/rfc5280#section-5.3.1
         #
-        # We're always going to try and use the cert's private key if
-        # it is specified even if we could also use the current account's key.
+        # BuyPass currently only implements Account key based revocation, so we
+        # can't just default to using the Cert key when it's available.
 
         # check the private key
         if ($KeyFile) {
@@ -103,7 +102,7 @@ function Revoke-PACertificate {
                 Write-Warning "Private key $KeyFile was not found. Will attempt revocation with account key."
             }
         }
-        else { Write-Debug "No KeyFile passed. Will attempt revocation with account key." }
+        else { Write-Debug "Will attempt revocation with account key." }
 
         # start building the splat for Invoke-ACME
         $acmeParams = @{
