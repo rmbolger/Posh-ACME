@@ -194,7 +194,7 @@ function Save-HttpChallenge {
                     # for servers behind load balancers or reverse proxies
                     $remoteIP = $context.Request.RemoteEndPoint.Address.ToString()
                     if ($context.Request.Headers['X-Forwarded-For']) {
-                        $remoteIP = $context.Request.Headers['X-Forwarded-For']
+                        $remoteIP += ' (fwd {0})' -f $context.Request.Headers['X-Forwarded-For']
                     }
 
                     $method = $context.Request.HttpMethod.ToString()
