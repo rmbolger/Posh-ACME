@@ -33,7 +33,7 @@ function Remove-PAOrder {
                 return
             }
         } else {
-            $matchingOrders = Get-PAOrder -List | Where-Object { $_.MainDomain -eq $MainDomain }
+            $matchingOrders = @(Get-PAOrder -List | Where-Object { $_.MainDomain -eq $MainDomain })
             if ($matchingOrders.Count -eq 1) {
                 $order = $matchingOrders
             } elseif ($matchingOrders.Count -ge 2) {
