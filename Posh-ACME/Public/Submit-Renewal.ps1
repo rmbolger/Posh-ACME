@@ -133,7 +133,7 @@ function Submit-Renewal {
                 $oldAcct = Get-PAAccount
 
                 # get the list of valid accounts
-                $accounts = Get-PAAccount -List -Refresh | Where-Object { $_.status -eq 'valid' }
+                $accounts = Get-PAAccount -List -Status 'valid' -Refresh
 
                 foreach ($acct in $accounts) {
 
