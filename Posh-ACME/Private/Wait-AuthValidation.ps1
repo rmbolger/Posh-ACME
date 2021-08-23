@@ -10,7 +10,7 @@ function Wait-AuthValidation {
     # now we poll
     $allValid = $false
     $skips = @()
-    for ($tries=1; $tries -le ($ValidationTimeout/2); $tries++) {
+    for ($tries=1; $tries -le ($ValidationTimeout/5); $tries++) {
 
         for ($i=0; $i -lt $AuthUrls.Count; $i++) {
 
@@ -42,7 +42,7 @@ function Wait-AuthValidation {
 
         # If we have any remaining, sleep. Otherwise, break/return
         if ($skips.Count -lt $AuthUrls.Count) {
-            Start-Sleep 2
+            Start-Sleep 5
         } else {
             $allValid = $true
             break
