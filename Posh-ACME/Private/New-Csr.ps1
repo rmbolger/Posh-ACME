@@ -81,7 +81,14 @@ function New-Csr {
 
     # create the extensions we care about
     $basicConstraints = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.BasicConstraints($false))))
-    $keyUsage = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($true, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.KeyUsage([Org.BouncyCastle.Asn1.X509.KeyUsage]::DigitalSignature -bor [Org.BouncyCastle.Asn1.X509.KeyUsage]::KeyEncipherment))))
+    if ($Order.KeyLength -like 'ec-*') {
+        # Only DigitalSignature on ECC certs because KeyEncipherment not supported
+        $keyUsage = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($true, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.KeyUsage([Org.BouncyCastle.Asn1.X509.KeyUsage]::DigitalSignature))))
+    } else {
+        # DigitalSignature and KeyEncipherment on RSA certs
+        $keyUsage = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($true, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.KeyUsage([Org.BouncyCastle.Asn1.X509.KeyUsage]::DigitalSignature -bor [Org.BouncyCastle.Asn1.X509.KeyUsage]::KeyEncipherment))))
+    }
+    # Client + Server Authentication
     $extKeyUsage = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.ExtendedKeyUsage([Org.BouncyCastle.Asn1.X509.KeyPurposeID]::IdKPServerAuth, [Org.BouncyCastle.Asn1.X509.KeyPurposeID]::IdKPClientAuth))))
     $ski = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.X509.Extension.SubjectKeyIdentifierStructure($keyPair.Public))))
 
