@@ -42,6 +42,14 @@ function Get-PAAuthorization {
                 } else { throw }
             }
 
+            # Look for Retry-After header. We're not yet ready to do anything with it
+            # but it can be useful for debugging.
+            # https://datatracker.ietf.org/doc/html/rfc8555#section-8.2
+            if ($response.Headers.ContainsKey('Retry-After')) {
+                $retryAfter = $response.Headers['Retry-After']
+                Write-Debug "Retry-After = $retryAfter"
+            }
+
             ConvertTo-PAAuthorization $response.Content $AuthUrl
         }
     }
