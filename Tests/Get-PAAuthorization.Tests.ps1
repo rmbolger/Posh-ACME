@@ -20,7 +20,7 @@ Describe "Get-PAAuthorization" {
                     @{ type='tls-alpn-01'; status='pending'; url='https://acme.example.com/chal/3' }
                 )
             } | ConvertTo-Json -Depth 5
-            Mock -ModuleName Posh-ACME Invoke-ACME { [pscustomobject]@{ Content = $fakeAuthzNoExpires } }
+            Mock -ModuleName Posh-ACME Invoke-ACME { [pscustomobject]@{ Content = $fakeAuthzNoExpires; Headers = @{} } }
 
             InModuleScope Posh-ACME {
                 { Get-PAAuthorization 'https://acme.example.com/authz/1' } | Should -Not -Throw
@@ -42,7 +42,7 @@ Describe "Get-PAAuthorization" {
                 )
             } | ConvertTo-Json -Depth 5
 
-            Mock -ModuleName Posh-ACME Invoke-ACME { return [pscustomobject]@{ Content = $fakeAuthzNoChallengeStatus } }
+            Mock -ModuleName Posh-ACME Invoke-ACME { return [pscustomobject]@{ Content = $fakeAuthzNoChallengeStatus; Headers = @{} } }
             Mock -ModuleName Posh-ACME Write-Warning {}
 
             InModuleScope Posh-ACME {
