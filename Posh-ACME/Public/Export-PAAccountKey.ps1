@@ -59,10 +59,10 @@ function Export-PAAccountKey {
 
     <#
     .SYNOPSIS
-        Get ACME order details.
+        Export an ACME account private key.
 
     .DESCRIPTION
-        Returns details such as Domains, key length, expiration, and status for one or more ACME orders previously created.
+        The account key is saved as an unencrypted Base64 encoded PEM file.
 
     .PARAMETER ID
         The ACME account ID value.
