@@ -1,4 +1,4 @@
-## (IN DEVELOPMENT) 4.7.0 (????-??-??)
+## 4.7.0 (2021-08-24)
 
 * Servers, Accounts, and Orders all now have configurable Names that also determine the name of their associated folders in the config on the filesystem. (#345) This is a fairly large change, but significant effort has been spent implementing it so that dependent scripts will not break.
   * **Please backup your current config before customizing your object names.** Previous Posh-ACME versions will break trying to read configs with custom names.
@@ -19,13 +19,19 @@
   * To retain backwards compatibility with existing 4.x dependent scripts, `Get-PAOrder` will return the single, most recent order when used with `-MainDomain` even if there are multiple matching orders. This also affects `Get-PACertificate` which uses Get-PAOrder under the hood.
   * `Set-PAOrder`, `Revoke-PACertificate`, and `Remove-PAOrder` will throw an error if only `MainDomain` is specified and it matches multiple orders. Specify the `Name` parameter as well to ensure a unique order match.
 * Custom plugins can now be loaded from an alternate filesystem location by creating a `POSHACME_PLUGINS` environment variable before the module is loaded. The value should be a folder path that contains uniquely named .ps1 plugin files. If any custom plugins have the same name as native plugins, a warning will be thrown and they will not be loaded.
-* A `NoSwitch` parameter has been added to `Set-PAServer` so you can modify the active server without switching to it.
+* Added `New-PAAuthorization` which allows the creation of authorization objects outside the context of an order. NOTE: BuyPass is the only free ACME CA that currently supports this feature.
+* Added a `OnlyReturnExisting` parameter to `New-PAAccount` when using an imported key which instructs the ACME server to only return account details if an account already exists for that key.
+* Added a `NoSwitch` parameter to `Set-PAServer` so you can modify the active server without switching to it.
 * The `AllSANs` field on PACertificate objects now reflects the SAN list on the actual certificate instead of its associated ACME order (just in case the two lists have divered for some strange reason).
 * Added missing help on `Get-PAPluginArgs`.
 * Default formatting for PAServer objects has been tweaked to show more useful info.
 * Default formatting for PAOrder object now includes `Name` and has removed `OSCPMustStaple`.
-* The `Get-PAServer -List` parameter set no longer includes the optional `-Quiet` parameter.
+* The `Quiet` parameter has been removed from the `Get-PAServer -List` parameter set because it didn't make sense.
 * Fixed an example in `Remove-PAServer` help.
+* Added workaround for BuyPass bug that prevents some error details from being parsed.
+* Adjusted support for Account Key Rollover to more closely follow RFC8555 which fixes a bug using it with BuyPass
+* Changed some logic in `Revoke-PACertificate` so that it works with BuyPass which doesn't seem to support revocation using the cert's private key.
+* Orders using an ECC private key will no longer include Key Encipherment in the CSR's keyUsage when submitting an order for finalization. Key Encipherment is not supported for ECDSA certs and some CAs were rejecting the finalization.
 
 ## 4.6.0 (2021-07-25)
 
