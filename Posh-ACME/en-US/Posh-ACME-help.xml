@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <helpItems schema="maml" xmlns="http://msh">
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
@@ -56,6 +56,7 @@
         <dev:code>Complete-PAOrder</dev:code>
         <dev:remarks>
           <maml:para>Complete the current order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -63,6 +64,7 @@
         <dev:code>Get-PAOrder example.com | Complete-PAOrder</dev:code>
         <dev:remarks>
           <maml:para>Complete the specified order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -87,11 +89,11 @@
       <command:verb>Export</command:verb>
       <command:noun>PAAccountKey</command:noun>
       <maml:description>
-        <maml:para>Get ACME order details.</maml:para>
+        <maml:para>Export an ACME account private key.</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Returns details such as Domains, key length, expiration, and status for one or more ACME orders previously created.</maml:para>
+      <maml:para>The account key is saved as an unencrypted Base64 encoded PEM file.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -226,28 +228,31 @@
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>---------- Example 1: Export the current account key ----------</maml:title>
         <dev:code>Export-PAAccountKey -OutputFile .\mykey.pem</dev:code>
         <dev:remarks>
           <maml:para>Exports the current ACME account's key to the specified file.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>--------- Example 2: Export the specified account key ---------</maml:title>
         <dev:code>Export-PAAccountKey 12345 -OutputFile .\mykey.pem -Force</dev:code>
         <dev:remarks>
           <maml:para>Exports the specified ACME account's key to the specified file and overwrites it if necessary.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>------ Example 3: Backup all account keys to the desktop ------</maml:title>
         <dev:code>$fldr = Join-Path ([Environment]::GetFolderPath('Desktop')) 'AcmeAccountKeys'
-PS C:\&gt;New-Item -ItemType Directory -Force -Path $fldr | Out-Null
-PS C:\&gt;Get-PAAccount -List | %{
-PS C:\&gt;    Export-PAAccountKey $_.ID -OutputFile "$fldr\$($_.ID).key" -Force
-PS C:\&gt;}</dev:code>
+New-Item -ItemType Directory -Force -Path $fldr | Out-Null
+Get-PAAccount -List | %{
+    Export-PAAccountKey $_.ID -OutputFile "$fldr\$($_.ID).key" -Force
+}</dev:code>
         <dev:remarks>
           <maml:para>Backup all account keys for this ACME server to a folder on the desktop.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -374,6 +379,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-KeyAuthorization 'XxXxXxXxXxXx'</dev:code>
         <dev:remarks>
           <maml:para>Get the key authorization for the specified token using the current account.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -381,6 +387,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>(Get-PAOrder | Get-PAAuthorization).DNS01Token | Get-KeyAuthorization</dev:code>
         <dev:remarks>
           <maml:para>Get all key authorizations for the DNS challenges in the current order using the current account.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -632,6 +639,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAAccount</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME account details for the currently selected account.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -639,6 +647,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAAccount -ID 1234567</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME account details for the specified account ID.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -646,6 +655,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAAccount -List</dev:code>
         <dev:remarks>
           <maml:para>Get all cached ACME account details.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -653,6 +663,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAAccount -Refresh</dev:code>
         <dev:remarks>
           <maml:para>Get fresh ACME account details for the currently selected account.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -660,6 +671,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAAccount -List -Refresh</dev:code>
         <dev:remarks>
           <maml:para>Get fresh ACME account details for all accounts.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -667,6 +679,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAAccount -List -Contact user1@example.com</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME account details for all accounts that have user1@example.com as the only contact.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -774,6 +787,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAAuthorization https://acme.example.com/authz/1234567</dev:code>
         <dev:remarks>
           <maml:para>Get the authorization for the specified URL.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -781,6 +795,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAOrder | Get-PAAuthorization</dev:code>
         <dev:remarks>
           <maml:para>Get the authorizations for the current order on the current account.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -788,6 +803,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAOrder -List | Get-PAAuthorization</dev:code>
         <dev:remarks>
           <maml:para>Get the authorizations for all orders on the current account.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -921,6 +937,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PACertificate</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME order details for the currently selected order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -928,6 +945,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PACertificate site.example.com</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME order details for the specified domain.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -935,6 +953,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PACertificate -List</dev:code>
         <dev:remarks>
           <maml:para>Get all cached ACME order details.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -1098,6 +1117,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAOrder</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME order details for the currently selected order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -1105,6 +1125,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAOrder site.example.com</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME order details for the specified domain.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -1112,6 +1133,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAOrder -List</dev:code>
         <dev:remarks>
           <maml:para>Get all cached ACME order details.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -1119,6 +1141,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAOrder -Refresh</dev:code>
         <dev:remarks>
           <maml:para>Get fresh ACME order details for the currently selected order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -1126,6 +1149,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAOrder -List -Refresh</dev:code>
         <dev:remarks>
           <maml:para>Get fresh ACME order details for all orders.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -1315,6 +1339,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAPlugin</dev:code>
         <dev:remarks>
           <maml:para>Get the list of available validation plugins</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -1322,6 +1347,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAPlugin Route53 -Guide</dev:code>
         <dev:remarks>
           <maml:para>Launch the user's default web browser to the online guide for the specified plugin.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -1429,6 +1455,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAPluginArgs</dev:code>
         <dev:remarks>
           <maml:para>Retrieve the plugin args for the current order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -1436,6 +1463,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAPluginArgs -Name myorder</dev:code>
         <dev:remarks>
           <maml:para>Retrieve the plugin args for the specified order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -1443,6 +1471,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAOrder -Name myorder | Get-PAPluginArgs</dev:code>
         <dev:remarks>
           <maml:para>Retrieve the plugin args for the order passed via the pipeline.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -1629,6 +1658,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAServer</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME server details for the currently selected server.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -1636,6 +1666,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAServer -DirectoryUrl LE_PROD</dev:code>
         <dev:remarks>
           <maml:para>Get cached LetsEncrypt production server details using the short name.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -1643,6 +1674,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAServer -List</dev:code>
         <dev:remarks>
           <maml:para>Get all cached ACME server details.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -1650,6 +1682,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAServer -DirectoryUrl https://myacme.example.com/directory</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME server details for the specified directory URL.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -1657,6 +1690,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAServer -Refresh</dev:code>
         <dev:remarks>
           <maml:para>Get fresh ACME server details for the currently selected server.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -1664,6 +1698,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PAServer -List -Refresh</dev:code>
         <dev:remarks>
           <maml:para>Get fresh ACME server details for all previously used servers.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -1805,6 +1840,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Install-PACertificate</dev:code>
         <dev:remarks>
           <maml:para>Install the certificate for the currently selected order to the default LocalMachine\My store.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -1812,6 +1848,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Get-PACertificate example.com | Install-PACertificate</dev:code>
         <dev:remarks>
           <maml:para>Install the specified certificate to the default LocalMachine\My store.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -1819,6 +1856,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Install-PACertificate -StoreLocation 'CurrentUser' -NotExportable</dev:code>
         <dev:remarks>
           <maml:para>Install the certificate for the currently selected order to the CurrentUser\My store and mark the private key as not exportable.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -2042,6 +2080,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Invoke-HttpChallengeListener</dev:code>
         <dev:remarks>
           <maml:para>Start listener on default port 80 for pending challenges for the current order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -2049,6 +2088,7 @@ PS C:\&gt;}</dev:code>
         <dev:code>Invoke-HttpChallengeListener -MainDomain 'test.example.com' -Port 8080 -ListenerTimeout 30</dev:code>
         <dev:remarks>
           <maml:para>Start listener on port 8080 with a timeout of 30 seconds for the specified order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -2057,6 +2097,7 @@ PS C:\&gt;}</dev:code>
 PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         <dev:remarks>
           <maml:para>Start listener using the specified prefixes for the current order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -2576,6 +2617,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         <dev:code>New-PAAccount -AcceptTOS</dev:code>
         <dev:remarks>
           <maml:para>Create a new account with no contact email and the default key length.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -2583,6 +2625,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         <dev:code>New-PAAccount -Contact user1@example.com -AcceptTOS</dev:code>
         <dev:remarks>
           <maml:para>Create a new account with the specified email and the default key length.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -2590,6 +2633,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         <dev:code>New-PAAccount -Contact user1@example.com -KeyLength 4096 -AcceptTOS</dev:code>
         <dev:remarks>
           <maml:para>Create a new account with the specified email and an RSA 4096 bit key.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -2597,6 +2641,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         <dev:code>New-PAAccount -KeyLength 'ec-384' -AcceptTOS -Force</dev:code>
         <dev:remarks>
           <maml:para>Create a new account with no contact email and an ECC key using P-384 curve that ignores any confirmations.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -2604,6 +2649,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         <dev:code>New-PAAccount -KeyFile .\mykey.key -AcceptTOS</dev:code>
         <dev:remarks>
           <maml:para>Create a new account using a pre-generated private key file.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -2712,6 +2758,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         <dev:code>$auth = New-PAAuthorization example.com</dev:code>
         <dev:remarks>
           <maml:para>Create a new authorization for the specified domain using the current account.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -2719,6 +2766,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         <dev:code>$auths = 'example.com','www.example.com' | New-PAAuthorization -Account (Get-PAAccount 123)</dev:code>
         <dev:remarks>
           <maml:para>Create new authorizations for the specified domains via the pipeline and using the specified account.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -3447,6 +3495,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         <dev:code>New-PACertificate site1.example.com -AcceptTOS</dev:code>
         <dev:remarks>
           <maml:para>This is the minimum parameters needed to generate a certificate for the specified site if you haven't already setup an ACME account. It will prompt you to add the required DNS TXT record manually. Once you have an account created, you can omit the -AcceptTOS parameter.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -3454,6 +3503,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         <dev:code>New-PACertificate 'site1.example.com','site2.example.com' -Contact admin@example.com</dev:code>
         <dev:remarks>
           <maml:para>Request a SAN certificate with multiple names and have notifications sent to the specified email address.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -3461,6 +3511,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         <dev:code>New-PACertificate '*.example.com','example.com'</dev:code>
         <dev:remarks>
           <maml:para>Request a wildcard certificate that includes the root domain as a SAN.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -3469,6 +3520,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
 PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $pluginArgs</dev:code>
         <dev:remarks>
           <maml:para>Request a certificate using the hypothetical Flurbog DNS plugin that requires a server name and set of credentials.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -3477,6 +3529,7 @@ PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $plugi
 PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $pluginArgs -DnsAlias validate.alt-example.com</dev:code>
         <dev:remarks>
           <maml:para>This is the same as the previous example except that it's telling the Flurbog plugin to write to an alias domain. This only works if you have already created a CNAME record for _acme-challenge.site1.example.com that points to validate.alt-example.com.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -4377,6 +4430,7 @@ PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $plugi
         <dev:code>New-PAOrder site1.example.com</dev:code>
         <dev:remarks>
           <maml:para>Create a new order for the specified domain using the default key length.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -4384,6 +4438,7 @@ PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $plugi
         <dev:code>New-PAOrder -Domain 'site1.example.com','site2.example.com','site3.example.com'</dev:code>
         <dev:remarks>
           <maml:para>Create a new SAN order for the specified domains using the default key length.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -4391,6 +4446,7 @@ PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $plugi
         <dev:code>New-PAOrder site1.example.com 4096</dev:code>
         <dev:remarks>
           <maml:para>Create a new order for the specified domain using an RSA 4096 bit key.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -4398,6 +4454,7 @@ PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $plugi
         <dev:code>New-PAOrder 'site1.example.com','site2.example.com' ec-384 -Force</dev:code>
         <dev:remarks>
           <maml:para>Create a new SAN order for the specified domains using an ECC key using P-384 curve that ignores any confirmations.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -4594,6 +4651,7 @@ PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $plugi
 PS C:\&gt;Publish-Challenge $auths[0].DNSId (Get-PAAccount) $auths[0].DNS01Token Manual @{}</dev:code>
         <dev:remarks>
           <maml:para>Publish a DNS challenge for the first authorization in the current order using the Manual DNS plugin.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -4603,6 +4661,7 @@ PS C:\&gt;$acct = Get-PAAccount
 PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</dev:code>
         <dev:remarks>
           <maml:para>Publish a challenge for example.com using a fictitious plugin and arguments.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -4773,6 +4832,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Remove-PAAccount 12345</dev:code>
         <dev:remarks>
           <maml:para>Remove the specified account without deactivation.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -4780,6 +4840,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Get-PAAccount | Remove-PAAccount -Deactivate -Force</dev:code>
         <dev:remarks>
           <maml:para>Remove the current account after deactivating it and skip confirmation prompts.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -4970,6 +5031,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Remove-PAOrder site1.example.com</dev:code>
         <dev:remarks>
           <maml:para>Remove the specified order without revoking the certificate.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -4977,6 +5039,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Get-PAOrder -List | Remove-PAOrder -RevokeCert -Force</dev:code>
         <dev:remarks>
           <maml:para>Remove all orders associated with the current account, revoke all certificates, and skip confirmation prompts.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -5167,6 +5230,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Remove-PAServer LE_STAGE</dev:code>
         <dev:remarks>
           <maml:para>Remove the staging server without deactivating accounts.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -5335,6 +5399,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Revoke-PAAuthorization https://acme.example.com/authz/1234567</dev:code>
         <dev:remarks>
           <maml:para>Revoke the authorization for the specified URL using the current account.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -5342,6 +5407,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Get-PAOrder | Revoke-PAAuthorization -Force</dev:code>
         <dev:remarks>
           <maml:para>Revoke all authorizations for the current order on the current account without confirmation prompts.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -5349,6 +5415,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Get-PAOrder -List | Revoke-PAAuthorizations</dev:code>
         <dev:remarks>
           <maml:para>Revoke all authorizations for all orders on the current account.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -5658,6 +5725,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Revoke-PACertificate example.com</dev:code>
         <dev:remarks>
           <maml:para>Revokes the certificate for the specified domain.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -5665,6 +5733,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Get-PAOrder | Revoke-PACertificate -Force</dev:code>
         <dev:remarks>
           <maml:para>Revokes the certificate associated with the current order and skips the confirmation prompt.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -5672,6 +5741,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Get-PACertificate | Revoke-PACertificate -Reason keyCompromise</dev:code>
         <dev:remarks>
           <maml:para>Revokes the current certificate with the specified reason.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -5679,6 +5749,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Revoke-PACertificate -CertFile mycert.crt -KeyFile mycert.key</dev:code>
         <dev:remarks>
           <maml:para>Revokes the specified cert using the specified private key.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -5774,6 +5845,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Save-Challenge Manual @{}</dev:code>
         <dev:remarks>
           <maml:para>Commit changes using the Manual DNS plugin that requires no plugin arguments.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -5781,6 +5853,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Save-Challenge MyPlugin @{Param1='asdf';Param2=1234}</dev:code>
         <dev:remarks>
           <maml:para>Commit changes for a set of challenges using a fictitious plugin and arguments.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -5884,6 +5957,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:remarks>
           <maml:para>PS C:\&gt;Send-ChallengeAck $auths[0].DNS01Url</maml:para>
           <maml:para>Tell the ACME server to validate the first DNS challenge in the current order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -5892,6 +5966,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:remarks>
           <maml:para>PS C:\&gt;$httpUrls = ($auths | ?{ $_.status -eq 'pending' }).HTTP01Url PS C:\&gt;$httpUrls | Send-ChallengeAck</maml:para>
           <maml:para>Tell the ACME server to validate all pending HTTP challenges in the current order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -6353,6 +6428,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Set-PAAccount -ID 1234567</dev:code>
         <dev:remarks>
           <maml:para>Switch to the specified account.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -6360,6 +6436,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Set-PAAccount -Contact 'user1@example.com','user2@example.com'</dev:code>
         <dev:remarks>
           <maml:para>Set new contacts for the current account.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -6367,6 +6444,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Set-PAAccount -ID 1234567 -Contact 'user1@example.com','user2@example.com'</dev:code>
         <dev:remarks>
           <maml:para>Set new contacts for the specified account.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -6374,6 +6452,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Get-PAAccount -List | Set-PAAccount -Contact user1@example.com -NoSwitch</dev:code>
         <dev:remarks>
           <maml:para>Set a new contact for all known accounts without switching from the current.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -6381,6 +6460,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Set-PAAccount -Deactivate</dev:code>
         <dev:remarks>
           <maml:para>Deactivate the current account.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -6388,6 +6468,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Set-PAAccount -KeyRollover -KeyLength ec-384</dev:code>
         <dev:remarks>
           <maml:para>Replace the current account key with a new ECC key using P-384 curve.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -6395,6 +6476,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Set-PAAccount -KeyRollover -KeyFile .\mykey.key</dev:code>
         <dev:remarks>
           <maml:para>Replace the current account key with a pre-generated private key.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -7000,6 +7082,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Set-PAOrder site1.example.com</dev:code>
         <dev:remarks>
           <maml:para>Switch to the specified domain's order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -7007,6 +7090,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Set-PAOrder -RevokeCert</dev:code>
         <dev:remarks>
           <maml:para>Revoke the current order's certificate.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -7014,6 +7098,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Set-PAOrder -FriendlyName 'new friendly name'</dev:code>
         <dev:remarks>
           <maml:para>Edit the friendly name for the current order and certificate if it exists.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -7228,6 +7313,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Set-PAServer LE_PROD</dev:code>
         <dev:remarks>
           <maml:para>Switch to the LetsEncrypt production server using the short name.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -7235,6 +7321,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Set-PAServer -DirectoryUrl https://myacme.example.com/directory</dev:code>
         <dev:remarks>
           <maml:para>Switch to the specified ACME server using the directory URL.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -7242,6 +7329,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>(Get-PAServer -List)[0] | Set-PAServer</dev:code>
         <dev:remarks>
           <maml:para>Switch to the first ACME server returned by "Get-PAServer -List"</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -7312,6 +7400,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Submit-ChallengeValidation</dev:code>
         <dev:remarks>
           <maml:para>Begin challenge validation on the current order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -7319,6 +7408,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Get-PAOrder | Submit-ChallengeValidation</dev:code>
         <dev:remarks>
           <maml:para>Begin challenge validation on the current order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -7393,6 +7483,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Submit-OrderFinalize</dev:code>
         <dev:remarks>
           <maml:para>Finalize the current order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -7400,6 +7491,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Get-PAOrder example.com | Submit-OrderFinalize</dev:code>
         <dev:remarks>
           <maml:para>Finalize the specified order.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -7688,6 +7780,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Submit-Renewal</dev:code>
         <dev:remarks>
           <maml:para>Renew the current order on the current account.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -7695,6 +7788,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Submit-Renewal -Force</dev:code>
         <dev:remarks>
           <maml:para>Renew the current order on the current account even if it hasn't reached its suggested renewal window.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -7702,6 +7796,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Submit-Renewal -AllOrders</dev:code>
         <dev:remarks>
           <maml:para>Renew all valid orders on the current account that have reached their suggested renewal window.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -7709,6 +7804,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Submit-Renewal -AllAccounts</dev:code>
         <dev:remarks>
           <maml:para>Renew all valid orders on all valid accounts that have reached their suggested renewal window.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -7716,6 +7812,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:code>Submit-Renewal site1.example.com -Force</dev:code>
         <dev:remarks>
           <maml:para>Renew the order for the specified site regardless of its renewal window.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -7912,6 +8009,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
 PS C:\&gt;Unpublish-Challenge $auths[0].DNSId (Get-PAAccount) $auths[0].DNS01Token Manual @{}</dev:code>
         <dev:remarks>
           <maml:para>Unpublish a DNS challenge for the first authorization in the current order using the Manual DNS plugin.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
@@ -7921,6 +8019,7 @@ PS C:\&gt;$acct = Get-PAAccount
 PS C:\&gt;Unpublish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</dev:code>
         <dev:remarks>
           <maml:para>Unpublish a challenge for example.com using a fictitious plugin and arguments.</maml:para>
+          <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>

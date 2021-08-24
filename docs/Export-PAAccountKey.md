@@ -8,7 +8,8 @@ schema: 2.0.0
 # Export-PAAccountKey
 
 ## SYNOPSIS
-Get ACME order details.
+
+Export an ACME account private key.
 
 ## SYNTAX
 
@@ -17,31 +18,37 @@ Export-PAAccountKey [[-ID] <String>] -OutputFile <String> [-Force] [-WhatIf] [-C
 ```
 
 ## DESCRIPTION
-Returns details such as Domains, key length, expiration, and status for one or more ACME orders previously created.
+
+The account key is saved as an unencrypted Base64 encoded PEM file.
 
 ## EXAMPLES
 
-### EXAMPLE 1
-```
+### Example 1: Export the current account key
+
+Introduction text goes here.
+
+```powershell
 Export-PAAccountKey -OutputFile .\mykey.pem
 ```
 
 Exports the current ACME account's key to the specified file.
 
-### EXAMPLE 2
-```
+### Example 2: Export the specified account key
+
+```powershell
 Export-PAAccountKey 12345 -OutputFile .\mykey.pem -Force
 ```
 
 Exports the specified ACME account's key to the specified file and overwrites it if necessary.
 
-### EXAMPLE 3
-```
+### Example 3: Backup all account keys to the desktop
+
+```powershell
 $fldr = Join-Path ([Environment]::GetFolderPath('Desktop')) 'AcmeAccountKeys'
-PS C:\>New-Item -ItemType Directory -Force -Path $fldr | Out-Null
-PS C:\>Get-PAAccount -List | %{
-PS C:\>    Export-PAAccountKey $_.ID -OutputFile "$fldr\$($_.ID).key" -Force
-PS C:\>}
+New-Item -ItemType Directory -Force -Path $fldr | Out-Null
+Get-PAAccount -List | %{
+    Export-PAAccountKey $_.ID -OutputFile "$fldr\$($_.ID).key" -Force
+}
 ```
 
 Backup all account keys for this ACME server to a folder on the desktop.
