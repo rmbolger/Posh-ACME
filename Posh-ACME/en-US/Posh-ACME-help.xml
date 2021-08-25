@@ -18,7 +18,7 @@
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none">
           <maml:name>Order</maml:name>
           <maml:description>
-            <maml:para>The ACME order to complete. The order object must be associated with the currently active ACME account.</maml:para>
+            <maml:para>The order object to complete which must be associated with the currently active ACME account.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">Object</command:parameterValue>
           <dev:type>
@@ -33,7 +33,7 @@
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none">
         <maml:name>Order</maml:name>
         <maml:description>
-          <maml:para>The ACME order to complete. The order object must be associated with the currently active ACME account.</maml:para>
+          <maml:para>The order object to complete which must be associated with the currently active ACME account.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">Object</command:parameterValue>
         <dev:type>
@@ -43,35 +43,51 @@
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
     </command:parameters>
-    <command:inputTypes />
-    <command:returnValues />
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>PoshACME.PAOrder</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>An order object as returned by Get-PAOrder.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>PoshACME.PACertificate</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The certificate object for the order.</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>------------ Example 1: Complete the current order ------------</maml:title>
         <dev:code>Complete-PAOrder</dev:code>
         <dev:remarks>
-          <maml:para>Complete the current order.</maml:para>
+          <maml:para></maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>------------- Example 2: Complete a specific order -------------</maml:title>
         <dev:code>Get-PAOrder example.com | Complete-PAOrder</dev:code>
         <dev:remarks>
-          <maml:para>Complete the specified order.</maml:para>
+          <maml:para></maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Complete-PAOrder/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -222,9 +238,7 @@
     <command:inputTypes />
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
@@ -258,8 +272,8 @@ Get-PAAccount -List | %{
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Export-PAAccountKey/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAccount</maml:linkText>
@@ -357,25 +371,32 @@ Get-PAAccount -List | %{
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
     </command:parameters>
-    <command:inputTypes />
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The token value from an ACME challenge object.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
     <command:returnValues>
       <command:returnValue>
         <dev:type>
           <maml:name>System.String</maml:name>
         </dev:type>
         <maml:description>
-          <maml:para></maml:para>
+          <maml:para>The key authorization value.</maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Get-KeyAuthorization 'XxXxXxXxXxXx'</dev:code>
         <dev:remarks>
           <maml:para>Get the key authorization for the specified token using the current account.</maml:para>
@@ -383,7 +404,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>(Get-PAOrder | Get-PAAuthorization).DNS01Token | Get-KeyAuthorization</dev:code>
         <dev:remarks>
           <maml:para>Get all key authorizations for the DNS challenges in the current order using the current account.</maml:para>
@@ -393,8 +414,8 @@ Get-PAAccount -List | %{
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Get-KeyAuthorization/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAuthorization</maml:linkText>
@@ -624,18 +645,16 @@ Get-PAAccount -List | %{
           <maml:name>PoshACME.PAAccount</maml:name>
         </dev:type>
         <maml:description>
-          <maml:para></maml:para>
+          <maml:para>An account object.</maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Get-PAAccount</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME account details for the currently selected account.</maml:para>
@@ -643,7 +662,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Get-PAAccount -ID 1234567</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME account details for the specified account ID.</maml:para>
@@ -651,7 +670,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>Get-PAAccount -List</dev:code>
         <dev:remarks>
           <maml:para>Get all cached ACME account details.</maml:para>
@@ -659,7 +678,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 4 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 4 --------------------------</maml:title>
         <dev:code>Get-PAAccount -Refresh</dev:code>
         <dev:remarks>
           <maml:para>Get fresh ACME account details for the currently selected account.</maml:para>
@@ -667,7 +686,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 5 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 5 --------------------------</maml:title>
         <dev:code>Get-PAAccount -List -Refresh</dev:code>
         <dev:remarks>
           <maml:para>Get fresh ACME account details for all accounts.</maml:para>
@@ -675,7 +694,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 6 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 6 --------------------------</maml:title>
         <dev:code>Get-PAAccount -List -Contact user1@example.com</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME account details for all accounts that have user1@example.com as the only contact.</maml:para>
@@ -685,8 +704,8 @@ Get-PAAccount -List | %{
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Get-PAAccount/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Set-PAAccount</maml:linkText>
@@ -765,25 +784,32 @@ Get-PAAccount -List | %{
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
     </command:parameters>
-    <command:inputTypes />
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The URI of the authorization object.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
     <command:returnValues>
       <command:returnValue>
         <dev:type>
           <maml:name>PoshACME.PAAuthorization</maml:name>
         </dev:type>
         <maml:description>
-          <maml:para></maml:para>
+          <maml:para>An authorization object.</maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Get-PAAuthorization https://acme.example.com/authz/1234567</dev:code>
         <dev:remarks>
           <maml:para>Get the authorization for the specified URL.</maml:para>
@@ -791,7 +817,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Get-PAOrder | Get-PAAuthorization</dev:code>
         <dev:remarks>
           <maml:para>Get the authorizations for the current order on the current account.</maml:para>
@@ -799,7 +825,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>Get-PAOrder -List | Get-PAAuthorization</dev:code>
         <dev:remarks>
           <maml:para>Get the authorizations for all orders on the current account.</maml:para>
@@ -809,8 +835,8 @@ Get-PAAccount -List | %{
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Get-PAAuthorization/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -922,18 +948,16 @@ Get-PAAccount -List | %{
           <maml:name>PoshACME.PACertificate</maml:name>
         </dev:type>
         <maml:description>
-          <maml:para></maml:para>
+          <maml:para>A certificate object.</maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Get-PACertificate</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME order details for the currently selected order.</maml:para>
@@ -941,7 +965,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Get-PACertificate site.example.com</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME order details for the specified domain.</maml:para>
@@ -949,7 +973,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>Get-PACertificate -List</dev:code>
         <dev:remarks>
           <maml:para>Get all cached ACME order details.</maml:para>
@@ -959,8 +983,8 @@ Get-PAAccount -List | %{
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Get-PACertificate/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>New-PACertificate</maml:linkText>
@@ -1102,18 +1126,16 @@ Get-PAAccount -List | %{
           <maml:name>PoshACME.PAOrder</maml:name>
         </dev:type>
         <maml:description>
-          <maml:para></maml:para>
+          <maml:para>An order object.</maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Get-PAOrder</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME order details for the currently selected order.</maml:para>
@@ -1121,7 +1143,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Get-PAOrder site.example.com</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME order details for the specified domain.</maml:para>
@@ -1129,7 +1151,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>Get-PAOrder -List</dev:code>
         <dev:remarks>
           <maml:para>Get all cached ACME order details.</maml:para>
@@ -1137,7 +1159,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 4 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 4 --------------------------</maml:title>
         <dev:code>Get-PAOrder -Refresh</dev:code>
         <dev:remarks>
           <maml:para>Get fresh ACME order details for the currently selected order.</maml:para>
@@ -1145,7 +1167,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 5 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 5 --------------------------</maml:title>
         <dev:code>Get-PAOrder -List -Refresh</dev:code>
         <dev:remarks>
           <maml:para>Get fresh ACME order details for all orders.</maml:para>
@@ -1155,8 +1177,8 @@ Get-PAAccount -List | %{
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Get-PAOrder/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Set-PAOrder</maml:linkText>
@@ -1329,13 +1351,11 @@ Get-PAAccount -List | %{
     <command:inputTypes />
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Get-PAPlugin</dev:code>
         <dev:remarks>
           <maml:para>Get the list of available validation plugins</maml:para>
@@ -1343,7 +1363,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Get-PAPlugin Route53 -Guide</dev:code>
         <dev:remarks>
           <maml:para>Launch the user's default web browser to the online guide for the specified plugin.</maml:para>
@@ -1353,8 +1373,8 @@ Get-PAAccount -List | %{
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Get-PAPlugin/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>New-PACertificate</maml:linkText>
@@ -1440,18 +1460,16 @@ Get-PAAccount -List | %{
           <maml:name>System.Collections.Hashtable</maml:name>
         </dev:type>
         <maml:description>
-          <maml:para></maml:para>
+          <maml:para>A hashtable containing saved plugin parameters.</maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Get-PAPluginArgs</dev:code>
         <dev:remarks>
           <maml:para>Retrieve the plugin args for the current order.</maml:para>
@@ -1459,7 +1477,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Get-PAPluginArgs -Name myorder</dev:code>
         <dev:remarks>
           <maml:para>Retrieve the plugin args for the specified order.</maml:para>
@@ -1467,7 +1485,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>Get-PAOrder -Name myorder | Get-PAPluginArgs</dev:code>
         <dev:remarks>
           <maml:para>Retrieve the plugin args for the order passed via the pipeline.</maml:para>
@@ -1477,8 +1495,8 @@ Get-PAAccount -List | %{
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Get-PAPluginArgs/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Gew-PAOrder</maml:linkText>
@@ -1643,18 +1661,16 @@ Get-PAAccount -List | %{
           <maml:name>PoshACME.PAServer</maml:name>
         </dev:type>
         <maml:description>
-          <maml:para></maml:para>
+          <maml:para>A server object.</maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Get-PAServer</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME server details for the currently selected server.</maml:para>
@@ -1662,7 +1678,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Get-PAServer -DirectoryUrl LE_PROD</dev:code>
         <dev:remarks>
           <maml:para>Get cached LetsEncrypt production server details using the short name.</maml:para>
@@ -1670,7 +1686,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>Get-PAServer -List</dev:code>
         <dev:remarks>
           <maml:para>Get all cached ACME server details.</maml:para>
@@ -1678,7 +1694,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 4 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 4 --------------------------</maml:title>
         <dev:code>Get-PAServer -DirectoryUrl https://myacme.example.com/directory</dev:code>
         <dev:remarks>
           <maml:para>Get cached ACME server details for the specified directory URL.</maml:para>
@@ -1686,7 +1702,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 5 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 5 --------------------------</maml:title>
         <dev:code>Get-PAServer -Refresh</dev:code>
         <dev:remarks>
           <maml:para>Get fresh ACME server details for the currently selected server.</maml:para>
@@ -1694,7 +1710,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 6 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 6 --------------------------</maml:title>
         <dev:code>Get-PAServer -List -Refresh</dev:code>
         <dev:remarks>
           <maml:para>Get fresh ACME server details for all previously used servers.</maml:para>
@@ -1704,8 +1720,8 @@ Get-PAAccount -List | %{
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Get-PAServer/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Set-PAServer</maml:linkText>
@@ -1827,16 +1843,25 @@ Get-PAAccount -List | %{
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
     </command:parameters>
-    <command:inputTypes />
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>PoshACME.PACertificate</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>A certificate object as returned by Get-PACertificate.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
     <command:returnValues />
     <maml:alertSet>
       <maml:alert>
-        <maml:para></maml:para>
+        <maml:para>This function only currently works on Windows OSes. A warning will be thrown on other OSes.</maml:para>
       </maml:alert>
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Install-PACertificate</dev:code>
         <dev:remarks>
           <maml:para>Install the certificate for the currently selected order to the default LocalMachine\My store.</maml:para>
@@ -1844,7 +1869,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Get-PACertificate example.com | Install-PACertificate</dev:code>
         <dev:remarks>
           <maml:para>Install the specified certificate to the default LocalMachine\My store.</maml:para>
@@ -1852,7 +1877,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>Install-PACertificate -StoreLocation 'CurrentUser' -NotExportable</dev:code>
         <dev:remarks>
           <maml:para>Install the certificate for the currently selected order to the CurrentUser\My store and mark the private key as not exportable.</maml:para>
@@ -1862,8 +1887,8 @@ Get-PAAccount -List | %{
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Install-PACertificate/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PACertificate</maml:linkText>
@@ -1882,7 +1907,7 @@ Get-PAAccount -List | %{
     </command:details>
     <maml:description>
       <maml:para>Uses System.Net.HttpListener to answer http-01 ACME challenges for the current or specified order. If MainDomain is not specified, the current Order is used.</maml:para>
-      <maml:para>If running on Windows with non-admin privileges, Access Denied errors may be thrown unless a URL reservation is added using netsh that matches the HttpListener prefix that will be used. The default wildcard prefix is http://+/.well-known/acme-challenge and the netsh command might look something like this:</maml:para>
+      <maml:para>If running on Windows with non-admin privileges, Access Denied errors may be thrown unless a URL reservation is added using `netsh` that matches the HttpListener prefix that will be used. The default wildcard prefix is `http://+/.well-known/acme-challenge` and the netsh command might look something like this:</maml:para>
       <maml:para>    netsh http add urlacl url=http://+/.well-known/acme-challenge/ user=Everyone</maml:para>
     </maml:description>
     <command:syntax>
@@ -2065,18 +2090,18 @@ Get-PAAccount -List | %{
           <maml:name>PoshACME.PAAuthorization</maml:name>
         </dev:type>
         <maml:description>
-          <maml:para></maml:para>
+          <maml:para>The authorization object associated with the order.</maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
     <maml:alertSet>
       <maml:alert>
-        <maml:para></maml:para>
+        <maml:para>&gt; DEPRECATION NOTICE: This function is deprecated and may be removed in a future major version. Please migrate your scripts to use the `WebSelfHost` plugin.</maml:para>
       </maml:alert>
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Invoke-HttpChallengeListener</dev:code>
         <dev:remarks>
           <maml:para>Start listener on default port 80 for pending challenges for the current order.</maml:para>
@@ -2084,7 +2109,7 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Invoke-HttpChallengeListener -MainDomain 'test.example.com' -Port 8080 -ListenerTimeout 30</dev:code>
         <dev:remarks>
           <maml:para>Start listener on port 8080 with a timeout of 30 seconds for the specified order.</maml:para>
@@ -2092,9 +2117,9 @@ Get-PAAccount -List | %{
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>$prefixes = 'http://example.com/.well-known/acme-challenge/','http://www.example.com/.well-known/acme-challenge'
-PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
+Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         <dev:remarks>
           <maml:para>Start listener using the specified prefixes for the current order.</maml:para>
           <maml:para></maml:para>
@@ -2103,8 +2128,8 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Invoke-HttpChallengeListener/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -2126,7 +2151,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>All certificate requests require a valid account on an ACME server. Adding an email contact is not required. But without one, certificate expiration notices will not be sent. The account KeyLength is personal preference and doesn't correspond to the KeyLength of the generated certificates.</maml:para>
+      <maml:para>All certificate requests require a valid account on an ACME server. An contact email address is not required for Let's Encrypt, but other CAs may require it. Without an email address, certificate expiration notices will not be sent. The account KeyLength is a personal preference and does not relate to the KeyLength of the certificates.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -2602,18 +2627,16 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
           <maml:name>PoshACME.PAAccount</maml:name>
         </dev:type>
         <maml:description>
-          <maml:para></maml:para>
+          <maml:para>An account object.</maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>New-PAAccount -AcceptTOS</dev:code>
         <dev:remarks>
           <maml:para>Create a new account with no contact email and the default key length.</maml:para>
@@ -2621,7 +2644,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>New-PAAccount -Contact user1@example.com -AcceptTOS</dev:code>
         <dev:remarks>
           <maml:para>Create a new account with the specified email and the default key length.</maml:para>
@@ -2629,7 +2652,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>New-PAAccount -Contact user1@example.com -KeyLength 4096 -AcceptTOS</dev:code>
         <dev:remarks>
           <maml:para>Create a new account with the specified email and an RSA 4096 bit key.</maml:para>
@@ -2637,7 +2660,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 4 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 4 --------------------------</maml:title>
         <dev:code>New-PAAccount -KeyLength 'ec-384' -AcceptTOS -Force</dev:code>
         <dev:remarks>
           <maml:para>Create a new account with no contact email and an ECC key using P-384 curve that ignores any confirmations.</maml:para>
@@ -2645,7 +2668,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 5 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 5 --------------------------</maml:title>
         <dev:code>New-PAAccount -KeyFile .\mykey.key -AcceptTOS</dev:code>
         <dev:remarks>
           <maml:para>Create a new account using a pre-generated private key file.</maml:para>
@@ -2655,8 +2678,8 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/New-PAAccount/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAccount</maml:linkText>
@@ -2736,25 +2759,32 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
     </command:parameters>
-    <command:inputTypes />
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The domain or IP address identifier to authorize.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
     <command:returnValues>
       <command:returnValue>
         <dev:type>
           <maml:name>PoshACME.PAAuthorization</maml:name>
         </dev:type>
         <maml:description>
-          <maml:para></maml:para>
+          <maml:para>An authorization object.</maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>$auth = New-PAAuthorization example.com</dev:code>
         <dev:remarks>
           <maml:para>Create a new authorization for the specified domain using the current account.</maml:para>
@@ -2762,7 +2792,7 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>$auths = 'example.com','www.example.com' | New-PAAuthorization -Account (Get-PAAccount 123)</dev:code>
         <dev:remarks>
           <maml:para>Create new authorizations for the specified domains via the pipeline and using the specified account.</maml:para>
@@ -2772,8 +2802,8 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/New-PAAuthorization/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAuthorization</maml:linkText>
@@ -3483,60 +3513,76 @@ PS C:\&gt;Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
       </command:parameter>
     </command:parameters>
     <command:inputTypes />
-    <command:returnValues />
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>PoshACME.PACertificate</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>A certificate object.</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code>New-PACertificate site1.example.com -AcceptTOS</dev:code>
+        <maml:title>------------- Example 1: Basic Manual Certificate -------------</maml:title>
+        <dev:code>New-PACertificate 'example.com','www.example.com' -AcceptTOS</dev:code>
         <dev:remarks>
-          <maml:para>This is the minimum parameters needed to generate a certificate for the specified site if you haven't already setup an ACME account. It will prompt you to add the required DNS TXT record manually. Once you have an account created, you can omit the -AcceptTOS parameter.</maml:para>
+          <maml:para>This is the bare minimum necessary to create a certificate for a basic domain (plus the `www` alt name). It prompt you to add the required DNS TXT record manually. You can omit the `-AcceptTOS` parameter if you already have an ACME account configured.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
-        <dev:code>New-PACertificate 'site1.example.com','site2.example.com' -Contact admin@example.com</dev:code>
+        <maml:title>--------- Example 2: Wildcard Certificate with Contact ---------</maml:title>
+        <dev:code>New-PACertificate '*.example.com','example.com' -Contact 'admin@example.com'</dev:code>
         <dev:remarks>
-          <maml:para>Request a SAN certificate with multiple names and have notifications sent to the specified email address.</maml:para>
+          <maml:para>Wildcard certificates generally include the non-wildcard root as a SAN because the wildcard doesn't match it. The contact email address is typically used by the CA to send expiration warnings.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
-        <dev:code>New-PACertificate '*.example.com','example.com'</dev:code>
+        <maml:title>------------------ Example 3: Using a plugin ------------------</maml:title>
+        <dev:code>$pArgs = @{
+    FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
+}
+New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs</dev:code>
         <dev:remarks>
-          <maml:para>Request a wildcard certificate that includes the root domain as a SAN.</maml:para>
+          <maml:para>Plugin parameters are passed as a basic hashtable object. Some parameters may require SecureString or PSCredential objects to protect sensitive API credentials, tokens, and keys.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 4 --------------------------</maml:title>
-        <dev:code>$pluginArgs = @{FBServer='fb.example.com'; FBCred=(Get-Credential)}
-PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $pluginArgs</dev:code>
+        <maml:title>-------------- Example 4: Using multiple plugins --------------</maml:title>
+        <dev:code>$pArgs = @{
+    FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
+    WSHPort = 8080
+}
+New-PACertificate '*.example.com','example.com' -Plugin FakeDNS,WebSelfHost -PluginArgs $pArgs</dev:code>
         <dev:remarks>
-          <maml:para>Request a certificate using the hypothetical Flurbog DNS plugin that requires a server name and set of credentials.</maml:para>
+          <maml:para>Each name in a certificate can use a different plugin if necessary. Be sure the specified plugin order matches the order of the names they are associated with. If there are fewer plugins specified than names, the last plugin in the list will be applied to all remaining names.</maml:para>
+          <maml:para>Each plugin's parameters should be combined into the same hashtable object.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 5 --------------------------</maml:title>
-        <dev:code>$pluginArgs = @{FBServer='fb.example.com'; FBCred=(Get-Credential)}
-PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $pluginArgs -DnsAlias validate.alt-example.com</dev:code>
+        <maml:title>------------ Example 5: Using a DNS Challenge Alias ------------</maml:title>
+        <dev:code>$pArgs = @{
+    FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
+}
+New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'acme.example.net'</dev:code>
         <dev:remarks>
-          <maml:para>This is the same as the previous example except that it's telling the Flurbog plugin to write to an alias domain. This only works if you have already created a CNAME record for _acme-challenge.site1.example.com that points to validate.alt-example.com.</maml:para>
+          <maml:para>Using `DnsAlias` tells the plugin to create the required TXT record to an alternate hostname. It requires having added a CNAME record for each name in the cert pointing to the alternate record location. In this case, `_acme-challenge.example.com` is pointing to `acme.example.net`.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/New-PACertificate/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Submit-Renewal</maml:linkText>
@@ -3558,8 +3604,8 @@ PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $plugi
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Creating an ACME order is the first step of the certificate request process. To create a SAN certificate with multiple names, include them all in an array for the -Domain parameter. The first name in the list will be considered the "MainDomain" and will also be in the certificate subject field. LetsEncrypt currently limits SAN certificates to 100 names.</maml:para>
-      <maml:para>Be aware that only one order per MainDomain per ACME Account can exist with this module. Subsequent orders that have the same MainDomain will overwrite previous orders and certificates under the assumption that you are trying to renew or update the certificate with additional names.</maml:para>
+      <maml:para>Creating an ACME order is the first step of the certificate request process. To create a SAN certificate with multiple names, include them all in an array for the -Domain parameter. The first name in the list will be considered the "MainDomain" and will also be in the certificate subject field. Different CAs have different policies regarding the number of SANs a certificate may have.</maml:para>
+      <maml:para>Be aware that new orders that share the same MainDomain as a previous order will overwrite the previous order unless the `Name` paraemter is specified and there are no other order matches for that name.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -4415,18 +4461,16 @@ PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $plugi
           <maml:name>PoshACME.PAOrder</maml:name>
         </dev:type>
         <maml:description>
-          <maml:para></maml:para>
+          <maml:para>An order object.</maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>New-PAOrder site1.example.com</dev:code>
         <dev:remarks>
           <maml:para>Create a new order for the specified domain using the default key length.</maml:para>
@@ -4434,7 +4478,7 @@ PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $plugi
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>New-PAOrder -Domain 'site1.example.com','site2.example.com','site3.example.com'</dev:code>
         <dev:remarks>
           <maml:para>Create a new SAN order for the specified domains using the default key length.</maml:para>
@@ -4442,7 +4486,7 @@ PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $plugi
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>New-PAOrder site1.example.com 4096</dev:code>
         <dev:remarks>
           <maml:para>Create a new order for the specified domain using an RSA 4096 bit key.</maml:para>
@@ -4450,7 +4494,7 @@ PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $plugi
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 4 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 4 --------------------------</maml:title>
         <dev:code>New-PAOrder 'site1.example.com','site2.example.com' ec-384 -Force</dev:code>
         <dev:remarks>
           <maml:para>Create a new SAN order for the specified domains using an ECC key using P-384 curve that ignores any confirmations.</maml:para>
@@ -4460,8 +4504,8 @@ PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $plugi
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/New-PAOrder/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -4484,7 +4528,7 @@ PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $plugi
     </command:details>
     <maml:description>
       <maml:para>Based on the type of validation plugin specified, this function will publish either a DNS TXT record or an HTTP challenge file for the given domain and token value that satisfies the dns-01 or http-01 challenge specification.</maml:para>
-      <maml:para>Depending on the plugin, calling Save-Challenge may be required to commit changes made by Publish-Challenge. If multiple challenges are being published, make all Publish-Challenge calls first. Then, Save-Challenge once to commit them all.</maml:para>
+      <maml:para>Depending on the plugin, calling `Save-Challenge` may be required to commit changes made by `Publish-Challenge`. If multiple challenges are being published, make all `Publish-Challenge` calls first. Then, `Save-Challenge` once to commit them all.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -4640,25 +4684,23 @@ PS C:\&gt;New-PACertificate site1.example.com -Plugin Flurbog -PluginArgs $plugi
     <command:inputTypes />
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>$auths = Get-PAOrder | Get-PAAuthorization
-PS C:\&gt;Publish-Challenge $auths[0].DNSId (Get-PAAccount) $auths[0].DNS01Token Manual @{}</dev:code>
+Publish-Challenge $auths[0].DNSId (Get-PAAccount) $auths[0].DNS01Token Manual @{}</dev:code>
         <dev:remarks>
           <maml:para>Publish a DNS challenge for the first authorization in the current order using the Manual DNS plugin.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>$pArgs = @{Param1='asdf';Param2=1234}
-PS C:\&gt;$acct = Get-PAAccount
-PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</dev:code>
+$acct = Get-PAAccount
+Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</dev:code>
         <dev:remarks>
           <maml:para>Publish a challenge for example.com using a fictitious plugin and arguments.</maml:para>
           <maml:para></maml:para>
@@ -4667,8 +4709,8 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Publish-Challenge/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Unpublish-Challenge</maml:linkText>
@@ -4694,7 +4736,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>This function removes the ACME account from the local profile which also removes any associated orders and certificates. It will not remove or cleanup copies of certificates that have been exported or installed elsewhere. It will also not deactivate the account on the ACME server without using -Deactivate. However, with the account's private key it can't be recovered from the server.</maml:para>
+      <maml:para>This function removes the ACME account from the local profile which also removes any associated orders and certificates. It will not remove or cleanup copies of certificates that have been exported or installed elsewhere. It will not deactivate the account on the ACME server unless `-Deactivate` is specified. But you won't be able to re-use the account on another system without an export of the account's key such as the one generated with `Export-PAAccountKey`.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -4822,13 +4864,11 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     <command:inputTypes />
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Remove-PAAccount 12345</dev:code>
         <dev:remarks>
           <maml:para>Remove the specified account without deactivation.</maml:para>
@@ -4836,7 +4876,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Get-PAAccount | Remove-PAAccount -Deactivate -Force</dev:code>
         <dev:remarks>
           <maml:para>Remove the current account after deactivating it and skip confirmation prompts.</maml:para>
@@ -4846,8 +4886,8 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Remove-PAAccount/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAccount</maml:linkText>
@@ -4869,7 +4909,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>This function removes the reference to the order from the local profile which also removes any associated certificate and private key. It will not remove or cleanup copies of the certificate that have been exported or installed elsewhere. It will also not revoke the certificate unless -RevokeCert is used. The ACME server may retain a reference to the order until it decides to delete it.</maml:para>
+      <maml:para>This function removes the order from the local profile which also removes any associated certificate/key. It will not remove or cleanup copies of the certificate that have been exported or installed elsewhere. It will not revoke the certificate unless `-RevokeCert` is specified. The ACME server may retain a reference to the order until it decides to delete it.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -5021,13 +5061,11 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     <command:inputTypes />
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Remove-PAOrder site1.example.com</dev:code>
         <dev:remarks>
           <maml:para>Remove the specified order without revoking the certificate.</maml:para>
@@ -5035,7 +5073,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Get-PAOrder -List | Remove-PAOrder -RevokeCert -Force</dev:code>
         <dev:remarks>
           <maml:para>Remove all orders associated with the current account, revoke all certificates, and skip confirmation prompts.</maml:para>
@@ -5045,8 +5083,8 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Remove-PAOrder/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -5068,7 +5106,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>This function removes the ACME server from the local profile which also removes any associated accounts, orders and certificates. It will not remove or cleanup copies of certificates that have been exported or installed elsewhere. It will not revoke any certificates that are still valid. It will not deactivate the accounts on the ACME server unless the -DeactivateAccounts switch is specified.</maml:para>
+      <maml:para>This function removes the ACME server from the local profile which also removes any associated accounts, orders and certificates. It will not remove or cleanup copies of certificates that have been exported or installed elsewhere. It will not revoke any certificates. It will not deactivate the accounts on the ACME server unless the `-DeactivateAccounts` switch is specified.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -5220,13 +5258,11 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     <command:inputTypes />
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Remove-PAServer LE_STAGE</dev:code>
         <dev:remarks>
           <maml:para>Remove the staging server without deactivating accounts.</maml:para>
@@ -5236,8 +5272,8 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Remove-PAServer/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAServer</maml:linkText>
@@ -5259,8 +5295,8 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Many ACME server implementations cache succesful authorizations for a certain amount of time to avoid requiring an account to re-authorize identifiers for additional orders submitted during the cache window.</maml:para>
-      <maml:para>This can make testing authorization challenges in a client more cumbersome by having to create new orders with uncached identifiers. This function allows you to revoke those cached authorizations so that subsequent orders will go through the full challenge validation process.</maml:para>
+      <maml:para>Many ACME server implementations cache succesful authorizations for a certain amount of time to avoid requiring an account to re-authorize identifiers for additional orders submitted during the cache window. This can make testing authorization challenges in a client more cumbersome by having to create new orders with uncached identifiers. </maml:para>
+      <maml:para>This function allows you to revoke those cached authorizations so that subsequent orders will go through the full challenge validation process.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -5386,16 +5422,23 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
     </command:parameters>
-    <command:inputTypes />
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The URI of the authorization object.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Revoke-PAAuthorization https://acme.example.com/authz/1234567</dev:code>
         <dev:remarks>
           <maml:para>Revoke the authorization for the specified URL using the current account.</maml:para>
@@ -5403,7 +5446,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Get-PAOrder | Revoke-PAAuthorization -Force</dev:code>
         <dev:remarks>
           <maml:para>Revoke all authorizations for the current order on the current account without confirmation prompts.</maml:para>
@@ -5411,7 +5454,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>Get-PAOrder -List | Revoke-PAAuthorizations</dev:code>
         <dev:remarks>
           <maml:para>Revoke all authorizations for all orders on the current account.</maml:para>
@@ -5421,8 +5464,8 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Revoke-PAAuthorization/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAuthorization</maml:linkText>
@@ -5444,7 +5487,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Revokes a previously created ACME certificate.</maml:para>
+      <maml:para>Any certificate created with the current ACME account can be revoked. If you need to revoke a certificate not created with the current account, you either need to specify both `CertFile` and `KeyFile`. If you don't have the private key, you will need to go through the authorization process on this account for all names in the certificate and just specify `CertFile`.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -5476,7 +5519,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Reason</maml:name>
           <maml:description>
-            <maml:para>The reason for cert revocation. This must be one of the reasons defined in RFC 5280 including keyCompromise, cACompromise, affiliationChanged, superseded, cessationOfOperation, certificateHold, removeFromCRL, privilegeWithdrawn, and aACompromise. NOTE: Not all reason codes are supported by all ACME certificate authorities.</maml:para>
+            <maml:para>The reason for cert revocation. This must be one of the reasons defined in RFC 5280 including keyCompromise, cACompromise, affiliationChanged, superseded, cessationOfOperation, certificateHold, removeFromCRL, privilegeWithdrawn, and aACompromise. NOTE: Some reason codes are not supported by some ACME CAs.</maml:para>
           </maml:description>
           <command:parameterValueGroup>
             <command:parameterValue required="false" command:variableLength="false">keyCompromise</command:parameterValue>
@@ -5559,7 +5602,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Reason</maml:name>
           <maml:description>
-            <maml:para>The reason for cert revocation. This must be one of the reasons defined in RFC 5280 including keyCompromise, cACompromise, affiliationChanged, superseded, cessationOfOperation, certificateHold, removeFromCRL, privilegeWithdrawn, and aACompromise. NOTE: Not all reason codes are supported by all ACME certificate authorities.</maml:para>
+            <maml:para>The reason for cert revocation. This must be one of the reasons defined in RFC 5280 including keyCompromise, cACompromise, affiliationChanged, superseded, cessationOfOperation, certificateHold, removeFromCRL, privilegeWithdrawn, and aACompromise. NOTE: Some reason codes are not supported by some ACME CAs.</maml:para>
           </maml:description>
           <command:parameterValueGroup>
             <command:parameterValue required="false" command:variableLength="false">keyCompromise</command:parameterValue>
@@ -5666,7 +5709,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Reason</maml:name>
         <maml:description>
-          <maml:para>The reason for cert revocation. This must be one of the reasons defined in RFC 5280 including keyCompromise, cACompromise, affiliationChanged, superseded, cessationOfOperation, certificateHold, removeFromCRL, privilegeWithdrawn, and aACompromise. NOTE: Not all reason codes are supported by all ACME certificate authorities.</maml:para>
+          <maml:para>The reason for cert revocation. This must be one of the reasons defined in RFC 5280 including keyCompromise, cACompromise, affiliationChanged, superseded, cessationOfOperation, certificateHold, removeFromCRL, privilegeWithdrawn, and aACompromise. NOTE: Some reason codes are not supported by some ACME CAs.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">RevocationReasons</command:parameterValue>
         <dev:type>
@@ -5715,13 +5758,11 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     <command:inputTypes />
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Revoke-PACertificate example.com</dev:code>
         <dev:remarks>
           <maml:para>Revokes the certificate for the specified domain.</maml:para>
@@ -5729,7 +5770,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Get-PAOrder | Revoke-PACertificate -Force</dev:code>
         <dev:remarks>
           <maml:para>Revokes the certificate associated with the current order and skips the confirmation prompt.</maml:para>
@@ -5737,7 +5778,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>Get-PACertificate | Revoke-PACertificate -Reason keyCompromise</dev:code>
         <dev:remarks>
           <maml:para>Revokes the current certificate with the specified reason.</maml:para>
@@ -5745,7 +5786,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 4 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 4 --------------------------</maml:title>
         <dev:code>Revoke-PACertificate -CertFile mycert.crt -KeyFile mycert.key</dev:code>
         <dev:remarks>
           <maml:para>Revokes the specified cert using the specified private key.</maml:para>
@@ -5755,8 +5796,8 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Revoke-PACertificate/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>New-PACertificate</maml:linkText>
@@ -5774,7 +5815,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Some validation plugins require a finalization step after the Publish or Unpublish functionality to commit and make the changes live. This function should be called once after running all of the Publish-Challenge or Unpublish-Challenge commands.</maml:para>
+      <maml:para>Some validation plugins require a finalization step after the Publish or Unpublish functionality to commit and make the changes live. This function should be called once after running all of the `Publish-Challenge` or `Unpublish-Challenge` commands.</maml:para>
       <maml:para>For plugins that don't require a commit step, this function may still be run without causing an error, but does nothing.</maml:para>
     </maml:description>
     <command:syntax>
@@ -5835,13 +5876,11 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     <command:inputTypes />
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Save-Challenge Manual @{}</dev:code>
         <dev:remarks>
           <maml:para>Commit changes using the Manual DNS plugin that requires no plugin arguments.</maml:para>
@@ -5849,7 +5888,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Save-Challenge MyPlugin @{Param1='asdf';Param2=1234}</dev:code>
         <dev:remarks>
           <maml:para>Commit changes for a set of challenges using a fictitious plugin and arguments.</maml:para>
@@ -5859,8 +5898,8 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Save-Challenge/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Publish-Challenge</maml:linkText>
@@ -5882,7 +5921,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
       <command:verb>Send</command:verb>
       <command:noun>ChallengeAck</command:noun>
       <maml:description>
-        <maml:para>Notify the ACME server to proceed validating a challenge.</maml:para>
+        <maml:para>Notify the ACME server to try validating a challenge.</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
@@ -5943,28 +5982,36 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
     </command:parameters>
-    <command:inputTypes />
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The URI of an ACME challenge object.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code>$auths = Get-PAOrder | Get-PAAuthorization</dev:code>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>$auths = Get-PAOrder | Get-PAAuthorization
+Send-ChallengeAck $auths\[0\].DNS01Url</dev:code>
         <dev:remarks>
-          <maml:para>PS C:\&gt;Send-ChallengeAck $auths[0].DNS01Url</maml:para>
           <maml:para>Tell the ACME server to validate the first DNS challenge in the current order.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
-        <dev:code>$auths = Get-PAOrder | Get-PAAuthorization</dev:code>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
+        <dev:code>$auths = Get-PAOrder | Get-PAAuthorization
+$httpUrls = ($auths | ?{ $_.status -eq 'pending' }).HTTP01Url
+$httpUrls | Send-ChallengeAck</dev:code>
         <dev:remarks>
-          <maml:para>PS C:\&gt;$httpUrls = ($auths | ?{ $_.status -eq 'pending' }).HTTP01Url PS C:\&gt;$httpUrls | Send-ChallengeAck</maml:para>
           <maml:para>Tell the ACME server to validate all pending HTTP challenges in the current order.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
@@ -5972,8 +6019,8 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Send-ChallengeAck/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAuthorization</maml:linkText>
@@ -6418,13 +6465,11 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     <command:inputTypes />
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Set-PAAccount -ID 1234567</dev:code>
         <dev:remarks>
           <maml:para>Switch to the specified account.</maml:para>
@@ -6432,7 +6477,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Set-PAAccount -Contact 'user1@example.com','user2@example.com'</dev:code>
         <dev:remarks>
           <maml:para>Set new contacts for the current account.</maml:para>
@@ -6440,7 +6485,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>Set-PAAccount -ID 1234567 -Contact 'user1@example.com','user2@example.com'</dev:code>
         <dev:remarks>
           <maml:para>Set new contacts for the specified account.</maml:para>
@@ -6448,7 +6493,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 4 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 4 --------------------------</maml:title>
         <dev:code>Get-PAAccount -List | Set-PAAccount -Contact user1@example.com -NoSwitch</dev:code>
         <dev:remarks>
           <maml:para>Set a new contact for all known accounts without switching from the current.</maml:para>
@@ -6456,7 +6501,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 5 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 5 --------------------------</maml:title>
         <dev:code>Set-PAAccount -Deactivate</dev:code>
         <dev:remarks>
           <maml:para>Deactivate the current account.</maml:para>
@@ -6464,7 +6509,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 6 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 6 --------------------------</maml:title>
         <dev:code>Set-PAAccount -KeyRollover -KeyLength ec-384</dev:code>
         <dev:remarks>
           <maml:para>Replace the current account key with a new ECC key using P-384 curve.</maml:para>
@@ -6472,7 +6517,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 7 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 7 --------------------------</maml:title>
         <dev:code>Set-PAAccount -KeyRollover -KeyFile .\mykey.key</dev:code>
         <dev:remarks>
           <maml:para>Replace the current account key with a pre-generated private key.</maml:para>
@@ -6482,8 +6527,8 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Set-PAAccount/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAccount</maml:linkText>
@@ -7072,13 +7117,11 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     <command:inputTypes />
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Set-PAOrder site1.example.com</dev:code>
         <dev:remarks>
           <maml:para>Switch to the specified domain's order.</maml:para>
@@ -7086,7 +7129,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Set-PAOrder -RevokeCert</dev:code>
         <dev:remarks>
           <maml:para>Revoke the current order's certificate.</maml:para>
@@ -7094,7 +7137,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>Set-PAOrder -FriendlyName 'new friendly name'</dev:code>
         <dev:remarks>
           <maml:para>Edit the friendly name for the current order and certificate if it exists.</maml:para>
@@ -7104,8 +7147,8 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Set-PAOrder/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -7303,13 +7346,11 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     <command:inputTypes />
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Set-PAServer LE_PROD</dev:code>
         <dev:remarks>
           <maml:para>Switch to the LetsEncrypt production server using the short name.</maml:para>
@@ -7317,7 +7358,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Set-PAServer -DirectoryUrl https://myacme.example.com/directory</dev:code>
         <dev:remarks>
           <maml:para>Switch to the specified ACME server using the directory URL.</maml:para>
@@ -7325,7 +7366,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>(Get-PAServer -List)[0] | Set-PAServer</dev:code>
         <dev:remarks>
           <maml:para>Switch to the first ACME server returned by "Get-PAServer -List"</maml:para>
@@ -7335,8 +7376,8 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Set-PAServer/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAServer</maml:linkText>
@@ -7354,7 +7395,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>An ACME order contains an authorization object for each domain in the order. The client must complete at least one of a set of challenges for each authorization in order to prove they own the domain. Once complete, the client asks the server to validate each challenge and waits for the server to do so and update the authorization status.</maml:para>
+      <maml:para>An ACME order contains an authorization object for each domain in the order. Each authorization contains one or more challenge types. The client must complete at least one challenge for each authorization in order to prove they control the domain. Once complete, the client asks the server to validate each challenge and waits for the server to do so and update the authorization status.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -7387,16 +7428,23 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
     </command:parameters>
-    <command:inputTypes />
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>PoshACME.PAOrder</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>An order object.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Submit-ChallengeValidation</dev:code>
         <dev:remarks>
           <maml:para>Begin challenge validation on the current order.</maml:para>
@@ -7404,18 +7452,18 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
-        <dev:code>Get-PAOrder | Submit-ChallengeValidation</dev:code>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
+        <dev:code>Get-PAOrder -Name myorder | Submit-ChallengeValidation</dev:code>
         <dev:remarks>
-          <maml:para>Begin challenge validation on the current order.</maml:para>
+          <maml:para>Begin challenge validation on the specified order.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Submit-ChallengeValidation/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -7437,7 +7485,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Finalizing a certificate order will send a new certificate request to the server and then wait for it to become valid or invalid.</maml:para>
+      <maml:para>An ACME order that has reached the `ready` state is ready to be finalized which involves sending the certificate request to the ACME server so it can sign the certificate and transition the order into the `valid` state.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -7470,16 +7518,23 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
     </command:parameters>
-    <command:inputTypes />
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>PoshACME.PAOrder</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>An order object.</maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Submit-OrderFinalize</dev:code>
         <dev:remarks>
           <maml:para>Finalize the current order.</maml:para>
@@ -7487,7 +7542,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Get-PAOrder example.com | Submit-OrderFinalize</dev:code>
         <dev:remarks>
           <maml:para>Finalize the specified order.</maml:para>
@@ -7497,8 +7552,8 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Submit-OrderFinalize/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -7520,7 +7575,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>This function allows you to renew one more more previously completed certificate orders. You can choose to renew a specific order or set of orders, all orders for the current account, or all orders for all accounts.</maml:para>
+      <maml:para>This function allows you to renew one more more previously completed certificate orders. You can choose to renew a specific order, set of orders, all orders for the current account, or all orders for all accounts.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -7574,7 +7629,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>PluginArgs</maml:name>
           <maml:description>
-            <maml:para>A hashtable containing an updated set of plugin arguments to use with the renewal. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.</maml:para>
+            <maml:para>A hashtable containing an updated set of plugin arguments to use with the renewal. So if a plugin has a `MyText` string and `MyNumber` integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">Hashtable</command:parameterValue>
           <dev:type>
@@ -7622,7 +7677,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>PluginArgs</maml:name>
           <maml:description>
-            <maml:para>A hashtable containing an updated set of plugin arguments to use with the renewal. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.</maml:para>
+            <maml:para>A hashtable containing an updated set of plugin arguments to use with the renewal. So if a plugin has a `MyText` string and `MyNumber` integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">Hashtable</command:parameterValue>
           <dev:type>
@@ -7670,7 +7725,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>PluginArgs</maml:name>
           <maml:description>
-            <maml:para>A hashtable containing an updated set of plugin arguments to use with the renewal. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.</maml:para>
+            <maml:para>A hashtable containing an updated set of plugin arguments to use with the renewal. So if a plugin has a `MyText` string and `MyNumber` integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">Hashtable</command:parameterValue>
           <dev:type>
@@ -7757,7 +7812,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>PluginArgs</maml:name>
         <maml:description>
-          <maml:para>A hashtable containing an updated set of plugin arguments to use with the renewal. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.</maml:para>
+          <maml:para>A hashtable containing an updated set of plugin arguments to use with the renewal. So if a plugin has a `MyText` string and `MyNumber` integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">Hashtable</command:parameterValue>
         <dev:type>
@@ -7768,15 +7823,24 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
       </command:parameter>
     </command:parameters>
     <command:inputTypes />
-    <command:returnValues />
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>PoshACME.PACertificate</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>A certificate object.</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
     <maml:alertSet>
       <maml:alert>
-        <maml:para></maml:para>
+        <maml:para>Certificate objects are only returned for orders that were actually renewed successfully. Any orders that have not reached the suggested renewal window are skipped unless `-Force` is specified.</maml:para>
       </maml:alert>
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>Submit-Renewal</dev:code>
         <dev:remarks>
           <maml:para>Renew the current order on the current account.</maml:para>
@@ -7784,7 +7848,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>Submit-Renewal -Force</dev:code>
         <dev:remarks>
           <maml:para>Renew the current order on the current account even if it hasn't reached its suggested renewal window.</maml:para>
@@ -7792,7 +7856,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
         <dev:code>Submit-Renewal -AllOrders</dev:code>
         <dev:remarks>
           <maml:para>Renew all valid orders on the current account that have reached their suggested renewal window.</maml:para>
@@ -7800,7 +7864,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 4 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 4 --------------------------</maml:title>
         <dev:code>Submit-Renewal -AllAccounts</dev:code>
         <dev:remarks>
           <maml:para>Renew all valid orders on all valid accounts that have reached their suggested renewal window.</maml:para>
@@ -7808,7 +7872,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 5 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 5 --------------------------</maml:title>
         <dev:code>Submit-Renewal site1.example.com -Force</dev:code>
         <dev:remarks>
           <maml:para>Renew the order for the specified site regardless of its renewal window.</maml:para>
@@ -7818,8 +7882,8 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Submit-Renewal/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>New-PACertificate</maml:linkText>
@@ -7842,7 +7906,7 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     </command:details>
     <maml:description>
       <maml:para>Based on the type of validation plugin specified, this function will unpublish either a DNS TXT record or an HTTP challenge file for the given domain and token value that satisfies the dns-01 or http-01 challenge specification.</maml:para>
-      <maml:para>Depending on the plugin, calling Save-Challenge may be required to commit changes made by Unpublish-Challenge. If multiple challenges are being unpublished, make all Unpublish-Challenge calls first. Then, Save-Challenge once to commit them all.</maml:para>
+      <maml:para>Depending on the plugin, calling `Save-Challenge` may be required to commit changes made by `Unpublish-Challenge`. If multiple challenges are being unpublished, make all `Unpublish-Challenge` calls first. Then, `Save-Challenge` once to commit them all.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -7998,25 +8062,23 @@ PS C:\&gt;Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</
     <command:inputTypes />
     <command:returnValues />
     <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
+      <maml:alert />
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code>$auths = Get-PAOrder | Get-PAAuthorization
-PS C:\&gt;Unpublish-Challenge $auths[0].DNSId (Get-PAAccount) $auths[0].DNS01Token Manual @{}</dev:code>
+Unpublish-Challenge $auths[0].DNSId (Get-PAAccount) $auths[0].DNS01Token Manual @{}</dev:code>
         <dev:remarks>
           <maml:para>Unpublish a DNS challenge for the first authorization in the current order using the Manual DNS plugin.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
         <dev:code>$pArgs = @{Param1='asdf';Param2=1234}
-PS C:\&gt;$acct = Get-PAAccount
-PS C:\&gt;Unpublish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</dev:code>
+$acct = Get-PAAccount
+Unpublish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</dev:code>
         <dev:remarks>
           <maml:para>Unpublish a challenge for example.com using a fictitious plugin and arguments.</maml:para>
           <maml:para></maml:para>
@@ -8025,8 +8087,8 @@ PS C:\&gt;Unpublish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken
     </command:examples>
     <command:relatedLinks>
       <maml:navigationLink>
-        <maml:linkText>https://github.com/rmbolger/Posh-ACME</maml:linkText>
-        <maml:uri>https://github.com/rmbolger/Posh-ACME</maml:uri>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/Functions/Unpublish-Challenge/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Publish-Challenge</maml:linkText>

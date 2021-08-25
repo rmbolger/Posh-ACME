@@ -1,0 +1,12 @@
+site_name: Posh-ACME
+site_url: https://poshac.me/docs
+site_description: "Documentation for the Posh-ACME PowerShell module"
+site_author: "Ryan Bolger"
+repo_url: https://github.com/rmbolger/Posh-ACME
+edit_uri: edit/main/docs/
+theme:
+    name: slate
+    highlightjs: true
+    hljs_languages:
+        - powershell
+copyright: "Copyright &copy; 2021 Ryan Bolger"

@@ -4,7 +4,7 @@
 param()
 
 # Generate new MAML from the markdown
-New-ExternalHelp .\docs\ -OutputPath .\Posh-ACME\en-US\ -Force | Out-Null
+New-ExternalHelp .\docs\Functions\ -OutputPath .\Posh-ACME\en-US\ -Force | Out-Null
 
 # Fix the spacing on examples
 $maml = Get-Content .\Posh-ACME\en-US\Posh-ACME-help.xml
