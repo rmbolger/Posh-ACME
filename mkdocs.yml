@@ -2,6 +2,7 @@ site_name: Posh-ACME
 site_url: https://poshac.me/docs
 site_description: "Documentation for the Posh-ACME PowerShell module"
 site_author: "Ryan Bolger"
+site_dir: ..\Posh-ACME.docs
 repo_url: https://github.com/rmbolger/Posh-ACME
 edit_uri: edit/main/docs/
 theme:
