@@ -6,6 +6,10 @@ This plugin works against the [Combell][1] DNS provider. It is assumed that you 
 
 ## Setup
 
+https://api.combell.com/v2/documentation#section/Authentication
+
+
+
 Using Simply.com API requires only your account name or account number and API Key which can be found on the [account](https://www.simply.com/en/controlpanel/account/) page.
 
 ## Using the Plugin
