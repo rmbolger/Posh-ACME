@@ -9,14 +9,14 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - All-in-one command for new certs, `New-PACertificate`
 - Easy renewals with `Submit-Renewal`
 - RSA and ECDSA keys supported for accounts and certificates
-- Built-in validation plugins for [DNS](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) and [HTTP](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-HTTP-Plugins) based challenges. (pull requests welcome)
+- Built-in validation plugins for [DNS](https://poshac.me/docs/Guides/Supported-DNS-Plugins/) and [HTTP](https://poshac.me/docs/Guides/Supported-HTTP-Plugins/) based challenges. (pull requests welcome)
 - Support for pre-created certificate requests (CSR)
 - PEM and PFX output files
 - No elevated Windows privileges required *(unless using `-Install` switch)*
-- Cross platform PowerShell support. [(FAQ)](https://github.com/rmbolger/Posh-ACME/wiki/Frequently-Asked-Questions-(FAQ)#does-posh-acme-work-cross-platform-on-powershell-core)
+- Cross platform PowerShell support. [(FAQ)](https://poshac.me/docs/FAQ/#does-posh-acme-work-cross-platform-on-powershell-core)
 - Account key rollover support
 - [OCSP Must-Staple](https://scotthelme.co.uk/ocsp-must-staple/) support
-- DNS challenge [CNAME support](https://github.com/rmbolger/Posh-ACME/blob/main/Tutorial.md#advanced-dns-challenge-aliases)
+- DNS challenge [CNAME support](https://poshac.me/docs/Tutorial/#advanced-dns-challenge-aliases)
 - Multiple ACME accounts supported per ACME CA.
 - External Account Binding support for ACME CAs that require it
 - Preferred Chain support to use alternative CA trust chains

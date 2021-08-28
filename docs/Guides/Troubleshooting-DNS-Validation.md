@@ -1,11 +1,5 @@
 # Troubleshooting DNS Validation
 
-- [Overview](#overview)
-- [Querying TXT records](#querying-txt-records)
-- [DNS Propagation Delays](#dns-propagation-delays)
-- [Internal vs External DNS](#internal-vs-external-dns)
-- [CAA Record Issues](#caa-record-issues)
-
 ## Overview
 
 One of the more common problems using DNS challenge validation with ACME is when the server thinks your TXT records either don't exist or are invalid. There are a number of reasons why this might be the case and in this guide, we'll go over some of the possibilities. But first, let's review how to query TXT records.

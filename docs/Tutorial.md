@@ -32,7 +32,7 @@ New-PACertificate example.com -AcceptTOS -Contact 'admin@example.com'
 
 Because you didn't specify a plugin, it will default to using the `Manual` DNS plugin. That manual plugin will also be prompting you to create a DNS TXT record to answer the ACME server's validation challenge for the domain.
 
-At this point, you can either press `Ctrl+C` to cancel the process and modify your command or go ahead and create the requested TXT record and hit any key to continue. We'll cover plugins next, so for now create the record manually and press a key to continue. If you run into problems creating the TXT record, check out the [Troubleshooting DNS Challenge Validation](https://github.com/rmbolger/Posh-ACME/wiki/Troubleshooting-DNS-Challenge-Validation) wiki page.
+At this point, you can either press `Ctrl+C` to cancel the process and modify your command or go ahead and create the requested TXT record and hit any key to continue. We'll cover plugins next, so for now create the record manually and press a key to continue. If you run into problems creating the TXT record, check out [Troubleshooting DNS Validation](Guides/Troubleshooting-DNS-Validation.md).
 
 The command will sleep for 2 minutes by default to allow the DNS changes to propagate. Then if the ACME server is able to properly validate the TXT record, the final certificate files are generated and the command should output the details of your new certificate. Only a subset of the details are displayed by default. To see them all, run `Get-PACertificate | fl`. The files generated in the output folder should contain the following:
 
@@ -48,13 +48,13 @@ Posh-ACME is only designed to *obtain* certificates, not deploy them to your web
 
 The password on the PFX files is `poshacme` because we didn't override the default with `-PfxPass` or `-PfxPassSecure`. If you're running PowerShell with elevated privileges on Windows, you can also add the `-Install` switch to automatically import the certificate into the local computer's certificate store.
 
-So now you've got a certificate and that's great! But Let's Encrypt certificates expire relatively quickly (90 days). And you won't be able to renew this certificate without going through the manual DNS TXT record hassle again. So let's add a validation plugin to the process.
+So now you have a certificate and that's great! But Let's Encrypt certificates expire relatively quickly (90 days). And you won't be able to renew this certificate without going through the manual DNS TXT record hassle again. So let's add a validation plugin to the process.
 
 ## Plugins
 
-The ACME protocol currently supports three types of challenges to prove you control the domain you're requesting a certificate for: `dns-01`, `http-01`, and `tls-alpn-01`. We are going to focus on `dns-01` because it is the only one that can be used to request wildcard (*.example.com) certificates and the majority of Posh-ACME plugins are for [DNS providers](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers).
+The ACME protocol currently supports three types of challenges to prove you control the domain you're requesting a certificate for: `dns-01`, `http-01`, and `tls-alpn-01`. We are going to focus on `dns-01` because it is the only one that can be used to request wildcard (*.example.com) certificates and the majority of Posh-ACME plugins are for [DNS providers](Guides/Supported-DNS-Plugins.md).
 
-The ability to use a DNS plugin is going to depend on whether your DNS provider has a supported plugin in the current version of the module. If not, please [submit an issue](https://github.com/rmbolger/Posh-ACME/issues) requesting support. If you have PowerShell development skills, you might also try writing a plugin yourself. Instructions can be found in the [Plugins README](/Posh-ACME/Plugins/README.md). Pull requests for new plugins are both welcome and appreciated. It's also possible to redirect ACME DNS validations using a [CNAME record](https://support.dnsimple.com/articles/cname-record/) in your primary zone pointing to another DNS server that is supported. More on that later.
+The ability to use a DNS plugin is going to depend on whether your DNS provider has a supported plugin in the current version of the module. If not, please [submit an issue](https://github.com/rmbolger/Posh-ACME/issues) requesting support. If you have PowerShell development skills, you might also try writing a plugin yourself. Instructions can be found in the [Plugins README](https://github.com/rmbolger/Posh-ACME/blob/main/Posh-ACME/Plugins/README.md). Pull requests for new plugins are both welcome and appreciated. It's also possible to redirect ACME DNS validations using a [CNAME record](https://support.dnsimple.com/articles/cname-record/) in your primary zone pointing to another DNS server that is supported. More on that later.
 
 The first thing to do is figure out which DNS plugin to use and how to use it. Start by listing the available plugins.
 
@@ -67,8 +67,6 @@ Most plugins have a detailed usage guide in the project wiki. In these examples,
 ```powershell
 Get-PAPlugin Route53 -Guide
 ```
-
-> **_NOTE:_** The usage guides are also stored locally with the module in the Plugins folder. They're Markdown formatted and called `<plugin>-Readme.md`.
 
 Using a plugin will almost always require creating a hashtable with required plugin parameters. To see a quick reference of the available parameter sets try this:
 
@@ -170,7 +168,7 @@ Submit-Renewal -AllAccounts
 
 ### Task Scheduler / Cron
 
-Because PowerShell has no native way to run recurring tasks, you'll need to set something up using whatever job scheduling utility your OS provides like Task Scheduler on Windows or cron on Linux. It is suggested to run the job once or twice a day at ideally randomized times. At the very least, try not to run them directly on any hour marks to avoid potential load spikes on the ACME server. Generally, **the task must run as the same user you're currently logged in as** because the Posh-ACME config is stored in your local user profile. However, it's possible to [change the default config location](https://github.com/rmbolger/Posh-ACME/wiki/%28Advanced%29-Using-an-Alternate-Config-Location).
+Because PowerShell has no native way to run recurring tasks, you'll need to set something up using whatever job scheduling utility your OS provides like Task Scheduler on Windows or cron on Linux. It is suggested to run the job once or twice a day at ideally randomized times. At the very least, try not to run them directly on any hour marks to avoid potential load spikes on the ACME server. Generally, **the task must run as the same user you're currently logged in as** because the Posh-ACME config is stored in your local user profile. However, it's possible to [change the default config location](Guides/Using-an-Alternate-Config-Location.md).
 
 As mentioned earlier, Posh-ACME doesn't handle certificate deployment. So you'll likely want to create a script to both renew the cert and deploy it to your service/application. All the details you should need to deploy the cert are in the PACertificate object that is returned by `Submit-Renewal`. It's also the same object returned by `New-PACertificate` and `Get-PACertificate`; the latter being useful to test deployment scripts with.
 
