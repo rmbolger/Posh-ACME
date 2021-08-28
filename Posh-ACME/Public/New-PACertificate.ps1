@@ -62,7 +62,14 @@ function New-PACertificate {
     # one, switch to that. If the specified details don't match any existing
     # accounts, create a new one.
     $acct = Get-PAAccount
-    $accts = @(Get-PAAccount -List -Refresh -Status 'valid' @PSBoundParameters)
+    $acctListParams = @{
+        List = $true
+        Refresh = $true
+        Status = 'valid'
+    }
+    if ('Contact' -in $PSBoundParameters.Keys) { $acctListParams.Contact = $Contact }
+    if ('AccountKeyLength' -in $PSBoundParameters.Keys) { $acctListParams.KeyLength = $AccountKeyLength }
+    $accts = @(Get-PAAccount @acctListParams)
     if (-not $accts -or $accts.Count -eq 0) {
         # no matches for the set of filters, so create new
         Write-Verbose "Creating a new $AccountKeyLength account with contact: $($Contact -join ', ')"
