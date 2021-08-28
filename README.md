@@ -16,7 +16,7 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - Cross platform PowerShell support. [(FAQ)](https://poshac.me/docs/FAQ/#does-posh-acme-work-cross-platform-on-powershell-core)
 - Account key rollover support
 - [OCSP Must-Staple](https://scotthelme.co.uk/ocsp-must-staple/) support
-- DNS challenge [CNAME support](https://poshac.me/docs/Tutorial/#advanced-dns-challenge-aliases)
+- DNS challenge [CNAME support](https://poshac.me/docs/Guides/Using-DNS-Challenge-Aliases/)
 - Multiple ACME accounts supported per ACME CA.
 - External Account Binding support for ACME CAs that require it
 - Preferred Chain support to use alternative CA trust chains

@@ -18,7 +18,7 @@ Solving a CAPTCHA is required in order to create any records on domains you don'
 
 Regardless of your account status, Free DNS does not currently allow you to create records beginning with an underscore (`_`) unless you own the underlying domain you're creating the records on. Because Let's Encrypt DNS challenges require creating a TXT record that starts with `_acme-challenge`, you will be unable to generate a certificate for a Free DNS hosted domain unless you own it.
 
-The only thing you can use a non-owned domain for are [challenge aliases](https://github.com/rmbolger/Posh-ACME/blob/main/Tutorial.md#advanced-dns-challenge-aliases). But due to the CAPTCHA limitation on Free accounts, only Premium accounts can do this. If using challenge aliases, make sure your CNAME points to a record that does *not* start with `_`.
+The only thing you can use a non-owned domain for are [challenge aliases](../Guides/Using-DNS-Challenge-Aliases.md). But due to the CAPTCHA limitation on Free accounts, only Premium accounts can do this. If using challenge aliases, make sure your CNAME points to a record that does *not* start with `_`.
 
 ## Using the Plugin
 
