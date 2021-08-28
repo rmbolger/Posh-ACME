@@ -9,7 +9,7 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - All-in-one command for new certs, `New-PACertificate`
 - Easy renewals with `Submit-Renewal`
 - RSA and ECDSA keys supported for accounts and certificates
-- Built-in validation plugins for [DNS](https://poshac.me/docs/Guides/Supported-DNS-Plugins/) and [HTTP](https://poshac.me/docs/Guides/Supported-HTTP-Plugins/) based challenges. (pull requests welcome)
+- Built-in validation plugins for [DNS and HTTP](https://poshac.me/docs/Plugins/) based challenges. (pull requests welcome)
 - Support for pre-created certificate requests (CSR)
 - PEM and PFX output files
 - No elevated Windows privileges required *(unless using `-Install` switch)*

@@ -11,7 +11,7 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - All-in-one command for new certs, `New-PACertificate`
 - Easy renewals with `Submit-Renewal`
 - RSA and ECDSA keys supported for accounts and certificates
-- Built-in validation plugins for [DNS](Guides/Supported-DNS-Plugins.md) and [HTTP](Guides/Supported-DNS-Plugins.md) based challenges. (pull requests welcome)
+- Built-in validation plugins for [DNS and HTTP](Plugins/index.md) based challenges. (pull requests welcome)
 - Support for pre-created certificate requests (CSR)
 - PEM and PFX output files
 - No elevated Windows privileges required *(unless using `-Install` switch)*

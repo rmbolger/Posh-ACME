@@ -52,7 +52,7 @@ So now you have a certificate and that's great! But Let's Encrypt certificates e
 
 ## Plugins
 
-The ACME protocol currently supports three types of challenges to prove you control the domain you're requesting a certificate for: `dns-01`, `http-01`, and `tls-alpn-01`. We are going to focus on `dns-01` because it is the only one that can be used to request wildcard (*.example.com) certificates and the majority of Posh-ACME plugins are for [DNS providers](Guides/Supported-DNS-Plugins.md).
+The ACME protocol currently supports three types of challenges to prove you control the domain you're requesting a certificate for: `dns-01`, `http-01`, and `tls-alpn-01`. We are going to focus on `dns-01` because it is the only one that can be used to request wildcard (*.example.com) certificates and the majority of Posh-ACME plugins are for [DNS providers](Plugins/index.md#dns-plugins).
 
 The ability to use a DNS plugin is going to depend on whether your DNS provider has a supported plugin in the current version of the module. If not, please [submit an issue](https://github.com/rmbolger/Posh-ACME/issues) requesting support. If you have PowerShell development skills, you might also try writing a plugin yourself. Instructions can be found in the [Plugins README](https://github.com/rmbolger/Posh-ACME/blob/main/Posh-ACME/Plugins/README.md). Pull requests for new plugins are both welcome and appreciated. It's also possible to redirect ACME DNS validations using a [CNAME record](https://support.dnsimple.com/articles/cname-record/) in your primary zone pointing to another DNS server that is supported. More on that later.
 

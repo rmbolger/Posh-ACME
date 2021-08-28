@@ -6,7 +6,7 @@ This plugin works against the Microsoft Windows DNS server. It doesn't matter wh
 
 **The DnsServer module is not available on Windows versions prior to Windows 8 and Windows Server 2012. So this plugin will only work on those OSes or newer. Using Zone Scopes requires the Windows 10 or Windows Server 2016 version of the module or newer.**
 
-**This plugin currently does not work on non-Windows OSes in PowerShell Core. [Click here](https://github.com/rmbolger/Posh-ACME/wiki/List-of-Supported-DNS-Providers) for details.**
+**This plugin currently does not work on non-Windows OSes in PowerShell Core. On Windows, it requires at least PowerShell 7.**
 
 ## Setup
 
