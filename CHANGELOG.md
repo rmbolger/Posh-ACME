@@ -1,3 +1,8 @@
+## 4.7.1 (2021-08-28)
+
+* Fixed a parameter binding bug in New-PACertificate that could cause renewals to stall in some cases due to an interactive prompt.
+* Fixed help for Export-PAAccountKey
+
 ## 4.7.0 (2021-08-24)
 
 * Servers, Accounts, and Orders all now have configurable Names that also determine the name of their associated folders in the config on the filesystem. (#345) This is a fairly large change, but significant effort has been spent implementing it so that dependent scripts will not break.
