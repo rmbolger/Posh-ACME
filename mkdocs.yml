@@ -62,6 +62,8 @@ extra:
       link: https://twitter.com/rmbolger
     - icon: fontawesome/brands/linkedin
       link: https://linkedin.com/in/rmbolger/
+  version:
+    provider: mike
 
 # Extensions
 markdown_extensions:
