@@ -1,0 +1,2331 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation for the Posh-ACME PowerShell module">
+      
+      
+      
+        <meta name="author" content="Ryan Bolger">
+      
+      
+        <link rel="canonical" href="https://poshac.me/docs/v4/Plugins/Plugin-Development-Guide/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.5">
+    
+    
+      
+        <title>Plugin Development Guide - Posh-ACME</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.be71726b.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.3f5d1f46.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
+  
+    
+    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+      <script>var palette=__get("__palette");if(null!==palette&&"object"==typeof palette.color)for(var key in palette.color)document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#plugin-development-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Posh-ACME" class="md-header__button md-logo" aria-label="Posh-ACME" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Posh-ACME
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Plugin Development Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/rmbolger/Posh-ACME/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rmbolger/Posh-ACME
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../.." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../../Tutorial/" class="md-tabs__link">
+      Tutorial
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../Functions/Complete-PAOrder/" class="md-tabs__link">
+        Functions
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../" class="md-tabs__link md-tabs__link--active">
+        Plugins
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../Guides/" class="md-tabs__link">
+        Guides
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../../FAQ/" class="md-tabs__link">
+      FAQ
+    </a>
+  </li>
+
+      
+    </ul>
+  </div>
+</nav>
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Posh-ACME" class="md-nav__button md-logo" aria-label="Posh-ACME" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    Posh-ACME
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/rmbolger/Posh-ACME/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rmbolger/Posh-ACME
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorial/" class="md-nav__link">
+        Tutorial
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" data-md-state="indeterminate" type="checkbox" id="__nav_3" checked>
+      
+      <label class="md-nav__link" for="__nav_3">
+        Functions
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Functions" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Functions
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Complete-PAOrder/" class="md-nav__link">
+        Complete-PAOrder
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Export-PAAccountKey/" class="md-nav__link">
+        Export-PAAccountKey
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-KeyAuthorization/" class="md-nav__link">
+        Get-KeyAuthorization
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAAccount/" class="md-nav__link">
+        Get-PAAccount
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAAuthorization/" class="md-nav__link">
+        Get-PAAuthorization
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PACertificate/" class="md-nav__link">
+        Get-PACertificate
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAOrder/" class="md-nav__link">
+        Get-PAOrder
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAPlugin/" class="md-nav__link">
+        Get-PAPlugin
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAPluginArgs/" class="md-nav__link">
+        Get-PAPluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAServer/" class="md-nav__link">
+        Get-PAServer
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Install-PACertificate/" class="md-nav__link">
+        Install-PACertificate
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Invoke-HttpChallengeListener/" class="md-nav__link">
+        Invoke-HttpChallengeListener
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/New-PAAccount/" class="md-nav__link">
+        New-PAAccount
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/New-PAAuthorization/" class="md-nav__link">
+        New-PAAuthorization
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/New-PACertificate/" class="md-nav__link">
+        New-PACertificate
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/New-PAOrder/" class="md-nav__link">
+        New-PAOrder
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Publish-Challenge/" class="md-nav__link">
+        Publish-Challenge
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Remove-PAAccount/" class="md-nav__link">
+        Remove-PAAccount
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Remove-PAOrder/" class="md-nav__link">
+        Remove-PAOrder
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Remove-PAServer/" class="md-nav__link">
+        Remove-PAServer
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Revoke-PAAuthorization/" class="md-nav__link">
+        Revoke-PAAuthorization
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Revoke-PACertificate/" class="md-nav__link">
+        Revoke-PACertificate
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Save-Challenge/" class="md-nav__link">
+        Save-Challenge
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Send-ChallengeAck/" class="md-nav__link">
+        Send-ChallengeAck
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Set-PAAccount/" class="md-nav__link">
+        Set-PAAccount
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Set-PAOrder/" class="md-nav__link">
+        Set-PAOrder
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Set-PAServer/" class="md-nav__link">
+        Set-PAServer
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Submit-ChallengeValidation/" class="md-nav__link">
+        Submit-ChallengeValidation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Submit-OrderFinalize/" class="md-nav__link">
+        Submit-OrderFinalize
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Submit-Renewal/" class="md-nav__link">
+        Submit-Renewal
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Unpublish-Challenge/" class="md-nav__link">
+        Unpublish-Challenge
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+      
+      <label class="md-nav__link" for="__nav_4">
+        Plugins
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Plugins" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Plugins
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        Supported Plugins
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Plugin Development Guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Plugin Development Guide
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#function-details" class="md-nav__link">
+    Function Details
+  </a>
+  
+    <nav class="md-nav" aria-label="Function Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add-dnstxt-and-remove-dnstxt" class="md-nav__link">
+    Add-DnsTxt and Remove-DnsTxt
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-httpchallenge-and-remove-httpchallenge" class="md-nav__link">
+    Add-HttpChallenge and Remove-HttpChallenge
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#save-dnstxt-and-save-httpchallenge" class="md-nav__link">
+    Save-DnsTxt and Save-HttpChallenge
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameter-types" class="md-nav__link">
+    Parameter Types
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-guides" class="md-nav__link">
+    Usage Guides
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#general-development-tips-and-tricks" class="md-nav__link">
+    General Development Tips and Tricks
+  </a>
+  
+    <nav class="md-nav" aria-label="General Development Tips and Tricks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-write-host" class="md-nav__link">
+    No Write-Host
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-pipeline-output" class="md-nav__link">
+    No Pipeline Output
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usebasicparsing" class="md-nav__link">
+    UseBasicParsing
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-plugins" class="md-nav__link">
+    Testing Plugins
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dns-specific-tips-and-tricks" class="md-nav__link">
+    DNS Specific Tips and Tricks
+  </a>
+  
+    <nav class="md-nav" aria-label="DNS Specific Tips and Tricks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multiple-txt-values-per-record" class="md-nav__link">
+    Multiple TXT Values Per Record
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-only-specific-txtvalue" class="md-nav__link">
+    Remove Only Specific TxtValue
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zone-matching" class="md-nav__link">
+    Zone Matching
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dns-aliases-and-domain-apex" class="md-nav__link">
+    DNS Aliases and Domain Apex
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deriving-object-ids" class="md-nav__link">
+    Deriving Object IDs
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trailing-dots" class="md-nav__link">
+    Trailing Dots
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internationalized-domain-name-idn" class="md-nav__link">
+    Internationalized Domain Name (IDN)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#http-specific-tips-and-tricks" class="md-nav__link">
+    HTTP Specific Tips and Tricks
+  </a>
+  
+    <nav class="md-nav" aria-label="HTTP Specific Tips and Tricks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validation-timing" class="md-nav__link">
+    Validation Timing
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migrating-dns-plugins-from-3x-to-4x" class="md-nav__link">
+    Migrating DNS Plugins from 3.x to 4.x
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AcmeDns/" class="md-nav__link">
+        AcmeDns
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Akamai/" class="md-nav__link">
+        Akamai
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Aliyun/" class="md-nav__link">
+        Aliyun
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../All-Inkl/" class="md-nav__link">
+        All-Inkl
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Aurora/" class="md-nav__link">
+        Aurora
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AutoDNS/" class="md-nav__link">
+        AutoDNS
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Azure/" class="md-nav__link">
+        Azure
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Beget/" class="md-nav__link">
+        Beget
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../BlueCat/" class="md-nav__link">
+        BlueCat
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ClouDNS/" class="md-nav__link">
+        ClouDNS
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Cloudflare/" class="md-nav__link">
+        Cloudflare
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Constellix/" class="md-nav__link">
+        Constellix
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DMEasy/" class="md-nav__link">
+        DMEasy
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DNSPod/" class="md-nav__link">
+        DNSPod
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DNSimple/" class="md-nav__link">
+        DNSimple
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DOcean/" class="md-nav__link">
+        DOcean
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DeSEC/" class="md-nav__link">
+        DeSEC
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DomainOffensive/" class="md-nav__link">
+        DomainOffensive
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Domeneshop/" class="md-nav__link">
+        Domeneshop
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Dreamhost/" class="md-nav__link">
+        Dreamhost
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DuckDNS/" class="md-nav__link">
+        DuckDNS
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Dynu/" class="md-nav__link">
+        Dynu
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../EasyDNS/" class="md-nav__link">
+        EasyDNS
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Easyname/" class="md-nav__link">
+        Easyname
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../FreeDNS/" class="md-nav__link">
+        FreeDNS
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GCloud/" class="md-nav__link">
+        GCloud
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Gandi/" class="md-nav__link">
+        Gandi
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GoDaddy/" class="md-nav__link">
+        GoDaddy
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Hetzner/" class="md-nav__link">
+        Hetzner
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HostingDe/" class="md-nav__link">
+        HostingDe
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HurricaneElectric/" class="md-nav__link">
+        HurricaneElectric
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../IBMSoftLayer/" class="md-nav__link">
+        IBMSoftLayer
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Infoblox/" class="md-nav__link">
+        Infoblox
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Infomaniak/" class="md-nav__link">
+        Infomaniak
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Linode/" class="md-nav__link">
+        Linode
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Loopia/" class="md-nav__link">
+        Loopia
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../LuaDns/" class="md-nav__link">
+        LuaDns
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../NS1/" class="md-nav__link">
+        NS1
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../NameCom/" class="md-nav__link">
+        NameCom
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../NameSilo/" class="md-nav__link">
+        NameSilo
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Namecheap/" class="md-nav__link">
+        Namecheap
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../OVH/" class="md-nav__link">
+        OVH
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PointDNS/" class="md-nav__link">
+        PointDNS
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RFC2136/" class="md-nav__link">
+        RFC2136
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Rackspace/" class="md-nav__link">
+        Rackspace
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Regru/" class="md-nav__link">
+        Regru
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Route53/" class="md-nav__link">
+        Route53
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Selectel/" class="md-nav__link">
+        Selectel
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SimpleDNSPlus/" class="md-nav__link">
+        SimpleDNSPlus
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Simply/" class="md-nav__link">
+        Simply
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UKFast/" class="md-nav__link">
+        UKFast
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../WebRoot/" class="md-nav__link">
+        WebRoot
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../WebSelfHost/" class="md-nav__link">
+        WebSelfHost
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Windows/" class="md-nav__link">
+        Windows
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Yandex/" class="md-nav__link">
+        Yandex
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Zilore/" class="md-nav__link">
+        Zilore
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Zonomi/" class="md-nav__link">
+        Zonomi
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" data-md-state="indeterminate" type="checkbox" id="__nav_5" checked>
+      
+      <label class="md-nav__link" for="__nav_5">
+        Guides
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Guides" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Guides
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/" class="md-nav__link">
+        Guides and Deep Dives
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Custom-Challenge-Validation/" class="md-nav__link">
+        (Advanced) Custom Challenge Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
+        Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-DNS-Challenge-Aliases/" class="md-nav__link">
+        Using DNS Challenge Aliases
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-an-Alternate-Config-Location/" class="md-nav__link">
+        Using an Alternate Config Location
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/External-Articles/" class="md-nav__link">
+        External Articles
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../FAQ/" class="md-nav__link">
+        FAQ
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#function-details" class="md-nav__link">
+    Function Details
+  </a>
+  
+    <nav class="md-nav" aria-label="Function Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add-dnstxt-and-remove-dnstxt" class="md-nav__link">
+    Add-DnsTxt and Remove-DnsTxt
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-httpchallenge-and-remove-httpchallenge" class="md-nav__link">
+    Add-HttpChallenge and Remove-HttpChallenge
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#save-dnstxt-and-save-httpchallenge" class="md-nav__link">
+    Save-DnsTxt and Save-HttpChallenge
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameter-types" class="md-nav__link">
+    Parameter Types
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-guides" class="md-nav__link">
+    Usage Guides
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#general-development-tips-and-tricks" class="md-nav__link">
+    General Development Tips and Tricks
+  </a>
+  
+    <nav class="md-nav" aria-label="General Development Tips and Tricks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-write-host" class="md-nav__link">
+    No Write-Host
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-pipeline-output" class="md-nav__link">
+    No Pipeline Output
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usebasicparsing" class="md-nav__link">
+    UseBasicParsing
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-plugins" class="md-nav__link">
+    Testing Plugins
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dns-specific-tips-and-tricks" class="md-nav__link">
+    DNS Specific Tips and Tricks
+  </a>
+  
+    <nav class="md-nav" aria-label="DNS Specific Tips and Tricks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multiple-txt-values-per-record" class="md-nav__link">
+    Multiple TXT Values Per Record
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-only-specific-txtvalue" class="md-nav__link">
+    Remove Only Specific TxtValue
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zone-matching" class="md-nav__link">
+    Zone Matching
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dns-aliases-and-domain-apex" class="md-nav__link">
+    DNS Aliases and Domain Apex
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deriving-object-ids" class="md-nav__link">
+    Deriving Object IDs
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trailing-dots" class="md-nav__link">
+    Trailing Dots
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internationalized-domain-name-idn" class="md-nav__link">
+    Internationalized Domain Name (IDN)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#http-specific-tips-and-tricks" class="md-nav__link">
+    HTTP Specific Tips and Tricks
+  </a>
+  
+    <nav class="md-nav" aria-label="HTTP Specific Tips and Tricks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validation-timing" class="md-nav__link">
+    Validation Timing
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migrating-dns-plugins-from-3x-to-4x" class="md-nav__link">
+    Migrating DNS Plugins from 3.x to 4.x
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/rmbolger/Posh-ACME/edit/main/docs/Plugins/Plugin-Development-Guide.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="plugin-development-guide">Plugin Development Guide<a class="headerlink" href="#plugin-development-guide" title="Permanent link">&para;</a></h1>
+<h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
+<p>A validation plugin for Posh-ACME is a standard PowerShell PS1 script file located in the module's <code>Plugins</code> folder. It can also be in a folder outside the module and referenced using the <code>POSHACME_PLUGINS</code> environment variable. The file name is what users will use to reference it when specifying a plugin, so it should be related to the provider it is publishing against.</p>
+<p>All plugins must contain a function called <code>Get-CurrentPluginType</code> which returns a string indicating the type of ACME challenge they support. Posh-ACME currently supports the <code>dns-01</code> and <code>http-01</code> challenge types.</p>
+<p>DNS plugins must contain the following additional functions:</p>
+<ul>
+<li><code>Add-DnsTxt</code></li>
+<li><code>Remove-DnsTxt</code></li>
+<li><code>Save-DnsTxt</code></li>
+</ul>
+<p>HTTP plugins must contain the following additional functions:</p>
+<ul>
+<li><code>Add-HttpChallenge</code></li>
+<li><code>Remove-HttpChallenge</code></li>
+<li><code>Save-HttpChallenge</code></li>
+</ul>
+<p>The easiest way to get started is to make a copy of <code>_Example-DNS.ps1</code> or <code>_Example-HTTP.ps1</code> depending on the type of plugin you are making and rename it for your purposes.</p>
+<p><strong>Pull Requests for new plugins are quite welcome.</strong></p>
+<h2 id="function-details">Function Details<a class="headerlink" href="#function-details" title="Permanent link">&para;</a></h2>
+<h3 id="add-dnstxt-and-remove-dnstxt"><code>Add-DnsTxt</code> and <code>Remove-DnsTxt</code><a class="headerlink" href="#add-dnstxt-and-remove-dnstxt" title="Permanent link">&para;</a></h3>
+<p>These are responsible for adding/removing TXT records to/from a DNS server/provider. There are two mandatory and positional string parameters, <code>$RecordName</code> and <code>$TxtValue</code>. RecordName is the fully qualified domain name (FQDN) of the record we will be adding a TXT value for. TxtValue is the actual value that will be set in the TXT record. Do not modify or remove these first
+two parameters.</p>
+<p>Additional parameters should be added as necessary for the specific DNS provider such as credentials or API keys. In addition to standard PowerShell naming standards, their names must also not conflict with any other plugin's parameters. A good way to do that is to use a unique prefix on all of the parameters. It doesn't have to match the plugin name exactly as long as it's unique and reasonably related to the plugin. Common parameters that can be shared between this plugin's functions should be named the same as each other.</p>
+<p>The last parameter should always be <code>$ExtraParams</code> with the <code>ValueFromRemainingArguments</code> parameter attribute. This allows callers to <a href="https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting?view=powershell-5.1">splat</a> the combined collection of plugin parameters to each plugin without errors for parameters that don't exist.</p>
+<p>Many DNS providers will only need the Add and Remove functions. In those cases, remember to remove all but the <code>$ExtraParams</code> parameter in the Save function and just leave the function body empty. For other providers, it is may be more efficient to stage changes in bulk and then perform what is effectively a Save or Commit operation on those changes. In those cases, implement the Save function as described below.</p>
+<h3 id="add-httpchallenge-and-remove-httpchallenge"><code>Add-HttpChallenge</code> and <code>Remove-HttpChallenge</code><a class="headerlink" href="#add-httpchallenge-and-remove-httpchallenge" title="Permanent link">&para;</a></h3>
+<p>These are responsible for publishing/unpublishing the ACME challenge body text at a specific HTTP URL. There are three mandatory and positional string parameters, <code>$Domain</code>, <code>$Token</code>, and <code>$Body</code>. Domain and Token are what the validation server will use to build the URL it will check against (<code>http://&lt;Domain&gt;/.well-known/acme-challenge/&lt;Token&gt;</code>). Body is the text value it expects to get in response to that query. Do not modify or remove these first three parameters.</p>
+<p>Additional parameters should be added as necessary for the specific HTTP provider such as filesystem paths, credentials, or API keys. In addition to standard PowerShell naming standards, their names must also not conflict with any other plugin's parameters. A good way to do that is to use a unique prefix on all of the parameters. It doesn't have to match the plugin name exactly as long as it's unique and reasonably related to the plugin. Common parameters that can be shared between this plugin's functions should be named the same as each other.</p>
+<p>The last parameter should always be <code>$ExtraParams</code> with the <code>ValueFromRemainingArguments</code> parameter attribute. This allows callers to <a href="https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting?view=powershell-5.1">splat</a> the combined collection of plugin parameters to each plugin without errors for parameters that
+don't exist.</p>
+<p>Many HTTP providers will only need the Add and Remove functions. In those cases, remember to remove all but the <code>$ExtraParams</code> parameter in the Save function and just leave the function body empty. For other providers, it is may be more efficient to stage changes in bulk and then perform what is effectively a Save or Commit operation on those changes. In those cases, implement the Save function as described below.</p>
+<h3 id="save-dnstxt-and-save-httpchallenge"><code>Save-DnsTxt</code> and <code>Save-HttpChallenge</code><a class="headerlink" href="#save-dnstxt-and-save-httpchallenge" title="Permanent link">&para;</a></h3>
+<p>These functions are optional for DNS/HTTP plugins where it is more efficient to stage changes in bulk before Saving or Committing the changes. There are no required parameters except <code>$ExtraParams</code> which should always be last and have the <code>ValueFromRemainingArguments</code> parameter attribute.</p>
+<h3 id="parameter-types">Parameter Types<a class="headerlink" href="#parameter-types" title="Permanent link">&para;</a></h3>
+<p>Try to limit parameters to simple data types like <code>[string]</code>, <code>[int]</code>, and <code>[switch]</code>. Arrays and Hashtables are fine as long as the contents are also simple types. Hashtables in particular should not be nested. The parameters should be able to convert nicely back and forth using <code>Convert-ToJson</code> and <code>Convert-FromJson</code>.</p>
+<p>Secrets such as passwords and API keys/tokens should use <code>[SecureString]</code> or <code>[PSCredential]</code> parameters even if you ultimately need them in plain text within the plugin. This ensures the values are encrypted when saved to disk for later renewals. Here are some examples for how to convert them back to plain text in the plugin code.</p>
+<div class="highlight"><pre><span></span><code><span class="c"># get the username and password from a PSCredential called $cred</span>
+<span class="nv">$username</span> <span class="p">=</span> <span class="nv">$cred</span><span class="p">.</span><span class="n">Username</span>
+<span class="nv">$password</span> <span class="p">=</span> <span class="nv">$cred</span><span class="p">.</span><span class="n">GetNetworkCredential</span><span class="p">().</span><span class="n">Password</span>
+
+<span class="c"># get the plain text from a SecureString called $secString</span>
+<span class="nv">$plainText</span> <span class="p">=</span> <span class="no">[pscredential]</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="nv">$secString</span><span class="p">).</span><span class="n">GetNetworkCredential</span><span class="p">().</span><span class="n">Password</span>
+</code></pre></div>
+<h2 id="usage-guides">Usage Guides<a class="headerlink" href="#usage-guides" title="Permanent link">&para;</a></h2>
+<p>In addition to the native function help, it can be very helpful to new users to have a plugin specific readme. It should be a <a href="https://www.markdowntutorial.com/">Markdown</a> formatted file in the <a href="https://github.com/rmbolger/Posh-ACME/tree/main/docs/Plugins">docs/Plugins</a> folder called <code>&lt;PluginName&gt;.md</code>. It's usually easiest to copy an existing guide and modify it.</p>
+<p>For people who may be setting up automation against their provider for the first time, it can be helpful to add guidance on creating service accounts, limited access roles, or any prerequisite setup that the plugin requires to work properly. It should also have a section with an example on how to use the plugin with <code>New-PACertificate</code>.</p>
+<h2 id="general-development-tips-and-tricks">General Development Tips and Tricks<a class="headerlink" href="#general-development-tips-and-tricks" title="Permanent link">&para;</a></h2>
+<h3 id="no-write-host">No Write-Host<a class="headerlink" href="#no-write-host" title="Permanent link">&para;</a></h3>
+<p>Unless your plugin requires interactive user input which should be rare, do not use <code>Write-Host</code> to display informational messages or debug output. Use <code>Write-Verbose</code> for messages you would want a potential user to see. Use <code>Write-Debug</code> for things only the plugin developer would likely care about or a user trying to troubleshoot a plugin that is not working.</p>
+<p>When testing your module, use <code>-Verbose</code> to see your verbose messages. And run <code>$DebugPreference = 'Continue'</code> to make the debug messages show up without prompting for confirmation <em>(which happens if you use <code>-Debug</code>)</em>.</p>
+<h3 id="no-pipeline-output">No Pipeline Output<a class="headerlink" href="#no-pipeline-output" title="Permanent link">&para;</a></h3>
+<p>Do not output any objects to the pipeline from your plugin. This will interfere with scripts and workflows that use the normal output of public functions. You can use <code>Out-Null</code> on internal calls that would normally output to the pipeline when you don't care about that data.</p>
+<h3 id="usebasicparsing">UseBasicParsing<a class="headerlink" href="#usebasicparsing" title="Permanent link">&para;</a></h3>
+<p>Any time you call <code>Invoke-WebRequest</code> or <code>Invoke-RestMethod</code>, you should always add <code>@script:UseBasic</code> to the end.</p>
+<p>By default in PowerShell 5.1, those two functions use Internet Explorer's DOM parser to process the response body which can cause errors in cases where IE is not installed or hasn't gone through its first-run sequence yet. Both functions have a <code>-UseBasicParsing</code> parameter that switches the parser to a PowerShell native parser and is the new default functionality in PowerShell 6+. The parameter is also deprecated because they don't plan on bringing back IE DOM parsing in future PowerShell versions. So the module creates a variable when it is first loaded that checks whether <code>-UseBasicParsing</code> is still available or not and adds it to the <code>$script:UseBasic</code> hashtable. That way, you can just <a href="https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting">splat</a> it on all your calls to those two functions which will future proof your plugin.</p>
+<h3 id="testing-plugins">Testing Plugins<a class="headerlink" href="#testing-plugins" title="Permanent link">&para;</a></h3>
+<p>If the module is already loaded in the session, you will need to re-import it using <code>Import-Module -Force</code>. There is a helper script called <code>instdev.ps1</code> in the root of the git repository that can make this process a lot easier as you are developing the plugin.</p>
+<p>First make sure any existing copies of the module are uninstalled (or at least don't reside in your <code>$env:PSModulePath</code>). Clone the git repository (or your fork) to a folder on your local system and add your plugin file to the <code>Posh-Acme\Plugins</code> folder if it's not already there. Open a new PowerShell session to the repository root folder and run <code>.\instdev.ps1</code> which will do the following:</p>
+<ul>
+<li>Copy the module files to the current user's default PowerShell modules folder.</li>
+<li>Run <code>Import-Module Posh-ACME -Force</code></li>
+<li>Display the available module commands</li>
+</ul>
+<p>If there are no problems, your plugin should now be listed in the output of <code>Get-PAPlugin</code>.</p>
+<p>Testing a plugin can be done without requesting a new certificate. All you need is an existing ACME account created with <code>New-PAAccount</code> and the <code>Publish-Challenge</code>, <code>Unpublish-Challenge</code>, and <code>Save-Challenge</code> functions. They call the Add, Remove, and Save functions from the plugin. Here are some examples of how I generally call them while testing.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$DebugPreference</span> <span class="p">=</span> <span class="s1">&#39;Continue&#39;</span>
+<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span><span class="n">MyParam1</span><span class="p">=</span><span class="s1">&#39;asdf&#39;</span><span class="p">;</span><span class="n">MyParam2</span><span class="p">=</span><span class="s1">&#39;qwer&#39;</span><span class="p">}</span>
+
+<span class="c"># multiple calls to publish/unpublish are generally more useful for DNS plugins</span>
+<span class="nb">Publish-Challenge</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="p">(</span><span class="nb">Get-PAAccount</span><span class="p">)</span> <span class="n">test1</span> <span class="n">MyPlugin</span> <span class="nv">$pArgs</span> <span class="n">-Verbose</span>
+<span class="nb">Publish-Challenge</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="p">(</span><span class="nb">Get-PAAccount</span><span class="p">)</span> <span class="n">test2</span> <span class="n">MyPlugin</span> <span class="nv">$pArgs</span> <span class="n">-Verbose</span>
+<span class="nb">Publish-Challenge</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="p">(</span><span class="nb">Get-PAAccount</span><span class="p">)</span> <span class="n">test3</span> <span class="n">MyPlugin</span> <span class="nv">$pArgs</span> <span class="n">-Verbose</span>
+
+<span class="c"># save is only necessary if your plugin implements it</span>
+<span class="nb">Save-Challenge</span> <span class="n">MyPlugin</span> <span class="nv">$pArgs</span> <span class="n">-Verbose</span>
+
+<span class="nb">Unpublish-Challenge</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="p">(</span><span class="nb">Get-PAAccount</span><span class="p">)</span> <span class="n">test1</span> <span class="n">MyPlugin</span> <span class="nv">$pArgs</span> <span class="n">-Verbose</span>
+<span class="nb">Unpublish-Challenge</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="p">(</span><span class="nb">Get-PAAccount</span><span class="p">)</span> <span class="n">test2</span> <span class="n">MyPlugin</span> <span class="nv">$pArgs</span> <span class="n">-Verbose</span>
+<span class="nb">Unpublish-Challenge</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="p">(</span><span class="nb">Get-PAAccount</span><span class="p">)</span> <span class="n">test3</span> <span class="n">MyPlugin</span> <span class="nv">$pArgs</span> <span class="n">-Verbose</span>
+
+<span class="c"># save is only necessary if your plugin implements it</span>
+<span class="nb">Save-Challenge</span> <span class="n">MyPlugin</span> <span class="nv">$pArgs</span> <span class="n">-Verbose</span>
+</code></pre></div>
+<p>Alternatively, you can <a href="https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_scripts?view=powershell-5.1#script-scope-and-dot-sourcing">dot source</a> the plugin file and call the functions directly. But this can be difficult if the functions depend on module-scoped variables like <code>$script:UseBasic</code> or internal module functions. Also, remember to dot source again each time you make a change to the plugin.</p>
+<h2 id="dns-specific-tips-and-tricks">DNS Specific Tips and Tricks<a class="headerlink" href="#dns-specific-tips-and-tricks" title="Permanent link">&para;</a></h2>
+<h3 id="multiple-txt-values-per-record">Multiple TXT Values Per Record<a class="headerlink" href="#multiple-txt-values-per-record" title="Permanent link">&para;</a></h3>
+<p>It is both supported and expected that a given TXT record may have multiple values. It's most common with wildcard certificates that contain both the wildcard name (<code>*.example.com</code>) and the root domain (<code>example.com</code>). Both names require TXT records be added for the same FQDN (<code>_acme-challenge.example.com</code>). This can also happen if the user is using CNAME challenge aliases.</p>
+<p>The Add/Remove functions need to support all potential states of the particular TXT record. But how the record is represented by a given provider seems to vary. Some represent it as a single record with multiple values that you need to add to or remove from. Others have distinct records for each value that can be created/deleted individually. So make sure you can both create a new record that doesn't exist <em>and</em> add a value to a record that already does.</p>
+<h3 id="remove-only-specific-txtvalue">Remove Only Specific TxtValue<a class="headerlink" href="#remove-only-specific-txtvalue" title="Permanent link">&para;</a></h3>
+<p>Related to having multiple TXT values per record, the remove function must not blindly delete any record that matches <code>$RecordName</code>. It should be able to remove only the <code>$TxtValue</code> on a record that may have multiple values. But if the record only contains a single value, the record should be deleted entirely.</p>
+<h3 id="zone-matching">Zone Matching<a class="headerlink" href="#zone-matching" title="Permanent link">&para;</a></h3>
+<p>A particular DNS provider may be hosting both domain apex zones (<code>example.com</code>) and sub-zones (<code>sub1.example.com</code>). One of the first things a plugin usually has to do is figure out which zone <code>$RecordName</code> needs to be added to. This should be the deepest sub-zone that would still contain <code>$RecordName</code>. Here are some examples assuming only the two previously mentioned zones exist.</p>
+<table>
+<thead>
+<tr>
+<th><code>$RecordName</code></th>
+<th>Matching Zone</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_acme-challenge.example.com</td>
+<td>example.com</td>
+</tr>
+<tr>
+<td>_acme-challenge.site1.example.com</td>
+<td>example.com</td>
+</tr>
+<tr>
+<td>_acme-challenge.sub1.example.com</td>
+<td>sub1.example.com</td>
+</tr>
+<tr>
+<td>_acme-challenge.site1.sub1.example.com</td>
+<td>sub1.example.com</td>
+</tr>
+<tr>
+<td>_acme-challenge.site1.sub3.sub2.sub1.example.com</td>
+<td>sub1.example.com</td>
+</tr>
+</tbody>
+</table>
+<p>Many of the existing plugins have a helper function to handle this. Copy and modify their code where it makes sense but make sure helper function names are unique.</p>
+<h3 id="dns-aliases-and-domain-apex">DNS Aliases and Domain Apex<a class="headerlink" href="#dns-aliases-and-domain-apex" title="Permanent link">&para;</a></h3>
+<p>Don't forget to test your functions against the domain apex which can happen when users are using DNS challenge aliases. There's often a special way to represent records in the domain apex from an API perspective, commonly with the <code>@</code> character or an empty string instead of a record short name.</p>
+<div class="highlight"><pre><span></span><code><span class="c"># The my.cname.tld record doesn&#39;t actually need to exist for the test to work.</span>
+<span class="c"># The plugin will only be writing to example.com</span>
+<span class="nb">Publish-Challenge</span> <span class="n">my</span><span class="p">.</span><span class="n">cname</span><span class="p">.</span><span class="n">tld</span> <span class="p">(</span><span class="nb">Get-PAAccount</span><span class="p">)</span> <span class="n">test1</span> <span class="n">MyPlugin</span> <span class="nv">$pArgs</span> <span class="n">-DnsAlias</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Verbose</span>
+<span class="nb">Unpublish-Challenge</span> <span class="n">my</span><span class="p">.</span><span class="n">cname</span><span class="p">.</span><span class="n">tld</span> <span class="p">(</span><span class="nb">Get-PAAccount</span><span class="p">)</span> <span class="n">test1</span> <span class="n">MyPlugin</span> <span class="nv">$pArgs</span> <span class="n">-DnsAlias</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Verbose</span>
+</code></pre></div>
+<h3 id="deriving-object-ids">Deriving Object IDs<a class="headerlink" href="#deriving-object-ids" title="Permanent link">&para;</a></h3>
+<p>Many providers assign ID values to object types like zones and records that you need to use to manipulate those objects. A user should ideally not have to know or provide any zone, record, or object IDs in order to use the plugin. All of that should be discovered by the plugin code and the only thing the user should need to provide is whatever credentials or tokens the API requires for authentication.</p>
+<p>In the rare cases that you do need the user to provide something like a zone ID, make sure you allow for multiple values. A single certificate can contain names from many different zones and the plugin parameters that get passed to the plugin are the same for each TXT record that needs to be created.</p>
+<h3 id="trailing-dots">Trailing Dots<a class="headerlink" href="#trailing-dots" title="Permanent link">&para;</a></h3>
+<p>Be aware how your particular DNS provider represents zone and record names. Some include the trailing dot (<code>example.com.</code>). Others don't. This can affect string matching when finding zones and existing records.</p>
+<h3 id="internationalized-domain-name-idn">Internationalized Domain Name (IDN)<a class="headerlink" href="#internationalized-domain-name-idn" title="Permanent link">&para;</a></h3>
+<p>Many DNS providers and registrars support <a href="https://en.wikipedia.org/wiki/Internationalized_domain_name">IDN domains</a> which contain non-ascii unicode characters (or even emojis). When using IDN domains with ACME, the IDN names must be specified as <a href="https://en.wikipedia.org/wiki/Punycode">Punycode</a>. But the DNS providers may still send or receive the unicode version of the name. Particularly if your provider is not US-based, be aware of and try to account for how the provider handles IDN names.</p>
+<p>The .NET <a href="https://docs.microsoft.com/en-us/dotnet/api/system.globalization.idnmapping">System.Globalization.IdnMapping</a> class can help convert back and for between IDN and punycode names like this:</p>
+<div class="highlight"><pre><span></span><code><span class="c"># create an instance of the class</span>
+<span class="nv">$idn</span> <span class="p">=</span> <span class="no">[System.Globalization.IdnMapping]</span><span class="p">::</span><span class="n">new</span><span class="p">()</span>
+
+<span class="c"># convert an IDN name to punycode</span>
+<span class="nv">$idn</span><span class="p">.</span><span class="n">GetAscii</span><span class="p">(</span><span class="s1">&#39;bücher.example&#39;</span><span class="p">)</span>
+
+<span class="c"># convert a punycode name back to IDN</span>
+<span class="nv">$idn</span><span class="p">.</span><span class="n">GetUnicode</span><span class="p">(</span><span class="s1">&#39;xn--bcher-kva.example&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="http-specific-tips-and-tricks">HTTP Specific Tips and Tricks<a class="headerlink" href="#http-specific-tips-and-tricks" title="Permanent link">&para;</a></h2>
+<h3 id="validation-timing">Validation Timing<a class="headerlink" href="#validation-timing" title="Permanent link">&para;</a></h3>
+<p>When DNS plugins are used, there's a user customizable sleep timer between when the TXT records are published and the module asks the ACME server to validate those records because records are not typically available instantaneously worldwide. However, that sleep timer does not exist when an order is only using HTTP plugins because HTTP resources are typically available instantly.</p>
+<p>If your particular HTTP provider requires a delay between when the challenges are published and when they are validated, you should add that delay in the <code>Save-HttpChallenge</code> function of your plugin.</p>
+<h2 id="migrating-dns-plugins-from-3x-to-4x">Migrating DNS Plugins from 3.x to 4.x<a class="headerlink" href="#migrating-dns-plugins-from-3x-to-4x" title="Permanent link">&para;</a></h2>
+<p>In case you have been using your own private DNS plugin in 3.x, here's how to migrate it to the 4.x format.</p>
+<ul>
+<li>Add <code>function Get-CurrentPluginType { 'dns-01' }</code> to the top of the file.</li>
+<li>Replace instances of <code>Add-DnsTxt&lt;Name&gt;</code> with <code>Add-DnsTxt</code></li>
+<li>Replace instances of <code>Remove-DnsTxt&lt;Name&gt;</code> with <code>Remove-DnsTxt</code></li>
+<li>Replace instances of <code>Save-DnsTxt&lt;Name&gt;</code> with <code>Save-DnsTxt</code></li>
+<li>Replace instances of <code>-DnsPlugin</code> with <code>-Plugin</code> in usage guides.</li>
+</ul>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Supported Plugins" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Supported Plugins
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../AcmeDns/" class="md-footer__link md-footer__link--next" aria-label="Next: AcmeDns" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              AcmeDns
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2021 Ryan Bolger
+          </div>
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+  <div class="md-footer-social">
+    
+      
+      
+        
+        
+      
+      <a href="https://github.com/rmbolger" target="_blank" rel="noopener" title="github.com" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+      </a>
+    
+      
+      
+        
+        
+      
+      <a href="https://twitter.com/rmbolger" target="_blank" rel="noopener" title="twitter.com" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+      </a>
+    
+      
+      
+        
+        
+      
+      <a href="https://linkedin.com/in/rmbolger/" target="_blank" rel="noopener" title="linkedin.com" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"/></svg>
+      </a>
+    
+  </div>
+
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.409db549.min.js", "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.56a63758.min.js"></script>
+      
+    
+  </body>
+</html>

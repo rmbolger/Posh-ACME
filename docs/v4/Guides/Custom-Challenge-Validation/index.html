@@ -1,0 +1,2092 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation for the Posh-ACME PowerShell module">
+      
+      
+      
+        <meta name="author" content="Ryan Bolger">
+      
+      
+        <link rel="canonical" href="https://poshac.me/docs/v4/Guides/Custom-Challenge-Validation/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.5">
+    
+    
+      
+        <title>(Advanced) Custom Challenge Validation - Posh-ACME</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.be71726b.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.3f5d1f46.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
+  
+    
+    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+      <script>var palette=__get("__palette");if(null!==palette&&"object"==typeof palette.color)for(var key in palette.color)document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#custom-challenge-validation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Posh-ACME" class="md-header__button md-logo" aria-label="Posh-ACME" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Posh-ACME
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              (Advanced) Custom Challenge Validation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/rmbolger/Posh-ACME/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rmbolger/Posh-ACME
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../.." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../../Tutorial/" class="md-tabs__link">
+      Tutorial
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../Functions/Complete-PAOrder/" class="md-tabs__link">
+        Functions
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../Plugins/" class="md-tabs__link">
+        Plugins
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../" class="md-tabs__link md-tabs__link--active">
+        Guides
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../../FAQ/" class="md-tabs__link">
+      FAQ
+    </a>
+  </li>
+
+      
+    </ul>
+  </div>
+</nav>
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Posh-ACME" class="md-nav__button md-logo" aria-label="Posh-ACME" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    Posh-ACME
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/rmbolger/Posh-ACME/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rmbolger/Posh-ACME
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorial/" class="md-nav__link">
+        Tutorial
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" data-md-state="indeterminate" type="checkbox" id="__nav_3" checked>
+      
+      <label class="md-nav__link" for="__nav_3">
+        Functions
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Functions" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Functions
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Complete-PAOrder/" class="md-nav__link">
+        Complete-PAOrder
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Export-PAAccountKey/" class="md-nav__link">
+        Export-PAAccountKey
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-KeyAuthorization/" class="md-nav__link">
+        Get-KeyAuthorization
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAAccount/" class="md-nav__link">
+        Get-PAAccount
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAAuthorization/" class="md-nav__link">
+        Get-PAAuthorization
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PACertificate/" class="md-nav__link">
+        Get-PACertificate
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAOrder/" class="md-nav__link">
+        Get-PAOrder
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAPlugin/" class="md-nav__link">
+        Get-PAPlugin
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAPluginArgs/" class="md-nav__link">
+        Get-PAPluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAServer/" class="md-nav__link">
+        Get-PAServer
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Install-PACertificate/" class="md-nav__link">
+        Install-PACertificate
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Invoke-HttpChallengeListener/" class="md-nav__link">
+        Invoke-HttpChallengeListener
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/New-PAAccount/" class="md-nav__link">
+        New-PAAccount
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/New-PAAuthorization/" class="md-nav__link">
+        New-PAAuthorization
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/New-PACertificate/" class="md-nav__link">
+        New-PACertificate
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/New-PAOrder/" class="md-nav__link">
+        New-PAOrder
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Publish-Challenge/" class="md-nav__link">
+        Publish-Challenge
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Remove-PAAccount/" class="md-nav__link">
+        Remove-PAAccount
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Remove-PAOrder/" class="md-nav__link">
+        Remove-PAOrder
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Remove-PAServer/" class="md-nav__link">
+        Remove-PAServer
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Revoke-PAAuthorization/" class="md-nav__link">
+        Revoke-PAAuthorization
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Revoke-PACertificate/" class="md-nav__link">
+        Revoke-PACertificate
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Save-Challenge/" class="md-nav__link">
+        Save-Challenge
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Send-ChallengeAck/" class="md-nav__link">
+        Send-ChallengeAck
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Set-PAAccount/" class="md-nav__link">
+        Set-PAAccount
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Set-PAOrder/" class="md-nav__link">
+        Set-PAOrder
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Set-PAServer/" class="md-nav__link">
+        Set-PAServer
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Submit-ChallengeValidation/" class="md-nav__link">
+        Submit-ChallengeValidation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Submit-OrderFinalize/" class="md-nav__link">
+        Submit-OrderFinalize
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Submit-Renewal/" class="md-nav__link">
+        Submit-Renewal
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Unpublish-Challenge/" class="md-nav__link">
+        Unpublish-Challenge
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" data-md-state="indeterminate" type="checkbox" id="__nav_4" checked>
+      
+      <label class="md-nav__link" for="__nav_4">
+        Plugins
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Plugins" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Plugins
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/" class="md-nav__link">
+        Supported Plugins
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Plugin-Development-Guide/" class="md-nav__link">
+        Plugin Development Guide
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/AcmeDns/" class="md-nav__link">
+        AcmeDns
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Akamai/" class="md-nav__link">
+        Akamai
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Aliyun/" class="md-nav__link">
+        Aliyun
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/All-Inkl/" class="md-nav__link">
+        All-Inkl
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Aurora/" class="md-nav__link">
+        Aurora
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/AutoDNS/" class="md-nav__link">
+        AutoDNS
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Azure/" class="md-nav__link">
+        Azure
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Beget/" class="md-nav__link">
+        Beget
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/BlueCat/" class="md-nav__link">
+        BlueCat
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/ClouDNS/" class="md-nav__link">
+        ClouDNS
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Cloudflare/" class="md-nav__link">
+        Cloudflare
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Constellix/" class="md-nav__link">
+        Constellix
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/DMEasy/" class="md-nav__link">
+        DMEasy
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/DNSPod/" class="md-nav__link">
+        DNSPod
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/DNSimple/" class="md-nav__link">
+        DNSimple
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/DOcean/" class="md-nav__link">
+        DOcean
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/DeSEC/" class="md-nav__link">
+        DeSEC
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/DomainOffensive/" class="md-nav__link">
+        DomainOffensive
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Domeneshop/" class="md-nav__link">
+        Domeneshop
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Dreamhost/" class="md-nav__link">
+        Dreamhost
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/DuckDNS/" class="md-nav__link">
+        DuckDNS
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Dynu/" class="md-nav__link">
+        Dynu
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/EasyDNS/" class="md-nav__link">
+        EasyDNS
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Easyname/" class="md-nav__link">
+        Easyname
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/FreeDNS/" class="md-nav__link">
+        FreeDNS
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/GCloud/" class="md-nav__link">
+        GCloud
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Gandi/" class="md-nav__link">
+        Gandi
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/GoDaddy/" class="md-nav__link">
+        GoDaddy
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Hetzner/" class="md-nav__link">
+        Hetzner
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/HostingDe/" class="md-nav__link">
+        HostingDe
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/HurricaneElectric/" class="md-nav__link">
+        HurricaneElectric
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/IBMSoftLayer/" class="md-nav__link">
+        IBMSoftLayer
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Infoblox/" class="md-nav__link">
+        Infoblox
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Infomaniak/" class="md-nav__link">
+        Infomaniak
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Linode/" class="md-nav__link">
+        Linode
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Loopia/" class="md-nav__link">
+        Loopia
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/LuaDns/" class="md-nav__link">
+        LuaDns
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/NS1/" class="md-nav__link">
+        NS1
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/NameCom/" class="md-nav__link">
+        NameCom
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/NameSilo/" class="md-nav__link">
+        NameSilo
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Namecheap/" class="md-nav__link">
+        Namecheap
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/OVH/" class="md-nav__link">
+        OVH
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/PointDNS/" class="md-nav__link">
+        PointDNS
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/RFC2136/" class="md-nav__link">
+        RFC2136
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Rackspace/" class="md-nav__link">
+        Rackspace
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Regru/" class="md-nav__link">
+        Regru
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Route53/" class="md-nav__link">
+        Route53
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Selectel/" class="md-nav__link">
+        Selectel
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/SimpleDNSPlus/" class="md-nav__link">
+        SimpleDNSPlus
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Simply/" class="md-nav__link">
+        Simply
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/UKFast/" class="md-nav__link">
+        UKFast
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/WebRoot/" class="md-nav__link">
+        WebRoot
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/WebSelfHost/" class="md-nav__link">
+        WebSelfHost
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Windows/" class="md-nav__link">
+        Windows
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Yandex/" class="md-nav__link">
+        Yandex
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Zilore/" class="md-nav__link">
+        Zilore
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/Zonomi/" class="md-nav__link">
+        Zonomi
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
+      
+      <label class="md-nav__link" for="__nav_5">
+        Guides
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Guides" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Guides
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        Guides and Deep Dives
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          (Advanced) Custom Challenge Validation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        (Advanced) Custom Challenge Validation
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#intro" class="md-nav__link">
+    Intro
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#server-selection" class="md-nav__link">
+    Server Selection
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#account-setup" class="md-nav__link">
+    Account Setup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-an-order" class="md-nav__link">
+    Create an Order
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authorizations-and-challenges" class="md-nav__link">
+    Authorizations and Challenges
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publishing-an-http-challenge" class="md-nav__link">
+    Publishing an HTTP Challenge
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publishing-a-dns-challenge" class="md-nav__link">
+    Publishing a DNS Challenge
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publishing-a-tls-alpn-challenge" class="md-nav__link">
+    Publishing a TLS-ALPN Challenge
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notify-the-acme-server" class="md-nav__link">
+    Notify the ACME Server
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Troubleshooting-DNS-Validation/" class="md-nav__link">
+        Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Using-DNS-Challenge-Aliases/" class="md-nav__link">
+        Using DNS Challenge Aliases
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Using-an-Alternate-Config-Location/" class="md-nav__link">
+        Using an Alternate Config Location
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../External-Articles/" class="md-nav__link">
+        External Articles
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../FAQ/" class="md-nav__link">
+        FAQ
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#intro" class="md-nav__link">
+    Intro
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#server-selection" class="md-nav__link">
+    Server Selection
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#account-setup" class="md-nav__link">
+    Account Setup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-an-order" class="md-nav__link">
+    Create an Order
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authorizations-and-challenges" class="md-nav__link">
+    Authorizations and Challenges
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publishing-an-http-challenge" class="md-nav__link">
+    Publishing an HTTP Challenge
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publishing-a-dns-challenge" class="md-nav__link">
+    Publishing a DNS Challenge
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publishing-a-tls-alpn-challenge" class="md-nav__link">
+    Publishing a TLS-ALPN Challenge
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notify-the-acme-server" class="md-nav__link">
+    Notify the ACME Server
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/rmbolger/Posh-ACME/edit/main/docs/Guides/Custom-Challenge-Validation.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="custom-challenge-validation">Custom Challenge Validation<a class="headerlink" href="#custom-challenge-validation" title="Permanent link">&para;</a></h1>
+<h2 id="intro">Intro<a class="headerlink" href="#intro" title="Permanent link">&para;</a></h2>
+<p>The beauty of the ACME protocol is that it's an <a href="https://tools.ietf.org/html/rfc8555">open standard</a>. And while Posh-ACME primarily targets users who want to avoid understanding all of the protocol complexity, it also exposes functions that allow you to do things a bit closer to the protocol level than just running <code>New-PACertificate</code> and <code>Submit-Renewal</code>. This can enable more advanced automation scenarios such as supporting challenge types that the module doesn't directly support yet or responding to authorization challenges in a way not directly supported by existing plugins. This guide will walk through the ACME certificate request process and demonstrate how to manage the validation of authorization challenges.</p>
+<p>At a high level, the ACME conversation looks more or less like this:</p>
+<ul>
+<li>Create an account</li>
+<li>Create a certificate order</li>
+<li>Prove control of the "identifiers" (DNS names or IP addresses) in the requested cert by answering challenges.</li>
+<li>Finalize the order by submitting an certificate request (CSR)</li>
+<li>Download the signed certificate and chain</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>IP Address identifiers (<a href="https://tools.ietf.org/html/rfc8738">RFC 8738</a>) are supported by Posh-ACME. But they're not yet supported by any ACME-compatible public certificate authorities that I'm aware of. If you want to test them, you'll have to use <a href="https://github.com/letsencrypt/pebble">Pebble</a>.</p>
+</div>
+<p>If you're curious about what's going on under the hood during this guide, add <code>-Verbose</code> to your commands or run <code>$VerbosePreference = 'Continue'</code>. If you really want to get deep, you can also turn on debug logging by running <code>$DebugPreference = 'Continue'</code> which will also display the raw JSON requests and responses. The defaults for both of those preferences are <code>SilentlyContinue</code> if you want to change them back later.</p>
+<h2 id="server-selection">Server Selection<a class="headerlink" href="#server-selection" title="Permanent link">&para;</a></h2>
+<p>While testing code, you should <strong>not</strong> use the production Let's Encrypt server. The staging server is the easiest alternative, but still has some rate limits that you can run afoul of if your code goes crazy. There is also <a href="https://github.com/letsencrypt/pebble">Pebble</a> which is a tiny ACME server you can self-host and is built for testing code against. For simplicity, we'll select the Let's Encrypt staging server.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">Set-PAServer</span> <span class="n">LE_STAGE</span>
+</code></pre></div>
+<h2 id="account-setup">Account Setup<a class="headerlink" href="#account-setup" title="Permanent link">&para;</a></h2>
+<p>Requesting a certificate always starts with creating an account on the ACME server which is basically just a public/private key pair that is used to sign the protocol messages you send to the server along with some metadata like one or more email addresses to send expiration notifications to. If you've been previously using the module against the staging server, you likely already have an account. If so, you can either skip this section or create a second account which is also supported.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">New-PAAccount</span> <span class="n">-AcceptTOS</span> <span class="n">-Contact</span> <span class="s1">&#39;me@example.com&#39;</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If you're using Pebble as your ACME server, it doesn't save accounts or order details when you shut it down. So you'll have to re-create accounts and orders if you exit and restart it.</p>
+</div>
+<h2 id="create-an-order">Create an Order<a class="headerlink" href="#create-an-order" title="Permanent link">&para;</a></h2>
+<p>The only required parameter for a new order is the set of names you want included in the certificate. Optional parameters include things like <code>-KeyLength</code> to change the private key type/size, <code>-Install</code> which tells Posh-ACME to automatically store the signed cert in the Windows certificate store <em>(requires local admin)</em>, and <code>-PfxPass</code> which lets you set the decryption password for the certificate PFX file. If we were using plugins, this is also where you could set which plugin to use and the parameters associated with it.</p>
+<p>In this example, we'll create a typical wildcard cert that contains a root domain and the wildcard version of it. Keep in mind that wildcard names <a href="https://community.letsencrypt.org/t/acme-v2-and-wildcard-certificate-support-is-live/55579">require using DNS challenge validation</a>. So if you're testing HTTP challenge validation, either leave that one out or add a different non-wildcard name.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$domains</span> <span class="p">=</span> <span class="s1">&#39;example.com&#39;</span><span class="p">,</span><span class="s1">&#39;*.example.com&#39;</span>
+<span class="nb">New-PAOrder</span> <span class="nv">$domains</span>
+</code></pre></div>
+<p>Assuming you didn't use names that were previously validated on this account, you should get output that looks something like this where the status is <code>pending</code>. If the status is <code>ready</code>, create an order with different names that haven't been previously validated.</p>
+<div class="highlight"><pre><span></span><code>MainDomain  status  KeyLength SANs            OCSPMustStaple CertExpires Plugin
+----------  ------  --------- ----            -------------- ----------- ------
+example.com pending 2048      {*.example.com} False                      {Manual}
+</code></pre></div>
+<h2 id="authorizations-and-challenges">Authorizations and Challenges<a class="headerlink" href="#authorizations-and-challenges" title="Permanent link">&para;</a></h2>
+<p>The distinction between an order, authorization, and challenge can be confusing if you're not familiar with the ACME protocol. So let's clarify first. An order is a request for a certificate that contains one or more "identifiers" (a name like <code>example.com</code>). Each identifier in an order has an authorization object associated with it that indicates whether the account that created the order is authorized to get a cert for that name. New authorizations start in a pending state awaiting the client to complete a challenge associated with that authorization. Each authorization can have multiple different challenges (DNS, HTTP, ALPN, etc) that indicate the different methods the ACME server will accept to prove ownership of the name. You only need to complete one of the offered challenges in order to satisfy an authorization.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Different types of identifiers may only allow a subset of challenge types. For instance, wildcard DNS names can only be validated by a DNS challenge and IP addresses can only be validated by HTTP or ALPN challenges.</p>
+</div>
+<p><code>Get-PAAuthorization</code> can be used with the output of <code>Get-PAOrder</code> to retrieve the current set of authorizations (and their challenges) for an order. So lets put those details into a variable and display them.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$auths</span> <span class="p">=</span> <span class="nb">Get-PAOrder</span> <span class="p">|</span> <span class="nb">Get-PAAuthorization</span>
+<span class="nv">$auths</span>
+</code></pre></div>
+<p>This should give an output that looks something like this. The first status column is the overall status of the authorization. The last two columns are the status of the <code>dns-01</code> and <code>http-01</code> challenges. Normally the challenge specific details are buried a bit deeper in a <code>challenges</code> property, but Posh-ACME tries to help by surfacing the commonly used challenge details on the root object. Notice also how the wildcard name has no <code>HTTP01Status</code> because it was not offered as a valid challenge type for that identifier.</p>
+<div class="highlight"><pre><span></span><code>fqdn          status  Expires               DNS01Status HTTP01Status
+----          ------  -------               ----------- ------------
+example.com   pending 12/24/2020 7:14:33 PM pending     pending
+*.example.com pending 12/24/2020 7:14:33 PM pending
+</code></pre></div>
+<p>Let's take a look at the full details of one of the authorization objects by running <code>$auths[0] | fl</code>. You should get an output like this:</p>
+<div class="highlight"><pre><span></span><code>identifier   : @{type=dns; value=example.com}
+status       : pending
+expires      : 2020-12-25T16:52:23Z
+challenges   : {@{type=dns-01; status=pending; url=https://acme-staging-v02.api.letsencrypt.org/acme/challenge/&lt;AUTH_ID&gt;/&lt;DNS_CHAL_ID&gt;; token=&lt;DNS_TOKEN&gt;},
+               @{type=http-01; status=pending; url=https://acme-staging-v02.api.letsencrypt.org/acme/challenge/&lt;AUTH_ID&gt;/&lt;HTTP_CHAL_ID&gt;; token=&lt;HTTP_TOKEN&gt;},
+               @{type=tls-alpn-01; status=pending; url=https://acme-staging-v02.api.letsencrypt.org/acme/challenge/&lt;AUTH_ID&gt;/&lt;ALPN_CHAL_ID&gt;; token=&lt;ALPN_TOKEN&gt;}}
+DNSId        : example.com
+fqdn         : example.com
+location     : https://acme-staging-v02.api.letsencrypt.org/acme/authz/&lt;AUTH_ID&gt;
+DNS01Status  : pending
+DNS01Url     : https://acme-staging-v02.api.letsencrypt.org/acme/challenge/&lt;AUTH_ID&gt;/&lt;DNS_CHAL_ID&gt;
+DNS01Token   : &lt;DNS_TOKEN&gt;
+HTTP01Status : pending
+HTTP01Url    : https://acme-staging-v02.api.letsencrypt.org/acme/challenge/&lt;AUTH_ID&gt;/&lt;HTTP_CHAL_ID&gt;
+HTTP01Token  : &lt;HTTP_TOKEN&gt;
+</code></pre></div>
+<p>For this identifier, the ACME server has offered all three challenge types: <code>http-01</code>, <code>dns-01</code>, and <code>tls-alpn-01</code>. In addition to the type, each challenge contains a <code>status</code>, <code>url</code> and <code>token</code> property. For HTTP and DNS challenges, these can also be read from the root authorization object using the <code>HTTP01xxx</code> and <code>DNS01xxx</code> properties. We'll go over how to use the tokens in the next couple sections about publishing challenges.</p>
+<h2 id="publishing-an-http-challenge">Publishing an HTTP Challenge<a class="headerlink" href="#publishing-an-http-challenge" title="Permanent link">&para;</a></h2>
+<p>For an HTTP challenge, the ACME server must be able send an HTTP GET request to a particular URL <strong>on port 80</strong> and receive a <a href="https://tools.ietf.org/html/rfc8555#section-8.1">key authorization</a> value which is based on the token value in the challenge and the public key thumbprint of your account key. You can build the URL using the following template:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$url</span> <span class="p">=</span> <span class="s1">&#39;http://{0}/.well-known/acme-challenge/{1}&#39;</span> <span class="o">-f</span> <span class="nv">$auths</span><span class="p">[</span><span class="n">0</span><span class="p">].</span><span class="n">DNSId</span><span class="p">,</span><span class="nv">$auths</span><span class="p">[</span><span class="n">0</span><span class="p">].</span><span class="n">HTTP01Token</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Most ACME servers will follow HTTP 3xx redirect responses, but the initial request will always be non-TLS to port 80. So you must not block port 80 on your web server if you want to use HTTP challenges.</p>
+</div>
+<p>The key authorization can be generated using <code>Get-KeyAuthorization</code> like this.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$keyauth</span> <span class="p">=</span> <span class="nb">Get-KeyAuthorization</span> <span class="nv">$auths</span><span class="p">[</span><span class="n">0</span><span class="p">].</span><span class="n">HTTP01Token</span>
+</code></pre></div>
+<p>Now it's up to you to setup your web server so it responds with the key authorization value when the URL is queried from the Internet. If it's only queryable from your internal LAN, the challenge validation will fail.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you're using PowerShell functions to create the challenge files, make sure to specify ASCII/ANSI file encoding. Line endings shouldn't matter, but the encoding does in my testing. So if you're using <code>Out-File</code>, add <code>-Encoding ascii</code>.</p>
+</div>
+<h2 id="publishing-a-dns-challenge">Publishing a DNS Challenge<a class="headerlink" href="#publishing-a-dns-challenge" title="Permanent link">&para;</a></h2>
+<p>For a DNS challenge, the ACME server must be able send an TXT record query for a particular record name and receive a key authorization value in the response which is similar to the value it wants for an HTTP challenge. You can build the record name using the following template:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$recName</span> <span class="p">=</span> <span class="s1">&#39;_acme-challenge.{0}&#39;</span> <span class="o">-f</span> <span class="nv">$auths</span><span class="p">[</span><span class="n">1</span><span class="p">].</span><span class="n">DNSId</span>
+</code></pre></div>
+<p>The key authorization can be generated using <code>Get-KeyAuthorization</code> like this. Note the extra <code>-ForDNS</code> parameter compared to the HTTP challenge and the reference to <code>DNS01Token</code> instead of <code>HTTP01Token</code>. Each challenge type within an authorization has a unique token value.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$keyauth</span> <span class="p">=</span> <span class="nb">Get-KeyAuthorization</span> <span class="nv">$auths</span><span class="p">[</span><span class="n">1</span><span class="p">].</span><span class="n">DNS01Token</span> <span class="n">-ForDNS</span>
+</code></pre></div>
+<p>The astute reader may have realized that in our example, this means the name of the TXT record would be the same for both identifiers, <code>example.com</code> and <code>*.example.com</code>. They both translate to <code>_acme-challenge.example.com</code>. This tends to confuse people at first, but it's really no different than having multiple A records pointing to different IPs for a website. The ACME validation server is smart enough to check all of the returned results and find the one it cares about.</p>
+<p>Now it's up to you to publish the record on your DNS server that is queryable from the Internet. Depending on your DNS provider and its replication topology, it may take anywhere from seconds to minutes for the records you create to be queryable from the Internet. Make sure you either know how long it's supposed to take and wait that long before proceeding, or query your authoritative external nameservers directly until they return the expected results.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>In DNS providers that use <a href="https://www.cloudflare.com/learning/dns/what-is-anycast-dns/">anycast</a> even if you successfully query the nameserver for your record from your location, it may still fail from other locations in the world due to propagation delays. Some providers have an API you can query to know when it is fully propagated. Others don't and you just have to wait longer.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>ACME validation servers will also follow CNAME records to validate challenges. This can be useful if your primary DNS server has no API or the security posture of your organization doesn't allow an automated process such as an ACME client to have write access to the zone you need to create TXT records within. If you know this will be the case, you can create a permanent CNAME record for the <code>_acme-challenge.&lt;FQDN&gt;</code> name that points to another FQDN somewhere else. Then write your TXT record to that other target and as long as that zone is still Internet-facing, the validation will succeed.</p>
+</div>
+<h2 id="publishing-a-tls-alpn-challenge">Publishing a TLS-ALPN Challenge<a class="headerlink" href="#publishing-a-tls-alpn-challenge" title="Permanent link">&para;</a></h2>
+<p>At the time of this writing, I don't know enough about ALPN to authoritatively write a section on how to use it. But I know it's dependent on the web server software you're using. Here is <a href="https://letsencrypt.org/docs/challenge-types/#tls-alpn-01">Let's Encrypt's documentation</a> on the subject.</p>
+<h2 id="notify-the-acme-server">Notify the ACME Server<a class="headerlink" href="#notify-the-acme-server" title="Permanent link">&para;</a></h2>
+<p>Now that you've published all of your key validations for all of your challenges, you're ready to ask the ACME server to check them. The requires the <code>url</code> property from the challenge you published which for HTTP/DNS challenges can also be read from <code>HTTP01Url</code> or <code>DNS01Url</code> on the root authorization object. Use the <code>Send-ChallengeAck</code> function like this.</p>
+<div class="highlight"><pre><span></span><code><span class="c"># if all of your challenges were published using the same challenge type such as HTTP</span>
+<span class="nv">$auths</span><span class="p">.</span><span class="n">HTTP01Url</span> <span class="p">|</span> <span class="nb">Send-ChallengeAck</span>
+
+<span class="c"># if you published challenges of different types, make sure to use the specific URLs associated with them</span>
+<span class="nv">$auths</span><span class="p">[</span><span class="n">0</span><span class="p">].</span><span class="n">HTTP01Url</span> <span class="p">|</span> <span class="nb">Send-ChallengeAck</span>
+<span class="nv">$auths</span><span class="p">[</span><span class="n">1</span><span class="p">].</span><span class="n">DNS01Url</span> <span class="p">|</span> <span class="nb">Send-ChallengeAck</span>
+</code></pre></div>
+<p>The challenges are usually validated quickly. But there may be a delay if the ACME server is overloaded. You can poll the status of your authorizations by re-running <code>Get-PAOrder | Get-PAAuthorization</code>. Eventually, the status for each one will either be "valid" or "invalid". Good output should look something like this. Notice how the overall status for each challenge is <code>valid</code> while the individual challenge status is only valid for the specific challenge types we published.</p>
+<div class="highlight"><pre><span></span><code>fqdn          status  Expires               DNS01Status HTTP01Status
+----          ------  -------               ----------- ------------
+example.com   valid   12/24/2020 7:14:33 PM             valid
+*.example.com valid   12/24/2020 7:14:33 PM valid
+</code></pre></div>
+<h1 id="finishing-up">Finishing Up<a class="headerlink" href="#finishing-up" title="Permanent link">&para;</a></h1>
+<p>Now that you have all of your identifiers authorized, your order status should now be "ready" which you can check with <code>Get-PAOrder -Refresh</code>. It should look something like this.</p>
+<div class="highlight"><pre><span></span><code>MainDomain  status  KeyLength SANs            OCSPMustStaple CertExpires Plugin
+----------  ------  --------- ----            -------------- ----------- ------
+example.com ready   2048      {*.example.com} False                      {Manual}
+</code></pre></div>
+<p>The next step is "finalization" in which you send a the actual x509 certificate request (CSR) to the ACME server. Run the following:</p>
+<div class="highlight"><pre><span></span><code>Submit-OrderFinalize
+</code></pre></div>
+<p>If you run <code>Get-PAOrder -Refresh</code> again, your order status should now be <code>valid</code> which means you're ready to download the final signed certificate. Run the following to let Posh-ACME take care of that and build the various combinations of PEM/PFX files.</p>
+<div class="highlight"><pre><span></span><code>Complete-PAOrder
+</code></pre></div>
+<p>This will also output the final certificate details that should look something like this.</p>
+<div class="highlight"><pre><span></span><code>Subject         NotAfter             KeyLength Thumbprint                               AllSANs
+-------         --------             --------- ----------                               -------
+CN=example.com  3/15/2021 4:37:37 PM 2048      XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX {example.com, *.example.com}
+</code></pre></div>
+<p>It is also the same output you get from <code>Get-PACertificate</code>. Run <code>Get-PACertificate | fl</code> to get a full list of cert properties including the filesystem paths where the files are stored.</p>
+<h2 id="debugging-challenge-failures">Debugging Challenge Failures<a class="headerlink" href="#debugging-challenge-failures" title="Permanent link">&para;</a></h2>
+<p>If for some reason one or more of your challenge validations failed, you can retrieve the error details from the ACME server like this.</p>
+<div class="highlight"><pre><span></span><code><span class="p">(</span><span class="nb">Get-PAOrder</span> <span class="p">|</span> <span class="nb">Get-PAAuthorization</span><span class="p">).</span><span class="n">challenges</span><span class="p">.</span><span class="n">error</span> <span class="p">|</span> <span class="nb">fl</span>
+</code></pre></div>
+<h2 id="revoking-authorizations">Revoking Authorizations<a class="headerlink" href="#revoking-authorizations" title="Permanent link">&para;</a></h2>
+<p>Let's Encrypt and other ACME CAs will generally cache authorizations associated with an account for a period of time. Let's Encrypt caches them for around 30 days which means that if you request another cert in that timeframe with an identifier/name that you've already authorized, the authorization objects won't need to be re-validated. Their status will be immediately valid.</p>
+<p>This can be annoying if you're trying to test your challenge validation automation. However, you can revoke your existing authorizations for a given order like this:</p>
+<div class="highlight"><pre><span></span><code><span class="c"># NOTE: Without -Force, there will be a confirmation prompt for each name being revoked.</span>
+<span class="nb">Get-PAorder</span> <span class="p">|</span> <span class="nb">Revoke-PAAuthorization</span> <span class="n">-Force</span>
+</code></pre></div>
+<p>This process <strong>does not</strong> revoke the <em>certificate</em>. It only revokes the <em>authorizations</em> so that you need to re-validate those names when you request a new certificate that contains them.</p>
+<h2 id="renewals">Renewals<a class="headerlink" href="#renewals" title="Permanent link">&para;</a></h2>
+<p>The concept of a renewal doesn't actually exist in the ACME protocol. What most clients call a renewal is just a new order with the same parameters as last time. So the only thing extra you need to deal with is knowing <em>when</em> to renew. When you successfully complete a certificate order, Posh-ACME will attach a <code>RenewAfter</code> property to the order object which you can use to calculate whether it's time to renew or not. The property is an <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> date/time string which can be parsed and checked with <a href="https://docs.microsoft.com/en-us/dotnet/api/system.datetimeoffset"><code>DateTimeOffset</code></a> like this.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$renewAfter</span> <span class="p">=</span> <span class="no">[DateTimeOffset]</span><span class="p">::</span><span class="n">Parse</span><span class="p">((</span><span class="nb">Get-PAOrder</span><span class="p">).</span><span class="n">RenewAfter</span><span class="p">)</span>
+<span class="k">if</span> <span class="p">(</span><span class="no">[DateTimeOffset]</span><span class="p">::</span><span class="n">Now</span> <span class="o">-gt</span> <span class="nv">$renewAfter</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c"># time to renew</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The RenewAfter value is just a suggestion based on the lifetime of the certificate. Technically, you can renew whenever you want. But if you renew the same certificate too often, you might run into rate limits with your CA.</p>
+</div>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Guides and Deep Dives" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Guides and Deep Dives
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../Troubleshooting-DNS-Validation/" class="md-footer__link md-footer__link--next" aria-label="Next: Troubleshooting DNS Validation" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Troubleshooting DNS Validation
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2021 Ryan Bolger
+          </div>
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+  <div class="md-footer-social">
+    
+      
+      
+        
+        
+      
+      <a href="https://github.com/rmbolger" target="_blank" rel="noopener" title="github.com" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+      </a>
+    
+      
+      
+        
+        
+      
+      <a href="https://twitter.com/rmbolger" target="_blank" rel="noopener" title="twitter.com" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+      </a>
+    
+      
+      
+        
+        
+      
+      <a href="https://linkedin.com/in/rmbolger/" target="_blank" rel="noopener" title="linkedin.com" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"/></svg>
+      </a>
+    
+  </div>
+
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.409db549.min.js", "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.56a63758.min.js"></script>
+      
+    
+  </body>
+</html>
