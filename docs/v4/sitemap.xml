@@ -176,6 +176,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://poshac.me/docs/v4/Guides/ACME-CA-Comparison/</loc>
+         <lastmod>2021-09-01</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://poshac.me/docs/v4/Guides/Custom-Challenge-Validation/</loc>
          <lastmod>2021-09-01</lastmod>
          <changefreq>daily</changefreq>
