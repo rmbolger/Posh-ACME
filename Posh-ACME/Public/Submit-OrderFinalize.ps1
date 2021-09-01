@@ -111,37 +111,4 @@ function Submit-OrderFinalize {
         catch { $PSCmdlet.ThrowTerminatingError($_) }
 
     }
-
-
-
-    <#
-    .SYNOPSIS
-        Finalize a certificate order
-
-    .DESCRIPTION
-        Finalizing a certificate order will send a new certificate request to the server and then wait for it to become valid or invalid.
-
-    .PARAMETER Order
-        The ACME order to finalize. The order object must be associated with the currently active ACME account.
-
-    .EXAMPLE
-        Submit-OrderFinalize
-
-        Finalize the current order.
-
-    .EXAMPLE
-        Get-PAOrder example.com | Submit-OrderFinalize
-
-        Finalize the specified order.
-
-    .LINK
-        Project: https://github.com/rmbolger/Posh-ACME
-
-    .LINK
-        Get-PAOrder
-
-    .LINK
-        Submit-ChallengeValidation
-
-    #>
 }

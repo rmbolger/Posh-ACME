@@ -81,39 +81,4 @@ function Get-PAPluginArgs {
 
         $pData
     }
-
-    <#
-    .SYNOPSIS
-        Retrieve the plugin args for the current or specified order.
-
-    .DESCRIPTION
-        An easy way to recall the plugin args used for a given order.
-
-    .PARAMETER MainDomain
-        The primary domain for the order. For a SAN order, this was the first domain in the list when creating the order.
-
-    .PARAMETER Name
-        The name of the ACME order. This can be useful to distinguish between two orders that have the same MainDomain.
-
-    .EXAMPLE
-        Get-PAPluginArgs
-
-        Retrieve the plugin args for the current order.
-
-    .EXAMPLE
-        Get-PAPluginArgs -Name myorder
-
-        Retrieve the plugin args for the specified order.
-
-    .EXAMPLE
-        Get-PAOrder -Name myorder | Get-PAPluginArgs
-
-        Retrieve the plugin args for the order passed via the pipeline.
-
-    .LINK
-        Project: https://github.com/rmbolger/Posh-ACME
-
-    .LINK
-        Gew-PAOrder
-    #>
 }

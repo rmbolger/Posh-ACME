@@ -79,7 +79,7 @@ function Get-PAPlugin {
         # the future.
         # https://github.com/PowerShell/PowerShell/issues/7201
 
-        $url = "https://github.com/rmbolger/Posh-ACME/blob/main/Posh-ACME/Plugins/$($pluginDetail.Name)-Readme.md"
+        $url = "https://poshac.me/docs/v4/Plugins/$($pluginDetail.Name)/"
 
         try {
             # launch the browser to the guide
@@ -100,48 +100,4 @@ function Get-PAPlugin {
         }
         return
     }
-
-
-
-    <#
-    .SYNOPSIS
-        Show plugin details, help, or launch the online guide.
-
-    .DESCRIPTION
-        With no parameters, this function will return a list of built-in validation plugins and their details.
-
-        With a Plugin specified, this function will return that plugin's details, help, or launch the online guide depending on which switches are specified.
-
-    .PARAMETER Plugin
-        The name of a validation plugin.
-
-    .PARAMETER Help
-        If specified, display the help contents for the specified plugin.
-
-    .PARAMETER Guide
-        If specified, launch the default web browser to the specified plugin's online guide. This currently only works on Windows and will simply display the URL on other OSes.
-
-    .PARAMETER Params
-        If specified, returns the plugin-specific parameter sets associated with this plugin.
-
-    .EXAMPLE
-        Get-PAPlugin
-
-        Get the list of available validation plugins
-
-    .EXAMPLE
-        Get-PAPlugin Route53 -Guide
-
-        Launch the user's default web browser to the online guide for the specified plugin.
-
-    .LINK
-        Project: https://github.com/rmbolger/Posh-ACME
-
-    .LINK
-        New-PACertificate
-
-    .LINK
-        Publish-Challenge
-
-    #>
 }

@@ -1,0 +1,7 @@
+nav:
+  - index.md
+  - Tutorial.md
+  - Functions
+  - Plugins
+  - Guides
+  - 'FAQ': 'FAQ.md'

@@ -85,44 +85,4 @@ function New-PAAuthorization {
 
         }
     }
-
-
-
-
-
-    <#
-    .SYNOPSIS
-        Create a pre-authorization for an ACME identifier.
-
-    .DESCRIPTION
-        Instead of creating an ACME order object and satisfying the associated authorization challenges on demand, users may choose to pre-authorize one or more identifiers in advance. When a user later creates an order with pre-authorized identifiers, it will be immediately ready to finalize.
-
-        NOTE: Not all ACME servers support pre-authorization. The authorizations created this way also expire the same way they do when associated directly with an order.
-
-    .PARAMETER Domain
-        One or more ACME identifiers (usually domain names).
-
-    .PARAMETER Account
-        An existing ACME account object such as the output from Get-PAAccount. If no account is specified, the current account will be used.
-
-    .EXAMPLE
-        $auth = New-PAAuthorization example.com
-
-        Create a new authorization for the specified domain using the current account.
-
-    .EXAMPLE
-        $auths = 'example.com','www.example.com' | New-PAAuthorization -Account (Get-PAAccount 123)
-
-        Create new authorizations for the specified domains via the pipeline and using the specified account.
-
-    .LINK
-        Project: https://github.com/rmbolger/Posh-ACME
-
-    .LINK
-        Get-PAAuthorization
-
-    .LINK
-        New-PAOrder
-
-    #>
 }

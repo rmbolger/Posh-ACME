@@ -81,36 +81,4 @@ function Complete-PAOrder {
         # output cert details
         return $cert
     }
-
-
-    <#
-    .SYNOPSIS
-        Exports cert files for a completed order and adds suggested renewal window to the order.
-
-    .DESCRIPTION
-        Once an ACME order is finalized, the signed certificate and chain can be downloaded and combined with the local private key to generate the supported PEM and PFX files on disk. This function will also calculate the renewal window based on the signed certificate's expiration date and update the order object with that info. If the Install flag is set, this function will attempt to import the certificate into the Windows certificate store.
-
-    .PARAMETER Order
-        The ACME order to complete. The order object must be associated with the currently active ACME account.
-
-    .EXAMPLE
-        Complete-PAOrder
-
-        Complete the current order.
-
-    .EXAMPLE
-        Get-PAOrder example.com | Complete-PAOrder
-
-        Complete the specified order.
-
-    .LINK
-        Project: https://github.com/rmbolger/Posh-ACME
-
-    .LINK
-        Get-PAOrder
-
-    .LINK
-        New-PAOrder
-
-    #>
 }

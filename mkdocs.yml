@@ -1,0 +1,77 @@
+# Project information
+site_name: Posh-ACME
+site_url: https://poshac.me/docs
+site_author: "Ryan Bolger"
+site_description: "Documentation for the Posh-ACME PowerShell module"
+site_dir: ..\Posh-ACME.docs\docs
+
+# Repository
+repo_name: rmbolger/Posh-ACME
+repo_url: https://github.com/rmbolger/Posh-ACME
+edit_uri: edit/main/docs/
+
+# Copyright
+copyright: "Copyright &copy; 2021 Ryan Bolger"
+
+# Configuration
+theme:
+  # https://squidfunk.github.io/mkdocs-material/
+  name: material
+
+  # Don't include MkDocs' JavaScript
+  include_search_page: false
+  search_index_only: true
+
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+
+  icon:
+    repo: fontawesome/brands/github
+
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+
+# Plugins
+plugins:
+  - search
+  # Using awesome-pages for semi-auto sub-sections until this issue is resolved
+  # https://github.com/mkdocs/mkdocs/issues/714
+  - awesome-pages
+
+# Customization
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/rmbolger
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/rmbolger
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/in/rmbolger/
+  version:
+    provider: mike
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - toc:
+      permalink: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
