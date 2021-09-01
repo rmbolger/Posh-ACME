@@ -14,10 +14,11 @@ $html = Get-ChildItem *.html -Recurse | Get-Content -Raw
 
 # create regex as necessary
 $reScript = [regex]'<script>(?<src>.*)</script>'
+$reStyle = [regex]'<style>(?<src>.*)</style>'
 
 # find all script instances
 $reScript.Matches($html) | ForEach-Object {
-    # pull out the matched script source
+    # pull out the matched source
     $_.Groups['src'].Value
 }  | Group-Object | ForEach-Object {
 
@@ -27,6 +28,25 @@ $reScript.Matches($html) | ForEach-Object {
     $tagHash = [Convert]::ToBase64String($sha256.ComputeHash($tagBytes))
     [pscustomobject]@{
         cspSection = 'script-src'
+        hash = "'sha256-$tagHash'"
+        instances = $_.Count
+        contents = $content
+    }
+
+} | Sort-Object hash
+
+# find all style instances
+$reStyle.Matches($html) | ForEach-Object {
+    # pull out the matched source
+    $_.Groups['src'].Value
+}  | Group-Object | ForEach-Object {
+
+    $content = $_.Name
+
+    $tagBytes = [Text.Encoding]::UTF8.GetBytes($content)
+    $tagHash = [Convert]::ToBase64String($sha256.ComputeHash($tagBytes))
+    [pscustomobject]@{
+        cspSection = 'style-src'
         hash = "'sha256-$tagHash'"
         instances = $_.Count
         contents = $content
