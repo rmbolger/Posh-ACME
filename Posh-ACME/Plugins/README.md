@@ -2,4 +2,4 @@
 
 The plugin development guide has been moved to here:
 
-https://poshac.me/docs/Plugins/Plugin-Development-Guide/
+https://poshac.me/docs/latest/Plugins/Plugin-Development-Guide/

@@ -9,14 +9,14 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - All-in-one command for new certs, `New-PACertificate`
 - Easy renewals with `Submit-Renewal`
 - RSA and ECDSA keys supported for accounts and certificates
-- Built-in validation plugins for [DNS and HTTP](https://poshac.me/docs/Plugins/) based challenges. (pull requests welcome)
+- Built-in validation plugins for [DNS and HTTP](https://poshac.me/docs/latest/Plugins/) based challenges. (pull requests welcome)
 - Support for pre-created certificate requests (CSR)
 - PEM and PFX output files
 - No elevated Windows privileges required *(unless using `-Install` switch)*
-- Cross platform PowerShell support. [(FAQ)](https://poshac.me/docs/FAQ/#does-posh-acme-work-cross-platform-on-powershell-core)
+- Cross platform PowerShell support. [(FAQ)](https://poshac.me/docs/latest/FAQ/#does-posh-acme-work-cross-platform-on-powershell-core)
 - Account key rollover support
 - [OCSP Must-Staple](https://scotthelme.co.uk/ocsp-must-staple/) support
-- DNS challenge [CNAME support](https://poshac.me/docs/Guides/Using-DNS-Challenge-Aliases/)
+- DNS challenge [CNAME support](https://poshac.me/docs/latest/Guides/Using-DNS-Challenge-Aliases/)
 - Multiple ACME accounts supported per ACME CA.
 - External Account Binding support for ACME CAs that require it
 - Preferred Chain support to use alternative CA trust chains
