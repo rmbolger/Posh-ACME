@@ -1559,6 +1559,18 @@
   
   
     <li class="md-nav__item">
+      <a href="../Using-Custom-Plugins/" class="md-nav__link">
+        Using Custom Plugins
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../Using-DNS-Challenge-Aliases/" class="md-nav__link">
         Using DNS Challenge Aliases
       </a>
@@ -1715,7 +1727,7 @@
                 
                 
                 <h1 id="using-an-alternate-config-location">Using an Alternate Config Location<a class="headerlink" href="#using-an-alternate-config-location" title="Permanent link">&para;</a></h1>
-<p>As of version 3.2.0, you can now configure Posh-ACME to use a different config location than the default path in the current user's profile folder. To do so, set an environment variable called <code>POSHACME_HOME</code> prior to running <code>Import-Module</code> or calling your first function. This can be done directly in the PowerShell session or any other standard way of setting environment variables in your OS or config management system. If the module was already imported before setting the environment variable, re-import with the <code>-Force</code> parameter to pick up the new location.</p>
+<p>Since version 3.2.0, you can configure Posh-ACME to use a different config location than the default path in the current user's profile folder. To do so, set an environment variable called <code>POSHACME_HOME</code> prior to running <code>Import-Module</code> or calling your first function. This can be done directly in the PowerShell session or any other standard way of setting environment variables in your OS or config management system. If the module was already imported before setting the environment variable, re-import with the <code>-Force</code> parameter to pick up the new location.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$env:POSHACME_HOME</span> <span class="p">=</span> <span class="s1">&#39;C:\my\path&#39;</span>
 <span class="nb">Import-Module</span> <span class="n">Posh-ACME</span> <span class="n">-Force</span>
 </code></pre></div>

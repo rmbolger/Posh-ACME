@@ -432,6 +432,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#modifying-certificate-names" class="md-nav__link">
+    Modifying Certificate Names
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1645,6 +1652,18 @@
   
   
     <li class="md-nav__item">
+      <a href="../Guides/Using-Custom-Plugins/" class="md-nav__link">
+        Using Custom Plugins
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../Guides/Using-DNS-Challenge-Aliases/" class="md-nav__link">
         Using DNS Challenge Aliases
       </a>
@@ -1773,6 +1792,13 @@
         <li class="md-nav__item">
   <a href="#going-into-production" class="md-nav__link">
     Going Into Production
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modifying-certificate-names" class="md-nav__link">
+    Modifying Certificate Names
   </a>
   
 </li>
@@ -1947,6 +1973,24 @@
 <span class="nb">New-PACertificate</span> <span class="s1">&#39;*.example.com&#39;</span><span class="p">,</span><span class="s1">&#39;example.com&#39;</span> <span class="n">-AcceptTOS</span> <span class="n">-Contact</span> <span class="s1">&#39;admin@example.com&#39;</span> <span class="p">`</span>
     <span class="n">-Plugin</span> <span class="n">Route53</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span> <span class="n">-Verbose</span>
 </code></pre></div>
+<h2 id="modifying-certificate-names">Modifying Certificate Names<a class="headerlink" href="#modifying-certificate-names" title="Permanent link">&para;</a></h2>
+<p>You may eventually need to add or remove names from your certificate to accommodate changes in the services you're hosting. But certificates can't be modified after they're generated. So you need to request a new certificate with the updated set of names.</p>
+<p>While you could just re-run your <code>New-PACertificate</code> command with a modified domain list and all the other original parameters and plugin details, that can be a hassle if it has been a while since you originally setup the certificate and don't remember exactly what you ran. However, all you really need is the modified domain list and the order name.</p>
+<p>Grab the the order details for the order you'll be modifying and create a hashtable for splatting with the <code>Name</code> and <code>Domain</code> parameters.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$o</span> <span class="p">=</span> <span class="nb">Get-PAOrder</span> <span class="n">-Name</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span>
+<span class="nv">$newCertParams</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">Name</span> <span class="p">=</span> <span class="nv">$o</span><span class="p">.</span><span class="n">Name</span><span class="p">;</span> <span class="n">Domain</span> <span class="p">=</span> <span class="p">@(</span><span class="nv">$o</span><span class="p">.</span><span class="n">MainDomain</span><span class="p">)+@(</span><span class="nv">$o</span><span class="p">.</span><span class="n">SANs</span><span class="p">)</span> <span class="p">}</span>
+</code></pre></div>
+<p>Now modify the Domain parameter in the hashtable however you need to. Here are a couple examples.</p>
+<div class="highlight"><pre><span></span><code><span class="c"># add a new name</span>
+<span class="nv">$newCertParams</span><span class="p">.</span><span class="n">Domain</span> <span class="p">+=</span> <span class="s1">&#39;blog.example.com&#39;</span>
+
+<span class="c"># remove an existing name</span>
+<span class="nv">$newCertParams</span><span class="p">.</span><span class="n">Domain</span> <span class="p">=</span> <span class="nv">$newCertParams</span><span class="p">.</span><span class="n">Domain</span> <span class="p">|</span> <span class="p">?{</span> <span class="nv">$_</span> <span class="o">-ne</span> <span class="s1">&#39;oldsite.example.com&#39;</span> <span class="p">}</span>
+</code></pre></div>
+<p>Finally, run <code>New-PACertificate</code> and splat your updated parameters.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">New-PACertificate</span> <span class="nv">@newCertParams</span> <span class="n">-Verbose</span>
+</code></pre></div>
+<p>The function should pick up all the old parameters from the previous order (finding it via the <code>Name</code> parameter) and create a new order/cert that overwrites the old one.</p>
                 
               
               

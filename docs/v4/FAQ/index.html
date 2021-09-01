@@ -1557,6 +1557,18 @@
   
   
     <li class="md-nav__item">
+      <a href="../Guides/Using-Custom-Plugins/" class="md-nav__link">
+        Using Custom Plugins
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../Guides/Using-DNS-Challenge-Aliases/" class="md-nav__link">
         Using DNS Challenge Aliases
       </a>
@@ -1798,14 +1810,14 @@
                 
                 <h1 id="frequently-asked-questions-faq">Frequently Asked Questions (FAQ)<a class="headerlink" href="#frequently-asked-questions-faq" title="Permanent link">&para;</a></h1>
 <h2 id="where-is-my-config-where-is-my-cert">Where is my config? Where is my cert?<a class="headerlink" href="#where-is-my-config-where-is-my-cert" title="Permanent link">&para;</a></h2>
-<p>Unless you have [[changed the default|(Advanced) Using an Alternate Config Location]],  all Posh-ACME config is in your user profile depending on the OS:</p>
+<p>Unless you have <a href="../Guides/Using-an-Alternate-Config-Location/">changed the default</a>, all Posh-ACME config is in your user profile depending on the OS:</p>
 <ul>
 <li>Windows: <code>%LOCALAPPDATA%\Posh-ACME</code></li>
 <li>Linux: <code>$HOME/.config/Posh-ACME</code></li>
 <li>MacOS: <code>$HOME/Library/Preferences/Posh-ACME</code></li>
 </ul>
 <p>The full paths to all cert files for the current order is in the detailed output of <code>Get-PACertificate</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">Get-PACertificate</span> <span class="p">|</span> <span class="nb">fl</span>
+<div class="highlight"><pre><span></span><code><span class="nb">Get-PACertificate</span> <span class="p">|</span> <span class="nb">Format-List</span>
 </code></pre></div>
 <h2 id="how-do-i-upgrade-from-3x-to-4x">How Do I Upgrade From 3.x to 4.x?<a class="headerlink" href="#how-do-i-upgrade-from-3x-to-4x" title="Permanent link">&para;</a></h2>
 <p>If your certificate renewals are using <code>Submit-Renewal</code>, no changes should be necessary in order to upgrade from 3.x to 4.0 unless you were using the <code>-NewKey</code> parameter which has been removed. Orders can now be configured to always generate a new private key using <code>Set-PAOrder -AlwaysNewKey</code>. For example, you can set the flag for all orders in an account like this:</p>
@@ -1839,7 +1851,7 @@
 <span class="nb">New-PACertificate</span> <span class="n">www2</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">MyPlugin</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
 <h2 id="how-have-plugins-changed-in-4x">How have Plugins changed in 4.x?<a class="headerlink" href="#how-have-plugins-changed-in-4x" title="Permanent link">&para;</a></h2>
-<p>See the <a href="https://github.com/rmbolger/Posh-ACME/blob/main/Posh-ACME/Plugins/README.md#migrating-dns-plugins-from-3x-to-4x">Migrating DNS Plugins from 3x to 4x</a> section of the plugin development guide.</p>
+<p>See the <a href="../Plugins/Plugin-Development-Guide/#migrating-dns-plugins-from-3x-to-4x">Migrating DNS Plugins from 3x to 4x</a> section of the plugin development guide.</p>
 <h2 id="does-posh-acme-work-cross-platform-on-powershell-core">Does Posh-ACME work cross platform on PowerShell Core?<a class="headerlink" href="#does-posh-acme-work-cross-platform-on-powershell-core" title="Permanent link">&para;</a></h2>
 <p>Yes as of 2.2.0!...with a few caveats.</p>
 <p>The <code>-Install</code> parameter in <code>New-PACertificate</code> is not supported on non-Windows platforms and will throw an error if used because there's no certificate store equivalent to install to.</p>
