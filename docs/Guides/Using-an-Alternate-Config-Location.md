@@ -1,6 +1,6 @@
 # Using an Alternate Config Location
 
-As of version 3.2.0, you can now configure Posh-ACME to use a different config location than the default path in the current user's profile folder. To do so, set an environment variable called `POSHACME_HOME` prior to running `Import-Module` or calling your first function. This can be done directly in the PowerShell session or any other standard way of setting environment variables in your OS or config management system. If the module was already imported before setting the environment variable, re-import with the `-Force` parameter to pick up the new location.
+Since version 3.2.0, you can configure Posh-ACME to use a different config location than the default path in the current user's profile folder. To do so, set an environment variable called `POSHACME_HOME` prior to running `Import-Module` or calling your first function. This can be done directly in the PowerShell session or any other standard way of setting environment variables in your OS or config management system. If the module was already imported before setting the environment variable, re-import with the `-Force` parameter to pick up the new location.
 
 ```powershell
 $env:POSHACME_HOME = 'C:\my\path'

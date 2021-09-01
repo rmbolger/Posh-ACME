@@ -2,7 +2,7 @@
 
 ## Where is my config? Where is my cert?
 
-Unless you have [[changed the default|(Advanced) Using an Alternate Config Location]],  all Posh-ACME config is in your user profile depending on the OS:
+Unless you have [changed the default](Guides/Using-an-Alternate-Config-Location.md), all Posh-ACME config is in your user profile depending on the OS:
 
 - Windows: `%LOCALAPPDATA%\Posh-ACME`
 - Linux: `$HOME/.config/Posh-ACME`
@@ -11,7 +11,7 @@ Unless you have [[changed the default|(Advanced) Using an Alternate Config Locat
 The full paths to all cert files for the current order is in the detailed output of `Get-PACertificate`.
 
 ```powershell
-Get-PACertificate | fl
+Get-PACertificate | Format-List
 ```
 
 ## How Do I Upgrade From 3.x to 4.x?
@@ -56,7 +56,7 @@ New-PACertificate www2.example.com -Plugin MyPlugin -PluginArgs $pArgs
 
 ## How have Plugins changed in 4.x?
 
-See the [Migrating DNS Plugins from 3x to 4x](https://github.com/rmbolger/Posh-ACME/blob/main/Posh-ACME/Plugins/README.md#migrating-dns-plugins-from-3x-to-4x) section of the plugin development guide.
+See the [Migrating DNS Plugins from 3x to 4x](Plugins/Plugin-Development-Guide.md#migrating-dns-plugins-from-3x-to-4x) section of the plugin development guide.
 
 ## Does Posh-ACME work cross platform on PowerShell Core?
 

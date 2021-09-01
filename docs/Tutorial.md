@@ -217,3 +217,34 @@ Set-PAServer LE_PROD
 New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact 'admin@example.com' `
     -Plugin Route53 -PluginArgs $pArgs -Verbose
 ```
+
+## Modifying Certificate Names
+
+You may eventually need to add or remove names from your certificate to accommodate changes in the services you're hosting. But certificates can't be modified after they're generated. So you need to request a new certificate with the updated set of names.
+
+While you could just re-run your `New-PACertificate` command with a modified domain list and all the other original parameters and plugin details, that can be a hassle if it has been a while since you originally setup the certificate and don't remember exactly what you ran. However, all you really need is the modified domain list and the order name.
+
+Grab the the order details for the order you'll be modifying and create a hashtable for splatting with the `Name` and `Domain` parameters.
+
+```powershell
+$o = Get-PAOrder -Name example.com
+$newCertParams = @{ Name = $o.Name; Domain = @($o.MainDomain)+@($o.SANs) }
+```
+
+Now modify the Domain parameter in the hashtable however you need to. Here are a couple examples.
+
+```powershell
+# add a new name
+$newCertParams.Domain += 'blog.example.com'
+
+# remove an existing name
+$newCertParams.Domain = $newCertParams.Domain | ?{ $_ -ne 'oldsite.example.com' }
+```
+
+Finally, run `New-PACertificate` and splat your updated parameters.
+
+```powershell
+New-PACertificate @newCertParams -Verbose
+```
+
+The function should pick up all the old parameters from the previous order (finding it via the `Name` parameter) and create a new order/cert that overwrites the old one.
