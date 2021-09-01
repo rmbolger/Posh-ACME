@@ -1,7 +1,7 @@
 ---
 external help file: Posh-ACME-help.xml
 Module Name: Posh-ACME
-online version: https://poshac.me/docs/Functions/Get-KeyAuthorization/
+online version: https://poshac.me/docs/v4/Functions/Get-KeyAuthorization/
 schema: 2.0.0
 ---
 

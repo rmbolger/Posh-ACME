@@ -1,7 +1,7 @@
 ---
 external help file: Posh-ACME-help.xml
 Module Name: Posh-ACME
-online version: https://poshac.me/docs/Functions/Remove-PAAccount/
+online version: https://poshac.me/docs/v4/Functions/Remove-PAAccount/
 schema: 2.0.0
 ---
 

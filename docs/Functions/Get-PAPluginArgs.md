@@ -1,7 +1,7 @@
 ---
 external help file: Posh-ACME-help.xml
 Module Name: Posh-ACME
-online version: https://poshac.me/docs/Functions/Get-PAPluginArgs/
+online version: https://poshac.me/docs/v4/Functions/Get-PAPluginArgs/
 schema: 2.0.0
 ---
 

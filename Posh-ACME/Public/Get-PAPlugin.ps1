@@ -79,7 +79,7 @@ function Get-PAPlugin {
         # the future.
         # https://github.com/PowerShell/PowerShell/issues/7201
 
-        $url = "https://github.com/rmbolger/Posh-ACME/blob/main/Posh-ACME/Plugins/$($pluginDetail.Name)-Readme.md"
+        $url = "https://poshac.me/docs/v4/Plugins/$($pluginDetail.Name)/"
 
         try {
             # launch the browser to the guide

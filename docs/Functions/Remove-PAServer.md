@@ -1,7 +1,7 @@
 ---
 external help file: Posh-ACME-help.xml
 Module Name: Posh-ACME
-online version: https://poshac.me/docs/Functions/Remove-PAServer/
+online version: https://poshac.me/docs/v4/Functions/Remove-PAServer/
 schema: 2.0.0
 ---
 

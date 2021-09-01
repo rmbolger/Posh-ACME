@@ -87,7 +87,7 @@
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Complete-PAOrder/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Complete-PAOrder/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -273,7 +273,7 @@ Get-PAAccount -List | %{
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Export-PAAccountKey/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Export-PAAccountKey/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAccount</maml:linkText>
@@ -415,7 +415,7 @@ Get-PAAccount -List | %{
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Get-KeyAuthorization/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Get-KeyAuthorization/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAuthorization</maml:linkText>
@@ -705,7 +705,7 @@ Get-PAAccount -List | %{
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Get-PAAccount/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Get-PAAccount/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Set-PAAccount</maml:linkText>
@@ -836,7 +836,7 @@ Get-PAAccount -List | %{
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Get-PAAuthorization/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Get-PAAuthorization/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -984,7 +984,7 @@ Get-PAAccount -List | %{
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Get-PACertificate/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Get-PACertificate/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>New-PACertificate</maml:linkText>
@@ -1178,7 +1178,7 @@ Get-PAAccount -List | %{
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Get-PAOrder/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Get-PAOrder/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Set-PAOrder</maml:linkText>
@@ -1374,7 +1374,7 @@ Get-PAAccount -List | %{
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Get-PAPlugin/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Get-PAPlugin/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>New-PACertificate</maml:linkText>
@@ -1496,7 +1496,7 @@ Get-PAAccount -List | %{
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Get-PAPluginArgs/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Get-PAPluginArgs/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Gew-PAOrder</maml:linkText>
@@ -1721,7 +1721,7 @@ Get-PAAccount -List | %{
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Get-PAServer/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Get-PAServer/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Set-PAServer</maml:linkText>
@@ -1888,7 +1888,7 @@ Get-PAAccount -List | %{
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Install-PACertificate/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Install-PACertificate/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PACertificate</maml:linkText>
@@ -2129,7 +2129,7 @@ Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Invoke-HttpChallengeListener/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Invoke-HttpChallengeListener/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -2679,7 +2679,7 @@ Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/New-PAAccount/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/New-PAAccount/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAccount</maml:linkText>
@@ -2803,7 +2803,7 @@ Invoke-HttpChallengeListener -ListenerPrefixes $prefixes</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/New-PAAuthorization/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/New-PAAuthorization/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAuthorization</maml:linkText>
@@ -3582,7 +3582,7 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/New-PACertificate/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/New-PACertificate/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Submit-Renewal</maml:linkText>
@@ -4505,7 +4505,7 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/New-PAOrder/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/New-PAOrder/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -4710,7 +4710,7 @@ Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Publish-Challenge/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Publish-Challenge/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Unpublish-Challenge</maml:linkText>
@@ -4887,7 +4887,7 @@ Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Remove-PAAccount/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Remove-PAAccount/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAccount</maml:linkText>
@@ -5084,7 +5084,7 @@ Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Remove-PAOrder/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Remove-PAOrder/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -5273,7 +5273,7 @@ Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Remove-PAServer/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Remove-PAServer/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAServer</maml:linkText>
@@ -5465,7 +5465,7 @@ Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Revoke-PAAuthorization/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Revoke-PAAuthorization/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAuthorization</maml:linkText>
@@ -5797,7 +5797,7 @@ Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Revoke-PACertificate/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Revoke-PACertificate/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>New-PACertificate</maml:linkText>
@@ -5899,7 +5899,7 @@ Publish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Save-Challenge/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Save-Challenge/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Publish-Challenge</maml:linkText>
@@ -6020,7 +6020,7 @@ $httpUrls | Send-ChallengeAck</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Send-ChallengeAck/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Send-ChallengeAck/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAuthorization</maml:linkText>
@@ -6528,7 +6528,7 @@ $httpUrls | Send-ChallengeAck</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Set-PAAccount/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Set-PAAccount/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAAccount</maml:linkText>
@@ -7148,7 +7148,7 @@ $httpUrls | Send-ChallengeAck</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Set-PAOrder/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Set-PAOrder/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -7377,7 +7377,7 @@ $httpUrls | Send-ChallengeAck</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Set-PAServer/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Set-PAServer/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAServer</maml:linkText>
@@ -7463,7 +7463,7 @@ $httpUrls | Send-ChallengeAck</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Submit-ChallengeValidation/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Submit-ChallengeValidation/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -7553,7 +7553,7 @@ $httpUrls | Send-ChallengeAck</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Submit-OrderFinalize/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Submit-OrderFinalize/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Get-PAOrder</maml:linkText>
@@ -7883,7 +7883,7 @@ $httpUrls | Send-ChallengeAck</dev:code>
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Submit-Renewal/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Submit-Renewal/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>New-PACertificate</maml:linkText>
@@ -8088,7 +8088,7 @@ Unpublish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken</dev:code
     <command:relatedLinks>
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://poshac.me/docs/Functions/Unpublish-Challenge/</maml:uri>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Unpublish-Challenge/</maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Publish-Challenge</maml:linkText>

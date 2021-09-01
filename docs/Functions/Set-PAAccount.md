@@ -1,7 +1,7 @@
 ---
 external help file: Posh-ACME-help.xml
 Module Name: Posh-ACME
-online version: https://poshac.me/docs/Functions/Set-PAAccount/
+online version: https://poshac.me/docs/v4/Functions/Set-PAAccount/
 schema: 2.0.0
 ---
 

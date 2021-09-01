@@ -62,7 +62,7 @@ The first thing to do is figure out which DNS plugin to use and how to use it. S
 Get-PAPlugin
 ```
 
-Most plugins have a detailed usage guide in the project wiki. In these examples, we'll use the AWS Route53 plugin. Here's a quick shortcut to get to the usage guide. This will open the default browser to the page on Windows and just display the URL on non-Windows.
+Most plugins have a detailed usage guide [here](Plugins/index.md). In these examples, we'll use the AWS Route53 plugin. Here's a quick shortcut to get to the usage guide. This will open the default browser to the page on Windows and just display the URL on non-Windows.
 
 ```powershell
 Get-PAPlugin Route53 -Guide
