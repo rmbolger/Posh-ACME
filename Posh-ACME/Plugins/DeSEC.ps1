@@ -8,20 +8,32 @@ function Add-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
+        [securestring]$DSCToken,
+        [Parameter(ParameterSetName='DeprecatedSecure',Mandatory,Position=2)]
         [securestring]$DSToken,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$DSTokenInsecure,
-        [Parameter()]
-        [int]$DSTTL = 300,
+        [Parameter(ParameterSetName='DeprecatedSecure')]
+        [Parameter(ParameterSetName='DeprecatedInsecure')]
+        [int]$DSTTL = 3600,
+        [Parameter(ParameterSetName='Secure')]
+        [int]$DSCTTL = 3600,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # convert the secure token to a normal string
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $DSTokenInsecure = (New-Object PSCredential ("user", $DSToken)).GetNetworkCredential().Password
+        $token = (New-Object PSCredential ("user", $DSCToken)).GetNetworkCredential().Password
+    } elseif ('DeprecatedSecure' -eq $PSCmdlet.ParameterSetName) {
+        $token = (New-Object PSCredential ("user", $DSToken)).GetNetworkCredential().Password
+        $DSCTTL = $DSTTL
+    } else {
+        # DeprecatedInsecure
+        $token = $DSTokenInsecure
+        $DSCTTL = $DSTTL
     }
-    $AuthHeader = @{ Authorization = "Token $($DSTokenInsecure)" }
+    $AuthHeader = @{ Authorization = "Token $($token)" }
 
     try {
         $rrset, $recordUri, $domain, $subname = Find-DeSECRRset $RecordName $AuthHeader
@@ -43,7 +55,7 @@ function Add-DnsTxt {
                 subname = $subname
                 "type" = "TXT"
                 records = @("`"$TxtValue`"")
-                ttl = $DSTTL
+                ttl = $DSCTTL
             } | ConvertTo-Json
 
             Write-Verbose "Creating new RRset for record $RecordName with value $TxtValue."
@@ -66,21 +78,27 @@ function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER DSToken
+    .PARAMETER DSCToken
         The deSEC API authentication token for your account.
+
+    .PARAMETER DSToken
+        (DEPRECATED) The deSEC API authentication token for your account.
 
     .PARAMETER DSTokenInsecure
-        The deSEC API authentication token for your account.
+        (DEPRECATED) The deSEC API authentication token for your account.
+
+    .PARAMETER DSCTTL
+        The TTL of new TXT record (default 3600).
 
     .PARAMETER DSTTL
-        The TTL of new TXT record (default 300).
+        (DEPRECATED) The TTL of new TXT record (default 3600).
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $DSToken = ConvertTo-SecureString 'token-value' -AsPlainText -Force
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $DSToken
+        $token = ConvertTo-SecureString 'token-value' -AsPlainText -Force
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -94,18 +112,30 @@ function Remove-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
+        [securestring]$DSCToken,
+        [Parameter(ParameterSetName='DeprecatedSecure',Mandatory,Position=2)]
         [securestring]$DSToken,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$DSTokenInsecure,
+        [Parameter(ParameterSetName='DeprecatedSecure')]
+        [Parameter(ParameterSetName='DeprecatedInsecure')]
+        [int]$DSTTL = 3600,
+        [Parameter(ParameterSetName='Secure')]
+        [int]$DSCTTL = 3600,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # convert the secure token to a normal string
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $DSTokenInsecure = (New-Object PSCredential ("user", $DSToken)).GetNetworkCredential().Password
+        $token = (New-Object PSCredential ("user", $DSCToken)).GetNetworkCredential().Password
+    } elseif ('DeprecatedSecure' -eq $PSCmdlet.ParameterSetName) {
+        $token = (New-Object PSCredential ("user", $DSToken)).GetNetworkCredential().Password
+    } else {
+        # DeprecatedInsecure
+        $token = $DSTokenInsecure
     }
-    $AuthHeader = @{ Authorization = "Token $($DSTokenInsecure)" }
+    $AuthHeader = @{ Authorization = "Token $($token)" }
 
     # get existing record
     try {
@@ -144,18 +174,27 @@ function Remove-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER DSToken
+    .PARAMETER DSCToken
         The deSEC API authentication token for your account.
 
+    .PARAMETER DSToken
+        (DEPRECATED) The deSEC API authentication token for your account.
+
     .PARAMETER DSTokenInsecure
-        The deSEC API authentication token for your account.
+        (DEPRECATED) The deSEC API authentication token for your account.
+
+    .PARAMETER DSCTTL
+        The TTL of new TXT record (default 3600).
+
+    .PARAMETER DSTTL
+        (DEPRECATED) The TTL of new TXT record (default 3600).
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $DSToken = ConvertTo-SecureString 'token-value' -AsPlainText -Force
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $DSToken
+        $token = ConvertTo-SecureString 'token-value' -AsPlainText -Force
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
 
         Removes a TXT record for the specified site with the specified value.
     #>

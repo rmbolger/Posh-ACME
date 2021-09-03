@@ -10,19 +10,13 @@ You may already have an API token from your original registration email. If not,
 
 ## Using the Plugin
 
-You will need to provide the API token as a SecureString value to `DSToken` or a standard string value to `DSTokenInsecure`. The SecureString version can only be used from Windows or any OS running PowerShell 6.2 or later. `DSTTL` is the TTL of new `TXT` record (optional, defaults to 300 if not provided).
+You will need to provide the API token as a SecureString value to `DSCToken`. There is an optional `DSCTTL` parameter to use as the TTL of new `TXT` record. It defaults to 3600 which seems to be the minimum value allowed by the API.
 
-### Windows or PS 6.2+
-
-```powershell
-$token = Read-Host "deSEC Token" -AsSecureString
-$pArgs = @{ DSToken = $token; DSTTL=3600 }
-New-PACertificate example.com -Plugin DeSEC -PluginArgs $pArgs
-```
-
-### Any OS
+*NOTE: The `DSToken`, `DSTokenInsecure`, and `DSTTL` parameters have been deprecated because they conflicted with another Posh-ACME plugin. Please migrate to the newer parameters as they will be removed in the next major version of the module.*
 
 ```powershell
-$pArgs = @{ DSTokenInsecure = 'token-value'; DSTTL=3600 }
+$pArgs = @{
+    DSCToken = (Read-Host "deSEC Token" -AsSecureString)
+}
 New-PACertificate example.com -Plugin DeSEC -PluginArgs $pArgs
 ```
