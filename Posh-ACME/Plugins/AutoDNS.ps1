@@ -12,7 +12,7 @@ function Add-DnsTxt {
         [string]$AutoDNSUser,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [securestring]$AutoDNSPassword,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AutoDNSPasswordInsecure,
         [string]$AutoDNSContext='4',
         [string]$AutoDNSGateway='gateway.autodns.com',
@@ -68,7 +68,7 @@ function Add-DnsTxt {
         AutoDNS password. This SecureString version should only be used on Windows.
 
     .PARAMETER AutoDNSPasswordInsecure
-        AutoDNS password. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) AutoDNS password. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER AutoDNSContext
         ID of the personalized system of the subuser. Defaults to 4.
@@ -80,7 +80,8 @@ function Add-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -AutoDnsUser 'user' -AutoDNSPasswordInsecure 'password'
+        $pass = Read-Host -AsSecureString
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -AutoDnsUser 'user' -AutoDNSPassword $pass
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -98,7 +99,7 @@ function Remove-DnsTxt {
         [string]$AutoDNSUser,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [securestring]$AutoDNSPassword,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AutoDNSPasswordInsecure,
         [string]$AutoDNSContext='4',
         [string]$AutoDNSGateway='gateway.autodns.com',
@@ -155,7 +156,7 @@ function Remove-DnsTxt {
         AutoDNS password. This SecureString version should only be used on Windows.
 
     .PARAMETER AutoDNSPasswordInsecure
-        AutoDNS password. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) AutoDNS password. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER AutoDNSContext
         ID of the personalized system of the subuser. Defaults to 4.
@@ -167,7 +168,8 @@ function Remove-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -AutoDnsUser 'user' -AutoDNSPasswordInsecure 'password'
+        $pass = Read-Host -AsSecureString
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -AutoDnsUser 'user' -AutoDNSPassword $pass
 
         Removes a TXT record for the specified site with the specified value.
     #>

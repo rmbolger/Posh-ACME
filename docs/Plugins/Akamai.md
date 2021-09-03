@@ -20,7 +20,7 @@ Akamai is one of the few DNS providers with an API to check whether changes have
 
 Specify API values individually using `AKHost`, `AKClientToken`, and `AKAccessToken` as string values and `AKClientSecret` as a SecureString value
 
-*NOTE: The `AKClientSecretInsecure` parameter is still supported but should be considered deprecated and may be removed in a future major release.*
+*NOTE: The `AKClientSecretInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
 $secret = Read-Host "Client Secret" -AsSecureString

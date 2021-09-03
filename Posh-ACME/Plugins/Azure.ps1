@@ -11,17 +11,17 @@ function Add-DnsTxt {
         [Parameter(Mandatory,Position=2)]
         [string]$AZSubscriptionId,
         [Parameter(ParameterSetName='Credential',Mandatory)]
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
         [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZTenantId,
         [Parameter(ParameterSetName='Credential',Mandatory)]
         [pscredential]$AZAppCred,
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
         [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZAppUsername,
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [string]$AZAppPasswordInsecure,
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
         [string]$AZCertThumbprint,
@@ -101,7 +101,7 @@ function Add-DnsTxt {
         The username for an Azure AD user or service principal that has permissions to write TXT records in the specified zone. The username for a service principal is the Application ID of its associated App Registration which can be found on its properties page.
 
     .PARAMETER AZAppPasswordInsecure
-        The password for the principal specified by AZAppUsername.
+        (DEPRECATED) The password for the principal specified by AZAppUsername.
 
     .PARAMETER AZCertThumbprint
         The thumbprint for a service principal's authentication certificate. This parameter should only be used from Windows. On non-Windows, please use AZCertPfx and AZPfxPass parameters instead.
@@ -163,17 +163,17 @@ function Remove-DnsTxt {
         [Parameter(Mandatory,Position=2)]
         [string]$AZSubscriptionId,
         [Parameter(ParameterSetName='Credential',Mandatory)]
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
         [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZTenantId,
         [Parameter(ParameterSetName='Credential',Mandatory)]
         [pscredential]$AZAppCred,
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
         [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZAppUsername,
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [string]$AZAppPasswordInsecure,
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
         [string]$AZCertThumbprint,
@@ -264,7 +264,7 @@ function Remove-DnsTxt {
         The username for an Azure AD user or service principal that has permissions to write TXT records in the specified zone. The username for a service principal is the Application ID of its associated App Registration which can be found on its properties page.
 
     .PARAMETER AZAppPasswordInsecure
-        The password for the principal specified by AZAppUsername.
+        (DEPRECATED) The password for the principal specified by AZAppUsername.
 
     .PARAMETER AZCertThumbprint
         The thumbprint for a service principal's authentication certificate. This parameter should only be used from Windows. On non-Windows, please use AZCertPfx and AZPfxPass parameters instead.
@@ -377,17 +377,17 @@ function Connect-AZTenant {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(ParameterSetName='Credential',Mandatory)]
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
         [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZTenantId,
         [Parameter(ParameterSetName='Credential',Mandatory)]
         [pscredential]$AZAppCred,
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
         [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZAppUsername,
-        [Parameter(ParameterSetName='CredentialInsecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [string]$AZAppPasswordInsecure,
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
         [string]$AZCertThumbprint,
@@ -456,7 +456,7 @@ function Connect-AZTenant {
             $token = Invoke-RestMethod $metadataUri -Body $body -Headers $headers @script:UseBasic -EA Stop
         } catch { throw }
 
-    } elseif ($PSCmdlet.ParameterSetName -in 'Credential','CredentialInsecure') {
+    } elseif ($PSCmdlet.ParameterSetName -in 'Credential','DeprecatedCredentialInsecure') {
         # We need the plaintext password to authenticate with.
         if ('Credential' -eq $PSCmdlet.ParameterSetName) {
             $AZAppUsername = $AZAppCred.UserName

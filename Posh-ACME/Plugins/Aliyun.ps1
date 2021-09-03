@@ -11,14 +11,14 @@ function Add-DnsTxt {
         [string]$AliKeyId,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$AliSecret,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$AliSecretInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # convert the insecure secret to a securestring
-    if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
+    if ('DeprecatedInsecure' -eq $PSCmdlet.ParameterSetName) {
         $AliSecret = ConvertTo-SecureString $AliSecretInsecure -AsPlainText -Force
     }
 
@@ -66,7 +66,7 @@ function Add-DnsTxt {
         The Access Secret for your Aliyun account. This SecureString version should only be used on Windows.
 
     .PARAMETER AliSecretInsecure
-        The Access Secret for your Aliyun account. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The Access Secret for your Aliyun account. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -76,11 +76,6 @@ function Add-DnsTxt {
         PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'key-id' $secret
 
         Adds a TXT record using a securestring object for AliSecret. (Only works on Windows)
-
-    .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'key-id' 'secret'
-
-        Adds a TXT record using a standard string object for AliSecretInsecure. (Use this on non-Windows)
     #>
 }
 
@@ -95,14 +90,14 @@ function Remove-DnsTxt {
         [string]$AliKeyId,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$AliSecret,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$AliSecretInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # convert the insecure secret to a securestring
-    if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
+    if ('DeprecatedInsecure' -eq $PSCmdlet.ParameterSetName) {
         $AliSecret = ConvertTo-SecureString $AliSecretInsecure -AsPlainText -Force
     }
 
@@ -150,7 +145,7 @@ function Remove-DnsTxt {
         The Access Secret for your Aliyun account. This SecureString version should only be used on Windows.
 
     .PARAMETER AliSecretInsecure
-        The Access Secret for your Aliyun account. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The Access Secret for your Aliyun account. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -160,11 +155,6 @@ function Remove-DnsTxt {
         PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'key-id' $secret
 
         Removes a TXT record using a securestring object for AliSecret. (Only works on Windows)
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'key-id' 'secret'
-
-        Removes a TXT record using a standard string object for AliSecretInsecure. (Use this on non-Windows)
     #>
 }
 

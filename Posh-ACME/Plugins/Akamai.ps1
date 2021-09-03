@@ -8,17 +8,17 @@ function Add-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKHost,
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKAccessToken,
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKClientToken,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [securestring]$AKClientSecret,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKClientSecretInsecure,
         [Parameter(ParameterSetName='EdgeRC',Mandatory)]
         [switch]$AKUseEdgeRC,
@@ -101,7 +101,7 @@ function Add-DnsTxt {
         The client_secret associated with your credentials. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER AKClientSecretInsecure
-        The client_secret associated with your credentials. This standard String version can be used on any OS.
+        (DEPRECATED) The client_secret associated with your credentials. This standard String version can be used on any OS.
 
     .PARAMETER AKUseEdgeRC
         If specified, the necessary API tokens will be read from a .edgrc file. Use AKEdgeRCFile and AKEdgeRCSection to specify the details.
@@ -123,12 +123,6 @@ function Add-DnsTxt {
         Adds the specified TXT record with the specified value using explicit API credentials and a secure client secret.
 
     .EXAMPLE
-        $params = @{AKHost='apihost.akamaiapis.net';AKAccessToken='token-value';AKClientToken='token-value';AKClientSecretInsecure='secret-value'}
-        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' @params
-
-        Adds the specified TXT record with the specified value using explicit API credentials and a plain text client secret.
-
-    .EXAMPLE
         Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -AKUseEdgeRC
 
         Adds the specified TXT record with the specified value using the default .edgerc file and section.
@@ -143,17 +137,17 @@ function Remove-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKHost,
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKAccessToken,
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKClientToken,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [securestring]$AKClientSecret,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKClientSecretInsecure,
         [Parameter(ParameterSetName='EdgeRC',Mandatory)]
         [switch]$AKUseEdgeRC,
@@ -221,7 +215,7 @@ function Remove-DnsTxt {
         The client_secret associated with your credentials. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER AKClientSecretInsecure
-        The client_secret associated with your credentials. This standard String version can be used on any OS.
+        (DEPRECATED) The client_secret associated with your credentials. This standard String version can be used on any OS.
 
     .PARAMETER AKUseEdgeRC
         If specified, the necessary API tokens will be read from a .edgrc file. Use AKEdgeRCFile and AKEdgeRCSection to specify the details.
@@ -243,12 +237,6 @@ function Remove-DnsTxt {
         Removes the specified TXT record with the specified value using explicit API credentials and a secure client secret.
 
     .EXAMPLE
-        $params = @{AKHost='apihost.akamaiapis.net';AKAccessToken='token-value';AKClientToken='token-value';AKClientSecretInsecure='secret-value'}
-        PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' @params
-
-        Removes the specified TXT record with the specified value using explicit API credentials and a plain text client secret.
-
-    .EXAMPLE
         Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -AKUseEdgeRC
 
         Removes the specified TXT record with the specified value using the default .edgerc file and section.
@@ -259,17 +247,17 @@ function Save-DnsTxt {
     [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKHost,
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKAccessToken,
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKClientToken,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [securestring]$AKClientSecret,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKClientSecretInsecure,
         [Parameter(ParameterSetName='EdgeRC',Mandatory)]
         [switch]$AKUseEdgeRC,
@@ -342,7 +330,7 @@ function Save-DnsTxt {
         The client_secret associated with your credentials. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER AKClientSecretInsecure
-        The client_secret associated with your credentials. This standard String version can be used on any OS.
+        (DEPRECATED) The client_secret associated with your credentials. This standard String version can be used on any OS.
 
     .PARAMETER AKUseEdgeRC
         If specified, the necessary API tokens will be read from a .edgrc file. Use AKEdgeRCFile and AKEdgeRCSection to specify the details.
@@ -424,17 +412,17 @@ function Get-AKRestParams {
     [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKHost,
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKAccessToken,
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKClientToken,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [securestring]$AKClientSecret,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$AKClientSecretInsecure,
         [Parameter(ParameterSetName='EdgeRC',Mandatory)]
         [switch]$AKUseEdgeRC,

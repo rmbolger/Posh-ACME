@@ -207,7 +207,7 @@ All authentication methods require specifying `AZSubscriptionId` which is the su
 
 Subscription and Tenant values are passed as standard strings using `AZSubscriptionId` and `AZTenantId`. The credential is passed as a PSCredential object using `AZAppCred`. PSCredential objects require a username and password. For a service principal, the username is the its `ApplicationId` guid and the password is whatever was originally set for it. If you've been following the setup instructions, you may have `$subscriptionID`, `$tenantID`, and `$appCred` variables you can use instead of the sample values below.
 
-*NOTE: The `AZAppUsername` and `AZAppPasswordInsecure` parameters are still supported but should be considered deprecated and may be removed in a future major release.*
+*NOTE: The `AZAppUsername` and `AZAppPasswordInsecure` parameters are deprecated and will be removed in the next major module version. Please migrate to a secure parameter set.*
 
 ```powershell
 $pArgs = @{

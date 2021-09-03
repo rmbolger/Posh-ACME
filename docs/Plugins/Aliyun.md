@@ -14,7 +14,7 @@ First, login to your account and go to the [Security Management](https://usercen
 
 The Key ID is specified as a string using `AliKeyId` and the secret is specified as a SecureString using `AliSecret`.
 
-*NOTE: The `AliSecretInsecure` parameter is still supported but should be considered deprecated and may be removed in a future major release.*
+*NOTE: The `AliSecretInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
 $secret = Read-Host "Secret" -AsSecureString
