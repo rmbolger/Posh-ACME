@@ -1,19 +1,22 @@
 function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName='Email')]
+    [CmdletBinding(DefaultParameterSetName='Bearer')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(ParameterSetName='Email',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Email',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedEmail',Mandatory)]
         [string]$CFAuthEmail,
-        [Parameter(ParameterSetName='Email',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='Email',Mandatory)]
+        [securestring]$CFAuthKeySecure,
+        [Parameter(ParameterSetName='DeprecatedEmail',Mandatory)]
         [string]$CFAuthKey,
-        [Parameter(ParameterSetName='Bearer',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Bearer',Mandatory)]
         [securestring]$CFToken,
-        [Parameter(ParameterSetName='BearerInsecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedBearerInsecure',Mandatory)]
         [string]$CFTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -80,39 +83,46 @@ function Add-DnsTxt {
     .PARAMETER CFAuthEmail
         The email address of the account used to connect to Cloudflare API
 
-    .PARAMETER CFAuthKey
+    .PARAMETER CFAuthKeySecure
         The Global API Key associated with the email address entered in the CFAuthEmail parameter.
+
+    .PARAMETER CFAuthKey
+        (DEPRECATED) The Global API Key associated with the email address entered in the CFAuthEmail parameter.
 
     .PARAMETER CFToken
         The scoped API Token that has been given read/write permissions to the necessary zones. This SecureString version can only be used from Windows or any OS with PowerShell Core 6.2+.
 
     .PARAMETER CFTokenInsecure
-        The scoped API Token that has been given read/write permissions to the necessary zones. This standard String version may be used with any OS.
+        (DEPRECATED) The scoped API Token that has been given read/write permissions to the necessary zones. This standard String version may be used with any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'admin@example.com' 'key'
+        $token = Read-Host 'API Token' -AsSecureString
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -CFToken $token
 
         Adds a TXT record for the specified site with the specified value.
     #>
 }
 
 function Remove-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Bearer')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(ParameterSetName='Email',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Email',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedEmail',Mandatory)]
         [string]$CFAuthEmail,
-        [Parameter(ParameterSetName='Email',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='Email',Mandatory)]
+        [securestring]$CFAuthKeySecure,
+        [Parameter(ParameterSetName='DeprecatedEmail',Mandatory)]
         [string]$CFAuthKey,
-        [Parameter(ParameterSetName='Bearer',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Bearer',Mandatory)]
         [securestring]$CFToken,
-        [Parameter(ParameterSetName='BearerInsecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedBearerInsecure',Mandatory)]
         [string]$CFTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -174,22 +184,26 @@ function Remove-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER CFAuthEmail
-        The email address of the account used to connect to Cloudflare API.
+        The email address of the account used to connect to Cloudflare API
+
+    .PARAMETER CFAuthKeySecure
+        The Global API Key associated with the email address entered in the CFAuthEmail parameter.
 
     .PARAMETER CFAuthKey
-        The Global API Key associated with the email address entered in the CFAuthEmail parameter.
+        (DEPRECATED) The Global API Key associated with the email address entered in the CFAuthEmail parameter.
 
     .PARAMETER CFToken
         The scoped API Token that has been given read/write permissions to the necessary zones. This SecureString version can only be used from Windows or any OS with PowerShell Core 6.2+.
 
     .PARAMETER CFTokenInsecure
-        The scoped API Token that has been given read/write permissions to the necessary zones. This standard String version may be used with any OS.
+        (DEPRECATED) The scoped API Token that has been given read/write permissions to the necessary zones. This standard String version may be used with any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'admin@example.com' 'key'
+        $token = Read-Host 'API Token' -AsSecureString
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -CFToken $token
 
         Removes a TXT record for the specified site with the specified value.
     #>
@@ -221,21 +235,30 @@ function Save-DnsTxt {
 # https://api.cloudflare.com/
 
 function Get-CFAuthHeader {
-    [CmdletBinding(DefaultParameterSetName='Email')]
+    [CmdletBinding(DefaultParameterSetName='Bearer')]
     param(
-        [Parameter(ParameterSetName='Email',Mandatory,Position=0)]
+        [Parameter(ParameterSetName='Email',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedEmail',Mandatory)]
         [string]$CFAuthEmail,
-        [Parameter(ParameterSetName='Email',Mandatory,Position=1)]
+        [Parameter(ParameterSetName='Email',Mandatory)]
+        [securestring]$CFAuthKeySecure,
+        [Parameter(ParameterSetName='DeprecatedEmail',Mandatory)]
         [string]$CFAuthKey,
-        [Parameter(ParameterSetName='Bearer',Mandatory,Position=0)]
+        [Parameter(ParameterSetName='Bearer',Mandatory)]
         [securestring]$CFToken,
-        [Parameter(ParameterSetName='BearerInsecure',Mandatory,Position=0)]
+        [Parameter(ParameterSetName='DeprecatedBearerInsecure',Mandatory)]
         [string]$CFTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraConnectParams
     )
 
     if ('Email' -eq $PSCmdlet.ParameterSetName) {
+        $CFAuthKey = [pscredential]::new('a',$CFAuthKeySecure).GetNetworkCredential().Password
+        return @{
+            'X-Auth-Email' = $CFAuthEmail
+            'X-Auth-Key'   = $CFAuthKey
+        }
+    } elseif ('DeprecatedEmail' -eq $PSCmdlet.ParameterSetName) {
         return @{
             'X-Auth-Email' = $CFAuthEmail
             'X-Auth-Key'   = $CFAuthKey
@@ -245,7 +268,7 @@ function Get-CFAuthHeader {
         $CFTokenInsecure = [pscredential]::new('a',$CFToken).GetNetworkCredential().Password
         return @{ Authorization = "Bearer $CFTokenInsecure" }
 
-    } elseif ('BearerInsecure' -eq $PSCmdlet.ParameterSetName) {
+    } elseif ('DeprecatedBearerInsecure' -eq $PSCmdlet.ParameterSetName) {
 
         return @{ Authorization = "Bearer $CFTokenInsecure" }
 

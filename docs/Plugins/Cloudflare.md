@@ -31,9 +31,9 @@ The API token will need `Zone - DNS - Edit` permissions on the zone(s) you will 
 
 ## Using the Plugin
 
-If you're using the newer API Token method, you'll use it with the `CFToken` SecureString parameter. If you're using the Global API Key method, you'll need to use the `CFAuthEmail` and `CFAuthKey` parameters with the account's email address and previously retrieved Global API Key.
+If you're using the newer API Token method, you'll use it with the `CFToken` SecureString parameter. If you're using the Global API Key method, you'll need to use the `CFAuthEmail` and `CFAuthKeySecure` parameters with the account's email address as a string and previously retrieved Global API Key as a SecureString.
 
-*NOTE: The `CFTokenInsecure` parameter is still supported but should be considered deprecated and may be removed in a future major release.*
+*NOTE: The `CFTokenInsecure` and `CFAuthKey` parameters are deprecated and will be removed in the next major module version. Please migrate to one of the Secure parameter sets.*
 
 ### API Token
 
@@ -46,6 +46,7 @@ New-PACertificate example.com -Plugin Cloudflare -PluginArgs $pArgs
 ### Global API Key
 
 ```powershell
-$pArgs = @{ CFAuthEmail='xxxx@example.com'; CFAuthKey='xxxxxxxx' }
+$secKey = Read-Host -AsSecureString -Prompt 'Global API Key'
+$pArgs = @{ CFAuthEmail='xxxx@example.com'; CFAuthKeySecure=$secKey }
 New-PACertificate example.com -Plugin Cloudflare -PluginArgs $pArgs
 ```
