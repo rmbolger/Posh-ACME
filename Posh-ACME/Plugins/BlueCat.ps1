@@ -1,28 +1,42 @@
 function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(Mandatory, Position = 2)]
+        [Parameter(ParameterSetName='Secure', Mandatory, Position = 2)]
+        [pscredential]$BlueCatCredential,
+        [Parameter(ParameterSetName='DeprecatedInsecure', Mandatory, Position = 2)]
         [string]$BlueCatUsername,
-        [Parameter(Mandatory, Position = 3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure', Mandatory, Position = 3)]
         [string]$BlueCatPassword,
-        [Parameter(Mandatory, Position = 4)]
+        [Parameter(Mandatory)]
         [string]$BlueCatUri,
-        [Parameter(Mandatory, Position = 5)]
+        [Parameter(Mandatory)]
         [string]$BlueCatConfig,
-        [Parameter(Mandatory, Position = 6)]
+        [Parameter(Mandatory)]
         [string]$BlueCatView,
+        [Parameter(Mandatory)]
+        [string[]]$BlueCatDeployTargets,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    CheckPSVersion
+    # Until PS Core gets New-WebServiceProxy, this will be a Desktop only plugin
+    if (-not $PSVersionTable.PSEdition -or $PSVersionTable.PSEdition -ne "Desktop") {
+        throw "The BlueCat plugin requires Windows PowerShell and is not supported on PowerShell Core."
+    }
+
+    # extract the plain text credentials
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $BlueCatUsername = $BlueCatCredential.UserName
+        $BlueCatPassword = $BlueCatCredential.GetNetworkCredential().Password
+    }
+
     $proxy = Get-BlueCatWsdlProxy -Username $BlueCatUsername -Password $BlueCatPassword -Uri $BlueCatUri
     $view = Get-View -ConfigurationName $BlueCatConfig -ViewName $BlueCatView -BlueCatProxy $proxy
     $parentZone = Get-ParentZone -AbsoluteName $RecordName -ViewId $view.id -BlueCatProxy $proxy
@@ -42,11 +56,14 @@ function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
+    .PARAMETER BlueCatCredential
+        BlueCat Username and Password.
+
     .PARAMETER BlueCatUsername
-        BlueCat Username.
+        (DEPRECATED) BlueCat Username.
 
     .PARAMETER BlueCatPassword
-        BlueCat Password.
+        (DEPRECATED) BlueCat Password.
 
     .PARAMETER BlueCatUri
         BlueCat API uri.
@@ -57,39 +74,57 @@ function Add-DnsTxt {
     .PARAMETER BlueCatView
         BlueCat DNS View name.
 
+    .PARAMETER BlueCatDeployTargets
+        List of BlueCat servers to deploy.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -BlueCatUsername 'user' -BlueCatPassword 'password' -BlueCatUri 'https://FQDN//Services/API' -BlueCatConfig 'foobar' -BlueCatView 'foobaz'
+        $cred = Get-Credential
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -BlueCatCredential $cred -BlueCatUri 'https://FQDN//Services/API' -BlueCatConfig 'foobar' -BlueCatView 'foobaz'
 
         Adds a TXT record for the specified site with the specified value.
     #>
 }
 
 function Remove-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(Mandatory, Position = 2)]
+        [Parameter(ParameterSetName='Secure', Mandatory, Position = 2)]
+        [pscredential]$BlueCatCredential,
+        [Parameter(ParameterSetName='DeprecatedInsecure', Mandatory, Position = 2)]
         [string]$BlueCatUsername,
-        [Parameter(Mandatory, Position = 3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure', Mandatory, Position = 3)]
         [string]$BlueCatPassword,
-        [Parameter(Mandatory, Position = 4)]
+        [Parameter(Mandatory)]
         [string]$BlueCatUri,
-        [Parameter(Mandatory, Position = 5)]
+        [Parameter(Mandatory)]
         [string]$BlueCatConfig,
-        [Parameter(Mandatory, Position = 6)]
+        [Parameter(Mandatory)]
         [string]$BlueCatView,
+        [Parameter(Mandatory)]
+        [string[]]$BlueCatDeployTargets,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    CheckPSVersion
+    # Until PS Core gets New-WebServiceProxy, this will be a Desktop only plugin
+    if (-not $PSVersionTable.PSEdition -or $PSVersionTable.PSEdition -ne "Desktop") {
+        throw "The BlueCat plugin requires Windows PowerShell and is not supported on PowerShell Core."
+    }
+
+    # extract the plain text credentials
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $BlueCatUsername = $BlueCatCredential.UserName
+        $BlueCatPassword = $BlueCatCredential.GetNetworkCredential().Password
+    }
+
     $proxy = Get-BlueCatWsdlProxy -Username $BlueCatUsername -Password $BlueCatPassword -Uri $BlueCatUri
     $view = Get-View -ConfigurationName $BlueCatConfig -ViewName $BlueCatView -BlueCatProxy $proxy
     $parentZone = Get-ParentZone -AbsoluteName $RecordName -ViewId $view.id -BlueCatProxy $proxy
@@ -115,11 +150,14 @@ function Remove-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
+    .PARAMETER BlueCatCredential
+        BlueCat Username and Password.
+
     .PARAMETER BlueCatUsername
-        BlueCat Username.
+        (DEPRECATED) BlueCat Username.
 
     .PARAMETER BlueCatPassword
-        BlueCat Password.
+        (DEPRECATED) BlueCat Password.
 
     .PARAMETER BlueCatUri
         BlueCat API uri.
@@ -130,35 +168,53 @@ function Remove-DnsTxt {
     .PARAMETER BlueCatView
         BlueCat DNS View name.
 
+    .PARAMETER BlueCatDeployTargets
+        List of BlueCat servers to deploy.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -BlueCatUsername 'user' -BlueCatPassword 'password' -BlueCatUri 'https://FQDN//Services/API' -BlueCatConfig 'foobar' -BlueCatView 'foobaz'
+        $cred = Get-Credential
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -BlueCatCredential $cred -BlueCatUri 'https://FQDN//Services/API' -BlueCatConfig 'foobar' -BlueCatView 'foobaz'
 
         Removes a TXT record for the specified site with the specified value.
     #>
 }
 
 function Save-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
-        [Parameter(Mandatory, Position = 0)]
+        [Parameter(ParameterSetName='Secure', Mandatory, Position = 2)]
+        [pscredential]$BlueCatCredential,
+        [Parameter(ParameterSetName='DeprecatedInsecure', Mandatory, Position = 2)]
         [string]$BlueCatUsername,
-        [Parameter(Mandatory, Position = 1)]
+        [Parameter(ParameterSetName='DeprecatedInsecure', Mandatory, Position = 3)]
         [string]$BlueCatPassword,
-        [Parameter(Mandatory, Position = 2)]
+        [Parameter(Mandatory)]
         [string]$BlueCatUri,
-        [Parameter(Mandatory, Position = 3)]
+        [Parameter(Mandatory)]
         [string]$BlueCatConfig,
-        [Parameter(Mandatory, Position = 4)]
+        [Parameter(Mandatory)]
+        [string]$BlueCatView,
+        [Parameter(Mandatory)]
         [string[]]$BlueCatDeployTargets,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    CheckPSVersion
+    # Until PS Core gets New-WebServiceProxy, this will be a Desktop only plugin
+    if (-not $PSVersionTable.PSEdition -or $PSVersionTable.PSEdition -ne "Desktop") {
+        throw "The BlueCat plugin requires Windows PowerShell and is not supported on PowerShell Core."
+    }
+
+    # extract the plain text credentials
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $BlueCatUsername = $BlueCatCredential.UserName
+        $BlueCatPassword = $BlueCatCredential.GetNetworkCredential().Password
+    }
+
     $proxy = Get-BlueCatWsdlProxy -Username $BlueCatUsername -Password $BlueCatPassword -Uri $BlueCatUri
     $config = $proxy.getEntityByName(0, $BlueCatConfig, "Configuration")
     Foreach ($ServerFQDN in $BlueCatDeployTargets) {
@@ -174,17 +230,23 @@ function Save-DnsTxt {
     .DESCRIPTION
         Use the BAM API to deploy DNS changes.
 
+    .PARAMETER BlueCatCredential
+        BlueCat Username and Password.
+
     .PARAMETER BlueCatUsername
-        BlueCat Username.
+        (DEPRECATED) BlueCat Username.
 
     .PARAMETER BlueCatPassword
-        BlueCat Password.
+        (DEPRECATED) BlueCat Password.
 
     .PARAMETER BlueCatUri
         BlueCat API uri.
 
     .PARAMETER BlueCatConfig
         BlueCat Configuration name.
+
+    .PARAMETER BlueCatView
+        BlueCat DNS View name.
 
     .PARAMETER BlueCatDeployTargets
         List of BlueCat servers to deploy.
@@ -202,20 +264,14 @@ function Save-DnsTxt {
 # Helper Functions
 ############################
 
-function CheckPSVersion {
-    if ($PSVersionTable.PSEdition -ne "Desktop") {
-        throw "This DNS plugin requires Windows PowerShell and is not supported on PowerShell Core."
-    }
-}
-
 function Get-BlueCatWsdlProxy {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [String]$Username,
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [String]$Password,
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [String]$Uri
     )
     $wsdlProxy = New-WebServiceProxy -Uri "$($Uri)?wsdl"
@@ -228,9 +284,10 @@ function Get-BlueCatWsdlProxy {
 
 function HashtableToString {
     param(
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [Hashtable]$Hashtable
     )
+
     $str = ""
     foreach ($i in $Hashtable.GetEnumerator()) {
         $str += "$($i.Name)=$($i.Value)|"
@@ -240,9 +297,10 @@ function HashtableToString {
 
 function StringToHashtable {
     param(
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [String]$String
     )
+
     $hashtable = @{}
     $pairs = $String.split("|")
     foreach ($kv in $pairs) {
@@ -253,9 +311,10 @@ function StringToHashtable {
 
 function ConvertPSObjectToHashtable {
     param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         $InputObject
     )
+
     $hashtable = @{}
     foreach ($property in $InputObject.PSObject.Properties) {
         $hashtable[$property.Name] = $property.Value
@@ -265,26 +324,28 @@ function ConvertPSObjectToHashtable {
 
 function Get-View {
     param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [String]$ConfigurationName,
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [String]$ViewName,
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [System.Web.Services.Protocols.SoapHttpClientProtocol]$BlueCatProxy
     )
+
     $config = $BlueCatProxy.getEntityByName(0, $ConfigurationName, "Configuration")
     $BlueCatProxy.getEntityByName($config.id, $ViewName, "View")
 }
 
 function Get-ParentZone {
     param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [String]$AbsoluteName,
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [String]$ViewId,
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [System.Web.Services.Protocols.SoapHttpClientProtocol]$BlueCatProxy
     )
+
     $zones = $AbsoluteName.split(".")
     [array]::Reverse($zones)
     $parentZone = @{ "id" = $ViewId }

@@ -6,7 +6,9 @@ This plugin works against the [BlueCat Address Manager](https://www.bluecatnetwo
 
 ## Using the Plugin
 
-Due to the potentially short lifetime of a BAM auth token you must pass a username and password using the keys `BlueCatUsername` and `BlueCatPassword` along with the API uri as `BlueCatUri`. In addition you must also pass the Configuration name as `BlueCatConfig`, the DNS View name as `BlueCatView`, and the list of DNS servers to deploy as `BlueCatDeployTargets`.
+Due to the potentially short lifetime of a BAM auth token you must pass the username and password as a PSCredential object using the `BlueCatCredential` parameter. You also need to provide the API uri as `BlueCatUri`. In addition you must also pass the Configuration name as `BlueCatConfig`, the DNS View name as `BlueCatView`, and the list of DNS servers to deploy as `BlueCatDeployTargets`.
+
+*NOTE: The `BlueCatUsername` and `BlueCatPassword` parameters deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
 $BlueCatParams = @{
