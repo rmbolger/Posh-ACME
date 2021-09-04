@@ -1,17 +1,23 @@
 function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
+        [string]$DOTokenSecure,
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$DOToken,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $DOToken = [pscredential]::new('a',$DOTokenSecure).GetNetworkCredential().Password
+    }
 
     $apiRoot = "https://api.digitalocean.com/v2/domains"
     $restParams = @{Headers=@{Authorization="Bearer $DOToken"};ContentType='application/json'}
@@ -59,8 +65,11 @@ function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER DOToken
+    .PARAMETER DOTokenSecure
         A Personal Access Token generated on the Digital Ocean website with Write access.
+
+    .PARAMETER DOToken
+        (DEPRECATED) A Personal Access Token generated on the Digital Ocean website with Write access.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -73,17 +82,23 @@ function Add-DnsTxt {
 }
 
 function Remove-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
+        [string]$DOTokenSecure,
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$DOToken,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $DOToken = [pscredential]::new('a',$DOTokenSecure).GetNetworkCredential().Password
+    }
 
     $apiRoot = "https://api.digitalocean.com/v2/domains"
     $restParams = @{Headers=@{Authorization="Bearer $DOToken"};ContentType='application/json'}
@@ -126,8 +141,11 @@ function Remove-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER DOToken
+    .PARAMETER DOTokenSecure
         A Personal Access Token generated on the Digital Ocean website with Write access.
+
+    .PARAMETER DOToken
+        (DEPRECATED) A Personal Access Token generated on the Digital Ocean website with Write access.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -162,7 +180,7 @@ function Save-DnsTxt {
 ############################
 
 # API Docs
-# https://developers.digitalocean.com/documentation/v2/#introduction
+# https://docs.digitalocean.com/reference/api/api-reference/
 
 function Find-DOZone {
     [CmdletBinding()]

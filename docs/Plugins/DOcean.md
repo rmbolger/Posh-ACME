@@ -18,8 +18,13 @@ You need to create a [Personal Access Token](https://cloud.digitalocean.com/sett
 
 ## Using the Plugin
 
-The only plugin argument you need is the API token created earlier.
+Use the `DOTokenSecure` SecureString parameter with the token value you created earlier.
+
+*NOTE: The `DOToken` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-New-PACertificate example.com -Plugin DOcean -PluginArgs @{DOToken='xxxxxxxxxxxxxxxx'}
+$pArgs = @{
+    DOTokenSecure = (Read-Host 'Access Token' -AsSecureString)
+}
+New-PACertificate example.com -Plugin DOcean -PluginArgs $pArgs
 ```
