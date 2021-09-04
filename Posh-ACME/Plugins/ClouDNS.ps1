@@ -277,7 +277,7 @@ function Get-CDCommonBody {
 
     # decrypt the secure password so we can add it to the querystring
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $CDPasswordInsecure = (New-Object PSCredential "user",$CDPassword).GetNetworkCredential().Password
+        $CDPasswordInsecure = [pscredential]::new('a',$CDPassword).GetNetworkCredential().Password
     }
 
     $body = @{

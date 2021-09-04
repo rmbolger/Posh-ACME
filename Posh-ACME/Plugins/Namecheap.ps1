@@ -239,7 +239,7 @@ function Get-NCCommonBody {
 
     # decrypt the secure password so we can add it to the querystring
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $NCApiKeyInsecure = (New-Object PSCredential "user",$NCApiKey).GetNetworkCredential().Password
+        $NCApiKeyInsecure = [pscredential]::new('a',$NCApiKey).GetNetworkCredential().Password
     }
 
     $body = @{

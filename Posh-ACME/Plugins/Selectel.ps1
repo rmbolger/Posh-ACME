@@ -18,7 +18,7 @@ function Add-DnsTxt {
     # grab the cleartext token if the secure version was used
     # and make the auth header
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $SelectelAdminTokenInsecure = (New-Object PSCredential "user", $SelectelAdminToken).GetNetworkCredential().Password
+        $SelectelAdminTokenInsecure = [pscredential]::new('a',$SelectelAdminToken).GetNetworkCredential().Password
     }
     $AuthHeader = @{ 'X-Token' = $SelectelAdminTokenInsecure }
 
@@ -103,7 +103,7 @@ function Remove-DnsTxt {
     # grab the cleartext token if the secure version was used
     # and make the auth header
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $SelectelAdminTokenInsecure = (New-Object PSCredential "user", $SelectelAdminToken).GetNetworkCredential().Password
+        $SelectelAdminTokenInsecure = [pscredential]::new('a',$SelectelAdminToken).GetNetworkCredential().Password
     }
     $AuthHeader = @{ 'X-Token' = $SelectelAdminTokenInsecure }
 

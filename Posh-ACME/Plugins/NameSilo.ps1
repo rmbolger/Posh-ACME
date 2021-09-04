@@ -16,7 +16,7 @@ function Add-DnsTxt {
     )
 
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $NameSiloKeyInsecure = (New-Object pscredential "user",$NameSiloKey).GetNetworkCredential().Password
+        $NameSiloKeyInsecure = [pscredential]::new('a',$NameSiloKey).GetNetworkCredential().Password
     }
 
     # query the zone and record ID if it exists
@@ -86,7 +86,7 @@ function Remove-DnsTxt {
     )
 
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $NameSiloKeyInsecure = (New-Object pscredential "user",$NameSiloKey).GetNetworkCredential().Password
+        $NameSiloKeyInsecure = [pscredential]::new('a',$NameSiloKey).GetNetworkCredential().Password
     }
 
     # query the zone and record ID if it exists

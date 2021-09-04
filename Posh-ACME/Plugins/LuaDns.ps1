@@ -21,7 +21,7 @@ function Add-DnsTxt {
     # create a pscredential from insecure args if necessary
     if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
         $secpass = ConvertTo-SecureString $LuaPassword -AsPlainText -Force
-        $LuaCredential = New-Object PSCredential ($LuaUsername,$secpass)
+        $LuaCredential = [pscredential]::new($LuaUsername,$secpass)
     }
 
     $apiRoot = 'https://api.luadns.com/v1'
@@ -111,7 +111,7 @@ function Remove-DnsTxt {
     # create a pscredential from insecure args if necessary
     if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
         $secpass = ConvertTo-SecureString $LuaPassword -AsPlainText -Force
-        $LuaCredential = New-Object PSCredential ($LuaUsername,$secpass)
+        $LuaCredential = [pscredential]::new($LuaUsername,$secpass)
     }
 
     $apiRoot = 'https://api.luadns.com/v1'

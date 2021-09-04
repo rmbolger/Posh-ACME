@@ -22,7 +22,7 @@ function Add-DnsTxt {
 
     # decrypt the securestring password so we can add it to the XML auth block
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $AutoDNSPasswordInsecure = (New-Object PSCredential "user",$AutoDNSPassword).GetNetworkCredential().Password
+        $AutoDNSPasswordInsecure = [pscredential]::new('a',$AutoDNSPassword).GetNetworkCredential().Password
     }
     $authBlock = "<auth><user>$AutoDNSUser</user><password>$AutoDNSPasswordInsecure</password><context>$AutoDNSContext</context></auth>"
     $apiBase = "https://$AutoDNSGateway"
@@ -109,7 +109,7 @@ function Remove-DnsTxt {
 
     # decrypt the securestring password so we can add it to the XML auth block
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $AutoDNSPasswordInsecure = (New-Object PSCredential "user",$AutoDNSPassword).GetNetworkCredential().Password
+        $AutoDNSPasswordInsecure = [pscredential]::new('a',$AutoDNSPassword).GetNetworkCredential().Password
     }
     $authBlock = "<auth><user>$AutoDNSUser</user><password>$AutoDNSPasswordInsecure</password><context>$AutoDNSContext</context></auth>"
     $apiBase = "https://$AutoDNSGateway"

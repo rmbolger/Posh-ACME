@@ -19,7 +19,7 @@ Function Add-DnsTxt {
 
     # un-secure the password so we can add it to the auth header
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $HetznerTokenInsecure = (New-Object PSCredential "user",$HetznerToken).GetNetworkCredential().Password
+        $HetznerTokenInsecure = [pscredential]::new('a',$HetznerToken).GetNetworkCredential().Password
     }
     $restParams = @{
         Headers = @{
@@ -112,7 +112,7 @@ Function Remove-DnsTxt {
 
     # un-secure the password so we can add it to the auth header
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $HetznerTokenInsecure = (New-Object PSCredential "user",$HetznerToken).GetNetworkCredential().Password
+        $HetznerTokenInsecure = [pscredential]::new('a',$HetznerToken).GetNetworkCredential().Password
     }
     $restParams = @{
         Headers = @{

@@ -20,7 +20,7 @@ function Add-DnsTxt {
 
     # convert the secure secret to a normal string
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $DMESecretInsecure = (New-Object PSCredential ("user", $DMESecret)).GetNetworkCredential().Password
+        $DMESecretInsecure = [pscredential]::new('a',$DMESecret).GetNetworkCredential().Password
     }
 
     $apiBase = 'https://api.dnsmadeeasy.com/V2.0/dns/managed'
@@ -119,7 +119,7 @@ function Remove-DnsTxt {
 
     # convert the secure secret to a normal string
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $DMESecretInsecure = (New-Object PSCredential ("user", $DMESecret)).GetNetworkCredential().Password
+        $DMESecretInsecure = [pscredential]::new('a',$DMESecret).GetNetworkCredential().Password
     }
 
     $apiBase = 'https://api.dnsmadeeasy.com/V2.0/dns/managed'

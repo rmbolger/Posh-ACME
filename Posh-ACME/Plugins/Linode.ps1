@@ -17,7 +17,7 @@ function Add-DnsTxt {
 
     # grab the cleartext token if the secure version was used
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $LITokenInsecure = (New-Object PSCredential "user",$LIToken).GetNetworkCredential().Password
+        $LITokenInsecure = [pscredential]::new('a',$LIToken).GetNetworkCredential().Password
     }
 
     $apiRoot = 'https://api.linode.com/v4'
@@ -105,7 +105,7 @@ function Remove-DnsTxt {
 
     # grab the cleartext token if the secure version was used
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $LITokenInsecure = (New-Object PSCredential "user",$LIToken).GetNetworkCredential().Password
+        $LITokenInsecure = [pscredential]::new('a',$LIToken).GetNetworkCredential().Password
     }
 
     $apiRoot = 'https://api.linode.com/v4'

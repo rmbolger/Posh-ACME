@@ -224,7 +224,7 @@ function Get-KasLoginDataFromParameters {
     }
 
     # get plaintext from securestring
-    $kasAuthData = (New-Object PSCredential "user", $secureAuthData).GetNetworkCredential().Password
+    $kasAuthData = [pscredential]::new('a',$secureAuthData).GetNetworkCredential().Password
 
     # when user provided plaintext password, compute sha1 of the password
     if ('plain' -eq $paramSetName) {

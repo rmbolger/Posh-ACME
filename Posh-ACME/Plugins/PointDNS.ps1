@@ -310,7 +310,7 @@ function Get-PDAuthHeaders {
     )
 
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $PDKeyInsecure = (New-Object pscredential "user",$PDKey).GetNetworkCredential().Password
+        $PDKeyInsecure = [pscredential]::new('a',$PDKey).GetNetworkCredential().Password
     }
 
     $authHeader = Get-PDAuthHeader $PDUser $PDKeyInsecure

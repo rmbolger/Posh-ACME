@@ -25,7 +25,7 @@ function Add-DnsTxt {
     # create a pscredential from insecure args if necessary
     if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
         $secpass = ConvertTo-SecureString $IBPassword -AsPlainText -Force
-        $IBCred = New-Object PSCredential ($IBUsername,$secpass)
+        $IBCred = [pscredential]::new($IBUsername,$secpass)
     }
 
     $recUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&view=$IBView"
@@ -127,7 +127,7 @@ function Remove-DnsTxt {
     # create a pscredential from insecure args if necessary
     if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
         $secpass = ConvertTo-SecureString $IBPassword -AsPlainText -Force
-        $IBCred = New-Object PSCredential ($IBUsername,$secpass)
+        $IBCred = [pscredential]::new($IBUsername,$secpass)
     }
 
     try {

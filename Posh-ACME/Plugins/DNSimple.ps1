@@ -17,7 +17,7 @@ function Add-DnsTxt {
 
     # get the plaintext version of the token
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $DSTokenInsecure = (New-Object PSCredential "user",$DSToken).GetNetworkCredential().Password
+        $DSTokenInsecure = [pscredential]::new('a',$DSToken).GetNetworkCredential().Password
     }
 
     $apiRoot = 'https://api.dnsimple.com/v2'
@@ -109,7 +109,7 @@ function Remove-DnsTxt {
 
     # get the plaintext version of the token
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $DSTokenInsecure = (New-Object PSCredential "user",$DSToken).GetNetworkCredential().Password
+        $DSTokenInsecure = [pscredential]::new('a',$DSToken).GetNetworkCredential().Password
     }
 
     $apiRoot = 'https://api.dnsimple.com/v2'

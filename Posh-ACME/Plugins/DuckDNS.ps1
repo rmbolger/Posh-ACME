@@ -19,7 +19,7 @@ function Add-DnsTxt {
 
     # get the plaintext version of the token
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $DuckTokenInsecure = (New-Object PSCredential "user",$DuckToken).GetNetworkCredential().Password
+        $DuckTokenInsecure = [pscredential]::new('a',$DuckToken).GetNetworkCredential().Password
     }
 
     Write-Verbose "Adding TXT $TxtValue on DuckDNS for $($DuckDomain -join ',')"
@@ -84,7 +84,7 @@ function Remove-DnsTxt {
 
     # get the plaintext version of the token
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $DuckTokenInsecure = (New-Object PSCredential "user",$DuckToken).GetNetworkCredential().Password
+        $DuckTokenInsecure = [pscredential]::new('a',$DuckToken).GetNetworkCredential().Password
     }
 
     Write-Verbose "Clearing TXT on DuckDNS for $($DuckDomain -join ',')"

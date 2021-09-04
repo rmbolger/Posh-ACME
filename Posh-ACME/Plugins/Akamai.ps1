@@ -450,7 +450,7 @@ function Get-AKRestParams {
         }
     } elseif ('Secure' -eq $PSCmdlet.ParameterSetName) {
         # convert the securestring to a string
-        $AKClientSecretInsecure = (New-Object PSCredential "user",$AKClientSecret).GetNetworkCredential().Password
+        $AKClientSecretInsecure = [pscredential]::new('a',$AKClientSecret).GetNetworkCredential().Password
     }
 
     # return the passed in values

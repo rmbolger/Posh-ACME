@@ -19,7 +19,7 @@ function Add-DnsTxt {
 
     # grab the plaintext password if the secure version was used
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $LoopiaPassInsecure = (New-Object PSCredential "user",$LoopiaPass).GetNetworkCredential().Password
+        $LoopiaPassInsecure = [pscredential]::new('a',$LoopiaPass).GetNetworkCredential().Password
     }
     $creds = @($LoopiaUser,$LoopiaPassInsecure)
 
@@ -103,7 +103,7 @@ function Remove-DnsTxt {
 
     # grab the plaintext password if the secure version was used
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $LoopiaPassInsecure = (New-Object PSCredential "user",$LoopiaPass).GetNetworkCredential().Password
+        $LoopiaPassInsecure = [pscredential]::new('a',$LoopiaPass).GetNetworkCredential().Password
     }
     $creds = @($LoopiaUser,$LoopiaPassInsecure)
 

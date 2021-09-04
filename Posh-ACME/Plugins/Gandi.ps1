@@ -17,7 +17,7 @@ function Add-DnsTxt {
 
     # un-secure the password so we can add it to the auth header
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $GandiTokenInsecure = (New-Object PSCredential "user",$GandiToken).GetNetworkCredential().Password
+        $GandiTokenInsecure = [pscredential]::new('a',$GandiToken).GetNetworkCredential().Password
     }
     $restParams = @{
         Headers = @{
@@ -116,7 +116,7 @@ function Remove-DnsTxt {
 
     # un-secure the password so we can add it to the auth header
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $GandiTokenInsecure = (New-Object PSCredential "user",$GandiToken).GetNetworkCredential().Password
+        $GandiTokenInsecure = [pscredential]::new('a',$GandiToken).GetNetworkCredential().Password
     }
     $restParams = @{
         Headers = @{

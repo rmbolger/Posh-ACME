@@ -17,7 +17,7 @@ function Add-DnsTxt {
 
     # Decrypt the secure string token
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $DomOffTokenInsecure = (New-Object PSCredential "user", $DomOffToken).GetNetworkCredential().Password
+        $DomOffTokenInsecure = [pscredential]::new('a',$DomOffToken).GetNetworkCredential().Password
     }
 
     Write-Verbose "Adding $RecordName with value $TxtValue on Domain Offensive"
@@ -82,7 +82,7 @@ function Remove-DnsTxt {
 
     # Decrypt the secure string token
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $DomOffTokenInsecure = (New-Object PSCredential "user", $DomOffToken).GetNetworkCredential().Password
+        $DomOffTokenInsecure = [pscredential]::new('a',$DomOffToken).GetNetworkCredential().Password
     }
 
     Write-Verbose "Removing $RecordName with value $TxtValue on Domain Offensive"

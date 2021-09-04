@@ -228,7 +228,7 @@ function Invoke-AliRest {
     $stsBytes = [Text.Encoding]::UTF8.GetBytes($strToSign)
 
     # compute the signature
-    $secPlain = (New-Object PSCredential "user",$AccessSecret).GetNetworkCredential().Password
+    $secPlain = [pscredential]::new('a',$AccessSecret).GetNetworkCredential().Password
     $secBytes = [Text.Encoding]::UTF8.GetBytes("$secPlain&")
     $hmac = New-Object Security.Cryptography.HMACSHA1($secBytes,$true)
     $sig = [Convert]::ToBase64String($hmac.ComputeHash($stsBytes))

@@ -346,8 +346,8 @@ function Connect-OVH {
 
     # generate plain text versions of the secure params we can work with
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $OVHAppSecretInsecure = (New-Object PSCredential "user",$OVHAppSecret).GetNetworkCredential().Password
-        $OVHConsumerKeyInsecure = (New-Object PSCredential "user",$OVHConsumerKey).GetNetworkCredential().Password
+        $OVHAppSecretInsecure = [pscredential]::new('a',$OVHAppSecret).GetNetworkCredential().Password
+        $OVHConsumerKeyInsecure = [pscredential]::new('a',$OVHConsumerKey).GetNetworkCredential().Password
     }
 
     # determine the region specific API endpoint

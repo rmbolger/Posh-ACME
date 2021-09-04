@@ -219,7 +219,7 @@ function Connect-RackspaceDns {
 
     # decrypt the secure password so we can put it in the auth header
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $RSApiKeyInsecure = (New-Object PSCredential "user",$RSApiKey).GetNetworkCredential().Password
+        $RSApiKeyInsecure = [pscredential]::new('a',$RSApiKey).GetNetworkCredential().Password
     }
 
     # create the authentication object we need to send

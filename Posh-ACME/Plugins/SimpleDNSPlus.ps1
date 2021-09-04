@@ -26,7 +26,7 @@ function Add-DnsTxt {
     # create a pscredential from insecure args if necessary
     if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
         $secpass = ConvertTo-SecureString $SdnsPassword -AsPlainText -Force
-        $SdnsCred = New-Object PSCredential ($SdnsUser,$secpass)
+        $SdnsCred = [pscredential]::new($SdnsUser,$secpass)
     }
     $credSplat = @{}
     if ($SdnsCred) { $credSplat.Credential = $SdnsCred }
@@ -139,7 +139,7 @@ function Remove-DnsTxt {
     # create a pscredential from insecure args if necessary
     if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
         $secpass = ConvertTo-SecureString $SdnsPassword -AsPlainText -Force
-        $SdnsCred = New-Object PSCredential ($SdnsUser,$secpass)
+        $SdnsCred = [pscredential]::new($SdnsUser,$secpass)
     }
     $credSplat = @{}
     if ($SdnsCred) { $credSplat.Credential = $SdnsCred }

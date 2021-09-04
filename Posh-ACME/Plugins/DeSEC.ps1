@@ -24,9 +24,9 @@ function Add-DnsTxt {
 
     # convert the secure token to a normal string
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $token = (New-Object PSCredential ("user", $DSCToken)).GetNetworkCredential().Password
+        $token = [pscredential]::new('a',$DSCToken).GetNetworkCredential().Password
     } elseif ('DeprecatedSecure' -eq $PSCmdlet.ParameterSetName) {
-        $token = (New-Object PSCredential ("user", $DSToken)).GetNetworkCredential().Password
+        $token = [pscredential]::new('a',$DSToken).GetNetworkCredential().Password
         $DSCTTL = $DSTTL
     } else {
         # DeprecatedInsecure
@@ -128,9 +128,9 @@ function Remove-DnsTxt {
 
     # convert the secure token to a normal string
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $token = (New-Object PSCredential ("user", $DSCToken)).GetNetworkCredential().Password
+        $token = [pscredential]::new('a',$DSCToken).GetNetworkCredential().Password
     } elseif ('DeprecatedSecure' -eq $PSCmdlet.ParameterSetName) {
-        $token = (New-Object PSCredential ("user", $DSToken)).GetNetworkCredential().Password
+        $token = [pscredential]::new('a',$DSToken).GetNetworkCredential().Password
     } else {
         # DeprecatedInsecure
         $token = $DSTokenInsecure

@@ -17,7 +17,7 @@ function Add-DnsTxt {
 
     # grab the cleartext key if the secure version was used
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $NS1KeyInsecure = (New-Object PSCredential "user",$NS1Key).GetNetworkCredential().Password
+        $NS1KeyInsecure = [pscredential]::new('a',$NS1Key).GetNetworkCredential().Password
     }
 
     $apiRoot = 'https://api.nsone.net/v1'
@@ -112,7 +112,7 @@ function Remove-DnsTxt {
 
     # grab the cleartext key if the secure version was used
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $NS1KeyInsecure = (New-Object PSCredential "user",$NS1Key).GetNetworkCredential().Password
+        $NS1KeyInsecure = [pscredential]::new('a',$NS1Key).GetNetworkCredential().Password
     }
 
     $apiRoot = 'https://api.nsone.net/v1'

@@ -25,7 +25,7 @@ function Add-DnsTxt {
 
     # grab the cleartext key value if it was specified
     if ($DDNSKeyValue -and 'Secure' -eq $PSCmdlet.ParameterSetName) {
-        $DDNSKeyValueInsecure = (New-Object PSCredential "user",$DDNSKeyValue).GetNetworkCredential().Password
+        $DDNSKeyValueInsecure = [pscredential]::new('a',$DDNSKeyValue).GetNetworkCredential().Password
     }
 
     # The nice thing about RFC2136 is that BIND doesn't care if you send duplicate updates
@@ -140,7 +140,7 @@ function Remove-DnsTxt {
 
     # grab the cleartext key value if it was specified
     if ($DDNSKeyValue -and 'Secure' -eq $PSCmdlet.ParameterSetName) {
-        $DDNSKeyValueInsecure = (New-Object PSCredential "user",$DDNSKeyValue).GetNetworkCredential().Password
+        $DDNSKeyValueInsecure = [pscredential]::new('a',$DDNSKeyValue).GetNetworkCredential().Password
     }
 
     # The nice thing about RFC2136 is that BIND doesn't care if you send duplicate updates
