@@ -10,16 +10,12 @@ If you haven't done it already, you need to generate API Credentials for your ac
 
 ## Using the Plugin
 
-With your API key and secret, you'll need to pass them with the `DMEKey` parameter and either the `DMESecret` or `DMESecretInsecure` parameter. `DMESecret` is a [SecureString](https://docs.microsoft.com/en-us/dotnet/api/system.security.securestring) but only currently works properly on Windows. For non-Windows, use `DMESecretInsecure`.
+With your API key and secret, you'll need to pass them with the `DMEKey` parameter and the `DMESecret` SecureString parameter.
+
+*NOTE: The `DMESecuretInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-# On Windows, prompt for the SecureString secret
 $dmeSecret = Read-Host -Prompt 'DME Secret' -AsSecureString
-$dmeParams = @{ DMEKey='xxxxxxxxxxxx'; DMESecret=$dmeSecret }
-
-# On non-Windows, just use a regular string
-$dmeParams = @{ DMEKey='xxxxxxxxxxxx'; DMESecretInsecure='yyyyyyyyyyyy' }
-
-# Request the cert
-New-PACertificate example.com -Plugin DMEasy -PluginArgs $dmeParams
+$pArgs = @{ DMEKey='xxxxxxxxxxxx'; DMESecret=$dmeSecret }
+New-PACertificate example.com -Plugin DMEasy -PluginArgs $pArgs
 ```

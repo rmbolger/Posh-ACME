@@ -8,14 +8,14 @@ function Add-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$DNSPodKeyId,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [securestring]$DNSPodKeyToken,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$DNSPodKeyTokenInsecure,
         [Parameter(ParameterSetName='Secure')]
-        [Parameter(ParameterSetName='Insecure')]
+        [Parameter(ParameterSetName='DeprecatedInsecure')]
         [string]$DNSPodApiRoot='https://api.dnspod.com',
         [Parameter(ParameterSetName='Obsolete_DO_NOT_USE',Mandatory)]
         [pscredential]$DNSPodCredential,
@@ -90,7 +90,7 @@ function Add-DnsTxt {
         The API Key Token value as a SecureString value. This should only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER DNSPodKeyTokenInsecure
-        The API Key Token value as a standard String value.
+        (DEPRECATED) The API Key Token value as a standard String value.
 
     .PARAMETER DNSPodApiRoot
         The root URL for the DNSPod API you are using. Default to "https://api.dnspod.com" but may also be set to "https://dnsapi.cn".
@@ -111,11 +111,6 @@ function Add-DnsTxt {
         Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -DNSPodKeyId '1' -DnsPodKeyToken (Read-Host -AsSecureString)
 
         Adds a TXT record for the specified site with the specified value using a secure token value.
-
-    .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -DNSPodKeyId '1' -DnsPodKeyTokenInsecure 'token-value'
-
-        Adds a TXT record for the specified site with the specified value using plain text token.
     #>
 }
 
@@ -127,14 +122,14 @@ function Remove-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory)]
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$DNSPodKeyId,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [securestring]$DNSPodKeyToken,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$DNSPodKeyTokenInsecure,
         [Parameter(ParameterSetName='Secure')]
-        [Parameter(ParameterSetName='Insecure')]
+        [Parameter(ParameterSetName='DeprecatedInsecure')]
         [string]$DNSPodApiRoot='https://api.dnspod.com',
         [Parameter(ParameterSetName='Obsolete_DO_NOT_USE',Mandatory)]
         [pscredential]$DNSPodCredential,
@@ -206,7 +201,7 @@ function Remove-DnsTxt {
         The API Key Token value as a SecureString value. This should only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER DNSPodKeyTokenInsecure
-        The API Key Token value as a standard String value.
+        (DEPRECATED) The API Key Token value as a standard String value.
 
     .PARAMETER DNSPodApiRoot
         The root URL for the DNSPod API you are using. Default to "https://api.dnspod.com" but may also be set to "https://dnsapi.cn".
@@ -227,11 +222,6 @@ function Remove-DnsTxt {
         Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -DNSPodKeyId '1' -DnsPodKeyToken (Read-Host -AsSecureString)
 
         Removes a TXT record for the specified site with the specified value using a secure token value.
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -DNSPodKeyId '1' -DnsPodKeyTokenInsecure 'token-value'
-
-        Removes a TXT record for the specified site with the specified value using plain text token.
     #>
 }
 

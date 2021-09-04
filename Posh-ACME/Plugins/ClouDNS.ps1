@@ -15,7 +15,7 @@ function Add-DnsTxt {
         [string]$CDUsername,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=4)]
         [securestring]$CDPassword,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=4)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=4)]
         [string]$CDPasswordInsecure,
         [switch]$CDPollPropagation,
         [Parameter(ValueFromRemainingArguments)]
@@ -73,7 +73,7 @@ function Add-DnsTxt {
         The password associated with your username. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER CDPasswordInsecure
-        The password associated with your username. This standard String version can be used on any OS.
+        (DEPRECATED) The password associated with your username. This standard String version can be used on any OS.
 
     .PARAMETER CDPollPropagation
         If specified, this will cause the Save method to block until each affected zone has updated its nameservers by querying the API for their status.
@@ -86,11 +86,6 @@ function Add-DnsTxt {
         PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txtvalue' 'auth-id' '12345' $pass
 
         Adds a TXT record using a securestring object for CDPassword.
-
-    .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txtvalue' 'auth-id' '12345' 'xxxxxxxx'
-
-        Adds a TXT record using a standard string object for CDPasswordInsecure.
     #>
 }
 
@@ -109,7 +104,7 @@ function Remove-DnsTxt {
         [string]$CDUsername,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=4)]
         [securestring]$CDPassword,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=4)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=4)]
         [string]$CDPasswordInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -158,7 +153,7 @@ function Remove-DnsTxt {
         The password associated with your username. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER CDPasswordInsecure
-        The password associated with your username. This standard String version can be used on any OS.
+        (DEPRECATED) The password associated with your username. This standard String version can be used on any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -168,11 +163,6 @@ function Remove-DnsTxt {
         PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txtvalue' 'auth-id' '12345' $pass
 
         Removes a TXT record using a securestring object for CDPassword.
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txtvalue' 'auth-id' '12345' 'xxxxxxxx'
-
-        Removes a TXT record using a standard string object for CDPasswordInsecure.
     #>
 }
 
@@ -187,7 +177,7 @@ function Save-DnsTxt {
         [string]$CDUsername,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$CDPassword,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$CDPasswordInsecure,
         [switch]$CDPollPropagation,
         [int]$CDPollTimeout=300,
@@ -242,7 +232,7 @@ function Save-DnsTxt {
         The password associated with your username. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER CDPasswordInsecure
-        The password associated with your username. This standard String version can be used on any OS.
+        (DEPRECATED) The password associated with your username. This standard String version can be used on any OS.
 
     .PARAMETER CDPollPropagation
         If specified, this will cause the Save method to block until each affected zone has updated its nameservers by querying the API for their status.
@@ -258,11 +248,6 @@ function Save-DnsTxt {
         PS C:\>Save-DnsTxt 'auth-id' '12345' $pass
 
         Saves TXT records using a securestring object for CDPassword.
-
-    .EXAMPLE
-        Save-DnsTxt 'auth-id' '12345' 'xxxxxxxx'
-
-        Saves TXT records using a standard string object for CDPasswordInsecure.
     #>
 }
 
@@ -284,7 +269,7 @@ function Get-CDCommonBody {
         [string]$CDUsername,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$CDPassword,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$CDPasswordInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraConnectParams

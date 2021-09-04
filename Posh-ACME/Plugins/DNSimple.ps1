@@ -9,7 +9,7 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$DSToken,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$DSTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -79,7 +79,7 @@ function Add-DnsTxt {
         The Account API token for DNSimple. This SecureString version should only be used on Windows.
 
     .PARAMETER DSTokenInsecure
-        The Account API token for DNSimple. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The Account API token for DNSimple. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -89,11 +89,6 @@ function Add-DnsTxt {
         PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
 
         Adds a TXT record for the specified site with the specified value on Windows.
-
-    .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'token'
-
-        Adds a TXT record for the specified site with the specified value on non-Windows.
     #>
 }
 
@@ -106,7 +101,7 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$DSToken,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$DSTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -176,7 +171,7 @@ function Remove-DnsTxt {
         The Account API token for DNSimple. This SecureString version should only be used on Windows.
 
     .PARAMETER DSTokenInsecure
-        The Account API token for DNSimple. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The Account API token for DNSimple. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -186,11 +181,6 @@ function Remove-DnsTxt {
         PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
 
         Removes a TXT record for the specified site with the specified value on Windows.
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'token'
-
-        Remove a TXT record for the specified site with the specified value on non-Windows.
     #>
 }
 

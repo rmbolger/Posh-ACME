@@ -11,7 +11,7 @@ function Add-DnsTxt {
         [string]$DMEKey,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$DMESecret,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$DMESecretInsecure,
         [switch]$DMEUseSandbox,
         [Parameter(ValueFromRemainingArguments)]
@@ -83,7 +83,7 @@ function Add-DnsTxt {
         The DNS Made Easy API secret key for your account. This SecureString version should only be used on Windows.
 
     .PARAMETER DMESecretInsecure
-        The DNS Made Easy API secret key for your account. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The DNS Made Easy API secret key for your account. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER DMEUseSandbox
         If specified, all commands will run against the DNS Made Easy sandbox API endpoint. This is generally only used for testing the plugin.
@@ -110,7 +110,7 @@ function Remove-DnsTxt {
         [string]$DMEKey,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$DMESecret,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$DMESecretInsecure,
         [switch]$DMEUseSandbox,
         [Parameter(ValueFromRemainingArguments)]
@@ -184,7 +184,7 @@ function Remove-DnsTxt {
         The DNS Made Easy API secret key for your account. This SecureString version should only be used on Windows.
 
     .PARAMETER DMESecretInsecure
-        The DNS Made Easy API secret key for your account. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The DNS Made Easy API secret key for your account. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER DMEUseSandbox
         If specified, all commands will run against the DNS Made Easy sandbox API endpoint. This is generally only used for testing the plugin.

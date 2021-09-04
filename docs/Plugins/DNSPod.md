@@ -12,26 +12,16 @@ Login to the console and go to the [Key Management](https://console.dnspod.com/a
 
 ## Using the Plugin
 
-The API key ID is used with the `DNSPodKeyId` string parameter. The key token can be used with `DNSPodKeyToken` as a SecureString or `DNSPodKeyTokenInsecure` as a standard string. The SecureString version should only be used on Windows or any OS with PowerShell 6.2 or later.
+The API key ID is used with the `DNSPodKeyId` string parameter. The key token is used with `DNSPodKeyToken` as a SecureString.
+
+*NOTE: The `DNSPodKeyTokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 There is also a `DNSPodApiRoot` optional parameter that defaults to the API root for dnspod.com. If you are using dnspod.cn, you may specify `https://dnsapi.cn` instead for this parameter.
-
-### Windows or PS 6.2+
 
 ```powershell
 $pArgs = @{
     DNSPodKeyID = '111'
     DNSPodToken = (Read-Host 'Enter Token' -AsSecureString)
-}
-New-PACertificate example.com -Plugin DNSPod -PluginArgs $pArgs
-```
-
-### Any OS
-
-```powershell
-$pArgs = @{
-    DNSPodKeyID = '111'
-    DNSPodTokenInsecure = 'xxxxxxxxxxxx'
 }
 New-PACertificate example.com -Plugin DNSPod -PluginArgs $pArgs
 ```
