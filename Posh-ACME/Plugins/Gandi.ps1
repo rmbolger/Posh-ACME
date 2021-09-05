@@ -9,7 +9,7 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$GandiToken,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$GandiTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -81,7 +81,7 @@ function Add-DnsTxt {
         The API token for your Gandi account. This SecureString version should only be used on Windows.
 
     .PARAMETER GandiTokenInsecure
-        The API token for your Gandi account. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The API token for your Gandi account. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -91,11 +91,6 @@ function Add-DnsTxt {
         PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
 
         Adds a TXT record using a securestring object for GandiToken. (Only works on Windows)
-
-    .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'token'
-
-        Adds a TXT record using a standard string object for GandiTokenInsecure. (Use this on non-Windows)
     #>
 }
 
@@ -108,7 +103,7 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$GandiToken,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$GandiTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -179,7 +174,7 @@ function Remove-DnsTxt {
         The API token for your Gandi account. This SecureString version should only be used on Windows.
 
     .PARAMETER GandiTokenInsecure
-        The API token for your Gandi account. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The API token for your Gandi account. This standard String version should be used on non-Windows OSes.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -189,11 +184,6 @@ function Remove-DnsTxt {
         PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
 
         Removes a TXT record using a securestring object for GandiToken. (Only works on Windows)
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'token'
-
-        Removes a TXT record using a standard string object for GandiTokenInsecure. (Use this on non-Windows)
     #>
 }
 

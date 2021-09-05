@@ -10,9 +10,9 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [pscredential]$FDCredential,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$FDUsername,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$FDPassword,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -79,10 +79,10 @@ function Add-DnsTxt {
         Username and password for FreeDNS. This PSCredential option can only be used from Windows or any OS running PowerShell 6.2 or later.
 
     .PARAMETER FDUsername
-        Username for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Username for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
 
     .PARAMETER FDPassword
-        Password for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Password for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -91,11 +91,6 @@ function Add-DnsTxt {
         Add-DnsTxt '_acme-challenge.example.com' 'txtvalue' -FDCredential (Get-Credential)
 
         Adds a TXT record using after providing credentials in a prompt.
-
-    .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txtvalue' -FDUsername 'myusername' -FDPassword 'mypassword'
-
-        Adds a TXT record using plain text credentials.
     #>
 }
 
@@ -109,9 +104,9 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [pscredential]$FDCredential,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$FDUsername,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$FDPassword,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -160,10 +155,10 @@ function Remove-DnsTxt {
         Username and password for FreeDNS. This PSCredential option can only be used from Windows or any OS running PowerShell 6.2 or later.
 
     .PARAMETER FDUsername
-        Username for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Username for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
 
     .PARAMETER FDPassword
-        Password for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Password for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -172,11 +167,6 @@ function Remove-DnsTxt {
         Remove-DnsTxt '_acme-challenge.example.com' 'txtvalue' -FDCredential (Get-Credential)
 
         Removes a TXT record using after providing credentials in a prompt.
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txtvalue' -FDUsername 'myusername' -FDPassword 'mypassword'
-
-        Removes a TXT record using plain text credentials.
     #>
 }
 
@@ -212,9 +202,9 @@ function Connect-FreeDNS {
     param(
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [pscredential]$FDCredential,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$FDUsername,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$FDPassword,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraConnectParams

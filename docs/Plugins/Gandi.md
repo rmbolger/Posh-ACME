@@ -10,19 +10,13 @@ First, login to your [account page](https://account.gandi.net) and go to the `Se
 
 ## Using the Plugin
 
-There are two parameter sets you can use with this plugin. One requires being on Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The other can be used from any OS.
+The API key is used with the `GandiToken` SecureString parameter.
 
-### Windows or PS 6.2+
-
-```powershell
-$token = Read-Host "Gandi Token" -AsSecureString
-$gParams = @{GandiToken=$token}
-New-PACertificate example.com -Plugin Gandi -PluginArgs $gParams
-```
-
-### Any OS
+*NOTE: The `GandiTokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-$gParams = @{GandiTokenInsecure='xxxxxxxxxxxxxxxxxxxxxxxxx'}
-New-PACertificate example.com -Plugin Gandi -PluginArgs $gParams
+$pArgs = @{
+    GandiToken = (Read-Host "Gandi Token" -AsSecureString)
+}
+New-PACertificate example.com -Plugin Gandi -PluginArgs $pArgs
 ```

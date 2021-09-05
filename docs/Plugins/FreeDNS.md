@@ -22,27 +22,13 @@ The only thing you can use a non-owned domain for are [challenge aliases](../Gui
 
 ## Using the Plugin
 
-Your account credentials will either be used with the `FDCredential` parameter or `FDUsername`/`FDPassword` parameters. FDCredential uses a PSCredential object that should only be used on Windows or any OS that has PowerShell 6.2 or later. Any environment can use the FDUsername/FDPassword option.
+Your account credentials will be used with the `FDCredential` parameter which is a PSCredential object.
 
-### Windows or PS 6.2+
-
-```powershell
-# create the plugin args hashtable
-$pArgs = @{ FDCredential = (Get-Credential) }
-
-# generate the cert
-New-PACertificate example.com -Plugin FreeDNS -PluginArgs $pArgs
-```
-
-## Any OS
+*NOTE: The `FDUsername` and `FDPassword` parameters are deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-# create the plugin args hashtable
 $pArgs = @{
-    FDUsername = 'myusername'
-    FDPassword = 'mypassword'
+    FDCredential = (Get-Credential)
 }
-
-# generate the cert
 New-PACertificate example.com -Plugin FreeDNS -PluginArgs $pArgs
 ```
