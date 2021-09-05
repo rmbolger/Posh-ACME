@@ -9,7 +9,7 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure', Mandatory, Position=2)]
         [securestring]$DomOffToken,
-        [Parameter(ParameterSetName='Insecure', Mandatory, Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure', Mandatory, Position=2)]
         [string]$DomOffTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -41,7 +41,7 @@ function Add-DnsTxt {
         Token as provided by Domain Offensive. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER DomOffTokenInsecure
-        Token as provided by Domain Offensive. Works on any OS.
+        (DEPRECATED) Token as provided by Domain Offensive. Works on any OS.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -74,7 +74,7 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure', Mandatory, Position=2)]
         [securestring]$DomOffToken,
-        [Parameter(ParameterSetName='Insecure', Mandatory, Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure', Mandatory, Position=2)]
         [string]$DomOffTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -106,7 +106,7 @@ function Remove-DnsTxt {
         Token as provided by Domain Offensive. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER DomOffTokenInsecure
-        Token as provided by Domain Offensive. Works on any OS.
+        (DEPRECATED) Token as provided by Domain Offensive. Works on any OS.
 
     .PARAMETER Domain
         The fully qualified name of the TXT record to be removed.

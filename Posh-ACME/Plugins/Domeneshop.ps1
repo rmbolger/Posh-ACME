@@ -11,7 +11,7 @@ function Add-DnsTxt {
         [string]$DomeneshopToken,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$DomeneshopSecret,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$DomeneshopSecretInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -65,7 +65,7 @@ function Add-DnsTxt {
         The API-secret associated with your API-token. This SecureString version should only be used on Windows or PowerShell 6.2+.
 
     .PARAMETER DomeneshopSecretInsecure
-        The API-secret associated with your API-token. This standard String version can be used on any OS.
+        (DEPRECATED) The API-secret associated with your API-token. This standard String version can be used on any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -89,7 +89,7 @@ function Remove-DnsTxt {
         [string]$DomeneshopToken,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$DomeneshopSecret,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$DomeneshopSecretInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -136,7 +136,7 @@ function Remove-DnsTxt {
         The API-secret associated with your API-token. This SecureString version should only be used on Windows or PowerShell 6.2+.
 
     .PARAMETER DomeneshopSecretInsecure
-        The API-secret associated with your API-token. This standard String version can be used on any OS.
+        (DEPRECATED) The API-secret associated with your API-token. This standard String version can be used on any OS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -182,7 +182,7 @@ function Get-DomeneshopAuthorization {
         [string]$DomeneshopToken,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=1)]
         [securestring]$DomeneshopSecret,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=1)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=1)]
         [string]$DomeneshopSecretInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraConnectParams

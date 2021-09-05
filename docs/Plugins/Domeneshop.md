@@ -12,24 +12,14 @@ We need to retrieve an API token and secret for the account that will be used to
 
 ## Using the Plugin
 
-The API token is specified using the `DomeneshopToken` parameter. The secret is specified either with `DomeneshopSecret` as a [SecureString](https://docs.microsoft.com/en-us/dotnet/api/system.security.securestring) or `DomeneshopSecretInsecure` as a regular string. The SecureString version can only be used on Windows OSes or any OS with PowerShell 6.2 or later. Non-Windows OSes on PowerShell 6.0-6.1 must use the regular string version due to [this issue](https://github.com/PowerShell/PowerShell/issues/1654).
+The API token is specified using the `DomeneshopToken` string parameter. The secret is specified with the `DomeneshopSecret` SecureString parameter.
 
-### Windows and/or PS 6.2+ only
+*NOTE: The `DomeneshopSecretInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
 $pArgs = @{
     DomeneshopToken = 'xxxxxxxxxxxx'
     DomeneshopSecret = (Read-Host "Secret" -AsSecureString)
-}
-New-PACertificate example.com -Plugin Domeneshop -PluginArgs $pArgs
-```
-
-### Any OS
-
-```powershell
-$pArgs = @{
-    DomeneshopToken = 'xxxxxxxxxxxx'
-    DomeneshopSecretInsecure = 'yyyyyyyyyyyy'
 }
 New-PACertificate example.com -Plugin Domeneshop -PluginArgs $pArgs
 ```

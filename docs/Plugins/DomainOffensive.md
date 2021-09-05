@@ -10,23 +10,13 @@ We need to retrieve an secret API token for the account that will be used to upd
 
 ## Using the Plugin
 
-Your personal API token is specified using the `DomOffToken` or `DomOffTokenInsecure` parameter.
+Your personal API token is specified using the `DomOffToken` SecureString parameter.
 
+*NOTE: The `DomOffTokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
-### Windows and/or PS 6.2+ only (secure string)
-```powershell
-$secToken = Read-Host -Prompt "Token" -AsSecureString
-$pArgs = @{
-    DomOffToken = $secToken
-}
-New-PACertificate example.com -Plugin DomainOffensive -PluginArgs $pArgs
-```
-
-
-### Any OS (default string)
 ```powershell
 $pArgs = @{
-    DomOffTokenInsecure = 'token-value'
+    DomOffToken = (Read-Host -Prompt "Token" -AsSecureString)
 }
 New-PACertificate example.com -Plugin DomainOffensive -PluginArgs $pArgs
 ```
