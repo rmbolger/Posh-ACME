@@ -75,7 +75,8 @@ function Add-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -DOToken 'token'
+        $token = Read-Host 'Token' -AsSecureString
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -151,7 +152,8 @@ function Remove-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -DOToken 'token'
+        $token = Read-Host 'Token' -AsSecureString
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
 
         Removes a TXT record for the specified site with the specified value.
     #>
