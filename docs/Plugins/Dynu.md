@@ -12,11 +12,16 @@ You will need to retrieve the Client ID and Secret that will be used to update D
 
 ## Using the Plugin
 
-You will need the account's Client ID and Secret to be set as `DynuClientID` and `DynuSecret`.
+The Client ID is used with the `DynuClientID` string parameter and the secret is used with the `DynuSecretSecure` SecureString parameter.
+
+*NOTE: The `DynuSecret` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-$DynuParams = @{DynuClientID='xxxxxxxx'; DynuSecret='xxxxxxxx'}
-New-PACertificate example.com -Plugin Dynu -PluginArgs $DynuParams
+$pArgs = @{
+    DynuClientID = 'xxxxxxxx'
+    DynuSecretSecure = (Read-Host 'Secret' -AsSecureString)
+}
+New-PACertificate example.com -Plugin Dynu -PluginArgs $pArgs
 ```
 
 ## "Quota Exception" error

@@ -1,7 +1,7 @@
 function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -9,11 +9,18 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$DynuClientID,
-        [Parameter(Mandatory,Position=3)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
+        [securestring]$DynuSecretSecure,
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$DynuSecret,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    # grab the plain text secret
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $DynuSecret = [pscredential]::new('a',$DynuSecretSecure).GetNetworkCredential().Password
+    }
 
     $apiBase = 'https://api.dynu.com/v2'
     $RecordName = $RecordName.ToLower()
@@ -86,21 +93,25 @@ function Add-DnsTxt {
     .PARAMETER DynuClientID
         The API Client ID for the Dynu account. Can be found at https://www.dynu.com/en-US/ControlPanel/APICredentials
 
-    .PARAMETER DynuSecret
+    .PARAMETER DynuSecretSecure
         The API Secret for the Dynu account. Can be found at https://www.dynu.com/en-US/ControlPanel/APICredentials
+
+    .PARAMETER DynuSecret
+        (DEPRECATED) The API Secret for the Dynu account. Can be found at https://www.dynu.com/en-US/ControlPanel/APICredentials
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'client-id' 'client-secret'
+        $secret = Read-Host 'Client Secret' -AsSecureString
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'client-id' $secret
 
         Adds a TXT record for the specified domain with the specified value.
     #>
 }
 
 function Remove-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -108,11 +119,18 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$DynuClientID,
-        [Parameter(Mandatory,Position=3)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
+        [securestring]$DynuSecretSecure,
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$DynuSecret,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    # grab the plain text secret
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $DynuSecret = [pscredential]::new('a',$DynuSecretSecure).GetNetworkCredential().Password
+    }
 
     $apiBase = 'https://api.dynu.com/v2'
     $RecordName = $RecordName.ToLower()
@@ -160,14 +178,18 @@ function Remove-DnsTxt {
     .PARAMETER DynuClientID
         The API Client ID for the Dynu account. Can be found at https://www.dynu.com/en-US/ControlPanel/APICredentials
 
-    .PARAMETER DynuSecret
+    .PARAMETER DynuSecretSecure
         The API Secret for the Dynu account. Can be found at https://www.dynu.com/en-US/ControlPanel/APICredentials
+
+    .PARAMETER DynuSecret
+        (DEPRECATED) The API Secret for the Dynu account. Can be found at https://www.dynu.com/en-US/ControlPanel/APICredentials
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'client-id' 'client-secret'
+        $secret = Read-Host 'Client Secret' -AsSecureString
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'client-id' $secret
 
         Removes a TXT record for the specified domain with the specified value.
     #>
