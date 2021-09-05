@@ -9,7 +9,7 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$DuckToken,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$DuckTokenInsecure,
         [Parameter(Mandatory,Position=3)]
         [string[]]$DuckDomain,
@@ -50,7 +50,7 @@ function Add-DnsTxt {
         The API token for DuckDNS. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER DuckTokenInsecure
-        The API token for DuckDNS. This standard String version may be used on any OS.
+        (DEPRECATED) The API token for DuckDNS. This standard String version may be used on any OS.
 
     .PARAMETER DuckDomains
         The list of domains associated with this token to update. Domains do not need to include the .duckdns.org part, just the subname.
@@ -59,7 +59,8 @@ function Add-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.mydomain.duckdns.org' 'txt-value' 'token-value' 'mydomain'
+        $token = Read-Host 'Token' -AsSecureString
+        Add-DnsTxt '_acme-challenge.mydomain.duckdns.org' 'txt-value' $token 'mydomain'
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -74,7 +75,7 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$DuckToken,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$DuckTokenInsecure,
         [Parameter(Mandatory,Position=3)]
         [string[]]$DuckDomain,
@@ -115,7 +116,7 @@ function Remove-DnsTxt {
         The API token for DuckDNS. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
 
     .PARAMETER DuckTokenInsecure
-        The API token for DuckDNS. This standard String version may be used on any OS.
+        (DEPRECATED) The API token for DuckDNS. This standard String version may be used on any OS.
 
     .PARAMETER DuckDomains
         The list of domains associated with this token to update. Domains do not need to include the .duckdns.org part, just the subname.
@@ -124,7 +125,8 @@ function Remove-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.mydomain.duckdns.org' 'txt-value' 'token-value' 'mydomain'
+        $token = Read-Host 'Token' -AsSecureString
+        Remove-DnsTxt '_acme-challenge.mydomain.duckdns.org' 'txt-value' $token 'mydomain'
 
         Removes a TXT record for the specified site with the specified value.
     #>
