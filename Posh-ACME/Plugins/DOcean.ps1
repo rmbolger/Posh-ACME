@@ -8,7 +8,7 @@ function Add-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
-        [string]$DOTokenSecure,
+        [securestring]$DOTokenSecure,
         [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$DOToken,
         [Parameter(ValueFromRemainingArguments)]
@@ -90,7 +90,7 @@ function Remove-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
-        [string]$DOTokenSecure,
+        [securestring]$DOTokenSecure,
         [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$DOToken,
         [Parameter(ValueFromRemainingArguments)]

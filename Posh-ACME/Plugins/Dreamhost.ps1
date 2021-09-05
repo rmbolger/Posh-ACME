@@ -8,7 +8,7 @@ function Add-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
-        [string]$DreamhostApiKeySecure,
+        [securestring]$DreamhostApiKeySecure,
         [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$DreamhostApiKey,
         [Parameter(ValueFromRemainingArguments)]
@@ -70,7 +70,7 @@ function Remove-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
-        [string]$DreamhostApiKeySecure,
+        [securestring]$DreamhostApiKeySecure,
         [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$DreamhostApiKey,
         [Parameter(ValueFromRemainingArguments)]
