@@ -10,9 +10,13 @@ We need to generate the API key that will be used to update DNS records. Open th
 
 ## Using the Plugin
 
-You will need the previously generated API key to fill the DreamhostApiKey parameter.
+You will use the previously generated API key with the `DreamhostApiKeySecure` SecureString parameter.
+
+*NOTE: The `DreamhostApiKey` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-$DreamhostArgs = @{DreamhostApiKey='xxxxxxxx'}
-New-PACertificate example.com -Plugin Dreamhost -PluginArgs $DreamhostArgs
+$pArgs = @{
+    DreamhostApiKeySecure = (Read-Host 'Key' -AsSecureString)
+}
+New-PACertificate example.com -Plugin Dreamhost -PluginArgs $pArgs
 ```

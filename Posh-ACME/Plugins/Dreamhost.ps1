@@ -1,17 +1,24 @@
 function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
+        [string]$DreamhostApiKeySecure,
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$DreamhostApiKey,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    # grab the plaintext key
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $DreamhostApiKey = [pscredential]::new('a',$DreamhostApiKeySecure).GetNetworkCredential().Password
+    }
 
     Write-Verbose "Adding $RecordName with value $TxtValue on Dreamhost"
     $uri = "https://api.dreamhost.com/?cmd=dns-add_record&type=TXT&format=json&key=$DreamhostApiKey&record=$RecordName&value=$TxtValue"
@@ -35,14 +42,18 @@ function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER DreamhostApiKey
+    .PARAMETER DreamhostApiKeySecure
         A Dreamhost API key with minimum function access of dns-add_record and dns-remove_record. See related links for URI to Dreamhost panel for API key generation.
+
+    .PARAMETER DreamhostApiKey
+        (DEPRECATED) A Dreamhost API key with minimum function access of dns-add_record and dns-remove_record. See related links for URI to Dreamhost panel for API key generation.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'key'
+        $key = Read-Host 'Key' -AsSecureString
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $key
 
         Adds a TXT record for the specified site with the specified value using the default account associated with the given API key.
 
@@ -52,17 +63,24 @@ function Add-DnsTxt {
 }
 
 function Remove-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
+        [string]$DreamhostApiKeySecure,
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$DreamhostApiKey,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    # grab the plaintext key
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $DreamhostApiKey = [pscredential]::new('a',$DreamhostApiKeySecure).GetNetworkCredential().Password
+    }
 
     Write-Verbose "Removing $RecordName with value $TxtValue on Dreamhost"
     $uri = "https://api.dreamhost.com/?cmd=dns-remove_record&type=TXT&format=json&key=$DreamhostApiKey&record=$RecordName&value=$TxtValue"
@@ -86,14 +104,18 @@ function Remove-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER DreamhostApiKey
+    .PARAMETER DreamhostApiKeySecure
         A Dreamhost API key with minimum function access of dns-add_record and dns-remove_record. See related links for URI to Dreamhost panel for API key generation.
+
+    .PARAMETER DreamhostApiKey
+        (DEPRECATED) A Dreamhost API key with minimum function access of dns-add_record and dns-remove_record. See related links for URI to Dreamhost panel for API key generation.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'key'
+        $key = Read-Host 'Key' -AsSecureString
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $key
 
         Removes a TXT record for the specified site with the specified value using the default account associated with the given API key.
     #>
