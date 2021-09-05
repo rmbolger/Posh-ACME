@@ -1,7 +1,7 @@
 ﻿function Get-CurrentPluginType { 'dns-01' }
 
 Function Add-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -9,7 +9,9 @@ Function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory)]
         [string]$EDToken,
-        [Parameter(Mandatory)]
+        [Parameter(ParameterSetName='Secure',Mandatory)]
+        [securestring]$EDKeySecure,
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$EDKey,
         [switch]$EDUseSandbox,
         [Parameter(ValueFromRemainingArguments)]
@@ -18,6 +20,11 @@ Function Add-DnsTxt {
 
     # set the API base
     $apiBase = if ($EDUseSandbox) { "https://sandbox.rest.easydns.net" } else { "https://rest.easydns.net" }
+
+    # grab the plain text key
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $EDKey = [pscredential]::new('a',$EDKeySecure).GetNetworkCredential().Password
+    }
 
     # create the basic auth header
     $encodedCreds = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($EDToken):$($EDKey)"))
@@ -78,8 +85,11 @@ Function Add-DnsTxt {
     .PARAMETER EDToken
         The EasyDNS API Token.
 
-    .PARAMETER EDKey
+    .PARAMETER EDKeySecure
         The EasyDNS API Key.
+
+    .PARAMETER EDKey
+        (DEPRECATED) The EasyDNS API Key.
 
     .PARAMETER EDUseSandbox
         If specified, the plugin runs against the Sandbox environment instead of the Live environment.
@@ -88,14 +98,15 @@ Function Add-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txtvalue' -EDToken 'xxxxxxxx' -EDKey 'xxxxxxxx'
+        $key = Read-Host 'Key' -AsSecureString
+        Add-DnsTxt '_acme-challenge.example.com' 'txtvalue' -EDToken 'xxxxxxxx' -EDKey $key
 
         Adds a TXT record for the specified site with the specified value.
     #>
 }
 
 Function Remove-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -103,7 +114,9 @@ Function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory)]
         [string]$EDToken,
-        [Parameter(Mandatory)]
+        [Parameter(ParameterSetName='Secure',Mandatory)]
+        [securestring]$EDKeySecure,
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$EDKey,
         [switch]$EDUseSandbox,
         [Parameter(ValueFromRemainingArguments)]
@@ -112,6 +125,11 @@ Function Remove-DnsTxt {
 
     # set the API base
     $apiBase = if ($EDUseSandbox) { "https://sandbox.rest.easydns.net" } else { "https://rest.easydns.net" }
+
+    # grab the plain text key
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $EDKey = [pscredential]::new('a',$EDKeySecure).GetNetworkCredential().Password
+    }
 
     # create the basic auth header
     $encodedCreds = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($EDToken):$($EDKey)"))
@@ -161,8 +179,11 @@ Function Remove-DnsTxt {
     .PARAMETER EDToken
         The EasyDNS API Token.
 
-    .PARAMETER EDKey
+    .PARAMETER EDKeySecure
         The EasyDNS API Key.
+
+    .PARAMETER EDKey
+        (DEPRECATED) The EasyDNS API Key.
 
     .PARAMETER EDUseSandbox
         If specified, the plugin runs against the Sandbox environment instead of the Live environment.
@@ -171,7 +192,8 @@ Function Remove-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txtvalue' -EDToken 'xxxxxxxx' -EDKey 'xxxxxxxx'
+        $key = Read-Host 'Key' -AsSecureString
+        Remove-DnsTxt '_acme-challenge.example.com' 'txtvalue' -EDToken 'xxxxxxxx' -EDKey $key
 
         Removes a TXT record for the specified site with the specified value.
     #>

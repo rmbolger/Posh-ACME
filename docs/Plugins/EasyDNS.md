@@ -12,9 +12,14 @@ Documentation, including signup instructions, is available at http://docs.sandbo
 
 ## Using the Plugin
 
-The API Token and Key are associated with the `EDToken` and `EDKey` parameters. If you are testing against the sandbox environment, you must also include `EDUseSandbox = $true`.
+The API Token is used with the `EDToken` string parameter. The API Key is used with the `EDKeySecure` SecureString parameter. If you are testing against the sandbox environment, you must also include `EDUseSandbox = $true`.
+
+*NOTE: The `EDKey` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-$pArgs = @{ EDToken='xxxxxxxxxxxxxxxx'; EDKey='xxxxxxxxxxxxxxxx' }
+$pArgs = @{
+    EDToken = 'xxxxxxxxxxxxxxxx'
+    EDKey = (Read-Host 'Key' -AsSecureString)
+}
 New-PACertificate example.com -Plugin EasyDNS -PluginArgs $pArgs
 ```
