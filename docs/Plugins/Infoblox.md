@@ -10,37 +10,16 @@ The Infoblox WAPI (REST API) takes a standard username/password combo for authen
 
 ## Using the Plugin
 
-There are two slightly different ways to use the plugin depending on your OS platform. If you're on Windows, you'll be creating a `PSCredential` object for the username and password. On non-Windows, you'll pass the username and password in separately as standard string objects.
+Your username and password are used with the `IBCred` parameter as a PSCredential object. You need to set the `IBServer` parameter which is usually the grid master. By default, the DNS View is set to `default`. You can use the `IBView` parameter to specify a different one. If your grid still uses the default self-signed certificate, you'll also want to set `IBIgnoreCert=$true`.
 
-You need to set the server which is usually the grid master. By default, the DNS View is set to `default`. You can use the `IBView` parameter to specify a different one. If your grid still uses the default self-signed certificate, you'll also want to set `IBIgnoreCert=$true`.
-
-Here are a couple examples.
-
-### Windows
+*NOTE: The `IBUsername` and `IBPassword` parameters are deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-# create the credential object
-$ibcred = Get-Credential
-
-# build the parameter hashtable
-$ibParams = @{ IBServer='gridmaster.example.com'; IBView='External'; IBCred=$ibcred; IBIgnoreCert=$true }
-
-# generate the cert
-New-PACertificate example.com -Plugin Infoblox -PluginArgs $ibParams
-```
-
-## Non-Windows
-
-```powershell
-# build the parameter hashtable
-$ibParams = @{
-    IBServer='gridmaster.example.com';
-    IBUsername='myusername';
-    IBPassword='xxxxxxxxxxxxxx';
-    IBView='External';
-    IBIgnoreCert=$true
+$pArgs = @{
+    IBServer = 'gridmaster.example.com'
+    IBView = 'External'
+    IBCred = (Get-Credential)
+    IBIgnoreCert = $true
 }
-
-# generate the cert
-New-PACertificate example.com -Plugin Infoblox -PluginArgs $ibParams
+New-PACertificate example.com -Plugin Infoblox -PluginArgs $pArgs
 ```

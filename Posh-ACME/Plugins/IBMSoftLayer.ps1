@@ -9,9 +9,9 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [pscredential]$IBMCredential,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$IBMUser,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$IBMKey,
         [switch]$IBMPrivateNetwork,
         [Parameter(ValueFromRemainingArguments)]
@@ -19,7 +19,7 @@ function Add-DnsTxt {
     )
 
     # convert the User/Key to a credential object if necessary
-    if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
+    if ('DeprecatedInsecure' -eq $PSCmdlet.ParameterSetName) {
         $secKey = ConvertTo-SecureString $IBMKey -AsPlainText -Force
         $IBMCredential = New-Object System.Management.Automation.PSCredential ($IBMUser, $secKey)
     }
@@ -67,10 +67,10 @@ function Add-DnsTxt {
         The API User and Key for an IBM Cloud account with permissions to write TXT records on specified zones. This should only be used on Windows.
 
     .PARAMETER IBMUser
-        The API User name for an IBM Cloud account with permissions to write TXT records on specified zones. This may be used on any OS.
+        (DEPRECATED) The API User name for an IBM Cloud account with permissions to write TXT records on specified zones. This may be used on any OS.
 
     .PARAMETER IBMKey
-        The API Key for an IBM Cloud account with permissions to write TXT records on specified zones. This may be used on any OS.
+        (DEPRECATED) The API Key for an IBM Cloud account with permissions to write TXT records on specified zones. This may be used on any OS.
 
     .PARAMETER IBMPrivateNetwork
         If specified, the plugin will connect to the SoftLayer API over the private network. Use this only from a machine inside the IBM Cloud environment or from a machine with VPN access.
@@ -80,14 +80,9 @@ function Add-DnsTxt {
 
     .EXAMPLE
         $cred = Get-Credential
-        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -IBMCredential $cred
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -IBMCredential $cred
 
         Adds a TXT record using a PSCredential object with the API User and Key. (Only works on Windows)
-
-    .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -IBMUser 'SL00000' -IBMKey 'xxxxxxxxx'
-
-        Adds a TXT record using standard strings for API User and Key. (Use this on non-Windows)
     #>
 }
 
@@ -100,9 +95,9 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [pscredential]$IBMCredential,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$IBMUser,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$IBMKey,
         [switch]$IBMPrivateNetwork,
         [Parameter(ValueFromRemainingArguments)]
@@ -110,7 +105,7 @@ function Remove-DnsTxt {
     )
 
     # convert the User/Key to a credential object if necessary
-    if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
+    if ('DeprecatedInsecure' -eq $PSCmdlet.ParameterSetName) {
         $secKey = ConvertTo-SecureString $IBMKey -AsPlainText -Force
         $IBMCredential = New-Object System.Management.Automation.PSCredential ($IBMUser, $secKey)
     }
@@ -158,10 +153,10 @@ function Remove-DnsTxt {
         The API User and Key for an IBM Cloud account with permissions to write TXT records on specified zones. This should only be used on Windows.
 
     .PARAMETER IBMUser
-        The API User name for an IBM Cloud account with permissions to write TXT records on specified zones. This may be used on any OS.
+        (DEPRECATED) The API User name for an IBM Cloud account with permissions to write TXT records on specified zones. This may be used on any OS.
 
     .PARAMETER IBMKey
-        The API Key for an IBM Cloud account with permissions to write TXT records on specified zones. This may be used on any OS.
+        (DEPRECATED) The API Key for an IBM Cloud account with permissions to write TXT records on specified zones. This may be used on any OS.
 
     .PARAMETER IBMPrivateNetwork
         If specified, the plugin will connect to the SoftLayer API over the private network. Use this only from a machine inside the IBM Cloud environment or from a machine with VPN access.
@@ -171,14 +166,9 @@ function Remove-DnsTxt {
 
     .EXAMPLE
         $cred = Get-Credential
-        PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -IBMCredential $cred
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -IBMCredential $cred
 
         Removes a TXT record using a PSCredential object with the API User and Key. (Only works on Windows)
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -IBMUser 'SL00000' -IBMKey 'xxxxxxxxx'
-
-        Removes a TXT record using standard strings for API User and Key. (Use this on non-Windows)
     #>
 }
 

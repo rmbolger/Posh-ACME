@@ -14,20 +14,15 @@ Login to your account and go to the [API Tokens](https://cloud.linode.com/profil
 
 ## Using the Plugin
 
-The only required plugin parameter is `LIToken` or `LITokenInsecure`. The "Insecure" version must be used on non-Windows OSes due to a bug in PowerShell Core relating to SecureString variables.
+The token you created is used with the `LIToken` SecureString parameter.
+
+*NOTE: The `LITokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 Linode also has an unusually long delay between when a record is set and when it propagates to their public name servers. There's a note at the bottom of the DNS Manager web GUI that reads, *"Changes made to a master zone will take effect in our nameservers every quarter hour."* So you need to set `DnsSleep` parameter in `New-PACertificate` to at least 15 minutes. But in testing, 17 minutes (1020 seconds) seemed to be the minimum to reliably satisfy the challenges.
 
-### Windows
-
 ```powershell
-$token = Read-Host -Prompt 'Token:' -AsSecureString
-New-PACertificate example.com -Plugin Linode -PluginArgs @{LIToken=$token} -DnsSleep 1020
-```
-
-### Non-Windows
-
-```powershell
-$token = 'xxxxxxxxxxxxxxxx'
-New-PACertificate example.com -Plugin Linode -PluginArgs @{LITokenInsecure=$token} -DnsSleep 1020
+$pArgs = @{
+    LIToken = (Read-Host -Prompt 'Token' -AsSecureString)
+}
+New-PACertificate example.com -Plugin Linode -PluginArgs $pArgs -DnsSleep 1020
 ```

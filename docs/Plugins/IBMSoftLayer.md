@@ -10,16 +10,11 @@ If you don't already have an API Key setup, login to your account and go to the 
 
 ## Using the Plugin
 
-There are two possible parameter sets to use with this plugin. The first can only be used on Windows and involves creating a `PSCredential` object for the `IBMCredential` parameter using the API username and key value from earlier. The second uses standard string values for `IBMUser` and `IBMKey` parameter values and can be used on non-Windows.
+The API username and key are used with the `IBMCredential` parameter as a PSCredential object where the key is the password.
+
+*NOTE: The `IBMUser` and `IBMKey` parameters are deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-# On Windows, prompt for the credentials
-$cred = Get-Credential
-$ibmParams = @{ IBMCredential=$cred }
-
-# On non-Windows, just use a regular strings
-$ibmParams = @{ IBMUser='SL00000000'; IBMKey='xxxxxxxxxxxx' }
-
-# Request the cert
-New-PACertificate example.com -Plugin IBMSoftLayer -PluginArgs $ibmParams
+$pArgs = @{ IBMCredential = (Get-Credential) }
+New-PACertificate example.com -Plugin IBMSoftLayer -PluginArgs $pArgs
 ```

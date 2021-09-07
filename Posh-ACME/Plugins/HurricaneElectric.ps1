@@ -10,9 +10,9 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [pscredential]$HECredential,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$HEUsername,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$HEPassword,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -74,10 +74,10 @@ function Add-DnsTxt {
         Username and password for Hurricane Electric. This PSCredential option can only be used from Windows or any OS running PowerShell 6.2 or later.
 
     .PARAMETER HEUsername
-        Username for Hurricane Electric. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Username for Hurricane Electric. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
 
     .PARAMETER HEPassword
-        Password for Hurricane Electric. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Password for Hurricane Electric. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -86,11 +86,6 @@ function Add-DnsTxt {
         Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -HECredential (Get-Credential)
 
         Adds a TXT record using after providing credentials in a prompt.
-
-    .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -HEUsername 'user' -HEPassword 'pass'
-
-        Adds a TXT record using plain text credentials.
     #>
 }
 
@@ -104,9 +99,9 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [pscredential]$HECredential,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$HEUsername,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$HEPassword,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -169,10 +164,10 @@ function Remove-DnsTxt {
         Username and password for Hurricane Electric. This PSCredential option can only be used from Windows or any OS running PowerShell 6.2 or later.
 
     .PARAMETER HEUsername
-        Username for Hurricane Electric. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Username for Hurricane Electric. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
 
     .PARAMETER HEPassword
-        Password for Hurricane Electric. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Password for Hurricane Electric. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -181,11 +176,6 @@ function Remove-DnsTxt {
         Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -HECredential (Get-Credential)
 
         Removes a TXT record using after providing credentials in a prompt.
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -HEUsername 'user' -HEPassword 'pass'
-
-        Removes a TXT record using plain text credentials.
     #>
 }
 
@@ -222,9 +212,9 @@ function Connect-HurricaneElectric {
     param(
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [pscredential]$HECredential,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$HEUsername,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$HEPassword,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraConnectParams

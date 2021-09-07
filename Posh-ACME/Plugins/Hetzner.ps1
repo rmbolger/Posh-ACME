@@ -9,7 +9,7 @@ Function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$HetznerToken,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$HetznerTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -82,13 +82,15 @@ Function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
     .PARAMETER HetznerToken
-        The API token for your Hetzner account. This SecureString version can only be used on Windows or any OS running PowerShell 6.2 or later.
+        The API token for your Hetzner account.
     .PARAMETER HetznerTokenInsecure
-        The API token for your Hetzner account. This standard String version may be used on any OS.
+        (DEPRECATED) The API token for your Hetzner account.
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -HetznerTokenInsecure 'xxxxxxxx'
+        $token = Read-Host 'Token' -AsSecureString
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -HetznerToken $token
+
         Adds or updates the specified TXT record with the specified value.
     #>
 }
@@ -102,7 +104,7 @@ Function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$HetznerToken,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$HetznerTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -164,13 +166,15 @@ Function Remove-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
     .PARAMETER HetznerToken
-        The API token for your Hetzner account. This SecureString version can only be used on Windows or any OS running PowerShell 6.2 or later.
+        The API token for your Hetzner account.
     .PARAMETER HetznerTokenInsecure
-        The API token for your Hetzner account. This standard String version may be used on any OS.
+        (DEPRECATED) The API token for your Hetzner account.
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -HetznerTokenInsecure 'xxxxxxxx'
+        $token = Read-Host 'Token' -AsSecureString
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -HetznerToken $token
+
         Removes the specified TXT record with the specified value.
     #>
 }

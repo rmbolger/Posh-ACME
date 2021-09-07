@@ -12,9 +12,9 @@ function Add-DnsTxt {
         [string]$IBServer,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [pscredential]$IBCred,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$IBUsername,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$IBPassword,
         [string]$IBView='default',
         [switch]$IBIgnoreCert,
@@ -23,7 +23,7 @@ function Add-DnsTxt {
     )
 
     # create a pscredential from insecure args if necessary
-    if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
+    if ('DeprecatedInsecure' -eq $PSCmdlet.ParameterSetName) {
         $secpass = ConvertTo-SecureString $IBPassword -AsPlainText -Force
         $IBCred = [pscredential]::new($IBUsername,$secpass)
     }
@@ -73,10 +73,10 @@ function Add-DnsTxt {
         Credentials for Infoblox that have permission to write TXT records to the specified zone. This PSCredential option should only be used from Windows.
 
     .PARAMETER IBUsername
-        The Infoblox username that has permission to write TXT records to the specified zone. This should be used from non-Windows.
+        (DEPRECATED) The Infoblox username that has permission to write TXT records to the specified zone. This should be used from non-Windows.
 
     .PARAMETER IBPassword
-        The password for the IBUsername parameter. This should be used from non-Windows.
+        (DEPRECATED) The password for the IBUsername parameter. This should be used from non-Windows.
 
     .PARAMETER IBView
         The name of the DNS View for the specified zone. Defaults to 'default'.
@@ -89,16 +89,10 @@ function Add-DnsTxt {
 
     .EXAMPLE
         $cred = Get-Credential
-        PS C:\>$pluginArgs = @{IBServer='gridmaster.example.com'; IBCred=$cred; IBView='External'; IBIgnoreCert=$true}
-        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' @pluginArgs
+        $pluginArgs = @{IBServer='gridmaster.example.com'; IBCred=$cred; IBView='External'; IBIgnoreCert=$true}
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' @pluginArgs
 
         Adds a TXT record for the specified site/value on Windows.
-
-    .EXAMPLE
-        $pluginArgs = @{IBServer='gridmaster.example.com'; IBUsername='myuser'; IBPassword='xxxxxxxx'; IBView='External'; IBIgnoreCert=$true}
-        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' @pluginArgs
-
-        Adds a TXT record for the specified site/value on non-Windows.
     #>
 }
 
@@ -114,9 +108,9 @@ function Remove-DnsTxt {
         [string]$IBServer,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [pscredential]$IBCred,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$IBUsername,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$IBPassword,
         [string]$IBView='default',
         [switch]$IBIgnoreCert,
@@ -125,7 +119,7 @@ function Remove-DnsTxt {
     )
 
     # create a pscredential from insecure args if necessary
-    if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
+    if ('DeprecatedInsecure' -eq $PSCmdlet.ParameterSetName) {
         $secpass = ConvertTo-SecureString $IBPassword -AsPlainText -Force
         $IBCred = [pscredential]::new($IBUsername,$secpass)
     }
@@ -174,10 +168,10 @@ function Remove-DnsTxt {
         Credentials for Infoblox that have permission to write TXT records to the specified zone. This PSCredential option should only be used from Windows.
 
     .PARAMETER IBUsername
-        The Infoblox username that has permission to write TXT records to the specified zone. This should be used from non-Windows.
+        (DEPRECATED) The Infoblox username that has permission to write TXT records to the specified zone. This should be used from non-Windows.
 
     .PARAMETER IBPassword
-        The password for the IBUsername parameter. This should be used from non-Windows.
+        (DEPRECATED) The password for the IBUsername parameter. This should be used from non-Windows.
 
     .PARAMETER IBView
         The name of the DNS View for the specified zone. Defaults to 'default'.
@@ -190,16 +184,10 @@ function Remove-DnsTxt {
 
     .EXAMPLE
         $cred = Get-Credential
-        PS C:\>$pluginArgs = @{IBServer='gridmaster.example.com'; IBCred=$cred; IBView='External'; IBIgnoreCert=$true}
-        PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' @pluginArgs
+        $pluginArgs = @{IBServer='gridmaster.example.com'; IBCred=$cred; IBView='External'; IBIgnoreCert=$true}
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' @pluginArgs
 
         Removes a TXT record for the specified site/value on Windows.
-
-    .EXAMPLE
-        $pluginArgs = @{IBServer='gridmaster.example.com'; IBUsername='myuser'; IBPassword='xxxxxxxx'; IBView='External'; IBIgnoreCert=$true}
-        PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' @pluginArgs
-
-        Removes a TXT record for the specified site/value on non-Windows.
     #>
 }
 

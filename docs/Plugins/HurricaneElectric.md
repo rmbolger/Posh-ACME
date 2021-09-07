@@ -12,27 +12,11 @@ There's not really any setup aside from knowing your account credentials. Hurric
 
 ## Using the Plugin
 
-Your account credentials will either be used with the `HECredential` parameter or `HEUsername`/`HEPassword` parameters. HECredential uses a PSCredential object that should only be used on Windows or any OS that has PowerShell 6.2 or later. Any environment can use the HEUsername/HEPassword option.
+Your account credentials will be used with the `HECredential` parameter as a PSCredential object.
 
-### Windows or PS 6.2+
+*NOTE: The `HEUsername` and `HEPassword` parameters are deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-# create the plugin args hashtable
 $pArgs = @{ HECredential = (Get-Credential) }
-
-# generate the cert
-New-PACertificate example.com -Plugin HurricaneElectric -PluginArgs $pArgs
-```
-
-## Any OS
-
-```powershell
-# create the plugin args hashtable
-$pArgs = @{
-    HEUsername = 'myusername'
-    HEPassword = 'mypassword'
-}
-
-# generate the cert
 New-PACertificate example.com -Plugin HurricaneElectric -PluginArgs $pArgs
 ```

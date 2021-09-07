@@ -10,19 +10,12 @@ You will need to generate an API Token if you haven't already done so. Go to [Ma
 
 ## Using the Plugin
 
-You will need to provide the API Token as a SecureString value to `HetznerToken` or a standard string value to `HetznerTokenInsecure`. The SecureString version can only be used from Windows or any OS running PowerShell 6.2 or later.
+You will need to provide the API Token as a SecureString value to `HetznerToken`.
 
-### Windows or PS 6.2+
+*NOTE: The `HetznerTokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
 $token = Read-Host "Hetzner Token" -AsSecureString
 $pArgs = @{HetznerToken=$token}
-New-PACertificate example.com -Plugin Hetzner -PluginArgs $pArgs
-```
-
-### Any OS
-
-```powershell
-$pArgs = @{HetznerTokenInsecure='xxxxxxxxxxxxxxxxxxxxxxxxx'}
 New-PACertificate example.com -Plugin Hetzner -PluginArgs $pArgs
 ```

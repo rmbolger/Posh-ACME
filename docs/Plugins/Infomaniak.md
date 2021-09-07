@@ -12,19 +12,13 @@ Note: If the token gets invalidated before a renewal is submitted, a new token h
 
 ## Using the Plugin
 
-You will need to provide the API Token as a SecureString value to `InfomaniakToken` or a standard string value to `InfomaniakTokenInsecure`. The SecureString version can only be used from Windows or any OS running PowerShell 6.2 or later.
+You will need to provide the API Token as a SecureString value to `InfomaniakToken`.
 
-### Windows or PS 6.2+
-
-```powershell
-$token = Read-Host "Infomaniak Token" -AsSecureString
-$pArgs = @{InfomaniakToken=$token}
-New-PACertificate example.com -Plugin Infomaniak -PluginArgs $pArgs
-```
-
-### Any OS
+*NOTE: The `InfomaniakTokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-$pArgs = @{InfomaniakTokenInsecure='xxxxxxxxxxxxxxxxxxxxxxxxx'}
+$pArgs = @{
+    InfomaniakToken = (Read-Host "Infomaniak Token" -AsSecureString)
+}
 New-PACertificate example.com -Plugin Infomaniak -PluginArgs $pArgs
 ```

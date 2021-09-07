@@ -9,7 +9,7 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$LIToken,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$LITokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -67,24 +67,19 @@ function Add-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER LIToken
-        A Personal Access Token associated with the Linode account that has Read/Write permissions on Domains. This SecureString version should only be used on Windows.
+        A Personal Access Token associated with the Linode account that has Read/Write permissions on Domains.
 
     .PARAMETER LITokenInsecure
-        A Personal Access Token associated with the Linode account that has Read/Write permissions on Domains. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) A Personal Access Token associated with the Linode account that has Read/Write permissions on Domains.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
         $token = Read-Host "Token" -AsSecureString
-        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
 
         Adds a TXT record for the specified site with the specified value on Windows.
-
-    .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'token'
-
-        Adds a TXT record for the specified site with the specified value on non-Windows.
     #>
 }
 
@@ -97,7 +92,7 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$LIToken,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$LITokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -146,7 +141,7 @@ function Remove-DnsTxt {
         Remove a DNS TXT record from Linode.
 
     .DESCRIPTION
-        Add a DNS TXT record to Linode using the v4 API.
+        Remove a DNS TXT record to Linode using the v4 API.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -155,24 +150,19 @@ function Remove-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER LIToken
-        A Personal Access Token associated with the Linode account that has Read/Write permissions on Domains. This SecureString version should only be used on Windows.
+        A Personal Access Token associated with the Linode account that has Read/Write permissions on Domains.
 
     .PARAMETER LITokenInsecure
-        A Personal Access Token associated with the Linode account that has Read/Write permissions on Domains. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) A Personal Access Token associated with the Linode account that has Read/Write permissions on Domains.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
         $token = Read-Host "Token" -AsSecureString
-        PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
 
         Removes a TXT record for the specified site with the specified value on Windows.
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'token'
-
-        Removes a TXT record for the specified site with the specified value on non-Windows.
     #>
 }
 
