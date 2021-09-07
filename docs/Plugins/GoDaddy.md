@@ -16,9 +16,14 @@ We need to [generate an API key](https://developer.godaddy.com/keys) for the pro
 
 ## Using the Plugin
 
-The only plugin arguments you need are the API key and API secret created earlier.
+The Key is used with the `GDKey` string parameter and the Secret is used with the `GDSecretSecure` SecureString parameter.
+
+*NOTE: The `GDSecret` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-$pArgs = @{GDKey='xxxxxxxxxxxxxxxx';GDSecret='xxxxxxxxxxxxxxxx'}
+$pArgs = @{
+    GDKey = 'xxxxxxxxxxxxxxxx'
+    GDSecret = (Read-Host 'Secret' -AsSecureString)
+}
 New-PACertificate example.com -Plugin GoDaddy -PluginArgs $pArgs
 ```

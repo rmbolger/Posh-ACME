@@ -1,7 +1,7 @@
 function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
@@ -9,7 +9,9 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory, Position = 2)]
         [string]$GDKey,
-        [Parameter(Mandatory, Position = 3)]
+        [Parameter(ParameterSetName='Secure', Mandatory, Position = 3)]
+        [securestring]$GDSecretSecure,
+        [Parameter(ParameterSetName='DeprecatedInsecure', Mandatory, Position = 3)]
         [string]$GDSecret,
         [Parameter(Mandatory = $false)]
         [switch]$GDUseOTE,
@@ -20,6 +22,11 @@ function Add-DnsTxt {
     $apiRoot = "https://api.godaddy.com/v1/domains"
     if ($GDUseOTE) {
         $apiRoot = "https://api.ote-godaddy.com/v1/domains"
+    }
+
+    # grab the plain text secret if necessary
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $GDSecret = [pscredential]::new('a',$GDSecretSecure).GetNetworkCredential().Password
     }
 
     $headers = @{Authorization = "sso-key $($GDKey):$($GDSecret)"}
@@ -81,8 +88,11 @@ function Add-DnsTxt {
     .PARAMETER GDKey
         The GoDaddy API Key.
 
-    .PARAMETER GDSecret
+    .PARAMETER GDSecretSecure
         The GoDaddy API Secret.
+
+    .PARAMETER GDSecret
+        (DEPRECATED) The GoDaddy API Secret.
 
     .PARAMETER GDUseOTE
         If specified, use the GoDaddy OTE test environment rather than the production environment.
@@ -91,14 +101,15 @@ function Add-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'key' 'secret'
+        $secret = Read-Host 'API Secret' -AsSecureString
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'key' $secret
 
         Adds a TXT record for the specified site with the specified value.
     #>
 }
 
 function Remove-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
@@ -106,7 +117,9 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory, Position = 2)]
         [string]$GDKey,
-        [Parameter(Mandatory, Position = 3)]
+        [Parameter(ParameterSetName='Secure', Mandatory, Position = 3)]
+        [securestring]$GDSecretSecure,
+        [Parameter(ParameterSetName='DeprecatedInsecure', Mandatory, Position = 3)]
         [string]$GDSecret,
         [Parameter(Mandatory = $false)]
         [switch]$GDUseOTE,
@@ -117,6 +130,11 @@ function Remove-DnsTxt {
     $apiRoot = "https://api.godaddy.com/v1/domains"
     if ($GDUseOTE) {
         $apiRoot = "https://api.ote-godaddy.com/v1/domains"
+    }
+
+    # grab the plain text secret if necessary
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $GDSecret = [pscredential]::new('a',$GDSecretSecure).GetNetworkCredential().Password
     }
 
     $headers = @{Authorization = "sso-key $($GDKey):$($GDSecret)"}
@@ -176,8 +194,11 @@ function Remove-DnsTxt {
     .PARAMETER GDKey
         The GoDaddy API Key.
 
-    .PARAMETER GDSecret
+    .PARAMETER GDSecretSecure
         The GoDaddy API Secret.
+
+    .PARAMETER GDSecret
+        (DEPRECATED) The GoDaddy API Secret.
 
     .PARAMETER GDUseOTE
         If specified, use the GoDaddy OTE test environment rather than the production environment.
@@ -186,7 +207,8 @@ function Remove-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'key' 'secret'
+        $secret = Read-Host 'API Secret' -AsSecureString
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'key' $secret
 
         Removes a TXT record for the specified site with the specified value.
     #>
