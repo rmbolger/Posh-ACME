@@ -10,19 +10,13 @@ If you haven't done it already, [generate API key](https://my.selectel.ru/profil
 
 ## Using the Plugin
 
-There are two parameter sets you can use with this plugin. The first uses `SelectelAdminToken` which is your generated admin token as a SecureString object. But it can only be used from Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The second parameter set uses `SelectelAdminTokenInsecure` for the token as a standard String object.
+The API Key is used with the `SelectelAdminToken` SecureString parameter.
 
-### Windows or PS 6.2+
-
-```powershell
-$token = Read-Host "Selectel API key" -AsSecureString
-$StParams = @{SelectelAdminToken=$token}
-New-PACertificate example.com -Plugin Selectel -PluginArgs $StParams
-```
-
-### Any OS
+*NOTE: The `SelectelAdminTokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-$StParams = @{SelectelAdminTokenInsecure='xxxxxxxxxxxx'}
-New-PACertificate example.com -Plugin Selectel -PluginArgs $StParams
+$pArgs = @{
+    SelectelAdminToken = (Read-Host 'API key' -AsSecureString)
+}
+New-PACertificate example.com -Plugin Selectel -PluginArgs $pArgs
 ```

@@ -11,7 +11,7 @@ function Add-DnsTxt {
         [string]$RSUsername,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$RSApiKey,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$RSApiKeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -74,7 +74,7 @@ function Add-DnsTxt {
         The API Key associated with your Rackspace Cloud account.
 
     .PARAMETER RSApiKeyInsecure
-        The API Key associated with your Rackspace Cloud account.
+        (DEPRECATED) The API Key associated with your Rackspace Cloud account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -84,11 +84,6 @@ function Add-DnsTxt {
         PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'myusername' $key
 
         Adds a TXT record using a securestring object for RSApiKey. (Only works on Windows)
-
-    .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'myusername' 'key'
-
-        Adds a TXT record using a standard string object for RSApiKeyInsecure. (Use this on non-Windows)
     #>
 }
 
@@ -103,7 +98,7 @@ function Remove-DnsTxt {
         [string]$RSUsername,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$RSApiKey,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$RSApiKeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -161,7 +156,7 @@ function Remove-DnsTxt {
         The API Key associated with your Rackspace Cloud account.
 
     .PARAMETER RSApiKeyInsecure
-        The API Key associated with your Rackspace Cloud account.
+        (DEPRECATED) The API Key associated with your Rackspace Cloud account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -171,11 +166,6 @@ function Remove-DnsTxt {
         PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'myusername' $key
 
         Removes a TXT record using a securestring object for RSApiKey. (Only works on Windows)
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'myusername' 'key'
-
-        Removes a TXT record using a standard string object for RSApiKeyInsecure. (Use this on non-Windows)
     #>
 }
 
@@ -208,7 +198,7 @@ function Connect-RackspaceDns {
         [string]$RSUsername,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=1)]
         [securestring]$RSApiKey,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=1)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=1)]
         [string]$RSApiKeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraConnectParams

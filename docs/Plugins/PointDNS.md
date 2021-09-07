@@ -12,19 +12,14 @@ your API key. Click the key icon if you need to generate a new key.
 
 ## Using the Plugin
 
-There are two parameter sets you can use with this plugin. The first takes `PDUser` as the email address associated with your account and `PDKey` for your API key as a SecureString object. But it can only be used from Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The second parameter set also takes `PDUser` but uses `PDKeyInsecure` for the API key as a standard String object.
+The `PDUser` parameter should be set to the email address associatedw ith your account. The API key is used with the `PDKey` SecureString parameter.
 
-### Windows or PS 6.2+
-
-```powershell
-$token = Read-Host "PointDNS Key" -AsSecureString
-$pdParams = @{PDUser='email@example.com';PDKey=$token}
-New-PACertificate example.com -Plugin PointDNS -PluginArgs $pdParams
-```
-
-### Any OS
+*NOTE: The `PDKeyInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-$pdParams = @{PDUser='email@example.com';PDKeyInsecure='xxxxxxxxxxxx'}
-New-PACertificate example.com -Plugin PointDNS -PluginArgs $pdParams
+$pArgs = @{
+    PDUser = 'email@example.com'
+    PDKey = (Read-Host 'API Key' -AsSecureString)
+}
+New-PACertificate example.com -Plugin PointDNS -PluginArgs $pArgs
 ```

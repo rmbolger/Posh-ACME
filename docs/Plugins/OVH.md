@@ -19,8 +19,6 @@ Kimsufi Europe | kimsufi-eu | [Create App](https://eu.api.kimsufi.com/createApp/
 Kimsufi North America | kimsufi-ca | [Create App](https://ca.api.kimsufi.com/createApp/)
 RunAbove | runabove-ca | [Create App](https://api.runabove.com/createApp/)
 
-*NOTE: Only one OVH region is supported per ACME account. If you have domains in multiple regions that need certificates, please create a separate ACME account for each one.*
-
 ### Create Application Credentials
 
 Select the region that matches your account and use the appropriate "Create App" link to create an application credential for your account. Set the App Name and Description to whatever you want and click `Create Keys`. You will be presented with an `Application Key` and `Application Secret` which you should save for later.
@@ -103,45 +101,18 @@ After logging in successfully, you should be redirected to a success page on the
 
 ## Using the Plugin
 
-The App Key value will be used with the `OVHAppKey` parameter. The App Secret and Consumer Key values will either be used with `OVHAppSecret`/`OVHConsumerKey` or `OVHAppSecretInsecure`/`OVHConsumerKeyInsecure` depending on your Operating System and PowerShell version. The first pair are SecureString values that can be used on Windows or any OS running PowerShell 6.2 or later. The second pair are standard string values that can be used on any OS.
+The App Key value will be used with the `OVHAppKey` parameter. The App Secret and Consumer Key values will be used with the `OVHAppSecret` and `OVHConsumerKey` SecureString parameters.
+
+*NOTE: The `OVHAppSecretInsecure` and `OVHConsumerKeyInsecure` parameters are deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 **IMPORTANT**: If the permissions on your consumer key only allow write access to specific records, you must add `OVHUseModify = $true` to your plugin arguments. This instructs the plugin to modify existing records instead of trying to create new ones from scratch which will fail.
 
-### Windows or PS 6.2+
-
 ```powershell
-$appSecret = Read-Host -Prompt "App Secret" -AsSecureString
-$consumerKey = Read-Host -Prompt "Consumer Key" -AsSecureString
 $pArgs = @{
     OVHAppKey = 'xxxxxxxxxxx'
-    OVHAppSecret = $appSecret
-    OVHConsumerKey = $consumerKey
+    OVHAppSecret = (Read-Host -Prompt "App Secret" -AsSecureString)
+    OVHConsumerKey = (Read-Host -Prompt "Consumer Key" -AsSecureString)
     OVHRegion = 'ovh-eu'
-}
-New-PACertificate example.com -Plugin OVH -PluginArgs $pArgs
-```
-
-### Non-Windows PS 6.1 and earlier
-
-```powershell
-$pArgs = @{
-    OVHAppKey = 'xxxxxxxxxxxx'
-    OVHAppSecretInsecure = 'yyyyyyyyyyyy'
-    OVHConsumerKeyInsecure = 'zzzzzzzzzzzz'
-    OVHRegion = 'ovh-eu'
-}
-New-PACertificate example.com -Plugin OVH -PluginArgs $pArgs
-```
-
-### Specific Record Access
-
-```powershell
-$pArgs = @{
-    OVHAppKey = 'xxxxxxxxxxxx'
-    OVHAppSecretInsecure = 'yyyyyyyyyyyy'
-    OVHConsumerKeyInsecure = 'zzzzzzzzzzzz'
-    OVHRegion = 'ovh-eu'
-    OVHUseModify = $true
 }
 New-PACertificate example.com -Plugin OVH -PluginArgs $pArgs
 ```

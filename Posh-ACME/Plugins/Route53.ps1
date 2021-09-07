@@ -8,11 +8,11 @@ function Add-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Keys',Mandatory,Position=2)]
-        [Parameter(ParameterSetName='KeysInsecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$R53AccessKey,
         [Parameter(ParameterSetName='Keys',Mandatory,Position=3)]
         [securestring]$R53SecretKey,
-        [Parameter(ParameterSetName='KeysInsecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$R53SecretKeyInsecure,
         [Parameter(ParameterSetName='Profile',Mandatory)]
         [string]$R53ProfileName,
@@ -109,7 +109,7 @@ function Add-DnsTxt {
         The Secret Key for the IAM account specified by -R53AccessKey.
 
     .PARAMETER R53SecretKeyInsecure
-        The Secret Key for the IAM account specified by -R53AccessKey.
+        (DEPRECATED) The Secret Key for the IAM account specified by -R53AccessKey.
 
     .PARAMETER R53ProfileName
         The profile name of a previously stored credential using Set-AWSCredential from the AWS PowerShell module. This only works if the module is installed.
@@ -132,11 +132,6 @@ function Add-DnsTxt {
         Add a TXT record using an explicit Access Key and Secret key from Windows.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -R53AccessKey 'xxxxxxxx' -R53SecretKeyInsecure 'yyyyyyyy'
-
-        Add a TXT record using an explicit Access Key and Secret key from a non-Windows OS.
-
-    .EXAMPLE
         Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -R53UseIAMRole
 
         Add a TXT record using implicit credential from an associated IAM Role.
@@ -151,11 +146,11 @@ function Remove-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(ParameterSetName='Keys',Mandatory,Position=2)]
-        [Parameter(ParameterSetName='KeysInsecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$R53AccessKey,
         [Parameter(ParameterSetName='Keys',Mandatory,Position=3)]
         [securestring]$R53SecretKey,
-        [Parameter(ParameterSetName='KeysInsecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$R53SecretKeyInsecure,
         [Parameter(ParameterSetName='Profile',Mandatory)]
         [string]$R53ProfileName,
@@ -259,7 +254,7 @@ function Remove-DnsTxt {
         The Secret Key for the IAM account specified by -R53AccessKey.
 
     .PARAMETER R53SecretKeyInsecure
-        The Secret Key for the IAM account specified by -R53AccessKey.
+        (DEPRECATED) The Secret Key for the IAM account specified by -R53AccessKey.
 
     .PARAMETER R53ProfileName
         The profile name of a previously stored credential using Set-AWSCredential from the AWS PowerShell module. This only works if the module is installed.
@@ -280,11 +275,6 @@ function Remove-DnsTxt {
         PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -R53AccessKey 'xxxxxxxx' -R53SecretKey $seckey
 
         Remove a TXT record using an explicit Access Key and Secret key from Windows.
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -R53AccessKey 'xxxxxxxx' -R53SecretKeyInsecure 'yyyyyyyy'
-
-        Remove a TXT record using an explicit Access Key and Secret key from a non-Windows OS.
 
     .EXAMPLE
         Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -R53UseIAMRole
@@ -319,11 +309,11 @@ function Initialize-R53Config {
     [CmdletBinding(DefaultParameterSetName='Keys')]
     param (
         [Parameter(ParameterSetName='Keys',Mandatory,Position=0)]
-        [Parameter(ParameterSetName='KeysInsecure',Mandatory,Position=0)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=0)]
         [string]$R53AccessKey,
         [Parameter(ParameterSetName='Keys',Mandatory,Position=1)]
         [securestring]$R53SecretKey,
-        [Parameter(ParameterSetName='KeysInsecure',Mandatory,Position=1)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=1)]
         [string]$R53SecretKeyInsecure,
         [Parameter(ParameterSetName='Profile',Mandatory)]
         [string]$R53ProfileName,
@@ -381,7 +371,7 @@ function Initialize-R53Config {
             $script:AwsCredParam = @{AccessKey=$R53AccessKey; SecretKey=$secPlain}
             break
         }
-        'KeysInsecure' {
+        'DeprecatedInsecure' {
             $script:AwsCredParam = @{AccessKey=$R53AccessKey; SecretKey=$R53SecretKeyInsecure}
             break
         }

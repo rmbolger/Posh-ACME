@@ -29,7 +29,9 @@ Enable the HTTP API in the server options dialog
 
 The primary parameter you need with this plugin is `SdnsApiRoot` which is the root URL for the HTTP API such as `http://dns.example.com:8053`. Remember to add a `/v2` if you enabled the API v.1 check box. If you're using HTTPS and a self-signed certificate, you'll also need to add the `SdnsIgnoreCert` parameter.
 
-If you're not using anonymous authentication, you'll also need to specify credentials either as a PSCredential object with `SdnsCred` or plain text credentials with `SdnsUser` and `SdnsPassword`. The PSCredential option may only be used on Windows or any OS with PowerShell 6.2 or later.
+If you're not using anonymous authentication, you'll also need to specify credentials as a PSCredential object with `SdnsCred`.
+
+*NOTE: The `SdnsUser` and `SdnsPassword` parameters are deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ### Anonymous Authentication
 
@@ -41,25 +43,13 @@ $pArgs = @{
 New-PACertificate example.com -Plugin SimpleDNSPlus -PluginArgs $pArgs
 ```
 
-### Secure Credential Authentication (Windows and/or PS 6.2+ only)
+### Credential Authentication
 
 ```powershell
 $pArgs = @{
     SdnsApiRoot = 'http://dns.example.com:8053'
     SdnsIgnoreCert = $true
     SdnsCred = (Get-Credential)
-}
-New-PACertificate example.com -Plugin SimpleDNSPlus -PluginArgs $pArgs
-```
-
-### Plain Text Username/Password Authentication
-
-```powershell
-$pArgs = @{
-    SdnsApiRoot = 'http://dns.example.com:8053'
-    SdnsIgnoreCert = $true
-    SdnsUser = 'admin'
-    SdnsPassword = 'xxxxxxxx'
 }
 New-PACertificate example.com -Plugin SimpleDNSPlus -PluginArgs $pArgs
 ```

@@ -9,7 +9,7 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 2)]
         [securestring]$SelectelAdminToken,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 2)]
+        [Parameter(ParameterSetName = 'DeprecatedInsecure', Mandatory, Position = 2)]
         [string]$SelectelAdminTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -67,7 +67,7 @@ function Add-DnsTxt {
         The Selectel admin token generated for your account.
 
     .PARAMETER SelectelAdminTokenInsecure
-        The Selectel admin token generated for your account.
+        (DEPRECATED) The Selectel admin token generated for your account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -77,11 +77,6 @@ function Add-DnsTxt {
         PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
 
         Adds the specified TXT record with the specified value using a secure token.
-
-    .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'my-token'
-
-        Adds the specified TXT record with the specified value using a plaintext token.
     #>
 }
 
@@ -94,7 +89,7 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 2)]
         [securestring]$SelectelAdminToken,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 2)]
+        [Parameter(ParameterSetName = 'DeprecatedInsecure', Mandatory, Position = 2)]
         [string]$SelectelAdminTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -146,7 +141,7 @@ function Remove-DnsTxt {
         The Selectel admin token generated for your account.
 
     .PARAMETER SelectelAdminTokenInsecure
-        The Selectel admin token generated for your account.
+        (DEPRECATED) The Selectel admin token generated for your account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -156,11 +151,6 @@ function Remove-DnsTxt {
         PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
 
         Removes the specified TXT record with the specified value using a secure token.
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'my-token'
-
-        Removes the specified TXT record with the specified value using a plaintext token.
     #>
 }
 

@@ -9,15 +9,15 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 2)]
         [pscredential]$RegRuCredential,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 2)]
+        [Parameter(ParameterSetName = 'DeprecatedInsecure', Mandatory, Position = 2)]
         [string]$RegRuLogin,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 3)]
+        [Parameter(ParameterSetName = 'DeprecatedInsecure', Mandatory, Position = 3)]
         [string]$RegRuPwdInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    if ($PSCmdlet.ParameterSetName -eq 'Secure') {
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
         $RegRuLogin = $RegRuCredential.UserName
         $RegRuPwdInsecure = $RegRuCredential.GetNetworkCredential().Password
     }
@@ -73,20 +73,21 @@ function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
+    .PARAMETER RegRuCredential
+        Your Reg.Ru username and either account password or API access password.
+
     .PARAMETER RegRuLogin
-        Your Reg.Ru username.
+        (DEPRECATED) Your Reg.Ru username.
 
     .PARAMETER RegRuPassword
-        Your Reg.Ru account or API access password.
-
-    .PARAMETER DomainName
-        Your domain from Reg.Ru admin panel.
+        (DEPRECATED) Your Reg.Ru account or API access password.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.site1.domain.zone' 'asdfqwer12345678' 'user@reg.ru' 'YourPassword' 'domain.zone'
+        $cred = Get-Credential
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $cred
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -101,15 +102,15 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 2)]
         [pscredential]$RegRuCredential,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 2)]
+        [Parameter(ParameterSetName = 'DeprecatedInsecure', Mandatory, Position = 2)]
         [string]$RegRuLogin,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory, Position = 3)]
+        [Parameter(ParameterSetName = 'DeprecatedInsecure', Mandatory, Position = 3)]
         [string]$RegRuPwdInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    if ($PSCmdlet.ParameterSetName -eq 'Secure') {
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
         $RegRuLogin = $RegRuCredential.UserName
         $RegRuPwdInsecure = $RegRuCredential.GetNetworkCredential().Password
     }
@@ -166,20 +167,21 @@ function Remove-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
+    .PARAMETER RegRuCredential
+        Your Reg.Ru username and either account password or API access password.
+
     .PARAMETER RegRuLogin
-        Your Reg.Ru username.
+        (DEPRECATED) Your Reg.Ru username.
 
     .PARAMETER RegRuPassword
-        Your Reg.Ru account or API access password.
-
-    .PARAMETER DomainName
-        Your domain from Reg.Ru admin panel.
+        (DEPRECATED) Your Reg.Ru account or API access password.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.site1.domain.zone' 'asdfqwer12345678' 'user@reg.ru' 'YourPassword' 'domain.zone'
+        $cred = Get-Credential
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $cred
 
         Removes a TXT record for the specified site with the specified value.
     #>

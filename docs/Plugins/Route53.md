@@ -107,13 +107,15 @@ Now you'd need to attach the role with your EC2 instance or launch a new instanc
 
 If you are using explicit credentials, you may send them directly to the plugin via `R53AccessKey` and `R53SecretKey` parameters. A SecureString value is required for `R53SecretKey`. If you lost the keys, you can re-generate them from the AWS IAM console. But there's no way to retrieve an existing secret key value.
 
-*NOTE: The `R53SecretKeyInsecure` parameter is still supported but should be considered deprecated and may be removed in a future major release.*
+*NOTE: The `R53SecretKeyInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ### Explicit Credentials
 
 ```powershell
-$secKey = Read-Host -Prompt "Secret Key" -AsSecureString
-$pArgs = @{R53AccessKey='xxxxxxxx';R53SecretKey=$secKey}
+$pArgs = @{
+    R53AccessKey = 'xxxxxxxx'
+    R53SecretKey = (Read-Host "Secret Key" -AsSecureString)
+}
 New-PACertificate example.com -Plugin Route53 -PluginArgs $pArgs
 ```
 

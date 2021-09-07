@@ -14,29 +14,11 @@ API Access is not allowed without adding your client machine's IP or subnet to a
 
 ## Using the Plugin
 
-You will need to provide your account email address and password (or API password) in either the `RegRuCredential` parameter as a PSCredential object or `RegRuLogin` and `RegRuPwdInsecure` parameters as standard string values. The PSCredential option may only be used on Windows or any OS running PowerShell 6.2 or later.
+Your account username and either the account password or API password are used with the `RegRuCredential` parameter as a PSCredential object. It has been reported that the typical DNS propagation time for this provider is close to 1 hour. So be sure to set the DNSSleep parameter longer than 3600.
 
-It has been reported that the typical DNS propagation time for this provider is close to 1 hour. So be sure to set the DNSSleep parameter longer than 3600.
-
-### Windows or PS 6.2+
+*NOTE: The `RegRuLogin` and `RegRuPwdInsecure` parameters are deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-# create the plugin args hashtable
 $pArgs = @{ RegRuCredential = (Get-Credential) }
-
-# generate the cert
-New-PACertificate test.domain.zone -Plugin Regru -DNSSleep 4000 -PluginArgs $pArgs
-```
-
-## Any OS
-
-```powershell
-# create the plugin args hashtable
-$pArgs = @{
-    RegRuLogin = 'username'
-    RegRuPwdInsecure = 'password'
-}
-
-# generate the cert
-New-PACertificate test.domain.zone -Plugin Regru -DNSSleep 4000 -PluginArgs $pArgs
+New-PACertificate example.com -Plugin Regru -PluginArgs $pArgs -DNSSleep 4000
 ```

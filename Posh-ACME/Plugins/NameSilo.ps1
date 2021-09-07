@@ -1,7 +1,7 @@
 function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -9,7 +9,7 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$NameSiloKey,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$NameSiloKeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -58,20 +58,21 @@ function Add-DnsTxt {
         The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager.
 
     .PARAMETER NameSiloKeyInsecure
-        The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager.
+        (DEPRECATED) The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt -RecordName '_acme-challenge.example.com' 'txt-value' -NameSiloKeyInsecure 'api-key'
+        $key = Read-Host 'API Key' -AsSecureString
+        Add-DnsTxt -RecordName '_acme-challenge.example.com' 'txt-value' -NameSiloKey $key
 
         Adds a TXT record for the specified site with the specified value.
     #>
 }
 
 function Remove-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -79,7 +80,7 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$NameSiloKey,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$NameSiloKeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -124,13 +125,14 @@ function Remove-DnsTxt {
         The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager.
 
     .PARAMETER NameSiloKeyInsecure
-        The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager.
+        (DEPRECATED) The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxt -RecordName '_acme-challenge.example.com' 'txt-value' -NameSiloKeyInsecure 'api-key'
+        $key = Read-Host 'API Key' -AsSecureString
+        Remove-DnsTxt -RecordName '_acme-challenge.example.com' 'txt-value' -NameSiloKey $key
 
         Removes a TXT record for the specified site with the specified value.
     #>

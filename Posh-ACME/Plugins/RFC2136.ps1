@@ -15,7 +15,7 @@ function Add-DnsTxt {
         [string]$DDNSKeyType,
         [Parameter(ParameterSetName='Secure')]
         [securestring]$DDNSKeyValue,
-        [Parameter(ParameterSetName='Insecure')]
+        [Parameter(ParameterSetName='DeprecatedInsecure')]
         [string]$DDNSKeyValueInsecure,
         [string]$DDNSExePath='nsupdate',
         [string[]]$DDNSZone,
@@ -91,7 +91,7 @@ function Add-DnsTxt {
         When using TSIG authentication, the value of the key you are using.
 
     .PARAMETER DDNSKeyValueInsecure
-        When using TSIG authentication, the value of the key you are using.
+        (DEPRECATED) When using TSIG authentication, the value of the key you are using.
 
     .PARAMETER DDNSExePath
         The path to the nsupdate executable. The default is just 'nsupdate' which will use the first copy found in the PATH environment variable.
@@ -108,8 +108,9 @@ function Add-DnsTxt {
         Adds the specified TXT record with the specified value using unauthenticated RFC2136.
 
     .EXAMPLE
-        $tsigParams = @{DDNSKeyName='key-name';DDNSKeyType='hmac-sha256';DDNSKeyValueInsecure='key-value'}
-        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -DDNSNameserver 'ns.example.com' @tsigParams
+        $tsigKey = Read-Host 'TSIG Key' -AsSecureString
+        $tsigParams = @{DDNSKeyName='key-name';DDNSKeyType='hmac-sha256';DDNSKeyValue=$tsigKey}
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -DDNSNameserver 'ns.example.com' @tsigParams
 
         Adds the specified TXT record with the specified value using RFC2136 with SHA256 TSIG authentication.
     #>
@@ -130,7 +131,7 @@ function Remove-DnsTxt {
         [string]$DDNSKeyType,
         [Parameter(ParameterSetName='Secure')]
         [securestring]$DDNSKeyValue,
-        [Parameter(ParameterSetName='Insecure')]
+        [Parameter(ParameterSetName='DeprecatedInsecure')]
         [string]$DDNSKeyValueInsecure,
         [string]$DDNSExePath='nsupdate',
         [string[]]$DDNSZone,
@@ -205,7 +206,7 @@ function Remove-DnsTxt {
         When using TSIG authentication, the value of the key you are using.
 
     .PARAMETER DDNSKeyValueInsecure
-        When using TSIG authentication, the value of the key you are using.
+        (DEPRECATED) When using TSIG authentication, the value of the key you are using.
 
     .PARAMETER DDNSExePath
         The path to the nsupdate executable. The default is just 'nsupdate' which will use the first copy found in the PATH environment variable.
@@ -222,8 +223,9 @@ function Remove-DnsTxt {
         Removes the specified TXT record with the specified value using unauthenticated RFC2136.
 
     .EXAMPLE
-        $tsigParams = @{DDNSKeyName='key-name';DDNSKeyType='hmac-sha256';DDNSKeyValueInsecure='key-value'}
-        PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -DDNSNameserver 'ns.example.com' @tsigParams
+        $tsigKey = Read-Host 'TSIG Key' -AsSecureString
+        $tsigParams = @{DDNSKeyName='key-name';DDNSKeyType='hmac-sha256';DDNSKeyValue=$tsigKey}
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -DDNSNameserver 'ns.example.com' @tsigParams
 
         Removes the specified TXT record with the specified value using RFC2136 with SHA256 TSIG authentication.
     #>

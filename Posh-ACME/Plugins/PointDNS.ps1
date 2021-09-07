@@ -11,7 +11,7 @@ function Add-DnsTxt {
         [string]$PDUser,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$PDKey,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$PDKeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -61,13 +61,14 @@ function Add-DnsTxt {
         PointDNS API key.
 
     .PARAMETER PDKeyInsecure
-        PointDNS API key.
+        (DEPRECATED) PointDNS API key.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'user@example.com' 'key-value'
+        $key = Read-Host 'API Key' -AsSecureString
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'user@example.com' $key
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -84,7 +85,7 @@ function Remove-DnsTxt {
         [string]$PDUser,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$PDKey,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$PDKeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -135,13 +136,14 @@ function Remove-DnsTxt {
         PointDNS API key.
 
     .PARAMETER PDKeyInsecure
-        PointDNS API key.
+        (DEPRECATED) PointDNS API key.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'user@example.com' 'key-value'
+        $key = Read-Host 'API Key' -AsSecureString
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'user@example.com' $key
 
         Removes a TXT record for the specified site with the specified value.
     #>
@@ -303,7 +305,7 @@ function Get-PDAuthHeaders {
         [string]$PDUser,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=1)]
         [securestring]$PDKey,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=1)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=1)]
         [string]$PDKeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams

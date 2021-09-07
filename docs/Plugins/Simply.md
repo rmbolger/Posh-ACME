@@ -10,25 +10,14 @@ Using Simply.com API requires only your account name or account number and API K
 
 ## Using the Plugin
 
-Your account name/number is used with the `SimplyAccount` parameter. The API key can be used with `SimplyAPIKey` as a SecureString or `SimplyAPIKeyInsecure` as a standard string. The SecureString version should only be used on Windows or any OS with PowerShell 6.2 or later.
+Your account name/number is used with the `SimplyAccount` parameter. The API key is used with the `SimplyAPIKey` SecureString parameter.
 
-
-### Windows or PS 6.2+
+*NOTE: The `SimplyAPIKeyInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
 $pArgs = @{
     SimplyAccount = 'S123456'
     SimplyAPIKey = (Read-Host 'Enter Key' -AsSecureString)
-}
-New-PACertificate example.com -Plugin Simply -PluginArgs $pArgs
-```
-
-### Any OS
-
-```powershell
-$pArgs = @{
-    SimplyAccount = 'S123456'
-    SimplyAPIKeyInsecure = 'xxxxxxxxxxxx'
 }
 New-PACertificate example.com -Plugin Simply -PluginArgs $pArgs
 ```

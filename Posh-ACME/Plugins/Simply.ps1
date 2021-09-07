@@ -11,7 +11,7 @@ function Add-DnsTxt {
         [string]$SimplyAccount,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$SimplyAPIKey,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$SimplyAPIKeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -71,11 +71,12 @@ function Add-DnsTxt {
     .PARAMETER SimplyAPIKey
         The API Key associated with the account as a SecureString value.
     .PARAMETER SimplyAPIKeyInsecure
-        The API Key associated with the account as a standard string value.
+        (DEPRECATED) The API Key associated with the account as a standard string value.
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'S123456' 'key-value'
+        $key = Read-Host 'API Key' -AsSecureString
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'S123456' $key
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -92,7 +93,7 @@ function Remove-DnsTxt {
         [string]$SimplyAccount,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$SimplyAPIKey,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$SimplyAPIKeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -141,11 +142,12 @@ function Remove-DnsTxt {
     .PARAMETER SimplyAPIKey
         The API Key associated with the account as a SecureString value.
     .PARAMETER SimplyAPIKeyInsecure
-        The API Key associated with the account as a standard string value.
+        (DEPRECATED) The API Key associated with the account as a standard string value.
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'S123456' 'key-value'
+        $key = Read-Host 'API Key' -AsSecureString
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'S123456' $key
 
         Removes a TXT record from the specified site with the specified value.
     #>

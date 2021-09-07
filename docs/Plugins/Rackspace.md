@@ -10,19 +10,12 @@ First, go to the Profile page for your account and record the `Rackspace API Key
 
 ## Using the Plugin
 
-There are two parameter sets you can use with this plugin. One requires being on Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The other can be used from any OS.
+Your account username is used with the `RSUsername` paraemter. The API key is used with the `RSApiKey` SecureString parameter.
 
-### Windows or PS 6.2+
+*NOTE: The `RSApiKeyInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
 $rsKey = Read-Host "API Key" -AsSecureString
 $rsParams = @{RSUsername='myusername';RSApiKey=$rsKey}
-New-PACertificate example.com -Plugin Rackspace -PluginArgs $rsParams
-```
-
-### Any OS
-
-```powershell
-$rsParams = @{RSUsername='myusername';RSApiKeyInsecure='xxxxxxxx'}
 New-PACertificate example.com -Plugin Rackspace -PluginArgs $rsParams
 ```

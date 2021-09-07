@@ -12,9 +12,9 @@ function Add-DnsTxt {
         [string]$SdnsApiRoot,
         [Parameter(ParameterSetName='Secure')]
         [pscredential]$SdnsCred,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$SdnsUser,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$SdnsPassword,
         [switch]$SdnsIgnoreCert,
         [Parameter(ValueFromRemainingArguments)]
@@ -24,7 +24,7 @@ function Add-DnsTxt {
     $apiRoot = "$($SdnsApiRoot)/zones"
 
     # create a pscredential from insecure args if necessary
-    if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
+    if ('DeprecatedInsecure' -eq $PSCmdlet.ParameterSetName) {
         $secpass = ConvertTo-SecureString $SdnsPassword -AsPlainText -Force
         $SdnsCred = [pscredential]::new($SdnsUser,$secpass)
     }
@@ -83,10 +83,10 @@ function Add-DnsTxt {
         The HTTP API credentials required to authenticate.
 
     .PARAMETER SdnsUser
-        The HTTP API Username.
+        (DEPRECATED) The HTTP API Username.
 
     .PARAMETER SdnsSecret
-        The HTTP API Password.
+        (DEPRECATED) The HTTP API Password.
 
     .PARAMETER SdnsIgnoreCert
         Use this switch to prevent certificate errors when your Simple DNS Plus server is using a self-signed or other untrusted SSL certificate. When passing parameters via hashtable, set it as a boolean such as @{SdnsIgnoreCert=$true}.
@@ -104,12 +104,6 @@ function Add-DnsTxt {
         PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txtvalue' @pArgs
 
         Adds a TXT record using credentials and ignores certificate validation.
-
-    .EXAMPLE
-        $pArgs = @{ SdnsApiRoot = 'http://dns.example.com:8053'; SdnsUser = 'admin'; SdnsPassword = 'xxxxxxxx' }
-        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txtvalue' @pArgs
-
-        Adds a TXT record using plain text credentials.
     #>
 }
 
@@ -125,9 +119,9 @@ function Remove-DnsTxt {
         [string]$SdnsApiRoot,
         [Parameter(ParameterSetName='Secure')]
         [pscredential]$SdnsCred,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$SdnsUser,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$SdnsPassword,
         [switch]$SdnsIgnoreCert,
         [Parameter(ValueFromRemainingArguments)]
@@ -137,7 +131,7 @@ function Remove-DnsTxt {
     $apiRoot = "$($SdnsApiRoot)/zones"
 
     # create a pscredential from insecure args if necessary
-    if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
+    if ('DeprecatedInsecure' -eq $PSCmdlet.ParameterSetName) {
         $secpass = ConvertTo-SecureString $SdnsPassword -AsPlainText -Force
         $SdnsCred = [pscredential]::new($SdnsUser,$secpass)
     }
@@ -204,10 +198,10 @@ function Remove-DnsTxt {
         The HTTP API credentials required to authenticate.
 
     .PARAMETER SdnsUser
-        The HTTP API Username.
+        (DEPRECATED) The HTTP API Username.
 
     .PARAMETER SdnsSecret
-        The HTTP API Password.
+        (DEPRECATED) The HTTP API Password.
 
     .PARAMETER SdnsIgnoreCert
         Use this switch to prevent certificate errors when your Simple DNS Plus server is using a self-signed or other untrusted SSL certificate. When passing parameters via hashtable, set it as a boolean such as @{SdnsIgnoreCert=$true}.
@@ -225,12 +219,6 @@ function Remove-DnsTxt {
         PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txtvalue' @pArgs
 
         Removes a TXT record using credentials and ignores certificate validation.
-
-    .EXAMPLE
-        $pArgs = @{ SdnsApiRoot = 'http://dns.example.com:8053'; SdnsUser = 'admin'; SdnsPassword = 'xxxxxxxx' }
-        PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txtvalue' @pArgs
-
-        Removes a TXT record using plain text credentials.
     #>
 }
 

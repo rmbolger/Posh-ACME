@@ -13,9 +13,9 @@ function Add-DnsTxt {
         [securestring]$OVHAppSecret,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [securestring]$OVHConsumerKey,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$OVHAppSecretInsecure,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$OVHConsumerKeyInsecure,
         [ValidateSet('ovh-eu','ovh-us','ovh-ca','soyoustart-eu','soyoustart-ca','kimsufi-eu','kimsufi-ca','runabove-ca')]
         [string]$OVHRegion = 'ovh-eu',
@@ -111,16 +111,16 @@ function Add-DnsTxt {
         The Application Key value associated with the OVH API application you created.
 
     .PARAMETER OVHAppSecret
-        The SecureString version of the Application Secret value associated with the OVH API application you created.
+        The Application Secret value associated with the OVH API application you created.
 
     .PARAMETER OVHAppSecretInsecure
-        The standard string version of the Application Secret value associated with the OVH API application you created.
+        (DEPRECATED) The Application Secret value associated with the OVH API application you created.
 
     .PARAMETER OVHConsumerKey
-        The SecureString version of the Consumer Key value generated for the API application you created.
+        The Consumer Key value generated for the API application you created.
 
     .PARAMETER OVHConsumerKeyInsecure
-        The standard string version of the Consumer Key value generated for the API application you created.
+        (DEPRECATED) The Consumer Key value generated for the API application you created.
 
     .PARAMETER OVHRegion
         The region code associated with your OVH account. Must be one of the following: 'ovh-eu','ovh-us','ovh-ca','soyoustart-eu','soyoustart-ca','kimsufi-eu','kimsufi-ca','runabove-ca'
@@ -133,17 +133,11 @@ function Add-DnsTxt {
 
     .EXAMPLE
         $appSecret = Read-Host -Prompt "App Secret" -AsSecureString
-        PS C:\>$cKey = Read-Host -Prompt "Consumer Key" -AsSecureString
-        PS C:\>$pArgs = @{OVHAppKey='xxxxxxxx'; OVHAppSecret=$appSecret; OVHConsumerKey=$cKey; OVHRegion='ovh-eu'}
-        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' @pArgs
+        $cKey = Read-Host -Prompt "Consumer Key" -AsSecureString
+        $pArgs = @{OVHAppKey='xxxxxxxx'; OVHAppSecret=$appSecret; OVHConsumerKey=$cKey; OVHRegion='ovh-eu'}
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' @pArgs
 
         Adds a TXT record using SecureString parameter values.
-
-    .EXAMPLE
-        $pArgs = @{OVHAppKey='xxxxxxxx'; OVHAppSecret='yyyyyyyy'; OVHConsumerKey='zzzzzzzz'; OVHRegion='ovh-eu'}
-        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' @pArgs
-
-        Adds a TXT record using standard string parameter values.
     #>
 }
 
@@ -160,9 +154,9 @@ function Remove-DnsTxt {
         [securestring]$OVHAppSecret,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [securestring]$OVHConsumerKey,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$OVHAppSecretInsecure,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$OVHConsumerKeyInsecure,
         [ValidateSet('ovh-eu','ovh-us','ovh-ca','soyoustart-eu','soyoustart-ca','kimsufi-eu','kimsufi-ca','runabove-ca')]
         [string]$OVHRegion = 'ovh-eu',
@@ -218,16 +212,16 @@ function Remove-DnsTxt {
         The Application Key value associated with the OVH API application you created.
 
     .PARAMETER OVHAppSecret
-        The SecureString version of the Application Secret value associated with the OVH API application you created.
+        The Application Secret value associated with the OVH API application you created.
 
     .PARAMETER OVHAppSecretInsecure
-        The standard string version of the Application Secret value associated with the OVH API application you created.
+        (DEPRECATED) The Application Secret value associated with the OVH API application you created.
 
     .PARAMETER OVHConsumerKey
-        The SecureString version of the Consumer Key value generated for the API application you created.
+        The Consumer Key value generated for the API application you created.
 
     .PARAMETER OVHConsumerKeyInsecure
-        The standard string version of the Consumer Key value generated for the API application you created.
+        (DEPRECATED) The Consumer Key value generated for the API application you created.
 
     .PARAMETER OVHRegion
         The region code associated with your OVH account. Must be one of the following: 'ovh-eu','ovh-us','ovh-ca','soyoustart-eu','soyoustart-ca','kimsufi-eu','kimsufi-ca','runabove-ca'
@@ -240,17 +234,11 @@ function Remove-DnsTxt {
 
     .EXAMPLE
         $appSecret = Read-Host -Prompt "App Secret" -AsSecureString
-        PS C:\>$cKey = Read-Host -Prompt "Consumer Key" -AsSecureString
-        PS C:\>$pArgs = @{OVHAppKey='xxxxxxxxxxx'; OVHAppSecret=$appSecret; OVHConsumerKey=$Key; OVHRegion='ovh-eu'}
-        PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' @pArgs
+        $cKey = Read-Host -Prompt "Consumer Key" -AsSecureString
+        $pArgs = @{OVHAppKey='xxxxxxxxxxx'; OVHAppSecret=$appSecret; OVHConsumerKey=$Key; OVHRegion='ovh-eu'}
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' @pArgs
 
         Removes a TXT record using SecureString parameter values.
-
-    .EXAMPLE
-        $pArgs = @{OVHAppKey='xxxxxxxx'; OVHAppSecret='yyyyyyyy'; OVHConsumerKey='zzzzzzzz'; OVHRegion='ovh-eu'}
-        PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' @pArgs
-
-        Removes a TXT record using standard string parameter values.
     #>
 }
 
@@ -263,9 +251,9 @@ function Save-DnsTxt {
         [securestring]$OVHAppSecret,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [securestring]$OVHConsumerKey,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$OVHAppSecretInsecure,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$OVHConsumerKeyInsecure,
         [ValidateSet('ovh-eu','ovh-us','ovh-ca','soyoustart-eu','soyoustart-ca','kimsufi-eu','kimsufi-ca','runabove-ca')]
         [string]$OVHRegion = 'ovh-eu',
@@ -296,16 +284,16 @@ function Save-DnsTxt {
         The Application Key value associated with the OVH API application you created.
 
     .PARAMETER OVHAppSecret
-        The SecureString version of the Application Secret value associated with the OVH API application you created.
+        The Application Secret value associated with the OVH API application you created.
 
     .PARAMETER OVHAppSecretInsecure
-        The standard string version of the Application Secret value associated with the OVH API application you created.
+        (DEPRECATED) The Application Secret value associated with the OVH API application you created.
 
     .PARAMETER OVHConsumerKey
-        The SecureString version of the Consumer Key value generated for the API application you created.
+        The Consumer Key value generated for the API application you created.
 
     .PARAMETER OVHConsumerKeyInsecure
-        The standard string version of the Consumer Key value generated for the API application you created.
+        (DEPRECATED) The Consumer Key value generated for the API application you created.
 
     .PARAMETER OVHRegion
         The region code associated with your OVH account. Must be one of the following: 'ovh-eu','ovh-us','ovh-ca','soyoustart-eu','soyoustart-ca','kimsufi-eu','kimsufi-ca','runabove-ca'
@@ -334,9 +322,9 @@ function Connect-OVH {
         [securestring]$OVHAppSecret,
         [Parameter(ParameterSetName='Secure',Mandatory)]
         [securestring]$OVHConsumerKey,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$OVHAppSecretInsecure,
-        [Parameter(ParameterSetName='Insecure',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory)]
         [string]$OVHConsumerKeyInsecure,
         [ValidateSet('ovh-eu','ovh-us','ovh-ca','soyoustart-eu','soyoustart-ca','kimsufi-eu','kimsufi-ca','runabove-ca')]
         [string]$OVHRegion = 'ovh-eu',

@@ -9,7 +9,7 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$NS1Key,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$NS1KeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -77,7 +77,7 @@ function Add-DnsTxt {
         The API key with DNS permissions on your NS1 account.
 
     .PARAMETER NS1KeyInsecure
-        The API key with DNS permissions on your NS1 account.
+        (DEPRECATED) The API key with DNS permissions on your NS1 account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -87,11 +87,6 @@ function Add-DnsTxt {
         PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $key
 
         Adds a TXT record for the specified site with the specified value from Windows.
-
-    .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'key'
-
-        Adds a TXT record for the specified site with the specified value from non-Windows.
     #>
 }
 
@@ -104,7 +99,7 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$NS1Key,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$NS1KeyInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -174,7 +169,7 @@ function Remove-DnsTxt {
         The API key with DNS permissions on your NS1 account.
 
     .PARAMETER NS1KeyInsecure
-        The API key with DNS permissions on your NS1 account.
+        (DEPRECATED) The API key with DNS permissions on your NS1 account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -184,11 +179,6 @@ function Remove-DnsTxt {
         PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $key
 
         Removes a TXT record for the specified site with the specified value from Windows.
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'key'
-
-        Remove a TXT record for the specified site with the specified value from non-Windows.
     #>
 }
 
