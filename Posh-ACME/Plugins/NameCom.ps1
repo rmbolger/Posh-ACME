@@ -1,7 +1,7 @@
 ﻿function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -9,7 +9,9 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$NameComUsername,
-        [Parameter(Mandatory,Position=3)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
+        [securestring]$NameComTokenSecure,
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$NameComToken,
         [switch]$NameComUseTestEnv,
         [Parameter(ValueFromRemainingArguments)]
@@ -18,6 +20,10 @@ function Add-DnsTxt {
 
     $apiRoot = 'https://api.name.com/v4'
     if ($NameComUseTestEnv) { $apiRoot = 'https://api.dev.name.com/v4' }
+
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $NameComToken = [pscredential]::new('a',$NameComTokenSecure).GetNetworkCredential().Password
+    }
 
     $restParams = Get-RestHeaders $NameComUsername $NameComToken
 
@@ -60,8 +66,11 @@ function Add-DnsTxt {
     .PARAMETER NameComUsername
         The account API username.
 
-    .PARAMETER NameComToken
+    .PARAMETER NameComTokenSecure
         The account API token.
+
+    .PARAMETER NameComToken
+        (DEPRECATED) The account API token.
 
     .PARAMETER NameComUseTestEnv
         If specified, use the name.com testing environment.
@@ -70,14 +79,15 @@ function Add-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'username' 'token'
+        $token = Read-Host 'Token' -AsSecureString
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'username' $token
 
         Adds a TXT record for the specified site with the specified value.
     #>
 }
 
 function Remove-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
@@ -85,7 +95,9 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$NameComUsername,
-        [Parameter(Mandatory,Position=3)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
+        [securestring]$NameComTokenSecure,
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$NameComToken,
         [switch]$NameComUseTestEnv,
         [Parameter(ValueFromRemainingArguments)]
@@ -94,6 +106,10 @@ function Remove-DnsTxt {
 
     $apiRoot = 'https://api.name.com/v4'
     if ($NameComUseTestEnv) { $apiRoot = 'https://api.dev.name.com/v4' }
+
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $NameComToken = [pscredential]::new('a',$NameComTokenSecure).GetNetworkCredential().Password
+    }
 
     $restParams = Get-RestHeaders $NameComUsername $NameComToken
 
@@ -131,8 +147,11 @@ function Remove-DnsTxt {
     .PARAMETER NameComUsername
         The account API username.
 
-    .PARAMETER NameComToken
+    .PARAMETER NameComTokenSecure
         The account API token.
+
+    .PARAMETER NameComToken
+        (DEPRECATED) The account API token.
 
     .PARAMETER NameComUseTestEnv
         If specified, use the name.com testing environment.
@@ -141,7 +160,8 @@ function Remove-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'username' 'token'
+        $token = Read-Host 'Token' -AsSecureString
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'username' $token
 
         Remove a TXT record for the specified site with the specified value.
     #>
@@ -260,7 +280,7 @@ function Get-RestHeaders {
     $restParams = @{
         Headers = @{
             Accept='application/json'
-            Authorization = "Basic {0}" -f [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $NameComUserName,$NameComToken)))
+            Authorization = "Basic {0}" -f [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $NameComUsername,$NameComToken)))
         }
         ContentType = 'application/json'
     }

@@ -10,16 +10,12 @@ First, go to the [Account API Settings](https://www.name.com/account/settings/ap
 
 ## Using the Plugin
 
-With the username and token values from earlier, set the `NameComUsername` and `NameComToken` parameters and then pass them to `New-PACertificate` as follows:
+The username is used with the `NameComUsername` parameter and the token is used with the `NameComTokenSecure` SecureString parameter. If you are using name.com's API testing environment, you'll also need to include `NameComUseTestEnv=$true` in your plugin arguments.
 
 ```powershell
-$pargs = @{NameComUserName='username'; NameComToken='XXXXXXXXXX'}
-New-PACertificate example.com -Plugin NameCom -PluginArgs $pargs
-```
-
-If you are using name.com's API testing environment, you'll also need to include the `NameComUseTestEnv` switch in your plugin arguments like this:
-
-```powershell
-$pargs = @{NameComUserName='username'; NameComToken='XXXXXXXXXX'; NameComUseTestEnv=$true}
+$pargs = @{
+    NameComUsername = 'username'
+    NameComToken = (Read-Host 'Token' -AsSecureString)
+}
 New-PACertificate example.com -Plugin NameCom -PluginArgs $pargs
 ```
