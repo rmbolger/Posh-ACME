@@ -64,13 +64,13 @@ function Add-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER IBMCredential
-        The API User and Key for an IBM Cloud account with permissions to write TXT records on specified zones. This should only be used on Windows.
+        The API User and Key for an IBM Cloud account with permissions to write TXT records on specified zones.
 
     .PARAMETER IBMUser
-        (DEPRECATED) The API User name for an IBM Cloud account with permissions to write TXT records on specified zones. This may be used on any OS.
+        (DEPRECATED) The API User name for an IBM Cloud account with permissions to write TXT records on specified zones.
 
     .PARAMETER IBMKey
-        (DEPRECATED) The API Key for an IBM Cloud account with permissions to write TXT records on specified zones. This may be used on any OS.
+        (DEPRECATED) The API Key for an IBM Cloud account with permissions to write TXT records on specified zones.
 
     .PARAMETER IBMPrivateNetwork
         If specified, the plugin will connect to the SoftLayer API over the private network. Use this only from a machine inside the IBM Cloud environment or from a machine with VPN access.
@@ -150,13 +150,13 @@ function Remove-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER IBMCredential
-        The API User and Key for an IBM Cloud account with permissions to write TXT records on specified zones. This should only be used on Windows.
+        The API User and Key for an IBM Cloud account with permissions to write TXT records on specified zones.
 
     .PARAMETER IBMUser
-        (DEPRECATED) The API User name for an IBM Cloud account with permissions to write TXT records on specified zones. This may be used on any OS.
+        (DEPRECATED) The API User name for an IBM Cloud account with permissions to write TXT records on specified zones.
 
     .PARAMETER IBMKey
-        (DEPRECATED) The API Key for an IBM Cloud account with permissions to write TXT records on specified zones. This may be used on any OS.
+        (DEPRECATED) The API Key for an IBM Cloud account with permissions to write TXT records on specified zones.
 
     .PARAMETER IBMPrivateNetwork
         If specified, the plugin will connect to the SoftLayer API over the private network. Use this only from a machine inside the IBM Cloud environment or from a machine with VPN access.

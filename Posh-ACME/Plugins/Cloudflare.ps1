@@ -90,10 +90,10 @@ function Add-DnsTxt {
         (DEPRECATED) The Global API Key associated with the email address entered in the CFAuthEmail parameter.
 
     .PARAMETER CFToken
-        The scoped API Token that has been given read/write permissions to the necessary zones. This SecureString version can only be used from Windows or any OS with PowerShell Core 6.2+.
+        The scoped API Token that has been given read/write permissions to the necessary zones.
 
     .PARAMETER CFTokenInsecure
-        (DEPRECATED) The scoped API Token that has been given read/write permissions to the necessary zones. This standard String version may be used with any OS.
+        (DEPRECATED) The scoped API Token that has been given read/write permissions to the necessary zones.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -193,10 +193,10 @@ function Remove-DnsTxt {
         (DEPRECATED) The Global API Key associated with the email address entered in the CFAuthEmail parameter.
 
     .PARAMETER CFToken
-        The scoped API Token that has been given read/write permissions to the necessary zones. This SecureString version can only be used from Windows or any OS with PowerShell Core 6.2+.
+        The scoped API Token that has been given read/write permissions to the necessary zones.
 
     .PARAMETER CFTokenInsecure
-        (DEPRECATED) The scoped API Token that has been given read/write permissions to the necessary zones. This standard String version may be used with any OS.
+        (DEPRECATED) The scoped API Token that has been given read/write permissions to the necessary zones.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

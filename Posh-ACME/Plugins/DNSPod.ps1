@@ -87,7 +87,7 @@ function Add-DnsTxt {
         The API Key ID value.
 
     .PARAMETER DNSPodKeyToken
-        The API Key Token value as a SecureString value. This should only be used on Windows or any OS with PowerShell 6.2+.
+        The API Key Token value as a SecureString value.
 
     .PARAMETER DNSPodKeyTokenInsecure
         (DEPRECATED) The API Key Token value as a standard String value.
@@ -198,7 +198,7 @@ function Remove-DnsTxt {
         The API Key ID value.
 
     .PARAMETER DNSPodKeyToken
-        The API Key Token value as a SecureString value. This should only be used on Windows or any OS with PowerShell 6.2+.
+        The API Key Token value as a SecureString value.
 
     .PARAMETER DNSPodKeyTokenInsecure
         (DEPRECATED) The API Key Token value as a standard String value.

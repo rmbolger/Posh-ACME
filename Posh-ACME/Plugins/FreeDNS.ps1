@@ -76,13 +76,13 @@ function Add-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER FDCredential
-        Username and password for FreeDNS. This PSCredential option can only be used from Windows or any OS running PowerShell 6.2 or later.
+        Username and password for FreeDNS.
 
     .PARAMETER FDUsername
-        (DEPRECATED) Username for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Username for FreeDNS.
 
     .PARAMETER FDPassword
-        (DEPRECATED) Password for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Password for FreeDNS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -152,13 +152,13 @@ function Remove-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER FDCredential
-        Username and password for FreeDNS. This PSCredential option can only be used from Windows or any OS running PowerShell 6.2 or later.
+        Username and password for FreeDNS.
 
     .PARAMETER FDUsername
-        (DEPRECATED) Username for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Username for FreeDNS.
 
     .PARAMETER FDPassword
-        (DEPRECATED) Password for FreeDNS. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Password for FreeDNS.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

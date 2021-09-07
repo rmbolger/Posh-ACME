@@ -98,10 +98,10 @@ function Add-DnsTxt {
         The client_token associated with your credentials.
 
     .PARAMETER AKClientSecret
-        The client_secret associated with your credentials. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
+        The client_secret associated with your credentials.
 
     .PARAMETER AKClientSecretInsecure
-        (DEPRECATED) The client_secret associated with your credentials. This standard String version can be used on any OS.
+        (DEPRECATED) The client_secret associated with your credentials.
 
     .PARAMETER AKUseEdgeRC
         If specified, the necessary API tokens will be read from a .edgrc file. Use AKEdgeRCFile and AKEdgeRCSection to specify the details.
@@ -212,10 +212,10 @@ function Remove-DnsTxt {
         The client_token associated with your credentials.
 
     .PARAMETER AKClientSecret
-        The client_secret associated with your credentials. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
+        The client_secret associated with your credentials.
 
     .PARAMETER AKClientSecretInsecure
-        (DEPRECATED) The client_secret associated with your credentials. This standard String version can be used on any OS.
+        (DEPRECATED) The client_secret associated with your credentials.
 
     .PARAMETER AKUseEdgeRC
         If specified, the necessary API tokens will be read from a .edgrc file. Use AKEdgeRCFile and AKEdgeRCSection to specify the details.
@@ -327,10 +327,10 @@ function Save-DnsTxt {
         The client_token associated with your credentials.
 
     .PARAMETER AKClientSecret
-        The client_secret associated with your credentials. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
+        The client_secret associated with your credentials.
 
     .PARAMETER AKClientSecretInsecure
-        (DEPRECATED) The client_secret associated with your credentials. This standard String version can be used on any OS.
+        (DEPRECATED) The client_secret associated with your credentials.
 
     .PARAMETER AKUseEdgeRC
         If specified, the necessary API tokens will be read from a .edgrc file. Use AKEdgeRCFile and AKEdgeRCSection to specify the details.

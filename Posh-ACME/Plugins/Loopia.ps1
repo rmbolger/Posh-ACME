@@ -63,10 +63,10 @@ function Add-DnsTxt {
         The Loopia API username.
 
     .PARAMETER LoopiaPass
-        The Loopia API password. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+        The Loopia API password.
 
     .PARAMETER LoopiaPassInsecure
-        The Loopia API password. This standard String version may be used on any OS.
+        The Loopia API password.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -154,10 +154,10 @@ function Remove-DnsTxt {
         The Loopia API username.
 
     .PARAMETER LoopiaPass
-        The Loopia API password. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+        The Loopia API password.
 
     .PARAMETER LoopiaPassInsecure
-        The Loopia API password. This standard String version may be used on any OS.
+        The Loopia API password.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

@@ -63,10 +63,10 @@ function Add-DnsTxt {
         The Access Key ID for your Aliyun account.
 
     .PARAMETER AliSecret
-        The Access Secret for your Aliyun account. This SecureString version should only be used on Windows.
+        The Access Secret for your Aliyun account.
 
     .PARAMETER AliSecretInsecure
-        (DEPRECATED) The Access Secret for your Aliyun account. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The Access Secret for your Aliyun account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -142,10 +142,10 @@ function Remove-DnsTxt {
         The Access Key ID for your Aliyun account.
 
     .PARAMETER AliSecret
-        The Access Secret for your Aliyun account. This SecureString version should only be used on Windows.
+        The Access Secret for your Aliyun account.
 
     .PARAMETER AliSecretInsecure
-        (DEPRECATED) The Access Secret for your Aliyun account. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The Access Secret for your Aliyun account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

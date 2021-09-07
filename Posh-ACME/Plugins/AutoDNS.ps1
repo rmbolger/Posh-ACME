@@ -65,10 +65,10 @@ function Add-DnsTxt {
         AutoDNS username.
 
     .PARAMETER AutoDNSPassword
-        AutoDNS password. This SecureString version should only be used on Windows.
+        AutoDNS password.
 
     .PARAMETER AutoDNSPasswordInsecure
-        (DEPRECATED) AutoDNS password. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) AutoDNS password.
 
     .PARAMETER AutoDNSContext
         ID of the personalized system of the subuser. Defaults to 4.
@@ -153,10 +153,10 @@ function Remove-DnsTxt {
         AutoDNS username.
 
     .PARAMETER AutoDNSPassword
-        AutoDNS password. This SecureString version should only be used on Windows.
+        AutoDNS password.
 
     .PARAMETER AutoDNSPasswordInsecure
-        (DEPRECATED) AutoDNS password. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) AutoDNS password.
 
     .PARAMETER AutoDNSContext
         ID of the personalized system of the subuser. Defaults to 4.

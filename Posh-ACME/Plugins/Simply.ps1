@@ -69,7 +69,7 @@ function Add-DnsTxt {
     .PARAMETER SimplyAccount
         The account name of the account used to connect to Simply API (e.g. S123456)
     .PARAMETER SimplyAPIKey
-        The API Key associated with the account as a SecureString value. This should only be used on Windows or any OS with PowerShell 6.2+.
+        The API Key associated with the account as a SecureString value.
     .PARAMETER SimplyAPIKeyInsecure
         The API Key associated with the account as a standard string value.
     .PARAMETER ExtraParams
@@ -139,7 +139,7 @@ function Remove-DnsTxt {
     .PARAMETER SimplyAccount
         The account name of the account used to connect to Simply API (e.g. S123456)
     .PARAMETER SimplyAPIKey
-        The API Key associated with the account as a SecureString value. This should only be used on Windows or any OS with PowerShell 6.2+.
+        The API Key associated with the account as a SecureString value.
     .PARAMETER SimplyAPIKeyInsecure
         The API Key associated with the account as a standard string value.
     .PARAMETER ExtraParams

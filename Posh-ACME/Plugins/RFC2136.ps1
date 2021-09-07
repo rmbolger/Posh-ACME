@@ -88,10 +88,10 @@ function Add-DnsTxt {
         When using TSIG authentication, the type of key you are using. Accepts hmac-md5, hmac-sha1, hmac-sha224, hmac-sha256, hmac-sha384, and hmac-sha512.
 
     .PARAMETER DDNSKeyValue
-        When using TSIG authentication, the value of the key you are using. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+        When using TSIG authentication, the value of the key you are using.
 
     .PARAMETER DDNSKeyValueInsecure
-        When using TSIG authentication, the value of the key you are using. This standard String version may be used on any OS.
+        When using TSIG authentication, the value of the key you are using.
 
     .PARAMETER DDNSExePath
         The path to the nsupdate executable. The default is just 'nsupdate' which will use the first copy found in the PATH environment variable.
@@ -202,10 +202,10 @@ function Remove-DnsTxt {
         When using TSIG authentication, the type of key you are using. Accepts hmac-md5, hmac-sha1, hmac-sha224, hmac-sha256, hmac-sha384, and hmac-sha512.
 
     .PARAMETER DDNSKeyValue
-        When using TSIG authentication, the value of the key you are using. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+        When using TSIG authentication, the value of the key you are using.
 
     .PARAMETER DDNSKeyValueInsecure
-        When using TSIG authentication, the value of the key you are using. This standard String version may be used on any OS.
+        When using TSIG authentication, the value of the key you are using.
 
     .PARAMETER DDNSExePath
         The path to the nsupdate executable. The default is just 'nsupdate' which will use the first copy found in the PATH environment variable.

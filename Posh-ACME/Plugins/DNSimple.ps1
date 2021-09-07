@@ -76,10 +76,10 @@ function Add-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER DSToken
-        The Account API token for DNSimple. This SecureString version should only be used on Windows.
+        The Account API token for DNSimple.
 
     .PARAMETER DSTokenInsecure
-        (DEPRECATED) The Account API token for DNSimple. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The Account API token for DNSimple.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -168,10 +168,10 @@ function Remove-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER DSToken
-        The Account API token for DNSimple. This SecureString version should only be used on Windows.
+        The Account API token for DNSimple.
 
     .PARAMETER DSTokenInsecure
-        (DEPRECATED) The Account API token for DNSimple. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The Account API token for DNSimple.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

@@ -38,10 +38,10 @@ function Add-DnsTxt {
         Add a DNS TXT record to a Domain Offensive DNS Zone
 
     .PARAMETER DomOffToken
-        Token as provided by Domain Offensive. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
+        Token as provided by Domain Offensive.
 
     .PARAMETER DomOffTokenInsecure
-        (DEPRECATED) Token as provided by Domain Offensive. Works on any OS.
+        (DEPRECATED) Token as provided by Domain Offensive.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -103,10 +103,10 @@ function Remove-DnsTxt {
         Remove a DNS TXT record from Domain Offensive DNS
 
     .PARAMETER DomOffToken
-        Token as provided by Domain Offensive. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
+        Token as provided by Domain Offensive.
 
     .PARAMETER DomOffTokenInsecure
-        (DEPRECATED) Token as provided by Domain Offensive. Works on any OS.
+        (DEPRECATED) Token as provided by Domain Offensive.
 
     .PARAMETER Domain
         The fully qualified name of the TXT record to be removed.

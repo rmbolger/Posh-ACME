@@ -64,10 +64,10 @@ function Add-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER SelectelAdminToken
-        The Selectel admin token generated for your account. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+        The Selectel admin token generated for your account.
 
     .PARAMETER SelectelAdminTokenInsecure
-        The Selectel admin token generated for your account. This standard String version may be used on any OS.
+        The Selectel admin token generated for your account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -143,10 +143,10 @@ function Remove-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER SelectelAdminToken
-        The Selectel admin token generated for your account. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+        The Selectel admin token generated for your account.
 
     .PARAMETER SelectelAdminTokenInsecure
-        The Selectel admin token generated for your account. This standard String version may be used on any OS.
+        The Selectel admin token generated for your account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

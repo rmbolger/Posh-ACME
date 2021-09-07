@@ -74,10 +74,10 @@ function Add-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER NS1Key
-        The API key with DNS permissions on your NS1 account. This SecureString version should only be used on Windows.
+        The API key with DNS permissions on your NS1 account.
 
     .PARAMETER NS1KeyInsecure
-        The API key with DNS permissions on your NS1 account. This standard String version should be used on non-Windows OSes.
+        The API key with DNS permissions on your NS1 account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -171,10 +171,10 @@ function Remove-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER NS1Key
-        The API key with DNS permissions on your NS1 account. This SecureString version should only be used on Windows.
+        The API key with DNS permissions on your NS1 account.
 
     .PARAMETER NS1KeyInsecure
-        The API key with DNS permissions on your NS1 account. This standard String version should be used on non-Windows OSes.
+        The API key with DNS permissions on your NS1 account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

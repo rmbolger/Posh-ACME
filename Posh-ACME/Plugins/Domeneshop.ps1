@@ -62,10 +62,10 @@ function Add-DnsTxt {
         The API-token for the account logging in.
 
     .PARAMETER DomeneshopSecret
-        The API-secret associated with your API-token. This SecureString version should only be used on Windows or PowerShell 6.2+.
+        The API-secret associated with your API-token.
 
     .PARAMETER DomeneshopSecretInsecure
-        (DEPRECATED) The API-secret associated with your API-token. This standard String version can be used on any OS.
+        (DEPRECATED) The API-secret associated with your API-token.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -133,10 +133,10 @@ function Remove-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER DomeneshopSecret
-        The API-secret associated with your API-token. This SecureString version should only be used on Windows or PowerShell 6.2+.
+        The API-secret associated with your API-token.
 
     .PARAMETER DomeneshopSecretInsecure
-        (DEPRECATED) The API-secret associated with your API-token. This standard String version can be used on any OS.
+        (DEPRECATED) The API-secret associated with your API-token.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

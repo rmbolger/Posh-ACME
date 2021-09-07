@@ -106,10 +106,10 @@ function Add-DnsTxt {
         The Access Key ID for the IAM account with permissions to write to the specified hosted zone.
 
     .PARAMETER R53SecretKey
-        The Secret Key for the IAM account specified by -R53AccessKey. This SecureString version should only be used on Windows.
+        The Secret Key for the IAM account specified by -R53AccessKey.
 
     .PARAMETER R53SecretKeyInsecure
-        The Secret Key for the IAM account specified by -R53AccessKey. This standard String version should be used on non-Windows OSes.
+        The Secret Key for the IAM account specified by -R53AccessKey.
 
     .PARAMETER R53ProfileName
         The profile name of a previously stored credential using Set-AWSCredential from the AWS PowerShell module. This only works if the module is installed.
@@ -256,10 +256,10 @@ function Remove-DnsTxt {
         The Access Key ID for the IAM account with permissions to write to the specified hosted zone.
 
     .PARAMETER R53SecretKey
-        The Secret Key for the IAM account specified by -R53AccessKey. This SecureString version should only be used on Windows.
+        The Secret Key for the IAM account specified by -R53AccessKey.
 
     .PARAMETER R53SecretKeyInsecure
-        The Secret Key for the IAM account specified by -R53AccessKey. This standard String version should be used on non-Windows OSes.
+        The Secret Key for the IAM account specified by -R53AccessKey.
 
     .PARAMETER R53ProfileName
         The profile name of a previously stored credential using Set-AWSCredential from the AWS PowerShell module. This only works if the module is installed.

@@ -55,10 +55,10 @@ function Add-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER NameSiloKey
-        The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+        The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager.
 
     .PARAMETER NameSiloKeyInsecure
-        The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager. This standard String version may be used on any OS.
+        The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -121,10 +121,10 @@ function Remove-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER NameSiloKey
-        The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+        The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager.
 
     .PARAMETER NameSiloKeyInsecure
-        The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager. This standard String version may be used on any OS.
+        The API key for the NameSilo account. Created at https://www.namesilo.com/account/api-manager.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

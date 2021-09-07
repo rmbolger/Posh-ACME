@@ -47,10 +47,10 @@ function Add-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER DuckToken
-        The API token for DuckDNS. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
+        The API token for DuckDNS.
 
     .PARAMETER DuckTokenInsecure
-        (DEPRECATED) The API token for DuckDNS. This standard String version may be used on any OS.
+        (DEPRECATED) The API token for DuckDNS.
 
     .PARAMETER DuckDomains
         The list of domains associated with this token to update. Domains do not need to include the .duckdns.org part, just the subname.
@@ -113,10 +113,10 @@ function Remove-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER DuckToken
-        The API token for DuckDNS. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
+        The API token for DuckDNS.
 
     .PARAMETER DuckTokenInsecure
-        (DEPRECATED) The API token for DuckDNS. This standard String version may be used on any OS.
+        (DEPRECATED) The API token for DuckDNS.
 
     .PARAMETER DuckDomains
         The list of domains associated with this token to update. Domains do not need to include the .duckdns.org part, just the subname.

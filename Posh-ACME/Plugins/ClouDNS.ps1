@@ -70,10 +70,10 @@ function Add-DnsTxt {
         The username or id for the account logging in.
 
     .PARAMETER CDPassword
-        The password associated with your username. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
+        The password associated with your username.
 
     .PARAMETER CDPasswordInsecure
-        (DEPRECATED) The password associated with your username. This standard String version can be used on any OS.
+        (DEPRECATED) The password associated with your username.
 
     .PARAMETER CDPollPropagation
         If specified, this will cause the Save method to block until each affected zone has updated its nameservers by querying the API for their status.
@@ -150,10 +150,10 @@ function Remove-DnsTxt {
         The username or id for the account logging in.
 
     .PARAMETER CDPassword
-        The password associated with your username. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
+        The password associated with your username.
 
     .PARAMETER CDPasswordInsecure
-        (DEPRECATED) The password associated with your username. This standard String version can be used on any OS.
+        (DEPRECATED) The password associated with your username.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -229,10 +229,10 @@ function Save-DnsTxt {
         The username or id for the account logging in.
 
     .PARAMETER CDPassword
-        The password associated with your username. This SecureString version should only be used on Windows or any OS with PowerShell 6.2+.
+        The password associated with your username.
 
     .PARAMETER CDPasswordInsecure
-        (DEPRECATED) The password associated with your username. This standard String version can be used on any OS.
+        (DEPRECATED) The password associated with your username.
 
     .PARAMETER CDPollPropagation
         If specified, this will cause the Save method to block until each affected zone has updated its nameservers by querying the API for their status.

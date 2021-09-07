@@ -78,10 +78,10 @@ function Add-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER GandiToken
-        The API token for your Gandi account. This SecureString version should only be used on Windows.
+        The API token for your Gandi account.
 
     .PARAMETER GandiTokenInsecure
-        (DEPRECATED) The API token for your Gandi account. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The API token for your Gandi account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -171,10 +171,10 @@ function Remove-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER GandiToken
-        The API token for your Gandi account. This SecureString version should only be used on Windows.
+        The API token for your Gandi account.
 
     .PARAMETER GandiTokenInsecure
-        (DEPRECATED) The API token for your Gandi account. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The API token for your Gandi account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

@@ -81,10 +81,10 @@ function Add-DnsTxt {
         The username of your Namecheap account.
 
     .PARAMETER NCApiKey
-        The API Key associated with your Namecheap account. This SecureString version of the API Key should only be used on Windows.
+        The API Key associated with your Namecheap account.
 
     .PARAMETER NCApiKeyInsecure
-        The API Key associated with your Namecheap account. This standard String version of the API Key should be used on non-Windows OSes.
+        The API Key associated with your Namecheap account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -178,10 +178,10 @@ function Remove-DnsTxt {
         The username of your Namecheap account.
 
     .PARAMETER NCApiKey
-        The API Key associated with your Namecheap account. This SecureString version of the API Key should only be used on Windows.
+        The API Key associated with your Namecheap account.
 
     .PARAMETER NCApiKeyInsecure
-        The API Key associated with your Namecheap account. This standard String version of the API Key should be used on non-Windows OSes.
+        The API Key associated with your Namecheap account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

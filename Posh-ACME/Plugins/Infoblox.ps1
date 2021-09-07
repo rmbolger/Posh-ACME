@@ -70,13 +70,13 @@ function Add-DnsTxt {
         The IP or hostname of the Infoblox server.
 
     .PARAMETER IBCred
-        Credentials for Infoblox that have permission to write TXT records to the specified zone. This PSCredential option should only be used from Windows.
+        Credentials for Infoblox that have permission to write TXT records to the specified zone.
 
     .PARAMETER IBUsername
-        (DEPRECATED) The Infoblox username that has permission to write TXT records to the specified zone. This should be used from non-Windows.
+        (DEPRECATED) The Infoblox username that has permission to write TXT records to the specified zone.
 
     .PARAMETER IBPassword
-        (DEPRECATED) The password for the IBUsername parameter. This should be used from non-Windows.
+        (DEPRECATED) The password for the IBUsername parameter.
 
     .PARAMETER IBView
         The name of the DNS View for the specified zone. Defaults to 'default'.
@@ -165,13 +165,13 @@ function Remove-DnsTxt {
         The IP or hostname of the Infoblox server.
 
     .PARAMETER IBCred
-        Credentials for Infoblox that have permission to write TXT records to the specified zone. This PSCredential option should only be used from Windows.
+        Credentials for Infoblox that have permission to write TXT records to the specified zone.
 
     .PARAMETER IBUsername
-        (DEPRECATED) The Infoblox username that has permission to write TXT records to the specified zone. This should be used from non-Windows.
+        (DEPRECATED) The Infoblox username that has permission to write TXT records to the specified zone.
 
     .PARAMETER IBPassword
-        (DEPRECATED) The password for the IBUsername parameter. This should be used from non-Windows.
+        (DEPRECATED) The password for the IBUsername parameter.
 
     .PARAMETER IBView
         The name of the DNS View for the specified zone. Defaults to 'default'.

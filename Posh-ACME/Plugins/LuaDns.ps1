@@ -67,13 +67,13 @@ function Add-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER LuaCredential
-        A PSCredential object containing the account email address as the username and API token as the password. This PSCredential option should only be used from Windows.
+        A PSCredential object containing the account email address as the username and API token as the password.
 
     .PARAMETER LuaUsername
-        The account email address. This should be used from non-Windows.
+        The account email address.
 
     .PARAMETER LuaPassword
-        The account API token. This should be used from non-Windows.
+        The account API token.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -156,13 +156,13 @@ function Remove-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER LuaCredential
-        A PSCredential object containing the account email address as the username and API token as the password. This PSCredential option should only be used from Windows.
+        A PSCredential object containing the account email address as the username and API token as the password.
 
     .PARAMETER LuaUsername
-        The account email address. This should be used from non-Windows.
+        The account email address.
 
     .PARAMETER LuaPassword
-        The account API token. This should be used from non-Windows.
+        The account API token.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

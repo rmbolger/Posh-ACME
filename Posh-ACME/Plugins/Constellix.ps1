@@ -102,7 +102,7 @@ function Add-DnsTxt {
         The Constellix API key for your account.
 
     .PARAMETER ConstellixSecret
-        The Constellix API secret key for your account as a SecureString.
+        The Constellix API secret key for your account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -211,7 +211,7 @@ function Remove-DnsTxt {
         The Constellix API key for your account.
 
     .PARAMETER ConstellixSecret
-        The Constellix API secret key for your account. This SecureString version should only be used on Windows.
+        The Constellix API secret key for your account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

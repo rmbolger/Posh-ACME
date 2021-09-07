@@ -80,10 +80,10 @@ function Add-DnsTxt {
         The DNS Made Easy API key for your account.
 
     .PARAMETER DMESecret
-        The DNS Made Easy API secret key for your account. This SecureString version should only be used on Windows.
+        The DNS Made Easy API secret key for your account.
 
     .PARAMETER DMESecretInsecure
-        (DEPRECATED) The DNS Made Easy API secret key for your account. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The DNS Made Easy API secret key for your account.
 
     .PARAMETER DMEUseSandbox
         If specified, all commands will run against the DNS Made Easy sandbox API endpoint. This is generally only used for testing the plugin.
@@ -181,10 +181,10 @@ function Remove-DnsTxt {
         The DNS Made Easy API key for your account.
 
     .PARAMETER DMESecret
-        The DNS Made Easy API secret key for your account. This SecureString version should only be used on Windows.
+        The DNS Made Easy API secret key for your account.
 
     .PARAMETER DMESecretInsecure
-        (DEPRECATED) The DNS Made Easy API secret key for your account. This standard String version should be used on non-Windows OSes.
+        (DEPRECATED) The DNS Made Easy API secret key for your account.
 
     .PARAMETER DMEUseSandbox
         If specified, all commands will run against the DNS Made Easy sandbox API endpoint. This is generally only used for testing the plugin.

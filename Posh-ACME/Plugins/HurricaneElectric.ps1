@@ -71,13 +71,13 @@ function Add-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER HECredential
-        Username and password for Hurricane Electric. This PSCredential option can only be used from Windows or any OS running PowerShell 6.2 or later.
+        Username and password for Hurricane Electric.
 
     .PARAMETER HEUsername
-        (DEPRECATED) Username for Hurricane Electric. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Username for Hurricane Electric.
 
     .PARAMETER HEPassword
-        (DEPRECATED) Password for Hurricane Electric. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Password for Hurricane Electric.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -161,13 +161,13 @@ function Remove-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER HECredential
-        Username and password for Hurricane Electric. This PSCredential option can only be used from Windows or any OS running PowerShell 6.2 or later.
+        Username and password for Hurricane Electric.
 
     .PARAMETER HEUsername
-        (DEPRECATED) Username for Hurricane Electric. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Username for Hurricane Electric.
 
     .PARAMETER HEPassword
-        (DEPRECATED) Password for Hurricane Electric. This should be used from non-Windows OSes running PowerShell 6.0-6.1.
+        (DEPRECATED) Password for Hurricane Electric.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

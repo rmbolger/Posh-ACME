@@ -58,10 +58,10 @@ function Add-DnsTxt {
         PointDNS Username / Email
 
     .PARAMETER PDKey
-        PointDNS API key. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+        PointDNS API key.
 
     .PARAMETER PDKeyInsecure
-        PointDNS API key. This standard String version may be used on any OS.
+        PointDNS API key.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -132,10 +132,10 @@ function Remove-DnsTxt {
         PointDNS Username / Email
 
     .PARAMETER PDKey
-        PointDNS API key. This SecureString version can only be used on Windows or any OS with PowerShell 6.2+.
+        PointDNS API key.
 
     .PARAMETER PDKeyInsecure
-        PointDNS API key. This standard String version may be used on any OS.
+        PointDNS API key.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
