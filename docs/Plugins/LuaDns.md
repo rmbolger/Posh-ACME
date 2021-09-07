@@ -10,20 +10,11 @@ First, go to the [Account Settings](https://api.luadns.com/settings) page and ma
 
 ## Using the Plugin
 
-### Windows
+The account email address and API token should be used to create a PSCredential object that you'll pass to the `LuaCredential` parameter.
 
-We need to put the account email address and API token in a PSCredential object and use it with the `LuaCredential` parameter.
-
-```powershell
-$cred = Get-Credential
-New-PACertificate example.com -Plugin LuaDns -PluginArgs @{LuaCredential=$cred}
-```
-
-### Non-Windows
-
-We need to set `LuaUsername` as the account email address and `LuaPassword` as the API token.
+*NOTE: The `LuaUsername` and `LuaPassword` parameters are deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-$pargs = @{ LuaUsername = 'user@example.com'; LuaPassword = 'xxxxxxxxxxxx' }
-New-PACertificate example.com -Plugin LuaDns -PluginArgs $pargs
+$pArgs = @{ LuaCredential = (Get-Credential) }
+New-PACertificate example.com -Plugin LuaDns -PluginArgs $pArgs
 ```

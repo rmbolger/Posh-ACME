@@ -12,19 +12,12 @@ Once API Access is turned on, click the [Manage](https://ap.www.namecheap.com/se
 
 ## Using the Plugin
 
-There are two parameter sets you can use with this plugin. One requires being on Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The other can be used from any OS.
-
-### Windows or PS 6.2+
+The username is used with the `NCUsername` parameter and the API key is used with the `NCApiKey` SecureString parameter.
 
 ```powershell
-$ncKey = Read-Host "API Key" -AsSecureString
-$ncParams = @{NCUsername='myusername';NCApiKey=$ncKey}
-New-PACertificate example.com -Plugin Namecheap -PluginArgs $ncParams
-```
-
-### Any OS
-
-```powershell
-$ncParams = @{NCUsername='myusername';NCApiKeyInsecure='xxxxxxxx'}
-New-PACertificate example.com -Plugin Namecheap -PluginArgs $ncParams
+$pArgs = @{
+    NCUsername = 'myusername'
+    NUApiKey = (Read-Host 'API Key' -AsSecureString)
+}
+New-PACertificate example.com -Plugin Namecheap -PluginArgs $pArgs
 ```

@@ -10,16 +10,16 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [pscredential]$LuaCredential,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$LuaUsername,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$LuaPassword,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # create a pscredential from insecure args if necessary
-    if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
+    if ('DeprecatedInsecure' -eq $PSCmdlet.ParameterSetName) {
         $secpass = ConvertTo-SecureString $LuaPassword -AsPlainText -Force
         $LuaCredential = [pscredential]::new($LuaUsername,$secpass)
     }
@@ -70,10 +70,10 @@ function Add-DnsTxt {
         A PSCredential object containing the account email address as the username and API token as the password.
 
     .PARAMETER LuaUsername
-        The account email address.
+        (DEPRECATED) The account email address.
 
     .PARAMETER LuaPassword
-        The account API token.
+        (DEPRECATED) The account API token.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -82,11 +82,6 @@ function Add-DnsTxt {
         Add-DnsTxt '_acme-challenge.example.com' 'txt-value' (Get-Credential)
 
         Adds a TXT record for the specified site with the specified value from Windows.
-
-    .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'user@example.com' 'password'
-
-        Adds a TXT record for the specified site with the specified value from non-Windows.
     #>
 }
 
@@ -100,16 +95,16 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [pscredential]$LuaCredential,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=2)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$LuaUsername,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$LuaPassword,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # create a pscredential from insecure args if necessary
-    if ('Insecure' -eq $PSCmdlet.ParameterSetName) {
+    if ('DeprecatedInsecure' -eq $PSCmdlet.ParameterSetName) {
         $secpass = ConvertTo-SecureString $LuaPassword -AsPlainText -Force
         $LuaCredential = [pscredential]::new($LuaUsername,$secpass)
     }
@@ -159,10 +154,10 @@ function Remove-DnsTxt {
         A PSCredential object containing the account email address as the username and API token as the password.
 
     .PARAMETER LuaUsername
-        The account email address.
+        (DEPRECATED) The account email address.
 
     .PARAMETER LuaPassword
-        The account API token.
+        (DEPRECATED) The account API token.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -171,11 +166,6 @@ function Remove-DnsTxt {
         Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' (Get-Credential)
 
         Removes a TXT record for the specified site with the specified value from Windows.
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'user@example.com' 'password'
-
-        Remove a TXT record for the specified site with the specified value from non-Windows.
     #>
 }
 

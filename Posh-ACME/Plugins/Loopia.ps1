@@ -11,7 +11,7 @@ function Add-DnsTxt {
         [string]$LoopiaUser,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$LoopiaPass,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$LoopiaPassInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -66,7 +66,7 @@ function Add-DnsTxt {
         The Loopia API password.
 
     .PARAMETER LoopiaPassInsecure
-        The Loopia API password.
+        (DEPRECATED) The Loopia API password.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -76,11 +76,6 @@ function Add-DnsTxt {
         Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'user@loopiaapi' $pass
 
         Adds the specified TXT record with the specified value using a secure password.
-
-    .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'user@loopiaapi' 'pass-value'
-
-        Adds the specified TXT record with the specified value using a plaintext password.
     #>
 }
 
@@ -95,7 +90,7 @@ function Remove-DnsTxt {
         [string]$LoopiaUser,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$LoopiaPass,
-        [Parameter(ParameterSetName='Insecure',Mandatory,Position=3)]
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$LoopiaPassInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -157,7 +152,7 @@ function Remove-DnsTxt {
         The Loopia API password.
 
     .PARAMETER LoopiaPassInsecure
-        The Loopia API password.
+        (DEPRECATED) The Loopia API password.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -167,11 +162,6 @@ function Remove-DnsTxt {
         Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'user@loopiaapi' $pass
 
         Removes the specified TXT record with the specified value using a secure password.
-
-    .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'user@loopiaapi' 'pass-value'
-
-        Removes the specified TXT record with the specified value using a plaintext password.
     #>
 }
 
