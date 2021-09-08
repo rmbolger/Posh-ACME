@@ -62,6 +62,7 @@ function Get-PAPlugin {
 
                 [pscustomobject]@{
                     PSTypeName = 'PoshACME.PluginParameter'
+                    Plugin = $Plugin
                     ParameterSet = $setName
                     IsDefault = $set.IsDefault
                     Parameter = $_.Name
