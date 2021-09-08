@@ -19,7 +19,7 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - DNS challenge [CNAME support](https://poshac.me/docs/latest/Guides/Using-DNS-Challenge-Aliases/)
 - Multiple ACME accounts supported per ACME CA.
 - External Account Binding support for ACME CAs that require it
-- Preferred Chain support to use alternative CA trust chains
+- Preferred Chain support to use alternative CA trust chains [(Guide)](https://poshac.me/docs/Guides/Using-Alternate-Trust-Chains/)
 
 ## Installation (Stable)
 

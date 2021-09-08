@@ -21,7 +21,7 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - DNS challenge [CNAME support](Guides/Using-DNS-Challenge-Aliases.md)
 - Multiple ACME accounts supported per ACME CA.
 - External Account Binding support for ACME CAs that require it
-- Preferred Chain support to use alternative CA trust chains
+- Preferred Chain support to use alternative CA trust chains [(Guide)](Guides/Using-Alternate-Trust-Chains.md)
 
 ## Installation (Stable)
 
