@@ -10,21 +10,13 @@ If you haven't done it already, [generate an administrator token](https://pddimp
 
 ## Using the Plugin
 
-There are two parameter sets you can use with this plugin. The first uses `YDAdminToken` which is your generated admin token as a SecureString object. But it can only be used from Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell [bug](https://github.com/PowerShell/PowerShell/issues/1654). The second parameter set uses `YDAdminTokenInsecure` for the token as a standard String object.
+The PDD admin token is used with the `YDAdminToken` SecureString parameter. Users have reported DNS replication delays of up to 15 minutes. So you may also have to override the default `DNSSleep` parameter with something longer like 1000.
 
-*Note: Users have reported DNS replication delays of up to 15 minutes. So you may have to override the default `DNSSleep` parameter with something longer like 1000.*
-
-### Windows or PS 6.2+
+*NOTE: The `YDAdminTokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
 ```powershell
-$token = Read-Host "Yandex token" -AsSecureString
-$ydParams = @{YDAdminToken=$token}
-New-PACertificate example.com -Plugin Yandex -PluginArgs $ydParams -DNSSleep 1000
-```
-
-### Any OS
-
-```powershell
-$ydParams = @{YDAdminTokenInsecure='xxxxxxxxxxxx'}
-New-PACertificate example.com -Plugin Yandex -PluginArgs $ydParams -DNSSleep 1000
+$pArgs = @{
+    YDAdminToken = (Read-Host "Yandex token" -AsSecureString)
+}
+New-PACertificate example.com -Plugin Yandex -PluginArgs $pArgs -DNSSleep 1000
 ```
