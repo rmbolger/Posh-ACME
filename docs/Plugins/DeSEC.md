@@ -12,7 +12,8 @@ You may already have an API token from your original registration email. If not,
 
 You will need to provide the API token as a SecureString value to `DSCToken`. There is an optional `DSCTTL` parameter to use as the TTL of new `TXT` record. It defaults to 3600 which seems to be the minimum value allowed by the API.
 
-*NOTE: The `DSToken`, `DSTokenInsecure`, and `DSTTL` parameters have been deprecated because they conflicted with another Posh-ACME plugin. Please migrate to the newer parameters as they will be removed in the next major version of the module.*
+!!! warning
+    The `DSToken`, `DSTokenInsecure`, and `DSTTL` parameters have been deprecated because they conflicted with another Posh-ACME plugin. If you are using them, please migrate to the newer parameters as they will be removed in the next major version of the module.
 
 ```powershell
 $pArgs = @{

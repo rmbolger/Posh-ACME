@@ -12,10 +12,13 @@ If you haven't done it already, you need to generate API Credentials for your ac
 
 With your API key and secret, you'll need to pass them with the `DMEKey` parameter and the `DMESecret` SecureString parameter.
 
-*NOTE: The `DMESecuretInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `DMESecuretInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
-$dmeSecret = Read-Host -Prompt 'DME Secret' -AsSecureString
-$pArgs = @{ DMEKey='xxxxxxxxxxxx'; DMESecret=$dmeSecret }
+$pArgs = @{
+    DMEKey = 'xxxxxxxxxxxx'
+    DMESecret = (Read-Host 'DME Secret' -AsSecureString)
+}
 New-PACertificate example.com -Plugin DMEasy -PluginArgs $pArgs
 ```

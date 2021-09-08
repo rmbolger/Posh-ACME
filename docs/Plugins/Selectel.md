@@ -12,7 +12,8 @@ If you haven't done it already, [generate API key](https://my.selectel.ru/profil
 
 The API Key is used with the `SelectelAdminToken` SecureString parameter.
 
-*NOTE: The `SelectelAdminTokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `SelectelAdminTokenInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
 $pArgs = @{

@@ -12,9 +12,12 @@ First, go to the [Account Settings](https://api.luadns.com/settings) page and ma
 
 The account email address and API token should be used to create a PSCredential object that you'll pass to the `LuaCredential` parameter.
 
-*NOTE: The `LuaUsername` and `LuaPassword` parameters are deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `LuaUsername` and `LuaPassword` parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.
 
 ```powershell
-$pArgs = @{ LuaCredential = (Get-Credential) }
+$pArgs = @{
+    LuaCredential = (Get-Credential)
+}
 New-PACertificate example.com -Plugin LuaDns -PluginArgs $pArgs
 ```

@@ -12,7 +12,8 @@ First, go to the [API Keys](https://my.nsone.net/#/account/settings) page and cl
 
 The API key will be used with the `NS1Key` SecureString parameter.
 
-*NOTE: The `NS1KeyInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `NS1KeyInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
 $pArgs = @{

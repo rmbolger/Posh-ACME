@@ -12,7 +12,8 @@ We need to generate the API key that will be used to update DNS records. Open th
 
 You will use the previously generated API key with the `DreamhostApiKeySecure` SecureString parameter.
 
-*NOTE: The `DreamhostApiKey` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `DreamhostApiKey` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
 $pArgs = @{

@@ -19,7 +19,9 @@ The web root is specified using the `WRPath` parameter. If you don't want the pl
 ### Default functionality
 
 ```powershell
-$pArgs = @{ WRPath = 'C:\inetpub\wwwroot' }
+$pArgs = @{
+    WRPath = 'C:\inetpub\wwwroot'
+}
 New-PACertificate example.com -Plugin WebRoot -PluginArgs $pArgs
 ```
 

@@ -4,7 +4,8 @@ title: Zonomi
 
 This plugin works against the [Zonomi DNS](https://zonomi.com) provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
 
-*NOTE: The API Zonomi uses is also used by other providers such as [RimuHosting](https://rimuhosting.com/). This plugin is compatible with those as well.*
+!!! note
+    The API Zonomi uses is also used by other providers such as [RimuHosting](https://rimuhosting.com/). This plugin is compatible with those as well.
 
 ## Setup
 
@@ -16,7 +17,8 @@ If you use a different compatible provider, there should be an equivalent contro
 
 The API key is used with the `ZonomiKey` SecureString parameter. Users on other Zonomi compatible providers will also need to supply the API URL for that provider to the `ZonomiApiUrl` parameter.
 
-*NOTE: The `ZonomiApiKey` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `ZonomiApiKey` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ### Using Zonomi
 

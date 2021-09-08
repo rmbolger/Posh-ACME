@@ -14,7 +14,8 @@ Login to the console and go to the [Key Management](https://console.dnspod.com/a
 
 The API key ID is used with the `DNSPodKeyId` string parameter. The key token is used with `DNSPodKeyToken` as a SecureString.
 
-*NOTE: The `DNSPodKeyTokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `DNSPodKeyTokenInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 There is also a `DNSPodApiRoot` optional parameter that defaults to the API root for dnspod.com. If you are using dnspod.cn, you may specify `https://dnsapi.cn` instead for this parameter.
 

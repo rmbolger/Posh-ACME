@@ -18,7 +18,8 @@ We need to [generate an API key](https://developer.godaddy.com/keys) for the pro
 
 The Key is used with the `GDKey` string parameter and the Secret is used with the `GDSecretSecure` SecureString parameter.
 
-*NOTE: The `GDSecret` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `GDSecret` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
 $pArgs = @{

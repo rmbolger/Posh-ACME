@@ -4,9 +4,11 @@ title: Windows
 
 This plugin works against the Microsoft Windows DNS server. It doesn't matter whether it's hosted on-premises or in the cloud, physical or virtual, domain joined or standalone. As long as it can be managed via the standard [DnsServer PowerShell module](https://docs.microsoft.com/en-us/powershell/module/dnsserver), it should be supported. This does **not** work against [Azure DNS](https://azure.microsoft.com/en-us/services/dns/). Use the Azure plugin for that.
 
-**The DnsServer module is not available on Windows versions prior to Windows 8 and Windows Server 2012. So this plugin will only work on those OSes or newer. Using Zone Scopes requires the Windows 10 or Windows Server 2016 version of the module or newer.**
+!!! warning
+    The DnsServer module is not available on Windows versions prior to Windows 8 and Windows Server 2012. So this plugin will only work on those OSes or newer. Using Zone Scopes requires the Windows 10 or Windows Server 2016 version of the module or newer.
 
-**This plugin currently does not work on non-Windows OSes in PowerShell Core. On Windows, it requires at least PowerShell 7.**
+!!! warning
+    This plugin currently does not work on non-Windows OSes in PowerShell Core. On Windows, it requires at least PowerShell 7.
 
 ## Setup
 
@@ -20,7 +22,8 @@ Install-WindowsFeature RSAT-DNS-Server
 
 On Windows client OSes, you will need to download and install the appropriate Remote Server Administration Tools (RSAT) for your OS. The installers are historically OS specific. Here are links for [Windows 10](https://www.microsoft.com/en-us/download/details.aspx?id=45520), [Windows 8.1](https://www.microsoft.com/en-us/download/details.aspx?id=39296), [Windows 8](https://www.microsoft.com/en-us/download/details.aspx?id=28972), and [Windows 7](https://www.microsoft.com/en-us/download/details.aspx?id=7887).
 
-*Warning: The vast majority of testing for this plugin was done on Windows 10 and Windows Server 2016. Please submit [issues](https://github.com/rmbolger/Posh-ACME/issues) if you run into problems on downlevel OSes.*
+!!! warning
+    The vast majority of testing for this plugin was done on Windows 10 and Windows Server 2016. Please submit [issues](https://github.com/rmbolger/Posh-ACME/issues) if you run into problems on downlevel OSes.
 
 ### PSRemoting and New-CimSession
 
@@ -58,7 +61,11 @@ In a domain joined environment, the only required parameter is the hostname or I
 New-PACertificate example.com -Plugin Windows -PluginArgs @{WinServer='dns1.example.com'}
 
 # standalone environment, adding credentials and SSL flag
-$pArgs = @{WinServer='dns1.example.com'; WinCred=(Get-Credential); WinUseSSL=$true}
+$pArgs = @{
+    WinServer = 'dns1.example.com'
+    WinCred = (Get-Credential)
+    WinUseSSL=$true
+}
 New-PACertificate example.com -Plugin Windows -PluginArgs $pArgs
 ```
 
@@ -68,7 +75,10 @@ Zone Scopes were added in the Windows Server 2016 version of the DNS server and 
 
 ```powershell
 # using zone scope in domain joined environment
-$pArgs = @{WinServer='dns1.example.com'; WinZoneScope='external'}
+$pArgs = @{
+    WinServer = 'dns1.example.com'
+    WinZoneScope = 'external'
+}
 New-PACertificate example.com -Plugin Windows -PluginArgs $pArgs
 ```
 

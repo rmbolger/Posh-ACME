@@ -12,7 +12,8 @@ We need to retrieve an secret API token for the account that will be used to upd
 
 Your personal API token is specified using the `DomOffToken` SecureString parameter.
 
-*NOTE: The `DomOffTokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `DomOffTokenInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
 $pArgs = @{

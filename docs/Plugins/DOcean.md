@@ -4,7 +4,8 @@ title: DOcean
 
 This plugin works against the [Digital Ocean](https://m.do.co/c/d515942ef761) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
 
-*NOTE: The link above is an affiliate link which reduces my out of pocket cost to maintain this plugin. I'd be most grateful if you use it when signing up for a new account.*
+!!! note
+    The link above is an affiliate link which reduces my out of pocket cost to maintain this plugin. I'd be most grateful if you use it when signing up for a new account.
 
 ## Setup
 
@@ -20,7 +21,8 @@ You need to create a [Personal Access Token](https://cloud.digitalocean.com/sett
 
 Use the `DOTokenSecure` SecureString parameter with the token value you created earlier.
 
-*NOTE: The `DOToken` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `DOToken` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
 $pArgs = @{

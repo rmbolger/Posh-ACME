@@ -16,7 +16,8 @@ Duck DNS has a rather annoying limitation that there can only ever be a single T
 
 Your API token is specified using the `DuckToken` SecureString parameter. You also need to specify the domain subnames using the `DuckDomain` parameter.
 
-*NOTE: The `DuckTokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `DuckTokenInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
 $pArgs = @{

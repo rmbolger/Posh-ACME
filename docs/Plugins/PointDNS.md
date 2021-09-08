@@ -14,7 +14,8 @@ your API key. Click the key icon if you need to generate a new key.
 
 The `PDUser` parameter should be set to the email address associatedw ith your account. The API key is used with the `PDKey` SecureString parameter.
 
-*NOTE: The `PDKeyInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `PDKeyInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
 $pArgs = @{

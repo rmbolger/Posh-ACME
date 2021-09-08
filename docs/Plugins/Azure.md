@@ -64,7 +64,13 @@ $notAfter = $notBefore.AddYears(5)
 The `New-AzADServicePrincipal` function will generate a password for us, so all we have to do is give it a name and specify our expiration dates. We'll also use `-SkipAssignment` to prevent the default functionality of giving it the Contributor role on the subscription.
 
 ```powershell
-$sp = New-AzADServicePrincipal -DisplayName PoshACME -StartDate $notBefore -EndDate $notAfter -SkipAssignment
+$spParams = @{
+    DisplayName = 'PoshACME'
+    StartDate = $notBefore
+    EndDate = $notAfter
+    SkipAssignment = $true
+}
+$sp = New-AzADServicePrincipal @spParams
 ```
 
 You'll use your new credential with either the `AZAppCred` plugin parameter or `AZAppUsername` and `AZAppPasswordInsecure` plugin parameters. The username is in the `ApplicationId` property and the password is in `Secret`. Here's how to save a reference to them for later.
@@ -82,23 +88,35 @@ $appPass = $appCred.GetNetworkCredential().Password
 
 Before we can create a certificate based credential, we have to actually create a certificate to use with it. Self-signed certs are fine here because we're only using them to sign data and Azure just needs to verify the signature using the public key we will associate with the principal.
 
-*Note: New-SelfSignedCertificate is only available on Windows 10/2016 or later. Check [this document](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-authenticate-service-principal-powershell) for instructions on earlier OSes.*
+!!! note
+    New-SelfSignedCertificate is only available on Windows 10/2016 or later. Check [this document](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-authenticate-service-principal-powershell) for instructions on earlier OSes.
 
-*Note: If you plan on using an existing certificate, make sure it is being stored using the legacy CSP called "Microsoft Enhanced RSA and AES Cryptographic Provider" that supports the SHA256 hashing algorithm. PowerShell doesn't yet support retrieving private key values from newer KSP based providers.*
+!!! note
+    If you plan on using an existing certificate, make sure it is being stored using the legacy CSP called "Microsoft Enhanced RSA and AES Cryptographic Provider" that supports the SHA256 hashing algorithm. PowerShell doesn't yet support retrieving private key values from newer KSP based providers.
 
 ```powershell
 # Keep in mind that this certificate will be created in the current user's certificate
 # store. If you intend to use it from another account, you will need to either create it
 # there or export it and re-import it there.
-$cert = New-SelfSignedCertificate -CertStoreLocation "Cert:\CurrentUser\My" `
-    -Subject "CN=Azure App PoshACME" -HashAlgorithm SHA256 `
-    -Provider "Microsoft Enhanced RSA and AES Cryptographic Provider" `
-    -NotBefore $notBefore -NotAfter $notAfter
+$certParams = @{
+    CertStoreLocation = 'Cert:\CurrentUser\My'
+    Subject = 'CN=Azure App PoshACME'
+    HashAlgorithm = 'SHA256'
+    Provider = 'Microsoft Enhanced RSA and AES Cryptographic Provider'
+    NotBefore = $notBefore
+    NotAfter = $notAfter
+}
+$cert = New-SelfSignedCertificate @certParams
 
 $certData = [System.Convert]::ToBase64String($cert.GetRawCertData())
 
-$sp = New-AzADServicePrincipal -DisplayName PoshACME -CertValue $certData `
-    -StartDate $cert.NotBefore -EndDate $cert.NotAfter
+$spParams = @{
+  DisplayName = 'PoshACME'
+  CertValue = $certData
+  StartDate = $cert.NotBefore
+  EndDate = $cert.NotAfter
+}
+$sp = New-AzADServicePrincipal @spParams
 ```
 
 You'll use your new credential with the `AZAppUsername` and `AZCertThumbprint` plugin parameters. Here's how to save a reference to them for later.
@@ -125,8 +143,13 @@ openssl pkcs12 -export -in poshacme.crt -inkey poshacme.key -CSP "Microsoft Enha
 $cert = [Security.Cryptography.X509Certificates.X509Certificate2]::new((Resolve-Path './poshacme.crt'))
 $certData = [Convert]::ToBase64String($cert.GetRawCertData())
 
-$sp = New-AzADServicePrincipal -DisplayName PoshACMELinux -CertValue $certData `
-    -StartDate $cert.NotBefore -EndDate $cert.NotAfter
+$spParams = @{
+    DisplayName = 'PoshACMELinux'
+    CertValue = $certData
+    StartDate = $cert.NotBefore
+    EndDate = $cert.NotAfter
+}
+$sp = New-AzADServicePrincipal @spParams
 
 # (optional) delete the PEM files we don't need for plugin purposes
 rm poshacme.crt poshacme.key
@@ -151,8 +174,12 @@ Now we'll tie everything together by assigning the service principal we created 
 
 ```powershell
 # modify the ResourceGroupName as appropriate for your environment
-New-AzRoleAssignment -ApplicationId $sp.ApplicationId -ResourceGroupName 'MyZones' `
-    -RoleDefinitionName 'DNS TXT Contributor'
+$raParams = @{
+    ApplicationId = $sp.ApplicationId
+    ResourceGroupName = 'MyZones'
+    RoleDefinitionName = 'DNS TXT Contributor'
+}
+New-AzRoleAssignment @raParams
 ```
 
 ### (Optional) Using a Managed Service Identity (MSI)
@@ -162,8 +189,12 @@ When using a [Managed Service Identity (MSI)](https://docs.microsoft.com/en-us/a
 ```powershell
 # NOTE: The VM must have a managed identity associated with it for this to work
 $spID = (Get-AzVM -ResourceGroupName '<VM Resource Group>' -Name '<VM Name>').Identity.PrincipalId
-New-AzRoleAssignment -ObjectId $spID -ResourceGroupName 'MyZones' `
-    -RoleDefinitionName 'DNS TXT Contributor'
+$raParams = @{
+    ObjectId = $spID
+    ResourceGroupName = 'MyZones'
+    RoleDefinitionName = 'DNS TXT Contributor'
+}
+New-AzRoleAssignment @raParams
 ```
 
 In addition to the `AZSubscriptionId` plugin parameter that all auth methods must provide, the only plugin parameter you'll need is the `AZUseIMDS` switch.
@@ -177,8 +208,9 @@ Here is how to get the token for the context you are currently logged in with us
 ```powershell
 # Az.Accounts 1.9.x or earlier
 $ctx = Get-AzContext
-$token = ($ctx.TokenCache.ReadItems() | ?{ $_.TenantId -eq $ctx.Subscription.TenantId -and $_.Resource -eq "https://management.core.windows.net/" } |
-    Select -First 1).AccessToken
+$token = ($ctx.TokenCache.ReadItems() | ?{
+    $_.TenantId -eq $ctx.Subscription.TenantId -and $_.Resource -eq "https://management.core.windows.net/"
+} | Select-Object -First 1).AccessToken
 
 # Az.Accounts 2.0.x or later
 $token = (Get-AzAccessToken -ResourceUrl "https://management.core.windows.net/" -TenantId $tenantId).Token
@@ -201,19 +233,21 @@ To get a token for the MSI when running in a VM, Azure Function or App Service -
 
 All authentication methods require specifying `AZSubscriptionId` which is the subscription that contains the DNS zones to modify. Password and Certificate based credentials also require `AZTenantId` which is the Azure AD tenant guid. Additional parameters are outlined in each section below.
 
-> **_NOTE:_** The plugin defaults to using the primary public Azure Cloud. But country and government specific Azure clouds are also supported by specifying the `AZEnvironment` parameter. Supported environments include `AzureCloud` (Default), `AzureUSGovernment`, `AzureGermanCloud`, and `AzureChinaCloud`.
+!!! note
+    The plugin defaults to using the primary public Azure Cloud. But country and government specific Azure clouds are also supported by specifying the `AZEnvironment` parameter. Supported environments include `AzureCloud` (Default), `AzureUSGovernment`, `AzureGermanCloud`, and `AzureChinaCloud`.
 
 ### Password Credential
 
 Subscription and Tenant values are passed as standard strings using `AZSubscriptionId` and `AZTenantId`. The credential is passed as a PSCredential object using `AZAppCred`. PSCredential objects require a username and password. For a service principal, the username is the its `ApplicationId` guid and the password is whatever was originally set for it. If you've been following the setup instructions, you may have `$subscriptionID`, `$tenantID`, and `$appCred` variables you can use instead of the sample values below.
 
-*NOTE: The `AZAppUsername` and `AZAppPasswordInsecure` parameters are deprecated and will be removed in the next major module version. Please migrate to a secure parameter set.*
+!!! warning
+    The `AZAppUsername` and `AZAppPasswordInsecure` parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to a secure parameter set.
 
 ```powershell
 $pArgs = @{
-  AZSubscriptionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-  AZTenantId = 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
-  AZAppCred = (Get-Credential)
+    AZSubscriptionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+    AZTenantId = 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
+    AZAppCred = (Get-Credential)
 }
 New-PACertificate example.com -Plugin Azure -PluginArgs $pArgs
 ```
@@ -228,10 +262,10 @@ You'll need to specify the service principal username which is its `ApplicationI
 
 ```powershell
 $pArgs = @{
-  AZSubscriptionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-  AZTenantId = 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
-  AZAppUsername = 'zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz'
-  AZCertThumbprint = '1A2B3C4D5E6F1A2B3C4D5E6F1A2B3C4D5E6F1A2B'
+    AZSubscriptionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+    AZTenantId = 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
+    AZAppUsername = 'zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz'
+    AZCertThumbprint = '1A2B3C4D5E6F1A2B3C4D5E6F1A2B3C4D5E6F1A2B'
 }
 New-PACertificate example.com -Plugin Azure -PluginArgs $pArgs
 ```
@@ -242,11 +276,11 @@ You'll need to specify the service principal username which is its `ApplicationI
 
 ```powershell
 $pArgs = @{
-  AZSubscriptionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-  AZTenantId = 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
-  AZAppUsername = 'zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz'
-  AZCertPfx = '/home/certuser/poshacme.pfx'
-  AZPfxPass = 'poshacme'
+    AZSubscriptionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+    AZTenantId = 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
+    AZAppUsername = 'zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz'
+    AZCertPfx = '/home/certuser/poshacme.pfx'
+    AZPfxPass = 'poshacme'
 }
 New-PACertificate example.com -Plugin Azure -PluginArgs $pArgs
 ```
@@ -257,8 +291,8 @@ Only the subscription guid and the access token you previously retrieved are req
 
 ```powershell
 $pArgs = @{
-  AZSubscriptionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-  AZAccessToken = $token
+    AZSubscriptionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+    AZAccessToken = $token
 }
 New-PACertificate example.com -Plugin Azure -PluginArgs $pArgs
 ```
@@ -269,8 +303,8 @@ Only the subscription guid and the `AZUseIMDS` switch are required for this meth
 
 ```powershell
 $pArgs = @{
-  AZSubscriptionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-  AZUseIMDS = $true
+    AZSubscriptionId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+    AZUseIMDS = $true
 }
 New-PACertificate example.com -Plugin Azure -PluginArgs $pArgs
 ```

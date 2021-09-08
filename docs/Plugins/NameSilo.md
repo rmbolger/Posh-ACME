@@ -12,7 +12,8 @@ For authentication against the NameSilo API, an API key is required. Open the [a
 
 The API key is used with the `NameSiloKey` SecureString parameter. NameSilo only updates DNS records every 15 minutes. So you should also provide a `-DnsSleep` parameter of 900 or more.
 
-*NOTE: The `NameSiloKeyInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `NameSiloKeyInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
 $pArgs = @{

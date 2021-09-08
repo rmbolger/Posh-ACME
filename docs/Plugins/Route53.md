@@ -4,7 +4,8 @@ title: Route53
 
 This plugin works against the [AWS Route53](https://aws.amazon.com/route53/) DNS provider. It is assumed that you already have an AWS account with at least one DNS zone. The setup portion of this guide also assumes you have access to create IAM users/roles. If you have been given access credentials by your AWS admin, you may need the admin to create the IAM policies necessary for you to edit the zone TXT records.
 
-> **_NOTE:_** You may use this plugin without the AWS PowerShell module installed *unless* you use the profile name authentication method. In that case, you will either need the [Aws.Tools.Route53](https://www.powershellgallery.com/packages/AWS.Tools.Route53/) or the older [AWSPowerShell](https://www.powershellgallery.com/packages/AWSPowerShell) or [AWSPowerShell.NetCore](https://www.powershellgallery.com/packages/AWSPowerShell.NetCore) module depending on your environment. More details can be found in the [AWS PowerShell documentation](https://docs.aws.amazon.com/powershell/).
+!!! note
+    You may use this plugin without the AWS PowerShell module installed *unless* you use the profile name authentication method. In that case, you will either need the [Aws.Tools.Route53](https://www.powershellgallery.com/packages/AWS.Tools.Route53/) or the older [AWSPowerShell](https://www.powershellgallery.com/packages/AWSPowerShell) or [AWSPowerShell.NetCore](https://www.powershellgallery.com/packages/AWSPowerShell.NetCore) module depending on your environment. More details can be found in the [AWS PowerShell documentation](https://docs.aws.amazon.com/powershell/).
 
 ## Setup
 
@@ -12,7 +13,8 @@ There are generally two different ways to use this plugin depending on whether y
 
 If you already have your policies, users, groups, and roles setup, skip the rest of this section. Otherwise, read on for examples.
 
-> **_NOTE:_** These examples require either the [AWS.Tools.IdentityManagement](https://www.powershellgallery.com/packages/AWS.Tools.IdentityManagement) module or the older [AWSPowerShell](https://www.powershellgallery.com/packages/AWSPowerShell) or [AWSPowerShell.NetCore](https://www.powershellgallery.com/packages/AWSPowerShell.NetCore) module depending on your environment.
+!!! note
+    These examples require either the [AWS.Tools.IdentityManagement](https://www.powershellgallery.com/packages/AWS.Tools.IdentityManagement) module or the older [AWSPowerShell](https://www.powershellgallery.com/packages/AWSPowerShell) or [AWSPowerShell.NetCore](https://www.powershellgallery.com/packages/AWSPowerShell.NetCore) module depending on your environment.
 
 ### Setup Admin Credentials
 
@@ -107,7 +109,8 @@ Now you'd need to attach the role with your EC2 instance or launch a new instanc
 
 If you are using explicit credentials, you may send them directly to the plugin via `R53AccessKey` and `R53SecretKey` parameters. A SecureString value is required for `R53SecretKey`. If you lost the keys, you can re-generate them from the AWS IAM console. But there's no way to retrieve an existing secret key value.
 
-*NOTE: The `R53SecretKeyInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `R53SecretKeyInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ### Explicit Credentials
 

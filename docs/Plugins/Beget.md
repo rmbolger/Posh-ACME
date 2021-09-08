@@ -10,16 +10,16 @@ It is possible to use this plugin using the same credentials that are used to lo
 
 To do this, go to your [Beget API settings](https://cp.beget.com/settings/access/api) and select "Use separate password". After setting the password, uncheck all of the Permitted Methods except for "DNS management" and click the `Apply` button.
 
-**IMPORTANT:** There are some limitations with how the Beget API works that make it risky to use when using [DNS Challenge Aliases](../Guides/Using-DNS-Challenge-Aliases.md). If you need to use this plugin with challenge aliases, the value for the DnsAlias must not contain any other record types or TXT values because they will likely be deleted when the plugin attempts to create the TXT records.
+!!! warning
+    There are some limitations with how the Beget API works that make it risky to use when using [DNS Challenge Aliases](../Guides/Using-DNS-Challenge-Aliases.md). If you need to use this plugin with challenge aliases, the value for the DnsAlias must not contain any other record types or TXT values because they will likely be deleted when the plugin attempts to create the TXT records.
 
 ## Using the Plugin
 
 Your Beget credentials are passed as the username and password in a PSCredential object to the `BegetCredential` parameter.
 
 ```powershell
-$cred = Get-Credential -Message "Beget Credentials"
 $pArgs = @{
-    BegetCredential = $cred
+    BegetCredential = (Get-Credential -Message "Beget Credentials")
 }
 New-PACertificate example.com -Plugin Beget -PluginArgs $pArgs
 ```

@@ -4,7 +4,8 @@ title: HurricaneElectric
 
 This plugin works against [Hurricane Electric DNS](https://dns.he.net/). It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
 
-*NOTE: Hurricane Electric can be configured as a secondary to your primary zones hosted elsewhere. This plugin will not work for secondary zones. You must use a plugin that is able to modify the primary nameservers.*
+!!! note
+    Hurricane Electric can be configured as a secondary to your primary zones hosted elsewhere. This plugin will not work for secondary zones. You must use a plugin that is able to modify the primary nameservers.
 
 ## Setup
 
@@ -14,9 +15,12 @@ There's not really any setup aside from knowing your account credentials. Hurric
 
 Your account credentials will be used with the `HECredential` parameter as a PSCredential object.
 
-*NOTE: The `HEUsername` and `HEPassword` parameters are deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `HEUsername` and `HEPassword` parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.
 
 ```powershell
-$pArgs = @{ HECredential = (Get-Credential) }
+$pArgs = @{
+    HECredential = (Get-Credential)
+}
 New-PACertificate example.com -Plugin HurricaneElectric -PluginArgs $pArgs
 ```

@@ -31,7 +31,8 @@ The primary parameter you need with this plugin is `SdnsApiRoot` which is the ro
 
 If you're not using anonymous authentication, you'll also need to specify credentials as a PSCredential object with `SdnsCred`.
 
-*NOTE: The `SdnsUser` and `SdnsPassword` parameters are deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `SdnsUser` and `SdnsPassword` parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.
 
 ### Anonymous Authentication
 

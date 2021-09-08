@@ -12,10 +12,12 @@ You will need to generate an API Token if you haven't already done so. Go to [Ma
 
 You will need to provide the API Token as a SecureString value to `HetznerToken`.
 
-*NOTE: The `HetznerTokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `HetznerTokenInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
-$token = Read-Host "Hetzner Token" -AsSecureString
-$pArgs = @{HetznerToken=$token}
+$pArgs = @{
+    HetznerToken = (Read-Host 'Hetzner Token' -AsSecureString)
+}
 New-PACertificate example.com -Plugin Hetzner -PluginArgs $pArgs
 ```

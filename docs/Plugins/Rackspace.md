@@ -12,10 +12,13 @@ First, go to the Profile page for your account and record the `Rackspace API Key
 
 Your account username is used with the `RSUsername` paraemter. The API key is used with the `RSApiKey` SecureString parameter.
 
-*NOTE: The `RSApiKeyInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `RSApiKeyInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
-$rsKey = Read-Host "API Key" -AsSecureString
-$rsParams = @{RSUsername='myusername';RSApiKey=$rsKey}
-New-PACertificate example.com -Plugin Rackspace -PluginArgs $rsParams
+$pArgs = @{
+    RSUsername = 'myusername'
+    RSApiKey = (Read-Host "API Key" -AsSecureString)
+}
+New-PACertificate example.com -Plugin Rackspace -PluginArgs $pArgs
 ```

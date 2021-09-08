@@ -24,7 +24,8 @@ The only thing you can use a non-owned domain for are [challenge aliases](../Gui
 
 Your account credentials will be used with the `FDCredential` parameter which is a PSCredential object.
 
-*NOTE: The `FDUsername` and `FDPassword` parameters are deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `FDUsername` and `FDPassword` parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.
 
 ```powershell
 $pArgs = @{

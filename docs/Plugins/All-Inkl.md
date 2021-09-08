@@ -16,10 +16,9 @@ In addition you can provide the password as SecureString in plain text by using 
 Alternatively you can handle the authentication yourself and provide a valid session id by specifying the `KasSession` parameter as SecureString.
 
 ```powershell
-$pwd = Read-Host "All-Inkl KAS Password" -AsSecureString
 $pArgs = @{
     KasUsername = 'myusername'
-    KasPwd = $pwd
+    KasPwd = (Read-Host "KAS Password" -AsSecureString)
 }
 New-PACertificate example.com -Plugin All-Inkl -PluginArgs $pArgs
 ```

@@ -11,13 +11,13 @@ This is an HTTP challenge plugin that works by temporarily running an HTTP liste
 
 When running on Windows, the HttpListener class depends on a kernel mode web server called http.sys. Because it's a system-level service, non-administrator users can't use it without an explicit URL reservation that gives them permission. Open an elevated PowerShell session and run the following to see the current list of URL reservations.
 
-```
+```ps1con
 netsh http show urlacl
 ```
 
 Modern Windows versions will have a bunch of these even in a default install for various system components and services. We need to add one that matches what the plugin will be trying to use. By default, it will use `http://+:80/.well-known/acme-challenge/`. The easiest thing to do is create the reservation and give permissions to "Everyone". It's perfectly reasonable to only grant permissions to the user or group who will need it as well. But you will need to [adjust the command line](https://docs.microsoft.com/en-us/windows/win32/http/add-urlacl) appropriately with the target user/group instead of an sddl string.
 
-```
+```ps1con
 netsh http add urlacl url=http://+:80/.well-known/acme-challenge/ sddl=D:(A;;GX;;;S-1-1-0)
 ```
 

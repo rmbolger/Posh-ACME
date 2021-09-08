@@ -12,13 +12,13 @@ In addition to your username and password, you will also need a "Context" value 
 
 `AutoDNSUser`, `AutoDNSContext`, and `AutoDNSGateway` are specified using regular string values. `AutoDNSPassword` is a SecureString value.
 
-*NOTE: The `AutoDNSPasswordInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `AutoDNSPasswordInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
-$pass = Read-Host -Prompt "Password" -AsSecureString
 $pArgs = @{
     AutoDNSUser = 'myusername'
-    AutoDNSPassword = $pass
+    AutoDNSPassword = (Read-Host -Prompt "Password" -AsSecureString)
     AutoDNSContext = '4'
     AutoDNSGateway = 'gateway.autodns.com'
 }

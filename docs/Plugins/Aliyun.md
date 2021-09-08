@@ -8,13 +8,15 @@ This plugin works against the [Aliyun (Alibaba Cloud)](https://www.alibabacloud.
 
 First, login to your account and go to the [Security Management](https://usercenter.console.aliyun.com/#/manage/ak) page. Click the `Create Access Key` link and make a note of the Key ID and Secret values.
 
-**Note:** It is also supported recommended to use RAM (Resource Access Management) users with more limited privileges instead of your root account key. More information about creating RAM users can be found [here](https://www.alibabacloud.com/help/product/28625.htm).
+!!! note
+    It is also supported recommended to use RAM (Resource Access Management) users with more limited privileges instead of your root account key. More information about creating RAM users can be found [here](https://www.alibabacloud.com/help/product/28625.htm).
 
 ## Using the Plugin
 
 The Key ID is specified as a string using `AliKeyId` and the secret is specified as a SecureString using `AliSecret`.
 
-*NOTE: The `AliSecretInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `AliSecretInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
 $secret = Read-Host "Secret" -AsSecureString

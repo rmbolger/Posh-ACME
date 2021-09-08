@@ -15,9 +15,8 @@ The API Key and Secret are passed as the username and password in a PSCredential
 There is also an optional `AuroraApi` parameter for the hostname provided in API URL which defaults to `api.auroradns.eu`. So if your API URL is the same, you can ignore that parameter.
 
 ```powershell
-$cred = Get-Credential -Message "Aurora Username:Key / Password:Secret"
 $pArgs = @{
-    AuroraCredential = $cred
+    AuroraCredential = (Get-Credential))
 }
 New-PACertificate example.com -Plugin Aurora -PluginArgs $pArgs
 ```

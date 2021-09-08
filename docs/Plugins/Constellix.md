@@ -20,10 +20,9 @@ Now login to the management console as the user who will be using Posh-ACME and 
 The API key will used with the `ConstellixKey` parameter as a string value. The API secret will be used with the `ConstellixSecret` parameter as a SecureString value.
 
 ```powershell
-$secret = Read-Host -Prompt 'API Secret' -AsSecureString
 $pArgs = @{
     ConstellixKey = 'xxxxxxxxxxxx'
-    ConstellixSecret = $secret
+    ConstellixSecret = (Read-Host 'API Secret' -AsSecureString)
 }
 New-PACertificate example.com -Plugin Constellix -PluginArgs $pArgs
 ```

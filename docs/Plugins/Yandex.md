@@ -12,7 +12,8 @@ If you haven't done it already, [generate an administrator token](https://pddimp
 
 The PDD admin token is used with the `YDAdminToken` SecureString parameter. Users have reported DNS replication delays of up to 15 minutes. So you may also have to override the default `DNSSleep` parameter with something longer like 1000.
 
-*NOTE: The `YDAdminTokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `YDAdminTokenInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
 $pArgs = @{

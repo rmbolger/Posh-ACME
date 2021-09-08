@@ -18,7 +18,7 @@ There is also an optional `ACMEAllowFrom` parameter which takes an array of stri
 
 This plugin is ultimately using CNAME aliases for DNS challenges under the hood. The first time you use it, you will be prompted to create the necessary CNAME records for each new name included in a cert.
 
-```
+```ps1con
 PS C:\> New-PACertificate example.com -Plugin AcmeDns -PluginArgs @{ACMEServer='auth.acme-dns.io'}
 
 Please create the following CNAME records:

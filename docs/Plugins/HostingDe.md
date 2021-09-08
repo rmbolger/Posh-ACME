@@ -13,7 +13,8 @@ On your account [profile page](https://secure.hosting.de/profile), click `Create
 The API key will used with the `HDEToken` parameter as a SecureString value.
 
 ```powershell
-$token = Read-Host -Prompt 'API Token' -AsSecureString
-$pArgs = @{ HDEToken = $token }
+$pArgs = @{
+    HDEToken = (Read-Host 'API Token' -AsSecureString)
+}
 New-PACertificate example.com -Plugin HostingDe -PluginArgs $pArgs
 ```

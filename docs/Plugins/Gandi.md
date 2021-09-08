@@ -12,7 +12,8 @@ First, login to your [account page](https://account.gandi.net) and go to the `Se
 
 The API key is used with the `GandiToken` SecureString parameter.
 
-*NOTE: The `GandiTokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `GandiTokenInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
 $pArgs = @{

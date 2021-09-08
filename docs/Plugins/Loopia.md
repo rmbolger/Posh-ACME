@@ -23,7 +23,8 @@ Keep in mind, the username you selected will end with `@loopiaapi` and you will 
 
 The username is used with the `LoopiaUser` parameter and the password is used with the `LoopiaPass` SecureString parameter.
 
-*NOTE: The `LoopiaPassInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `LoopiaPassInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
 $pArgs @{

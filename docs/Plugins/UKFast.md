@@ -12,9 +12,11 @@ For further documentation on working with API keys, please visit the [UKFast Dev
 
 ## Using the Plugin
 
-The API key will be used with the `UKFastApiKey` parameter. This is a SecureString. 
+The API key will be used with the `UKFastApiKey` SecureString parameter.
 
 ```powershell
-$pArgs = @{UKFastApiKey=(Read-Host "Enter API Key" -AsSecureString)}
+$pArgs = @{
+    UKFastApiKey = (Read-Host "Enter API Key" -AsSecureString)
+}
 New-PACertificate example.com -Plugin UKFast -PluginArgs $pArgs
 ```

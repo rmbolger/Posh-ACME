@@ -4,7 +4,8 @@ title: EasyDNS
 
 This plugin works against the [EasyDNS](https://www.easydns.com) provider. It is assumed that you have already setup an account with a domain registered.
 
-**Note:** The EasyDNS REST API is currently (August 2019) in BETA status and has been for quite a while. Beta APIs may change prior to release and potentially break this plugin. Please don't rely on it for mission critical things.
+!!! warning
+    The EasyDNS REST API is currently (August 2019) in BETA status and has been for quite a while. Beta APIs may change prior to release and potentially break this plugin. Please don't rely on it for mission critical things.
 
 # Setup
 
@@ -14,7 +15,8 @@ Documentation, including signup instructions, is available at http://docs.sandbo
 
 The API Token is used with the `EDToken` string parameter. The API Key is used with the `EDKeySecure` SecureString parameter. If you are testing against the sandbox environment, you must also include `EDUseSandbox = $true`.
 
-*NOTE: The `EDKey` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `EDKey` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
 $pArgs = @{

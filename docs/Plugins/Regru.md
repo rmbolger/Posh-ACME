@@ -16,9 +16,12 @@ API Access is not allowed without adding your client machine's IP or subnet to a
 
 Your account username and either the account password or API password are used with the `RegRuCredential` parameter as a PSCredential object. It has been reported that the typical DNS propagation time for this provider is close to 1 hour. So be sure to set the DNSSleep parameter longer than 3600.
 
-*NOTE: The `RegRuLogin` and `RegRuPwdInsecure` parameters are deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `RegRuLogin` and `RegRuPwdInsecure` parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.
 
 ```powershell
-$pArgs = @{ RegRuCredential = (Get-Credential) }
+$pArgs = @{
+    RegRuCredential = (Get-Credential)
+}
 New-PACertificate example.com -Plugin Regru -PluginArgs $pArgs -DNSSleep 4000
 ```

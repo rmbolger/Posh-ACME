@@ -20,14 +20,14 @@ Akamai is one of the few DNS providers with an API to check whether changes have
 
 Specify API values individually using `AKHost`, `AKClientToken`, and `AKAccessToken` as string values and `AKClientSecret` as a SecureString value
 
-*NOTE: The `AKClientSecretInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `AKClientSecretInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
-$secret = Read-Host "Client Secret" -AsSecureString
 $pArgs = @{
     AKHost = 'myhost.akamaiapis.net'
     AKClientToken = 'xxxxxxxxxxxx'
-    AKClientSecret = $secret
+    AKClientSecret = (Read-Host "Client Secret" -AsSecureString)
     AKAccessToken = 'yyyyyyyyyyyy'
 }
 New-PACertificate example.com -Plugin Akamai -PluginArgs $pArgs -DNSSleep 10
@@ -44,6 +44,10 @@ New-PACertificate example.com -Plugin Akamai -PluginArgs @{AKUseEdgeRC=$true} -D
 
 ```powershell
 # alternate location and section
-$pArgs = @{AKUseEdgeRC=$true; AKEdgeRCFile='C:\ProgramData\.edgerc'; AKEdgeRCSection='poshacme' }
+$pArgs = @{
+    AKUseEdgeRC= $true
+    AKEdgeRCFile = 'C:\ProgramData\.edgerc'
+    AKEdgeRCSection = 'poshacme'
+}
 New-PACertificate example.com -Plugin Akamai -PluginArgs $pArgs -DNSSleep 10
 ```

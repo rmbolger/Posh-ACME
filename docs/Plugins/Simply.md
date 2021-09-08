@@ -12,7 +12,8 @@ Using Simply.com API requires only your account name or account number and API K
 
 Your account name/number is used with the `SimplyAccount` parameter. The API key is used with the `SimplyAPIKey` SecureString parameter.
 
-*NOTE: The `SimplyAPIKeyInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `SimplyAPIKeyInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 ```powershell
 $pArgs = @{

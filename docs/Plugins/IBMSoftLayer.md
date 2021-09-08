@@ -12,9 +12,12 @@ If you don't already have an API Key setup, login to your account and go to the 
 
 The API username and key are used with the `IBMCredential` parameter as a PSCredential object where the key is the password.
 
-*NOTE: The `IBMUser` and `IBMKey` parameters are deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `IBMUser` and `IBMKey` parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.
 
 ```powershell
-$pArgs = @{ IBMCredential = (Get-Credential) }
+$pArgs = @{
+    IBMCredential = (Get-Credential)
+}
 New-PACertificate example.com -Plugin IBMSoftLayer -PluginArgs $pArgs
 ```

@@ -103,9 +103,11 @@ After logging in successfully, you should be redirected to a success page on the
 
 The App Key value will be used with the `OVHAppKey` parameter. The App Secret and Consumer Key values will be used with the `OVHAppSecret` and `OVHConsumerKey` SecureString parameters.
 
-*NOTE: The `OVHAppSecretInsecure` and `OVHConsumerKeyInsecure` parameters are deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `OVHAppSecretInsecure` and `OVHConsumerKeyInsecure` parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.
 
-**IMPORTANT**: If the permissions on your consumer key only allow write access to specific records, you must add `OVHUseModify = $true` to your plugin arguments. This instructs the plugin to modify existing records instead of trying to create new ones from scratch which will fail.
+!!! warning
+    If the permissions on your consumer key only allow write access to specific records, you must add `OVHUseModify = $true` to your plugin arguments. This instructs the plugin to modify existing records instead of trying to create new ones from scratch which will fail.
 
 ```powershell
 $pArgs = @{

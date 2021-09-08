@@ -4,7 +4,8 @@ title: Linode
 
 This plugin works against the [Linode](https://www.linode.com/?r=4dfd67cf6f1e384ce626f2943620186344bb2ccf) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
 
-*NOTE: The link above is an affiliate link which reduces my out of pocket cost to maintain this plugin. I'd be most grateful if you use it when signing up for a new account.*
+!!! note
+    The link above is an affiliate link which reduces my out of pocket cost to maintain this plugin. I'd be most grateful if you use it when signing up for a new account.
 
 ## Setup
 
@@ -16,7 +17,8 @@ Login to your account and go to the [API Tokens](https://cloud.linode.com/profil
 
 The token you created is used with the `LIToken` SecureString parameter.
 
-*NOTE: The `LITokenInsecure` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
+!!! warning
+    The `LITokenInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
 
 Linode also has an unusually long delay between when a record is set and when it propagates to their public name servers. There's a note at the bottom of the DNS Manager web GUI that reads, *"Changes made to a master zone will take effect in our nameservers every quarter hour."* So you need to set `DnsSleep` parameter in `New-PACertificate` to at least 15 minutes. But in testing, 17 minutes (1020 seconds) seemed to be the minimum to reliably satisfy the challenges.
 
