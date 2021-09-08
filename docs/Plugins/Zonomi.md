@@ -14,17 +14,24 @@ If you use a different compatible provider, there should be an equivalent contro
 
 ## Using the Plugin
 
-For Zonomi users, all you need to supply is the `ZonomiApiKey` parameter.
+The API key is used with the `ZonomiKey` SecureString parameter. Users on other Zonomi compatible providers will also need to supply the API URL for that provider to the `ZonomiApiUrl` parameter.
 
-```powershell
-New-PACertificate example.com -Plugin Zonomi -PluginArgs @{ZonomiApiKey='xxxxxxxxxxxxxxxx'}
-```
+*NOTE: The `ZonomiApiKey` parameter is deprecated and will be removed in the next major module version. Please migrate to the Secure parameter set.*
 
-If you use a different compatible provider, you must also supply the `ZonomiApiUrl` parameter. Here is an example using RimuHosting.
+### Using Zonomi
 
 ```powershell
 $pArgs = @{
-    ZonomiApiKey = 'xxxxxxxxxxxxxxxx'
+    ZonomiKey = (Read-Host 'API Key' -AsSecureString)
+}
+New-PACertificate example.com -Plugin Zonomi -PluginArgs $pArgs
+```
+
+### Using RimuHosting
+
+```powershell
+$pArgs = @{
+    ZonomiKey = (Read-Host 'API Key' -AsSecureString)
     ZonomiApiUrl = 'https://rimuhosting.com/dns/dyndns.jsp'
 }
 New-PACertificate example.com -Plugin Zonomi -PluginArgs $pArgs

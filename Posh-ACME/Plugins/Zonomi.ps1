@@ -1,18 +1,24 @@
 ﻿function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
+        [securestring]$ZonomiKey,
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$ZonomiApiKey,
         [string]$ZonomiApiUrl = 'https://zonomi.com/app/dns/dyndns.jsp',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $ZonomiApiKey = [pscredential]::new('a',$ZonomiKey).GetNetworkCredential().Password
+    }
 
     $AuthHeader = @{"Authorization" = "redrata apikey=$ZonomiApiKey"}
 
@@ -61,8 +67,11 @@ function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER ZonomiApiKey
+    .PARAMETER ZonomiKey
         Your Zonomi DNS API key.
+
+    .PARAMETER ZonomiApiKey
+        (DEPRECATED) Your Zonomi DNS API key.
 
     .PARAMETER ZonomiApiUrl
         The base URL for the API.
@@ -71,7 +80,8 @@ function Add-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'key'
+        $key = Read-Host 'API Key' -AsSecureString
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $key
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -79,18 +89,24 @@ function Add-DnsTxt {
 
 
 function Remove-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='Secure')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
+        [securestring]$ZonomiKey,
+        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
         [string]$ZonomiApiKey,
         [string]$ZonomiApiUrl = 'https://zonomi.com/app/dns/dyndns.jsp',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $ZonomiApiKey = [pscredential]::new('a',$ZonomiKey).GetNetworkCredential().Password
+    }
 
     $AuthHeader = @{"Authorization" = "redrata apikey=$ZonomiApiKey"}
 
@@ -118,8 +134,11 @@ function Remove-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER ZonomiApiKey
+    .PARAMETER ZonomiKey
         Your Zonomi DNS API key.
+
+    .PARAMETER ZonomiApiKey
+        (DEPRECATED) Your Zonomi DNS API key.
 
     .PARAMETER ZonomiApiUrl
         The base URL for the API.
@@ -128,7 +147,8 @@ function Remove-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'key'
+        $key = Read-Host 'API Key' -AsSecureString
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $key
 
         Removes a TXT record for the specified site with the specified value.
     #>
