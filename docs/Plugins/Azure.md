@@ -159,13 +159,14 @@ rm poshacme.crt poshacme.key
 # that only the process running Posh-ACME can read them.
 ```
 
-You'll use your new credential with the `AZAppUsername`, `AZCertPfx`, and `AZPfxPass` plugin parameters. Here's how to save a reference to them for later.
+You'll use your new credential with the `AZAppUsername`, `AZCertPfx`, and `AZPfxPassSecure` plugin parameters. Here's how to save a reference to them for later.
 
 ```powershell
 $appUser = $sp.ApplicationId.ToString()
 # modify the path and/or password as appropriate
 $certPfx = (Resolve-Path './poshacme.pfx').ToString()
-$pfxPass = 'poshacme'
+# remember to use the password you used with openssl
+$pfxPass = ConvertToSecureString 'poshacme' -AsPlainText -Force
 ```
 
 ### Assign Permissions to the Service Principal
@@ -272,7 +273,10 @@ New-PACertificate example.com -Plugin Azure -PluginArgs $pArgs
 
 #### Non-Windows Certificate
 
-You'll need to specify the service principal username which is its `ApplicationId` guid, the path to the PFX file, and the PFX password. If you've been following the setup instructions, you may have `$subscriptionID`, `$tenantID`, `$appUser`, `$certPfx`, and `$pfxPass` variables you can use instead of the sample values below.
+You'll need to specify the service principal username which is its `ApplicationId` guid, the path to the PFX file, and the PFX password as a SecureString. If you've been following the setup instructions, you may have `$subscriptionID`, `$tenantID`, `$appUser`, `$certPfx`, and `$pfxPass` variables you can use instead of the sample values below.
+
+!!! warning
+    The `AZPfxPass` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to a secure parameter set.
 
 ```powershell
 $pArgs = @{
@@ -280,7 +284,7 @@ $pArgs = @{
     AZTenantId = 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
     AZAppUsername = 'zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz'
     AZCertPfx = '/home/certuser/poshacme.pfx'
-    AZPfxPass = 'poshacme'
+    AZPfxPassSecure = (ConvertTo-SecureString 'poshacme' -AsPlainText -Force)
 }
 New-PACertificate example.com -Plugin Azure -PluginArgs $pArgs
 ```

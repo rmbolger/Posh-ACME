@@ -13,21 +13,26 @@ function Add-DnsTxt {
         [Parameter(ParameterSetName='Credential',Mandatory)]
         [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedCertFile',Mandatory)]
         [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZTenantId,
         [Parameter(ParameterSetName='Credential',Mandatory)]
         [pscredential]$AZAppCred,
         [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedCertFile',Mandatory)]
         [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZAppUsername,
         [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [string]$AZAppPasswordInsecure,
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
         [string]$AZCertThumbprint,
+        [Parameter(ParameterSetName='DeprecatedCertFile',Mandatory)]
         [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZCertPfx,
         [Parameter(ParameterSetName='CertFile',Mandatory)]
+        [securestring]$AZPfxPassSecure,
+        [Parameter(ParameterSetName='DeprecatedCertFile',Mandatory)]
         [string]$AZPfxPass,
         [Parameter(ParameterSetName='Token',Mandatory)]
         [string]$AZAccessToken,
@@ -104,13 +109,16 @@ function Add-DnsTxt {
         (DEPRECATED) The password for the principal specified by AZAppUsername.
 
     .PARAMETER AZCertThumbprint
-        The thumbprint for a service principal's authentication certificate. This parameter should only be used from Windows. On non-Windows, please use AZCertPfx and AZPfxPass parameters instead.
+        The thumbprint for a service principal's authentication certificate. This parameter should only be used from Windows. On non-Windows, please use AZCertPfx and AZPfxPassSecure parameters instead.
 
     .PARAMETER AZCertPfx
         The path to a service principal's PFX certificate file used for authentication.
 
-    .PARAMETER AZPfxPass
+    .PARAMETER AZPfxPassSecure
         The export password for the PFX file specified by AZCertPfx.
+
+    .PARAMETER AZPfxPass
+        (DEPRECATED) The export password for the PFX file specified by AZCertPfx.
 
     .PARAMETER AZAccessToken
         An existing Azure access token (JWT) to use for authorization when modifying TXT records. This is useful only for short lived instances or when the Azure authentication logic lives outside the module because access tokens are only valid for 1 hour.
@@ -165,21 +173,26 @@ function Remove-DnsTxt {
         [Parameter(ParameterSetName='Credential',Mandatory)]
         [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedCertFile',Mandatory)]
         [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZTenantId,
         [Parameter(ParameterSetName='Credential',Mandatory)]
         [pscredential]$AZAppCred,
         [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedCertFile',Mandatory)]
         [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZAppUsername,
         [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [string]$AZAppPasswordInsecure,
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
         [string]$AZCertThumbprint,
+        [Parameter(ParameterSetName='DeprecatedCertFile',Mandatory)]
         [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZCertPfx,
         [Parameter(ParameterSetName='CertFile',Mandatory)]
+        [securestring]$AZPfxPassSecure,
+        [Parameter(ParameterSetName='DeprecatedCertFile',Mandatory)]
         [string]$AZPfxPass,
         [Parameter(ParameterSetName='Token',Mandatory)]
         [string]$AZAccessToken,
@@ -267,13 +280,16 @@ function Remove-DnsTxt {
         (DEPRECATED) The password for the principal specified by AZAppUsername.
 
     .PARAMETER AZCertThumbprint
-        The thumbprint for a service principal's authentication certificate. This parameter should only be used from Windows. On non-Windows, please use AZCertPfx and AZPfxPass parameters instead.
+        The thumbprint for a service principal's authentication certificate. This parameter should only be used from Windows. On non-Windows, please use AZCertPfx and AZPfxPassSecure parameters instead.
 
     .PARAMETER AZCertPfx
         The path to a service principal's PFX certificate file used for authentication.
 
-    .PARAMETER AZPfxPass
+    .PARAMETER AZPfxPassSecure
         The export password for the PFX file specified by AZCertPfx.
+
+    .PARAMETER AZPfxPass
+        (DEPRECATED) The export password for the PFX file specified by AZCertPfx.
 
     .PARAMETER AZAccessToken
         An existing Azure access token (JWT) to use for authorization when modifying TXT records. This is useful only for short lived instances or when the Azure authentication logic lives outside the module because access tokens are only valid for 1 hour.
@@ -379,21 +395,26 @@ function Connect-AZTenant {
         [Parameter(ParameterSetName='Credential',Mandatory)]
         [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedCertFile',Mandatory)]
         [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZTenantId,
         [Parameter(ParameterSetName='Credential',Mandatory)]
         [pscredential]$AZAppCred,
         [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
+        [Parameter(ParameterSetName='DeprecatedCertFile',Mandatory)]
         [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZAppUsername,
         [Parameter(ParameterSetName='DeprecatedCredentialInsecure',Mandatory)]
         [string]$AZAppPasswordInsecure,
         [Parameter(ParameterSetName='CertThumbprint',Mandatory)]
         [string]$AZCertThumbprint,
+        [Parameter(ParameterSetName='DeprecatedCertFile',Mandatory)]
         [Parameter(ParameterSetName='CertFile',Mandatory)]
         [string]$AZCertPfx,
         [Parameter(ParameterSetName='CertFile',Mandatory)]
+        [securestring]$AZPfxPassSecure,
+        [Parameter(ParameterSetName='DeprecatedCertFile',Mandatory)]
         [string]$AZPfxPass,
         [Parameter(ParameterSetName='Token',Mandatory)]
         [string]$AZAccessToken,
@@ -473,7 +494,7 @@ function Connect-AZTenant {
                 -Method Post -Body $authBody @script:UseBasic -EA Stop
         } catch { throw }
 
-    } elseif ($PSCmdlet.ParameterSetName -in 'CertThumbprint','CertFile') {
+    } elseif ($PSCmdlet.ParameterSetName -in 'CertThumbprint','CertFile','DeprecatedCertFile') {
 
         if ('CertThumbprint' -eq $PSCmdlet.ParameterSetName) {
             Write-Debug "Looking for cert thumbprint $AZCertThumbprint"
@@ -520,6 +541,9 @@ function Connect-AZTenant {
 
             # We're working with a PFX file, so import into an X509Certificate2 object
             try {
+                if ('CertFile' -eq $PSCmdlet.ParameterSetName) {
+                    $AZPfxPass = [pscredential]::new('a',$AZPfxPassSecure).GetNetworkCredential().Password
+                }
                 $cert = [Security.Cryptography.X509Certificates.X509Certificate2]::new(
                     $AZPfxObj,
                     $AZPfxPass,
