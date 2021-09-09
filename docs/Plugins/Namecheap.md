@@ -14,10 +14,13 @@ Once API Access is turned on, click the [Manage](https://ap.www.namecheap.com/se
 
 The username is used with the `NCUsername` parameter and the API key is used with the `NCApiKey` SecureString parameter.
 
+!!! warning
+    The `NCApiKeyInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
+
 ```powershell
 $pArgs = @{
     NCUsername = 'myusername'
-    NUApiKey = (Read-Host 'API Key' -AsSecureString)
+    NCApiKey = (Read-Host 'API Key' -AsSecureString)
 }
 New-PACertificate example.com -Plugin Namecheap -PluginArgs $pArgs
 ```
