@@ -16,7 +16,7 @@
         <link rel="canonical" href="https://poshac.me/docs/v4/Plugins/Azure/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.5">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.6">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.be71726b.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.802231af.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.3f5d1f46.min.css">
@@ -48,6 +48,17 @@
 
     
     
+
+  
+  
+    
+  
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Posh-ACME - Azure" />
+  <meta property="og:description" content="Documentation for the Posh-ACME PowerShell module" />
+  <meta property="og:url" content="https://poshac.me/docs/v4/Plugins/Azure/" />
+
+
   </head>
   
   
@@ -2147,7 +2158,7 @@
 <div class="highlight"><pre><span></span><code><span class="c"># Depending on your OpenSSL config, this may prompt you for certificate details</span>
 <span class="c"># like Country, Organization, etc. None of the details matter for the purposes of</span>
 <span class="c"># authentication and can be set to anything you like.</span>
-<span class="n">openssl</span> <span class="n">req</span> <span class="n">-x509</span> <span class="n">-nodes</span> <span class="n">-sha256</span> <span class="n">-days</span> <span class="n">1826</span> <span class="n">-newkey</span> <span class="n">rsa</span><span class="err">:</span><span class="n">2048</span> <span class="n">-keyout</span> <span class="n">poshacme</span><span class="p">.</span><span class="n">key</span> <span class="n">-out</span> <span class="n">poshacme</span><span class="p">.</span><span class="n">crt</span>
+<span class="n">openssl</span> <span class="n">req</span> <span class="n">-x509</span> <span class="n">-nodes</span> <span class="n">-sha256</span> <span class="n">-days</span> <span class="n">1826</span> <span class="n">-newkey</span> <span class="n">rsa</span><span class="p">:</span><span class="n">2048</span> <span class="n">-keyout</span> <span class="n">poshacme</span><span class="p">.</span><span class="n">key</span> <span class="n">-out</span> <span class="n">poshacme</span><span class="p">.</span><span class="n">crt</span>
 
 <span class="c"># change the export password to whatever you want, but remember what it is so you can</span>
 <span class="c"># provide it as part of the plugin parameters</span>
@@ -2401,7 +2412,7 @@
     <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.409db549.min.js", "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.56a63758.min.js"></script>
+      <script src="../../assets/javascripts/bundle.756773cc.min.js"></script>
       
     
   </body>
