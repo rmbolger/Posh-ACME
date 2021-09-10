@@ -45,7 +45,7 @@ With a Plugin specified, this function will return that plugin's details, help, 
 
 ## Examples
 
-### Example 1
+### Example 1: List Plugins
 
 ```powershell
 Get-PAPlugin
@@ -53,7 +53,15 @@ Get-PAPlugin
 
 Get the list of available validation plugins
 
-### Example 2
+### Example 2: Show Plugin Parameter Sets
+
+```powershell
+Get-PAPlugin Route53 -Params
+```
+
+Launch the user's default web browser to the online guide for the specified plugin.
+
+### Example 3: Open Plugin Guide
 
 ```powershell
 Get-PAPlugin Route53 -Guide

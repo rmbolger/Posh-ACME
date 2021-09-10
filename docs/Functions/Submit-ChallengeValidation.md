@@ -19,11 +19,13 @@ Submit-ChallengeValidation [[-Order] <Object>] [<CommonParameters>]
 
 ## Description
 
-An ACME order contains an authorization object for each domain in the order. Each authorization contains one or more challenge types. The client must complete at least one challenge for each authorization in order to prove they control the domain. Once complete, the client asks the server to validate each challenge and waits for the server to do so and update the authorization status.
+This function encapsulates the authorization validation cycle for challenges in a given order. It takes care of publishing the challenge records according to the order's plugin configuration, notifying the ACME server to validate the records, and cleaning up the challenge records whether the validation succeeded or not.
+
+If everything is successful, the order object will have transitioned from the `pending` state to the `ready` state which indicates it is ready for finalization using `Submit-OrderFinalize`.
 
 ## Examples
 
-### Example 1
+### Example 1: Current Order
 
 ```powershell
 Submit-ChallengeValidation
@@ -31,7 +33,7 @@ Submit-ChallengeValidation
 
 Begin challenge validation on the current order.
 
-### Example 2
+### Example 2: Specific Order
 
 ```powershell
 Get-PAOrder -Name myorder | Submit-ChallengeValidation
@@ -68,6 +70,6 @@ An order object.
 
 ## Related Links
 
-[Get-PAOrder](Get-PAOrder.md)
-
 [New-PAOrder](New-PAOrder.md)
+
+[Submit-OrderFinalize](Submit-OrderFinalize.md)

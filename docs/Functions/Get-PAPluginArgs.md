@@ -23,7 +23,7 @@ An easy way to recall the plugin args used for a given order.
 
 ## Examples
 
-### Example 1
+### Example 1: Current Order Args
 
 ```powershell
 Get-PAPluginArgs
@@ -31,21 +31,13 @@ Get-PAPluginArgs
 
 Retrieve the plugin args for the current order.
 
-### Example 2
-
-```powershell
-Get-PAPluginArgs -Name myorder
-```
-
-Retrieve the plugin args for the specified order.
-
-### Example 3
+### Example 2: Specific Order Args
 
 ```powershell
 Get-PAOrder -Name myorder | Get-PAPluginArgs
 ```
 
-Retrieve the plugin args for the order passed via the pipeline.
+Retrieve the plugin args for the specified order.
 
 ## Parameters
 

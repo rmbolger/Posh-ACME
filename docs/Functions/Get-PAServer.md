@@ -33,7 +33,7 @@ It may also be used to refresh server details and list additional servers that h
 
 ## Examples
 
-### Example 1
+### Example 1: Current Server
 
 ```powershell
 Get-PAServer
@@ -41,7 +41,7 @@ Get-PAServer
 
 Get cached ACME server details for the currently selected server.
 
-### Example 2
+### Example 2: Specific Server
 
 ```powershell
 Get-PAServer -DirectoryUrl LE_PROD
@@ -49,15 +49,7 @@ Get-PAServer -DirectoryUrl LE_PROD
 
 Get cached LetsEncrypt production server details using the short name.
 
-### Example 3
-
-```powershell
-Get-PAServer -List
-```
-
-Get all cached ACME server details.
-
-### Example 4
+### Example 3: Specific Server URL
 
 ```powershell
 Get-PAServer -DirectoryUrl https://myacme.example.com/directory
@@ -65,27 +57,18 @@ Get-PAServer -DirectoryUrl https://myacme.example.com/directory
 
 Get cached ACME server details for the specified directory URL.
 
-### Example 5
+### Example 4: All Servers
 
 ```powershell
-Get-PAServer -Refresh
+Get-PAServer -List
 ```
 
-Get fresh ACME server details for the currently selected server.
-
-### Example 6
-
-```powershell
-Get-PAServer -List -Refresh
-```
-
-Get fresh ACME server details for all previously used servers.
+Get all cached ACME server details.
 
 ## Parameters
 
 ### -DirectoryUrl
-Either the URL to an ACME server's "directory" endpoint or one of the supported short names.
-Currently supported short names include LE_PROD (LetsEncrypt Production v2), LE_STAGE (LetsEncrypt Staging v2), BUYPASS_PROD (BuyPass.com Production), and BUYPASS_TEST (BuyPass.com Testing).
+Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).
 
 ```yaml
 Type: String

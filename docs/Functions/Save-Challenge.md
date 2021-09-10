@@ -21,25 +21,18 @@ Save-Challenge [-Plugin] <String> [[-PluginArgs] <Hashtable>] [<CommonParameters
 
 Some validation plugins require a finalization step after the Publish or Unpublish functionality to commit and make the changes live. This function should be called once after running all of the `Publish-Challenge` or `Unpublish-Challenge` commands.
 
-For plugins that don't require a commit step, this function may still be run without causing an error, but does nothing.
+For plugins that don't require a commit step, this function may still be run without causing an error, but has no effect.
 
 ## Examples
 
-### Example 1
+### Example 1: Commit Changes
 
 ```powershell
-Save-Challenge Manual @{}
+$pArgs = @{ FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString) }
+Save-Challenge -Plugin FakeDNS -PluginArgs $pArgs
 ```
 
-Commit changes using the Manual DNS plugin that requires no plugin arguments.
-
-### Example 2
-
-```powershell
-Save-Challenge MyPlugin @{Param1='asdf';Param2=1234}
-```
-
-Commit changes for a set of challenges using a fictitious plugin and arguments.
+Commit changes that the specified plugin has made.
 
 ## Parameters
 
@@ -61,7 +54,7 @@ Accept wildcard characters: False
 
 ### -PluginArgs
 A hashtable containing the plugin arguments to use with the specified plugin.
-So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
+So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.
 
 ```yaml
 Type: Hashtable

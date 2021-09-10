@@ -35,31 +35,15 @@ All certificate requests require a valid account on an ACME server. An contact e
 
 ## Examples
 
-### Example 1
+### Example 1: Basic Account
 
 ```powershell
-New-PAAccount -AcceptTOS
-```
-
-Create a new account with no contact email and the default key length.
-
-### Example 2
-
-```powershell
-New-PAAccount -Contact user1@example.com -AcceptTOS
+New-PAAccount -Contact 'me@example.com' -AcceptTOS
 ```
 
 Create a new account with the specified email and the default key length.
 
-### Example 3
-
-```powershell
-New-PAAccount -Contact user1@example.com -KeyLength 4096 -AcceptTOS
-```
-
-Create a new account with the specified email and an RSA 4096 bit key.
-
-### Example 4
+### Example 2: No Contact and Alternate KeyLength
 
 ```powershell
 New-PAAccount -KeyLength 'ec-384' -AcceptTOS -Force
@@ -67,13 +51,31 @@ New-PAAccount -KeyLength 'ec-384' -AcceptTOS -Force
 
 Create a new account with no contact email and an ECC key using P-384 curve that ignores any confirmations.
 
-### Example 5
+### Example 3: Pre-Generated Key
 
 ```powershell
 New-PAAccount -KeyFile .\mykey.key -AcceptTOS
 ```
 
 Create a new account using a pre-generated private key file.
+
+### Example 4: External Account Binding
+
+```powershell
+$eabKID = 'xxxxxxxx'
+$eabHMAC = 'yyyyyyyy'
+New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.com' -AcceptTOS
+```
+
+Create a new account using External Account Binding (EAB) values provided by your ACME CA.
+
+### Example 5: Alternative Plugin Encryption
+
+```powershell
+New-PAAccount -UseAltPluginEncryption -Contact 'me@example.com' -AcceptTOS
+```
+
+Create a new account configured for alternative plugin encryption which uses an OS-portable AES key instead of the OS-native libraries.
 
 ## Parameters
 
@@ -240,7 +242,7 @@ Accept wildcard characters: False
 ### -UseAltPluginEncryption
 If specified, the account will be configured to use a randomly generated AES key to encrypt sensitive plugin parameters on disk instead of using the OS's native encryption methods.
 This can be useful if the config is being shared across systems or platforms.
-You can revert to OS native encryption using -UseAltPluginEncryption:$false.
+You can revert to OS native encryption using `Set-PAAccount -UseAltPluginEncryption:$false`.
 
 ```yaml
 Type: SwitchParameter

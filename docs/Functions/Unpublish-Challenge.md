@@ -28,24 +28,63 @@ Then, `Save-Challenge` once to commit them all.
 
 ## Examples
 
-### Example 1
+### Example 1: Unpublish a Challenge
 
 ```powershell
-$auths = Get-PAOrder | Get-PAAuthorization
-Unpublish-Challenge $auths[0].DNSId (Get-PAAccount) $auths[0].DNS01Token Manual @{}
+$splat = @{
+    Domain = 'example.com'
+    Account = (Get-PAAccount)
+    Token = 'fake-token'
+    Plugin = 'FakeDNS'
+    PluginArgs = @{
+        FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
+    }
+}
+Unpublish-Challenge @splat
+
+# if plugin requires saving
+Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs
 ```
 
-Unpublish a DNS challenge for the first authorization in the current order using the Manual DNS plugin.
+Unpublish a single DNS challenge.
 
-### Example 2
+### Example 2: DNS Order Challenges
 
 ```powershell
-$pArgs = @{Param1='asdf';Param2=1234}
-$acct = Get-PAAccount
-Unpublish-Challenge example.com $acct MyPlugin $pArgs -Token faketoken
+$splat = @{
+    Account = (Get-PAAccount)
+    Plugin = 'FakeDNS'
+    PluginArgs = @{
+        FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
+    }
+}
+Get-PAOrder | Get-PAAuthorization | ForEach-Object {
+    Unpublish-Challenge -Domain $_.DNSId -Token $_.DNS01Token @splat
+}
+
+# if plugin requires saving
+Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs
 ```
 
-Unpublish a challenge for example.com using a fictitious plugin and arguments.
+Unpublish DNS challenges for all authorizations in the current order.
+
+### Example 3: HTTP Order Challenges
+
+```powershell
+$splat = @{
+    Account = (Get-PAAccount)
+    Plugin = 'WebRoot'
+    PluginArgs = @{ WRPath = 'C:\inetpub\wwwroot' }
+}
+Get-PAOrder | Get-PAAuthorization | ForEach-Object {
+    Unpublish-Challenge -Domain $_.DNSId -Token $_.HTTP01Token @splat
+}
+
+# if plugin requires saving
+Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs
+```
+
+Unpublish HTTP challenges for all authorizations in the current order.
 
 ## Parameters
 
@@ -113,7 +152,7 @@ Accept wildcard characters: False
 
 ### -PluginArgs
 A hashtable containing the plugin arguments to use with the specified plugin.
-So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
+So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.
 
 ```yaml
 Type: Hashtable
@@ -129,7 +168,7 @@ Accept wildcard characters: False
 
 ### -DnsAlias
 When using DNS Alias support with DNS validation plugins, the alias domain that the TXT record will be removed from.
-This should be the complete FQDN including the '_acme-challenge.' prefix if necessary.
+This should be the complete FQDN including the `_acme-challenge.` prefix if necessary.
 This field is ignored for non-DNS validation plugins.
 
 ```yaml

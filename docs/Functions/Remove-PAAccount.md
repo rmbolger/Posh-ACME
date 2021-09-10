@@ -19,13 +19,11 @@ Remove-PAAccount [-ID] <String> [-Deactivate] [-Force] [-WhatIf] [-Confirm] [<Co
 
 ## Description
 
-This function removes the ACME account from the local profile which also removes any associated orders and certificates.
-It will not remove or cleanup copies of certificates that have been exported or installed elsewhere.
-It will not deactivate the account on the ACME server unless `-Deactivate` is specified. But you won't be able to re-use the account on another system without an export of the account's key such as the one generated with `Export-PAAccountKey`.
+This function removes the ACME account from the local profile which also removes any associated orders and certificates. It will not remove or cleanup copies of certificates that have been exported or installed elsewhere. It will not deactivate the account on the ACME server unless `-Deactivate` is specified. But you won't be able to re-use the account on another system without an export of the account's key such as the one generated with `Export-PAAccountKey`.
 
 ## Examples
 
-### Example 1
+### Example 1: Remove Account
 
 ```powershell
 Remove-PAAccount 12345
@@ -33,7 +31,7 @@ Remove-PAAccount 12345
 
 Remove the specified account without deactivation.
 
-### Example 2
+### Example 2: Deactivate and Remove
 
 ```powershell
 Get-PAAccount | Remove-PAAccount -Deactivate -Force

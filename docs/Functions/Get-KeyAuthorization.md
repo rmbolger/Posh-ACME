@@ -23,7 +23,7 @@ A key authorization is a string that expresses a domain holder's authorization f
 
 ## Examples
 
-### Example 1
+### Example 1: Specific Key Auth
 
 ```powershell
 Get-KeyAuthorization 'XxXxXxXxXxXx'
@@ -31,10 +31,10 @@ Get-KeyAuthorization 'XxXxXxXxXxXx'
 
 Get the key authorization for the specified token using the current account.
 
-### Example 2
+### Example 2: DNS Key Auths for current order
 
 ```powershell
-(Get-PAOrder | Get-PAAuthorization).DNS01Token | Get-KeyAuthorization
+(Get-PAOrder | Get-PAAuthorization).DNS01Token | Get-KeyAuthorization -ForDNS
 ```
 
 Get all key authorizations for the DNS challenges in the current order using the current account.

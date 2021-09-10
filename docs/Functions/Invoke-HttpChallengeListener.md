@@ -20,7 +20,7 @@ Invoke-HttpChallengeListener [[-MainDomain] <String>] [[-Name] <String>] [-Liste
 
 ## Description
 
-Uses System.Net.HttpListener to answer http-01 ACME challenges for the current or specified order.
+Uses `System.Net.HttpListener` to answer http-01 ACME challenges for the current or specified order.
 If MainDomain is not specified, the current Order is used.
 
 If running on Windows with non-admin privileges, Access Denied errors may be thrown unless a URL reservation is added using `netsh` that matches the HttpListener prefix that will be used. The default wildcard prefix is `http://+/.well-known/acme-challenge` and the netsh command might look something like this:
@@ -29,7 +29,7 @@ If running on Windows with non-admin privileges, Access Denied errors may be thr
 
 ## Examples
 
-### Example 1
+### Example 1: Answer for Current Order
 
 ```powershell
 Invoke-HttpChallengeListener
@@ -37,15 +37,15 @@ Invoke-HttpChallengeListener
 
 Start listener on default port 80 for pending challenges for the current order.
 
-### Example 2
+### Example 2: Specific Order with Options
 
 ```powershell
-Invoke-HttpChallengeListener -MainDomain 'test.example.com' -Port 8080 -ListenerTimeout 30
+Invoke-HttpChallengeListener -MainDomain 'example.com' -Port 8080 -ListenerTimeout 30
 ```
 
 Start listener on port 8080 with a timeout of 30 seconds for the specified order.
 
-### Example 3
+### Example 3: Using Other Prefixes
 
 ```powershell
 $prefixes = 'http://example.com/.well-known/acme-challenge/','http://www.example.com/.well-known/acme-challenge'
@@ -179,7 +179,8 @@ The authorization object associated with the order.
 
 ## Notes
 
-> **DEPRECATION NOTICE:** This function is deprecated and may be removed in a future major version. Please migrate your scripts to use the `WebSelfHost` plugin.
+!!! warning
+    This function is deprecated and may be removed in a future major version. Please migrate your scripts to use the `WebSelfHost` plugin.
 
 ## Related Links
 

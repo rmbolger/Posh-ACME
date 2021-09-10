@@ -20,20 +20,19 @@ Send-ChallengeAck [-ChallengeUrl] <String> [[-Account] <Object>] [<CommonParamet
 ## Description
 
 Use this after publishing the required resource for one of the challenges from an authorization object.
-It lets the ACME server know that it should proceed validating that challenge.
+It lets the ACME server know that it should proceed validating that challenge. For ACME servers that allow retrying challenges, this can also be used to trigger a retry.
 
 ## Examples
 
-### Example 1
+### Example 1: Validate Challenge
 
 ```powershell
-$auths = Get-PAOrder | Get-PAAuthorization
-Send-ChallengeAck $auths\[0\].DNS01Url
+Send-ChallengeAck https://acme.example.com/chal/1234567
 ```
 
-Tell the ACME server to validate the first DNS challenge in the current order.
+Validate a specific challenge URL.
 
-### Example 2
+### Example 2: Validate Pending HTTP Challenges
 
 ```powershell
 $auths = Get-PAOrder | Get-PAAuthorization

@@ -24,7 +24,7 @@ Use this function to set the current ACME server or change a server's configurat
 
 ## Examples
 
-### Example 1
+### Example 1: Server Short Name
 
 ```powershell
 Set-PAServer LE_PROD
@@ -32,7 +32,7 @@ Set-PAServer LE_PROD
 
 Switch to the LetsEncrypt production server using the short name.
 
-### Example 2
+### Example 2: Server URL
 
 ```powershell
 Set-PAServer -DirectoryUrl https://myacme.example.com/directory
@@ -40,19 +40,26 @@ Set-PAServer -DirectoryUrl https://myacme.example.com/directory
 
 Switch to the specified ACME server using the directory URL.
 
-### Example 3
+### Example 3: Disable Telemetry
 
 ```powershell
-(Get-PAServer -List)[0] | Set-PAServer
+Set-PAServer -DisableTelemetry
 ```
 
-Switch to the first ACME server returned by "Get-PAServer -List"
+Disable Posh-ACME telemetry collection for activity on the current ACME server.
+
+### Example 4: Enable Telemetry
+
+```powershell
+Set-PAServer -DisableTelemetry:$false
+```
+
+Enable Posh-ACME telemetry collection for activity on the current ACME server.
 
 ## Parameters
 
 ### -DirectoryUrl
-Either the URL to an ACME server's "directory" endpoint or one of the supported short names.
-Currently supported short names include LE_PROD (LetsEncrypt Production v2), LE_STAGE (LetsEncrypt Staging v2), BUYPASS_PROD (BuyPass.com Production), and BUYPASS_TEST (BuyPass.com Testing).
+Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).
 
 ```yaml
 Type: String

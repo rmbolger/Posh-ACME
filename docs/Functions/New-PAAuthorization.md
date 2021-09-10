@@ -27,7 +27,7 @@ The authorizations created this way also expire the same way they do when associ
 
 ## Examples
 
-### Example 1
+### Example 1: Auth for Current Account
 
 ```powershell
 $auth = New-PAAuthorization example.com
@@ -35,13 +35,13 @@ $auth = New-PAAuthorization example.com
 
 Create a new authorization for the specified domain using the current account.
 
-### Example 2
+### Example 2: Auths for Specific Account
 
 ```powershell
 $auths = 'example.com','www.example.com' | New-PAAuthorization -Account (Get-PAAccount 123)
 ```
 
-Create new authorizations for the specified domains via the pipeline and using the specified account.
+Create new authorizations for the specified domains using the specified account.
 
 ## Parameters
 

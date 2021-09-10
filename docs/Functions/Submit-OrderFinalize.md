@@ -23,7 +23,7 @@ An ACME order that has reached the `ready` state is ready to be finalized which 
 
 ## Examples
 
-### Example 1
+### Example 1: Current Order
 
 ```powershell
 Submit-OrderFinalize
@@ -31,7 +31,7 @@ Submit-OrderFinalize
 
 Finalize the current order.
 
-### Example 2
+### Example 2: Specific Order
 
 ```powershell
 Get-PAOrder example.com | Submit-OrderFinalize

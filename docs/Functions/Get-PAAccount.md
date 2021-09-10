@@ -32,7 +32,7 @@ Returns details such as Email, key length, and status for one or more ACME accou
 
 ## Examples
 
-### Example 1
+### Example 1: Current Account
 
 ```powershell
 Get-PAAccount
@@ -40,7 +40,7 @@ Get-PAAccount
 
 Get cached ACME account details for the currently selected account.
 
-### Example 2
+### Example 2: Specific Account
 
 ```powershell
 Get-PAAccount -ID 1234567
@@ -48,7 +48,7 @@ Get-PAAccount -ID 1234567
 
 Get cached ACME account details for the specified account ID.
 
-### Example 3
+### Example 3: All Accounts
 
 ```powershell
 Get-PAAccount -List
@@ -56,26 +56,10 @@ Get-PAAccount -List
 
 Get all cached ACME account details.
 
-### Example 4
+### Example 4: Filter on Contact
 
 ```powershell
-Get-PAAccount -Refresh
-```
-
-Get fresh ACME account details for the currently selected account.
-
-### Example 5
-
-```powershell
-Get-PAAccount -List -Refresh
-```
-
-Get fresh ACME account details for all accounts.
-
-### Example 6
-
-```powershell
-Get-PAAccount -List -Contact user1@example.com
+Get-PAAccount -List -Contact 'user1@example.com'
 ```
 
 Get cached ACME account details for all accounts that have user1@example.com as the only contact.

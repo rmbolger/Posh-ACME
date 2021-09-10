@@ -20,22 +20,22 @@ Remove-PAOrder [[-MainDomain] <String>] [[-Name] <String>] [-RevokeCert] [-Force
 
 ## Description
 
-This function removes the order from the local profile which also removes any associated certificate/key.
-It will not remove or cleanup copies of the certificate that have been exported or installed elsewhere.
-It will not revoke the certificate unless `-RevokeCert` is specified.
-The ACME server may retain a reference to the order until it decides to delete it.
+This function removes the order from the local profile which also removes any associated certificate/key. It will not remove or cleanup copies of the certificate that have been exported or installed elsewhere. It will not revoke the certificate unless `-RevokeCert` is specified. The ACME server may retain a reference to the order until it decides to delete it.
+
+!!! note
+    Revoking a certificate is discouraged unless the private key is known to have been compromised. Revoking certs that simply aren't being used anymore is a waste of CA resources.
 
 ## Examples
 
-### Example 1
+### Example 1: Remove Order
 
 ```powershell
-Remove-PAOrder site1.example.com
+Remove-PAOrder example.com
 ```
 
 Remove the specified order without revoking the certificate.
 
-### Example 2
+### Example 2: Revoke and Remove All
 
 ```powershell
 Get-PAOrder -List | Remove-PAOrder -RevokeCert -Force
@@ -145,6 +145,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## Related Links
 
-[Get-PAOrder](Get-PAOrder.md)
-
 [New-PAOrder](New-PAOrder.md)
+
+[Revoke-PACertificate](Revoke-PACertificate.md)

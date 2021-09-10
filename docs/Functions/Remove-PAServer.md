@@ -20,26 +20,31 @@ Remove-PAServer [[-DirectoryUrl] <String>] [-Name <String>] [-DeactivateAccounts
 
 ## Description
 
-This function removes the ACME server from the local profile which also removes any associated accounts, orders and certificates.
-It will not remove or cleanup copies of certificates that have been exported or installed elsewhere.
-It will not revoke any certificates.
-It will not deactivate the accounts on the ACME server unless the `-DeactivateAccounts` switch is specified.
+This function removes the ACME server from the local profile which also removes any associated accounts, orders and certificates. It will not remove or cleanup copies of certificates that have been exported or installed elsewhere.
+It will not revoke any certificates. It will not deactivate the accounts on the ACME server unless the `-DeactivateAccounts` switch is specified.
 
 ## Examples
 
-### Example 1
+### Example 1: Remove Server
 
 ```powershell
 Remove-PAServer LE_STAGE
 ```
 
-Remove the staging server without deactivating accounts.
+Remove the specified server without deactivating accounts.
+
+### Example 2: Remove and Deactivate Accounts
+
+```powershell
+Get-PAServer | Remove-PAServer -DeactivateAccounts -Force
+```
+
+Remove the current server and deactivates accounts without confirmation.
 
 ## Parameters
 
 ### -DirectoryUrl
-Either the URL to an ACME server's "directory" endpoint or one of the supported short names.
-Currently supported short names include LE_PROD (LetsEncrypt Production v2) and LE_STAGE (LetsEncrypt Staging v2).
+Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).
 
 ```yaml
 Type: String

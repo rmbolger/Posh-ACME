@@ -20,11 +20,11 @@ Install-PACertificate [[-PACertificate] <Object>] [[-StoreLocation] <String>] [[
 
 ## Description
 
-This can be used instead of the -Install parameter on New-PACertificate to import a certificate with more configurable options.
+This can be used instead of the `-Install` parameter on `New-PACertificate` to import a certificate with additional options.
 
 ## Examples
 
-### Example 1
+### Example 1: Import Current Certificate
 
 ```powershell
 Install-PACertificate
@@ -32,7 +32,7 @@ Install-PACertificate
 
 Install the certificate for the currently selected order to the default LocalMachine\My store.
 
-### Example 2
+### Example 2: Import Specific Certificate
 
 ```powershell
 Get-PACertificate example.com | Install-PACertificate
@@ -40,7 +40,7 @@ Get-PACertificate example.com | Install-PACertificate
 
 Install the specified certificate to the default LocalMachine\My store.
 
-### Example 3
+### Example 3: Import with Options
 
 ```powershell
 Install-PACertificate -StoreLocation 'CurrentUser' -NotExportable

@@ -23,7 +23,7 @@ Returns details such as fqdn, status, expiration, and challenges for one or more
 
 ## Examples
 
-### Example 1
+### Example 1: Specific Authorization
 
 ```powershell
 Get-PAAuthorization https://acme.example.com/authz/1234567
@@ -31,7 +31,7 @@ Get-PAAuthorization https://acme.example.com/authz/1234567
 
 Get the authorization for the specified URL.
 
-### Example 2
+### Example 2: Order Authorizations
 
 ```powershell
 Get-PAOrder | Get-PAAuthorization
@@ -39,13 +39,6 @@ Get-PAOrder | Get-PAAuthorization
 
 Get the authorizations for the current order on the current account.
 
-### Example 3
-
-```powershell
-Get-PAOrder -List | Get-PAAuthorization
-```
-
-Get the authorizations for all orders on the current account.
 
 ## Parameters
 

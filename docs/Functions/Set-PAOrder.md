@@ -9,7 +9,7 @@ schema: 2.0.0
 
 ## Synopsis
 
-Set the current ACME order, edits an orders properties, or revokes an order's certificate.
+Switch to or modify an order.
 
 ## Syntax
 
@@ -32,20 +32,19 @@ Set-PAOrder [[-MainDomain] <String>] [-Name <String>] [-RevokeCert] [-Force] [-N
 
 ## Description
 
-Switch to a specific ACME order and edit its properties or revoke its certificate.
-Revoked certificate orders are not deleted and can be re-requested using Submit-Renewal or New-PACertificate.
+Switch to a specific ACME order and edit its properties or revoke its certificate. Orders with revoked certificates are not deleted and can be re-requested using Submit-Renewal or New-PACertificate.
 
 ## Examples
 
-### Example 1
+### Example 1: Switch Order
 
 ```powershell
-Set-PAOrder site1.example.com
+Set-PAOrder example.com
 ```
 
 Switch to the specified domain's order.
 
-### Example 2
+### Example 2: Revoke Certificate
 
 ```powershell
 Set-PAOrder -RevokeCert
@@ -53,13 +52,14 @@ Set-PAOrder -RevokeCert
 
 Revoke the current order's certificate.
 
-### Example 3
+### Example 3: Update Plugin Args
 
 ```powershell
-Set-PAOrder -FriendlyName 'new friendly name'
+$pArgs = @{ FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString) }
+Set-PAOrder example.com -Plugin FakeDNS -PluginArgs $pArgs
 ```
 
-Edit the friendly name for the current order and certificate if it exists.
+Reset the plugin and its arguments for the specified order.
 
 ## Parameters
 
@@ -164,7 +164,7 @@ Accept wildcard characters: False
 
 ### -PluginArgs
 A hashtable containing the plugin arguments to use with the specified Plugin list.
-So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
+So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.
 
 ```yaml
 Type: Hashtable

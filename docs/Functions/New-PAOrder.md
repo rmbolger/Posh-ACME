@@ -50,37 +50,50 @@ Be aware that new orders that share the same MainDomain as a previous order will
 
 ## Examples
 
-### Example 1
+### Example 1: Single Domain Order
 
 ```powershell
-New-PAOrder site1.example.com
+New-PAOrder example.com
 ```
 
 Create a new order for the specified domain using the default key length.
 
-### Example 2
+### Example 2: Multi-Domain with Plugin
 
 ```powershell
-New-PAOrder -Domain 'site1.example.com','site2.example.com','site3.example.com'
+$pArgs = @{
+    FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
+}
+$domains = 'example.com','www.example.com','blog.example.com'
+New-PAOrder -Domain $domains -Plugin FakeDNS -PluginArgs $pArgs
 ```
 
-Create a new SAN order for the specified domains using the default key length.
+Create a new SAN order for the specified domains and specify plugin details.
 
-### Example 3
+### Example 3: ECDSA Private Key
 
 ```powershell
-New-PAOrder site1.example.com 4096
+New-PAOrder example.com -KeyLength 'ec-256'
 ```
 
-Create a new order for the specified domain using an RSA 4096 bit key.
+Create a new order for the specified domain using an ECDSA P-256 private key.
 
-### Example 4
+### Example 4: Pre-generated Private Key
 
 ```powershell
-New-PAOrder 'site1.example.com','site2.example.com' ec-384 -Force
+New-PAOrder example.com -KeyFile .\mykey.key
 ```
 
-Create a new SAN order for the specified domains using an ECC key using P-384 curve that ignores any confirmations.
+Create a new order using an externally generated private key.
+
+### Example 5: External Cert Request
+
+```powershell
+New-PAOrder -CSRPath .\myreq.csr
+```
+
+Create a new order using an externally generated certificate request.
+
 
 ## Parameters
 
@@ -187,7 +200,7 @@ Accept wildcard characters: False
 
 ### -PluginArgs
 A hashtable containing the plugin arguments to use with the specified Plugin list.
-So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
+So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.
 
 ```yaml
 Type: Hashtable

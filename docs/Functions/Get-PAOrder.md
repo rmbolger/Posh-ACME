@@ -31,7 +31,7 @@ Returns details such as Domains, key length, expiration, and status for one or m
 
 ## Examples
 
-### Example 1
+### Example 1: Current Order
 
 ```powershell
 Get-PAOrder
@@ -39,15 +39,15 @@ Get-PAOrder
 
 Get cached ACME order details for the currently selected order.
 
-### Example 2
+### Example 2: Specific Order
 
 ```powershell
-Get-PAOrder site.example.com
+Get-PAOrder example.com
 ```
 
 Get cached ACME order details for the specified domain.
 
-### Example 3
+### Example 3: All Orders
 
 ```powershell
 Get-PAOrder -List
@@ -55,21 +55,13 @@ Get-PAOrder -List
 
 Get all cached ACME order details.
 
-### Example 4
+### Example 4: Refresh Order Status
 
 ```powershell
 Get-PAOrder -Refresh
 ```
 
 Get fresh ACME order details for the currently selected order.
-
-### Example 5
-
-```powershell
-Get-PAOrder -List -Refresh
-```
-
-Get fresh ACME order details for all orders.
 
 ## Parameters
 

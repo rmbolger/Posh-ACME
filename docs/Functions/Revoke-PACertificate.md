@@ -31,17 +31,12 @@ Revoke-PACertificate -CertFile <String> [-KeyFile <String>] [-Reason <Revocation
 
 Any certificate created with the current ACME account can be revoked. If you need to revoke a certificate not created with the current account, you either need to specify both `CertFile` and `KeyFile`. If you don't have the private key, you will need to go through the authorization process on this account for all names in the certificate and just specify `CertFile`.
 
+!!! note
+    Revoking a certificate is discouraged unless the private key is known to have been compromised. Revoking certs that simply aren't being used anymore is a waste of CA resources.
+
 ## Examples
 
-### Example 1
-
-```powershell
-Revoke-PACertificate example.com
-```
-
-Revokes the certificate for the specified domain.
-
-### Example 2
+### Example 1: Revoke Order Cert
 
 ```powershell
 Get-PAOrder | Revoke-PACertificate -Force
@@ -49,7 +44,7 @@ Get-PAOrder | Revoke-PACertificate -Force
 
 Revokes the certificate associated with the current order and skips the confirmation prompt.
 
-### Example 3
+### Example 2: Revoke with Reason
 
 ```powershell
 Get-PACertificate | Revoke-PACertificate -Reason keyCompromise
@@ -57,7 +52,7 @@ Get-PACertificate | Revoke-PACertificate -Reason keyCompromise
 
 Revokes the current certificate with the specified reason.
 
-### Example 4
+### Example 3: Revoke External Cert
 
 ```powershell
 Revoke-PACertificate -CertFile mycert.crt -KeyFile mycert.key

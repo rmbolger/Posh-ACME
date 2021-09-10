@@ -39,7 +39,7 @@ Export-PAAccountKey 12345 -OutputFile .\mykey.pem -Force
 
 Exports the specified ACME account's key to the specified file and overwrites it if necessary.
 
-### Example 3: Backup all account keys to the desktop
+### Example 3: Backup account keys to the desktop
 
 ```powershell
 $fldr = Join-Path ([Environment]::GetFolderPath('Desktop')) 'AcmeAccountKeys'

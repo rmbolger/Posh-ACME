@@ -26,7 +26,7 @@ This function allows you to revoke those cached authorizations so that subsequen
 
 ## Examples
 
-### Example 1
+### Example 1: Revoke an Authorization
 
 ```powershell
 Revoke-PAAuthorization https://acme.example.com/authz/1234567
@@ -34,7 +34,7 @@ Revoke-PAAuthorization https://acme.example.com/authz/1234567
 
 Revoke the authorization for the specified URL using the current account.
 
-### Example 2
+### Example 2: Revoke Order Authorizations
 
 ```powershell
 Get-PAOrder | Revoke-PAAuthorization -Force
@@ -42,7 +42,7 @@ Get-PAOrder | Revoke-PAAuthorization -Force
 
 Revoke all authorizations for the current order on the current account without confirmation prompts.
 
-### Example 3
+### Example 3: Revoke All Order Authorizations
 
 ```powershell
 Get-PAOrder -List | Revoke-PAAuthorizations

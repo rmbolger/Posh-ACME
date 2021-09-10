@@ -33,8 +33,7 @@ New-PACertificate [-CSRPath] <String> [-Name <String>] [-Contact <String[]>] [-A
 ```
 
 ## Description
-This is the primary function for this module and is capable executing the entire ACME certificate request process from start to finish without any prerequisite steps.
-However, utilizing the module's other functions can enable more complicated workflows and reduce the number of parameters you need to supply to this function.
+This is the primary function for this module and is capable executing the entire ACME certificate request process from start to finish without any prerequisite steps. However, utilizing the module's other functions can enable more complicated workflows and reduce the number of parameters you need to supply to this function.
 
 ## Examples
 
@@ -234,10 +233,7 @@ Accept wildcard characters: False
 ```
 
 ### -DirectoryUrl
-
-Either the URL to an ACME server's "directory" endpoint or one of the supported short names.
-Currently supported short names include LE_PROD (LetsEncrypt Production v2) and LE_STAGE (LetsEncrypt Staging v2).
-Defaults to 'LE_PROD'.
+Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).
 
 ```yaml
 Type: String
@@ -273,7 +269,7 @@ Accept wildcard characters: False
 ### -PluginArgs
 
 A hashtable containing the plugin arguments to use with the specified Plugin list.
-So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.
+So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.
 
 ```yaml
 Type: Hashtable

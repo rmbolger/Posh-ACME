@@ -36,12 +36,14 @@ Set-PAAccount [[-ID] <String>] [-KeyRollover] [-KeyLength <String>] [-NoSwitch] 
 
 ## Description
 
-This function allows you to switch between ACME accounts for a particular server.
-It also allows you to update the contact information associated with an account, deactivate the account, or replace the account key with a new one.
+This function allows you to switch between ACME accounts on a server. It also allows you to update the contact information associated with an account, deactivate the account, or replace the account key with a new one.
+
+!!! note
+    Some ACME CAs do not support all types of account modifications.
 
 ## Examples
 
-### Example 1
+### Example 1: Switch Accounts
 
 ```powershell
 Set-PAAccount -ID 1234567
@@ -49,7 +51,7 @@ Set-PAAccount -ID 1234567
 
 Switch to the specified account.
 
-### Example 2
+### Example 2: Update Contact Email
 
 ```powershell
 Set-PAAccount -Contact 'user1@example.com','user2@example.com'
@@ -57,23 +59,15 @@ Set-PAAccount -Contact 'user1@example.com','user2@example.com'
 
 Set new contacts for the current account.
 
-### Example 3
+### Example 3: Update All Account Contacts
 
 ```powershell
-Set-PAAccount -ID 1234567 -Contact 'user1@example.com','user2@example.com'
-```
-
-Set new contacts for the specified account.
-
-### Example 4
-
-```powershell
-Get-PAAccount -List | Set-PAAccount -Contact user1@example.com -NoSwitch
+Get-PAAccount -List | Set-PAAccount -Contact 'user1@example.com' -NoSwitch
 ```
 
 Set a new contact for all known accounts without switching from the current.
 
-### Example 5
+### Example 4: Deactivate Account
 
 ```powershell
 Set-PAAccount -Deactivate
@@ -81,7 +75,7 @@ Set-PAAccount -Deactivate
 
 Deactivate the current account.
 
-### Example 6
+### Example 5: New Account Key
 
 ```powershell
 Set-PAAccount -KeyRollover -KeyLength ec-384
@@ -89,13 +83,25 @@ Set-PAAccount -KeyRollover -KeyLength ec-384
 
 Replace the current account key with a new ECC key using P-384 curve.
 
-### Example 7
+### Example 6: New External Account Key
 
 ```powershell
 Set-PAAccount -KeyRollover -KeyFile .\mykey.key
 ```
 
 Replace the current account key with a pre-generated private key.
+
+### Example 7: Alternative Plugin Encryption
+
+```powershell
+# enable
+Set-PAAccount -UseAltPluginEncryption
+
+# disable
+Set-PAAccount -UseAltPluginEncryption:$false
+```
+
+Enable or Disable the alternative AES plugin encryption option for orders on this account.
 
 ## Parameters
 
@@ -147,9 +153,7 @@ Accept wildcard characters: False
 ```
 
 ### -UseAltPluginEncryption
-If specified, the account will be configured to use a randomly generated AES key to encrypt sensitive plugin parameters on disk instead of using the OS's native encryption methods.
-This can be useful if the config is being shared across systems or platforms.
-You can revert to OS native encryption using -UseAltPluginEncryption:$false.
+If specified, the account will be configured to use a randomly generated AES key to encrypt sensitive plugin parameters on disk instead of using the OS's native encryption methods. This can be useful if the config is being shared across systems or platforms. You can revert to OS native encryption using `-UseAltPluginEncryption:$false`.
 
 ```yaml
 Type: SwitchParameter

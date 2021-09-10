@@ -31,7 +31,7 @@ Returns details such as Thumbprint, Subject, Validity, SANs, and file locations 
 
 ## Examples
 
-### Example 1
+### Example 1: Current Certificate
 
 ```powershell
 Get-PACertificate
@@ -39,15 +39,15 @@ Get-PACertificate
 
 Get cached ACME order details for the currently selected order.
 
-### Example 2
+### Example 2: Specific Certificate
 
 ```powershell
-Get-PACertificate site.example.com
+Get-PACertificate example.com
 ```
 
 Get cached ACME order details for the specified domain.
 
-### Example 3
+### Example 3: All Certificates
 
 ```powershell
 Get-PACertificate -List

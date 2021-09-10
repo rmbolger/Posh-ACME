@@ -34,12 +34,15 @@ Submit-Renewal [-AllAccounts] [-Force] [-NoSkipManualDns] [-PluginArgs <Hashtabl
 
 ## Description
 
-This function allows you to renew one more more previously completed certificate orders.
-You can choose to renew a specific order, set of orders, all orders for the current account, or all orders for all accounts.
+Technically, a renewal is just a normal new certificate order using the same parameters as a previous order. This function allows you to easily request a new certificate for any existing order
+
+This function allows you to renew one more more previously complete orders as long as the renewal window has been reached and plugin configuration exists to automate the challenge validation. It will also pick up and attempt to continue pending or previously failed orders. You can choose to renew a specific order, set of orders, all orders for the current account, or all orders for all accounts.
+
+A PACertificate object is returned for every successfully renewed order.
 
 ## Examples
 
-### Example 1
+### Example 1: Renew Current
 
 ```powershell
 Submit-Renewal
@@ -47,15 +50,15 @@ Submit-Renewal
 
 Renew the current order on the current account.
 
-### Example 2
+### Example 2: Force Specific Order
 
 ```powershell
-Submit-Renewal -Force
+Submit-Renewal example.com -Force
 ```
 
-Renew the current order on the current account even if it hasn't reached its suggested renewal window.
+Renew the specified order on the current account even if it hasn't reached its suggested renewal window.
 
-### Example 3
+### Example 3: All Orders
 
 ```powershell
 Submit-Renewal -AllOrders
@@ -63,7 +66,7 @@ Submit-Renewal -AllOrders
 
 Renew all valid orders on the current account that have reached their suggested renewal window.
 
-### Example 4
+### Example 4: All Orders on All Accounts
 
 ```powershell
 Submit-Renewal -AllAccounts
@@ -71,13 +74,14 @@ Submit-Renewal -AllAccounts
 
 Renew all valid orders on all valid accounts that have reached their suggested renewal window.
 
-### Example 5
+### Example 5: Update PluginArgs
 
 ```powershell
-Submit-Renewal site1.example.com -Force
+$pArgs = @{ (Read-Host 'FakeDNS API Token' -AsSecureString) }
+Submit-Renewal -PluginArgs $pArgs
 ```
 
-Renew the order for the specified site regardless of its renewal window.
+Renew the current order using updated plugin args that will also be saved for subsequent renewals.
 
 ## Parameters
 
