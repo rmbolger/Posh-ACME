@@ -1333,26 +1333,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1626,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1739,26 +1755,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1784,15 +1780,16 @@
 <p>First, login to your account and go to the <a href="https://ap.www.namecheap.com/settings/tools">Profile - Tools</a> page. In the "Business &amp; Dev Tools" section, API Access must be turned on. Namecheap seems to require a certain amount of activity (registered domains or money spent) in order to enable API Access. Turning it on requires Namecheap support to authorize and actually enable which can take a couple days.</p>
 <p>Once API Access is turned on, click the <a href="https://ap.www.namecheap.com/settings/tools/apiaccess">Manage</a> button and record your <code>API Key</code> value and your Namecheap username. You will also need to whitelist the public IP address of each machine you will be running Posh-ACME from. <a href="https://whatsmyip.com/">whatsmyip.com</a> can help here if you're behind a NAT router.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>There are two parameter sets you can use with this plugin. One requires being on Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell <a href="https://github.com/PowerShell/PowerShell/issues/1654">bug</a>. The other can be used from any OS.</p>
-<h3 id="windows-or-ps-62">Windows or PS 6.2+<a class="headerlink" href="#windows-or-ps-62" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$ncKey</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="s2">&quot;API Key&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$ncParams</span> <span class="p">=</span> <span class="p">@{</span><span class="n">NCUsername</span><span class="p">=</span><span class="s1">&#39;myusername&#39;</span><span class="p">;</span><span class="n">NCApiKey</span><span class="p">=</span><span class="nv">$ncKey</span><span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Namecheap</span> <span class="n">-PluginArgs</span> <span class="nv">$ncParams</span>
-</code></pre></div>
-<h3 id="any-os">Any OS<a class="headerlink" href="#any-os" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$ncParams</span> <span class="p">=</span> <span class="p">@{</span><span class="n">NCUsername</span><span class="p">=</span><span class="s1">&#39;myusername&#39;</span><span class="p">;</span><span class="n">NCApiKeyInsecure</span><span class="p">=</span><span class="s1">&#39;xxxxxxxx&#39;</span><span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Namecheap</span> <span class="n">-PluginArgs</span> <span class="nv">$ncParams</span>
+<p>The username is used with the <code>NCUsername</code> parameter and the API key is used with the <code>NCApiKey</code> SecureString parameter.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>NCApiKeyInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">NCUsername</span> <span class="p">=</span> <span class="s1">&#39;myusername&#39;</span>
+    <span class="n">NCApiKey</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;API Key&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Namecheap</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 
                   

@@ -1599,8 +1599,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1727,7 +1763,11 @@
                 <h1 id="how-to-use-the-bluecat-dns-plugin">How To Use the BlueCat DNS Plugin<a class="headerlink" href="#how-to-use-the-bluecat-dns-plugin" title="Permanent link">&para;</a></h1>
 <p>This plugin works against the <a href="https://www.bluecatnetworks.com/platform/management/bluecat-address-manager/">BlueCat Address Manager</a> DNS provider. It is assumed that you have already have an account that is an "API User" and have created the DNS zone(s) you will be working against. This plugin has been tested against version 8.1.1.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>Due to the potentially short lifetime of a BAM auth token you must pass a username and password using the keys <code>BlueCatUsername</code> and <code>BlueCatPassword</code> along with the API uri as <code>BlueCatUri</code>. In addition you must also pass the Configuration name as <code>BlueCatConfig</code>, the DNS View name as <code>BlueCatView</code>, and the list of DNS servers to deploy as <code>BlueCatDeployTargets</code>.</p>
+<p>Due to the potentially short lifetime of a BAM auth token you must pass the username and password as a PSCredential object using the <code>BlueCatCredential</code> parameter. You also need to provide the API uri as <code>BlueCatUri</code>. In addition you must also pass the Configuration name as <code>BlueCatConfig</code>, the DNS View name as <code>BlueCatView</code>, and the list of DNS servers to deploy as <code>BlueCatDeployTargets</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>BlueCatUsername</code> and <code>BlueCatPassword</code> parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.</p>
+</div>
 <div class="highlight"><pre><span></span><code><span class="nv">$BlueCatParams</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">BlueCatUsername</span><span class="p">=</span><span class="s1">&#39;xxxxxxxx&#39;</span>
     <span class="n">BlueCatPassword</span><span class="p">=</span><span class="s1">&#39;xxxxxxxx&#39;</span>

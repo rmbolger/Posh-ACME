@@ -1613,8 +1613,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1761,14 +1797,14 @@
 <p>If your acme-dns instance is using the default configuration running with TLS on port 443, the only required parameter for the plugin is <code>ACMEServer</code> which is the hostname of your instance. If you are not using TLS, using an alternate port, or require additional uri path segments, you will need to specify the full URI using <code>ACMEUri</code> instead.</p>
 <p>There is also an optional <code>ACMEAllowFrom</code> parameter which takes an array of strings with networks specified in CIDR notation. If included, these networks will be the only ones that can send TXT record updates to the server for the registrations that get created as part of the certificate request. In some environments, it may make more sense to control network access via standard firewalls.</p>
 <p>This plugin is ultimately using CNAME aliases for DNS challenges under the hood. The first time you use it, you will be prompted to create the necessary CNAME records for each new name included in a cert.</p>
-<div class="highlight"><pre><span></span><code>PS C:\&gt; New-PACertificate example.com -Plugin AcmeDns -PluginArgs @{ACMEServer=&#39;auth.acme-dns.io&#39;}
+<div class="highlight"><pre><span></span><code><span class="gp">PS C:\&gt; </span><span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">AcmeDns</span> <span class="n">-PluginArgs</span> <span class="p">@{</span><span class="n">ACMEServer</span><span class="p">=</span><span class="s1">&#39;auth.acme-dns.io&#39;</span><span class="p">}</span>
 
-Please create the following CNAME records:
-------------------------------------------
-_acme-challenge.example.com -&gt; xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.auth.acme-dns.io
-------------------------------------------
+<span class="go">Please create the following CNAME records:</span>
+<span class="go">------------------------------------------</span>
+<span class="go">_acme-challenge.example.com -&gt; xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.auth.acme-dns.io</span>
+<span class="go">------------------------------------------</span>
 
-Press any key to continue.:
+<span class="go">Press any key to continue.:</span>
 </code></pre></div>
 <p>For each CNAME in the list, you need to create the associated record on your DNS server before continuing. Assuming the records get created properly, the process should complete successfully. Future renewals will complete without additional prompting as long as no new names are added to the cert.</p>
 <h2 id="advanced-pre-registration-and-cname-creation">(Advanced) Pre-registration and CNAME creation<a class="headerlink" href="#advanced-pre-registration-and-cname-creation" title="Permanent link">&para;</a></h2>

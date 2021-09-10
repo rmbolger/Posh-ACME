@@ -1569,8 +1569,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1681,12 +1717,22 @@
                 
                 <h1 id="how-to-use-the-easydns-plugin">How To Use the EasyDNS Plugin<a class="headerlink" href="#how-to-use-the-easydns-plugin" title="Permanent link">&para;</a></h1>
 <p>This plugin works against the <a href="https://www.easydns.com">EasyDNS</a> provider. It is assumed that you have already setup an account with a domain registered.</p>
-<p><strong>Note:</strong> The EasyDNS REST API is currently (August 2019) in BETA status and has been for quite a while. Beta APIs may change prior to release and potentially break this plugin. Please don't rely on it for mission critical things.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The EasyDNS REST API is currently (August 2019) in BETA status and has been for quite a while. Beta APIs may change prior to release and potentially break this plugin. Please don't rely on it for mission critical things.</p>
+</div>
 <h1 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h1>
 <p>Documentation, including signup instructions, is available at http://docs.sandbox.rest.easydns.net/. When you first receive an API Token and Key, they will be for the sandbox environment, not the live environment. In the sandbox environment, publishing and unpublishing challenge records will work but they will not be hosted as public DNS records and thus can't be used to get a certificate. To move to the live environment, you will need to email the API support team with the request.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>The API Token and Key are associated with the <code>EDToken</code> and <code>EDKey</code> parameters. If you are testing against the sandbox environment, you must also include <code>EDUseSandbox = $true</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">EDToken</span><span class="p">=</span><span class="s1">&#39;xxxxxxxxxxxxxxxx&#39;</span><span class="p">;</span> <span class="n">EDKey</span><span class="p">=</span><span class="s1">&#39;xxxxxxxxxxxxxxxx&#39;</span> <span class="p">}</span>
+<p>The API Token is used with the <code>EDToken</code> string parameter. The API Key is used with the <code>EDKeySecure</code> SecureString parameter. If you are testing against the sandbox environment, you must also include <code>EDUseSandbox = $true</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>EDKey</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">EDToken</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxxxxxxxxxx&#39;</span>
+    <span class="n">EDKey</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;Key&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">EasyDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 

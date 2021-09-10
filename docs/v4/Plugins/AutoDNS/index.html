@@ -1606,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1744,11 +1780,13 @@
 <p>In addition to your username and password, you will also need a "Context" value for your account. This is typically a number and varies per provider. The plugin defaults to <code>4</code>. If you are not using InternetX directly, you will also need the XML gateway URL. The plugin defaults to <code>gateway.autodns.com</code>.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p><code>AutoDNSUser</code>, <code>AutoDNSContext</code>, and <code>AutoDNSGateway</code> are specified using regular string values. <code>AutoDNSPassword</code> is a SecureString value.</p>
-<p><em>NOTE: The <code>AutoDNSPasswordInsecure</code> parameter is still supported but should be considered deprecated and may be removed in a future major release.</em></p>
-<div class="highlight"><pre><span></span><code><span class="nv">$pass</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s2">&quot;Password&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>AutoDNSPasswordInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">AutoDNSUser</span> <span class="p">=</span> <span class="s1">&#39;myusername&#39;</span>
-    <span class="n">AutoDNSPassword</span> <span class="p">=</span> <span class="nv">$pass</span>
+    <span class="n">AutoDNSPassword</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s2">&quot;Password&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
     <span class="n">AutoDNSContext</span> <span class="p">=</span> <span class="s1">&#39;4&#39;</span>
     <span class="n">AutoDNSGateway</span> <span class="p">=</span> <span class="s1">&#39;gateway.autodns.com&#39;</span>
 <span class="p">}</span>

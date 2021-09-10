@@ -1606,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1743,16 +1779,16 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>If you haven't done it already, you need to generate API Credentials for your account from the <a href="https://dnsmadeeasy.com/account/info">Account Information</a> page. You should end up with an <code>API Key</code> and <code>Secret Key</code> value. These are what we will use with the plugin.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>With your API key and secret, you'll need to pass them with the <code>DMEKey</code> parameter and either the <code>DMESecret</code> or <code>DMESecretInsecure</code> parameter. <code>DMESecret</code> is a <a href="https://docs.microsoft.com/en-us/dotnet/api/system.security.securestring">SecureString</a> but only currently works properly on Windows. For non-Windows, use <code>DMESecretInsecure</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="c"># On Windows, prompt for the SecureString secret</span>
-<span class="nv">$dmeSecret</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s1">&#39;DME Secret&#39;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$dmeParams</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">DMEKey</span><span class="p">=</span><span class="s1">&#39;xxxxxxxxxxxx&#39;</span><span class="p">;</span> <span class="n">DMESecret</span><span class="p">=</span><span class="nv">$dmeSecret</span> <span class="p">}</span>
-
-<span class="c"># On non-Windows, just use a regular string</span>
-<span class="nv">$dmeParams</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">DMEKey</span><span class="p">=</span><span class="s1">&#39;xxxxxxxxxxxx&#39;</span><span class="p">;</span> <span class="n">DMESecretInsecure</span><span class="p">=</span><span class="s1">&#39;yyyyyyyyyyyy&#39;</span> <span class="p">}</span>
-
-<span class="c"># Request the cert</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">DMEasy</span> <span class="n">-PluginArgs</span> <span class="nv">$dmeParams</span>
+<p>With your API key and secret, you'll need to pass them with the <code>DMEKey</code> parameter and the <code>DMESecret</code> SecureString parameter.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>DMESecuretInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">DMEKey</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxxxxxx&#39;</span>
+    <span class="n">DMESecret</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;DME Secret&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">DMEasy</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 
                   

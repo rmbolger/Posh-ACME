@@ -563,15 +563,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-list-plugins" class="md-nav__link">
+    Example 1: List Plugins
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-show-plugin-parameter-sets" class="md-nav__link">
+    Example 2: Show Plugin Parameter Sets
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-open-plugin-guide" class="md-nav__link">
+    Example 3: Open Plugin Guide
   </a>
   
 </li>
@@ -1729,8 +1736,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1894,15 +1937,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-list-plugins" class="md-nav__link">
+    Example 1: List Plugins
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-show-plugin-parameter-sets" class="md-nav__link">
+    Example 2: Show Plugin Parameter Sets
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-open-plugin-guide" class="md-nav__link">
+    Example 3: Open Plugin Guide
   </a>
   
 </li>
@@ -2004,11 +2054,15 @@
 <p>With no parameters, this function will return a list of built-in validation plugins and their details.</p>
 <p>With a Plugin specified, this function will return that plugin's details, help, or launch the online guide depending on which switches are specified.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
+<h3 id="example-1-list-plugins">Example 1: List Plugins<a class="headerlink" href="#example-1-list-plugins" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-PAPlugin</span>
 </code></pre></div>
 <p>Get the list of available validation plugins</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
+<h3 id="example-2-show-plugin-parameter-sets">Example 2: Show Plugin Parameter Sets<a class="headerlink" href="#example-2-show-plugin-parameter-sets" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">Get-PAPlugin</span> <span class="n">Route53</span> <span class="n">-Params</span>
+</code></pre></div>
+<p>Launch the user's default web browser to the online guide for the specified plugin.</p>
+<h3 id="example-3-open-plugin-guide">Example 3: Open Plugin Guide<a class="headerlink" href="#example-3-open-plugin-guide" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-PAPlugin</span> <span class="n">Route53</span> <span class="n">-Guide</span>
 </code></pre></div>
 <p>Launch the user's default web browser to the online guide for the specified plugin.</p>

@@ -1009,26 +1009,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1626,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1739,26 +1755,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1784,19 +1780,15 @@
 <p>As of November 13, 2020, DNSPod was integrated with Tencent Cloud and slightly changed how their API works. Instead of authenticating with your normal website login credentials, you must create an API token to use instead.</p>
 <p>Login to the console and go to the <a href="https://console.dnspod.com/account/token">Key Management</a> section. Create a new key and make a note of its ID and Token values.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>The API key ID is used with the <code>DNSPodKeyId</code> string parameter. The key token can be used with <code>DNSPodKeyToken</code> as a SecureString or <code>DNSPodKeyTokenInsecure</code> as a standard string. The SecureString version should only be used on Windows or any OS with PowerShell 6.2 or later.</p>
+<p>The API key ID is used with the <code>DNSPodKeyId</code> string parameter. The key token is used with <code>DNSPodKeyToken</code> as a SecureString.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>DNSPodKeyTokenInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
 <p>There is also a <code>DNSPodApiRoot</code> optional parameter that defaults to the API root for dnspod.com. If you are using dnspod.cn, you may specify <code>https://dnsapi.cn</code> instead for this parameter.</p>
-<h3 id="windows-or-ps-62">Windows or PS 6.2+<a class="headerlink" href="#windows-or-ps-62" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">DNSPodKeyID</span> <span class="p">=</span> <span class="s1">&#39;111&#39;</span>
     <span class="n">DNSPodToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;Enter Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">DNSPod</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
-</code></pre></div>
-<h3 id="any-os">Any OS<a class="headerlink" href="#any-os" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">DNSPodKeyID</span> <span class="p">=</span> <span class="s1">&#39;111&#39;</span>
-    <span class="n">DNSPodTokenInsecure</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxxxxxx&#39;</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">DNSPod</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>

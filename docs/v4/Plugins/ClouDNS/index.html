@@ -978,15 +978,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#windows-andor-ps-62-only" class="md-nav__link">
-    Windows and/or PS 6.2+ only
+  <a href="#standard-propagation-delay" class="md-nav__link">
+    Standard Propagation Delay
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
+  <a href="#cloudns-propagation-polling" class="md-nav__link">
+    ClouDNS Propagation Polling
   </a>
   
 </li>
@@ -1639,8 +1639,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1769,15 +1805,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#windows-andor-ps-62-only" class="md-nav__link">
-    Windows and/or PS 6.2+ only
+  <a href="#standard-propagation-delay" class="md-nav__link">
+    Standard Propagation Delay
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
+  <a href="#cloudns-propagation-polling" class="md-nav__link">
+    ClouDNS Propagation Polling
   </a>
   
 </li>
@@ -1806,7 +1842,10 @@
                 
                 <h1 id="how-to-use-the-cloudns-dns-plugin">How To Use the ClouDNS DNS Plugin<a class="headerlink" href="#how-to-use-the-cloudns-dns-plugin" title="Permanent link">&para;</a></h1>
 <p>This plugin works against the <a href="https://www.cloudns.net/aff/id/224075/">ClouDNS</a> provider. It is assumed that you have already setup an account and registered the domains or zones you will be working against.</p>
-<p><strong>Note:</strong> This provider does not allow API Access on its free account tier. If you sign up for a premium plan trial and let it expire, the plugin will stop working unless you upgrade your account to premium again. Their premium plans are very reasonably priced and if you are a new customer, you can help me maintain this plugin by using this <a href="https://www.cloudns.net/aff/id/224075/">affiliate link</a> when you sign up.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This provider does not allow API Access on its free account tier. If you sign up for a premium plan trial and let it expire, the plugin will stop working unless you upgrade your account to premium again. Their premium plans are reasonably priced and if you are a new customer, you can help me maintain this plugin by using this <a href="https://www.cloudns.net/aff/id/224075/">affiliate link</a> when you sign up.</p>
+</div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>First, login to your account and go to the <a href="https://www.cloudns.net/api-settings/">API Settings</a> page. Click the <code>Add new user</code> link and set a password and optional IP whitelist. After saving, make note of the <code>auth-id</code> value for this user.</p>
 <h3 id="optional-sub-users-and-zone-delegation">(Optional) Sub Users and Zone Delegation<a class="headerlink" href="#optional-sub-users-and-zone-delegation" title="Permanent link">&para;</a></h3>
@@ -1814,42 +1853,25 @@
 <p>After the user is created, click the text link in the DNS Zones column for the user that should be something like "0 / X" where X is the number of zone you configured for delegation. This will pop up a dialog box and let you add the specific zones you are delegating.</p>
 <p>Make a note of the <code>sub-auth-id</code> or <code>sub-auth-user</code> name you set for later.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>The <code>CDUserType</code> parameter must be set to either <code>auth-id</code>, <code>sub-auth-id</code>, or <code>sub-auth-user</code> depending on the type of credential you are using. The <code>CDUsername</code> parameter should be set to the ID or username of the user. The password can be set using either <code>CDPassword</code> as a <a href="https://docs.microsoft.com/en-us/dotnet/api/system.security.securestring">SecureString</a> or <code>CDPasswordInsecure</code> as a regular string. The SecureString version can only be used on Windows OSes or any OS with PowerShell 6.2 or later. Non-Windows OSes on PowerShell 6.0-6.1 must use the regular string version due to <a href="https://github.com/PowerShell/PowerShell/issues/1654">this issue</a>.</p>
+<p>The <code>CDUserType</code> parameter must be set to either <code>auth-id</code>, <code>sub-auth-id</code>, or <code>sub-auth-user</code> depending on the type of credential you are using. The <code>CDUsername</code> parameter should be set to the ID or username of the user. The password is set using <code>CDPassword</code> as a SecureString value.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>CDPasswordInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
 <p>By default the plugin assumes Posh-ACME's default DNS propagation delay mechanics will be used. But ClouDNS also supports a polling API to check whether record changes have propagated to the nameservers. To use this instead of the default mechanics, add a <code>CDPollPropagation = $true</code> parameter to your plugin args. By default, it will timeout after 5 minutes if the polling API never returns a success. You can override the timeout value with <code>CDPollTimeout</code> in seconds. When using CDPollPropagation, you should also set Posh-ACME's <code>DNSSleep</code> parameter to 0 unless you are using additional plugins that don't support their own form of propagation polling.</p>
-<h3 id="windows-andor-ps-62-only">Windows and/or PS 6.2+ only<a class="headerlink" href="#windows-andor-ps-62-only" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$secPass</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="s2">&quot;Password&quot;</span> <span class="n">-AsSecureString</span>
-
-<span class="c"># standard Posh-ACME propagation delay</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">CDUserType</span> <span class="p">=</span> <span class="s1">&#39;auth-id&#39;</span><span class="p">;</span>
-    <span class="n">CDUsername</span> <span class="p">=</span> <span class="s1">&#39;12345&#39;</span><span class="p">;</span>
-    <span class="n">CDPassword</span> <span class="p">=</span> <span class="nv">$secPass</span>
+<h3 id="standard-propagation-delay">Standard Propagation Delay<a class="headerlink" href="#standard-propagation-delay" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">CDUserType</span> <span class="p">=</span> <span class="s1">&#39;auth-id&#39;</span>
+    <span class="n">CDUsername</span> <span class="p">=</span> <span class="s1">&#39;12345&#39;</span>
+    <span class="n">CDPassword</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Password&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">ClouDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
-
-<span class="c"># ClouDNS propagation polling</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">CDUserType</span> <span class="p">=</span> <span class="s1">&#39;auth-id&#39;</span><span class="p">;</span>
-    <span class="n">CDUsername</span> <span class="p">=</span> <span class="s1">&#39;12345&#39;</span><span class="p">;</span>
-    <span class="n">CDPassword</span> <span class="p">=</span> <span class="nv">$secPass</span><span class="p">;</span>
-    <span class="n">CDPollPropagation</span> <span class="p">=</span> <span class="nv">$true</span>
-<span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">ClouDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span> <span class="n">-DnsSleep</span> <span class="n">0</span>
 </code></pre></div>
-<h3 id="any-os">Any OS<a class="headerlink" href="#any-os" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c"># standard Posh-ACME propagation delay</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">CDUserType</span> <span class="p">=</span> <span class="s1">&#39;auth-id&#39;</span><span class="p">;</span>
-    <span class="n">CDUsername</span> <span class="p">=</span> <span class="s1">&#39;12345&#39;</span><span class="p">;</span>
-    <span class="n">CDPasswordInsecure</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx&#39;</span>
-<span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">ClouDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
-
-<span class="c"># ClouDNS propagation polling</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">CDUserType</span> <span class="p">=</span> <span class="s1">&#39;auth-id&#39;</span><span class="p">;</span>
-    <span class="n">CDUsername</span> <span class="p">=</span> <span class="s1">&#39;12345&#39;</span><span class="p">;</span>
-    <span class="n">CDPasswordInsecure</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx&#39;</span><span class="p">;</span>
+<h3 id="cloudns-propagation-polling">ClouDNS Propagation Polling<a class="headerlink" href="#cloudns-propagation-polling" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">CDUserType</span> <span class="p">=</span> <span class="s1">&#39;auth-id&#39;</span>
+    <span class="n">CDUsername</span> <span class="p">=</span> <span class="s1">&#39;12345&#39;</span>
+    <span class="n">CDPassword</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Password&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
     <span class="n">CDPollPropagation</span> <span class="p">=</span> <span class="nv">$true</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">ClouDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span> <span class="n">-DnsSleep</span> <span class="n">0</span>

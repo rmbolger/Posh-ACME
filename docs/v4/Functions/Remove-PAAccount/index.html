@@ -649,15 +649,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-remove-account" class="md-nav__link">
+    Example 1: Remove Account
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-deactivate-and-remove" class="md-nav__link">
+    Example 2: Deactivate and Remove
   </a>
   
 </li>
@@ -1702,8 +1702,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1833,15 +1869,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-remove-account" class="md-nav__link">
+    Example 1: Remove Account
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-deactivate-and-remove" class="md-nav__link">
+    Example 2: Deactivate and Remove
   </a>
   
 </li>
@@ -1937,15 +1973,13 @@
 <div class="highlight"><pre><span></span><code><span class="nb">Remove-PAAccount</span> <span class="p">[</span><span class="n">-ID</span><span class="p">]</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;</span> <span class="p">[</span><span class="n">-Deactivate</span><span class="p">]</span> <span class="p">[</span><span class="n">-Force</span><span class="p">]</span> <span class="p">[</span><span class="n">-WhatIf</span><span class="p">]</span> <span class="p">[</span><span class="n">-Confirm</span><span class="p">]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
-<p>This function removes the ACME account from the local profile which also removes any associated orders and certificates.
-It will not remove or cleanup copies of certificates that have been exported or installed elsewhere.
-It will not deactivate the account on the ACME server unless <code>-Deactivate</code> is specified. But you won't be able to re-use the account on another system without an export of the account's key such as the one generated with <code>Export-PAAccountKey</code>.</p>
+<p>This function removes the ACME account from the local profile which also removes any associated orders and certificates. It will not remove or cleanup copies of certificates that have been exported or installed elsewhere. It will not deactivate the account on the ACME server unless <code>-Deactivate</code> is specified. But you won't be able to re-use the account on another system without an export of the account's key such as the one generated with <code>Export-PAAccountKey</code>.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
+<h3 id="example-1-remove-account">Example 1: Remove Account<a class="headerlink" href="#example-1-remove-account" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Remove-PAAccount</span> <span class="n">12345</span>
 </code></pre></div>
 <p>Remove the specified account without deactivation.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
+<h3 id="example-2-deactivate-and-remove">Example 2: Deactivate and Remove<a class="headerlink" href="#example-2-deactivate-and-remove" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-PAAccount</span> <span class="p">|</span> <span class="nb">Remove-PAAccount</span> <span class="n">-Deactivate</span> <span class="n">-Force</span>
 </code></pre></div>
 <p>Remove the current account after deactivating it and skip confirmation prompts.</p>

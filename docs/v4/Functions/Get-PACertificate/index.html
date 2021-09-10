@@ -525,22 +525,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-current-certificate" class="md-nav__link">
+    Example 1: Current Certificate
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-specific-certificate" class="md-nav__link">
+    Example 2: Specific Certificate
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-all-certificates" class="md-nav__link">
+    Example 3: All Certificates
   </a>
   
 </li>
@@ -1735,8 +1735,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1886,22 +1922,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-current-certificate" class="md-nav__link">
+    Example 1: Current Certificate
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-specific-certificate" class="md-nav__link">
+    Example 2: Specific Certificate
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-all-certificates" class="md-nav__link">
+    Example 3: All Certificates
   </a>
   
 </li>
@@ -2009,15 +2045,15 @@
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
 <p>Returns details such as Thumbprint, Subject, Validity, SANs, and file locations for one or more ACME certificates previously created.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
+<h3 id="example-1-current-certificate">Example 1: Current Certificate<a class="headerlink" href="#example-1-current-certificate" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-PACertificate</span>
 </code></pre></div>
 <p>Get cached ACME order details for the currently selected order.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Get-PACertificate</span> <span class="n">site</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">com</span>
+<h3 id="example-2-specific-certificate">Example 2: Specific Certificate<a class="headerlink" href="#example-2-specific-certificate" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">Get-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span>
 </code></pre></div>
 <p>Get cached ACME order details for the specified domain.</p>
-<h3 id="example-3">Example 3<a class="headerlink" href="#example-3" title="Permanent link">&para;</a></h3>
+<h3 id="example-3-all-certificates">Example 3: All Certificates<a class="headerlink" href="#example-3-all-certificates" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-PACertificate</span> <span class="n">-List</span>
 </code></pre></div>
 <p>Get all cached ACME order details.</p>

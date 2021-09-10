@@ -757,22 +757,29 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-server-short-name" class="md-nav__link">
+    Example 1: Server Short Name
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-server-url" class="md-nav__link">
+    Example 2: Server URL
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-disable-telemetry" class="md-nav__link">
+    Example 3: Disable Telemetry
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-4-enable-telemetry" class="md-nav__link">
+    Example 4: Enable Telemetry
   </a>
   
 </li>
@@ -1723,8 +1730,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1854,22 +1897,29 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-server-short-name" class="md-nav__link">
+    Example 1: Server Short Name
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-server-url" class="md-nav__link">
+    Example 2: Server URL
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-disable-telemetry" class="md-nav__link">
+    Example 3: Disable Telemetry
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-4-enable-telemetry" class="md-nav__link">
+    Example 4: Enable Telemetry
   </a>
   
 </li>
@@ -1982,22 +2032,25 @@
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
 <p>Use this function to set the current ACME server or change a server's configuration settings.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
+<h3 id="example-1-server-short-name">Example 1: Server Short Name<a class="headerlink" href="#example-1-server-short-name" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Set-PAServer</span> <span class="n">LE_PROD</span>
 </code></pre></div>
 <p>Switch to the LetsEncrypt production server using the short name.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
+<h3 id="example-2-server-url">Example 2: Server URL<a class="headerlink" href="#example-2-server-url" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Set-PAServer</span> <span class="n">-DirectoryUrl</span> <span class="n">https</span><span class="err">:</span><span class="p">//</span><span class="n">myacme</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">directory</span>
 </code></pre></div>
 <p>Switch to the specified ACME server using the directory URL.</p>
-<h3 id="example-3">Example 3<a class="headerlink" href="#example-3" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="p">(</span><span class="nb">Get-PAServer</span> <span class="n">-List</span><span class="p">)[</span><span class="n">0</span><span class="p">]</span> <span class="p">|</span> <span class="nb">Set-PAServer</span>
+<h3 id="example-3-disable-telemetry">Example 3: Disable Telemetry<a class="headerlink" href="#example-3-disable-telemetry" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">Set-PAServer</span> <span class="n">-DisableTelemetry</span>
 </code></pre></div>
-<p>Switch to the first ACME server returned by "Get-PAServer -List"</p>
+<p>Disable Posh-ACME telemetry collection for activity on the current ACME server.</p>
+<h3 id="example-4-enable-telemetry">Example 4: Enable Telemetry<a class="headerlink" href="#example-4-enable-telemetry" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">Set-PAServer</span> <span class="n">-DisableTelemetry</span><span class="err">:</span><span class="nv">$false</span>
+</code></pre></div>
+<p>Enable Posh-ACME telemetry collection for activity on the current ACME server.</p>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <h3 id="-directoryurl">-DirectoryUrl<a class="headerlink" href="#-directoryurl" title="Permanent link">&para;</a></h3>
-<p>Either the URL to an ACME server's "directory" endpoint or one of the supported short names.
-Currently supported short names include LE_PROD (LetsEncrypt Production v2), LE_STAGE (LetsEncrypt Staging v2), BUYPASS_PROD (BuyPass.com Production), and BUYPASS_TEST (BuyPass.com Testing).</p>
+<p>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">String</span>
 <span class="nt">Parameter Sets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">(All)</span>
 <span class="nt">Aliases</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">location</span>

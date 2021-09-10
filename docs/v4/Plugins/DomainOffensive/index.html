@@ -1057,26 +1057,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-andor-ps-62-only-secure-string" class="md-nav__link">
-    Windows and/or PS 6.2+ only (secure string)
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os-default-string" class="md-nav__link">
-    Any OS (default string)
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1626,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1739,26 +1755,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-andor-ps-62-only-secure-string" class="md-nav__link">
-    Windows and/or PS 6.2+ only (secure string)
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os-default-string" class="md-nav__link">
-    Any OS (default string)
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1783,17 +1779,13 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>We need to retrieve an secret API token for the account that will be used to update DNS records. Further information can ba found at the (german) <a href="https://www.do.de/wiki/LetsEncrypt_-_Entwickler">developer docs</a>.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>Your personal API token is specified using the <code>DomOffToken</code> or <code>DomOffTokenInsecure</code> parameter.</p>
-<h3 id="windows-andor-ps-62-only-secure-string">Windows and/or PS 6.2+ only (secure string)<a class="headerlink" href="#windows-andor-ps-62-only-secure-string" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$secToken</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s2">&quot;Token&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">DomOffToken</span> <span class="p">=</span> <span class="nv">$secToken</span>
-<span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">DomainOffensive</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
-</code></pre></div>
-<h3 id="any-os-default-string">Any OS (default string)<a class="headerlink" href="#any-os-default-string" title="Permanent link">&para;</a></h3>
+<p>Your personal API token is specified using the <code>DomOffToken</code> SecureString parameter.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>DomOffTokenInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">DomOffTokenInsecure</span> <span class="p">=</span> <span class="s1">&#39;token-value&#39;</span>
+    <span class="n">DomOffToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s2">&quot;Token&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">DomainOffensive</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>

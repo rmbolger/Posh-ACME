@@ -1569,8 +1569,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1681,14 +1717,17 @@
                 
                 <h1 id="how-to-use-the-easyname-plugin">How To Use the Easyname Plugin<a class="headerlink" href="#how-to-use-the-easyname-plugin" title="Permanent link">&para;</a></h1>
 <p>This plugin works against the <a href="https://www.easyname.com">Easyname</a> hosting provider. It is assumed that you have already setup an account and have at least one domain registered.</p>
-<blockquote>
-<p><strong><em>NOTE:</em></strong> As of April 2021, Easyname's REST API is extremely limited in functionality and doesn't allow for DNS record manipulation. So this plugin utilizes web scraping to accomplish the task. That also means it is more likely to break if the site owner ever changes their HTML markup. So be wary of depending on this for critical projects.</p>
-</blockquote>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>As of April 2021, Easyname's REST API is extremely limited in functionality and doesn't allow for DNS record manipulation. So this plugin utilizes web scraping to accomplish the task. That also means it is more likely to break if the site owner ever changes their HTML markup. So be wary of depending on this for critical projects.</p>
+</div>
 <h1 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h1>
 <p>Because the plugin uses web scraping to manipulate DNS records, all that is needed is your standard login credentials which should include an email address and password.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p>Your login credentials should be used with the <code>EasynameCredential</code> parameter which is a PSCredential object.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">EasynameCredential</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span> <span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">EasynameCredential</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span>
+<span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Easyname</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 

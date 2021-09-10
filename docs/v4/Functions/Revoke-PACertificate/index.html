@@ -717,29 +717,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-revoke-order-cert" class="md-nav__link">
+    Example 1: Revoke Order Cert
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-revoke-with-reason" class="md-nav__link">
+    Example 2: Revoke with Reason
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-4" class="md-nav__link">
-    Example 4
+  <a href="#example-3-revoke-external-cert" class="md-nav__link">
+    Example 3: Revoke External Cert
   </a>
   
 </li>
@@ -1757,8 +1750,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1908,29 +1937,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-revoke-order-cert" class="md-nav__link">
+    Example 1: Revoke Order Cert
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-revoke-with-reason" class="md-nav__link">
+    Example 2: Revoke with Reason
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-4" class="md-nav__link">
-    Example 4
+  <a href="#example-3-revoke-external-cert" class="md-nav__link">
+    Example 3: Revoke External Cert
   </a>
   
 </li>
@@ -2054,20 +2076,20 @@
 </code></pre></div>
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
 <p>Any certificate created with the current ACME account can be revoked. If you need to revoke a certificate not created with the current account, you either need to specify both <code>CertFile</code> and <code>KeyFile</code>. If you don't have the private key, you will need to go through the authorization process on this account for all names in the certificate and just specify <code>CertFile</code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Revoking a certificate is discouraged unless the private key is known to have been compromised. Revoking certs that simply aren't being used anymore is a waste of CA resources.</p>
+</div>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Revoke-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span>
-</code></pre></div>
-<p>Revokes the certificate for the specified domain.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
+<h3 id="example-1-revoke-order-cert">Example 1: Revoke Order Cert<a class="headerlink" href="#example-1-revoke-order-cert" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-PAOrder</span> <span class="p">|</span> <span class="nb">Revoke-PACertificate</span> <span class="n">-Force</span>
 </code></pre></div>
 <p>Revokes the certificate associated with the current order and skips the confirmation prompt.</p>
-<h3 id="example-3">Example 3<a class="headerlink" href="#example-3" title="Permanent link">&para;</a></h3>
+<h3 id="example-2-revoke-with-reason">Example 2: Revoke with Reason<a class="headerlink" href="#example-2-revoke-with-reason" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-PACertificate</span> <span class="p">|</span> <span class="nb">Revoke-PACertificate</span> <span class="n">-Reason</span> <span class="n">keyCompromise</span>
 </code></pre></div>
 <p>Revokes the current certificate with the specified reason.</p>
-<h3 id="example-4">Example 4<a class="headerlink" href="#example-4" title="Permanent link">&para;</a></h3>
+<h3 id="example-3-revoke-external-cert">Example 3: Revoke External Cert<a class="headerlink" href="#example-3-revoke-external-cert" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Revoke-PACertificate</span> <span class="n">-CertFile</span> <span class="n">mycert</span><span class="p">.</span><span class="n">crt</span> <span class="n">-KeyFile</span> <span class="n">mycert</span><span class="p">.</span><span class="n">key</span>
 </code></pre></div>
 <p>Revokes the specified cert using the specified private key.</p>

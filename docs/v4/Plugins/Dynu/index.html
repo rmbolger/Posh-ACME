@@ -1613,8 +1613,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1754,13 +1790,23 @@
                 
                 <h1 id="how-to-use-the-dynu-dns-plugin">How To Use the Dynu DNS Plugin<a class="headerlink" href="#how-to-use-the-dynu-dns-plugin" title="Permanent link">&para;</a></h1>
 <p>This plugin works against the <a href="https://www.dynu.com">Dynu</a> DNS provider. It is assumed that you have already setup an account configured at least one DDNS domain to work against.</p>
-<p><strong>Note for Free Plan users</strong>: Dynu imposes <a href="https://www.dynu.com/en-US/Membership">some limitations</a> on non-paid accounts. The most significant is a limit of 4 DNS records per domain which effectively means you can only create a cert with up to 4 names in it from the same domain (and only if you have no other DNS records counting against your limit). Additionally, if you are using one of Dynu's provided domain names, their official policy (as of 03/2019) is that you can't create TXT records until the domain is 30 days old. <em>Though currently, that limitation only seems to apply to the web GUI.</em></p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Dynu imposes <a href="https://www.dynu.com/en-US/Membership">some limitations</a> on non-paid accounts. The most significant is a limit of 4 DNS records per domain which effectively means you can only create a cert with up to 4 names in it from the same domain (and only if you have no other DNS records counting against your limit). Additionally, if you are using one of Dynu's provided domain names, their official policy (as of 03/2019) is that you can't create TXT records until the domain is 30 days old. <em>Though currently, that limitation only seems to apply to the web GUI.</em></p>
+</div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>You will need to retrieve the Client ID and Secret that will be used to update DNS records. You can find these on your <a href="https://www.dynu.com/en-US/ControlPanel/APICredentials">Dynu Control Panel</a>.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>You will need the account's Client ID and Secret to be set as <code>DynuClientID</code> and <code>DynuSecret</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$DynuParams</span> <span class="p">=</span> <span class="p">@{</span><span class="n">DynuClientID</span><span class="p">=</span><span class="s1">&#39;xxxxxxxx&#39;</span><span class="p">;</span> <span class="n">DynuSecret</span><span class="p">=</span><span class="s1">&#39;xxxxxxxx&#39;</span><span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Dynu</span> <span class="n">-PluginArgs</span> <span class="nv">$DynuParams</span>
+<p>The Client ID is used with the <code>DynuClientID</code> string parameter and the secret is used with the <code>DynuSecretSecure</code> SecureString parameter.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>DynuSecret</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">DynuClientID</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx&#39;</span>
+    <span class="n">DynuSecretSecure</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;Secret&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Dynu</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
 <h2 id="quota-exception-error">"Quota Exception" error<a class="headerlink" href="#quota-exception-error" title="Permanent link">&para;</a></h2>
 <p>If you get this message it likely means you're on a free account and you've added too many names from the same domain to a certificate. See the note at the top of this guide for details.</p>

@@ -1321,26 +1321,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1626,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1739,26 +1755,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1783,15 +1779,14 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>For authentication against the NameSilo API, an API key is required. Open the <a href="https://www.namesilo.com/account/api-manager">api manager</a> page to generate the key. Read the note and understand that you can only retrieve the generated key once. If you have previously generated a key, use that one, otherwise by generating a new key you will invalidate the old key. Accept the API terms of use and click generate. Save the generated key in a secure location.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>You will need to provide the API key as a SecureString value to <code>NameSiloKey</code> or a standard string value to <code>NameSiloKeyInsecure</code>. The SecureString version can only be used from Windows or any OS running PowerShell 6.2 or later.</p>
-<p>Note that NameSilo only updates DNS records every 15 minutes. So you should also provide a <code>-DnsSleep</code> parameter of 900 or more.</p>
-<h3 id="windows-or-ps-62">Windows or PS 6.2+<a class="headerlink" href="#windows-or-ps-62" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$key</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="s2">&quot;NameSilo Key&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">NameSiloKey</span> <span class="p">=</span> <span class="nv">$key</span> <span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">NameSilo</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span> <span class="n">-DnsSleep</span> <span class="n">900</span>
-</code></pre></div>
-<h3 id="any-os">Any OS<a class="headerlink" href="#any-os" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">NameSiloKeyInsecure</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxxxxxxxxxxxxxxxxxxx&#39;</span> <span class="p">}</span>
+<p>The API key is used with the <code>NameSiloKey</code> SecureString parameter. NameSilo only updates DNS records every 15 minutes. So you should also provide a <code>-DnsSleep</code> parameter of 900 or more.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>NameSiloKeyInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">NameSiloKey</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;NameSilo Key&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">NameSilo</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span> <span class="n">-DnsSleep</span> <span class="n">900</span>
 </code></pre></div>
                 

@@ -1525,6 +1525,26 @@
     Using the Plugin
   </a>
   
+    <nav class="md-nav" aria-label="Using the Plugin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-zonomi" class="md-nav__link">
+    Using Zonomi
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-rimuhosting" class="md-nav__link">
+    Using RimuHosting
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1606,8 +1626,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1719,6 +1775,26 @@
     Using the Plugin
   </a>
   
+    <nav class="md-nav" aria-label="Using the Plugin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-zonomi" class="md-nav__link">
+    Using Zonomi
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-rimuhosting" class="md-nav__link">
+    Using RimuHosting
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1740,17 +1816,28 @@
                 
                 <h1 id="how-to-use-the-zonomi-dns-plugin">How To Use the Zonomi DNS Plugin<a class="headerlink" href="#how-to-use-the-zonomi-dns-plugin" title="Permanent link">&para;</a></h1>
 <p>This plugin works against the <a href="https://zonomi.com">Zonomi DNS</a> provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.</p>
-<p><em>NOTE: The API Zonomi uses is also used by other providers such as <a href="https://rimuhosting.com/">RimuHosting</a>. This plugin is compatible with those as well.</em></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The API Zonomi uses is also used by other providers such as <a href="https://rimuhosting.com/">RimuHosting</a>. This plugin is compatible with those as well.</p>
+</div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>Generate an API key from the <a href="https://zonomi.com/app/cp/apikeys.jsp">API Keys</a> page using the "DNS" type. Click the the green plus icon to generate a new key if one is not already displayed.</p>
 <p>If you use a different compatible provider, there should be an equivalent control panel page for API Keys available.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>For Zonomi users, all you need to supply is the <code>ZonomiApiKey</code> parameter.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Zonomi</span> <span class="n">-PluginArgs</span> <span class="p">@{</span><span class="n">ZonomiApiKey</span><span class="p">=</span><span class="s1">&#39;xxxxxxxxxxxxxxxx&#39;</span><span class="p">}</span>
-</code></pre></div>
-<p>If you use a different compatible provider, you must also supply the <code>ZonomiApiUrl</code> parameter. Here is an example using RimuHosting.</p>
+<p>The API key is used with the <code>ZonomiKey</code> SecureString parameter. Users on other Zonomi compatible providers will also need to supply the API URL for that provider to the <code>ZonomiApiUrl</code> parameter.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>ZonomiApiKey</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
+<h3 id="using-zonomi">Using Zonomi<a class="headerlink" href="#using-zonomi" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">ZonomiApiKey</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxxxxxxxxxx&#39;</span>
+    <span class="n">ZonomiKey</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;API Key&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Zonomi</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
+</code></pre></div>
+<h3 id="using-rimuhosting">Using RimuHosting<a class="headerlink" href="#using-rimuhosting" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">ZonomiKey</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;API Key&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
     <span class="n">ZonomiApiUrl</span> <span class="p">=</span> <span class="s1">&#39;https://rimuhosting.com/dns/dyndns.jsp&#39;</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Zonomi</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>

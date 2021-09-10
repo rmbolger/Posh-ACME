@@ -1189,26 +1189,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1626,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1739,26 +1755,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1783,14 +1779,14 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>You will need to generate an API Token if you haven't already done so. Go to <a href="https://dns.hetzner.com/settings/api-token">Manage API tokens</a> after logging in to the <a href="https://dns.hetzner.comn">DNS Console</a>. Give the token a name and click <code>Create access token</code>. Make a note of the token value as you'll need it later and won't be able to retrieve it after this point.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>You will need to provide the API Token as a SecureString value to <code>HetznerToken</code> or a standard string value to <code>HetznerTokenInsecure</code>. The SecureString version can only be used from Windows or any OS running PowerShell 6.2 or later.</p>
-<h3 id="windows-or-ps-62">Windows or PS 6.2+<a class="headerlink" href="#windows-or-ps-62" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$token</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="s2">&quot;Hetzner Token&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span><span class="n">HetznerToken</span><span class="p">=</span><span class="nv">$token</span><span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Hetzner</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
-</code></pre></div>
-<h3 id="any-os">Any OS<a class="headerlink" href="#any-os" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span><span class="n">HetznerTokenInsecure</span><span class="p">=</span><span class="s1">&#39;xxxxxxxxxxxxxxxxxxxxxxxxx&#39;</span><span class="p">}</span>
+<p>You will need to provide the API Token as a SecureString value to <code>HetznerToken</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>HetznerTokenInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">HetznerToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;Hetzner Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Hetzner</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 

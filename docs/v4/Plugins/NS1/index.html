@@ -1297,26 +1297,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows" class="md-nav__link">
-    Windows
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#non-windows" class="md-nav__link">
-    Non-Windows
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1626,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1739,26 +1755,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows" class="md-nav__link">
-    Windows
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#non-windows" class="md-nav__link">
-    Non-Windows
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1783,13 +1779,15 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>First, go to the <a href="https://my.nsone.net/#/account/settings">API Keys</a> page and click <code>Add Key</code>. Give it an app name like <code>Posh-ACME</code> and uncheck all of the permissions except the ones in the DNS section. You can also optionally add IP whitelist entries to further protect the use of the key. When finished, click <code>Create Key</code> and then unhide and record the key value for later.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>The API key will be used with the <code>NS1Key</code> or <code>NS1KeyInsecure</code> parameter. The "Insecure" version must be used on non-Windows OSes due to a bug in PowerShell Core relating to SecureString variables.</p>
-<h3 id="windows">Windows<a class="headerlink" href="#windows" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$ns1Key</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s2">&quot;API Key&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">NS1</span> <span class="n">-PluginArgs</span> <span class="p">@{</span><span class="n">NS1Key</span><span class="p">=</span><span class="nv">$ns1Key</span><span class="p">}</span>
-</code></pre></div>
-<h3 id="non-windows">Non-Windows<a class="headerlink" href="#non-windows" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">NS1</span> <span class="n">-PluginArgs</span> <span class="p">@{</span><span class="n">NS1KeyInsecure</span><span class="p">=</span><span class="s1">&#39;xxxxxxxxxxxx&#39;</span><span class="p">}</span>
+<p>The API key will be used with the <code>NS1Key</code> SecureString parameter.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>NS1KeyInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">NS1Key</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s2">&quot;API Key&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">NS1</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 
                   

@@ -1357,26 +1357,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1626,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1739,26 +1755,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1785,15 +1781,16 @@ that you have already set up an account and created the DNS zone(s) that you are
 <p><a href="https://app.pointhq.com/verify">Login</a> to your account. Go to <code>Account</code> and copy
 your API key. Click the key icon if you need to generate a new key.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>There are two parameter sets you can use with this plugin. The first takes <code>PDUser</code> as the email address associated with your account and <code>PDKey</code> for your API key as a SecureString object. But it can only be used from Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell <a href="https://github.com/PowerShell/PowerShell/issues/1654">bug</a>. The second parameter set also takes <code>PDUser</code> but uses <code>PDKeyInsecure</code> for the API key as a standard String object.</p>
-<h3 id="windows-or-ps-62">Windows or PS 6.2+<a class="headerlink" href="#windows-or-ps-62" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$token</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="s2">&quot;PointDNS Key&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$pdParams</span> <span class="p">=</span> <span class="p">@{</span><span class="n">PDUser</span><span class="p">=</span><span class="s1">&#39;email@example.com&#39;</span><span class="p">;</span><span class="n">PDKey</span><span class="p">=</span><span class="nv">$token</span><span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">PointDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pdParams</span>
-</code></pre></div>
-<h3 id="any-os">Any OS<a class="headerlink" href="#any-os" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$pdParams</span> <span class="p">=</span> <span class="p">@{</span><span class="n">PDUser</span><span class="p">=</span><span class="s1">&#39;email@example.com&#39;</span><span class="p">;</span><span class="n">PDKeyInsecure</span><span class="p">=</span><span class="s1">&#39;xxxxxxxxxxxx&#39;</span><span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">PointDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pdParams</span>
+<p>The <code>PDUser</code> parameter should be set to the email address associatedw ith your account. The API key is used with the <code>PDKey</code> SecureString parameter.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>PDKeyInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">PDUser</span> <span class="p">=</span> <span class="s1">&#39;email@example.com&#39;</span>
+    <span class="n">PDKey</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;API Key&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">PointDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 
                   

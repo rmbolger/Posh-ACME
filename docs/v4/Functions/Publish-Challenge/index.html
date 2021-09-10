@@ -637,15 +637,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-publish-a-challenge" class="md-nav__link">
+    Example 1: Publish a Challenge
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-dns-order-challenges" class="md-nav__link">
+    Example 2: DNS Order Challenges
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-http-order-challenges" class="md-nav__link">
+    Example 3: HTTP Order Challenges
   </a>
   
 </li>
@@ -1709,8 +1716,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1840,15 +1883,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-publish-a-challenge" class="md-nav__link">
+    Example 1: Publish a Challenge
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-dns-order-challenges" class="md-nav__link">
+    Example 2: DNS Order Challenges
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-http-order-challenges" class="md-nav__link">
+    Example 3: HTTP Order Challenges
   </a>
   
 </li>
@@ -1957,17 +2007,52 @@
 If multiple challenges are being published, make all <code>Publish-Challenge</code> calls first.
 Then, <code>Save-Challenge</code> once to commit them all.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$auths</span> <span class="p">=</span> <span class="nb">Get-PAOrder</span> <span class="p">|</span> <span class="nb">Get-PAAuthorization</span>
-<span class="nb">Publish-Challenge</span> <span class="nv">$auths</span><span class="p">[</span><span class="n">0</span><span class="p">].</span><span class="n">DNSId</span> <span class="p">(</span><span class="nb">Get-PAAccount</span><span class="p">)</span> <span class="nv">$auths</span><span class="p">[</span><span class="n">0</span><span class="p">].</span><span class="n">DNS01Token</span> <span class="n">Manual</span> <span class="p">@{}</span>
+<h3 id="example-1-publish-a-challenge">Example 1: Publish a Challenge<a class="headerlink" href="#example-1-publish-a-challenge" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">$splat</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">Domain</span> <span class="p">=</span> <span class="s1">&#39;example.com&#39;</span>
+    <span class="n">Account</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-PAAccount</span><span class="p">)</span>
+    <span class="n">Token</span> <span class="p">=</span> <span class="s1">&#39;fake-token&#39;</span>
+    <span class="n">Plugin</span> <span class="p">=</span> <span class="s1">&#39;FakeDNS&#39;</span>
+    <span class="n">PluginArgs</span> <span class="p">=</span> <span class="p">@{</span>
+        <span class="n">FDToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;FakeDNS API Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="nb">Publish-Challenge</span> <span class="nv">@splat</span>
+
+<span class="c"># if plugin requires saving</span>
+<span class="nb">Save-Challenge</span> <span class="n">-Plugin</span> <span class="nv">$splat</span><span class="p">.</span><span class="n">Plugin</span> <span class="n">-PluginArgs</span> <span class="nv">$splat</span><span class="p">.</span><span class="n">PluginArgs</span>
 </code></pre></div>
-<p>Publish a DNS challenge for the first authorization in the current order using the Manual DNS plugin.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span><span class="n">Param1</span><span class="p">=</span><span class="s1">&#39;asdf&#39;</span><span class="p">;</span><span class="n">Param2</span><span class="p">=</span><span class="n">1234</span><span class="p">}</span>
-<span class="nv">$acct</span> <span class="p">=</span> <span class="nb">Get-PAAccount</span>
-<span class="nb">Publish-Challenge</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="nv">$acct</span> <span class="n">MyPlugin</span> <span class="nv">$pArgs</span> <span class="n">-Token</span> <span class="n">faketoken</span>
+<p>Publish a single DNS challenge.</p>
+<h3 id="example-2-dns-order-challenges">Example 2: DNS Order Challenges<a class="headerlink" href="#example-2-dns-order-challenges" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">$splat</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">Account</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-PAAccount</span><span class="p">)</span>
+    <span class="n">Plugin</span> <span class="p">=</span> <span class="s1">&#39;FakeDNS&#39;</span>
+    <span class="n">PluginArgs</span> <span class="p">=</span> <span class="p">@{</span>
+        <span class="n">FDToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;FakeDNS API Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="nb">Get-PAOrder</span> <span class="p">|</span> <span class="nb">Get-PAAuthorization</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
+    <span class="nb">Publish-Challenge</span> <span class="n">-Domain</span> <span class="nv">$_</span><span class="p">.</span><span class="n">DNSId</span> <span class="n">-Token</span> <span class="nv">$_</span><span class="p">.</span><span class="n">DNS01Token</span> <span class="nv">@splat</span>
+<span class="p">}</span>
+
+<span class="c"># if plugin requires saving</span>
+<span class="nb">Save-Challenge</span> <span class="n">-Plugin</span> <span class="nv">$splat</span><span class="p">.</span><span class="n">Plugin</span> <span class="n">-PluginArgs</span> <span class="nv">$splat</span><span class="p">.</span><span class="n">PluginArgs</span>
 </code></pre></div>
-<p>Publish a challenge for example.com using a fictitious plugin and arguments.</p>
+<p>Publish DNS challenges for all authorizations in the current order.</p>
+<h3 id="example-3-http-order-challenges">Example 3: HTTP Order Challenges<a class="headerlink" href="#example-3-http-order-challenges" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">$splat</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">Account</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-PAAccount</span><span class="p">)</span>
+    <span class="n">Plugin</span> <span class="p">=</span> <span class="s1">&#39;WebSelfHost&#39;</span>
+    <span class="n">PluginArgs</span> <span class="p">=</span> <span class="p">@{}</span>
+<span class="p">}</span>
+<span class="nb">Get-PAOrder</span> <span class="p">|</span> <span class="nb">Get-PAAuthorization</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
+    <span class="nb">Publish-Challenge</span> <span class="n">-Domain</span> <span class="nv">$_</span><span class="p">.</span><span class="n">DNSId</span> <span class="n">-Token</span> <span class="nv">$_</span><span class="p">.</span><span class="n">HTTP01Token</span> <span class="nv">@splat</span>
+<span class="p">}</span>
+
+<span class="c"># if plugin requires saving</span>
+<span class="nb">Save-Challenge</span> <span class="n">-Plugin</span> <span class="nv">$splat</span><span class="p">.</span><span class="n">Plugin</span> <span class="n">-PluginArgs</span> <span class="nv">$splat</span><span class="p">.</span><span class="n">PluginArgs</span>
+</code></pre></div>
+<p>Publish HTTP challenges for all authorizations in the current order.</p>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <h3 id="-domain">-Domain<a class="headerlink" href="#-domain" title="Permanent link">&para;</a></h3>
 <p>The domain name that the challenge will be published for.
@@ -2021,7 +2106,7 @@ Use Get-PAPlugin to display a list of available plugins.</p>
 </code></pre></div>
 <h3 id="-pluginargs">-PluginArgs<a class="headerlink" href="#-pluginargs" title="Permanent link">&para;</a></h3>
 <p>A hashtable containing the plugin arguments to use with the specified plugin.
-So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.</p>
+So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as <code>@{MyText='text';MyNumber=1234}</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Hashtable</span>
 <span class="nt">Parameter Sets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">(All)</span>
 <span class="nt">Aliases</span><span class="p">:</span>
@@ -2034,7 +2119,7 @@ So if a plugin has a -MyText string and -MyNumber integer parameter, you could s
 </code></pre></div>
 <h3 id="-dnsalias">-DnsAlias<a class="headerlink" href="#-dnsalias" title="Permanent link">&para;</a></h3>
 <p>When using DNS Alias support with DNS validation plugins, the alias domain that the TXT record will be written to.
-This should be the complete FQDN including the '_acme-challenge.' prefix if necessary.
+This should be the complete FQDN including the <code>_acme-challenge.</code> prefix if necessary.
 This field is ignored for non-DNS validation plugins.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">String</span>
 <span class="nt">Parameter Sets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">(All)</span>

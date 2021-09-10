@@ -1021,26 +1021,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows" class="md-nav__link">
-    Windows
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#non-windows" class="md-nav__link">
-    Non-Windows
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1626,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1739,26 +1755,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows" class="md-nav__link">
-    Windows
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#non-windows" class="md-nav__link">
-    Non-Windows
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1780,17 +1776,22 @@
                 
                 <h1 id="how-to-use-the-dnsimple-dns-plugin">How To Use the DNSimple DNS Plugin<a class="headerlink" href="#how-to-use-the-dnsimple-dns-plugin" title="Permanent link">&para;</a></h1>
 <p>This plugin works against the <a href="https://dnsimple.com/r/c9b80a2f227e49">DNSimple</a> DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.</p>
-<p><em>NOTE: The link above is an affiliate link which reduces my out of pocket cost to maintain this plugin. I'd be most grateful if you use it when signing up for a new account.</em></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The link above is an affiliate link which reduces my out of pocket cost to maintain this plugin. I'd be most grateful if you use it when signing up for a new account.</p>
+</div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>First, <a href="https://dnsimple.com/login">login</a> to your account and then go to <code>Account</code> - <code>API tokens</code> and click <code>New access token</code>. After giving it a name, it will show you the token string. Be sure to save it as you can't look it up if you forget later. You can only generate a new one. Also, make sure it is an <strong>account</strong> token, not a user token.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>With your token value, you'll need to set either the <code>DSToken</code> or <code>DSTokenInsecure</code> parameter. <code>DSToken</code> is a <a href="https://docs.microsoft.com/en-us/dotnet/api/system.security.securestring">SecureString</a> but only currently works properly on Windows. For non-Windows, use <code>DSTokenInsecure</code>.</p>
-<h3 id="windows">Windows<a class="headerlink" href="#windows" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$token</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="s2">&quot;DNSimple Token&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">DNSimple</span> <span class="n">-PluginArgs</span> <span class="p">@{</span><span class="n">DSToken</span><span class="p">=</span><span class="nv">$token</span><span class="p">}</span>
-</code></pre></div>
-<h3 id="non-windows">Non-Windows<a class="headerlink" href="#non-windows" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">DNSimple</span> <span class="n">-PluginArgs</span> <span class="p">@{</span><span class="n">DSTokenInsecure</span><span class="p">=</span><span class="s1">&#39;xxxxxxxxxxxx&#39;</span><span class="p">}</span>
+<p>With your token value, you'll need to set the <code>DSToken</code> SecureString parameter.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>DSTokenInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">DSToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;DNSimple Token&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">DNSimple</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 
                   

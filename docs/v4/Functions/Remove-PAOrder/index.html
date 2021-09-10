@@ -661,15 +661,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-remove-order" class="md-nav__link">
+    Example 1: Remove Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-revoke-and-remove-all" class="md-nav__link">
+    Example 2: Revoke and Remove All
   </a>
   
 </li>
@@ -1709,8 +1709,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1840,15 +1876,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-remove-order" class="md-nav__link">
+    Example 1: Remove Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-revoke-and-remove-all" class="md-nav__link">
+    Example 2: Revoke and Remove All
   </a>
   
 </li>
@@ -1952,16 +1988,17 @@
  <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
-<p>This function removes the order from the local profile which also removes any associated certificate/key.
-It will not remove or cleanup copies of the certificate that have been exported or installed elsewhere.
-It will not revoke the certificate unless <code>-RevokeCert</code> is specified.
-The ACME server may retain a reference to the order until it decides to delete it.</p>
+<p>This function removes the order from the local profile which also removes any associated certificate/key. It will not remove or cleanup copies of the certificate that have been exported or installed elsewhere. It will not revoke the certificate unless <code>-RevokeCert</code> is specified. The ACME server may retain a reference to the order until it decides to delete it.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Revoking a certificate is discouraged unless the private key is known to have been compromised. Revoking certs that simply aren't being used anymore is a waste of CA resources.</p>
+</div>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Remove-PAOrder</span> <span class="n">site1</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">com</span>
+<h3 id="example-1-remove-order">Example 1: Remove Order<a class="headerlink" href="#example-1-remove-order" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">Remove-PAOrder</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span>
 </code></pre></div>
 <p>Remove the specified order without revoking the certificate.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
+<h3 id="example-2-revoke-and-remove-all">Example 2: Revoke and Remove All<a class="headerlink" href="#example-2-revoke-and-remove-all" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-PAOrder</span> <span class="n">-List</span> <span class="p">|</span> <span class="nb">Remove-PAOrder</span> <span class="n">-RevokeCert</span> <span class="n">-Force</span>
 </code></pre></div>
 <p>Remove all orders associated with the current account, revoke all certificates, and skip confirmation prompts.</p>
@@ -2045,8 +2082,8 @@ The cmdlet is not run.</p>
 <h3 id="commonparameters">CommonParameters<a class="headerlink" href="#commonparameters" title="Permanent link">&para;</a></h3>
 <p>This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see <a href="http://go.microsoft.com/fwlink/?LinkID=113216">about_CommonParameters</a>.</p>
 <h2 id="related-links">Related Links<a class="headerlink" href="#related-links" title="Permanent link">&para;</a></h2>
-<p><a href="../Get-PAOrder/">Get-PAOrder</a></p>
 <p><a href="../New-PAOrder/">New-PAOrder</a></p>
+<p><a href="../Revoke-PACertificate/">Revoke-PACertificate</a></p>
                 
                   
                 

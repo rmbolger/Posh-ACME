@@ -1606,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1743,12 +1779,15 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>First, go to the <a href="https://www.name.com/account/settings/api">Account API Settings</a> page and create a new API token for your account. Make a note of both the token value and the username associated with the token. If the username is blank immediately following the token creation, try refreshing the page.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>With the username and token values from earlier, set the <code>NameComUsername</code> and <code>NameComToken</code> parameters and then pass them to <code>New-PACertificate</code> as follows:</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$pargs</span> <span class="p">=</span> <span class="p">@{</span><span class="n">NameComUserName</span><span class="p">=</span><span class="s1">&#39;username&#39;</span><span class="p">;</span> <span class="n">NameComToken</span><span class="p">=</span><span class="s1">&#39;XXXXXXXXXX&#39;</span><span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">NameCom</span> <span class="n">-PluginArgs</span> <span class="nv">$pargs</span>
-</code></pre></div>
-<p>If you are using name.com's API testing environment, you'll also need to include the <code>NameComUseTestEnv</code> switch in your plugin arguments like this:</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$pargs</span> <span class="p">=</span> <span class="p">@{</span><span class="n">NameComUserName</span><span class="p">=</span><span class="s1">&#39;username&#39;</span><span class="p">;</span> <span class="n">NameComToken</span><span class="p">=</span><span class="s1">&#39;XXXXXXXXXX&#39;</span><span class="p">;</span> <span class="n">NameComUseTestEnv</span><span class="p">=</span><span class="nv">$true</span><span class="p">}</span>
+<p>The username is used with the <code>NameComUsername</code> parameter and the token is used with the <code>NameComTokenSecure</code> SecureString parameter. If you are using name.com's API testing environment, you'll also need to include <code>NameComUseTestEnv=$true</code> in your plugin arguments.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>NameComeToken</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pargs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">NameComUsername</span> <span class="p">=</span> <span class="s1">&#39;username&#39;</span>
+    <span class="n">NameComTokenSecure</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">NameCom</span> <span class="n">-PluginArgs</span> <span class="nv">$pargs</span>
 </code></pre></div>
                 

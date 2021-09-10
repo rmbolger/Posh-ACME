@@ -1261,26 +1261,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows" class="md-nav__link">
-    Windows
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#non-windows" class="md-nav__link">
-    Non-Windows
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1626,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1739,26 +1755,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows" class="md-nav__link">
-    Windows
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#non-windows" class="md-nav__link">
-    Non-Windows
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1780,20 +1776,24 @@
                 
                 <h1 id="how-to-use-the-linode-dns-plugin">How To Use the Linode DNS Plugin<a class="headerlink" href="#how-to-use-the-linode-dns-plugin" title="Permanent link">&para;</a></h1>
 <p>This plugin works against the <a href="https://www.linode.com/?r=4dfd67cf6f1e384ce626f2943620186344bb2ccf">Linode</a> DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.</p>
-<p><em>NOTE: The link above is an affiliate link which reduces my out of pocket cost to maintain this plugin. I'd be most grateful if you use it when signing up for a new account.</em></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The link above is an affiliate link which reduces my out of pocket cost to maintain this plugin. I'd be most grateful if you use it when signing up for a new account.</p>
+</div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>This plugin works against v4 of the Linode API which is not compatible with "legacy" pre-paid accounts. In order to use it and generate the appropriate API Token, your account must be a newer style "hourly billed" account which it should automatically be if you created it after late 2014.</p>
 <p>Login to your account and go to the <a href="https://cloud.linode.com/profile/tokens">API Tokens</a> section of your profile. Generate a Personal Access Token and give it Read/Write access to Domains. Record the value to use later. You can't retrieve it if you forget it. You can only delete and re-create.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>The only required plugin parameter is <code>LIToken</code> or <code>LITokenInsecure</code>. The "Insecure" version must be used on non-Windows OSes due to a bug in PowerShell Core relating to SecureString variables.</p>
+<p>The token you created is used with the <code>LIToken</code> SecureString parameter.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>LITokenInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
 <p>Linode also has an unusually long delay between when a record is set and when it propagates to their public name servers. There's a note at the bottom of the DNS Manager web GUI that reads, <em>"Changes made to a master zone will take effect in our nameservers every quarter hour."</em> So you need to set <code>DnsSleep</code> parameter in <code>New-PACertificate</code> to at least 15 minutes. But in testing, 17 minutes (1020 seconds) seemed to be the minimum to reliably satisfy the challenges.</p>
-<h3 id="windows">Windows<a class="headerlink" href="#windows" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$token</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s1">&#39;Token:&#39;</span> <span class="n">-AsSecureString</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Linode</span> <span class="n">-PluginArgs</span> <span class="p">@{</span><span class="n">LIToken</span><span class="p">=</span><span class="nv">$token</span><span class="p">}</span> <span class="n">-DnsSleep</span> <span class="n">1020</span>
-</code></pre></div>
-<h3 id="non-windows">Non-Windows<a class="headerlink" href="#non-windows" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$token</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxxxxxxxxxx&#39;</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Linode</span> <span class="n">-PluginArgs</span> <span class="p">@{</span><span class="n">LITokenInsecure</span><span class="p">=</span><span class="nv">$token</span><span class="p">}</span> <span class="n">-DnsSleep</span> <span class="n">1020</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">LIToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s1">&#39;Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Linode</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span> <span class="n">-DnsSleep</span> <span class="n">1020</span>
 </code></pre></div>
                 
                   

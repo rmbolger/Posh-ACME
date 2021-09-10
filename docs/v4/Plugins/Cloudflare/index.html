@@ -1646,8 +1646,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1843,15 +1879,22 @@
 <li>Copy the key value for later.</li>
 </ul>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>If you're using the newer API Token method, you'll use it with the <code>CFToken</code> SecureString parameter. If you're using the Global API Key method, you'll need to use the <code>CFAuthEmail</code> and <code>CFAuthKey</code> parameters with the account's email address and previously retrieved Global API Key.</p>
-<p><em>NOTE: The <code>CFTokenInsecure</code> parameter is still supported but should be considered deprecated and may be removed in a future major release.</em></p>
+<p>If you're using the newer API Token method, you'll use it with the <code>CFToken</code> SecureString parameter. If you're using the Global API Key method, you'll need to use the <code>CFAuthEmail</code> and <code>CFAuthKeySecure</code> parameters with the account's email address as a string and previously retrieved Global API Key as a SecureString.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>CFTokenInsecure</code> and <code>CFAuthKey</code> parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to one of the Secure parameter sets.</p>
+</div>
 <h3 id="api-token_1">API Token<a class="headerlink" href="#api-token_1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$secToken</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="n">-AsSecureString</span> <span class="n">-Prompt</span> <span class="s1">&#39;API Token&#39;</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">CFToken</span> <span class="p">=</span> <span class="nv">$secToken</span> <span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">CFToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;API Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Cloudflare</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
 <h3 id="global-api-key_1">Global API Key<a class="headerlink" href="#global-api-key_1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">CFAuthEmail</span><span class="p">=</span><span class="s1">&#39;xxxx@example.com&#39;</span><span class="p">;</span> <span class="n">CFAuthKey</span><span class="p">=</span><span class="s1">&#39;xxxxxxxx&#39;</span> <span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">CFAuthEmail</span> <span class="p">=</span> <span class="s1">&#39;xxxx@example.com&#39;</span>
+    <span class="n">CFAuthKeySecure</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;Global API Key&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Cloudflare</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 

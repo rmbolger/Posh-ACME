@@ -609,36 +609,36 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-basic-account" class="md-nav__link">
+    Example 1: Basic Account
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-no-contact-and-alternate-keylength" class="md-nav__link">
+    Example 2: No Contact and Alternate KeyLength
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-pre-generated-key" class="md-nav__link">
+    Example 3: Pre-Generated Key
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-4" class="md-nav__link">
-    Example 4
+  <a href="#example-4-external-account-binding" class="md-nav__link">
+    Example 4: External Account Binding
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-5" class="md-nav__link">
-    Example 5
+  <a href="#example-5-alternative-plugin-encryption" class="md-nav__link">
+    Example 5: Alternative Plugin Encryption
   </a>
   
 </li>
@@ -1826,8 +1826,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1977,36 +2013,36 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-basic-account" class="md-nav__link">
+    Example 1: Basic Account
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-no-contact-and-alternate-keylength" class="md-nav__link">
+    Example 2: No Contact and Alternate KeyLength
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-pre-generated-key" class="md-nav__link">
+    Example 3: Pre-Generated Key
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-4" class="md-nav__link">
-    Example 4
+  <a href="#example-4-external-account-binding" class="md-nav__link">
+    Example 4: External Account Binding
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-5" class="md-nav__link">
-    Example 5
+  <a href="#example-5-alternative-plugin-encryption" class="md-nav__link">
+    Example 5: Alternative Plugin Encryption
   </a>
   
 </li>
@@ -2195,26 +2231,28 @@
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
 <p>All certificate requests require a valid account on an ACME server. An contact email address is not required for Let's Encrypt, but other CAs may require it. Without an email address, certificate expiration notices will not be sent. The account KeyLength is a personal preference and does not relate to the KeyLength of the certificates.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">New-PAAccount</span> <span class="n">-AcceptTOS</span>
-</code></pre></div>
-<p>Create a new account with no contact email and the default key length.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">New-PAAccount</span> <span class="n">-Contact</span> <span class="n">user1</span><span class="nv">@example</span><span class="p">.</span><span class="n">com</span> <span class="n">-AcceptTOS</span>
+<h3 id="example-1-basic-account">Example 1: Basic Account<a class="headerlink" href="#example-1-basic-account" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">New-PAAccount</span> <span class="n">-Contact</span> <span class="s1">&#39;me@example.com&#39;</span> <span class="n">-AcceptTOS</span>
 </code></pre></div>
 <p>Create a new account with the specified email and the default key length.</p>
-<h3 id="example-3">Example 3<a class="headerlink" href="#example-3" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">New-PAAccount</span> <span class="n">-Contact</span> <span class="n">user1</span><span class="nv">@example</span><span class="p">.</span><span class="n">com</span> <span class="n">-KeyLength</span> <span class="n">4096</span> <span class="n">-AcceptTOS</span>
-</code></pre></div>
-<p>Create a new account with the specified email and an RSA 4096 bit key.</p>
-<h3 id="example-4">Example 4<a class="headerlink" href="#example-4" title="Permanent link">&para;</a></h3>
+<h3 id="example-2-no-contact-and-alternate-keylength">Example 2: No Contact and Alternate KeyLength<a class="headerlink" href="#example-2-no-contact-and-alternate-keylength" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">New-PAAccount</span> <span class="n">-KeyLength</span> <span class="s1">&#39;ec-384&#39;</span> <span class="n">-AcceptTOS</span> <span class="n">-Force</span>
 </code></pre></div>
 <p>Create a new account with no contact email and an ECC key using P-384 curve that ignores any confirmations.</p>
-<h3 id="example-5">Example 5<a class="headerlink" href="#example-5" title="Permanent link">&para;</a></h3>
+<h3 id="example-3-pre-generated-key">Example 3: Pre-Generated Key<a class="headerlink" href="#example-3-pre-generated-key" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">New-PAAccount</span> <span class="n">-KeyFile</span> <span class="p">.\</span><span class="n">mykey</span><span class="p">.</span><span class="n">key</span> <span class="n">-AcceptTOS</span>
 </code></pre></div>
 <p>Create a new account using a pre-generated private key file.</p>
+<h3 id="example-4-external-account-binding">Example 4: External Account Binding<a class="headerlink" href="#example-4-external-account-binding" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">$eabKID</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx&#39;</span>
+<span class="nv">$eabHMAC</span> <span class="p">=</span> <span class="s1">&#39;yyyyyyyy&#39;</span>
+<span class="nb">New-PAAccount</span> <span class="n">-ExtAcctKID</span> <span class="nv">$eabKID</span> <span class="n">-ExtAcctHMACKey</span> <span class="nv">$eabHMAC</span> <span class="n">-Contact</span> <span class="s1">&#39;me@example.com&#39;</span> <span class="n">-AcceptTOS</span>
+</code></pre></div>
+<p>Create a new account using External Account Binding (EAB) values provided by your ACME CA.</p>
+<h3 id="example-5-alternative-plugin-encryption">Example 5: Alternative Plugin Encryption<a class="headerlink" href="#example-5-alternative-plugin-encryption" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">New-PAAccount</span> <span class="n">-UseAltPluginEncryption</span> <span class="n">-Contact</span> <span class="s1">&#39;me@example.com&#39;</span> <span class="n">-AcceptTOS</span>
+</code></pre></div>
+<p>Create a new account configured for alternative plugin encryption which uses an OS-portable AES key instead of the OS-native libraries.</p>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <h3 id="-contact">-Contact<a class="headerlink" href="#-contact" title="Permanent link">&para;</a></h3>
 <p>One or more email addresses to associate with this account.
@@ -2349,7 +2387,7 @@ Defaults to 'HS256'.</p>
 <h3 id="-usealtpluginencryption">-UseAltPluginEncryption<a class="headerlink" href="#-usealtpluginencryption" title="Permanent link">&para;</a></h3>
 <p>If specified, the account will be configured to use a randomly generated AES key to encrypt sensitive plugin parameters on disk instead of using the OS's native encryption methods.
 This can be useful if the config is being shared across systems or platforms.
-You can revert to OS native encryption using -UseAltPluginEncryption:$false.</p>
+You can revert to OS native encryption using <code>Set-PAAccount -UseAltPluginEncryption:$false</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SwitchParameter</span>
 <span class="nt">Parameter Sets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">(All)</span>
 <span class="nt">Aliases</span><span class="p">:</span>

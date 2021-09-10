@@ -1069,26 +1069,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-andor-ps-62-only" class="md-nav__link">
-    Windows and/or PS 6.2+ only
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1626,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1739,26 +1755,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-andor-ps-62-only" class="md-nav__link">
-    Windows and/or PS 6.2+ only
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1780,22 +1776,21 @@
                 
                 <h1 id="how-to-use-the-domeneshop-dns-plugin">How To Use the Domeneshop DNS Plugin<a class="headerlink" href="#how-to-use-the-domeneshop-dns-plugin" title="Permanent link">&para;</a></h1>
 <p>This plugin works against the <a href="https://domene.shop/">Domeneshop</a> DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.</p>
-<p><strong>Note:</strong> The API is currently (May 2019) a beta ("version 0"). The interface may change before it is released and those changes may break this plugin. Domeneshop recommends not relying on the API for mission critical services until it has been released.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The API is currently (May 2019) a beta ("version 0"). The interface may change before it is released and those changes may break this plugin. Domeneshop recommends not relying on the API for mission critical services until it has been released.</p>
+</div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>We need to retrieve an API token and secret for the account that will be used to update DNS records. <a href="https://www.domeneshop.no/admin?view=api">Login</a> to Domeneshop using the account that will be used to update DNS.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>The API token is specified using the <code>DomeneshopToken</code> parameter. The secret is specified either with <code>DomeneshopSecret</code> as a <a href="https://docs.microsoft.com/en-us/dotnet/api/system.security.securestring">SecureString</a> or <code>DomeneshopSecretInsecure</code> as a regular string. The SecureString version can only be used on Windows OSes or any OS with PowerShell 6.2 or later. Non-Windows OSes on PowerShell 6.0-6.1 must use the regular string version due to <a href="https://github.com/PowerShell/PowerShell/issues/1654">this issue</a>.</p>
-<h3 id="windows-andor-ps-62-only">Windows and/or PS 6.2+ only<a class="headerlink" href="#windows-andor-ps-62-only" title="Permanent link">&para;</a></h3>
+<p>The API token is specified using the <code>DomeneshopToken</code> string parameter. The secret is specified with the <code>DomeneshopSecret</code> SecureString parameter.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>DomeneshopSecretInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">DomeneshopToken</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxxxxxx&#39;</span>
     <span class="n">DomeneshopSecret</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Secret&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Domeneshop</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
-</code></pre></div>
-<h3 id="any-os">Any OS<a class="headerlink" href="#any-os" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">DomeneshopToken</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxxxxxx&#39;</span>
-    <span class="n">DomeneshopSecretInsecure</span> <span class="p">=</span> <span class="s1">&#39;yyyyyyyyyyyy&#39;</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Domeneshop</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>

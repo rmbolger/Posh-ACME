@@ -1606,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1740,7 +1776,10 @@
                 
                 <h1 id="how-to-use-the-docean-dns-plugin">How To Use the DOcean DNS Plugin<a class="headerlink" href="#how-to-use-the-docean-dns-plugin" title="Permanent link">&para;</a></h1>
 <p>This plugin works against the <a href="https://m.do.co/c/d515942ef761">Digital Ocean</a> DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.</p>
-<p><em>NOTE: The link above is an affiliate link which reduces my out of pocket cost to maintain this plugin. I'd be most grateful if you use it when signing up for a new account.</em></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The link above is an affiliate link which reduces my out of pocket cost to maintain this plugin. I'd be most grateful if you use it when signing up for a new account.</p>
+</div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>You need to create a <a href="https://cloud.digitalocean.com/settings/api/tokens">Personal Access Token</a> so the plugin can access Digital Ocean's API.</p>
 <ul>
@@ -1751,8 +1790,15 @@
 <li>Copy the resulting token string somewhere safe. There's no way to retrieve it once you leave this page. You would have to delete the old one and create a new one.</li>
 </ul>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>The only plugin argument you need is the API token created earlier.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">DOcean</span> <span class="n">-PluginArgs</span> <span class="p">@{</span><span class="n">DOToken</span><span class="p">=</span><span class="s1">&#39;xxxxxxxxxxxxxxxx&#39;</span><span class="p">}</span>
+<p>Use the <code>DOTokenSecure</code> SecureString parameter with the token value you created earlier.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>DOToken</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">DOTokenSecure</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;Access Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">DOcean</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 
                   

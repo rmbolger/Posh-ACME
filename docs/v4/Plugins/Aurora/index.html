@@ -1606,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1745,9 +1781,8 @@
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p>The API Key and Secret are passed as the username and password in a PSCredential object to the <code>AuroraCredential</code> parameter.</p>
 <p>There is also an optional <code>AuroraApi</code> parameter for the hostname provided in API URL which defaults to <code>api.auroradns.eu</code>. So if your API URL is the same, you can ignore that parameter.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$cred</span> <span class="p">=</span> <span class="nb">Get-Credential</span> <span class="n">-Message</span> <span class="s2">&quot;Aurora Username:Key / Password:Secret&quot;</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">AuroraCredential</span> <span class="p">=</span> <span class="nv">$cred</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">AuroraCredential</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">))</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Aurora</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>

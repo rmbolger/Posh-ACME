@@ -1640,8 +1640,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1808,15 +1844,24 @@
                 
                 <h1 id="how-to-use-the-windows-dns-plugin">How To Use the Windows DNS Plugin<a class="headerlink" href="#how-to-use-the-windows-dns-plugin" title="Permanent link">&para;</a></h1>
 <p>This plugin works against the Microsoft Windows DNS server. It doesn't matter whether it's hosted on-premises or in the cloud, physical or virtual, domain joined or standalone. As long as it can be managed via the standard <a href="https://docs.microsoft.com/en-us/powershell/module/dnsserver">DnsServer PowerShell module</a>, it should be supported. This does <strong>not</strong> work against <a href="https://azure.microsoft.com/en-us/services/dns/">Azure DNS</a>. Use the Azure plugin for that.</p>
-<p><strong>The DnsServer module is not available on Windows versions prior to Windows 8 and Windows Server 2012. So this plugin will only work on those OSes or newer. Using Zone Scopes requires the Windows 10 or Windows Server 2016 version of the module or newer.</strong></p>
-<p><strong>This plugin currently does not work on non-Windows OSes in PowerShell Core. On Windows, it requires at least PowerShell 7.</strong></p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The DnsServer module is not available on Windows versions prior to Windows 8 and Windows Server 2012. So this plugin will only work on those OSes or newer. Using Zone Scopes requires the Windows 10 or Windows Server 2016 version of the module or newer.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This plugin currently does not work on non-Windows OSes in PowerShell Core. On Windows, it requires at least PowerShell 7.</p>
+</div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <h3 id="dnsserver-module">DnsServer module<a class="headerlink" href="#dnsserver-module" title="Permanent link">&para;</a></h3>
 <p>The client machine running Posh-ACME must have the <code>DnsServer</code> PowerShell module installed. On Windows Server OSes, this can be installed from Server Manager or via PowerShell as follows.</p>
 <div class="highlight"><pre><span></span><code><span class="nb">Install-WindowsFeature</span> <span class="n">RSAT-DNS-Server</span>
 </code></pre></div>
 <p>On Windows client OSes, you will need to download and install the appropriate Remote Server Administration Tools (RSAT) for your OS. The installers are historically OS specific. Here are links for <a href="https://www.microsoft.com/en-us/download/details.aspx?id=45520">Windows 10</a>, <a href="https://www.microsoft.com/en-us/download/details.aspx?id=39296">Windows 8.1</a>, <a href="https://www.microsoft.com/en-us/download/details.aspx?id=28972">Windows 8</a>, and <a href="https://www.microsoft.com/en-us/download/details.aspx?id=7887">Windows 7</a>.</p>
-<p><em>Warning: The vast majority of testing for this plugin was done on Windows 10 and Windows Server 2016. Please submit <a href="https://github.com/rmbolger/Posh-ACME/issues">issues</a> if you run into problems on downlevel OSes.</em></p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The vast majority of testing for this plugin was done on Windows 10 and Windows Server 2016. Please submit <a href="https://github.com/rmbolger/Posh-ACME/issues">issues</a> if you run into problems on downlevel OSes.</p>
+</div>
 <h3 id="psremoting-and-new-cimsession">PSRemoting and New-CimSession<a class="headerlink" href="#psremoting-and-new-cimsession" title="Permanent link">&para;</a></h3>
 <p>The DnsServer module relies on PowerShell remoting via <code>New-CimSession</code> to establish a remote connection to the DNS server. Depending on your environment, PSRemoting might already be enabled. If not, you need to make sure it is working between your client and DNS server before trying to use Posh-ACME.</p>
 <p>Typically, the easiest environment to get things working has both client and server domain joined to the same Active Directory or different domains where the client's domain credentials are trusted by the server's AD. In this case, you can try the following to test from the client machine.</p>
@@ -1839,13 +1884,20 @@
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Windows</span> <span class="n">-PluginArgs</span> <span class="p">@{</span><span class="n">WinServer</span><span class="p">=</span><span class="s1">&#39;dns1.example.com&#39;</span><span class="p">}</span>
 
 <span class="c"># standalone environment, adding credentials and SSL flag</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span><span class="n">WinServer</span><span class="p">=</span><span class="s1">&#39;dns1.example.com&#39;</span><span class="p">;</span> <span class="n">WinCred</span><span class="p">=(</span><span class="nb">Get-Credential</span><span class="p">);</span> <span class="n">WinUseSSL</span><span class="p">=</span><span class="nv">$true</span><span class="p">}</span>
+<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">WinServer</span> <span class="p">=</span> <span class="s1">&#39;dns1.example.com&#39;</span>
+    <span class="n">WinCred</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span>
+    <span class="n">WinUseSSL</span><span class="p">=</span><span class="nv">$true</span>
+<span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Windows</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
 <h2 id="advanced-features">Advanced Features<a class="headerlink" href="#advanced-features" title="Permanent link">&para;</a></h2>
 <p>Zone Scopes were added in the Windows Server 2016 version of the DNS server and are now supported in the plugin with the <code>WinZoneScope</code> parameter. This is useful if you have a split-brain DNS setup and your external zone is in the non-default scope. Using the parameter requires that your client be running the Windows 10/2016 version of the DnsServer module.</p>
 <div class="highlight"><pre><span></span><code><span class="c"># using zone scope in domain joined environment</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span><span class="n">WinServer</span><span class="p">=</span><span class="s1">&#39;dns1.example.com&#39;</span><span class="p">;</span> <span class="n">WinZoneScope</span><span class="p">=</span><span class="s1">&#39;external&#39;</span><span class="p">}</span>
+<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">WinServer</span> <span class="p">=</span> <span class="s1">&#39;dns1.example.com&#39;</span>
+    <span class="n">WinZoneScope</span> <span class="p">=</span> <span class="s1">&#39;external&#39;</span>
+<span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Windows</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
 <p>VirtualizationInstances are not currently supported. If you use that features and need it supported, please submit an <a href="https://github.com/rmbolger/Posh-ACME/issues">issue</a> describing your environment.</p>

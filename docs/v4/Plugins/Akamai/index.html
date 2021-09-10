@@ -1626,8 +1626,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1788,12 +1824,14 @@
 <p>Akamai is one of the few DNS providers with an API to check whether changes have propagated to the authoritative nameservers for your zones and this plugin will use it automatically. What this means is that if all of the names in your certificate are using the Akamai plugin, you may want to decrease the default <code>DNSSleep</code> parameter from 120 seconds down to something small like 10 seconds because the changes should be propagated by the time the sleep timer would normally start. The examples below will demonstrate.</p>
 <h3 id="explicit-api-options">Explicit API Options<a class="headerlink" href="#explicit-api-options" title="Permanent link">&para;</a></h3>
 <p>Specify API values individually using <code>AKHost</code>, <code>AKClientToken</code>, and <code>AKAccessToken</code> as string values and <code>AKClientSecret</code> as a SecureString value</p>
-<p><em>NOTE: The <code>AKClientSecretInsecure</code> parameter is still supported but should be considered deprecated and may be removed in a future major release.</em></p>
-<div class="highlight"><pre><span></span><code><span class="nv">$secret</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="s2">&quot;Client Secret&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>AKClientSecretInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">AKHost</span> <span class="p">=</span> <span class="s1">&#39;myhost.akamaiapis.net&#39;</span>
     <span class="n">AKClientToken</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxxxxxx&#39;</span>
-    <span class="n">AKClientSecret</span> <span class="p">=</span> <span class="nv">$secret</span>
+    <span class="n">AKClientSecret</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Client Secret&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
     <span class="n">AKAccessToken</span> <span class="p">=</span> <span class="s1">&#39;yyyyyyyyyyyy&#39;</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Akamai</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span> <span class="n">-DNSSleep</span> <span class="n">10</span>
@@ -1804,7 +1842,11 @@
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Akamai</span> <span class="n">-PluginArgs</span> <span class="p">@{</span><span class="n">AKUseEdgeRC</span><span class="p">=</span><span class="nv">$true</span><span class="p">}</span> <span class="n">-DNSSleep</span> <span class="n">10</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c"># alternate location and section</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span><span class="n">AKUseEdgeRC</span><span class="p">=</span><span class="nv">$true</span><span class="p">;</span> <span class="n">AKEdgeRCFile</span><span class="p">=</span><span class="s1">&#39;C:\ProgramData\.edgerc&#39;</span><span class="p">;</span> <span class="n">AKEdgeRCSection</span><span class="p">=</span><span class="s1">&#39;poshacme&#39;</span> <span class="p">}</span>
+<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">AKUseEdgeRC</span><span class="p">=</span> <span class="nv">$true</span>
+    <span class="n">AKEdgeRCFile</span> <span class="p">=</span> <span class="s1">&#39;C:\ProgramData\.edgerc&#39;</span>
+    <span class="n">AKEdgeRCSection</span> <span class="p">=</span> <span class="s1">&#39;poshacme&#39;</span>
+<span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Akamai</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span> <span class="n">-DNSSleep</span> <span class="n">10</span>
 </code></pre></div>
                 

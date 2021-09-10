@@ -781,15 +781,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-current-order" class="md-nav__link">
+    Example 1: Current Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-specific-order" class="md-nav__link">
+    Example 2: Specific Order
   </a>
   
 </li>
@@ -1694,8 +1694,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1825,15 +1861,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-current-order" class="md-nav__link">
+    Example 1: Current Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-specific-order" class="md-nav__link">
+    Example 2: Specific Order
   </a>
   
 </li>
@@ -1923,11 +1959,11 @@
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
 <p>An ACME order that has reached the <code>ready</code> state is ready to be finalized which involves sending the certificate request to the ACME server so it can sign the certificate and transition the order into the <code>valid</code> state.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
+<h3 id="example-1-current-order">Example 1: Current Order<a class="headerlink" href="#example-1-current-order" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Submit-OrderFinalize</span>
 </code></pre></div>
 <p>Finalize the current order.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
+<h3 id="example-2-specific-order">Example 2: Specific Order<a class="headerlink" href="#example-2-specific-order" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-PAOrder</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="p">|</span> <span class="nb">Submit-OrderFinalize</span>
 </code></pre></div>
 <p>Finalize the specified order.</p>

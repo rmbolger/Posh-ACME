@@ -537,36 +537,29 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-current-order" class="md-nav__link">
+    Example 1: Current Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-specific-order" class="md-nav__link">
+    Example 2: Specific Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-all-orders" class="md-nav__link">
+    Example 3: All Orders
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-4" class="md-nav__link">
-    Example 4
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-5" class="md-nav__link">
-    Example 5
+  <a href="#example-4-refresh-order-status" class="md-nav__link">
+    Example 4: Refresh Order Status
   </a>
   
 </li>
@@ -1756,8 +1749,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1907,36 +1936,29 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-current-order" class="md-nav__link">
+    Example 1: Current Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-specific-order" class="md-nav__link">
+    Example 2: Specific Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-all-orders" class="md-nav__link">
+    Example 3: All Orders
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-4" class="md-nav__link">
-    Example 4
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-5" class="md-nav__link">
-    Example 5
+  <a href="#example-4-refresh-order-status" class="md-nav__link">
+    Example 4: Refresh Order Status
   </a>
   
 </li>
@@ -2051,26 +2073,22 @@
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
 <p>Returns details such as Domains, key length, expiration, and status for one or more ACME orders previously created.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
+<h3 id="example-1-current-order">Example 1: Current Order<a class="headerlink" href="#example-1-current-order" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-PAOrder</span>
 </code></pre></div>
 <p>Get cached ACME order details for the currently selected order.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Get-PAOrder</span> <span class="n">site</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">com</span>
+<h3 id="example-2-specific-order">Example 2: Specific Order<a class="headerlink" href="#example-2-specific-order" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">Get-PAOrder</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span>
 </code></pre></div>
 <p>Get cached ACME order details for the specified domain.</p>
-<h3 id="example-3">Example 3<a class="headerlink" href="#example-3" title="Permanent link">&para;</a></h3>
+<h3 id="example-3-all-orders">Example 3: All Orders<a class="headerlink" href="#example-3-all-orders" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-PAOrder</span> <span class="n">-List</span>
 </code></pre></div>
 <p>Get all cached ACME order details.</p>
-<h3 id="example-4">Example 4<a class="headerlink" href="#example-4" title="Permanent link">&para;</a></h3>
+<h3 id="example-4-refresh-order-status">Example 4: Refresh Order Status<a class="headerlink" href="#example-4-refresh-order-status" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-PAOrder</span> <span class="n">-Refresh</span>
 </code></pre></div>
 <p>Get fresh ACME order details for the currently selected order.</p>
-<h3 id="example-5">Example 5<a class="headerlink" href="#example-5" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Get-PAOrder</span> <span class="n">-List</span> <span class="n">-Refresh</span>
-</code></pre></div>
-<p>Get fresh ACME order details for all orders.</p>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <h3 id="-maindomain">-MainDomain<a class="headerlink" href="#-maindomain" title="Permanent link">&para;</a></h3>
 <p>The primary domain associated with the order.

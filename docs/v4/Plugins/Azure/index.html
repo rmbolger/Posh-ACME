@@ -1742,8 +1742,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -2053,7 +2089,13 @@
 </code></pre></div>
 <h4 id="password-based-principal">Password Based Principal<a class="headerlink" href="#password-based-principal" title="Permanent link">&para;</a></h4>
 <p>The <code>New-AzADServicePrincipal</code> function will generate a password for us, so all we have to do is give it a name and specify our expiration dates. We'll also use <code>-SkipAssignment</code> to prevent the default functionality of giving it the Contributor role on the subscription.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$sp</span> <span class="p">=</span> <span class="nb">New-AzADServicePrincipal</span> <span class="n">-DisplayName</span> <span class="n">PoshACME</span> <span class="n">-StartDate</span> <span class="nv">$notBefore</span> <span class="n">-EndDate</span> <span class="nv">$notAfter</span> <span class="n">-SkipAssignment</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$spParams</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">DisplayName</span> <span class="p">=</span> <span class="s1">&#39;PoshACME&#39;</span>
+    <span class="n">StartDate</span> <span class="p">=</span> <span class="nv">$notBefore</span>
+    <span class="n">EndDate</span> <span class="p">=</span> <span class="nv">$notAfter</span>
+    <span class="n">SkipAssignment</span> <span class="p">=</span> <span class="nv">$true</span>
+<span class="p">}</span>
+<span class="nv">$sp</span> <span class="p">=</span> <span class="nb">New-AzADServicePrincipal</span> <span class="nv">@spParams</span>
 </code></pre></div>
 <p>You'll use your new credential with either the <code>AZAppCred</code> plugin parameter or <code>AZAppUsername</code> and <code>AZAppPasswordInsecure</code> plugin parameters. The username is in the <code>ApplicationId</code> property and the password is in <code>Secret</code>. Here's how to save a reference to them for later.</p>
 <div class="highlight"><pre><span></span><code><span class="c"># For AZAppCred</span>
@@ -2065,20 +2107,36 @@
 </code></pre></div>
 <h4 id="certificate-based-principal-on-windows">Certificate Based Principal on Windows<a class="headerlink" href="#certificate-based-principal-on-windows" title="Permanent link">&para;</a></h4>
 <p>Before we can create a certificate based credential, we have to actually create a certificate to use with it. Self-signed certs are fine here because we're only using them to sign data and Azure just needs to verify the signature using the public key we will associate with the principal.</p>
-<p><em>Note: New-SelfSignedCertificate is only available on Windows 10/2016 or later. Check <a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-authenticate-service-principal-powershell">this document</a> for instructions on earlier OSes.</em></p>
-<p><em>Note: If you plan on using an existing certificate, make sure it is being stored using the legacy CSP called "Microsoft Enhanced RSA and AES Cryptographic Provider" that supports the SHA256 hashing algorithm. PowerShell doesn't yet support retrieving private key values from newer KSP based providers.</em></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>New-SelfSignedCertificate is only available on Windows 10/2016 or later. Check <a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-authenticate-service-principal-powershell">this document</a> for instructions on earlier OSes.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you plan on using an existing certificate, make sure it is being stored using the legacy CSP called "Microsoft Enhanced RSA and AES Cryptographic Provider" that supports the SHA256 hashing algorithm. PowerShell doesn't yet support retrieving private key values from newer KSP based providers.</p>
+</div>
 <div class="highlight"><pre><span></span><code><span class="c"># Keep in mind that this certificate will be created in the current user&#39;s certificate</span>
 <span class="c"># store. If you intend to use it from another account, you will need to either create it</span>
 <span class="c"># there or export it and re-import it there.</span>
-<span class="nv">$cert</span> <span class="p">=</span> <span class="nb">New-SelfSignedCertificate</span> <span class="n">-CertStoreLocation</span> <span class="s2">&quot;Cert:\CurrentUser\My&quot;</span> <span class="p">`</span>
-    <span class="n">-Subject</span> <span class="s2">&quot;CN=Azure App PoshACME&quot;</span> <span class="n">-HashAlgorithm</span> <span class="n">SHA256</span> <span class="p">`</span>
-    <span class="n">-Provider</span> <span class="s2">&quot;Microsoft Enhanced RSA and AES Cryptographic Provider&quot;</span> <span class="p">`</span>
-    <span class="n">-NotBefore</span> <span class="nv">$notBefore</span> <span class="n">-NotAfter</span> <span class="nv">$notAfter</span>
+<span class="nv">$certParams</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">CertStoreLocation</span> <span class="p">=</span> <span class="s1">&#39;Cert:\CurrentUser\My&#39;</span>
+    <span class="n">Subject</span> <span class="p">=</span> <span class="s1">&#39;CN=Azure App PoshACME&#39;</span>
+    <span class="n">HashAlgorithm</span> <span class="p">=</span> <span class="s1">&#39;SHA256&#39;</span>
+    <span class="n">Provider</span> <span class="p">=</span> <span class="s1">&#39;Microsoft Enhanced RSA and AES Cryptographic Provider&#39;</span>
+    <span class="n">NotBefore</span> <span class="p">=</span> <span class="nv">$notBefore</span>
+    <span class="n">NotAfter</span> <span class="p">=</span> <span class="nv">$notAfter</span>
+<span class="p">}</span>
+<span class="nv">$cert</span> <span class="p">=</span> <span class="nb">New-SelfSignedCertificate</span> <span class="nv">@certParams</span>
 
 <span class="nv">$certData</span> <span class="p">=</span> <span class="no">[System.Convert]</span><span class="p">::</span><span class="n">ToBase64String</span><span class="p">(</span><span class="nv">$cert</span><span class="p">.</span><span class="n">GetRawCertData</span><span class="p">())</span>
 
-<span class="nv">$sp</span> <span class="p">=</span> <span class="nb">New-AzADServicePrincipal</span> <span class="n">-DisplayName</span> <span class="n">PoshACME</span> <span class="n">-CertValue</span> <span class="nv">$certData</span> <span class="p">`</span>
-    <span class="n">-StartDate</span> <span class="nv">$cert</span><span class="p">.</span><span class="n">NotBefore</span> <span class="n">-EndDate</span> <span class="nv">$cert</span><span class="p">.</span><span class="n">NotAfter</span>
+<span class="nv">$spParams</span> <span class="p">=</span> <span class="p">@{</span>
+  <span class="n">DisplayName</span> <span class="p">=</span> <span class="s1">&#39;PoshACME&#39;</span>
+  <span class="n">CertValue</span> <span class="p">=</span> <span class="nv">$certData</span>
+  <span class="n">StartDate</span> <span class="p">=</span> <span class="nv">$cert</span><span class="p">.</span><span class="n">NotBefore</span>
+  <span class="n">EndDate</span> <span class="p">=</span> <span class="nv">$cert</span><span class="p">.</span><span class="n">NotAfter</span>
+<span class="p">}</span>
+<span class="nv">$sp</span> <span class="p">=</span> <span class="nb">New-AzADServicePrincipal</span> <span class="nv">@spParams</span>
 </code></pre></div>
 <p>You'll use your new credential with the <code>AZAppUsername</code> and <code>AZCertThumbprint</code> plugin parameters. Here's how to save a reference to them for later.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$appUser</span> <span class="p">=</span> <span class="nv">$sp</span><span class="p">.</span><span class="n">ApplicationId</span><span class="p">.</span><span class="n">ToString</span><span class="p">()</span>
@@ -2098,8 +2156,13 @@
 <span class="nv">$cert</span> <span class="p">=</span> <span class="no">[Security.Cryptography.X509Certificates.X509Certificate2]</span><span class="p">::</span><span class="n">new</span><span class="p">((</span><span class="nb">Resolve-Path</span> <span class="s1">&#39;./poshacme.crt&#39;</span><span class="p">))</span>
 <span class="nv">$certData</span> <span class="p">=</span> <span class="no">[Convert]</span><span class="p">::</span><span class="n">ToBase64String</span><span class="p">(</span><span class="nv">$cert</span><span class="p">.</span><span class="n">GetRawCertData</span><span class="p">())</span>
 
-<span class="nv">$sp</span> <span class="p">=</span> <span class="nb">New-AzADServicePrincipal</span> <span class="n">-DisplayName</span> <span class="n">PoshACMELinux</span> <span class="n">-CertValue</span> <span class="nv">$certData</span> <span class="p">`</span>
-    <span class="n">-StartDate</span> <span class="nv">$cert</span><span class="p">.</span><span class="n">NotBefore</span> <span class="n">-EndDate</span> <span class="nv">$cert</span><span class="p">.</span><span class="n">NotAfter</span>
+<span class="nv">$spParams</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">DisplayName</span> <span class="p">=</span> <span class="s1">&#39;PoshACMELinux&#39;</span>
+    <span class="n">CertValue</span> <span class="p">=</span> <span class="nv">$certData</span>
+    <span class="n">StartDate</span> <span class="p">=</span> <span class="nv">$cert</span><span class="p">.</span><span class="n">NotBefore</span>
+    <span class="n">EndDate</span> <span class="p">=</span> <span class="nv">$cert</span><span class="p">.</span><span class="n">NotAfter</span>
+<span class="p">}</span>
+<span class="nv">$sp</span> <span class="p">=</span> <span class="nb">New-AzADServicePrincipal</span> <span class="nv">@spParams</span>
 
 <span class="c"># (optional) delete the PEM files we don&#39;t need for plugin purposes</span>
 <span class="nb">rm </span><span class="n">poshacme</span><span class="p">.</span><span class="n">crt</span> <span class="n">poshacme</span><span class="p">.</span><span class="n">key</span>
@@ -2108,24 +2171,33 @@
 <span class="c"># service principal. So make sure to move and/or change permissions on the files so</span>
 <span class="c"># that only the process running Posh-ACME can read them.</span>
 </code></pre></div>
-<p>You'll use your new credential with the <code>AZAppUsername</code>, <code>AZCertPfx</code>, and <code>AZPfxPass</code> plugin parameters. Here's how to save a reference to them for later.</p>
+<p>You'll use your new credential with the <code>AZAppUsername</code>, <code>AZCertPfx</code>, and <code>AZPfxPassSecure</code> plugin parameters. Here's how to save a reference to them for later.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$appUser</span> <span class="p">=</span> <span class="nv">$sp</span><span class="p">.</span><span class="n">ApplicationId</span><span class="p">.</span><span class="n">ToString</span><span class="p">()</span>
 <span class="c"># modify the path and/or password as appropriate</span>
 <span class="nv">$certPfx</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Resolve-Path</span> <span class="s1">&#39;./poshacme.pfx&#39;</span><span class="p">).</span><span class="n">ToString</span><span class="p">()</span>
-<span class="nv">$pfxPass</span> <span class="p">=</span> <span class="s1">&#39;poshacme&#39;</span>
+<span class="c"># remember to use the password you used with openssl</span>
+<span class="nv">$pfxPass</span> <span class="p">=</span> <span class="n">ConvertToSecureString</span> <span class="s1">&#39;poshacme&#39;</span> <span class="n">-AsPlainText</span> <span class="n">-Force</span>
 </code></pre></div>
 <h3 id="assign-permissions-to-the-service-principal">Assign Permissions to the Service Principal<a class="headerlink" href="#assign-permissions-to-the-service-principal" title="Permanent link">&para;</a></h3>
 <p>Now we'll tie everything together by assigning the service principal we created to the custom Role we created and the Resource Group that contains our DNS zones. If your zones are in more than one resource group, just repeat this for each one. If you used your own method for creating a service princpal, just use <code>Get-AzAdServicePrincipal</code> to get a reference to it first.</p>
 <div class="highlight"><pre><span></span><code><span class="c"># modify the ResourceGroupName as appropriate for your environment</span>
-<span class="nb">New-AzRoleAssignment</span> <span class="n">-ApplicationId</span> <span class="nv">$sp</span><span class="p">.</span><span class="n">ApplicationId</span> <span class="n">-ResourceGroupName</span> <span class="s1">&#39;MyZones&#39;</span> <span class="p">`</span>
-    <span class="n">-RoleDefinitionName</span> <span class="s1">&#39;DNS TXT Contributor&#39;</span>
+<span class="nv">$raParams</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">ApplicationId</span> <span class="p">=</span> <span class="nv">$sp</span><span class="p">.</span><span class="n">ApplicationId</span>
+    <span class="n">ResourceGroupName</span> <span class="p">=</span> <span class="s1">&#39;MyZones&#39;</span>
+    <span class="n">RoleDefinitionName</span> <span class="p">=</span> <span class="s1">&#39;DNS TXT Contributor&#39;</span>
+<span class="p">}</span>
+<span class="nb">New-AzRoleAssignment</span> <span class="nv">@raParams</span>
 </code></pre></div>
 <h3 id="optional-using-a-managed-service-identity-msi">(Optional) Using a Managed Service Identity (MSI)<a class="headerlink" href="#optional-using-a-managed-service-identity-msi" title="Permanent link">&para;</a></h3>
 <p>When using a <a href="https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/overview">Managed Service Identity (MSI)</a>, we need the security principal ID of the VM or Service to assign permissions to. This example will query a VM.</p>
 <div class="highlight"><pre><span></span><code><span class="c"># NOTE: The VM must have a managed identity associated with it for this to work</span>
 <span class="nv">$spID</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-AzVM</span> <span class="n">-ResourceGroupName</span> <span class="s1">&#39;&lt;VM Resource Group&gt;&#39;</span> <span class="n">-Name</span> <span class="s1">&#39;&lt;VM Name&gt;&#39;</span><span class="p">).</span><span class="n">Identity</span><span class="p">.</span><span class="n">PrincipalId</span>
-<span class="nb">New-AzRoleAssignment</span> <span class="n">-ObjectId</span> <span class="nv">$spID</span> <span class="n">-ResourceGroupName</span> <span class="s1">&#39;MyZones&#39;</span> <span class="p">`</span>
-    <span class="n">-RoleDefinitionName</span> <span class="s1">&#39;DNS TXT Contributor&#39;</span>
+<span class="nv">$raParams</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">ObjectId</span> <span class="p">=</span> <span class="nv">$spID</span>
+    <span class="n">ResourceGroupName</span> <span class="p">=</span> <span class="s1">&#39;MyZones&#39;</span>
+    <span class="n">RoleDefinitionName</span> <span class="p">=</span> <span class="s1">&#39;DNS TXT Contributor&#39;</span>
+<span class="p">}</span>
+<span class="nb">New-AzRoleAssignment</span> <span class="nv">@raParams</span>
 </code></pre></div>
 <p>In addition to the <code>AZSubscriptionId</code> plugin parameter that all auth methods must provide, the only plugin parameter you'll need is the <code>AZUseIMDS</code> switch.</p>
 <h3 id="optional-using-an-existing-access-token">(Optional) Using An Existing Access Token<a class="headerlink" href="#optional-using-an-existing-access-token" title="Permanent link">&para;</a></h3>
@@ -2133,8 +2205,9 @@
 <p>Here is how to get the token for the context you are currently logged in with using with Powershell. The method depends on what version of the <code>Az.Accounts</code> module you're using.</p>
 <div class="highlight"><pre><span></span><code><span class="c"># Az.Accounts 1.9.x or earlier</span>
 <span class="nv">$ctx</span> <span class="p">=</span> <span class="nb">Get-AzContext</span>
-<span class="nv">$token</span> <span class="p">=</span> <span class="p">(</span><span class="nv">$ctx</span><span class="p">.</span><span class="n">TokenCache</span><span class="p">.</span><span class="n">ReadItems</span><span class="p">()</span> <span class="p">|</span> <span class="p">?{</span> <span class="nv">$_</span><span class="p">.</span><span class="n">TenantId</span> <span class="o">-eq</span> <span class="nv">$ctx</span><span class="p">.</span><span class="n">Subscription</span><span class="p">.</span><span class="n">TenantId</span> <span class="o">-and</span> <span class="nv">$_</span><span class="p">.</span><span class="n">Resource</span> <span class="o">-eq</span> <span class="s2">&quot;https://management.core.windows.net/&quot;</span> <span class="p">}</span> <span class="p">|</span>
-    <span class="nb">Select </span><span class="n">-First</span> <span class="n">1</span><span class="p">).</span><span class="n">AccessToken</span>
+<span class="nv">$token</span> <span class="p">=</span> <span class="p">(</span><span class="nv">$ctx</span><span class="p">.</span><span class="n">TokenCache</span><span class="p">.</span><span class="n">ReadItems</span><span class="p">()</span> <span class="p">|</span> <span class="p">?{</span>
+    <span class="nv">$_</span><span class="p">.</span><span class="n">TenantId</span> <span class="o">-eq</span> <span class="nv">$ctx</span><span class="p">.</span><span class="n">Subscription</span><span class="p">.</span><span class="n">TenantId</span> <span class="o">-and</span> <span class="nv">$_</span><span class="p">.</span><span class="n">Resource</span> <span class="o">-eq</span> <span class="s2">&quot;https://management.core.windows.net/&quot;</span>
+<span class="p">}</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="n">-First</span> <span class="n">1</span><span class="p">).</span><span class="n">AccessToken</span>
 
 <span class="c"># Az.Accounts 2.0.x or later</span>
 <span class="nv">$token</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-AzAccessToken</span> <span class="n">-ResourceUrl</span> <span class="s2">&quot;https://management.core.windows.net/&quot;</span> <span class="n">-TenantId</span> <span class="nv">$tenantId</span><span class="p">).</span><span class="n">Token</span>
@@ -2151,16 +2224,20 @@
 </ul>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p>All authentication methods require specifying <code>AZSubscriptionId</code> which is the subscription that contains the DNS zones to modify. Password and Certificate based credentials also require <code>AZTenantId</code> which is the Azure AD tenant guid. Additional parameters are outlined in each section below.</p>
-<blockquote>
-<p><strong><em>NOTE:</em></strong> The plugin defaults to using the primary public Azure Cloud. But country and government specific Azure clouds are also supported by specifying the <code>AZEnvironment</code> parameter. Supported environments include <code>AzureCloud</code> (Default), <code>AzureUSGovernment</code>, <code>AzureGermanCloud</code>, and <code>AzureChinaCloud</code>.</p>
-</blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The plugin defaults to using the primary public Azure Cloud. But country and government specific Azure clouds are also supported by specifying the <code>AZEnvironment</code> parameter. Supported environments include <code>AzureCloud</code> (Default), <code>AzureUSGovernment</code>, <code>AzureGermanCloud</code>, and <code>AzureChinaCloud</code>.</p>
+</div>
 <h3 id="password-credential">Password Credential<a class="headerlink" href="#password-credential" title="Permanent link">&para;</a></h3>
 <p>Subscription and Tenant values are passed as standard strings using <code>AZSubscriptionId</code> and <code>AZTenantId</code>. The credential is passed as a PSCredential object using <code>AZAppCred</code>. PSCredential objects require a username and password. For a service principal, the username is the its <code>ApplicationId</code> guid and the password is whatever was originally set for it. If you've been following the setup instructions, you may have <code>$subscriptionID</code>, <code>$tenantID</code>, and <code>$appCred</code> variables you can use instead of the sample values below.</p>
-<p><em>NOTE: The <code>AZAppUsername</code> and <code>AZAppPasswordInsecure</code> parameters are still supported but should be considered deprecated and may be removed in a future major release.</em></p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>AZAppUsername</code> and <code>AZAppPasswordInsecure</code> parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to a secure parameter set.</p>
+</div>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-  <span class="n">AZSubscriptionId</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&#39;</span>
-  <span class="n">AZTenantId</span> <span class="p">=</span> <span class="s1">&#39;yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy&#39;</span>
-  <span class="n">AZAppCred</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span>
+    <span class="n">AZSubscriptionId</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&#39;</span>
+    <span class="n">AZTenantId</span> <span class="p">=</span> <span class="s1">&#39;yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy&#39;</span>
+    <span class="n">AZAppCred</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Azure</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
@@ -2169,37 +2246,41 @@
 <h4 id="windows-certificate">Windows Certificate<a class="headerlink" href="#windows-certificate" title="Permanent link">&para;</a></h4>
 <p>You'll need to specify the service principal username which is its <code>ApplicationId</code> guid and the certificate thumbprint value. If you've been following the setup instructions, you may have <code>$subscriptionID</code>, <code>$tenantID</code>, <code>$appUser</code>, and <code>$thumbprint</code> variables you can use instead of the sample values below.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-  <span class="n">AZSubscriptionId</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&#39;</span>
-  <span class="n">AZTenantId</span> <span class="p">=</span> <span class="s1">&#39;yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy&#39;</span>
-  <span class="n">AZAppUsername</span> <span class="p">=</span> <span class="s1">&#39;zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz&#39;</span>
-  <span class="n">AZCertThumbprint</span> <span class="p">=</span> <span class="s1">&#39;1A2B3C4D5E6F1A2B3C4D5E6F1A2B3C4D5E6F1A2B&#39;</span>
+    <span class="n">AZSubscriptionId</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&#39;</span>
+    <span class="n">AZTenantId</span> <span class="p">=</span> <span class="s1">&#39;yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy&#39;</span>
+    <span class="n">AZAppUsername</span> <span class="p">=</span> <span class="s1">&#39;zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz&#39;</span>
+    <span class="n">AZCertThumbprint</span> <span class="p">=</span> <span class="s1">&#39;1A2B3C4D5E6F1A2B3C4D5E6F1A2B3C4D5E6F1A2B&#39;</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Azure</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
 <h4 id="non-windows-certificate">Non-Windows Certificate<a class="headerlink" href="#non-windows-certificate" title="Permanent link">&para;</a></h4>
-<p>You'll need to specify the service principal username which is its <code>ApplicationId</code> guid, the path to the PFX file, and the PFX password. If you've been following the setup instructions, you may have <code>$subscriptionID</code>, <code>$tenantID</code>, <code>$appUser</code>, <code>$certPfx</code>, and <code>$pfxPass</code> variables you can use instead of the sample values below.</p>
+<p>You'll need to specify the service principal username which is its <code>ApplicationId</code> guid, the path to the PFX file, and the PFX password as a SecureString. If you've been following the setup instructions, you may have <code>$subscriptionID</code>, <code>$tenantID</code>, <code>$appUser</code>, <code>$certPfx</code>, and <code>$pfxPass</code> variables you can use instead of the sample values below.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>AZPfxPass</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to a secure parameter set.</p>
+</div>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-  <span class="n">AZSubscriptionId</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&#39;</span>
-  <span class="n">AZTenantId</span> <span class="p">=</span> <span class="s1">&#39;yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy&#39;</span>
-  <span class="n">AZAppUsername</span> <span class="p">=</span> <span class="s1">&#39;zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz&#39;</span>
-  <span class="n">AZCertPfx</span> <span class="p">=</span> <span class="s1">&#39;/home/certuser/poshacme.pfx&#39;</span>
-  <span class="n">AZPfxPass</span> <span class="p">=</span> <span class="s1">&#39;poshacme&#39;</span>
+    <span class="n">AZSubscriptionId</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&#39;</span>
+    <span class="n">AZTenantId</span> <span class="p">=</span> <span class="s1">&#39;yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy&#39;</span>
+    <span class="n">AZAppUsername</span> <span class="p">=</span> <span class="s1">&#39;zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz&#39;</span>
+    <span class="n">AZCertPfx</span> <span class="p">=</span> <span class="s1">&#39;/home/certuser/poshacme.pfx&#39;</span>
+    <span class="n">AZPfxPassSecure</span> <span class="p">=</span> <span class="p">(</span><span class="nb">ConvertTo-SecureString</span> <span class="s1">&#39;poshacme&#39;</span> <span class="n">-AsPlainText</span> <span class="n">-Force</span><span class="p">)</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Azure</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
 <h3 id="existing-access-token">Existing Access Token<a class="headerlink" href="#existing-access-token" title="Permanent link">&para;</a></h3>
 <p>Only the subscription guid and the access token you previously retrieved are required for this method.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-  <span class="n">AZSubscriptionId</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&#39;</span>
-  <span class="n">AZAccessToken</span> <span class="p">=</span> <span class="nv">$token</span>
+    <span class="n">AZSubscriptionId</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&#39;</span>
+    <span class="n">AZAccessToken</span> <span class="p">=</span> <span class="nv">$token</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Azure</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
 <h3 id="instance-metadata-service-imds">Instance Metadata Service (IMDS)<a class="headerlink" href="#instance-metadata-service-imds" title="Permanent link">&para;</a></h3>
 <p>Only the subscription guid and the <code>AZUseIMDS</code> switch are required for this method.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-  <span class="n">AZSubscriptionId</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&#39;</span>
-  <span class="n">AZUseIMDS</span> <span class="p">=</span> <span class="nv">$true</span>
+    <span class="n">AZSubscriptionId</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&#39;</span>
+    <span class="n">AZUseIMDS</span> <span class="p">=</span> <span class="nv">$true</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Azure</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>

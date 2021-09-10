@@ -765,22 +765,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-switch-order" class="md-nav__link">
+    Example 1: Switch Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-revoke-certificate" class="md-nav__link">
+    Example 2: Revoke Certificate
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-update-plugin-args" class="md-nav__link">
+    Example 3: Update Plugin Args
   </a>
   
 </li>
@@ -1841,8 +1841,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1992,22 +2028,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-switch-order" class="md-nav__link">
+    Example 1: Switch Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-revoke-certificate" class="md-nav__link">
+    Example 2: Revoke Certificate
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-update-plugin-args" class="md-nav__link">
+    Example 3: Update Plugin Args
   </a>
   
 </li>
@@ -2210,7 +2246,7 @@
                 
                 <h1 id="set-paorder">Set-PAOrder<a class="headerlink" href="#set-paorder" title="Permanent link">&para;</a></h1>
 <h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
-<p>Set the current ACME order, edits an orders properties, or revokes an order's certificate.</p>
+<p>Switch to or modify an order.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
 <h3 id="edit-default">Edit (Default)<a class="headerlink" href="#edit-default" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Set-PAOrder</span> <span class="p">[[</span><span class="n">-MainDomain</span><span class="p">]</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-Name</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-NoSwitch</span><span class="p">]</span> <span class="p">[</span><span class="n">-Plugin</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">[]&gt;]</span>
@@ -2224,21 +2260,21 @@
  <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
-<p>Switch to a specific ACME order and edit its properties or revoke its certificate.
-Revoked certificate orders are not deleted and can be re-requested using Submit-Renewal or New-PACertificate.</p>
+<p>Switch to a specific ACME order and edit its properties or revoke its certificate. Orders with revoked certificates are not deleted and can be re-requested using Submit-Renewal or New-PACertificate.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Set-PAOrder</span> <span class="n">site1</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">com</span>
+<h3 id="example-1-switch-order">Example 1: Switch Order<a class="headerlink" href="#example-1-switch-order" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">Set-PAOrder</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span>
 </code></pre></div>
 <p>Switch to the specified domain's order.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
+<h3 id="example-2-revoke-certificate">Example 2: Revoke Certificate<a class="headerlink" href="#example-2-revoke-certificate" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Set-PAOrder</span> <span class="n">-RevokeCert</span>
 </code></pre></div>
 <p>Revoke the current order's certificate.</p>
-<h3 id="example-3">Example 3<a class="headerlink" href="#example-3" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Set-PAOrder</span> <span class="n">-FriendlyName</span> <span class="s1">&#39;new friendly name&#39;</span>
+<h3 id="example-3-update-plugin-args">Example 3: Update Plugin Args<a class="headerlink" href="#example-3-update-plugin-args" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">FDToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;FakeDNS API Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span> <span class="p">}</span>
+<span class="nb">Set-PAOrder</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">FakeDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
-<p>Edit the friendly name for the current order and certificate if it exists.</p>
+<p>Reset the plugin and its arguments for the specified order.</p>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <h3 id="-maindomain">-MainDomain<a class="headerlink" href="#-maindomain" title="Permanent link">&para;</a></h3>
 <p>The primary domain for the order.
@@ -2323,7 +2359,7 @@ Otherwise, you should specify as many plugin names as there are domains in the o
 </code></pre></div>
 <h3 id="-pluginargs">-PluginArgs<a class="headerlink" href="#-pluginargs" title="Permanent link">&para;</a></h3>
 <p>A hashtable containing the plugin arguments to use with the specified Plugin list.
-So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.</p>
+So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as <code>@{MyText='text';MyNumber=1234}</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Hashtable</span>
 <span class="nt">Parameter Sets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Edit</span>
 <span class="nt">Aliases</span><span class="p">:</span>

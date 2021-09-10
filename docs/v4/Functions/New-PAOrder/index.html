@@ -652,29 +652,36 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-single-domain-order" class="md-nav__link">
+    Example 1: Single Domain Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-multi-domain-with-plugin" class="md-nav__link">
+    Example 2: Multi-Domain with Plugin
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-ecdsa-private-key" class="md-nav__link">
+    Example 3: ECDSA Private Key
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-4" class="md-nav__link">
-    Example 4
+  <a href="#example-4-pre-generated-private-key" class="md-nav__link">
+    Example 4: Pre-generated Private Key
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-5-external-cert-request" class="md-nav__link">
+    Example 5: External Cert Request
   </a>
   
 </li>
@@ -1875,8 +1882,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -2033,29 +2076,36 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-single-domain-order" class="md-nav__link">
+    Example 1: Single Domain Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-multi-domain-with-plugin" class="md-nav__link">
+    Example 2: Multi-Domain with Plugin
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-ecdsa-private-key" class="md-nav__link">
+    Example 3: ECDSA Private Key
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-4" class="md-nav__link">
-    Example 4
+  <a href="#example-4-pre-generated-private-key" class="md-nav__link">
+    Example 4: Pre-generated Private Key
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-5-external-cert-request" class="md-nav__link">
+    Example 5: External Cert Request
   </a>
   
 </li>
@@ -2304,22 +2354,30 @@ The first name in the list will be considered the "MainDomain" and will also be 
 Different CAs have different policies regarding the number of SANs a certificate may have.</p>
 <p>Be aware that new orders that share the same MainDomain as a previous order will overwrite the previous order unless the <code>Name</code> paraemter is specified and there are no other order matches for that name.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">New-PAOrder</span> <span class="n">site1</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">com</span>
+<h3 id="example-1-single-domain-order">Example 1: Single Domain Order<a class="headerlink" href="#example-1-single-domain-order" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">New-PAOrder</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span>
 </code></pre></div>
 <p>Create a new order for the specified domain using the default key length.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">New-PAOrder</span> <span class="n">-Domain</span> <span class="s1">&#39;site1.example.com&#39;</span><span class="p">,</span><span class="s1">&#39;site2.example.com&#39;</span><span class="p">,</span><span class="s1">&#39;site3.example.com&#39;</span>
+<h3 id="example-2-multi-domain-with-plugin">Example 2: Multi-Domain with Plugin<a class="headerlink" href="#example-2-multi-domain-with-plugin" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">FDToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;FakeDNS API Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nv">$domains</span> <span class="p">=</span> <span class="s1">&#39;example.com&#39;</span><span class="p">,</span><span class="s1">&#39;www.example.com&#39;</span><span class="p">,</span><span class="s1">&#39;blog.example.com&#39;</span>
+<span class="nb">New-PAOrder</span> <span class="n">-Domain</span> <span class="nv">$domains</span> <span class="n">-Plugin</span> <span class="n">FakeDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
-<p>Create a new SAN order for the specified domains using the default key length.</p>
-<h3 id="example-3">Example 3<a class="headerlink" href="#example-3" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">New-PAOrder</span> <span class="n">site1</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">4096</span>
+<p>Create a new SAN order for the specified domains and specify plugin details.</p>
+<h3 id="example-3-ecdsa-private-key">Example 3: ECDSA Private Key<a class="headerlink" href="#example-3-ecdsa-private-key" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">New-PAOrder</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-KeyLength</span> <span class="s1">&#39;ec-256&#39;</span>
 </code></pre></div>
-<p>Create a new order for the specified domain using an RSA 4096 bit key.</p>
-<h3 id="example-4">Example 4<a class="headerlink" href="#example-4" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">New-PAOrder</span> <span class="s1">&#39;site1.example.com&#39;</span><span class="p">,</span><span class="s1">&#39;site2.example.com&#39;</span> <span class="n">ec</span><span class="p">-</span><span class="n">384</span> <span class="n">-Force</span>
+<p>Create a new order for the specified domain using an ECDSA P-256 private key.</p>
+<h3 id="example-4-pre-generated-private-key">Example 4: Pre-generated Private Key<a class="headerlink" href="#example-4-pre-generated-private-key" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">New-PAOrder</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-KeyFile</span> <span class="p">.\</span><span class="n">mykey</span><span class="p">.</span><span class="n">key</span>
 </code></pre></div>
-<p>Create a new SAN order for the specified domains using an ECC key using P-384 curve that ignores any confirmations.</p>
+<p>Create a new order using an externally generated private key.</p>
+<h3 id="example-5-external-cert-request">Example 5: External Cert Request<a class="headerlink" href="#example-5-external-cert-request" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">New-PAOrder</span> <span class="n">-CSRPath</span> <span class="p">.\</span><span class="n">myreq</span><span class="p">.</span><span class="n">csr</span>
+</code></pre></div>
+<p>Create a new order using an externally generated certificate request.</p>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <h3 id="-domain">-Domain<a class="headerlink" href="#-domain" title="Permanent link">&para;</a></h3>
 <p>One or more domain names to include in this order/certificate.
@@ -2406,7 +2464,7 @@ Otherwise, you should specify as many plugin names as there are domains in the o
 </code></pre></div>
 <h3 id="-pluginargs">-PluginArgs<a class="headerlink" href="#-pluginargs" title="Permanent link">&para;</a></h3>
 <p>A hashtable containing the plugin arguments to use with the specified Plugin list.
-So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.</p>
+So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as <code>@{MyText='text';MyNumber=1234}</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Hashtable</span>
 <span class="nt">Parameter Sets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">(All)</span>
 <span class="nt">Aliases</span><span class="p">:</span>

@@ -1213,26 +1213,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
 </li>
       
     </ul>
@@ -1626,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1739,26 +1755,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
 </li>
       
     </ul>
@@ -1780,26 +1776,21 @@
                 
                 <h1 id="how-to-use-the-hurricaneelectric-plugin">How To Use the HurricaneElectric Plugin<a class="headerlink" href="#how-to-use-the-hurricaneelectric-plugin" title="Permanent link">&para;</a></h1>
 <p>This plugin works against <a href="https://dns.he.net/">Hurricane Electric DNS</a>. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.</p>
-<p><em>NOTE: Hurricane Electric can be configured as a secondary to your primary zones hosted elsewhere. This plugin will not work for secondary zones. You must use a plugin that is able to modify the primary nameservers.</em></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Hurricane Electric can be configured as a secondary to your primary zones hosted elsewhere. This plugin will not work for secondary zones. You must use a plugin that is able to modify the primary nameservers.</p>
+</div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>There's not really any setup aside from knowing your account credentials. Hurricane Electric doesn't currently support an API for manipulating DNS records. So this plugin utilizes web scraping to accomplish the task. That also means it is more likely to break if the site owner ever changes their HTML markup. So be wary of depending on this for critical projects.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>Your account credentials will either be used with the <code>HECredential</code> parameter or <code>HEUsername</code>/<code>HEPassword</code> parameters. HECredential uses a PSCredential object that should only be used on Windows or any OS that has PowerShell 6.2 or later. Any environment can use the HEUsername/HEPassword option.</p>
-<h3 id="windows-or-ps-62">Windows or PS 6.2+<a class="headerlink" href="#windows-or-ps-62" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c"># create the plugin args hashtable</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">HECredential</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span> <span class="p">}</span>
-
-<span class="c"># generate the cert</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">HurricaneElectric</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
-</code></pre></div>
-<h2 id="any-os">Any OS<a class="headerlink" href="#any-os" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c"># create the plugin args hashtable</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">HEUsername</span> <span class="p">=</span> <span class="s1">&#39;myusername&#39;</span>
-    <span class="n">HEPassword</span> <span class="p">=</span> <span class="s1">&#39;mypassword&#39;</span>
+<p>Your account credentials will be used with the <code>HECredential</code> parameter as a PSCredential object.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>HEUsername</code> and <code>HEPassword</code> parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">HECredential</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span>
 <span class="p">}</span>
-
-<span class="c"># generate the cert</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">HurricaneElectric</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 

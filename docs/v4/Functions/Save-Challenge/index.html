@@ -709,15 +709,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-1-commit-changes" class="md-nav__link">
+    Example 1: Commit Changes
   </a>
   
 </li>
@@ -1681,8 +1674,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1812,15 +1841,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-1-commit-changes" class="md-nav__link">
+    Example 1: Commit Changes
   </a>
   
 </li>
@@ -1896,16 +1918,13 @@
 </code></pre></div>
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
 <p>Some validation plugins require a finalization step after the Publish or Unpublish functionality to commit and make the changes live. This function should be called once after running all of the <code>Publish-Challenge</code> or <code>Unpublish-Challenge</code> commands.</p>
-<p>For plugins that don't require a commit step, this function may still be run without causing an error, but does nothing.</p>
+<p>For plugins that don't require a commit step, this function may still be run without causing an error, but has no effect.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Save-Challenge</span> <span class="n">Manual</span> <span class="p">@{}</span>
+<h3 id="example-1-commit-changes">Example 1: Commit Changes<a class="headerlink" href="#example-1-commit-changes" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">FDToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;FakeDNS API Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span> <span class="p">}</span>
+<span class="nb">Save-Challenge</span> <span class="n">-Plugin</span> <span class="n">FakeDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
-<p>Commit changes using the Manual DNS plugin that requires no plugin arguments.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Save-Challenge</span> <span class="n">MyPlugin</span> <span class="p">@{</span><span class="n">Param1</span><span class="p">=</span><span class="s1">&#39;asdf&#39;</span><span class="p">;</span><span class="n">Param2</span><span class="p">=</span><span class="n">1234</span><span class="p">}</span>
-</code></pre></div>
-<p>Commit changes for a set of challenges using a fictitious plugin and arguments.</p>
+<p>Commit changes that the specified plugin has made.</p>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <h3 id="-plugin">-Plugin<a class="headerlink" href="#-plugin" title="Permanent link">&para;</a></h3>
 <p>The name of the validation plugin to use.
@@ -1922,7 +1941,7 @@ Use Get-PAPlugin to display a list of available plugins.</p>
 </code></pre></div>
 <h3 id="-pluginargs">-PluginArgs<a class="headerlink" href="#-pluginargs" title="Permanent link">&para;</a></h3>
 <p>A hashtable containing the plugin arguments to use with the specified plugin.
-So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.</p>
+So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as <code>@{MyText='text';MyNumber=1234}</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Hashtable</span>
 <span class="nt">Parameter Sets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">(All)</span>
 <span class="nt">Aliases</span><span class="p">:</span>

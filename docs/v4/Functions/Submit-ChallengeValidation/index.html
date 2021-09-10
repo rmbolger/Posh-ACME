@@ -769,15 +769,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-current-order" class="md-nav__link">
+    Example 1: Current Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-specific-order" class="md-nav__link">
+    Example 2: Specific Order
   </a>
   
 </li>
@@ -1694,8 +1694,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1825,15 +1861,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-current-order" class="md-nav__link">
+    Example 1: Current Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-specific-order" class="md-nav__link">
+    Example 2: Specific Order
   </a>
   
 </li>
@@ -1921,13 +1957,14 @@
 <div class="highlight"><pre><span></span><code><span class="nb">Submit-ChallengeValidation</span> <span class="p">[[</span><span class="n">-Order</span><span class="p">]</span> <span class="p">&lt;</span><span class="n">Object</span><span class="p">&gt;]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
-<p>An ACME order contains an authorization object for each domain in the order. Each authorization contains one or more challenge types. The client must complete at least one challenge for each authorization in order to prove they control the domain. Once complete, the client asks the server to validate each challenge and waits for the server to do so and update the authorization status.</p>
+<p>This function encapsulates the authorization validation cycle for challenges in a given order. It takes care of publishing the challenge records according to the order's plugin configuration, notifying the ACME server to validate the records, and cleaning up the challenge records whether the validation succeeded or not.</p>
+<p>If everything is successful, the order object will have transitioned from the <code>pending</code> state to the <code>ready</code> state which indicates it is ready for finalization using <code>Submit-OrderFinalize</code>.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
+<h3 id="example-1-current-order">Example 1: Current Order<a class="headerlink" href="#example-1-current-order" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Submit-ChallengeValidation</span>
 </code></pre></div>
 <p>Begin challenge validation on the current order.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
+<h3 id="example-2-specific-order">Example 2: Specific Order<a class="headerlink" href="#example-2-specific-order" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-PAOrder</span> <span class="n">-Name</span> <span class="n">myorder</span> <span class="p">|</span> <span class="nb">Submit-ChallengeValidation</span>
 </code></pre></div>
 <p>Begin challenge validation on the specified order.</p>
@@ -1951,8 +1988,8 @@ The order object must be associated with the currently active ACME account.</p>
 <h3 id="poshacmepaorder">PoshACME.PAOrder<a class="headerlink" href="#poshacmepaorder" title="Permanent link">&para;</a></h3>
 <p>An order object.</p>
 <h2 id="related-links">Related Links<a class="headerlink" href="#related-links" title="Permanent link">&para;</a></h2>
-<p><a href="../Get-PAOrder/">Get-PAOrder</a></p>
 <p><a href="../New-PAOrder/">New-PAOrder</a></p>
+<p><a href="../Submit-OrderFinalize/">Submit-OrderFinalize</a></p>
                 
                   
                 

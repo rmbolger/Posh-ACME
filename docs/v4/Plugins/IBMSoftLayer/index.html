@@ -1606,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1743,16 +1779,15 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>If you don't already have an API Key setup, login to your account and go to the <a href="https://control.bluemix.net/account/users">Users</a> page. There should be a <code>Generate</code> link in the "API KEY" column. When you click it, you will briefly see a dialog that shows your new API username and key. If you miss it, there should now be a <code>View</code> link where the Generate link was before. Click that and make a note of your API username and key values.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>There are two possible parameter sets to use with this plugin. The first can only be used on Windows and involves creating a <code>PSCredential</code> object for the <code>IBMCredential</code> parameter using the API username and key value from earlier. The second uses standard string values for <code>IBMUser</code> and <code>IBMKey</code> parameter values and can be used on non-Windows.</p>
-<div class="highlight"><pre><span></span><code><span class="c"># On Windows, prompt for the credentials</span>
-<span class="nv">$cred</span> <span class="p">=</span> <span class="nb">Get-Credential</span>
-<span class="nv">$ibmParams</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">IBMCredential</span><span class="p">=</span><span class="nv">$cred</span> <span class="p">}</span>
-
-<span class="c"># On non-Windows, just use a regular strings</span>
-<span class="nv">$ibmParams</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">IBMUser</span><span class="p">=</span><span class="s1">&#39;SL00000000&#39;</span><span class="p">;</span> <span class="n">IBMKey</span><span class="p">=</span><span class="s1">&#39;xxxxxxxxxxxx&#39;</span> <span class="p">}</span>
-
-<span class="c"># Request the cert</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">IBMSoftLayer</span> <span class="n">-PluginArgs</span> <span class="nv">$ibmParams</span>
+<p>The API username and key are used with the <code>IBMCredential</code> parameter as a PSCredential object where the key is the password.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>IBMUser</code> and <code>IBMKey</code> parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">IBMCredential</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">IBMSoftLayer</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 
                   

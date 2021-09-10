@@ -1045,26 +1045,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1626,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1739,26 +1755,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1783,14 +1779,14 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>You may already have an API token from your original registration email. If not, go to the <a href="https://desec.io/tokens">Token Management</a> page and create a new one. The value will only be shown once towards the bottom of the screen. <em>It is not the ID value in the list of tokens.</em></p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>You will need to provide the API token as a SecureString value to <code>DSToken</code> or a standard string value to <code>DSTokenInsecure</code>. The SecureString version can only be used from Windows or any OS running PowerShell 6.2 or later. <code>DSTTL</code> is the TTL of new <code>TXT</code> record (optional, defaults to 300 if not provided).</p>
-<h3 id="windows-or-ps-62">Windows or PS 6.2+<a class="headerlink" href="#windows-or-ps-62" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$token</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="s2">&quot;deSEC Token&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">DSToken</span> <span class="p">=</span> <span class="nv">$token</span><span class="p">;</span> <span class="n">DSTTL</span><span class="p">=</span><span class="n">3600</span> <span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">DeSEC</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
-</code></pre></div>
-<h3 id="any-os">Any OS<a class="headerlink" href="#any-os" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">DSTokenInsecure</span> <span class="p">=</span> <span class="s1">&#39;token-value&#39;</span><span class="p">;</span> <span class="n">DSTTL</span><span class="p">=</span><span class="n">3600</span> <span class="p">}</span>
+<p>You will need to provide the API token as a SecureString value to <code>DSCToken</code>. There is an optional <code>DSCTTL</code> parameter to use as the TTL of new <code>TXT</code> record. It defaults to 3600 which seems to be the minimum value allowed by the API.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>DSToken</code>, <code>DSTokenInsecure</code>, and <code>DSTTL</code> parameters have been deprecated because they conflicted with another Posh-ACME plugin. If you are using them, please migrate to the newer parameters as they will be removed in the next major version of the module.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">DSCToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;deSEC Token&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">DeSEC</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 

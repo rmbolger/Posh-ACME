@@ -760,50 +760,50 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-switch-accounts" class="md-nav__link">
+    Example 1: Switch Accounts
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-update-contact-email" class="md-nav__link">
+    Example 2: Update Contact Email
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-update-all-account-contacts" class="md-nav__link">
+    Example 3: Update All Account Contacts
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-4" class="md-nav__link">
-    Example 4
+  <a href="#example-4-deactivate-account" class="md-nav__link">
+    Example 4: Deactivate Account
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-5" class="md-nav__link">
-    Example 5
+  <a href="#example-5-new-account-key" class="md-nav__link">
+    Example 5: New Account Key
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-6" class="md-nav__link">
-    Example 6
+  <a href="#example-6-new-external-account-key" class="md-nav__link">
+    Example 6: New External Account Key
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-7" class="md-nav__link">
-    Example 7
+  <a href="#example-7-alternative-plugin-encryption" class="md-nav__link">
+    Example 7: Alternative Plugin Encryption
   </a>
   
 </li>
@@ -1820,8 +1820,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1978,50 +2014,50 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-switch-accounts" class="md-nav__link">
+    Example 1: Switch Accounts
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-update-contact-email" class="md-nav__link">
+    Example 2: Update Contact Email
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-update-all-account-contacts" class="md-nav__link">
+    Example 3: Update All Account Contacts
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-4" class="md-nav__link">
-    Example 4
+  <a href="#example-4-deactivate-account" class="md-nav__link">
+    Example 4: Deactivate Account
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-5" class="md-nav__link">
-    Example 5
+  <a href="#example-5-new-account-key" class="md-nav__link">
+    Example 5: New Account Key
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-6" class="md-nav__link">
-    Example 6
+  <a href="#example-6-new-external-account-key" class="md-nav__link">
+    Example 6: New External Account Key
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-7" class="md-nav__link">
-    Example 7
+  <a href="#example-7-alternative-plugin-encryption" class="md-nav__link">
+    Example 7: Alternative Plugin Encryption
   </a>
   
 </li>
@@ -2183,37 +2219,44 @@
  <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
-<p>This function allows you to switch between ACME accounts for a particular server.
-It also allows you to update the contact information associated with an account, deactivate the account, or replace the account key with a new one.</p>
+<p>This function allows you to switch between ACME accounts on a server. It also allows you to update the contact information associated with an account, deactivate the account, or replace the account key with a new one.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some ACME CAs do not support all types of account modifications.</p>
+</div>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
+<h3 id="example-1-switch-accounts">Example 1: Switch Accounts<a class="headerlink" href="#example-1-switch-accounts" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Set-PAAccount</span> <span class="n">-ID</span> <span class="n">1234567</span>
 </code></pre></div>
 <p>Switch to the specified account.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
+<h3 id="example-2-update-contact-email">Example 2: Update Contact Email<a class="headerlink" href="#example-2-update-contact-email" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Set-PAAccount</span> <span class="n">-Contact</span> <span class="s1">&#39;user1@example.com&#39;</span><span class="p">,</span><span class="s1">&#39;user2@example.com&#39;</span>
 </code></pre></div>
 <p>Set new contacts for the current account.</p>
-<h3 id="example-3">Example 3<a class="headerlink" href="#example-3" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Set-PAAccount</span> <span class="n">-ID</span> <span class="n">1234567</span> <span class="n">-Contact</span> <span class="s1">&#39;user1@example.com&#39;</span><span class="p">,</span><span class="s1">&#39;user2@example.com&#39;</span>
-</code></pre></div>
-<p>Set new contacts for the specified account.</p>
-<h3 id="example-4">Example 4<a class="headerlink" href="#example-4" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Get-PAAccount</span> <span class="n">-List</span> <span class="p">|</span> <span class="nb">Set-PAAccount</span> <span class="n">-Contact</span> <span class="n">user1</span><span class="nv">@example</span><span class="p">.</span><span class="n">com</span> <span class="n">-NoSwitch</span>
+<h3 id="example-3-update-all-account-contacts">Example 3: Update All Account Contacts<a class="headerlink" href="#example-3-update-all-account-contacts" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">Get-PAAccount</span> <span class="n">-List</span> <span class="p">|</span> <span class="nb">Set-PAAccount</span> <span class="n">-Contact</span> <span class="s1">&#39;user1@example.com&#39;</span> <span class="n">-NoSwitch</span>
 </code></pre></div>
 <p>Set a new contact for all known accounts without switching from the current.</p>
-<h3 id="example-5">Example 5<a class="headerlink" href="#example-5" title="Permanent link">&para;</a></h3>
+<h3 id="example-4-deactivate-account">Example 4: Deactivate Account<a class="headerlink" href="#example-4-deactivate-account" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Set-PAAccount</span> <span class="n">-Deactivate</span>
 </code></pre></div>
 <p>Deactivate the current account.</p>
-<h3 id="example-6">Example 6<a class="headerlink" href="#example-6" title="Permanent link">&para;</a></h3>
+<h3 id="example-5-new-account-key">Example 5: New Account Key<a class="headerlink" href="#example-5-new-account-key" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Set-PAAccount</span> <span class="n">-KeyRollover</span> <span class="n">-KeyLength</span> <span class="n">ec</span><span class="p">-</span><span class="n">384</span>
 </code></pre></div>
 <p>Replace the current account key with a new ECC key using P-384 curve.</p>
-<h3 id="example-7">Example 7<a class="headerlink" href="#example-7" title="Permanent link">&para;</a></h3>
+<h3 id="example-6-new-external-account-key">Example 6: New External Account Key<a class="headerlink" href="#example-6-new-external-account-key" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Set-PAAccount</span> <span class="n">-KeyRollover</span> <span class="n">-KeyFile</span> <span class="p">.\</span><span class="n">mykey</span><span class="p">.</span><span class="n">key</span>
 </code></pre></div>
 <p>Replace the current account key with a pre-generated private key.</p>
+<h3 id="example-7-alternative-plugin-encryption">Example 7: Alternative Plugin Encryption<a class="headerlink" href="#example-7-alternative-plugin-encryption" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c"># enable</span>
+<span class="nb">Set-PAAccount</span> <span class="n">-UseAltPluginEncryption</span>
+
+<span class="c"># disable</span>
+<span class="nb">Set-PAAccount</span> <span class="n">-UseAltPluginEncryption</span><span class="err">:</span><span class="nv">$false</span>
+</code></pre></div>
+<p>Enable or Disable the alternative AES plugin encryption option for orders on this account.</p>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <h3 id="-id">-ID<a class="headerlink" href="#-id" title="Permanent link">&para;</a></h3>
 <p>The account id value as returned by the ACME server.
@@ -2254,9 +2297,7 @@ These addresses will be used by the ACME server to send certificate expiration n
 <span class="nt">Accept wildcard characters</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
 </code></pre></div>
 <h3 id="-usealtpluginencryption">-UseAltPluginEncryption<a class="headerlink" href="#-usealtpluginencryption" title="Permanent link">&para;</a></h3>
-<p>If specified, the account will be configured to use a randomly generated AES key to encrypt sensitive plugin parameters on disk instead of using the OS's native encryption methods.
-This can be useful if the config is being shared across systems or platforms.
-You can revert to OS native encryption using -UseAltPluginEncryption:$false.</p>
+<p>If specified, the account will be configured to use a randomly generated AES key to encrypt sensitive plugin parameters on disk instead of using the OS's native encryption methods. This can be useful if the config is being shared across systems or platforms. You can revert to OS native encryption using <code>-UseAltPluginEncryption:$false</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SwitchParameter</span>
 <span class="nt">Parameter Sets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Edit</span>
 <span class="nt">Aliases</span><span class="p">:</span>

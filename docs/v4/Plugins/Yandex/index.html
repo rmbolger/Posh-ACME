@@ -1501,26 +1501,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1626,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1739,26 +1755,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1783,16 +1779,15 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>If you haven't done it already, <a href="https://pddimp.yandex.ru/api2/admin/get_token">generate an administrator token</a> and record it for later. It is also known as a "PDD" admin token.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>There are two parameter sets you can use with this plugin. The first uses <code>YDAdminToken</code> which is your generated admin token as a SecureString object. But it can only be used from Windows or any OS with PowerShell 6.2 or later due to a previous PowerShell <a href="https://github.com/PowerShell/PowerShell/issues/1654">bug</a>. The second parameter set uses <code>YDAdminTokenInsecure</code> for the token as a standard String object.</p>
-<p><em>Note: Users have reported DNS replication delays of up to 15 minutes. So you may have to override the default <code>DNSSleep</code> parameter with something longer like 1000.</em></p>
-<h3 id="windows-or-ps-62">Windows or PS 6.2+<a class="headerlink" href="#windows-or-ps-62" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$token</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="s2">&quot;Yandex token&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$ydParams</span> <span class="p">=</span> <span class="p">@{</span><span class="n">YDAdminToken</span><span class="p">=</span><span class="nv">$token</span><span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Yandex</span> <span class="n">-PluginArgs</span> <span class="nv">$ydParams</span> <span class="n">-DNSSleep</span> <span class="n">1000</span>
-</code></pre></div>
-<h3 id="any-os">Any OS<a class="headerlink" href="#any-os" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$ydParams</span> <span class="p">=</span> <span class="p">@{</span><span class="n">YDAdminTokenInsecure</span><span class="p">=</span><span class="s1">&#39;xxxxxxxxxxxx&#39;</span><span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Yandex</span> <span class="n">-PluginArgs</span> <span class="nv">$ydParams</span> <span class="n">-DNSSleep</span> <span class="n">1000</span>
+<p>The PDD admin token is used with the <code>YDAdminToken</code> SecureString parameter. Users have reported DNS replication delays of up to 15 minutes. So you may also have to override the default <code>DNSSleep</code> parameter with something longer like 1000.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>YDAdminTokenInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">YDAdminToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Yandex token&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Yandex</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span> <span class="n">-DNSSleep</span> <span class="n">1000</span>
 </code></pre></div>
                 
                   

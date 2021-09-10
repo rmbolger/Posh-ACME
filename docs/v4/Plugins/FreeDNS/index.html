@@ -1168,26 +1168,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
 </li>
       
     </ul>
@@ -1653,8 +1633,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1793,26 +1809,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#any-os" class="md-nav__link">
-    Any OS
-  </a>
-  
 </li>
       
     </ul>
@@ -1843,22 +1839,14 @@
 <p>Regardless of your account status, Free DNS does not currently allow you to create records beginning with an underscore (<code>_</code>) unless you own the underlying domain you're creating the records on. Because Let's Encrypt DNS challenges require creating a TXT record that starts with <code>_acme-challenge</code>, you will be unable to generate a certificate for a Free DNS hosted domain unless you own it.</p>
 <p>The only thing you can use a non-owned domain for are <a href="../../Guides/Using-DNS-Challenge-Aliases/">challenge aliases</a>. But due to the CAPTCHA limitation on Free accounts, only Premium accounts can do this. If using challenge aliases, make sure your CNAME points to a record that does <em>not</em> start with <code>_</code>.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>Your account credentials will either be used with the <code>FDCredential</code> parameter or <code>FDUsername</code>/<code>FDPassword</code> parameters. FDCredential uses a PSCredential object that should only be used on Windows or any OS that has PowerShell 6.2 or later. Any environment can use the FDUsername/FDPassword option.</p>
-<h3 id="windows-or-ps-62">Windows or PS 6.2+<a class="headerlink" href="#windows-or-ps-62" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c"># create the plugin args hashtable</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">FDCredential</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span> <span class="p">}</span>
-
-<span class="c"># generate the cert</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">FreeDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
-</code></pre></div>
-<h2 id="any-os">Any OS<a class="headerlink" href="#any-os" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c"># create the plugin args hashtable</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">FDUsername</span> <span class="p">=</span> <span class="s1">&#39;myusername&#39;</span>
-    <span class="n">FDPassword</span> <span class="p">=</span> <span class="s1">&#39;mypassword&#39;</span>
+<p>Your account credentials will be used with the <code>FDCredential</code> parameter which is a PSCredential object.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>FDUsername</code> and <code>FDPassword</code> parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">FDCredential</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span>
 <span class="p">}</span>
-
-<span class="c"># generate the cert</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">FreeDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 

@@ -1440,15 +1440,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#secure-credential-authentication-windows-andor-ps-62-only" class="md-nav__link">
-    Secure Credential Authentication (Windows and/or PS 6.2+ only)
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#plain-text-usernamepassword-authentication" class="md-nav__link">
-    Plain Text Username/Password Authentication
+  <a href="#credential-authentication" class="md-nav__link">
+    Credential Authentication
   </a>
   
 </li>
@@ -1633,8 +1626,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1757,15 +1786,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#secure-credential-authentication-windows-andor-ps-62-only" class="md-nav__link">
-    Secure Credential Authentication (Windows and/or PS 6.2+ only)
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#plain-text-usernamepassword-authentication" class="md-nav__link">
-    Plain Text Username/Password Authentication
+  <a href="#credential-authentication" class="md-nav__link">
+    Credential Authentication
   </a>
   
 </li>
@@ -1816,7 +1838,11 @@
 </ul>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p>The primary parameter you need with this plugin is <code>SdnsApiRoot</code> which is the root URL for the HTTP API such as <code>http://dns.example.com:8053</code>. Remember to add a <code>/v2</code> if you enabled the API v.1 check box. If you're using HTTPS and a self-signed certificate, you'll also need to add the <code>SdnsIgnoreCert</code> parameter.</p>
-<p>If you're not using anonymous authentication, you'll also need to specify credentials either as a PSCredential object with <code>SdnsCred</code> or plain text credentials with <code>SdnsUser</code> and <code>SdnsPassword</code>. The PSCredential option may only be used on Windows or any OS with PowerShell 6.2 or later.</p>
+<p>If you're not using anonymous authentication, you'll also need to specify credentials as a PSCredential object with <code>SdnsCred</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>SdnsUser</code> and <code>SdnsPassword</code> parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.</p>
+</div>
 <h3 id="anonymous-authentication">Anonymous Authentication<a class="headerlink" href="#anonymous-authentication" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">SdnsApiRoot</span> <span class="p">=</span> <span class="s1">&#39;http://dns.example.com:8053&#39;</span>
@@ -1824,20 +1850,11 @@
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">SimpleDNSPlus</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
-<h3 id="secure-credential-authentication-windows-andor-ps-62-only">Secure Credential Authentication (Windows and/or PS 6.2+ only)<a class="headerlink" href="#secure-credential-authentication-windows-andor-ps-62-only" title="Permanent link">&para;</a></h3>
+<h3 id="credential-authentication">Credential Authentication<a class="headerlink" href="#credential-authentication" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">SdnsApiRoot</span> <span class="p">=</span> <span class="s1">&#39;http://dns.example.com:8053&#39;</span>
     <span class="n">SdnsIgnoreCert</span> <span class="p">=</span> <span class="nv">$true</span>
     <span class="n">SdnsCred</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">SimpleDNSPlus</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
-</code></pre></div>
-<h3 id="plain-text-usernamepassword-authentication">Plain Text Username/Password Authentication<a class="headerlink" href="#plain-text-usernamepassword-authentication" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">SdnsApiRoot</span> <span class="p">=</span> <span class="s1">&#39;http://dns.example.com:8053&#39;</span>
-    <span class="n">SdnsIgnoreCert</span> <span class="p">=</span> <span class="nv">$true</span>
-    <span class="n">SdnsUser</span> <span class="p">=</span> <span class="s1">&#39;admin&#39;</span>
-    <span class="n">SdnsPassword</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx&#39;</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">SimpleDNSPlus</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>

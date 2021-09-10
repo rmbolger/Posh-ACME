@@ -1882,8 +1882,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -2308,8 +2344,7 @@
  <span class="p">[</span><span class="n">-PreferredChain</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
-<p>This is the primary function for this module and is capable executing the entire ACME certificate request process from start to finish without any prerequisite steps.
-However, utilizing the module's other functions can enable more complicated workflows and reduce the number of parameters you need to supply to this function.</p>
+<p>This is the primary function for this module and is capable executing the entire ACME certificate request process from start to finish without any prerequisite steps. However, utilizing the module's other functions can enable more complicated workflows and reduce the number of parameters you need to supply to this function.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
 <h3 id="example-1-basic-manual-certificate">Example 1: Basic Manual Certificate<a class="headerlink" href="#example-1-basic-manual-certificate" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">New-PACertificate</span> <span class="s1">&#39;example.com&#39;</span><span class="p">,</span><span class="s1">&#39;www.example.com&#39;</span> <span class="n">-AcceptTOS</span>
@@ -2453,9 +2488,7 @@ Defaults to 'ec-256'.</p>
 <span class="nt">Accept wildcard characters</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
 </code></pre></div>
 <h3 id="-directoryurl">-DirectoryUrl<a class="headerlink" href="#-directoryurl" title="Permanent link">&para;</a></h3>
-<p>Either the URL to an ACME server's "directory" endpoint or one of the supported short names.
-Currently supported short names include LE_PROD (LetsEncrypt Production v2) and LE_STAGE (LetsEncrypt Staging v2).
-Defaults to 'LE_PROD'.</p>
+<p>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">String</span>
 <span class="nt">Parameter Sets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">(All)</span>
 <span class="nt">Aliases</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">location</span>
@@ -2483,7 +2516,7 @@ Otherwise, you should specify as many plugin names as there are domains in the o
 </code></pre></div>
 <h3 id="-pluginargs">-PluginArgs<a class="headerlink" href="#-pluginargs" title="Permanent link">&para;</a></h3>
 <p>A hashtable containing the plugin arguments to use with the specified Plugin list.
-So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as @{MyText='text';MyNumber=1234}.</p>
+So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as <code>@{MyText='text';MyNumber=1234}</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Hashtable</span>
 <span class="nt">Parameter Sets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">(All)</span>
 <span class="nt">Aliases</span><span class="p">:</span>

@@ -1606,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1743,12 +1779,14 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>It is possible to use this plugin using the same credentials that are used to login to the web control panel. However, it is recommended to setup a separate password for API access and also limit the permissions.</p>
 <p>To do this, go to your <a href="https://cp.beget.com/settings/access/api">Beget API settings</a> and select "Use separate password". After setting the password, uncheck all of the Permitted Methods except for "DNS management" and click the <code>Apply</code> button.</p>
-<p><strong>IMPORTANT:</strong> There are some limitations with how the Beget API works that make it risky to use when using <a href="../../Guides/Using-DNS-Challenge-Aliases/">DNS Challenge Aliases</a>. If you need to use this plugin with challenge aliases, the value for the DnsAlias must not contain any other record types or TXT values because they will likely be deleted when the plugin attempts to create the TXT records.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>There are some limitations with how the Beget API works that make it risky to use when using <a href="../../Guides/Using-DNS-Challenge-Aliases/">DNS Challenge Aliases</a>. If you need to use this plugin with challenge aliases, the value for the DnsAlias must not contain any other record types or TXT values because they will likely be deleted when the plugin attempts to create the TXT records.</p>
+</div>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p>Your Beget credentials are passed as the username and password in a PSCredential object to the <code>BegetCredential</code> parameter.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$cred</span> <span class="p">=</span> <span class="nb">Get-Credential</span> <span class="n">-Message</span> <span class="s2">&quot;Beget Credentials&quot;</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">BegetCredential</span> <span class="p">=</span> <span class="nv">$cred</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">BegetCredential</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span> <span class="n">-Message</span> <span class="s2">&quot;Beget Credentials&quot;</span><span class="p">)</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Beget</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>

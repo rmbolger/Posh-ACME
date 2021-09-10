@@ -1399,33 +1399,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#non-windows-ps-61-and-earlier" class="md-nav__link">
-    Non-Windows PS 6.1 and earlier
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#specific-record-access" class="md-nav__link">
-    Specific Record Access
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1687,8 +1660,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1854,33 +1863,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-or-ps-62" class="md-nav__link">
-    Windows or PS 6.2+
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#non-windows-ps-61-and-earlier" class="md-nav__link">
-    Non-Windows PS 6.1 and earlier
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#specific-record-access" class="md-nav__link">
-    Specific Record Access
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1955,7 +1937,6 @@
 </tr>
 </tbody>
 </table>
-<p><em>NOTE: Only one OVH region is supported per ACME account. If you have domains in multiple regions that need certificates, please create a separate ACME account for each one.</em></p>
 <h3 id="create-application-credentials">Create Application Credentials<a class="headerlink" href="#create-application-credentials" title="Permanent link">&para;</a></h3>
 <p>Select the region that matches your account and use the appropriate "Create App" link to create an application credential for your account. Set the App Name and Description to whatever you want and click <code>Create Keys</code>. You will be presented with an <code>Application Key</code> and <code>Application Secret</code> which you should save for later.</p>
 <h3 id="generate-consumer-key">Generate Consumer Key<a class="headerlink" href="#generate-consumer-key" title="Permanent link">&para;</a></h3>
@@ -2008,35 +1989,20 @@
 <h4 id="save-the-resulting-consumer-key">Save the Resulting Consumer Key<a class="headerlink" href="#save-the-resulting-consumer-key" title="Permanent link">&para;</a></h4>
 <p>After logging in successfully, you should be redirected to a success page on the Posh-ACME wiki. Press Enter in the PowerShell Window to be presented with your Consumer Key value which you should save for later.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>The App Key value will be used with the <code>OVHAppKey</code> parameter. The App Secret and Consumer Key values will either be used with <code>OVHAppSecret</code>/<code>OVHConsumerKey</code> or <code>OVHAppSecretInsecure</code>/<code>OVHConsumerKeyInsecure</code> depending on your Operating System and PowerShell version. The first pair are SecureString values that can be used on Windows or any OS running PowerShell 6.2 or later. The second pair are standard string values that can be used on any OS.</p>
-<p><strong>IMPORTANT</strong>: If the permissions on your consumer key only allow write access to specific records, you must add <code>OVHUseModify = $true</code> to your plugin arguments. This instructs the plugin to modify existing records instead of trying to create new ones from scratch which will fail.</p>
-<h3 id="windows-or-ps-62">Windows or PS 6.2+<a class="headerlink" href="#windows-or-ps-62" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$appSecret</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s2">&quot;App Secret&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$consumerKey</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s2">&quot;Consumer Key&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+<p>The App Key value will be used with the <code>OVHAppKey</code> parameter. The App Secret and Consumer Key values will be used with the <code>OVHAppSecret</code> and <code>OVHConsumerKey</code> SecureString parameters.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>OVHAppSecretInsecure</code> and <code>OVHConsumerKeyInsecure</code> parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If the permissions on your consumer key only allow write access to specific records, you must add <code>OVHUseModify = $true</code> to your plugin arguments. This instructs the plugin to modify existing records instead of trying to create new ones from scratch which will fail.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">OVHAppKey</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxxxxx&#39;</span>
-    <span class="n">OVHAppSecret</span> <span class="p">=</span> <span class="nv">$appSecret</span>
-    <span class="n">OVHConsumerKey</span> <span class="p">=</span> <span class="nv">$consumerKey</span>
+    <span class="n">OVHAppSecret</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s2">&quot;App Secret&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+    <span class="n">OVHConsumerKey</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s2">&quot;Consumer Key&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
     <span class="n">OVHRegion</span> <span class="p">=</span> <span class="s1">&#39;ovh-eu&#39;</span>
-<span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">OVH</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
-</code></pre></div>
-<h3 id="non-windows-ps-61-and-earlier">Non-Windows PS 6.1 and earlier<a class="headerlink" href="#non-windows-ps-61-and-earlier" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">OVHAppKey</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxxxxxx&#39;</span>
-    <span class="n">OVHAppSecretInsecure</span> <span class="p">=</span> <span class="s1">&#39;yyyyyyyyyyyy&#39;</span>
-    <span class="n">OVHConsumerKeyInsecure</span> <span class="p">=</span> <span class="s1">&#39;zzzzzzzzzzzz&#39;</span>
-    <span class="n">OVHRegion</span> <span class="p">=</span> <span class="s1">&#39;ovh-eu&#39;</span>
-<span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">OVH</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
-</code></pre></div>
-<h3 id="specific-record-access">Specific Record Access<a class="headerlink" href="#specific-record-access" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">OVHAppKey</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxxxxxx&#39;</span>
-    <span class="n">OVHAppSecretInsecure</span> <span class="p">=</span> <span class="s1">&#39;yyyyyyyyyyyy&#39;</span>
-    <span class="n">OVHConsumerKeyInsecure</span> <span class="p">=</span> <span class="s1">&#39;zzzzzzzzzzzz&#39;</span>
-    <span class="n">OVHRegion</span> <span class="p">=</span> <span class="s1">&#39;ovh-eu&#39;</span>
-    <span class="n">OVHUseModify</span> <span class="p">=</span> <span class="nv">$true</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">OVH</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>

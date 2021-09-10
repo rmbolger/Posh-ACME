@@ -721,15 +721,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-validate-challenge" class="md-nav__link">
+    Example 1: Validate Challenge
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-validate-pending-http-challenges" class="md-nav__link">
+    Example 2: Validate Pending HTTP Challenges
   </a>
   
 </li>
@@ -1701,8 +1701,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1832,15 +1868,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-validate-challenge" class="md-nav__link">
+    Example 1: Validate Challenge
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-validate-pending-http-challenges" class="md-nav__link">
+    Example 2: Validate Pending HTTP Challenges
   </a>
   
 </li>
@@ -1936,14 +1972,13 @@
 </code></pre></div>
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
 <p>Use this after publishing the required resource for one of the challenges from an authorization object.
-It lets the ACME server know that it should proceed validating that challenge.</p>
+It lets the ACME server know that it should proceed validating that challenge. For ACME servers that allow retrying challenges, this can also be used to trigger a retry.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$auths</span> <span class="p">=</span> <span class="nb">Get-PAOrder</span> <span class="p">|</span> <span class="nb">Get-PAAuthorization</span>
-<span class="nb">Send-ChallengeAck</span> <span class="nv">$auths</span><span class="p">\[</span><span class="n">0</span><span class="p">\].</span><span class="n">DNS01Url</span>
+<h3 id="example-1-validate-challenge">Example 1: Validate Challenge<a class="headerlink" href="#example-1-validate-challenge" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">Send-ChallengeAck</span> <span class="n">https</span><span class="err">:</span><span class="p">//</span><span class="n">acme</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">chal</span><span class="p">/</span><span class="n">1234567</span>
 </code></pre></div>
-<p>Tell the ACME server to validate the first DNS challenge in the current order.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
+<p>Validate a specific challenge URL.</p>
+<h3 id="example-2-validate-pending-http-challenges">Example 2: Validate Pending HTTP Challenges<a class="headerlink" href="#example-2-validate-pending-http-challenges" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nv">$auths</span> <span class="p">=</span> <span class="nb">Get-PAOrder</span> <span class="p">|</span> <span class="nb">Get-PAAuthorization</span>
 <span class="nv">$httpUrls</span> <span class="p">=</span> <span class="p">(</span><span class="nv">$auths</span> <span class="p">|</span> <span class="p">?{</span> <span class="nv">$_</span><span class="p">.</span><span class="n">status</span> <span class="o">-eq</span> <span class="s1">&#39;pending&#39;</span> <span class="p">}).</span><span class="n">HTTP01Url</span>
 <span class="nv">$httpUrls</span> <span class="p">|</span> <span class="nb">Send-ChallengeAck</span>

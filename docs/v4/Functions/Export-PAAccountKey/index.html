@@ -471,8 +471,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3-backup-all-account-keys-to-the-desktop" class="md-nav__link">
-    Example 3: Backup all account keys to the desktop
+  <a href="#example-3-backup-account-keys-to-the-desktop" class="md-nav__link">
+    Example 3: Backup account keys to the desktop
   </a>
   
 </li>
@@ -1709,8 +1709,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1854,8 +1890,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3-backup-all-account-keys-to-the-desktop" class="md-nav__link">
-    Example 3: Backup all account keys to the desktop
+  <a href="#example-3-backup-account-keys-to-the-desktop" class="md-nav__link">
+    Example 3: Backup account keys to the desktop
   </a>
   
 </li>
@@ -1961,7 +1997,7 @@
 <div class="highlight"><pre><span></span><code><span class="nb">Export-PAAccountKey</span> <span class="n">12345</span> <span class="n">-OutputFile</span> <span class="p">.\</span><span class="n">mykey</span><span class="p">.</span><span class="n">pem</span> <span class="n">-Force</span>
 </code></pre></div>
 <p>Exports the specified ACME account's key to the specified file and overwrites it if necessary.</p>
-<h3 id="example-3-backup-all-account-keys-to-the-desktop">Example 3: Backup all account keys to the desktop<a class="headerlink" href="#example-3-backup-all-account-keys-to-the-desktop" title="Permanent link">&para;</a></h3>
+<h3 id="example-3-backup-account-keys-to-the-desktop">Example 3: Backup account keys to the desktop<a class="headerlink" href="#example-3-backup-account-keys-to-the-desktop" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nv">$fldr</span> <span class="p">=</span> <span class="nb">Join-Path</span> <span class="p">(</span><span class="no">[Environment]</span><span class="p">::</span><span class="n">GetFolderPath</span><span class="p">(</span><span class="s1">&#39;Desktop&#39;</span><span class="p">))</span> <span class="s1">&#39;AcmeAccountKeys&#39;</span>
 <span class="nb">New-Item</span> <span class="n">-ItemType</span> <span class="n">Directory</span> <span class="n">-Force</span> <span class="n">-Path</span> <span class="nv">$fldr</span> <span class="p">|</span> <span class="nb">Out-Null</span>
 <span class="nb">Get-PAAccount</span> <span class="n">-List</span> <span class="p">|</span> <span class="p">%{</span>

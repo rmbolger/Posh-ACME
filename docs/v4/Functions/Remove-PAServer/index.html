@@ -673,8 +673,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-remove-server" class="md-nav__link">
+    Example 1: Remove Server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-remove-and-deactivate-accounts" class="md-nav__link">
+    Example 2: Remove and Deactivate Accounts
   </a>
   
 </li>
@@ -1702,8 +1709,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1833,8 +1876,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-remove-server" class="md-nav__link">
+    Example 1: Remove Server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-remove-and-deactivate-accounts" class="md-nav__link">
+    Example 2: Remove and Deactivate Accounts
   </a>
   
 </li>
@@ -1938,19 +1988,20 @@
  <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
-<p>This function removes the ACME server from the local profile which also removes any associated accounts, orders and certificates.
-It will not remove or cleanup copies of certificates that have been exported or installed elsewhere.
-It will not revoke any certificates.
-It will not deactivate the accounts on the ACME server unless the <code>-DeactivateAccounts</code> switch is specified.</p>
+<p>This function removes the ACME server from the local profile which also removes any associated accounts, orders and certificates. It will not remove or cleanup copies of certificates that have been exported or installed elsewhere.
+It will not revoke any certificates. It will not deactivate the accounts on the ACME server unless the <code>-DeactivateAccounts</code> switch is specified.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
+<h3 id="example-1-remove-server">Example 1: Remove Server<a class="headerlink" href="#example-1-remove-server" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Remove-PAServer</span> <span class="n">LE_STAGE</span>
 </code></pre></div>
-<p>Remove the staging server without deactivating accounts.</p>
+<p>Remove the specified server without deactivating accounts.</p>
+<h3 id="example-2-remove-and-deactivate-accounts">Example 2: Remove and Deactivate Accounts<a class="headerlink" href="#example-2-remove-and-deactivate-accounts" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">Get-PAServer</span> <span class="p">|</span> <span class="nb">Remove-PAServer</span> <span class="n">-DeactivateAccounts</span> <span class="n">-Force</span>
+</code></pre></div>
+<p>Remove the current server and deactivates accounts without confirmation.</p>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <h3 id="-directoryurl">-DirectoryUrl<a class="headerlink" href="#-directoryurl" title="Permanent link">&para;</a></h3>
-<p>Either the URL to an ACME server's "directory" endpoint or one of the supported short names.
-Currently supported short names include LE_PROD (LetsEncrypt Production v2) and LE_STAGE (LetsEncrypt Staging v2).</p>
+<p>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">String</span>
 <span class="nt">Parameter Sets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">(All)</span>
 <span class="nt">Aliases</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">location</span>

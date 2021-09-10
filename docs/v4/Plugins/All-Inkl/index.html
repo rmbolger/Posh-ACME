@@ -1606,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1746,10 +1782,9 @@
 <p>In any case you have to provide the username with the <code>KasUsername</code> parameter.\
 In addition you can provide the password as SecureString in plain text by using the <code>KasPwd</code> parameter or as sha1 hash by using the <code>KasPwdHash</code> parameter. In both cases this plugin only sends a sha1 hash of your password to the All-Inkl KAS API.</p>
 <p>Alternatively you can handle the authentication yourself and provide a valid session id by specifying the <code>KasSession</code> parameter as SecureString.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$pwd</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="s2">&quot;All-Inkl KAS Password&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">KasUsername</span> <span class="p">=</span> <span class="s1">&#39;myusername&#39;</span>
-    <span class="n">KasPwd</span> <span class="p">=</span> <span class="nv">$pwd</span>
+    <span class="n">KasPwd</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;KAS Password&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">All-Inkl</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>

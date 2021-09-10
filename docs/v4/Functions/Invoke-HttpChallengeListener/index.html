@@ -577,22 +577,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-answer-for-current-order" class="md-nav__link">
+    Example 1: Answer for Current Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-specific-order-with-options" class="md-nav__link">
+    Example 2: Specific Order with Options
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-using-other-prefixes" class="md-nav__link">
+    Example 3: Using Other Prefixes
   </a>
   
 </li>
@@ -1750,8 +1750,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1881,22 +1917,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-answer-for-current-order" class="md-nav__link">
+    Example 1: Answer for Current Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-specific-order-with-options" class="md-nav__link">
+    Example 2: Specific Order with Options
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-using-other-prefixes" class="md-nav__link">
+    Example 3: Using Other Prefixes
   </a>
   
 </li>
@@ -2034,21 +2070,21 @@
  <span class="p">[</span><span class="n">-Port</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-ListenerPrefixes</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">[]&gt;]</span> <span class="p">[</span><span class="n">-WhatIf</span><span class="p">]</span> <span class="p">[</span><span class="n">-Confirm</span><span class="p">]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
-<p>Uses System.Net.HttpListener to answer http-01 ACME challenges for the current or specified order.
+<p>Uses <code>System.Net.HttpListener</code> to answer http-01 ACME challenges for the current or specified order.
 If MainDomain is not specified, the current Order is used.</p>
 <p>If running on Windows with non-admin privileges, Access Denied errors may be thrown unless a URL reservation is added using <code>netsh</code> that matches the HttpListener prefix that will be used. The default wildcard prefix is <code>http://+/.well-known/acme-challenge</code> and the netsh command might look something like this:</p>
 <div class="highlight"><pre><span></span><code>netsh http add urlacl url=http://+/.well-known/acme-challenge/ user=Everyone
 </code></pre></div>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
+<h3 id="example-1-answer-for-current-order">Example 1: Answer for Current Order<a class="headerlink" href="#example-1-answer-for-current-order" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Invoke-HttpChallengeListener</span>
 </code></pre></div>
 <p>Start listener on default port 80 for pending challenges for the current order.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Invoke-HttpChallengeListener</span> <span class="n">-MainDomain</span> <span class="s1">&#39;test.example.com&#39;</span> <span class="n">-Port</span> <span class="n">8080</span> <span class="n">-ListenerTimeout</span> <span class="n">30</span>
+<h3 id="example-2-specific-order-with-options">Example 2: Specific Order with Options<a class="headerlink" href="#example-2-specific-order-with-options" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">Invoke-HttpChallengeListener</span> <span class="n">-MainDomain</span> <span class="s1">&#39;example.com&#39;</span> <span class="n">-Port</span> <span class="n">8080</span> <span class="n">-ListenerTimeout</span> <span class="n">30</span>
 </code></pre></div>
 <p>Start listener on port 8080 with a timeout of 30 seconds for the specified order.</p>
-<h3 id="example-3">Example 3<a class="headerlink" href="#example-3" title="Permanent link">&para;</a></h3>
+<h3 id="example-3-using-other-prefixes">Example 3: Using Other Prefixes<a class="headerlink" href="#example-3-using-other-prefixes" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nv">$prefixes</span> <span class="p">=</span> <span class="s1">&#39;http://example.com/.well-known/acme-challenge/&#39;</span><span class="p">,</span><span class="s1">&#39;http://www.example.com/.well-known/acme-challenge&#39;</span>
 <span class="nb">Invoke-HttpChallengeListener</span> <span class="n">-ListenerPrefixes</span> <span class="nv">$prefixes</span>
 </code></pre></div>
@@ -2151,9 +2187,10 @@ The cmdlet is not run.</p>
 <h3 id="poshacmepaauthorization">PoshACME.PAAuthorization<a class="headerlink" href="#poshacmepaauthorization" title="Permanent link">&para;</a></h3>
 <p>The authorization object associated with the order.</p>
 <h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
-<blockquote>
-<p><strong>DEPRECATION NOTICE:</strong> This function is deprecated and may be removed in a future major version. Please migrate your scripts to use the <code>WebSelfHost</code> plugin.</p>
-</blockquote>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This function is deprecated and may be removed in a future major version. Please migrate your scripts to use the <code>WebSelfHost</code> plugin.</p>
+</div>
 <h2 id="related-links">Related Links<a class="headerlink" href="#related-links" title="Permanent link">&para;</a></h2>
 <p><a href="../Get-PAOrder/">Get-PAOrder</a></p>
 <p><a href="../Get-PAAuthorization/">Get-PAAuthorization</a></p>

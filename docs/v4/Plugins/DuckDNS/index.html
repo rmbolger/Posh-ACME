@@ -1093,26 +1093,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-andor-ps-62-only-secure-string" class="md-nav__link">
-    Windows and/or PS 6.2+ only (secure string)
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os-default-string" class="md-nav__link">
-    Any OS (default string)
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1626,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1739,26 +1755,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-andor-ps-62-only-secure-string" class="md-nav__link">
-    Windows and/or PS 6.2+ only (secure string)
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os-default-string" class="md-nav__link">
-    Any OS (default string)
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1785,19 +1781,13 @@
 <p>So if you're requesting a cert for <code>www.mydomain.duckdns.org</code> and <code>www.myotherdomain.duckdns.org</code>, you would need both <code>mydomain</code> and <code>myotherdomain</code>.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p>Duck DNS has a rather annoying limitation that there can only ever be a single TXT record associated with all domains on your account. This means that if you request a certificate with multiple names, each name must be validated separately instead of just creating all of the TXT records at once and validating them together. This can make the entire process take a lot longer depending on how many names are in the certificate. In order for Posh-ACME to process the validations in serial rather than parallel, you must specify the <code>UseSerialValidation</code> switch in your call to <code>New-PACertificate</code>.</p>
-<p>Your API token is specified using <code>DuckToken</code> or <code>DuckTokenInsecure</code> parameter. <code>DuckToken</code> is a SecureString value and should only be used from Windows or any OS with PowerShell 6.2 or later. <code>DuckTokenInsecure</code> may be used with any OS. You also need to specify the domain subnames using the <code>DuckDomain</code> parameter.</p>
-<h3 id="windows-andor-ps-62-only-secure-string">Windows and/or PS 6.2+ only (secure string)<a class="headerlink" href="#windows-andor-ps-62-only-secure-string" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$secToken</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s2">&quot;Token&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">DuckToken</span> <span class="p">=</span> <span class="nv">$secToken</span>
-    <span class="n">DuckDomain</span> <span class="p">=</span> <span class="s1">&#39;mydomain1&#39;</span>
-<span class="p">}</span>
-<span class="nv">$certNames</span> <span class="p">=</span> <span class="s1">&#39;mydomain1.duckdns.org&#39;</span><span class="p">,</span><span class="s1">&#39;www.mydomain1.duckdns.org&#39;</span>
-<span class="nb">New-PACertificate</span> <span class="nv">$certNames</span> <span class="n">-UseSerialValidation</span> <span class="n">-Plugin</span> <span class="n">DuckDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
-</code></pre></div>
-<h3 id="any-os-default-string">Any OS (default string)<a class="headerlink" href="#any-os-default-string" title="Permanent link">&para;</a></h3>
+<p>Your API token is specified using the <code>DuckToken</code> SecureString parameter. You also need to specify the domain subnames using the <code>DuckDomain</code> parameter.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>DuckTokenInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">DuckTokenInsecure</span> <span class="p">=</span> <span class="s1">&#39;token-value&#39;</span>
+    <span class="n">DuckToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s2">&quot;Token&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
     <span class="n">DuckDomain</span> <span class="p">=</span> <span class="s1">&#39;mydomain1&#39;</span>
 <span class="p">}</span>
 <span class="nv">$certNames</span> <span class="p">=</span> <span class="s1">&#39;mydomain1.duckdns.org&#39;</span><span class="p">,</span><span class="s1">&#39;www.mydomain1.duckdns.org&#39;</span>

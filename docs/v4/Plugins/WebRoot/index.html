@@ -1626,8 +1626,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1787,7 +1823,9 @@
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p>The web root is specified using the <code>WRPath</code> parameter. If you don't want the plugin to put the files in a <code>\.well-known\acme-challenge</code> sub-folder, you must also specify <code>WRExactPath = $true</code> in your plugin args.</p>
 <h3 id="default-functionality">Default functionality<a class="headerlink" href="#default-functionality" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">WRPath</span> <span class="p">=</span> <span class="s1">&#39;C:\inetpub\wwwroot&#39;</span> <span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">WRPath</span> <span class="p">=</span> <span class="s1">&#39;C:\inetpub\wwwroot&#39;</span>
+<span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">WebRoot</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
 <h2 id="no-sub-folder-example">No sub-folder example<a class="headerlink" href="#no-sub-folder-example" title="Permanent link">&para;</a></h2>

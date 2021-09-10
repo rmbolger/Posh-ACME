@@ -1646,8 +1646,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1823,10 +1859,10 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <h3 id="windows-only-prerequisites">Windows Only Prerequisites<a class="headerlink" href="#windows-only-prerequisites" title="Permanent link">&para;</a></h3>
 <p>When running on Windows, the HttpListener class depends on a kernel mode web server called http.sys. Because it's a system-level service, non-administrator users can't use it without an explicit URL reservation that gives them permission. Open an elevated PowerShell session and run the following to see the current list of URL reservations.</p>
-<div class="highlight"><pre><span></span><code>netsh http show urlacl
+<div class="highlight"><pre><span></span><code><span class="go">netsh http show urlacl</span>
 </code></pre></div>
 <p>Modern Windows versions will have a bunch of these even in a default install for various system components and services. We need to add one that matches what the plugin will be trying to use. By default, it will use <code>http://+:80/.well-known/acme-challenge/</code>. The easiest thing to do is create the reservation and give permissions to "Everyone". It's perfectly reasonable to only grant permissions to the user or group who will need it as well. But you will need to <a href="https://docs.microsoft.com/en-us/windows/win32/http/add-urlacl">adjust the command line</a> appropriately with the target user/group instead of an sddl string.</p>
-<div class="highlight"><pre><span></span><code>netsh http add urlacl url=http://+:80/.well-known/acme-challenge/ sddl=D:(A;;GX;;;S-1-1-0)
+<div class="highlight"><pre><span></span><code><span class="go">netsh http add urlacl url=http://+:80/.well-known/acme-challenge/ sddl=D:(A;;GX;;;S-1-1-0)</span>
 </code></pre></div>
 <p>If you will be running the listener on an alternate port, make sure your reservation also uses the alternate port. Also keep in mind that the ACME validation server will always request challenges on port 80. So if you're using an alternate port, make sure there's an appropriate port forward if it's behind NAT or an HTTP redirect if another server is in front of it.</p>
 <h3 id="additional-considerations">Additional Considerations<a class="headerlink" href="#additional-considerations" title="Permanent link">&para;</a></h3>

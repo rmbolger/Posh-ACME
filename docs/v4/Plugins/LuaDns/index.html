@@ -1285,26 +1285,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows" class="md-nav__link">
-    Windows
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#non-windows" class="md-nav__link">
-    Non-Windows
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1626,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1739,26 +1755,6 @@
     Using the Plugin
   </a>
   
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows" class="md-nav__link">
-    Windows
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#non-windows" class="md-nav__link">
-    Non-Windows
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1783,15 +1779,15 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>First, go to the <a href="https://api.luadns.com/settings">Account Settings</a> page and make sure the <code>Enable API Access</code> box is checked. Then click <code>Show Token</code> to see the API token for your account. You'll also need the email address associated with the account.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<h3 id="windows">Windows<a class="headerlink" href="#windows" title="Permanent link">&para;</a></h3>
-<p>We need to put the account email address and API token in a PSCredential object and use it with the <code>LuaCredential</code> parameter.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$cred</span> <span class="p">=</span> <span class="nb">Get-Credential</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">LuaDns</span> <span class="n">-PluginArgs</span> <span class="p">@{</span><span class="n">LuaCredential</span><span class="p">=</span><span class="nv">$cred</span><span class="p">}</span>
-</code></pre></div>
-<h3 id="non-windows">Non-Windows<a class="headerlink" href="#non-windows" title="Permanent link">&para;</a></h3>
-<p>We need to set <code>LuaUsername</code> as the account email address and <code>LuaPassword</code> as the API token.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$pargs</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">LuaUsername</span> <span class="p">=</span> <span class="s1">&#39;user@example.com&#39;</span><span class="p">;</span> <span class="n">LuaPassword</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxxxxxx&#39;</span> <span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">LuaDns</span> <span class="n">-PluginArgs</span> <span class="nv">$pargs</span>
+<p>The account email address and API token should be used to create a PSCredential object that you'll pass to the <code>LuaCredential</code> parameter.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>LuaUsername</code> and <code>LuaPassword</code> parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">LuaCredential</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">LuaDns</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 
                   

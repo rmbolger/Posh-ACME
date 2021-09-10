@@ -1606,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1744,8 +1780,10 @@
 <p>Authentication against the UKFast SafeDNS API requires an <code>API Application Key</code>, which can be obtained from the <a href="https://my.ukfast.co.uk/applications/index.php">API Applications</a> portal. Additionally the key must be given <code>READ/WRITE</code> permission for the SafeDNS service.</p>
 <p>For further documentation on working with API keys, please visit the <a href="https://developers.ukfast.io/getting-started#registering-applications">UKFast Developer Centre</a>.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>The API key will be used with the <code>UKFastApiKey</code> parameter. This is a SecureString. </p>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span><span class="n">UKFastApiKey</span><span class="p">=(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Enter API Key&quot;</span> <span class="n">-AsSecureString</span><span class="p">)}</span>
+<p>The API key will be used with the <code>UKFastApiKey</code> SecureString parameter.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">UKFastApiKey</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Enter API Key&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">UKFast</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 

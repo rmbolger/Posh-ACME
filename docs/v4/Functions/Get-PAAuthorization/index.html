@@ -493,22 +493,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-specific-authorization" class="md-nav__link">
+    Example 1: Specific Authorization
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-2-order-authorizations" class="md-nav__link">
+    Example 2: Order Authorizations
   </a>
   
 </li>
@@ -1728,8 +1721,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1859,22 +1888,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-specific-authorization" class="md-nav__link">
+    Example 1: Specific Authorization
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-2-order-authorizations" class="md-nav__link">
+    Example 2: Order Authorizations
   </a>
   
 </li>
@@ -1991,18 +2013,14 @@
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
 <p>Returns details such as fqdn, status, expiration, and challenges for one or more ACME authorizations.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
+<h3 id="example-1-specific-authorization">Example 1: Specific Authorization<a class="headerlink" href="#example-1-specific-authorization" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-PAAuthorization</span> <span class="n">https</span><span class="err">:</span><span class="p">//</span><span class="n">acme</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">authz</span><span class="p">/</span><span class="n">1234567</span>
 </code></pre></div>
 <p>Get the authorization for the specified URL.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
+<h3 id="example-2-order-authorizations">Example 2: Order Authorizations<a class="headerlink" href="#example-2-order-authorizations" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-PAOrder</span> <span class="p">|</span> <span class="nb">Get-PAAuthorization</span>
 </code></pre></div>
 <p>Get the authorizations for the current order on the current account.</p>
-<h3 id="example-3">Example 3<a class="headerlink" href="#example-3" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Get-PAOrder</span> <span class="n">-List</span> <span class="p">|</span> <span class="nb">Get-PAAuthorization</span>
-</code></pre></div>
-<p>Get the authorizations for all orders on the current account.</p>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <h3 id="-authurls">-AuthURLs<a class="headerlink" href="#-authurls" title="Permanent link">&para;</a></h3>
 <p>One or more authorization URLs.

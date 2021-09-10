@@ -1700,8 +1700,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1928,15 +1964,17 @@
                 
                 <h1 id="how-to-use-the-route53-dns-plugin">How To Use the Route53 DNS Plugin<a class="headerlink" href="#how-to-use-the-route53-dns-plugin" title="Permanent link">&para;</a></h1>
 <p>This plugin works against the <a href="https://aws.amazon.com/route53/">AWS Route53</a> DNS provider. It is assumed that you already have an AWS account with at least one DNS zone. The setup portion of this guide also assumes you have access to create IAM users/roles. If you have been given access credentials by your AWS admin, you may need the admin to create the IAM policies necessary for you to edit the zone TXT records.</p>
-<blockquote>
-<p><strong><em>NOTE:</em></strong> You may use this plugin without the AWS PowerShell module installed <em>unless</em> you use the profile name authentication method. In that case, you will either need the <a href="https://www.powershellgallery.com/packages/AWS.Tools.Route53/">Aws.Tools.Route53</a> or the older <a href="https://www.powershellgallery.com/packages/AWSPowerShell">AWSPowerShell</a> or <a href="https://www.powershellgallery.com/packages/AWSPowerShell.NetCore">AWSPowerShell.NetCore</a> module depending on your environment. More details can be found in the <a href="https://docs.aws.amazon.com/powershell/">AWS PowerShell documentation</a>.</p>
-</blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You may use this plugin without the AWS PowerShell module installed <em>unless</em> you use the profile name authentication method. In that case, you will either need the <a href="https://www.powershellgallery.com/packages/AWS.Tools.Route53/">Aws.Tools.Route53</a> or the older <a href="https://www.powershellgallery.com/packages/AWSPowerShell">AWSPowerShell</a> or <a href="https://www.powershellgallery.com/packages/AWSPowerShell.NetCore">AWSPowerShell.NetCore</a> module depending on your environment. More details can be found in the <a href="https://docs.aws.amazon.com/powershell/">AWS PowerShell documentation</a>.</p>
+</div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>There are generally two different ways to use this plugin depending on whether you are running it from outside AWS or inside from something like an EC2 instance. When outside, you need to specify explicit credentials for an IAM account that has permissions to modify a zone. When inside, you may instead choose to authenticate using an <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html">IAM Role</a>. When using explicit credentials, a personal high-level account will work, but it's a better idea to create a dedicated user with the minimum necessary privileges to create the TXT records necessary for ACME challenges.</p>
 <p>If you already have your policies, users, groups, and roles setup, skip the rest of this section. Otherwise, read on for examples.</p>
-<blockquote>
-<p><strong><em>NOTE:</em></strong> These examples require either the <a href="https://www.powershellgallery.com/packages/AWS.Tools.IdentityManagement">AWS.Tools.IdentityManagement</a> module or the older <a href="https://www.powershellgallery.com/packages/AWSPowerShell">AWSPowerShell</a> or <a href="https://www.powershellgallery.com/packages/AWSPowerShell.NetCore">AWSPowerShell.NetCore</a> module depending on your environment.</p>
-</blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These examples require either the <a href="https://www.powershellgallery.com/packages/AWS.Tools.IdentityManagement">AWS.Tools.IdentityManagement</a> module or the older <a href="https://www.powershellgallery.com/packages/AWSPowerShell">AWSPowerShell</a> or <a href="https://www.powershellgallery.com/packages/AWSPowerShell.NetCore">AWSPowerShell.NetCore</a> module depending on your environment.</p>
+</div>
 <h3 id="setup-admin-credentials">Setup Admin Credentials<a class="headerlink" href="#setup-admin-credentials" title="Permanent link">&para;</a></h3>
 <p>You'll need to create an Access key and associated secret for your account to use with the AWS module. Once you have those, use the following commands to save them to a local profile and set it as the default credential. If you have previously configured your AWS credentials into a profile via <code>Set-AWSCredentials</code>, skip that command below and replace references to the profile name in the <code>Initialize-AWSDefaultConfiguration</code> command with your own.</p>
 <div class="highlight"><pre><span></span><code><span class="nb">Set-AWSCredential</span> <span class="n">-StoreAs</span> <span class="s1">&#39;dnsadmin&#39;</span> <span class="n">-AccessKey</span> <span class="s1">&#39;xxxxxxxx&#39;</span> <span class="n">-SecretKey</span> <span class="s1">&#39;xxxxxxxx&#39;</span>
@@ -2003,10 +2041,15 @@
 <p>Now you'd need to attach the role with your EC2 instance or launch a new instance with the role pre-attached. More details on that can be found <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html">here</a>.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p>If you are using explicit credentials, you may send them directly to the plugin via <code>R53AccessKey</code> and <code>R53SecretKey</code> parameters. A SecureString value is required for <code>R53SecretKey</code>. If you lost the keys, you can re-generate them from the AWS IAM console. But there's no way to retrieve an existing secret key value.</p>
-<p><em>NOTE: The <code>R53SecretKeyInsecure</code> parameter is still supported but should be considered deprecated and may be removed in a future major release.</em></p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>R53SecretKeyInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
 <h3 id="explicit-credentials">Explicit Credentials<a class="headerlink" href="#explicit-credentials" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$secKey</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s2">&quot;Secret Key&quot;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span><span class="n">R53AccessKey</span><span class="p">=</span><span class="s1">&#39;xxxxxxxx&#39;</span><span class="p">;</span><span class="n">R53SecretKey</span><span class="p">=</span><span class="nv">$secKey</span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">R53AccessKey</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxx&#39;</span>
+    <span class="n">R53SecretKey</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Secret Key&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Route53</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
 <h3 id="aws-powershell-module-profile">AWS Powershell Module Profile<a class="headerlink" href="#aws-powershell-module-profile" title="Permanent link">&para;</a></h3>

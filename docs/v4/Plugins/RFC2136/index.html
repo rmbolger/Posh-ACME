@@ -1386,22 +1386,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#windows-or-powershell-62-with-tsig-and-explicit-nsupdate-path" class="md-nav__link">
-    Windows or PowerShell 6.2+ with TSIG and explicit nsupdate path
+  <a href="#tsig-and-explicit-nsupdate-path" class="md-nav__link">
+    TSIG and explicit nsupdate path
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#any-os-with-tsig-and-nsupdate-in-path" class="md-nav__link">
-    Any OS with TSIG and nsupdate in PATH
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os-with-unauthenticated-update-and-alternate-port" class="md-nav__link">
-    Any OS with unauthenticated update and alternate port
+  <a href="#unauthenticated-with-nsupdate-in-path-and-alternate-port" class="md-nav__link">
+    Unauthenticated with nsupdate in PATH and alternate port
   </a>
   
 </li>
@@ -1646,8 +1639,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1776,22 +1805,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#windows-or-powershell-62-with-tsig-and-explicit-nsupdate-path" class="md-nav__link">
-    Windows or PowerShell 6.2+ with TSIG and explicit nsupdate path
+  <a href="#tsig-and-explicit-nsupdate-path" class="md-nav__link">
+    TSIG and explicit nsupdate path
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#any-os-with-tsig-and-nsupdate-in-path" class="md-nav__link">
-    Any OS with TSIG and nsupdate in PATH
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#any-os-with-unauthenticated-update-and-alternate-port" class="md-nav__link">
-    Any OS with unauthenticated update and alternate port
+  <a href="#unauthenticated-with-nsupdate-in-path-and-alternate-port" class="md-nav__link">
+    Unauthenticated with nsupdate in PATH and alternate port
   </a>
   
 </li>
@@ -1822,7 +1844,7 @@
 <p>This plugin works against any DNS provider that supports dynamic updates using the protocol specified in <a href="https://tools.ietf.org/html/rfc2136">RFC 2136</a>. Both unauthenticated and TSIG authenticated updates are supported.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>It is beyond the scope of this guide to explain how to configure your DNS server to accept dynamic updates or generate a TSIG key to use for authentication. But if you're using BIND, the <a href="https://bind9.readthedocs.io/en/latest/reference.html#dynamic-update-policies">Dynamic Update Policies</a> section of the official docs is a good place to start. There are also a variety of tutorials available with a quick web search.</p>
-<p>The plugin does not currently support Kerberos (GSS-TSIG) based updates. You must either use unauthenticated updates with an IP whitelist or TSIG authenticated updates using a key type supported by your DNS server and the <code>nsupdate</code> utility. As of this writing, the current stable version of BIND is 9.16.1 and supports key types using the following algorithms:</p>
+<p>The plugin does not currently support Kerberos (GSS-TSIG) based updates. You must either use unauthenticated updates with an IP whitelist or TSIG authenticated updates using a key type supported by your DNS server and the <code>nsupdate</code> utility. As of this writing, the current stable version of BIND is 9.16.20 and supports key types using the following algorithms:</p>
 <ul>
 <li><code>hmac-md5</code></li>
 <li><code>hmac-sha1</code></li>
@@ -1834,38 +1856,36 @@
 <p>When using a TSIG key, you will typically have 3 values; a key name, a key type from the list above, and a Base64 encoded key value. You will need to supply all three as plugin parameters.</p>
 <h3 id="plugin-dependencies">Plugin Dependencies<a class="headerlink" href="#plugin-dependencies" title="Permanent link">&para;</a></h3>
 <p>Due to the inexplicable lack of good native DNS libraries within PowerShell/.NET, this plugin relies on the <code>nsupdate</code> utility which is part of the ISC BIND distribution. Most modern Linux distributions will have this installed by default, but double check to be sure. <strong>On Windows, you will need to download and install the utility.</strong> Go to the <a href="https://www.isc.org/download/">ISC BIND Downloads</a> page and download the current stable version for Windows. You don't actually need to run the installer. It is sufficient to simply unzip the archive and either add that folder to your <code>PATH</code> environment variable or specify the full path to <code>nsupdate.exe</code> in the plugin arguments. <em>(Adding the folder to your PATH also gives you easy access to the <code>dig</code> utility which many DNS admins prefer over nslookup)</em></p>
-<blockquote>
-<p><strong><em>NOTE:</em></strong> Some users have reported needing to install Visual C++ Redistributable libraries in order for the unzip-and-run method to work. Many systems will already have these installed. But if not, among the files unzipped should be a <code>vcredist_x64.exe</code> installer you can use. You can test by running <code>nsupdate -V</code> to check the version.</p>
-</blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some users have reported needing to install Visual C++ Redistributable libraries in order for the unzip-and-run method to work. Many systems will already have these installed. But if not, among the files unzipped should be a <code>vcredist_x64.exe</code> installer you can use. You can test by running <code>nsupdate -V</code> to check the version.</p>
+</div>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p>When using unauthenticated updates, the only required parameter is <code>DDNSNameserver</code> which is the IP or hostname of the authoritative DNS server that will accept dynamic updates for the zone your TXT record lives in. You may also provide <code>DDNSPort</code> if your server is not listening on the standard port 53.</p>
-<p>When using TSIG authenticated updates, in addition to the previous parameters you must also supply <code>DDNSKeyName</code>, <code>DDNSKeyType</code>, and one of two methods to provide the key value. The <code>DDNSKeyValue</code> parameter is a SecureString object which can only be used from Windows or any OS with PowerShell 6.2 or later. The other option is <code>DDNSKeyValueInsecure</code> which is a standard String.</p>
+<p>When using TSIG authenticated updates, in addition to the previous parameters you must also supply <code>DDNSKeyName</code>, <code>DDNSKeyType</code>, and <code>DDNSKeyValue</code> which is a SecureString object.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>DDNSKeyValueInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
 <p>If the <code>nsupdate</code> utility is not in your PATH environment variable, you must also supply the full path to it using the <code>DDNSExePath</code> parameter.</p>
 <p>There is an optional <code>DDNSZone</code> parameter which allows you to specify the zone(s) the records will be added to. But this shouldn't normally be necessary. See <a href="https://github.com/rmbolger/Posh-ACME/issues/307">issue #307</a> for more info.</p>
 <p>Here are a few examples using different combinations of parameters.</p>
-<h3 id="windows-or-powershell-62-with-tsig-and-explicit-nsupdate-path">Windows or PowerShell 6.2+ with TSIG and explicit nsupdate path<a class="headerlink" href="#windows-or-powershell-62-with-tsig-and-explicit-nsupdate-path" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$keyVal</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="s1">&#39;TSIG Key Value&#39;</span> <span class="n">-AsSecureString</span>
-<span class="nv">$params</span> <span class="p">=</span> <span class="p">@{</span>
+<h3 id="tsig-and-explicit-nsupdate-path">TSIG and explicit nsupdate path<a class="headerlink" href="#tsig-and-explicit-nsupdate-path" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">DDNSNameserver</span> <span class="p">=</span> <span class="s1">&#39;ns.example.com&#39;</span>
     <span class="n">DDNSKeyName</span> <span class="p">=</span> <span class="s1">&#39;mykey&#39;</span>
     <span class="n">DDNSKeyType</span> <span class="p">=</span> <span class="s1">&#39;hmac-sha256&#39;</span>
-    <span class="n">DDNSKeyValue</span> <span class="p">=</span> <span class="nv">$keyVal</span>
+    <span class="n">DDNSKeyValue</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;TSIG Key Value&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
     <span class="n">DDNSExePath</span> <span class="p">=</span> <span class="s1">&#39;C:\BIND\nsupdate.exe&#39;</span>
 <span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">RFC2136</span> <span class="n">-PluginArgs</span> <span class="nv">$params</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">RFC2136</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
-<h3 id="any-os-with-tsig-and-nsupdate-in-path">Any OS with TSIG and nsupdate in PATH<a class="headerlink" href="#any-os-with-tsig-and-nsupdate-in-path" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$params</span> <span class="p">=</span> <span class="p">@{</span>
+<h3 id="unauthenticated-with-nsupdate-in-path-and-alternate-port">Unauthenticated with nsupdate in PATH and alternate port<a class="headerlink" href="#unauthenticated-with-nsupdate-in-path-and-alternate-port" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">DDNSNameserver</span> <span class="p">=</span> <span class="s1">&#39;ns.example.com&#39;</span>
-    <span class="n">DDNSKeyName</span> <span class="p">=</span> <span class="s1">&#39;mykey&#39;</span>
-    <span class="n">DDNSKeyType</span> <span class="p">=</span> <span class="s1">&#39;hmac-sha256&#39;</span>
-    <span class="n">DDNSKeyValueInsecure</span> <span class="p">=</span> <span class="s1">&#39;bgBvAHQAIABhACAAcgBlAGEAbAAgAGsAZQB5AA==&#39;</span>
+    <span class="n">DDNSPort</span> <span class="p">=</span> <span class="n">54</span>
 <span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">RFC2136</span> <span class="n">-PluginArgs</span> <span class="nv">$params</span>
-</code></pre></div>
-<h3 id="any-os-with-unauthenticated-update-and-alternate-port">Any OS with unauthenticated update and alternate port<a class="headerlink" href="#any-os-with-unauthenticated-update-and-alternate-port" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$params</span> <span class="p">=</span> <span class="p">@{</span><span class="n">DDNSNameserver</span><span class="p">=</span><span class="s1">&#39;ns.example.com&#39;</span><span class="p">;</span> <span class="n">DDNSPort</span><span class="p">=</span><span class="n">54</span><span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">RFC2136</span> <span class="n">-PluginArgs</span> <span class="nv">$params</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">RFC2136</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 
                   

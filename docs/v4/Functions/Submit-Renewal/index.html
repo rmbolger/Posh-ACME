@@ -820,36 +820,36 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-renew-current" class="md-nav__link">
+    Example 1: Renew Current
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-force-specific-order" class="md-nav__link">
+    Example 2: Force Specific Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-all-orders" class="md-nav__link">
+    Example 3: All Orders
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-4" class="md-nav__link">
-    Example 4
+  <a href="#example-4-all-orders-on-all-accounts" class="md-nav__link">
+    Example 4: All Orders on All Accounts
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-5" class="md-nav__link">
-    Example 5
+  <a href="#example-5-update-pluginargs" class="md-nav__link">
+    Example 5: Update PluginArgs
   </a>
   
 </li>
@@ -1791,8 +1791,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1949,36 +1985,36 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-1" class="md-nav__link">
-    Example 1
+  <a href="#example-1-renew-current" class="md-nav__link">
+    Example 1: Renew Current
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-2" class="md-nav__link">
-    Example 2
+  <a href="#example-2-force-specific-order" class="md-nav__link">
+    Example 2: Force Specific Order
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-3" class="md-nav__link">
-    Example 3
+  <a href="#example-3-all-orders" class="md-nav__link">
+    Example 3: All Orders
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-4" class="md-nav__link">
-    Example 4
+  <a href="#example-4-all-orders-on-all-accounts" class="md-nav__link">
+    Example 4: All Orders on All Accounts
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-5" class="md-nav__link">
-    Example 5
+  <a href="#example-5-update-pluginargs" class="md-nav__link">
+    Example 5: Update PluginArgs
   </a>
   
 </li>
@@ -2123,29 +2159,31 @@
 <div class="highlight"><pre><span></span><code><span class="nb">Submit-Renewal</span> <span class="p">[</span><span class="n">-AllAccounts</span><span class="p">]</span> <span class="p">[</span><span class="n">-Force</span><span class="p">]</span> <span class="p">[</span><span class="n">-NoSkipManualDns</span><span class="p">]</span> <span class="p">[</span><span class="n">-PluginArgs</span> <span class="p">&lt;</span><span class="n">Hashtable</span><span class="p">&gt;]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
-<p>This function allows you to renew one more more previously completed certificate orders.
-You can choose to renew a specific order, set of orders, all orders for the current account, or all orders for all accounts.</p>
+<p>Technically, a renewal is just a normal new certificate order using the same parameters as a previous order. This function allows you to easily request a new certificate for any existing order</p>
+<p>This function allows you to renew one more more previously complete orders as long as the renewal window has been reached and plugin configuration exists to automate the challenge validation. It will also pick up and attempt to continue pending or previously failed orders. You can choose to renew a specific order, set of orders, all orders for the current account, or all orders for all accounts.</p>
+<p>A PACertificate object is returned for every successfully renewed order.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1">Example 1<a class="headerlink" href="#example-1" title="Permanent link">&para;</a></h3>
+<h3 id="example-1-renew-current">Example 1: Renew Current<a class="headerlink" href="#example-1-renew-current" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Submit-Renewal</span>
 </code></pre></div>
 <p>Renew the current order on the current account.</p>
-<h3 id="example-2">Example 2<a class="headerlink" href="#example-2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Submit-Renewal</span> <span class="n">-Force</span>
+<h3 id="example-2-force-specific-order">Example 2: Force Specific Order<a class="headerlink" href="#example-2-force-specific-order" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">Submit-Renewal</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Force</span>
 </code></pre></div>
-<p>Renew the current order on the current account even if it hasn't reached its suggested renewal window.</p>
-<h3 id="example-3">Example 3<a class="headerlink" href="#example-3" title="Permanent link">&para;</a></h3>
+<p>Renew the specified order on the current account even if it hasn't reached its suggested renewal window.</p>
+<h3 id="example-3-all-orders">Example 3: All Orders<a class="headerlink" href="#example-3-all-orders" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Submit-Renewal</span> <span class="n">-AllOrders</span>
 </code></pre></div>
 <p>Renew all valid orders on the current account that have reached their suggested renewal window.</p>
-<h3 id="example-4">Example 4<a class="headerlink" href="#example-4" title="Permanent link">&para;</a></h3>
+<h3 id="example-4-all-orders-on-all-accounts">Example 4: All Orders on All Accounts<a class="headerlink" href="#example-4-all-orders-on-all-accounts" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Submit-Renewal</span> <span class="n">-AllAccounts</span>
 </code></pre></div>
 <p>Renew all valid orders on all valid accounts that have reached their suggested renewal window.</p>
-<h3 id="example-5">Example 5<a class="headerlink" href="#example-5" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Submit-Renewal</span> <span class="n">site1</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Force</span>
+<h3 id="example-5-update-pluginargs">Example 5: Update PluginArgs<a class="headerlink" href="#example-5-update-pluginargs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;FakeDNS API Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span> <span class="p">}</span>
+<span class="nb">Submit-Renewal</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
-<p>Renew the order for the specified site regardless of its renewal window.</p>
+<p>Renew the current order using updated plugin args that will also be saved for subsequent renewals.</p>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <h3 id="-maindomain">-MainDomain<a class="headerlink" href="#-maindomain" title="Permanent link">&para;</a></h3>
 <p>The primary domain associated with an order.

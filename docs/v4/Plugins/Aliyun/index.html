@@ -1606,8 +1606,44 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        External Account Binding
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        Find Deprecated PluginArgs
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
         Troubleshooting DNS Validation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        Using Alternate Trust Chains
       </a>
     </li>
   
@@ -1742,10 +1778,16 @@
 <p>This plugin works against the <a href="https://www.alibabacloud.com/product/dns">Aliyun (Alibaba Cloud)</a> DNS provider. It is assumed that you have already setup an account and registered the domains or zones you will be working against.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>First, login to your account and go to the <a href="https://usercenter.console.aliyun.com/#/manage/ak">Security Management</a> page. Click the <code>Create Access Key</code> link and make a note of the Key ID and Secret values.</p>
-<p><strong>Note:</strong> It is also supported recommended to use RAM (Resource Access Management) users with more limited privileges instead of your root account key. More information about creating RAM users can be found <a href="https://www.alibabacloud.com/help/product/28625.htm">here</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is also supported recommended to use RAM (Resource Access Management) users with more limited privileges instead of your root account key. More information about creating RAM users can be found <a href="https://www.alibabacloud.com/help/product/28625.htm">here</a>.</p>
+</div>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p>The Key ID is specified as a string using <code>AliKeyId</code> and the secret is specified as a SecureString using <code>AliSecret</code>.</p>
-<p><em>NOTE: The <code>AliSecretInsecure</code> parameter is still supported but should be considered deprecated and may be removed in a future major release.</em></p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>AliSecretInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+</div>
 <div class="highlight"><pre><span></span><code><span class="nv">$secret</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="s2">&quot;Secret&quot;</span> <span class="n">-AsSecureString</span>
 <span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">AliKeyId</span> <span class="p">=</span> <span class="s1">&#39;asdf1234&#39;</span>
