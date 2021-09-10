@@ -20,7 +20,7 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - [OCSP Must-Staple](https://scotthelme.co.uk/ocsp-must-staple/) support
 - DNS challenge [CNAME support](Guides/Using-DNS-Challenge-Aliases.md)
 - Multiple ACME accounts supported per ACME CA.
-- External Account Binding support for ACME CAs that require it
+- External Account Binding support for ACME CAs that require it [(Guide)](Guides/External-Account-Binding.md)
 - Preferred Chain support to use alternative CA trust chains [(Guide)](Guides/Using-Alternate-Trust-Chains.md)
 
 ## Installation (Stable)

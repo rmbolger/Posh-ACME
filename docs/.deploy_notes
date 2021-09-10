@@ -1,6 +1,6 @@
 Be in the main branch or whatever branch contains the source docs folder:
 
-    mike deploy --prefix docs -branch "docsite" --push v4 latest
+    mike deploy --prefix docs --branch "docsite" --push v4 latest
 
 `--push` is optional. If you want to self-host the versioned docs, leave it out and run:
 

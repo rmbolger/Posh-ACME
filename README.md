@@ -18,7 +18,7 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - [OCSP Must-Staple](https://scotthelme.co.uk/ocsp-must-staple/) support
 - DNS challenge [CNAME support](https://poshac.me/docs/latest/Guides/Using-DNS-Challenge-Aliases/)
 - Multiple ACME accounts supported per ACME CA.
-- External Account Binding support for ACME CAs that require it
+- External Account Binding support for ACME CAs that require it [(Guide)](https://poshac.me/docs/Guides/External-Account-Binding/)
 - Preferred Chain support to use alternative CA trust chains [(Guide)](https://poshac.me/docs/Guides/Using-Alternate-Trust-Chains/)
 
 ## Installation (Stable)
