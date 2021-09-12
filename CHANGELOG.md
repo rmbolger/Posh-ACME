@@ -1,3 +1,7 @@
+## 4.8.1 (2021-09-12)
+
+* Fixed a bug introduced in 4.7.0 that broke `Set-PAAccount -UseAltPluginEncryption` preventing plugin args for orders from being properly re-encrypted.
+
 ## 4.8.0 (2021-09-09)
 
 * Documentation Revamp
