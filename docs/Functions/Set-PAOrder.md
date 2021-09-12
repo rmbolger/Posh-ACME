@@ -14,7 +14,6 @@ Switch to or modify an order.
 ## Syntax
 
 ### Edit (Default)
-
 ```powershell
 Set-PAOrder [[-MainDomain] <String>] [-Name <String>] [-NoSwitch] [-Plugin <String[]>]
  [-PluginArgs <Hashtable>] [-DnsAlias <String[]>] [-NewName <String>] [-FriendlyName <String>]
@@ -24,7 +23,6 @@ Set-PAOrder [[-MainDomain] <String>] [-Name <String>] [-NoSwitch] [-Plugin <Stri
 ```
 
 ### Revoke
-
 ```powershell
 Set-PAOrder [[-MainDomain] <String>] [-Name <String>] [-RevokeCert] [-Force] [-NoSwitch] [-WhatIf] [-Confirm]
  [<CommonParameters>]
@@ -406,7 +404,6 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## Related Links

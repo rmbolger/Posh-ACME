@@ -14,21 +14,18 @@ Set the current ACME account and/or update account details.
 ## Syntax
 
 ### Edit (Default)
-
 ```powershell
 Set-PAAccount [[-ID] <String>] [[-Contact] <String[]>] [-NewName <String>] [-UseAltPluginEncryption]
  [-ResetAltPluginEncryption] [-Deactivate] [-Force] [-NoSwitch] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### RolloverImportKey
-
 ```powershell
 Set-PAAccount [[-ID] <String>] [-KeyRollover] -KeyFile <String> [-NoSwitch] [-WhatIf] [-Confirm]
  [<CommonParameters>]
 ```
 
 ### Rollover
-
 ```powershell
 Set-PAAccount [[-ID] <String>] [-KeyRollover] [-KeyLength <String>] [-NoSwitch] [-WhatIf] [-Confirm]
  [<CommonParameters>]
@@ -313,7 +310,6 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## Related Links

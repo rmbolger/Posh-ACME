@@ -14,7 +14,7 @@ Exports cert files for a completed order and adds suggested renewal window to th
 ## Syntax
 
 ```powershell
-Complete-PAOrder [[-Order] <PoshACME.PAOrder>] [<CommonParameters>]
+Complete-PAOrder [[-Order] <Object>] [<CommonParameters>]
 ```
 
 ## Description
@@ -55,7 +55,6 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## Inputs

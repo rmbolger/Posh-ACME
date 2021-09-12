@@ -14,7 +14,6 @@ Create a new account on the current ACME server.
 ## Syntax
 
 ### Generate (Default)
-
 ```powershell
 New-PAAccount [[-Contact] <String[]>] [[-KeyLength] <String>] [-ID <String>] [-AcceptTOS] [-Force]
  [-ExtAcctKID <String>] [-ExtAcctHMACKey <String>] [-ExtAcctAlgorithm <String>] [-UseAltPluginEncryption]
@@ -22,7 +21,6 @@ New-PAAccount [[-Contact] <String[]>] [[-KeyLength] <String>] [-ID <String>] [-A
 ```
 
 ### ImportKey
-
 ```powershell
 New-PAAccount [[-Contact] <String[]>] -KeyFile <String> [-ID <String>] [-AcceptTOS] [-OnlyReturnExisting]
  [-Force] [-ExtAcctKID <String>] [-ExtAcctHMACKey <String>] [-ExtAcctAlgorithm <String>]
@@ -303,7 +301,6 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## Outputs

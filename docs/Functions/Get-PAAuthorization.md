@@ -39,7 +39,6 @@ Get-PAOrder | Get-PAAuthorization
 
 Get the authorizations for the current order on the current account.
 
-
 ## Parameters
 
 ### -AuthURLs
@@ -75,7 +74,6 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## Inputs

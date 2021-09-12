@@ -14,7 +14,6 @@ Request a new certificate
 ## Syntax
 
 ### FromScratch (Default)
-
 ```powershell
 New-PACertificate [-Domain] <String[]> [-Name <String>] [-Contact <String[]>] [-CertKeyLength <String>]
  [-AlwaysNewKey] [-AcceptTOS] [-AccountKeyLength <String>] [-DirectoryUrl <String>] [-Plugin <String[]>]
@@ -24,7 +23,6 @@ New-PACertificate [-Domain] <String[]> [-Name <String>] [-Contact <String[]>] [-
 ```
 
 ### FromCSR
-
 ```powershell
 New-PACertificate [-CSRPath] <String> [-Name <String>] [-Contact <String[]>] [-AcceptTOS]
  [-AccountKeyLength <String>] [-DirectoryUrl <String>] [-Plugin <String[]>] [-PluginArgs <Hashtable>]
@@ -476,7 +474,6 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## Outputs

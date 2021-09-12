@@ -14,13 +14,11 @@ Get ACME account details.
 ## Syntax
 
 ### Specific
-
 ```powershell
 Get-PAAccount [[-ID] <String>] [-Refresh] [-ExtraParams <Object>] [<CommonParameters>]
 ```
 
 ### List
-
 ```powershell
 Get-PAAccount [-List] [-Status <String>] [-Contact <String[]>] [-KeyLength <String[]>] [-Refresh]
  [-ExtraParams <Object>] [<CommonParameters>]
@@ -177,7 +175,6 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## Outputs

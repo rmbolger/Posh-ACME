@@ -14,7 +14,6 @@ Create a new order on the current ACME account.
 ## Syntax
 
 ### FromScratch (Default)
-
 ```powershell
 New-PAOrder [-Domain] <String[]> [[-KeyLength] <String>] [-Name <String>] [-Plugin <String[]>]
  [-PluginArgs <Hashtable>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-AlwaysNewKey] [-FriendlyName <String>]
@@ -23,7 +22,6 @@ New-PAOrder [-Domain] <String[]> [[-KeyLength] <String>] [-Name <String>] [-Plug
 ```
 
 ### ImportKey
-
 ```powershell
 New-PAOrder [-Domain] <String[]> -KeyFile <String> [-Name <String>] [-Plugin <String[]>]
  [-PluginArgs <Hashtable>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-AlwaysNewKey] [-FriendlyName <String>]
@@ -32,7 +30,6 @@ New-PAOrder [-Domain] <String[]> -KeyFile <String> [-Name <String>] [-Plugin <St
 ```
 
 ### FromCSR
-
 ```powershell
 New-PAOrder [-CSRPath] <String> [-Name <String>] [-Plugin <String[]>] [-PluginArgs <Hashtable>]
  [-DnsAlias <String[]>] [-UseSerialValidation] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
@@ -93,7 +90,6 @@ New-PAOrder -CSRPath .\myreq.csr
 ```
 
 Create a new order using an externally generated certificate request.
-
 
 ## Parameters
 
@@ -439,7 +435,6 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## Outputs

@@ -14,14 +14,12 @@ Revoke an ACME certificate
 ## Syntax
 
 ### MainDomain (Default)
-
 ```powershell
 Revoke-PACertificate [[-MainDomain] <String>] [-Name <String>] [-Reason <RevocationReasons>] [-Force] [-WhatIf]
  [-Confirm] [<CommonParameters>]
 ```
 
 ### CertFile
-
 ```powershell
 Revoke-PACertificate -CertFile <String> [-KeyFile <String>] [-Reason <RevocationReasons>] [-Force] [-WhatIf]
  [-Confirm] [<CommonParameters>]
@@ -189,7 +187,6 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## Related Links

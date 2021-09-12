@@ -14,20 +14,17 @@ Renew one or more certificates.
 ## Syntax
 
 ### Specific
-
 ```powershell
 Submit-Renewal [[-MainDomain] <String>] [[-Name] <String>] [-Force] [-NoSkipManualDns]
  [-PluginArgs <Hashtable>] [<CommonParameters>]
 ```
 
 ### AllOrders
-
 ```powershell
 Submit-Renewal [-AllOrders] [-Force] [-NoSkipManualDns] [-PluginArgs <Hashtable>] [<CommonParameters>]
 ```
 
 ### AllAccounts
-
 ```powershell
 Submit-Renewal [-AllAccounts] [-Force] [-NoSkipManualDns] [-PluginArgs <Hashtable>] [<CommonParameters>]
 ```
@@ -197,7 +194,6 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## Outputs
@@ -205,7 +201,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ### PoshACME.PACertificate
 A certificate object.
 
-## NOTES
+## Notes
 
 Certificate objects are only returned for orders that were actually renewed successfully. Any orders that have not reached the suggested renewal window are skipped unless `-Force` is specified.
 

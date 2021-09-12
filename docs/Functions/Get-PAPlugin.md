@@ -14,25 +14,21 @@ Show plugin details, help, or launch the online guide.
 ## Syntax
 
 ### Basic (Default)
-
 ```powershell
 Get-PAPlugin [[-Plugin] <String>] [<CommonParameters>]
 ```
 
 ### Params
-
 ```powershell
 Get-PAPlugin [-Plugin] <String> [-Params] [<CommonParameters>]
 ```
 
 ### Guide
-
 ```powershell
 Get-PAPlugin [-Plugin] <String> [-Guide] [<CommonParameters>]
 ```
 
 ### Help
-
 ```powershell
 Get-PAPlugin [-Plugin] <String> [-Help] [<CommonParameters>]
 ```
@@ -145,7 +141,6 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## Related Links
