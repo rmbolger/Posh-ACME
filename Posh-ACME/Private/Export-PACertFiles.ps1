@@ -101,6 +101,12 @@ function Export-PACertFiles {
         else {
             Write-Warning "Order has expired. Unable to re-download cert/chain files. Using cached copies."
             $chain0File = Join-Path $Order.Folder 'chain0.cer'
+
+            # if the chain0 file doesn't exist, it means this config was likely recently
+            # upgraded from 3.x. So we'll just fake it by copying the current chain.cer to chain0.cert
+            if (-not (Test-Path $chain0File -PathType Leaf)) {
+                Copy-Item $chainFile $chain0File
+            }
         }
 
         # try to find the chain file matching the preferred issuer if specified
