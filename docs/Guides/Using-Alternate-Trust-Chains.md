@@ -43,4 +43,4 @@ Set-PAOrder -Name 'example.com' -PreferredChain 'ISRG Root X1'
 ```
 
 !!! warning
-    Changing the chain on an existing certificate will only update the files in the Posh-ACME order folder. Even if the order has the `Install` property set to `$true`, it will not re-import the current certificate to the Windows certificate store even. It will only do that on the next renewal.
+    Changing the chain on an existing certificate will only update the files in the Posh-ACME order folder. Even if the order has the `Install` property set to `$true`, it will not re-import the current certificate to the Windows certificate store. It will only do that on the next renewal.

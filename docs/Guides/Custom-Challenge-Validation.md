@@ -52,9 +52,9 @@ New-PAOrder $domains
 Assuming you didn't use names that were previously validated on this account, you should get output that looks something like this where the status is `pending`. If the status is `ready`, create an order with different names that haven't been previously validated.
 
 ```
-MainDomain  status  KeyLength SANs            OCSPMustStaple CertExpires Plugin
-----------  ------  --------- ----            -------------- ----------- ------
-example.com pending 2048      {*.example.com} False                      {Manual}
+Name        MainDomain  status  KeyLength SANs            CertExpires Plugin
+----        ----------  ------  --------- ----            ----------- ------
+example.com example.com pending 2048      {*.example.com}             {Manual}
 ```
 
 ## Authorizations and Challenges
@@ -80,7 +80,7 @@ example.com   pending 12/24/2020 7:14:33 PM pending     pending
 *.example.com pending 12/24/2020 7:14:33 PM pending
 ```
 
-Let's take a look at the full details of one of the authorization objects by running `$auths[0] | fl`. You should get an output like this:
+Let's take a look at the full details of one of the authorization objects by running `$auths[0] | Format-List`. You should get an output like this:
 
 ```
 identifier   : @{type=dns; value=example.com}
@@ -179,14 +179,17 @@ example.com   valid   12/24/2020 7:14:33 PM             valid
 *.example.com valid   12/24/2020 7:14:33 PM valid
 ```
 
+!!! note
+    Some ACME CAs other than Let's Encrypt support the ability to re-validate authorizations that previously failed validation. In these cases, the status of those authorizations will remain `pending` instead of becoming `invalid`. Some CAs may periodically retry validation on their own. Others require you to run `Send-ChallengeAck` again to re-request validation.
+
 # Finishing Up
 
 Now that you have all of your identifiers authorized, your order status should now be "ready" which you can check with `Get-PAOrder -Refresh`. It should look something like this.
 
 ```
-MainDomain  status  KeyLength SANs            OCSPMustStaple CertExpires Plugin
-----------  ------  --------- ----            -------------- ----------- ------
-example.com ready   2048      {*.example.com} False                      {Manual}
+Name        MainDomain  status  KeyLength SANs            CertExpires Plugin
+----        ----------  ------  --------- ----            ----------- ------
+example.com example.com ready   2048      {*.example.com}             {Manual}
 ```
 
 The next step is "finalization" in which you send a the actual x509 certificate request (CSR) to the ACME server. Run the following:
@@ -209,7 +212,7 @@ Subject         NotAfter             KeyLength Thumbprint                       
 CN=example.com  3/15/2021 4:37:37 PM 2048      XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX {example.com, *.example.com}
 ```
 
-It is also the same output you get from `Get-PACertificate`. Run `Get-PACertificate | fl` to get a full list of cert properties including the filesystem paths where the files are stored.
+It is also the same output you get from `Get-PACertificate`. Run `Get-PACertificate | Format-List` to get a full list of cert properties including the filesystem paths where the files are stored.
 
 
 ## Debugging Challenge Failures
@@ -217,7 +220,7 @@ It is also the same output you get from `Get-PACertificate`. Run `Get-PACertific
 If for some reason one or more of your challenge validations failed, you can retrieve the error details from the ACME server like this.
 
 ```powershell
-(Get-PAOrder | Get-PAAuthorization).challenges.error | fl
+(Get-PAOrder | Get-PAAuthorization).challenges.error | Format-List
 ```
 
 ## Revoking Authorizations

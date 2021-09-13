@@ -1,6 +1,6 @@
 # Find Deprecated PluginArgs
 
-Posh-ACME 4.8 has deprecated many of the old "insecure" plugin parameter sets used to be necessary on non-Windows machines running early versions of PowerShell 6. This means that when Posh-ACME 5.0 is eventually released, certificate orders renewing with those parameter sets will stop working if they haven't been replaced by a "secure" parameter set. So it would be wise to update those parameters sooner rather than later.
+Posh-ACME 4.8 has deprecated the old "insecure" plugin parameter sets that used to be necessary on non-Windows machines running early versions of PowerShell 6. This means that when Posh-ACME 5.0 is eventually released, certificate orders renewing with those parameter sets will stop working if they haven't been replaced by a "secure" parameter set. So it would be wise to update those parameters sooner rather than later.
 
 In most cases, migrating to a secure parameter set is just a matter of using a SecureString version of a token, key, or password instead of a standard String object. It might also mean using a PSCredential object instead of separate Username and Password parameters. The [usage guide](../Plugins/index.md) for each plugin will detail exactly what to use.
 

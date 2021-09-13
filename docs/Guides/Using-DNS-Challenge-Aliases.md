@@ -35,7 +35,7 @@ _acme-challenge.example.com | example.net
 
 ## Testing
 
-You should verify your CNAME was created correctly before you try and use it. If you're inside a business with a split-horizon DNS infrastructure, you might need to explicitly query a public external resolver like CloudFlare's 1.1.1.1. However, some modern firewalls can be configured to prevent this ability. So make sure you can successfully query a known-good external record first. There are also web-based resolvers such as https://www.digwebinterface.com/ if necessary.
+You should verify your CNAME was created correctly before you try and use it. If you're inside a business with a split-horizon DNS infrastructure, you might need to explicitly query a public external resolver like CloudFlare's 1.1.1.1. However, some modern firewalls can be configured to prevent this ability. So make sure you can successfully query a known-good external record first. There are also web-based resolvers such as [digwebinterface.com](https://www.digwebinterface.com/) if necessary.
 
 ```doscon
 C:\>nslookup -q=CNAME _acme-challenge.example.com. 1.1.1.1
@@ -51,6 +51,16 @@ _acme-challenge.example.com  canonical name = acme.example.net
 Now that your CNAMEs are all setup, you just have to add one more parameter to your certificate request command, `-DnsAlias`. It works just like `-Plugin` as an array that should have one element for each domain in the request. But if all of your CNAMEs point to the same place, you can just specify the alias once and it will use that alias for all the names.
 
 ```powershell
-New-PACertificate '*.example.com','example.com' -AcceptTOS -Contact 'admin@example.com' `
-    -Plugin Route53 -PluginArgs $pArgs -DnsAlias acme.example.net -Verbose
+$certParams = @{
+    Domain = '*.example.com','example.com'
+    AcceptTOS = $true
+    Contact = 'me@example.com'
+    Plugin = 'FakeDNS'
+    PluginArgs = @{
+        FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
+    }
+    DnsAlias = 'acme.example.net'
+    Verbose = $true
+}
+New-PACertificate @certParams
 ```
