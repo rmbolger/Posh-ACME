@@ -1927,9 +1927,9 @@
 <span class="nb">New-PAOrder</span> <span class="nv">$domains</span>
 </code></pre></div>
 <p>Assuming you didn't use names that were previously validated on this account, you should get output that looks something like this where the status is <code>pending</code>. If the status is <code>ready</code>, create an order with different names that haven't been previously validated.</p>
-<div class="highlight"><pre><span></span><code>MainDomain  status  KeyLength SANs            OCSPMustStaple CertExpires Plugin
-----------  ------  --------- ----            -------------- ----------- ------
-example.com pending 2048      {*.example.com} False                      {Manual}
+<div class="highlight"><pre><span></span><code>Name        MainDomain  status  KeyLength SANs            CertExpires Plugin
+----        ----------  ------  --------- ----            ----------- ------
+example.com example.com pending 2048      {*.example.com}             {Manual}
 </code></pre></div>
 <h2 id="authorizations-and-challenges">Authorizations and Challenges<a class="headerlink" href="#authorizations-and-challenges" title="Permanent link">&para;</a></h2>
 <p>The distinction between an order, authorization, and challenge can be confusing if you're not familiar with the ACME protocol. So let's clarify first. An order is a request for a certificate that contains one or more "identifiers" (a name like <code>example.com</code>). Each identifier in an order has an authorization object associated with it that indicates whether the account that created the order is authorized to get a cert for that name. New authorizations start in a pending state awaiting the client to complete a challenge associated with that authorization. Each authorization can have multiple different challenges (DNS, HTTP, ALPN, etc) that indicate the different methods the ACME server will accept to prove ownership of the name. You only need to complete one of the offered challenges in order to satisfy an authorization.</p>
@@ -1947,7 +1947,7 @@ example.com pending 2048      {*.example.com} False                      {Manual
 example.com   pending 12/24/2020 7:14:33 PM pending     pending
 *.example.com pending 12/24/2020 7:14:33 PM pending
 </code></pre></div>
-<p>Let's take a look at the full details of one of the authorization objects by running <code>$auths[0] | fl</code>. You should get an output like this:</p>
+<p>Let's take a look at the full details of one of the authorization objects by running <code>$auths[0] | Format-List</code>. You should get an output like this:</p>
 <div class="highlight"><pre><span></span><code>identifier   : @{type=dns; value=example.com}
 status       : pending
 expires      : 2020-12-25T16:52:23Z
@@ -2015,11 +2015,15 @@ HTTP01Token  : &lt;HTTP_TOKEN&gt;
 example.com   valid   12/24/2020 7:14:33 PM             valid
 *.example.com valid   12/24/2020 7:14:33 PM valid
 </code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some ACME CAs other than Let's Encrypt support the ability to re-validate authorizations that previously failed validation. In these cases, the status of those authorizations will remain <code>pending</code> instead of becoming <code>invalid</code>. Some CAs may periodically retry validation on their own. Others require you to run <code>Send-ChallengeAck</code> again to re-request validation.</p>
+</div>
 <h1 id="finishing-up">Finishing Up<a class="headerlink" href="#finishing-up" title="Permanent link">&para;</a></h1>
 <p>Now that you have all of your identifiers authorized, your order status should now be "ready" which you can check with <code>Get-PAOrder -Refresh</code>. It should look something like this.</p>
-<div class="highlight"><pre><span></span><code>MainDomain  status  KeyLength SANs            OCSPMustStaple CertExpires Plugin
-----------  ------  --------- ----            -------------- ----------- ------
-example.com ready   2048      {*.example.com} False                      {Manual}
+<div class="highlight"><pre><span></span><code>Name        MainDomain  status  KeyLength SANs            CertExpires Plugin
+----        ----------  ------  --------- ----            ----------- ------
+example.com example.com ready   2048      {*.example.com}             {Manual}
 </code></pre></div>
 <p>The next step is "finalization" in which you send a the actual x509 certificate request (CSR) to the ACME server. Run the following:</p>
 <div class="highlight"><pre><span></span><code>Submit-OrderFinalize
@@ -2032,10 +2036,10 @@ example.com ready   2048      {*.example.com} False                      {Manual
 -------         --------             --------- ----------                               -------
 CN=example.com  3/15/2021 4:37:37 PM 2048      XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX {example.com, *.example.com}
 </code></pre></div>
-<p>It is also the same output you get from <code>Get-PACertificate</code>. Run <code>Get-PACertificate | fl</code> to get a full list of cert properties including the filesystem paths where the files are stored.</p>
+<p>It is also the same output you get from <code>Get-PACertificate</code>. Run <code>Get-PACertificate | Format-List</code> to get a full list of cert properties including the filesystem paths where the files are stored.</p>
 <h2 id="debugging-challenge-failures">Debugging Challenge Failures<a class="headerlink" href="#debugging-challenge-failures" title="Permanent link">&para;</a></h2>
 <p>If for some reason one or more of your challenge validations failed, you can retrieve the error details from the ACME server like this.</p>
-<div class="highlight"><pre><span></span><code><span class="p">(</span><span class="nb">Get-PAOrder</span> <span class="p">|</span> <span class="nb">Get-PAAuthorization</span><span class="p">).</span><span class="n">challenges</span><span class="p">.</span><span class="n">error</span> <span class="p">|</span> <span class="nb">fl</span>
+<div class="highlight"><pre><span></span><code><span class="p">(</span><span class="nb">Get-PAOrder</span> <span class="p">|</span> <span class="nb">Get-PAAuthorization</span><span class="p">).</span><span class="n">challenges</span><span class="p">.</span><span class="n">error</span> <span class="p">|</span> <span class="nb">Format-List</span>
 </code></pre></div>
 <h2 id="revoking-authorizations">Revoking Authorizations<a class="headerlink" href="#revoking-authorizations" title="Permanent link">&para;</a></h2>
 <p>Let's Encrypt and other ACME CAs will generally cache authorizations associated with an account for a period of time. Let's Encrypt caches them for around 30 days which means that if you request another cert in that timeframe with an identifier/name that you've already authorized, the authorization objects won't need to be re-validated. Their status will be immediately valid.</p>

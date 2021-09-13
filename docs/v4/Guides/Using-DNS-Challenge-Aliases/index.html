@@ -1895,7 +1895,7 @@
 <p>Don't point too many CNAMES at the same target. Let's Encrypt's ACME implementation can only deal with DNS responses <a href="https://github.com/letsencrypt/boulder/pull/3467">up to 4096 bytes</a> which is roughly 60-70 TXT records depending on your DNS server and query parameters. If your record is too big, the validations will fail.</p>
 </div>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
-<p>You should verify your CNAME was created correctly before you try and use it. If you're inside a business with a split-horizon DNS infrastructure, you might need to explicitly query a public external resolver like CloudFlare's 1.1.1.1. However, some modern firewalls can be configured to prevent this ability. So make sure you can successfully query a known-good external record first. There are also web-based resolvers such as https://www.digwebinterface.com/ if necessary.</p>
+<p>You should verify your CNAME was created correctly before you try and use it. If you're inside a business with a split-horizon DNS infrastructure, you might need to explicitly query a public external resolver like CloudFlare's 1.1.1.1. However, some modern firewalls can be configured to prevent this ability. So make sure you can successfully query a known-good external record first. There are also web-based resolvers such as <a href="https://www.digwebinterface.com/">digwebinterface.com</a> if necessary.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">C:\&gt;</span>nslookup -q=CNAME _acme-challenge.example.com. 1.1.1.1
 <span class="go">Server:  1dot1dot1dot1.cloudflare-dns.com</span>
 <span class="go">Address:  1.1.1.1</span>
@@ -1905,8 +1905,18 @@
 </code></pre></div>
 <h2 id="using-the-challenge-alias">Using the Challenge Alias<a class="headerlink" href="#using-the-challenge-alias" title="Permanent link">&para;</a></h2>
 <p>Now that your CNAMEs are all setup, you just have to add one more parameter to your certificate request command, <code>-DnsAlias</code>. It works just like <code>-Plugin</code> as an array that should have one element for each domain in the request. But if all of your CNAMEs point to the same place, you can just specify the alias once and it will use that alias for all the names.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">New-PACertificate</span> <span class="s1">&#39;*.example.com&#39;</span><span class="p">,</span><span class="s1">&#39;example.com&#39;</span> <span class="n">-AcceptTOS</span> <span class="n">-Contact</span> <span class="s1">&#39;admin@example.com&#39;</span> <span class="p">`</span>
-    <span class="n">-Plugin</span> <span class="n">Route53</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span> <span class="n">-DnsAlias</span> <span class="n">acme</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">net</span> <span class="n">-Verbose</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$certParams</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">Domain</span> <span class="p">=</span> <span class="s1">&#39;*.example.com&#39;</span><span class="p">,</span><span class="s1">&#39;example.com&#39;</span>
+    <span class="n">AcceptTOS</span> <span class="p">=</span> <span class="nv">$true</span>
+    <span class="n">Contact</span> <span class="p">=</span> <span class="s1">&#39;me@example.com&#39;</span>
+    <span class="n">Plugin</span> <span class="p">=</span> <span class="s1">&#39;FakeDNS&#39;</span>
+    <span class="n">PluginArgs</span> <span class="p">=</span> <span class="p">@{</span>
+        <span class="n">FDToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;FakeDNS API Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">DnsAlias</span> <span class="p">=</span> <span class="s1">&#39;acme.example.net&#39;</span>
+    <span class="n">Verbose</span> <span class="p">=</span> <span class="nv">$true</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="nv">@certParams</span>
 </code></pre></div>
                 
               
