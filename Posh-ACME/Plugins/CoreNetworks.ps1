@@ -28,6 +28,7 @@ function Add-DnsTxt {
     ### Remove the dns zone name from Record Name (for example example.com).
     $DnsTxtName = "$($RecordName.Replace(`".$CoreNetworkDnsZone`", `"`"))" 
 
+    ### Build the dns record
     $JsonBody = @{
         name = $DnsTxtName
         ttl  = 60
@@ -36,7 +37,6 @@ function Add-DnsTxt {
 
     } | ConvertTo-Json
 
-    $JsonBody
 
     ### Send a POST request including bearer authentication.
     try {
@@ -47,10 +47,8 @@ function Add-DnsTxt {
         throw
     }
 
-
     ### Save changes in the dns zone
     $(Commit-CoreNetworks $CoreNetworksApiRoot $headers $CoreNetworkDnsZone)
-
 
     <#
     .SYNOPSIS
@@ -109,13 +107,12 @@ function Remove-DnsTxt {
     ### Remove the dns zone name from Record Name (for example example.com).
     $DnsTxtName = "$($RecordName.Replace(`".$CoreNetworkDnsZone`", `"`"))" 
 
+    ### Build the dns record
     $JsonBody = @{
         name = $DnsTxtName
         data = "`"$TxtValue`""
 
     } | ConvertTo-Json
-
-    $JsonBody
 
 
     ### Send a POST request including bearer authentication.
@@ -130,8 +127,6 @@ function Remove-DnsTxt {
     ### Save changes in the dns zone
     $(Commit-CoreNetworks $CoreNetworksApiRoot $headers $CoreNetworkDnsZone)
 
-
-    <#
     <#
     .SYNOPSIS
         Add a DNS TXT record to CoreNetworks.
