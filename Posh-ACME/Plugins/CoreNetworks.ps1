@@ -21,13 +21,16 @@ function Add-DnsTxt {
     $headers = @{
         Authorization="Bearer $(Auth-CoreNetworks $CoreNetworksApiRoot $CoreNetworksCred)"
     }
+    Write-Debug $headers
 
     ### Search und find the dns zone of the (sub)domain  (for example: example.com).
     $CoreNetworkDnsZone = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
+    Write-Debug $CoreNetworkDnsZone
 
     ### Remove the dns zone name from Record Name (for example example.com).
     $DnsTxtName = "$($RecordName.Replace(`".$CoreNetworkDnsZone`", `"`"))" 
-    
+    Write-Debug $DnsTxtName
+
     ### Build the dns record
     $JsonBody = @{
         name = $DnsTxtName
@@ -36,7 +39,7 @@ function Add-DnsTxt {
         data = "`"$TxtValue`""
 
     } | ConvertTo-Json
-
+    Write-Debug $JsonBody
 
     ### Send a POST request including bearer authentication.
     try {
@@ -101,12 +104,15 @@ function Remove-DnsTxt {
     $headers = @{
         Authorization="Bearer $(Auth-CoreNetworks $CoreNetworksApiRoot $CoreNetworksCred)"
     }
+    Write-Debug $headers
 
     ### Search und find the dns zone of the (sub)domain  (for example: example.com).
     $CoreNetworkDnsZone = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
+    Write-Debug $CoreNetworkDnsZone
 
     ### Remove the dns zone name from Record Name (for example example.com).
-    $DnsTxtName = "$($RecordName.Replace(`".$CoreNetworkDnsZone`", `"`"))" 
+    $DnsTxtName = "$($RecordName.Replace(`".$CoreNetworkDnsZone`", `"`"))"
+    Write-Debug $DnsTxtName
 
     ### Build the dns record
     $JsonBody = @{
@@ -114,6 +120,7 @@ function Remove-DnsTxt {
         data = "`"$TxtValue`""
 
     } | ConvertTo-Json
+    Write-Debug $JsonBody
 
 
     ### Send a POST request including bearer authentication.
