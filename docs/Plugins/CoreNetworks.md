@@ -7,6 +7,7 @@ This plugin works against the [Core Networks](https://www.core-networks.de/) DNS
 ## Setup
 
 On your account [profile page](https://iface.core-networks.de/general/api/accounts), click `Add Access`. Give it custom a username and a strong password. Record the value to use later. You won't be able to go back and look it up after leaving the page.
+At the moment no Internationalized Domain Name (IDN) are supportet.
 
 ## Using the Plugin
 
