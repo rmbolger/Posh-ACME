@@ -27,7 +27,7 @@ function Add-DnsTxt {
 
     ### Remove the dns zone name from Record Name (for example example.com).
     $DnsTxtName = "$($RecordName.Replace(`".$CoreNetworkDnsZone`", `"`"))" 
-
+    
     ### Build the dns record
     $JsonBody = @{
         name = $DnsTxtName
@@ -40,7 +40,7 @@ function Add-DnsTxt {
 
     ### Send a POST request including bearer authentication.
     try {
-        Invoke-RestMethod -Method Post -Headers $headers -Body $JsonBody -ContentType "application/json" -Uri "$CoreNetworksApiRoot/dnszones/$CoreNetworkDnsZone/records/"
+        Invoke-RestMethod -Method Post -Headers $headers -Body $JsonBody -ContentType "application/json" -Uri "$CoreNetworksApiRoot/dnszones/$CoreNetworkDnsZone/records/" -UseBasicParsing
     }
     catch {
         Write-Debug $_
@@ -49,6 +49,7 @@ function Add-DnsTxt {
 
     ### Save changes in the dns zone
     $(Commit-CoreNetworks $CoreNetworksApiRoot $headers $CoreNetworkDnsZone)
+
 
     <#
     .SYNOPSIS
@@ -117,7 +118,7 @@ function Remove-DnsTxt {
 
     ### Send a POST request including bearer authentication.
     try {
-        Invoke-RestMethod -Method Post -Headers $headers -Body $JsonBody -ContentType "application/json" -Uri "$CoreNetworksApiRoot/dnszones/$CoreNetworkDnsZone/records/delete"
+        Invoke-RestMethod -Method Post -Headers $headers -Body $JsonBody -ContentType "application/json" -Uri "$CoreNetworksApiRoot/dnszones/$CoreNetworkDnsZone/records/delete" -UseBasicParsing
     }
     catch {
         Write-Debug $_
@@ -127,6 +128,8 @@ function Remove-DnsTxt {
     ### Save changes in the dns zone
     $(Commit-CoreNetworks $CoreNetworksApiRoot $headers $CoreNetworkDnsZone)
 
+
+    <#
     <#
     .SYNOPSIS
         Add a DNS TXT record to CoreNetworks.
@@ -211,7 +214,7 @@ function Auth-CoreNetworks {
     ### Send a POST request including bearer authentication.
     try {
         $data = Invoke-RestMethod -Method Post -Body "{`"login`":`"$($Cred.GetNetworkCredential().UserName)`",`"password`":`"$($Cred.GetNetworkCredential().Password)`"}" `
-        -ContentType "application/json" -Uri "$ApiRootUrl/auth/token"
+        -ContentType "application/json" -Uri "$ApiRootUrl/auth/token" -UseBasicParsing
 
         return $data.token
     }
@@ -236,7 +239,7 @@ function Find-CoreNetworksDnsZones {
     
     ### Send a POST request including bearer authentication.
     try {
-        $data = Invoke-RestMethod -Method Get -Headers $headers -ContentType "application/json" -Uri "$ApiRootUrl/dnszones/"
+        $data = Invoke-RestMethod -Method Get -Headers $headers -ContentType "application/json" -Uri "$ApiRootUrl/dnszones/" -UseBasicParsing
 
         foreach ($e in $data.name) {
             if ($RecordName -match $e ) {
@@ -266,7 +269,7 @@ function Commit-CoreNetworks {
 
     ### Send a POST request including bearer authentication.
     try {
-        Invoke-RestMethod -Method Post -Headers $headers -ContentType "application/json" -Uri "$ApiRootUrl/dnszones/$DnsZone/records/commit"
+        Invoke-RestMethod -Method Post -Headers $headers -ContentType "application/json" -Uri "$ApiRootUrl/dnszones/$DnsZone/records/commit" -UseBasicParsing
         
     }
     catch {
