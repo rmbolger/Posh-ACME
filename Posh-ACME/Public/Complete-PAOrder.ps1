@@ -62,7 +62,7 @@ function Complete-PAOrder {
         # certs we're going to cap to renewal window at 30 days before renewal.
         $cert = Import-Pem (Join-Path $Order.Folder 'cert.cer')
         $lifetime = $cert.NotAfter - $cert.NotBefore
-        $renewHours = [Math]::Max(720, ($lifetime.TotalHours / 3))
+        $renewHours = [Math]::Min(720, ($lifetime.TotalHours / 3))
 
         # Set the CertExpires and RenewAfter fields
         $Order | Add-Member 'CertExpires' $cert.NotAfter.ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture) -Force
