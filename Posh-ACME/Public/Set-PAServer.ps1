@@ -165,7 +165,9 @@ function Set-PAServer {
         # save the object to disk except for the dynamic properties
         Write-Debug "Saving PAServer to disk"
         $dirFile = Join-Path $newDir.Folder 'dir.json'
-        $newDir | Select-Object -Exclude Name,Folder | ConvertTo-Json -Depth 5 | Out-File $dirFile -Force -EA Stop
+        $newDir | Select-Object -Property * -ExcludeProperty Name,Folder |
+            ConvertTo-Json -Depth 5 |
+            Out-File $dirFile -Force -EA Stop
 
         if (-not $NoSwitch) {
             # set as the new active server

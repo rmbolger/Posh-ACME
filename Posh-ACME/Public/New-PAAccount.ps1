@@ -210,7 +210,9 @@ function New-PAAccount {
     if (-not (Test-Path $acct.Folder -PathType Container)) {
         New-Item -ItemType Directory -Path $acct.Folder -Force -EA Stop | Out-Null
     }
-    $acct | Select-Object -Exclude id,Folder | ConvertTo-Json -Depth 5 | Out-File (Join-Path $acct.Folder 'acct.json') -Force -EA Stop
+    $acct | Select-Object -Property * -ExcludeProperty id,Folder |
+        ConvertTo-Json -Depth 5 |
+        Out-File (Join-Path $acct.Folder 'acct.json') -Force -EA Stop
 
     return $acct
 }

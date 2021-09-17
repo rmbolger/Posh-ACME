@@ -58,7 +58,9 @@ function Update-PAAccount {
 
         # save it to disk without the dynamic properties
         $acctFile = Join-Path $server.Folder "$($acct.id)\acct.json"
-        $acct | Select-Object -Exclude id,Folder | ConvertTo-Json -Depth 5 | Out-File $acctFile -Force -EA Stop
+        $acct | Select-Object -Property * -ExcludeProperty id,Folder |
+            ConvertTo-Json -Depth 5 |
+            Out-File $acctFile -Force -EA Stop
 
     }
 }

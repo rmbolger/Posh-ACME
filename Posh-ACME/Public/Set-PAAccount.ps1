@@ -282,7 +282,9 @@ function Set-PAAccount {
         if ($saveAccount) {
             # save it to disk
             $acctFile = Join-Path $server.Folder "$($acct.id)\acct.json"
-            $acct | Select-Object -Exclude id,Folder | ConvertTo-Json -Depth 5 | Out-File $acctFile -Force -EA Stop
+            $acct | Select-Object -Property * -ExcludeProperty id,Folder |
+                ConvertTo-Json -Depth 5 |
+                Out-File $acctFile -Force -EA Stop
 
             # reload config from disk
             Import-PAConfig -Level Account

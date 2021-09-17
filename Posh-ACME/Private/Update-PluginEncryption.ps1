@@ -42,7 +42,8 @@ function Update-PluginEncryption {
             $script:Acct | Add-Member 'sskey' $null -Force
         }
         $acctFile = Join-Path $server.Folder "$ID\acct.json"
-        $script:Acct | Select-Object -Exclude id,Folder | ConvertTo-Json -Depth 5 |
+        $script:Acct | Select-Object -Property * -ExcludeProperty id,Folder |
+            ConvertTo-Json -Depth 5 |
             Out-File $acctFile -Force -EA Stop
 
         # re-export all the plugin args

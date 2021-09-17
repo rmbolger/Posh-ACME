@@ -65,7 +65,8 @@ function Update-PAOrder {
         $orderCopy | Add-Member 'PfxPassB64U' ($order.PfxPass | ConvertTo-Base64Url)
 
         # Save the copy to disk without the dynamic Name/Folder or plain text PfxPass
-        $orderCopy | Select-Object -Exclude Name,Folder,PfxPass | ConvertTo-Json -Depth 10 |
+        $orderCopy | Select-Object -Property * -ExcludeProperty Name,Folder,PfxPass |
+            ConvertTo-Json -Depth 10 |
             Out-File (Join-Path $order.Folder 'order.json') -Force -EA Stop
     }
 
