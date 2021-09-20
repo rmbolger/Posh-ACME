@@ -203,9 +203,9 @@ function Find-DOZone {
     }
 
     # gather all domains in the digital ocean account
-	$zones = @()
-	$responses = @()
-	$request = $ApiRoot
+    $zones = @()
+    $responses = @()
+    $request = $ApiRoot
     do {
         try {
             $responses += Invoke-RestMethod "$request" @RestParams @script:UseBasic
