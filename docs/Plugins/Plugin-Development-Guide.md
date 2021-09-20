@@ -68,7 +68,10 @@ $plainText = [pscredential]::new('a',$secString).GetNetworkCredential().Password
 
 ## Usage Guides
 
-In addition to the native function help, it can be very helpful to new users to have a plugin specific readme. It should be a [Markdown](https://www.markdowntutorial.com/) formatted file in the [docs/Plugins](https://github.com/rmbolger/Posh-ACME/tree/main/docs/Plugins) folder called `<PluginName>.md`. It's usually easiest to copy an existing guide and modify it.
+In addition to the native function help, it can be very helpful to new users to have a plugin specific readme. It should be a [Markdown](https://www.markdowntutorial.com/) formatted file in the [docs/Plugins](https://github.com/rmbolger/Posh-ACME/tree/main/docs/Plugins) folder called `<PluginName>.md`. It's usually easiest to copy an existing guide and modify it. The `title:` field at the top of the file should match the name of the plugin including capitalization.
+
+!!!note
+    You may notice there are some Markdown files for other plugins in the main Plugins folder called `<PluginName>-Readme.md`. These exist for legacy reasons before the docs website was around and are not necessary for new plugins.
 
 For people who may be setting up automation against their provider for the first time, it can be helpful to add guidance on creating service accounts, limited access roles, or any prerequisite setup that the plugin requires to work properly. It should also have a section with an example on how to use the plugin with `New-PACertificate`.
 
@@ -153,15 +156,41 @@ _acme-challenge.site1.sub3.sub2.sub1.example.com | sub1.example.com
 
 Many of the existing plugins have a helper function to handle this. Copy and modify their code where it makes sense but make sure helper function names are unique.
 
+### Relative Record Names
+
+Many providers will end up needing you to provide a record's relative/short name such as `_acme-challenge` or `_acme-challenge.www` rather than the fully-qualified domain provided by `$RecordName`. To do this properly, you must first know the zone name that would contain the record. Once you have it, use the following method to separate the relative name from the zone name.
+
+```powershell
+# assumes $zoneName contains the zone name containing the record
+$recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+```
+
+Keep in mind that there are cases where `$RecordName` and `$zoneName` can be identical. The code above will set `$recShort` to an empty string. Depending on the provider, this may not be the proper way to reference zone apex records. Some providers expect you to use `@`, others may want the full zone name like `example.com`. So if your provider expects something other than an empty string, make sure you account for it. Here's an example:
+
+```powershell
+if ($recShort -eq [string]::Empty) {
+    $recShort = '@'
+}
+```
+
 ### DNS Aliases and Domain Apex
 
-Don't forget to test your functions against the domain apex which can happen when users are using DNS challenge aliases. There's often a special way to represent records in the domain apex from an API perspective, commonly with the `@` character or an empty string instead of a record short name.
+Don't forget to test your functions against the domain apex which can happen when users are using DNS challenge aliases.
 
 ```powershell
 # The my.cname.tld record doesn't actually need to exist for the test to work.
 # The plugin will only be writing to example.com
-Publish-Challenge my.cname.tld (Get-PAAccount) test1 MyPlugin $pArgs -DnsAlias example.com -Verbose
-Unpublish-Challenge my.cname.tld (Get-PAAccount) test1 MyPlugin $pArgs -DnsAlias example.com -Verbose
+$publishParams = @{
+    Domain = 'my.cname.tld'
+    Account = (Get-PAAccount)
+    Token = 'fake-token'
+    Plugin = 'MyPlugin'
+    PluginArgs = $pArgs
+    DnsAlias = 'example.com'
+    Verbose = $true
+}
+Publish-Challenge @publishParams
+Unpublish-Challenge @publishParams
 ```
 
 ### Deriving Object IDs
