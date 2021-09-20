@@ -206,17 +206,17 @@ function Find-DOZone {
 	$zones = @()
 	$responses = @()
 	$request = $ApiRoot
-	do {
-		try {
-			$responses += Invoke-RestMethod "$request" @RestParams @script:UseBasic
-		} catch {
-			throw
-		}
-		$zones += ($responses[-1]).domains
-		$request = $responses[-1].links.pages.next
-	} until (
-		($null -eq $request)
-	)
+    do {
+        try {
+            $responses += Invoke-RestMethod "$request" @RestParams @script:UseBasic
+        } catch {
+            throw
+        }
+        $zones += ($responses[-1]).domains
+        $request = $responses[-1].links.pages.next
+    } until (
+        ($null -eq $request)
+    )
 
     # Since Digital Ocean could be hosting both apex and sub-zones, we need to find the closest/deepest
     # sub-zone that would hold the record rather than just adding it to the apex. So for something
