@@ -1,4 +1,4 @@
-title: Core Networks GmbH
+title: CoreNetworks
 
 # How To Use the Core Networks DNS Plugin
 
