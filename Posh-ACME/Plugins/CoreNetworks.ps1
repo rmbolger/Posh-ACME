@@ -9,8 +9,8 @@ function Add-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(Mandatory)]
-        [string]$CoreNetworksApiRoot,
+        [Parameter()]
+        [string]$CoreNetworksApiRoot = "https://beta.api.core-networks.de",
         [Parameter(Mandatory, ParameterSetName='Secure')]
         [pscredential]$CoreNetworksCred,
         [Parameter(ValueFromRemainingArguments)]
@@ -22,6 +22,11 @@ function Add-DnsTxt {
         Authorization="Bearer $(Auth-CoreNetworks $CoreNetworksApiRoot $CoreNetworksCred)"
     }
     Write-Debug $headers
+
+    ### Convert an IDN name to punycode
+    $idn = [System.Globalization.IdnMapping]::new()
+    $RecordName = $idn.GetAscii($RecordName)
+    Write-Debug $RecordName
 
     ### Search und find the dns zone of the (sub)domain  (for example: example.com).
     $CoreNetworkDnsZone = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
