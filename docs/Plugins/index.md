@@ -74,6 +74,7 @@ These plugins have been committed to the main development branch and are pending
 
 Plugin | Provider | Guide | Core Compatible
 ------ | -------- | ----- | ---------------
+ISPConfig | [ISPConfig](https://www.ispconfig.org/) | [Usage Guide](ISPConfig.md) | :white_check_mark:
 
 ### Notes
 
