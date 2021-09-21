@@ -23,11 +23,6 @@ function Add-DnsTxt {
     }
     Write-Debug $headers
 
-    ### Convert an IDN name to punycode
-    $idn = [System.Globalization.IdnMapping]::new()
-    $RecordName = $idn.GetAscii($RecordName)
-    Write-Debug $RecordName
-
     ### Search und find the dns zone of the (sub)domain  (for example: example.com).
     $CoreNetworkDnsZone = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
     Write-Debug $CoreNetworkDnsZone
