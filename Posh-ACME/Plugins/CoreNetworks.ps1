@@ -48,7 +48,7 @@ function Add-DnsTxt {
 
     ### Send a POST request including bearer authentication.
     try {
-        Invoke-RestMethod -Method Post -Headers $headers -Body $JsonBody -ContentType "application/json" -Uri "$CoreNetworksApiRoot/dnszones/$CoreNetworkDnsZone/records/" -UseBasicParsing  -ErrorAction Stop | Out-Null
+        Invoke-RestMethod -Method Post -Headers $headers -Body $JsonBody -ContentType "application/json" -Uri "$CoreNetworksApiRoot/dnszones/$CoreNetworkDnsZone/records/" -ErrorAction Stop @script:UseBasic | Out-Null
     }
     catch {
         Write-Debug $_
@@ -130,7 +130,7 @@ function Remove-DnsTxt {
 
     ### Send a POST request including bearer authentication.
     try {
-        Invoke-RestMethod -Method Post -Headers $headers -Body $JsonBody -ContentType "application/json" -Uri "$CoreNetworksApiRoot/dnszones/$CoreNetworkDnsZone/records/delete" -UseBasicParsing -ErrorAction Stop | Out-Null
+        Invoke-RestMethod -Method Post -Headers $headers -Body $JsonBody -ContentType "application/json" -Uri "$CoreNetworksApiRoot/dnszones/$CoreNetworkDnsZone/records/delete" -ErrorAction Stop @script:UseBasic | Out-Null
     }
     catch {
         Write-Debug $_
@@ -224,7 +224,7 @@ function Auth-CoreNetworks {
     ### Send a POST request including bearer authentication.
     try {
         $data = Invoke-RestMethod -Method Post -Body "{`"login`":`"$($Cred.GetNetworkCredential().UserName)`",`"password`":`"$($Cred.GetNetworkCredential().Password)`"}" `
-        -ContentType "application/json" -Uri "$ApiRootUrl/auth/token" -UseBasicParsing -ErrorAction Stop
+        -ContentType "application/json" -Uri "$ApiRootUrl/auth/token" -ErrorAction Stop @script:UseBasic
 
         return $data.token
     }
@@ -249,7 +249,7 @@ function Find-CoreNetworksDnsZones {
     
     ### Send a POST request including bearer authentication.
     try {
-        $data = Invoke-RestMethod -Method Get -Headers $headers -ContentType "application/json" -Uri "$ApiRootUrl/dnszones/" -UseBasicParsing -ErrorAction Stop
+        $data = Invoke-RestMethod -Method Get -Headers $headers -ContentType "application/json" -Uri "$ApiRootUrl/dnszones/" -ErrorAction Stop @script:UseBasic
 
         foreach ($e in $data.name) {
             if ($RecordName -match $e ) {
@@ -279,7 +279,7 @@ function Commit-CoreNetworks {
 
     ### Send a POST request including bearer authentication.
     try {
-        Invoke-RestMethod -Method Post -Headers $headers -ContentType "application/json" -Uri "$ApiRootUrl/dnszones/$DnsZone/records/commit" -UseBasicParsing -ErrorAction Stop | Out-Null
+        Invoke-RestMethod -Method Post -Headers $headers -ContentType "application/json" -Uri "$ApiRootUrl/dnszones/$DnsZone/records/commit" -ErrorAction Stop @script:UseBasic | Out-Null
         
     }
     catch {
