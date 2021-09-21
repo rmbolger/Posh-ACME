@@ -46,6 +46,7 @@ HurricaneElectric | [Hurricane Electric DNS](https://dns.he.net/) | [Usage Guide
 IBMSoftLayer | [IBM Cloud DNS](https://www.ibm.com/cloud/dns) | [Usage Guide](IBMSoftLayer.md) | :white_check_mark:
 Infoblox | [Infoblox NIOS](https://www.infoblox.com) | [Usage Guide](Infoblox.md) | :white_check_mark:
 Infomaniak | [Infomaniak](https://www.infomaniak.com) | [Usage Guide](Infomaniak.md) | :white_check_mark:
+ISPConfig | [ISPConfig](https://www.ispconfig.org/) | [Usage Guide](ISPConfig.md) | :white_check_mark:
 Linode | [Linode DNS](https://www.linode.com/?r=4dfd67cf6f1e384ce626f2943620186344bb2ccf) | [Usage Guide](Linode.md) | :white_check_mark:
 Loopia | [LoopiaDNS](https://www.loopia.com/loopiadns/) | [Usage Guide](Loopia.md) | :white_check_mark:
 LuaDns | [LuaDns](https://www.luadns.com) | [Usage Guide](LuaDns.md) | :white_check_mark:
@@ -74,7 +75,6 @@ These plugins have been committed to the main development branch and are pending
 
 Plugin | Provider | Guide | Core Compatible
 ------ | -------- | ----- | ---------------
-ISPConfig | [ISPConfig](https://www.ispconfig.org/) | [Usage Guide](ISPConfig.md) | :white_check_mark:
 
 ### Notes
 
