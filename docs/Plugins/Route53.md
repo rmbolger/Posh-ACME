@@ -142,3 +142,7 @@ When using an IAM Role, the only thing you need to specify is a switch called `R
 ```powershell
 New-PACertificate example.com -Plugin Route53 -PluginArgs @{R53UseIAMRole=$true}
 ```
+
+### Use Environment Variables
+
+If no other credential sources are found, the plugin will attempt to use environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and optionally `AWS_SESSION_TOKEN`

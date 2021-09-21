@@ -399,13 +399,35 @@ function Initialize-R53Config {
                 }
             }
         }
-        default {
-            # the only thing left is profile name which requires the module
-            # so error if we didn't find it
+        'Profile' {
+            # profile name requires the module, so error if we didn't find it
             if (-not $script:AwsUseModule) {
                 throw "An AWS PowerShell module is required to use this plugin with the R53ProfileName parameter. https://docs.aws.amazon.com/powershell/"
             }
             $script:AwsCredParam = @{ProfileName=$R53ProfileName}
+        }
+        default {
+            # if nothing else is set, try to use environment variables
+            # maybe they've been passed in by something like a CI system
+            if ((Test-Path -Path "env:AWS_ACCESS_KEY_ID") -and
+                (Test-Path -Path "env:AWS_SECRET_ACCESS_KEY")
+            ) {
+                if ((Test-Path -Path "env:AWS_SESSION_TOKEN")) {
+                    # we're using a short term token
+                    $script:AwsCredParam = @{
+                        AccessKey = $env:AWS_ACCESS_KEY_ID
+                        SecretKey = $env:AWS_SECRET_ACCESS_KEY
+                        Token     = $env:AWS_SESSION_TOKEN
+                    }
+                    else {
+                        # we just have normal access keys
+                        $script:AwsCredParam = @{
+                            AccessKey = $env:AWS_ACCESS_KEY_ID
+                            SecretKey = $env:AWS_SECRET_ACCESS_KEY
+                        }
+                    }
+                }
+            }
         }
     }
 
