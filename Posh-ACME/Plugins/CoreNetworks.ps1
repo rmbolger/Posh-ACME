@@ -97,8 +97,8 @@ function Remove-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(Mandatory)]
-        [string]$CoreNetworksApiRoot,
+        [Parameter()]
+        [string]$CoreNetworksApiRoot = "https://beta.api.core-networks.de",
         [Parameter(Mandatory, ParameterSetName='Secure')]
         [pscredential]$CoreNetworksCred,
         [Parameter(ValueFromRemainingArguments)]
