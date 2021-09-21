@@ -975,6 +975,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#relative-record-names" class="md-nav__link">
+    Relative Record Names
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#dns-aliases-and-domain-apex" class="md-nav__link">
     DNS Aliases and Domain Apex
   </a>
@@ -1421,6 +1428,18 @@
     <li class="md-nav__item">
       <a href="../IBMSoftLayer/" class="md-nav__link">
         IBMSoftLayer
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ISPConfig/" class="md-nav__link">
+        ISPConfig
       </a>
     </li>
   
@@ -2060,6 +2079,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#relative-record-names" class="md-nav__link">
+    Relative Record Names
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#dns-aliases-and-domain-apex" class="md-nav__link">
     DNS Aliases and Domain Apex
   </a>
@@ -2180,7 +2206,11 @@ don't exist.</p>
 <span class="nv">$plainText</span> <span class="p">=</span> <span class="no">[pscredential]</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="nv">$secString</span><span class="p">).</span><span class="n">GetNetworkCredential</span><span class="p">().</span><span class="n">Password</span>
 </code></pre></div>
 <h2 id="usage-guides">Usage Guides<a class="headerlink" href="#usage-guides" title="Permanent link">&para;</a></h2>
-<p>In addition to the native function help, it can be very helpful to new users to have a plugin specific readme. It should be a <a href="https://www.markdowntutorial.com/">Markdown</a> formatted file in the <a href="https://github.com/rmbolger/Posh-ACME/tree/main/docs/Plugins">docs/Plugins</a> folder called <code>&lt;PluginName&gt;.md</code>. It's usually easiest to copy an existing guide and modify it.</p>
+<p>In addition to the native function help, it can be very helpful to new users to have a plugin specific readme. It should be a <a href="https://www.markdowntutorial.com/">Markdown</a> formatted file in the <a href="https://github.com/rmbolger/Posh-ACME/tree/main/docs/Plugins">docs/Plugins</a> folder called <code>&lt;PluginName&gt;.md</code>. It's usually easiest to copy an existing guide and modify it. The <code>title:</code> field at the top of the file should match the name of the plugin including capitalization.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You may notice there are some Markdown files for other plugins in the main Plugins folder called <code>&lt;PluginName&gt;-Readme.md</code>. These exist for legacy reasons before the docs website was around and are not necessary for new plugins.</p>
+</div>
 <p>For people who may be setting up automation against their provider for the first time, it can be helpful to add guidance on creating service accounts, limited access roles, or any prerequisite setup that the plugin requires to work properly. It should also have a section with an example on how to use the plugin with <code>New-PACertificate</code>.</p>
 <h2 id="general-development-tips-and-tricks">General Development Tips and Tricks<a class="headerlink" href="#general-development-tips-and-tricks" title="Permanent link">&para;</a></h2>
 <h3 id="no-write-host">No Write-Host<a class="headerlink" href="#no-write-host" title="Permanent link">&para;</a></h3>
@@ -2259,12 +2289,31 @@ don't exist.</p>
 </tbody>
 </table>
 <p>Many of the existing plugins have a helper function to handle this. Copy and modify their code where it makes sense but make sure helper function names are unique.</p>
+<h3 id="relative-record-names">Relative Record Names<a class="headerlink" href="#relative-record-names" title="Permanent link">&para;</a></h3>
+<p>Many providers will end up needing you to provide a record's relative/short name such as <code>_acme-challenge</code> or <code>_acme-challenge.www</code> rather than the fully-qualified domain provided by <code>$RecordName</code>. To do this properly, you must first know the zone name that would contain the record. Once you have it, use the following method to separate the relative name from the zone name.</p>
+<div class="highlight"><pre><span></span><code><span class="c"># assumes $zoneName contains the zone name containing the record</span>
+<span class="nv">$recShort</span> <span class="p">=</span> <span class="p">(</span><span class="nv">$RecordName</span> <span class="o">-ireplace</span> <span class="no">[regex]</span><span class="p">::</span><span class="n">Escape</span><span class="p">(</span><span class="nv">$zoneName</span><span class="p">),</span> <span class="no">[string]</span><span class="p">::</span><span class="n">Empty</span><span class="p">).</span><span class="n">TrimEnd</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>Keep in mind that there are cases where <code>$RecordName</code> and <code>$zoneName</code> can be identical. The code above will set <code>$recShort</code> to an empty string. Depending on the provider, this may not be the proper way to reference zone apex records. Some providers expect you to use <code>@</code>, others may want the full zone name like <code>example.com</code>. So if your provider expects something other than an empty string, make sure you account for it. Here's an example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="p">(</span><span class="nv">$recShort</span> <span class="o">-eq</span> <span class="no">[string]</span><span class="p">::</span><span class="n">Empty</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$recShort</span> <span class="p">=</span> <span class="s1">&#39;@&#39;</span>
+<span class="p">}</span>
+</code></pre></div>
 <h3 id="dns-aliases-and-domain-apex">DNS Aliases and Domain Apex<a class="headerlink" href="#dns-aliases-and-domain-apex" title="Permanent link">&para;</a></h3>
-<p>Don't forget to test your functions against the domain apex which can happen when users are using DNS challenge aliases. There's often a special way to represent records in the domain apex from an API perspective, commonly with the <code>@</code> character or an empty string instead of a record short name.</p>
+<p>Don't forget to test your functions against the domain apex which can happen when users are using DNS challenge aliases.</p>
 <div class="highlight"><pre><span></span><code><span class="c"># The my.cname.tld record doesn&#39;t actually need to exist for the test to work.</span>
 <span class="c"># The plugin will only be writing to example.com</span>
-<span class="nb">Publish-Challenge</span> <span class="n">my</span><span class="p">.</span><span class="n">cname</span><span class="p">.</span><span class="n">tld</span> <span class="p">(</span><span class="nb">Get-PAAccount</span><span class="p">)</span> <span class="n">test1</span> <span class="n">MyPlugin</span> <span class="nv">$pArgs</span> <span class="n">-DnsAlias</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Verbose</span>
-<span class="nb">Unpublish-Challenge</span> <span class="n">my</span><span class="p">.</span><span class="n">cname</span><span class="p">.</span><span class="n">tld</span> <span class="p">(</span><span class="nb">Get-PAAccount</span><span class="p">)</span> <span class="n">test1</span> <span class="n">MyPlugin</span> <span class="nv">$pArgs</span> <span class="n">-DnsAlias</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Verbose</span>
+<span class="nv">$publishParams</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">Domain</span> <span class="p">=</span> <span class="s1">&#39;my.cname.tld&#39;</span>
+    <span class="n">Account</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-PAAccount</span><span class="p">)</span>
+    <span class="n">Token</span> <span class="p">=</span> <span class="s1">&#39;fake-token&#39;</span>
+    <span class="n">Plugin</span> <span class="p">=</span> <span class="s1">&#39;MyPlugin&#39;</span>
+    <span class="n">PluginArgs</span> <span class="p">=</span> <span class="nv">$pArgs</span>
+    <span class="n">DnsAlias</span> <span class="p">=</span> <span class="s1">&#39;example.com&#39;</span>
+    <span class="n">Verbose</span> <span class="p">=</span> <span class="nv">$true</span>
+<span class="p">}</span>
+<span class="nb">Publish-Challenge</span> <span class="nv">@publishParams</span>
+<span class="nb">Unpublish-Challenge</span> <span class="nv">@publishParams</span>
 </code></pre></div>
 <h3 id="deriving-object-ids">Deriving Object IDs<a class="headerlink" href="#deriving-object-ids" title="Permanent link">&para;</a></h3>
 <p>Many providers assign ID values to object types like zones and records that you need to use to manipulate those objects. A user should ideally not have to know or provide any zone, record, or object IDs in order to use the plugin. All of that should be discovered by the plugin code and the only thing the user should need to provide is whatever credentials or tokens the API requires for authentication.</p>
