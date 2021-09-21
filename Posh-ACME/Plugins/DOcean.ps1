@@ -19,35 +19,50 @@ function Add-DnsTxt {
         $DOToken = [pscredential]::new('a',$DOTokenSecure).GetNetworkCredential().Password
     }
 
-    $apiRoot = "https://api.digitalocean.com/v2/domains"
-    $restParams = @{Headers=@{Authorization="Bearer $DOToken"};ContentType='application/json'}
-
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (!($zoneName = Find-DOZone $apiRoot $restParams)) {
+    $zoneName = Find-DOZone $RecordName "Bearer $DOToken"
+    if (-not $zoneName) {
         throw "Unable to find Digital Ocean hosted zone for $RecordName"
     }
 
+    $recRoot = "https://api.digitalocean.com/v2/domains/$zoneName/records"
+
     # separate the portion of the name that doesn't contain the zone name
     $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
-
-    $recRoot = "$apiRoot/$zoneName/records"
+    if ($recShort -eq [string]::Empty) {
+        $recShort = '@'
+    }
 
     # query the current text record
     try {
-        $rec = (Invoke-RestMethod $recRoot @restParams @script:UseBasic).domain_records |
+        $queryParams = @{
+            Uri = $recRoot
+            Headers = @{
+                Authorization = "Bearer $DOToken"
+            }
+            Verbose = $false
+            ErrorAction = 'Stop'
+        }
+        Write-Debug "GET $($queryParams.Uri)"
+        $rec = (Invoke-RestMethod @queryParams @script:UseBasic).domain_records |
                 Where-Object { $_.type -eq 'TXT' -and $_.name -eq $recShort -and $_.data -eq $TxtValue }
     } catch { throw }
 
-    if (!$rec) {
-        # create new
-        $recBody = @{
+    if (-not $rec) {
+
+        # modify the query params to create a new record
+        $queryParams.Method = 'Post'
+        $queryParams.Body = @{
             type = 'TXT';
             name = $recShort;
             data = $TxtValue;
             ttl  = 30;
         } | ConvertTo-Json
+
+        Write-Debug "POST $($queryParams.Uri)`n$($queryParams.Body)"
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
-        Invoke-RestMethod $recRoot -Method Post @restParams -Body $recBody @script:UseBasic | Out-Null
+        Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
+
     } else {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
     }
@@ -101,29 +116,44 @@ function Remove-DnsTxt {
         $DOToken = [pscredential]::new('a',$DOTokenSecure).GetNetworkCredential().Password
     }
 
-    $apiRoot = "https://api.digitalocean.com/v2/domains"
-    $restParams = @{Headers=@{Authorization="Bearer $DOToken"};ContentType='application/json'}
-
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (!($zoneName = Find-DOZone $apiRoot $restParams)) {
+    $zoneName = Find-DOZone $RecordName "Bearer $DOToken"
+    if (-not $zoneName) {
         throw "Unable to find Digital Ocean hosted zone for $RecordName"
     }
 
+    $recRoot = "https://api.digitalocean.com/v2/domains/$zoneName/records"
+
     # separate the portion of the name that doesn't contain the zone name
     $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
-
-    $recRoot = "$apiRoot/$zoneName/records"
+    if ($recShort -eq [string]::Empty) {
+        $recShort = '@'
+    }
 
     # query the current text record
     try {
-        $rec = (Invoke-RestMethod $recRoot @restParams @script:UseBasic).domain_records |
+        $queryParams = @{
+            Uri = $recRoot
+            Headers = @{
+                Authorization = "Bearer $DOToken"
+            }
+            Verbose = $false
+            ErrorAction = 'Stop'
+        }
+        Write-Debug "GET $($queryParams.Uri)"
+        $rec = (Invoke-RestMethod @queryParams @script:UseBasic).domain_records |
                 Where-Object { $_.type -eq 'TXT' -and $_.name -eq $recShort -and $_.data -eq $TxtValue }
     } catch { throw }
 
     if ($rec) {
-        # delete it
+        # modify the query params to delete the record
+        $queryParams.Method = 'DELETE'
+        $queryParams.Uri = "{0}/{1}" -f $queryParams.Uri,$rec.id
+
+        Write-Debug "DELETE $($queryParams.Uri)"
         Write-Verbose "Deleting $RecordName with value $TxtValue"
-        Invoke-RestMethod "$recRoot/$($rec.id)" -Method Delete @restParams @script:UseBasic | Out-Null
+        Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
+
     } else {
         # nothing to do
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
@@ -188,9 +218,10 @@ function Find-DOZone {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [string]$ApiRoot,
+        [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [hashtable]$RestParams
+        [string]$BearerHeader,
+        [string]$ApiRoot = 'https://api.digitalocean.com/v2/domains'
     )
 
     # setup a module variable to cache the record to zone mapping
@@ -202,26 +233,38 @@ function Find-DOZone {
         return $script:DORecordZones.$RecordName
     }
 
-    try {
-        $zones = (Invoke-RestMethod "$ApiRoot" @RestParams @script:UseBasic).domains
-    } catch { throw }
-
-    # Since Digital Ocean could be hosting both apex and sub-zones, we need to find the closest/deepest
-    # sub-zone that would hold the record rather than just adding it to the apex. So for something
-    # like _acme-challenge.site1.sub1.sub2.example.com, we'd look for zone matches in the following
-    # order:
-    # - site1.sub1.sub2.example.com
-    # - sub1.sub2.example.com
-    # - sub2.example.com
-    # - example.com
-
+    # We need to find the zone ID for the closest/deepest sub-zone that would
+    # contain the record.
     $pieces = $RecordName.Split('.')
     for ($i=0; $i -lt ($pieces.Count-1); $i++) {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
-        if ($zoneTest -in $zones.name) {
-            $script:DORecordZones.$RecordName = $zoneTest
-            return $zoneTest
+
+        try {
+            $queryParams = @{
+                Uri = "$ApiRoot/$zoneTest"
+                Headers = @{
+                    Authorization = $BearerHeader
+                }
+                Verbose = $false
+                ErrorAction = 'Stop'
+            }
+            Write-Debug "GET $($queryParams.Uri)"
+            $response = Invoke-RestMethod @queryParams @script:UseBasic
+        } catch {
+            # ignore 404 errors, throw anything else
+            if ([Net.HttpStatusCode]::NotFound -eq $_.Exception.Response.StatusCode) {
+                continue
+            } else {
+                throw
+            }
+        }
+
+        if ($response.domain.name) {
+            $script:DORecordZones.$RecordName = $response.domain.name
+            return $response.domain.name
+        } else {
+            throw "DigitalOcean zone query succeeded, but didn't return expected results.`n$($response | ConvertTo-Json)"
         }
     }
 
