@@ -110,8 +110,8 @@ function Remove-DnsTxt {
     $CoreNetworkDnsZone = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
     Write-Debug $CoreNetworkDnsZone
 
-    ### Remove the dns zone name from Record Name (for example example.com).
-    $DnsTxtName = "$($RecordName.Replace(`".$CoreNetworkDnsZone`", `"`"))"
+    ### Grab the relative portion of the Fully Qualified Domain Name (FQDN)
+    $DnsTxtName = ($RecordName -ireplace [regex]::Escape($CoreNetworkDnsZone), [string]::Empty).TrimEnd('.')
     Write-Debug $DnsTxtName
 
     ### Build the dns record
