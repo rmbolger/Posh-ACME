@@ -28,7 +28,7 @@ Some of the features in the ACME protocol are optional. Others are mandatory, bu
 | [(EAB) External<br />Account Binding][rfc01] | n/a                        | n/a                                          | Required*          | Required                                     |
 | [Multi-perspective<br />Validation][le05]    | :white_check_mark:         | :x:                                          | :x:                | :x:                                          |
 | [Account<br />Key Rollover][rfc02]           | :white_check_mark:         | :white_check_mark:                           | :x:                | :x:*                                         |
-| [Account<br />Deactivation][rfc03]           | :white_check_mark:         | :white_check_mark:                           | :white_check_mark: | :x:*                                         |
+| [Account<br />Deactivation][rfc03]           | :white_check_mark:         | :white_check_mark:                           | :white_check_mark: | :white_check_mark:                           |
 | [Account<br />Orders][rfc04]                 | :x: *([Planned][le07])*    | :x:                                          | :x:                | :x:*                                         |
 | [IP Address<br />Identifiers][rfc05]         | :x: *([Planned][le08])*    | :x:                                          | :x:*               | :x:                                          |
 | [Pre-Authorization][rfc06]                   | :x:                        | :white_check_mark:                           | :x:                | :x:                                          |
@@ -40,7 +40,7 @@ Some of the features in the ACME protocol are optional. Others are mandatory, bu
 * :x: = Feature unsupported
 * :warning: = Feature partially supported.
 * :question: = Support unknown or untested
-* SSL.com throws "Missing Authentication Token" errors when making calls against Account endpoints which is why those features are labeled Unsupported.
+* SSL.com throws "Missing Authentication Token" errors when making some calls against Account endpoints which is why those features are labeled Unsupported.
 * SSL.com requires an email address in the ACME account contact field, but doesn't enforce it on creation time. Instead, it throws an "badCSR" error when you try to finalize an order from an account with an empty address.
 * ZeroSSL's EAB credentials can only be used once to establish a new ACME account. Creating additional accounts requires generating new EAB credentials.
 * ZeroSSL does support IP address based certificates, but not via the ACME protocol.
