@@ -1,23 +1,20 @@
 function Get-CurrentPluginType { 'dns-01' }
 
-
 function Add-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName='Secure')]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter()]
-        [string]$CoreNetworksApiRoot = "https://beta.api.core-networks.de",
-        [Parameter(Mandatory, ParameterSetName='Secure')]
+        [Parameter(Mandatory)]
         [pscredential]$CoreNetworksCred,
+        [string]$CoreNetworksApiRoot = 'https://beta.api.core-networks.de',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    ### Authentication at the API via authentication token, which must be sent in the header of every request. 
+    ### Authentication at the API via authentication token, which must be sent in the header of every request.
     $headers = @{
         Authorization="Bearer $(Auth-CoreNetworks $CoreNetworksApiRoot $CoreNetworksCred)"
     }
@@ -67,40 +64,37 @@ function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER CoreNetworksApiRoot
-        The root URL of the Simple DNS Plus Server API. For example, https://beta.api.core-networks.de/dnszones/example.com/records/
-
     .PARAMETER CoreNetworksCred
-        The HTTP API credentials required to authenticate.
+        The API username and password required to authenticate.
+
+    .PARAMETER CoreNetworksApiRoot
+        The root URL of the API. Defaults to https://beta.api.core-networks.de
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $pArgs = @{ CoreNetworksApiRoot = 'https://beta.api.core-networks.de'; CoreNetworksCred = (Get-Credential) }
-        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txtvalue' @pArgs
-        Adds a TXT record using credentials and ignores certificate validation.
+        Add-DnsTxt '_acme-challenge.example.com' 'txtvalue' -CoreNetworksCred (Get-Credential)
 
+        Adds a TXT record using credentials and ignores certificate validation.
     #>
 }
 
 function Remove-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName='Secure')]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter()]
-        [string]$CoreNetworksApiRoot = "https://beta.api.core-networks.de",
-        [Parameter(Mandatory, ParameterSetName='Secure')]
+        [Parameter(Mandatory)]
         [pscredential]$CoreNetworksCred,
+        [string]$CoreNetworksApiRoot = 'https://beta.api.core-networks.de',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    ### Authentication at the API via authentication token, which must be sent in the header of every request. 
+    ### Authentication at the API via authentication token, which must be sent in the header of every request.
     $headers = @{
         Authorization="Bearer $(Auth-CoreNetworks $CoreNetworksApiRoot $CoreNetworksCred)"
     }
@@ -148,17 +142,17 @@ function Remove-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER CoreNetworksApiRoot
-        The root URL of the Simple DNS Plus Server API. For example, https://beta.api.core-networks.de/dnszones/example.com/records/
-
     .PARAMETER CoreNetworksCred
-        The HTTP API credentials required to authenticate.
+        The API username and password required to authenticate.
+
+    .PARAMETER CoreNetworksApiRoot
+        The root URL of the API. Defaults to https://beta.api.core-networks.de
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value'
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -CoreNetworksCred (Get-Credential)
 
         Removes a TXT record for the specified site with the specified value.
     #>
@@ -167,34 +161,18 @@ function Remove-DnsTxt {
 function Save-DnsTxt {
     [CmdletBinding()]
     param(
-        <#
-        Add plugin specific parameters here. Make sure their names are
-        unique across all existing plugins. But make sure common ones
-        across this plugin are the same.
-        #>
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # If necessary, do work here to save or finalize changes performed by
-    # Add/Remove functions. It is not uncommon for this function to have
-    # no work to do depending on the DNS provider. In that case, just
-    # leave the function body empty.
-
     <#
     .SYNOPSIS
-        Commits changes for pending DNS TXT record modifications to <My DNS Server/Provider>
+        Not required.
 
     .DESCRIPTION
-        Description for <My DNS Server/Provider>
+        This provider does not require calling this function to commit changes to DNS records.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
-
-    .EXAMPLE
-        Save-DnsTxt
-
-        Commits changes for pending DNS TXT record modifications.
     #>
 }
 
@@ -206,7 +184,7 @@ function Save-DnsTxt {
 # https://beta.api.core-networks.de/doc/
 
 
-### To get a token, you need an API user account. You can set this up in the API user account management in our web interface. 
+### To get a token, you need an API user account. You can set this up in the API user account management in our web interface.
 function Auth-CoreNetworks {
     [CmdletBinding()]
     param(
@@ -241,7 +219,7 @@ function Find-CoreNetworksDnsZones {
         [Parameter(Mandatory, Position=2)]
         [string]$RecordName
     )
-    
+
     ### Send a POST request including bearer authentication.
     try {
         $data = Invoke-RestMethod -Method Get -Headers $headers -ContentType "application/json" -Uri "$ApiRootUrl/dnszones/" -ErrorAction Stop @script:UseBasic
@@ -260,7 +238,7 @@ function Find-CoreNetworksDnsZones {
 
 ### Our current backend for the name server is not suitable for the high-frequency processing of DNS records. So that you can make
 ### major changes to DNS zones quickly without having to wait for the name server, changes to the DNS records are not transmitted
-### to the name servers immediately. Instead, when you are done changing DNS records, you must commit the zone. 
+### to the name servers immediately. Instead, when you are done changing DNS records, you must commit the zone.
 function Commit-CoreNetworks {
     [CmdletBinding()]
         param(
@@ -275,7 +253,6 @@ function Commit-CoreNetworks {
     ### Send a POST request including bearer authentication.
     try {
         Invoke-RestMethod -Method Post -Headers $headers -ContentType "application/json" -Uri "$ApiRootUrl/dnszones/$DnsZone/records/commit" -ErrorAction Stop @script:UseBasic | Out-Null
-        
     }
     catch {
         Write-Debug $_
