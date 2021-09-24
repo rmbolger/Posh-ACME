@@ -14,33 +14,40 @@ function Add-DnsTxt {
         $ExtraParams
     )
 
-    ### Authentication at the API via authentication token, which must be sent in the header of every request.
+    ### Authentication at the API via authentication token, which must be sent in the headers of every request.
     $headers = @{
-        Authorization="Bearer $(Auth-CoreNetworks $CoreNetworksApiRoot $CoreNetworksCred)"
+        Authorization="Bearer $(Get-CoreNetworksAuthToken $CoreNetworksApiRoot $CoreNetworksCred)"
     }
-    Write-Debug $headers
 
     ### Search und find the dns zone of the (sub)domain  (for example: example.com).
-    $CoreNetworkDnsZone = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
-    Write-Debug $CoreNetworkDnsZone
+    $zoneName = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
+    Write-Debug $zoneName
 
     ### Grab the relative portion of the Fully Qualified Domain Name (FQDN)
-    $DnsTxtName = ($RecordName -ireplace [regex]::Escape($CoreNetworkDnsZone), [string]::Empty).TrimEnd('.')
+    $DnsTxtName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
     Write-Debug $DnsTxtName
 
-    ### Build the dns record
-    $JsonBody = @{
-        name = $DnsTxtName
-        ttl  = 60
-        type = "TXT"
-        data = "`"$TxtValue`""
-
-    } | ConvertTo-Json
-    Write-Debug $JsonBody
+    # build the add record query
+    # API will ignore if the record already exists
+    $queryParams = @{
+        Uri = "$CoreNetworksApiRoot/dnszones/$zoneName/records/"
+        Method = 'POST'
+        Body = @{
+            name = $DnsTxtName
+            ttl  = 60
+            type = 'TXT'
+            data = "`"$TxtValue`""
+        } | ConvertTo-Json
+        Headers = $headers
+        ContentType = 'application/json'
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
 
     ### Send a POST request including bearer authentication.
     try {
-        Invoke-RestMethod -Method Post -Headers $headers -Body $JsonBody -ContentType "application/json" -Uri "$CoreNetworksApiRoot/dnszones/$CoreNetworkDnsZone/records/" -ErrorAction Stop @script:UseBasic | Out-Null
+        Write-Debug "POST $($queryParams.Uri)`n$($queryParams.Body)"
+        Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
     }
     catch {
         Write-Debug $_
@@ -48,7 +55,7 @@ function Add-DnsTxt {
     }
 
     ### Save changes in the dns zone
-    $(Commit-CoreNetworks $CoreNetworksApiRoot $headers $CoreNetworkDnsZone)
+    Invoke-CoreNetworksCommit $CoreNetworksApiRoot $headers $zoneName
 
 
     <#
@@ -94,32 +101,38 @@ function Remove-DnsTxt {
         $ExtraParams
     )
 
-    ### Authentication at the API via authentication token, which must be sent in the header of every request.
+    ### Authentication at the API via authentication token, which must be sent in the headers of every request.
     $headers = @{
-        Authorization="Bearer $(Auth-CoreNetworks $CoreNetworksApiRoot $CoreNetworksCred)"
+        Authorization="Bearer $(Get-CoreNetworksAuthToken $CoreNetworksApiRoot $CoreNetworksCred)"
     }
-    Write-Debug $headers
 
     ### Search und find the dns zone of the (sub)domain  (for example: example.com).
-    $CoreNetworkDnsZone = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
-    Write-Debug $CoreNetworkDnsZone
+    $zoneName = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
+    Write-Debug $zoneName
 
     ### Grab the relative portion of the Fully Qualified Domain Name (FQDN)
-    $DnsTxtName = ($RecordName -ireplace [regex]::Escape($CoreNetworkDnsZone), [string]::Empty).TrimEnd('.')
+    $DnsTxtName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
     Write-Debug $DnsTxtName
 
-    ### Build the dns record
-    $JsonBody = @{
-        name = $DnsTxtName
-        data = "`"$TxtValue`""
-
-    } | ConvertTo-Json
-    Write-Debug $JsonBody
-
+    # build the delete record query
+    # API will ignore if the record we're deleting doesn't exist
+    $queryParams = @{
+        Uri = "$CoreNetworksApiRoot/dnszones/$zoneName/records/delete"
+        Method = 'POST'
+        Body = @{
+            name = $DnsTxtName
+            data = "`"$TxtValue`""
+        } | ConvertTo-Json
+        Headers = $headers
+        ContentType = 'application/json'
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
 
     ### Send a POST request including bearer authentication.
     try {
-        Invoke-RestMethod -Method Post -Headers $headers -Body $JsonBody -ContentType "application/json" -Uri "$CoreNetworksApiRoot/dnszones/$CoreNetworkDnsZone/records/delete" -ErrorAction Stop @script:UseBasic | Out-Null
+        Write-Debug "POST $($queryParams.Uri)`n$($queryParams.Body)"
+        Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
     }
     catch {
         Write-Debug $_
@@ -127,7 +140,7 @@ function Remove-DnsTxt {
     }
 
     ### Save changes in the dns zone
-    $(Commit-CoreNetworks $CoreNetworksApiRoot $headers $CoreNetworkDnsZone)
+    Invoke-CoreNetworksCommit $CoreNetworksApiRoot $headers $zoneName
 
     <#
     .SYNOPSIS
@@ -185,7 +198,7 @@ function Save-DnsTxt {
 
 
 ### To get a token, you need an API user account. You can set this up in the API user account management in our web interface.
-function Auth-CoreNetworks {
+function Get-CoreNetworksAuthToken {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory, Position=0)]
@@ -194,10 +207,25 @@ function Auth-CoreNetworks {
         [pscredential]$Cred
     )
 
-    ### Send a POST request including bearer authentication.
+    $passPlain = $Cred.GetNetworkCredential().Password
+
+    # Request a new bearer token using the credentials.
+    $queryParams = @{
+        Uri = "$ApiRootUrl/auth/token"
+        Method = 'POST'
+        Body = @{
+            login = $Cred.UserName
+            password = $passPlain
+        } | ConvertTo-Json
+        ContentType = 'application/json'
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
     try {
-        $data = Invoke-RestMethod -Method Post -Body "{`"login`":`"$($Cred.GetNetworkCredential().UserName)`",`"password`":`"$($Cred.GetNetworkCredential().Password)`"}" `
-        -ContentType "application/json" -Uri "$ApiRootUrl/auth/token" -ErrorAction Stop @script:UseBasic
+        # sanitize the body so we don't log the plaintext password
+        Write-Debug "POST $($queryParams.Uri)`n$($queryParams.Body.Replace($passPlain,'XXXXXXXX'))"
+
+        $data = Invoke-RestMethod @queryParams @script:UseBasic
 
         return $data.token
     }
@@ -215,14 +243,21 @@ function Find-CoreNetworksDnsZones {
         [Parameter(Mandatory, Position=0)]
         [System.Object]$ApiRootUrl,
         [Parameter(Mandatory, Position=1)]
-        [string]$Header,
+        [string]$Headers,
         [Parameter(Mandatory, Position=2)]
         [string]$RecordName
     )
 
     ### Send a POST request including bearer authentication.
     try {
-        $data = Invoke-RestMethod -Method Get -Headers $headers -ContentType "application/json" -Uri "$ApiRootUrl/dnszones/" -ErrorAction Stop @script:UseBasic
+        $queryParams = @{
+            Uri = "$ApiRootUrl/dnszones/"
+            Headers = $Headers
+            Verbose = $false
+            ErrorAction = 'Stop'
+        }
+        Write-Debug "GET $($queryParams.Uri)"
+        $data = Invoke-RestMethod @queryParams @script:UseBasic
 
         foreach ($e in $data.name) {
             if ($RecordName -match $e ) {
@@ -239,20 +274,30 @@ function Find-CoreNetworksDnsZones {
 ### Our current backend for the name server is not suitable for the high-frequency processing of DNS records. So that you can make
 ### major changes to DNS zones quickly without having to wait for the name server, changes to the DNS records are not transmitted
 ### to the name servers immediately. Instead, when you are done changing DNS records, you must commit the zone.
-function Commit-CoreNetworks {
+function Invoke-CoreNetworksCommit {
     [CmdletBinding()]
-        param(
-            [Parameter(Mandatory, Position = 0)]
-            [string]$ApiRootUrl,
-            [Parameter(Mandatory, Position = 1)]
-            [string]$Header,
-            [Parameter(Mandatory, Position = 2)]
-            [string]$DnsZone
-        )
+    param(
+        [Parameter(Mandatory, Position = 0)]
+        [string]$ApiRootUrl,
+        [Parameter(Mandatory, Position = 1)]
+        [string]$Headers,
+        [Parameter(Mandatory, Position = 2)]
+        [string]$DnsZone
+    )
+
+    $queryParams = @{
+        Uri = "$ApiRootUrl/dnszones/$DnsZone/records/commit"
+        Method = 'POST'
+        Headers = $Headers
+        ContentType = 'application/json'
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
 
     ### Send a POST request including bearer authentication.
     try {
-        Invoke-RestMethod -Method Post -Headers $headers -ContentType "application/json" -Uri "$ApiRootUrl/dnszones/$DnsZone/records/commit" -ErrorAction Stop @script:UseBasic | Out-Null
+        Write-Debug "POST $($queryParams.Uri)"
+        Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
     }
     catch {
         Write-Debug $_
