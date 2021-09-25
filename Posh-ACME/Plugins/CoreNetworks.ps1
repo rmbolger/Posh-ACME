@@ -241,9 +241,9 @@ function Find-CoreNetworksDnsZones {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory, Position=0)]
-        [System.Object]$ApiRootUrl,
+        [string]$ApiRootUrl,
         [Parameter(Mandatory, Position=1)]
-        [System.Object]$Headers,
+        [hashtable]$Headers,
         [Parameter(Mandatory, Position=2)]
         [string]$RecordName
     )
@@ -280,7 +280,7 @@ function Invoke-CoreNetworksCommit {
         [Parameter(Mandatory, Position = 0)]
         [string]$ApiRootUrl,
         [Parameter(Mandatory, Position = 1)]
-        [System.Object]$Headers,
+        [hashtable]$Headers,
         [Parameter(Mandatory, Position = 2)]
         [string]$DnsZone
     )
