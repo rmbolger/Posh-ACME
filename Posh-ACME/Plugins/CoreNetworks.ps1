@@ -243,7 +243,7 @@ function Find-CoreNetworksDnsZones {
         [Parameter(Mandatory, Position=0)]
         [System.Object]$ApiRootUrl,
         [Parameter(Mandatory, Position=1)]
-        [string]$Headers,
+        [System.Object]$Headers,
         [Parameter(Mandatory, Position=2)]
         [string]$RecordName
     )
@@ -280,7 +280,7 @@ function Invoke-CoreNetworksCommit {
         [Parameter(Mandatory, Position = 0)]
         [string]$ApiRootUrl,
         [Parameter(Mandatory, Position = 1)]
-        [string]$Headers,
+        [System.Object]$Headers,
         [Parameter(Mandatory, Position = 2)]
         [string]$DnsZone
     )
