@@ -9,18 +9,18 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory)]
         [pscredential]$CoreNetworksCred,
-        [string] $script:CoreNetworksApiRoot = 'https://beta.api.core-networks.de',
+        [string]$CoreNetworksApiRoot = 'https://beta.api.core-networks.de',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     ### Authentication at the API via authentication token, which must be sent in the headers of every request.
-    $script:headers = @{
+    $headers = @{
         Authorization="Bearer $(Get-CoreNetworksAuthToken $CoreNetworksApiRoot $CoreNetworksCred)"
     }
 
     ### Search und find the dns zone of the (sub)domain  (for example: example.com).
-    $script:zoneName = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
+    $zoneName = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
     Write-Debug $zoneName
 
     ### Grab the relative portion of the Fully Qualified Domain Name (FQDN)
@@ -53,6 +53,11 @@ function Add-DnsTxt {
         Write-Debug $_
         throw
     }
+
+    # Add the zone name to a script variable so the Save function can commit
+    # all changes at once when it's called.
+    if (-not $script:CoreNetworksZones) { $script:CoreNetworksZones = @() }
+    $script:CoreNetworksZones += $zoneName
 
     <#
     .SYNOPSIS
@@ -92,18 +97,18 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory)]
         [pscredential]$CoreNetworksCred,
-        [string]$script:CoreNetworksApiRoot = 'https://beta.api.core-networks.de',
+        [string]$CoreNetworksApiRoot = 'https://beta.api.core-networks.de',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     ### Authentication at the API via authentication token, which must be sent in the headers of every request.
-    $script:headers = @{
+    $headers = @{
         Authorization="Bearer $(Get-CoreNetworksAuthToken $CoreNetworksApiRoot $CoreNetworksCred)"
     }
 
     ### Search und find the dns zone of the (sub)domain  (for example: example.com).
-    $script:zoneName = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
+    $zoneName = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
     Write-Debug $zoneName
 
     ### Grab the relative portion of the Fully Qualified Domain Name (FQDN)
@@ -134,6 +139,11 @@ function Remove-DnsTxt {
         Write-Debug $_
         throw
     }
+
+    # Add the zone name to a script variable so the Save function can commit
+    # all changes at once when it's called.
+    if (-not $script:CoreNetworksZones) { $script:CoreNetworksZones = @() }
+    $script:CoreNetworksZones += $zoneName
 
     <#
     .SYNOPSIS
@@ -167,39 +177,72 @@ function Remove-DnsTxt {
 function Save-DnsTxt {
     [CmdletBinding()]
     param(
+        [Parameter(Mandatory)]
+        [pscredential]$CoreNetworksCred,
+        [string]$CoreNetworksApiRoot = 'https://beta.api.core-networks.de',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $queryParams = @{
-        Uri = "$script:CoreNetworksApiRoot/dnszones/$script:zoneName/records/commit"
-        Method = 'POST'
-        Headers = $script:Headers
-        ContentType = 'application/json'
-        Verbose = $false
-        ErrorAction = 'Stop'
+    ### Our current backend for the name server is not suitable for the high-frequency processing of DNS records. So that you can make
+    ### major changes to DNS zones quickly without having to wait for the name server, changes to the DNS records are not transmitted
+    ### to the name servers immediately. Instead, when you are done changing DNS records, you must commit the zone.
+
+    # return early if there's nothing to commit
+    if (-not $script:CoreNetworksZones) { return }
+
+    # get a fresh auth token
+    $headers = @{
+        Authorization="Bearer $(Get-CoreNetworksAuthToken $CoreNetworksApiRoot $CoreNetworksCred)"
     }
 
-    ### Send a POST request including bearer authentication.
-    try {
-        Write-Debug "POST $($queryParams.Uri)"
-        Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
-    }
-    catch {
-        Write-Debug $_
-        throw
+    # commit each unique zone
+    $script:CoreNetworksZones | Sort-Object -Unique | ForEach-Object {
+
+        $queryParams = @{
+            Uri = "$ApiRootUrl/dnszones/$_/records/commit"
+            Method = 'POST'
+            Headers = $headers
+            ContentType = 'application/json'
+            Verbose = $false
+            ErrorAction = 'Stop'
+        }
+
+        ### Send a POST request including bearer authentication.
+        try {
+            Write-Verbose "Committing changes for $_"
+            Write-Debug "POST $($queryParams.Uri)"
+            Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
+        }
+        catch {
+            Write-Debug $_
+            throw
+        }
+
     }
 
+    if ($script:CoreNetworksZones) { Remove-Variable CoreNetworksZones -Scope Script }
 
     <#
     .SYNOPSIS
-        Not required.
+        Commit changes made to Core Networks zones
 
     .DESCRIPTION
         This provider does not require calling this function to commit changes to DNS records.
 
+    .PARAMETER CoreNetworksCred
+        The API username and password required to authenticate.
+
+    .PARAMETER CoreNetworksApiRoot
+        The root URL of the API. Defaults to https://beta.api.core-networks.de
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+
+    .EXAMPLE
+        Save-DnsTxt -CoreNetworksCred (Get-Credential)
+
+        Commits changes to zones modified by Add-DnsTxt and Remove-DnsTxt.
     #>
 }
 
