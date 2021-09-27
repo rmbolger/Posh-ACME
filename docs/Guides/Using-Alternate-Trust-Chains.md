@@ -51,9 +51,9 @@ While the `-PreferredChain` option will make Posh-ACME download the alternate ch
 
 There does not seem to be a way to differentiate the chains being served based on application. All websites and applications using leaf certs from the same Intermediate CA will serve the same chain. But it is possible to influence which chain based on the contents of the `Intermediate Certification Authorities` cert store.
 
-Both chains start with the same [`R3` intermediate](https://letsencrypt.org/certs/lets-encrypt-r3.der) cert (Thumbprint: a053375bfe84e8b748782c7cee15827a6af5a405) signed by `ISRG Root X1` and should be added to your Intermediate cert store if it's not already there. If you wish to serve the short chain, this is all you need assuming the [self-signed `ISRG Root X1`](https://letsencrypt.org/certs/isrgrootx1.der) is in your Trusted Root store as well.
+Both chains start with the same [R3 intermediate](https://letsencrypt.org/certs/lets-encrypt-r3.der) cert (Thumbprint: a053375bfe84e8b748782c7cee15827a6af5a405) signed by `ISRG Root X1` and should be added to your Intermediate cert store if it's not already there. If you wish to serve the short chain, this is all you need assuming the [self-signed ISRG Root X1](https://letsencrypt.org/certs/isrgrootx1.der) is in your Trusted Root store as well.
 
-If you want to serve the longer chain, you will also need to add the [cross-signed `ISRG Root X1`](https://letsencrypt.org/certs/isrg-root-x2-cross-signed.der) cert (Thumbprint: 933c6ddee95c9c41a40f9f50493d82be03ad87bf) to the Intermediate cert store. Windows will find this cross-signed cert before it finds the self-signed copy in Trusted Roots and add it to the chain being served by the applications.
+If you want to serve the longer chain, you will also need to add the [cross-signed ISRG Root X1](https://letsencrypt.org/certs/isrg-root-x2-cross-signed.der) cert (Thumbprint: 933c6ddee95c9c41a40f9f50493d82be03ad87bf) to the Intermediate cert store. Windows will find this cross-signed cert before it finds the self-signed copy in Trusted Roots and add it to the chain being served by the applications.
 
 !!! note
     These suggestions are based on the observed behavior of Windows Server 2019 and 2022 prior to the expiration of `DST Root CA X3`. This document will be updated if the behavior changes following that expiration.
