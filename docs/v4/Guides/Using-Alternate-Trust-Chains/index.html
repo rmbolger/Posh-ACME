@@ -1673,6 +1673,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#serving-the-alternate-chain-from-windows" class="md-nav__link">
+    Serving the Alternate Chain from Windows
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1789,6 +1796,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#serving-the-alternate-chain-from-windows" class="md-nav__link">
+    Serving the Alternate Chain from Windows
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1815,7 +1829,7 @@
 <li><a href="https://letsencrypt.org/2020/12/21/extending-android-compatibility.html">Extending Android Device Compatibility for Let's Encrypt Certificates</a></li>
 <li><a href="https://community.letsencrypt.org/t/production-chain-changes/150739">Production Chain Changes</a></li>
 </ul>
-<p>Your default choice is currently the longer chain that builds to the expiring <code>DST Root CA X3</code> 3rd party certificate which should be compatible with almost all Android devices until 2024. The alternate choice is the shorter chain that builds to the non-expiring <code>ISRG Root X1</code> self-signed certificate.</p>
+<p>Your default choice is currently the longer chain that builds to the expiring <code>DST Root CA X3</code> 3rd party certificate which should be compatible with almost all Android devices until 2024. The alternate choice is the shorter chain that builds to the <code>ISRG Root X1</code> self-signed certificate which doesn't expire until 2035.</p>
 <p>Ultimately, your choice should depend on the clients that are connecting to your service. But if you don't know, it's probably safest to just leave the default. Let's Encrypt also has a <a href="https://letsencrypt.org/docs/certificate-compatibility/">Certificate Compatibility</a> page that can help.</p>
 <p>It is also a perfectly valid option to switch to a different <a href="../ACME-CA-Comparison/">public ACME CA</a> either permanently or until the dust settles on the DST Root expiration.</p>
 <h2 id="picking-an-alternate-chain">Picking an Alternate Chain<a class="headerlink" href="#picking-an-alternate-chain" title="Permanent link">&para;</a></h2>
@@ -1840,6 +1854,16 @@
 <p class="admonition-title">Warning</p>
 <p>Changing the chain on an existing certificate will only update the files in the Posh-ACME order folder. Even if the order has the <code>Install</code> property set to <code>$true</code>, it will not re-import the current certificate to the Windows certificate store. It will only do that on the next renewal.</p>
 </div>
+<h2 id="serving-the-alternate-chain-from-windows">Serving the Alternate Chain from Windows<a class="headerlink" href="#serving-the-alternate-chain-from-windows" title="Permanent link">&para;</a></h2>
+<p>While the <code>-PreferredChain</code> option will make Posh-ACME download the alternate chain for the files in your config, you may notice that on Windows your website/application is still serving the default chain. Unlike many Linux applications that have explicit configuration options for chain configuration, applications that use the Windows certificate store usually rely on the underlying operating system to decide what chain to serve with the leaf certificate.</p>
+<p>There does not seem to be a way to differentiate the chains being served based on application. All websites and applications using leaf certs from the same Intermediate CA will serve the same chain. But it is possible to influence which chain based on the contents of the <code>Intermediate Certification Authorities</code> cert store.</p>
+<p>Both chains start with the same <a href="https://letsencrypt.org/certs/lets-encrypt-r3.der">R3 intermediate</a> cert (Thumbprint: a053375bfe84e8b748782c7cee15827a6af5a405) signed by <code>ISRG Root X1</code> and should be added to your Intermediate cert store if it's not already there. If you wish to serve the short chain, this is all you need assuming the <a href="https://letsencrypt.org/certs/isrgrootx1.der">self-signed ISRG Root X1</a> is in your Trusted Root store as well.</p>
+<p>If you want to serve the longer chain, you will also need to add the <a href="https://letsencrypt.org/certs/isrg-root-x2-cross-signed.der">cross-signed ISRG Root X1</a> cert (Thumbprint: 933c6ddee95c9c41a40f9f50493d82be03ad87bf) to the Intermediate cert store. Windows will find this cross-signed cert before it finds the self-signed copy in Trusted Roots and add it to the chain being served by the applications.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These suggestions are based on the observed behavior of Windows Server 2019 and 2022 prior to the expiration of <code>DST Root CA X3</code>. This document will be updated if the behavior changes following that expiration.</p>
+</div>
+<p>The changes require a reboot to take effect.</p>
                 
               
               
