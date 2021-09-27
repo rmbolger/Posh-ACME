@@ -9,18 +9,18 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory)]
         [pscredential]$CoreNetworksCred,
-        [string]$CoreNetworksApiRoot = 'https://beta.api.core-networks.de',
+        [string] $script:CoreNetworksApiRoot = 'https://beta.api.core-networks.de',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     ### Authentication at the API via authentication token, which must be sent in the headers of every request.
-    $headers = @{
+    $script:headers = @{
         Authorization="Bearer $(Get-CoreNetworksAuthToken $CoreNetworksApiRoot $CoreNetworksCred)"
     }
 
     ### Search und find the dns zone of the (sub)domain  (for example: example.com).
-    $zoneName = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
+    $script:zoneName = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
     Write-Debug $zoneName
 
     ### Grab the relative portion of the Fully Qualified Domain Name (FQDN)
@@ -53,10 +53,6 @@ function Add-DnsTxt {
         Write-Debug $_
         throw
     }
-
-    ### Save changes in the dns zone
-    Invoke-CoreNetworksCommit $CoreNetworksApiRoot $headers $zoneName
-
 
     <#
     .SYNOPSIS
@@ -96,18 +92,18 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory)]
         [pscredential]$CoreNetworksCred,
-        [string]$CoreNetworksApiRoot = 'https://beta.api.core-networks.de',
+        [string]$script:CoreNetworksApiRoot = 'https://beta.api.core-networks.de',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     ### Authentication at the API via authentication token, which must be sent in the headers of every request.
-    $headers = @{
+    $script:headers = @{
         Authorization="Bearer $(Get-CoreNetworksAuthToken $CoreNetworksApiRoot $CoreNetworksCred)"
     }
 
     ### Search und find the dns zone of the (sub)domain  (for example: example.com).
-    $zoneName = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
+    $script:zoneName = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
     Write-Debug $zoneName
 
     ### Grab the relative portion of the Fully Qualified Domain Name (FQDN)
@@ -138,9 +134,6 @@ function Remove-DnsTxt {
         Write-Debug $_
         throw
     }
-
-    ### Save changes in the dns zone
-    Invoke-CoreNetworksCommit $CoreNetworksApiRoot $headers $zoneName
 
     <#
     .SYNOPSIS
@@ -177,6 +170,27 @@ function Save-DnsTxt {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    $queryParams = @{
+        Uri = "$script:CoreNetworksApiRoot/dnszones/$script:zoneName/records/commit"
+        Method = 'POST'
+        Headers = $script:Headers
+        ContentType = 'application/json'
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
+
+    ### Send a POST request including bearer authentication.
+    try {
+        Write-Debug "POST $($queryParams.Uri)"
+        Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
+    }
+    catch {
+        Write-Debug $_
+        throw
+    }
+
+
     <#
     .SYNOPSIS
         Not required.
@@ -241,9 +255,9 @@ function Find-CoreNetworksDnsZones {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory, Position=0)]
-        [string]$ApiRootUrl,
+        [System.Object]$ApiRootUrl,
         [Parameter(Mandatory, Position=1)]
-        [hashtable]$Headers,
+        [System.Object]$Headers,
         [Parameter(Mandatory, Position=2)]
         [string]$RecordName
     )
@@ -264,40 +278,6 @@ function Find-CoreNetworksDnsZones {
                 return $e
             }
         }
-    }
-    catch {
-        Write-Debug $_
-        throw
-    }
-}
-
-### Our current backend for the name server is not suitable for the high-frequency processing of DNS records. So that you can make
-### major changes to DNS zones quickly without having to wait for the name server, changes to the DNS records are not transmitted
-### to the name servers immediately. Instead, when you are done changing DNS records, you must commit the zone.
-function Invoke-CoreNetworksCommit {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory, Position = 0)]
-        [string]$ApiRootUrl,
-        [Parameter(Mandatory, Position = 1)]
-        [hashtable]$Headers,
-        [Parameter(Mandatory, Position = 2)]
-        [string]$DnsZone
-    )
-
-    $queryParams = @{
-        Uri = "$ApiRootUrl/dnszones/$DnsZone/records/commit"
-        Method = 'POST'
-        Headers = $Headers
-        ContentType = 'application/json'
-        Verbose = $false
-        ErrorAction = 'Stop'
-    }
-
-    ### Send a POST request including bearer authentication.
-    try {
-        Write-Debug "POST $($queryParams.Uri)"
-        Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
     }
     catch {
         Write-Debug $_
