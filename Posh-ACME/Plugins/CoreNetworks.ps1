@@ -200,7 +200,7 @@ function Save-DnsTxt {
     $script:CoreNetworksZones | Sort-Object -Unique | ForEach-Object {
 
         $queryParams = @{
-            Uri = "$ApiRootUrl/dnszones/$_/records/commit"
+            Uri = "$CoreNetworksApiRoot/dnszones/$_/records/commit"
             Method = 'POST'
             Headers = $headers
             ContentType = 'application/json'
