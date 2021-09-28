@@ -74,6 +74,7 @@ These plugins have been committed to the main development branch and are pending
 
 Plugin | Provider | Guide | Core Compatible
 ------ | -------- | ----- | ---------------
+CoreNetworks | [Core Networks](https://www.core-networks.de/) | [Usage Guide](CoreNetworks.md) | :white_check_mark:
 
 ### Notes
 
