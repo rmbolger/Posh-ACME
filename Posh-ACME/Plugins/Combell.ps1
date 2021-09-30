@@ -1,4 +1,13 @@
-# [Writing a Validation Plugin for Posh-ACME](https://github.com/rmbolger/Posh-ACME/blob/main/Posh-ACME/Plugins/README.md)
+# [Writing a Validation Plugin for Posh-ACME](https://poshac.me/docs/v4/Plugins/Plugin-Development-Guide/)
+#
+# Tips for developing this plugin
+# 1) 'dot source' the Combell.ps1 plugin:
+# 
+#     PS C:\Users\Steven Volckaert\Repos\stevenvolckaert\Posh-ACME\Posh-ACME\Plugins> . .\Combell.ps1
+#
+#  So: Add ". .\Combell.ps1" before every command:
+#
+#    PS C:\Users\Steven Volckaert\Repos\stevenvolckaert\Posh-ACME\Posh-ACME\Plugins> . .\Combell.ps1 ; Get-DnsRecords "skardev.com" -Verbose
 #
 
 function Get-CurrentPluginType { 'dns-01' }
@@ -6,23 +15,91 @@ function Get-CurrentPluginType { 'dns-01' }
 function Add-DnsTxt {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
-        [Parameter(Mandatory,Position=1)]
+        [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
         <#
         Add plugin specific parameters here. Make sure their names are
         unique across all existing plugins. But make sure common ones
         across this plugin are the same.
         #>
+        [Parameter(ParameterSetName = 'Secure', Mandatory)]
+        [securestring]$CombellApiKey,
+        [Parameter(ParameterSetName = 'Insecure', Mandatory)]
+        [string]$CombellApiKeyInsecure,
+        [Parameter(ParameterSetName = 'Secure', Mandatory)]
+        [securestring]$CombellApiSecret,
+        [Parameter(ParameterSetName = 'Insecure', Mandatory)]
+        [string]$CombellApiSecretInsecure,
+        <##>
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
+    # $RecordName contains the fully qualified domain name (FQDN); use it to get the domain name
+
+
     # Docs @ https://api.combell.com/v2/documentation#tag/DNS-records/paths/~1dns~1{domainName}~1records/post
-    # HTTP POST https://api.combell.com/v2/dns/{domainName}/records
-    #
-    # TODO Can {domainName} be computed from $RecordName? If not, add $CombellDomainName param - Steven Volckaert, 27 August 2021.
+
+    $txtRecords = Send-CombellHttpRequest `
+        -ApiKey $ApiKey `
+        -ApiSecret $ApiSecret `
+        -Method "GET" `
+        -Path "dns/$DomainName/records?type=TXT&record_name=$RecordName" `
+    | Where-Object { $_.record_name -eq $RecordName };
+    $txtRecords = $txtRecords | Where-Object { $_.record_name -eq $RecordName };
+    $numberOfTxtRecords = ($txtRecords | Measure-Object).Count;
+
+    if ($numberOfTxtRecords -eq 0) {
+        Write-Verbose "Domain ""$DomainName"" contains 0 TXT records that match record name ""$RecordName""; add TXT record { ""record_name"": ""$RecordName"", ""content"": ""$TxtValue"" }."
+        $requestBody = @{
+            type        = "TXT"
+            record_name = $RecordName
+            ttl         = 60
+            content     = "$TxtValue"
+        } | ConvertTo-Json -Compress
+        Write-Verbose "requestBody: $requestBody";
+
+        Send-CombellHttpRequest `
+            -ApiKey $ApiKey `
+            -ApiSecret $ApiSecret `
+            -Body $requestBody `
+            -Method "POST" `
+            -Path "dns/$DomainName/records" | Out-Null;
+
+        $txtRecords = Send-CombellHttpRequest `
+            -ApiKey $ApiKey `
+            -ApiSecret $ApiSecret `
+            -Method "GET" `
+            -Path "dns/$DomainName/records?type=TXT&record_name=$RecordName" | Out-Null;
+
+        return;
+    }   
+
+    $txtRecordToUpdate = $txtRecords | Select-Object -First 1;
+    $txtRecordDisplayName = "{ ""id"": ""$($txtRecordToUpdate.id)"", ""record_name"": ""$($txtRecordToUpdate.record_name)"", ""content"": ""$($txtRecordToUpdate.content)"" }";
+    Write-Verbose "Domain ""$DomainName"" contains $numberOfTxtRecords TXT record$(if ($numberOfTxtRecords -gt 1) { "s" }) that match$(if ($numberOfTxtRecords -eq 1) { "es" }) record name ""$RecordName""; update TXT record $txtRecordDisplayName with { ""content"": ""$TxtValue"" }."
+
+    if ($txtRecordToUpdate.content -ceq $TxtValue) {
+        Write-Verbose "TXT record $txtRecordDisplayName already has { ""content"": ""$TxtValue"" }; abort.";
+        return;
+    }
+
+    $requestBody = @{
+        type        = "TXT"
+        record_name = $RecordName
+        ttl         = 60
+        content     = $TxtValue
+    } | ConvertTo-Json -Compress;
+
+    Send-CombellHttpRequest `
+        -ApiKey $ApiKey `
+        -ApiSecret $ApiSecret `
+        -Body $requestBody `
+        -Method "PUT" `
+        -Path "dns/$DomainName/records/$($txtRecordToUpdate.id)" | Out-Null;
+
 
     # Do work here to add the TXT record. Remember to add @script:UseBasic
     # to all calls to Invoke-RestMethod or Invoke-WebRequest.
@@ -50,51 +127,156 @@ function Add-DnsTxt {
     #>
 }
 
-# Copied from Akamai.ps1 - Steven Volckaert, 12 August 2021.
-function Get-HMACSHA256Hash {
+# This function is provided only for testing purposes, it should probably be deleted when the plugin is ready.
+# See https://api.combell.com/v2/documentation#tag/DNS-records/paths/~1dns~1{domainName}~1records/get for
+# API documentation - Steven Volckaert, 29 September 2021.
+function Get-DnsRecords {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
-        [string]$Key,
-        [Parameter(Mandatory,Position=1)]
-        [string]$Message
+        [Parameter(Mandatory, Position = 0)]
+        [string]$DomainName,
+        [Parameter(Mandatory)]
+        [string]$ApiKey,
+        [Parameter(Mandatory)]
+        [string]$ApiSecret
     )
 
-    $hmac = New-Object System.Security.Cryptography.HMACSHA256
-    $hmac.Key = [Text.Encoding]::ASCII.GetBytes($Key)
-    $msgBytes = [Text.Encoding]::ASCII.GetBytes($Message)
-    return [Convert]::ToBase64String($hmac.ComputeHash($msgBytes))
+    Write-Verbose "-DomainName: ""$DomainName""";
+    Send-CombellHttpRequest `
+        -ApiKey $ApiKey `
+        -ApiSecret $ApiSecret `
+        -Method "GET" `
+        -Path "dns/$DomainName/records"
 }
 
-function Get-CombellHMAC {
+function Add-DnsTxtTestRecord {
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0)]
+        [string]$DomainName = "skardev.com",
+        [Parameter(Position = 1)]
+        [string]$RecordName = "_acme-challenge",
+        [Parameter(Position = 2)]
+        [string]$TxtValue = "loremipsum",
+        [Parameter(Mandatory)]
+        [string]$ApiKey,
+        [Parameter(Mandatory)]
+        [string]$ApiSecret
+    )
 
-    <#
-    TODO Compute HMAC with the SHA-256 hashing algorithm; see
-    - https://api.combell.com/v2/documentation#section/Authentication/Steps-to-generate-the-HMAC
-    - https://gist.github.com/45413/da6eb16a8dcfc357b633050b3fc14e34
+    $txtRecords = Send-CombellHttpRequest `
+        -ApiKey $ApiKey `
+        -ApiSecret $ApiSecret `
+        -Method "GET" `
+        -Path "dns/$DomainName/records?type=TXT&record_name=$RecordName";
+    $txtRecords = $txtRecords | Where-Object { $_.record_name -eq $RecordName };
+    $numberOfTxtRecords = ($txtRecords | Measure-Object).Count;
 
-    Finally: Base64-encode the result of the hash function
-    #>
+    if ($numberOfTxtRecords -eq 0) {
+        Write-Verbose "Domain ""$DomainName"" contains 0 TXT records that match record name ""$RecordName""; add TXT record { ""record_name"": ""$RecordName"", ""content"": ""$TxtValue"" }."
+        $requestBody = @{
+            type        = "TXT"
+            record_name = $RecordName
+            ttl         = 60
+            content     = "$TxtValue"
+        } | ConvertTo-Json -Compress
+        Write-Verbose "requestBody: $requestBody";
+
+        Send-CombellHttpRequest `
+            -ApiKey $ApiKey `
+            -ApiSecret $ApiSecret `
+            -Body $requestBody `
+            -Method "POST" `
+            -Path "dns/$DomainName/records" | Out-Null;
+
+        $txtRecords = Send-CombellHttpRequest `
+            -ApiKey $ApiKey `
+            -ApiSecret $ApiSecret `
+            -Method "GET" `
+            -Path "dns/$DomainName/records?type=TXT&record_name=$RecordName" | Out-Null;
+
+        return;
+    }   
+
+    $txtRecordToUpdate = $txtRecords | Select-Object -First 1;
+    $txtRecordDisplayName = "{ ""id"": ""$($txtRecordToUpdate.id)"", ""record_name"": ""$($txtRecordToUpdate.record_name)"", ""content"": ""$($txtRecordToUpdate.content)"" }";
+    Write-Verbose "Domain ""$DomainName"" contains $numberOfTxtRecords TXT record$(if ($numberOfTxtRecords -gt 1) { "s" }) that match$(if ($numberOfTxtRecords -eq 1) { "es" }) record name ""$RecordName""; update TXT record $txtRecordDisplayName with { ""content"": ""$TxtValue"" }."
+
+    if ($txtRecordToUpdate.content -ceq $TxtValue) {
+        Write-Verbose "TXT record $txtRecordDisplayName already has { ""content"": ""$TxtValue"" }; abort.";
+        return;
+    }
+    
+    $requestBody = @{
+        type        = "TXT"
+        record_name = $RecordName
+        ttl         = 60
+        content     = $TxtValue
+    } | ConvertTo-Json -Compress;
+
+    Send-CombellHttpRequest `
+        -ApiKey $ApiKey `
+        -ApiSecret $ApiSecret `
+        -Body $requestBody `
+        -Method "PUT" `
+        -Path "dns/$DomainName/records/$($txtRecordToUpdate.id)" | Out-Null;
 }
 
 function Remove-DnsTxt {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
-        [Parameter(Mandatory,Position=1)]
+        [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
         <#
         Add plugin specific parameters here. Make sure their names are
         unique across all existing plugins. But make sure common ones
         across this plugin are the same.
         #>
+        [Parameter(ParameterSetName = 'Secure', Mandatory)]
+        [securestring]$CombellApiKey,
+        [Parameter(ParameterSetName = 'Insecure', Mandatory)]
+        [string]$CombellApiKeyInsecure,
+        [Parameter(ParameterSetName = 'Secure', Mandatory)]
+        [securestring]$CombellApiSecret,
+        [Parameter(ParameterSetName = 'Insecure', Mandatory)]
+        [string]$CombellApiSecretInsecure,
+        <##>
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # Do work here to remove the TXT record. Remember to add @script:UseBasic
-    # to all calls to Invoke-RestMethod or Invoke-WebRequest.
+    # TODO convert securestring to normal string, if provided
+
+    $zoneName = Find-CombellZone $RecordName $CombellApiKeyInsecure $CombellApiSecretInsecure
+    Write-Verbose "Found domain zone ""$zoneName"" for record ""$RecordName"".";
+    $shortRecordName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    Write-Verbose "Short record name: ""$shortRecordName""";
+
+    $txtRecords = Send-CombellHttpRequest `
+        -ApiKey $CombellApiKeyInsecure `
+        -ApiSecret $CombellApiSecretInsecure `
+        -Method GET `
+        -Path "dns/$zoneName/records?type=TXT&record_name=$shortRecordName";
+    $txtRecords = $txtRecords | Where-Object { $_.record_name -eq $shortRecordName -and $_.content -ceq $TxtValue };
+    $numberOfTxtRecords = ($txtRecords | Measure-Object).Count;
+
+    if ($numberOfTxtRecords -eq 0) {
+        Write-Verbose "Domain ""$zoneName"" contains 0 TXT records that match record name ""$shortRecordName""; abort."
+        return;
+    }
+
+    Write-Verbose "Domain ""$zoneName"" contains $numberOfTxtRecords TXT record$(if ($numberOfTxtRecords -gt 1) { "s" }) that match$(if ($numberOfTxtRecords -eq 1) { "es" }) record name ""$shortRecordName"" and content ""$TxtValue""; delete $numberOfTxtRecords record$(if ($numberOfTxtRecords -gt 1) { "s" })."
+
+    foreach ($txtRecord in $txtRecords) {
+        Write-Verbose "Delete TXT record $txtRecord";
+        Send-CombellHttpRequest `
+            -ApiKey $CombellApiKeyInsecure `
+            -ApiSecret $CombellApiSecretInsecure `
+            -Method DELETE `
+            -Path "dns/$zoneName/records/$($txtRecord.id)" | Out-Null;
+    }
 
     <#
     .SYNOPSIS
@@ -122,34 +304,18 @@ function Remove-DnsTxt {
 function Save-DnsTxt {
     [CmdletBinding()]
     param(
-        <#
-        Add plugin specific parameters here. Make sure their names are
-        unique across all existing plugins. But make sure common ones
-        across this plugin are the same.
-        #>
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # If necessary, do work here to save or finalize changes performed by
-    # Add/Remove functions. It is not uncommon for this function to have
-    # no work to do depending on the DNS provider. In that case, just
-    # leave the function body empty.
-
     <#
     .SYNOPSIS
-        Commits changes for pending DNS TXT record modifications to <My DNS Server/Provider>
+        Not required.
 
     .DESCRIPTION
-        Description for <My DNS Server/Provider>
+        This provider does not require calling this function to commit changes to DNS records.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
-
-    .EXAMPLE
-        Save-DnsTxt
-
-        Commits changes for pending DNS TXT record modifications.
     #>
 }
 
@@ -157,20 +323,42 @@ function Save-DnsTxt {
 # Helper Functions
 ############################
 
-# Add a commented link to API docs if they exist.
+function Get-HMACSHA256Hash {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, Position = 0)]
+        [string]$Key,
+        [Parameter(Mandatory, Position = 1)]
+        [string]$Message
+    )
+
+    $hashAlgorithm = New-Object System.Security.Cryptography.HMACSHA256
+    $hashAlgorithm.Key = [Text.Encoding]::ASCII.GetBytes($Key)
+    $messageAsByteArray = [Text.Encoding]::ASCII.GetBytes($Message)
+    return [Convert]::ToBase64String($hashAlgorithm.ComputeHash($messageAsByteArray))
+}
+
+function Get-MD5Hash {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, Position = 0)]
+        [string]$Message
+    )
+
+    $hashAlgorithm = New-Object System.Security.Cryptography.MD5CryptoServiceProvider
+    $messageAsByteArray = [Text.Encoding]::ASCII.GetBytes($Message)
+    return [Convert]::ToBase64String($hashAlgorithm.ComputeHash($messageAsByteArray))
+}
 
 function Send-CombellHttpRequest {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [string]$Path,
-        [Parameter(Position=1)]
-        [ValidateSet('GET','PUT','POST','DELETE')]
+        [Parameter(Position = 1)]
+        [ValidateSet('GET', 'PUT', 'POST', 'DELETE')]
         [string]$Method = 'GET',
         [string]$Body,
-
-        [int]$MaxBody = 131072,
-
         [string]$AcceptHeader = 'application/json',
         [string]$ApiHost = 'api.combell.com',
         [Parameter(Mandatory)]
@@ -179,88 +367,137 @@ function Send-CombellHttpRequest {
         [string]$ApiSecret
     )
 
-    # TODO Consider trimming '/' from the end of $Path, if it exists
-    # TODO Consider to parameterize API version in paths "/v2/"
-
-
-    # initialize some stuff we'll need for the signature process
     $uri = [uri]"https://$($ApiHost)/v2/$Path"
     $urlEncodedPath = [System.Net.WebUtility]::UrlEncode("/v2/$Path");
-    $Method = $Method.ToLower();
     $unixTimestamp = [int][double]::Parse((Get-Date -UFormat %s));
     $nonce = (New-Guid).ToString()
 
-    $hmacInputValue = "${ApiKey}${Method}${urlEncodedPath}${unixTimestamp}${nonce}";
-    # TODO To support POSTs, $Body is not empty. In that case, $Body must be hashed (MD5), then Base64-encoded (or vice
-    # versa - the order is unclear from https://api.combell.com/v2/documentation#section/Authentication/Steps-to-generate-the-HMAC
-    # , and finally added to $hmacInputValue (concat at end)
-    Write-Verbose "HMAC input value: $hmacInputValue";
+    # Docs @ https://api.combell.com/v2/documentation#section/Authentication
+    $hmacInputValue = "${ApiKey}$($Method.ToLowerInvariant())${urlEncodedPath}${unixTimestamp}${nonce}";
 
-    # TODO $sha256Hash = Get-HMACSHA256Hash $ApiSecret $hmacInputValue;
-    # TODO $hmacSignature = Base64 encode $sha256Hash;
-
-
-    $authString = ""
-
-    # SHA256 hash the body up to the first $MaxBody characters
-    $bodyHash = [string]::Empty
-    if ($Body -and $Method -eq 'POST') {
-        $sha256 = [Security.Cryptography.SHA256]::Create()
-        $bodyToHash = if ($Body.Length -le $MaxBody) { $Body } else { $Body.Substring(0,$MaxBody) }
-        $bodyBytes = [Text.Encoding]::ASCII.GetBytes($bodyToHash)
-        $bodyHash = [Convert]::ToBase64String($sha256.ComputeHash($bodyBytes))
-    }
-
-    # Build the signature data
-    $sigData = "$Method`thttps`t$($uri.Authority)`t$($uri.PathAndQuery)`t`t$bodyHash`t$authString"
-
-    # Hash the timestamp using the client secret and then use that to
-    # hash the signature data to get the signature for the auth header
-    $tsHash = Get-HMACSHA256Hash $ClientSecret $unixTimestamp
-    $signature = Get-HMACSHA256Hash $tsHash $sigData
-
-    $hmacSignature = "";
-    $headers = @{
-        Authorization = "hmac ${ApiKey}:${hmacSignature}:${nonce}:${unixTimestamp}"
-        Accept = $AcceptHeader
-    }
-
-    # Apparently Akamai doesn't support the "Expect: 100 Continue" header
-    # and other implementations try to explicitly disable it using
-    # [System.Net.ServicePointManager]::Expect100Continue = $false
-    # However, none of the environments I tested (PS 5.1, 6, and 7)
-    # actually sent that header by default for any HTTP verb.
-    # It's plausible it was sent pre-5.1 or pre-.NET 4.7.1. But since
-    # we don't support those, we don't have to worry about them.
-
-    # build the call parameters
-    $irmParams = @{
-        Method = $Method
-        Uri = $uri
-        Headers = $headers
-        ContentType = 'application/json'
-        MaximumRedirection = 0
-        ErrorAction = 'Stop'
-    }
     if ($Body) {
-        $irmParams.Body = $Body
+        $hmacInputValue += Get-MD5Hash $Body;
+    }
+
+    $hmacSignature = Get-HMACSHA256Hash $ApiSecret $hmacInputValue;
+    $authorizationHeaderValue = "hmac ${ApiKey}:${hmacSignature}:${nonce}:${unixTimestamp}";
+    $headers = @{
+        Authorization = $authorizationHeaderValue
+        Accept        = $AcceptHeader
+    }   
+    $invokeRestMesthodParameters = @{
+        Method             = $Method
+        Uri                = $uri
+        Headers            = $headers
+        ContentType        = 'application/json'
+        MaximumRedirection = 0
+        ErrorAction        = 'Stop'
+    }
+
+    if ($Body) {
+        $invokeRestMesthodParameters.Body = $Body
     }
 
     try {
-        Invoke-RestMethod @irmParams @script:UseBasic
-    } catch {
+        $Stopwatch = New-Object -TypeName System.Diagnostics.Stopwatch;
+        $Stopwatch.Start();
+        Invoke-RestMethod @invokeRestMesthodParameters #@script:UseBasic
+        $Stopwatch.Stop();
+        Write-Verbose "$Method $uri - OK ($($Stopwatch.ElapsedMilliseconds) ms)"
+    }
+    catch {
+        $Stopwatch.Stop();
+        Write-Verbose "$Method $uri - $($_.Exception.Response.StatusCode.value__) $($_.Exception.StatusDescription) ($($Stopwatch.ElapsedMilliseconds) ms) - $($_)"
+
+        throw
+
+        # TODO Ignore 404
+
         # ignore 404 errors and just return $null
         # otherwise, let it through
-        if ([Net.HttpStatusCode]::NotFound -eq $_.Exception.Response.StatusCode) {
-            return $null
-        } else { throw }
+        #if ([Net.HttpStatusCode]::NotFound -eq $_.Exception.Response.StatusCode) {
+        #    return $null
+        #}
+        #else { throw }
     }
+}
+
+function Find-CombellZone {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, Position = 0)]
+        [string]$RecordName,
+        [Parameter(Mandatory, Position = 1)]
+        [string]$CombellApiKeyInsecure,
+        [Parameter(Mandatory, Position = 2)]
+        [string]$CombellApiSecretInsecure
+    )
+
+    # Setup a module variable to cache the record to zone mapping, so it's quicker to find later.
+    if (!$script:CombellRecordZones) {
+        $script:CombellRecordZones = @{}
+    }
+
+    # If the cache contains $RecordName, return it.
+    if ($script:CombellRecordZones.ContainsKey($RecordName)) {
+        return $script:CombellRecordZones.$RecordName
+    }
+
+    # Not specifying the 'take' query parameter defaults the result set to a maximum 25 items (situation on 30
+    # September 2021). It is not clear from the documentation how you can get all domains in a single request, so I'm
+    # defaulting here to a 'take' parameter value of '1000'.
+    # If you find a better solution, feel free to submit an issue.
+    # See https://api.combell.com/v2/documentation#operation/Domains for more information.
+    # - Steven Volckaert, 30 September 2021.
+    try {
+        $zones = Send-CombellHttpRequest `
+            -ApiKey $CombellApiKeyInsecure `
+            -ApiSecret $CombellApiSecretInsecure `
+            -Method GET `
+            -Path "domains?take=1000";
+    }
+    catch { throw }
+
+    # We need to find the deepest sub-zone that can hold the record and add it there, except if there is only the apex
+    # zone. So for a $RecordName like _acme-challenge.site1.sub1.sub2.example.com, we need to search the zone from
+    # longest to shortest set of FQDNs contained in $zones, i.e. in the following order:
+    # - site1.sub1.sub2.example.com
+    # - sub1.sub2.example.com
+    # - sub2.example.com
+    # - example.com
+    # See https://poshac.me/docs/v4/Plugins/Plugin-Development-Guide/#zone-matching for more information.
+    # - Steven Volckaert, 30 September 2021.
+    $pieces = $RecordName.Split('.')
+    for ($i = 0; $i -lt ($pieces.Count - 1); $i++) {
+        $zoneTest = $pieces[$i..($pieces.Count - 1)] -join '.'
+        Write-Verbose "Checking $zoneTest"
+        if ($zoneTest -in $zones.domain_name) {
+            $zone = $zones | Where-Object { $_.domain_name -eq $zoneTest }
+            $script:CombellRecordZones.$RecordName = $zone.domain_name
+            return $zone.domain_name
+        }
+    }
+
+    throw "No domain zone found for ""$RecordName"".";
+}
+
+function Get-CombellDomains {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, Position = 0)]
+        [string]$ApiKey,
+        [Parameter(Mandatory, Position = 0)]
+        [string]$ApiSecret
+    )
+
+    $domains = Send-CombellHttpRequest -ApiKey $ApiKey -ApiSecret $ApiSecret -Method GET -Path "domains?take=1000";
+    $domains;
 }
 
 function Get-CombellDnsRecords {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [string]$DomainName,
         [string]$RecordType = $null,
         [string]$ApiKey,
