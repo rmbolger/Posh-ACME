@@ -1719,6 +1719,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#verify-the-chain-being-served" class="md-nav__link">
+    Verify the Chain Being Served
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1869,6 +1876,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#verify-the-chain-being-served" class="md-nav__link">
+    Verify the Chain Being Served
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1952,7 +1966,7 @@
 <li>If it doesn't exist, import it the same way you did for the cross-signed ISRG Root X1</li>
 </ul>
 <h3 id="option-2-import-via-registry-file">Option 2: Import via Registry File<a class="headerlink" href="#option-2-import-via-registry-file" title="Permanent link">&para;</a></h3>
-<p>Many find it easier to import a registry file containing the necessary cert changes. I've created the following two that can allow you to switch back and forth between the "default" and "alternate" chain configurations.</p>
+<p>Many find it easier to import a registry file containing the necessary cert changes. Here are two that allow you to switch back and forth between the "default" and "alternate" chain configurations.</p>
 <ul>
 <li><a href="../../assets/files/LetsEncrypt-DefaultChain-SYSTEM.reg.txt">LetsEncrypt-DefaultChain-SYSTEM.reg</a></li>
 <li><a href="../../assets/files/LetsEncrypt-AltChain-SYSTEM.reg.txt">LetsEncrypt-AltChain-SYSTEM.reg</a></li>
@@ -1964,6 +1978,40 @@
 <div class="highlight"><pre><span></span><code><span class="p">&amp;</span> <span class="nv">$env:SystemRoot</span><span class="p">\</span><span class="n">system32</span><span class="p">\</span><span class="n">inetsrv</span><span class="p">\</span><span class="n">appcmd</span><span class="p">.</span><span class="n">exe</span> <span class="n">renew</span> <span class="n">binding</span> <span class="p">/</span><span class="n">oldcert</span><span class="p">:</span><span class="n">THUMBPRINT</span> <span class="p">/</span><span class="n">newcert</span><span class="p">:</span><span class="n">THUMBPRINT</span>
 </code></pre></div>
 <p>On earlier OSes, you can try modifying the binding from IIS Manager or just delete and re-create it. But again, the most reliable way is a reboot.</p>
+<h2 id="verify-the-chain-being-served">Verify the Chain Being Served<a class="headerlink" href="#verify-the-chain-being-served" title="Permanent link">&para;</a></h2>
+<p>If your website is exposed to the Internet, you can use a number of web based SSL checkers to verify which chain is being served by your site. Here are a couple popular ones:</p>
+<ul>
+<li><a href="https://www.ssllabs.com/ssltest/">Qualys SSL Labs</a></li>
+<li><a href="https://decoder.link/sslchecker/">Namecheap SSL Checker</a></li>
+</ul>
+<p>If your website or service is only listening on your internal network, the most common way to check the chain is using OpenSSL. It's usually pre-installed on Linux and MacOS. But you'll have to download and install it for Windows. A popular distribution is available from <a href="https://slproweb.com/products/Win32OpenSSL.html">Shining Light Productions</a>. All you should need is the "Light" Win64 version of whatever is the latest build.</p>
+<p>Run the following to check your site where <code>SERVER</code> is the hostname or IP of your server.</p>
+<div class="highlight"><pre><span></span><code>openssl s_client -connect SERVER:443
+</code></pre></div>
+<p>If your server requires using an SNI hostname, you can use this alternative:</p>
+<div class="highlight"><pre><span></span><code>openssl s_client -connect SERVER:443 -servername HOSTNAME
+</code></pre></div>
+<p>The output will be quite long and you may need to Ctrl-C to cancel the command. But the output you're looking for should be within the first 10 lines of output. There will be a block of text between two sets of <code>---</code> characters that should look like either of these:</p>
+<p>Default/Long Chain:</p>
+<div class="highlight"><pre><span></span><code>---
+Certificate chain
+ 0 s:CN = example.com
+   i:C = US, O = Let&#39;s Encrypt, CN = R3
+ 1 s:C = US, O = Let&#39;s Encrypt, CN = R3
+   i:C = US, O = Internet Security Research Group, CN = ISRG Root X1
+ 2 s:C = US, O = Internet Security Research Group, CN = ISRG Root X1
+   i:O = Digital Signature Trust Co., CN = DST Root CA X3
+---
+</code></pre></div>
+<p>Alternate/Short Chain:</p>
+<div class="highlight"><pre><span></span><code>---
+Certificate chain
+ 0 s:CN = example.com
+   i:C = US, O = Let&#39;s Encrypt, CN = R3
+ 1 s:C = US, O = Let&#39;s Encrypt, CN = R3
+   i:C = US, O = Internet Security Research Group, CN = ISRG Root X1
+---
+</code></pre></div>
                 
               
               
