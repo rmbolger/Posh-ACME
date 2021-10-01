@@ -308,19 +308,21 @@ function Get-CombellAuthorizationHeaderValue {
 
     $urlEncodedPath = [System.Net.WebUtility]::UrlEncode("/v2/$Path");
     $unixTimestamp = [int][double]::Parse((Get-Date -UFormat %s));
+    #$unixTimestamp = 1633103653;
     $nonce = (New-Guid).ToString();
+    #$nonce = "42f4286c-64f0-45da-a3e3-b3ec1f7bee7f";
     $hmacInputValue = "${ApiKey}$($Method.ToLowerInvariant())${urlEncodedPath}${unixTimestamp}${nonce}";
 
     if ($Body) {
         $md5Algorithm = New-Object System.Security.Cryptography.MD5CryptoServiceProvider;
-        $bodyAsByteArray = [Text.Encoding]::ASCII.GetBytes($Body);
+        $bodyAsByteArray = [Text.Encoding]::UTF8.GetBytes($Body);
         $bodyAsHashedBase64String = [Convert]::ToBase64String($md5Algorithm.ComputeHash($bodyAsByteArray));
         $hmacInputValue += $bodyAsHashedBase64String;
     }
 
     $hmacAlgorithm = New-Object System.Security.Cryptography.HMACSHA256;
-    $hmacAlgorithm.Key = [Text.Encoding]::ASCII.GetBytes($ApiSecret);
-    $hmacInputValueAsByteArray = [Text.Encoding]::ASCII.GetBytes($hmacInputValue);
+    $hmacAlgorithm.Key = [Text.Encoding]::UTF8.GetBytes($ApiSecret);
+    $hmacInputValueAsByteArray = [Text.Encoding]::UTF8.GetBytes($hmacInputValue);
     $hmacSignature = [Convert]::ToBase64String($hmacAlgorithm.ComputeHash($hmacInputValueAsByteArray));
 
     return "hmac ${ApiKey}:${hmacSignature}:${nonce}:${unixTimestamp}";
@@ -374,15 +376,15 @@ function Send-CombellHttpRequest {
 
     $headers = @{
         Authorization = $authorizationHeaderValue
-        Accept        = "application/json"
+        Accept        = 'application/json'
     }
     $invokeRestMesthodParameters = @{
         Method             = $Method
         Uri                = $uri
         Headers            = $headers
-        ContentType        = "application/json"
+        ContentType        = 'application/json'
         MaximumRedirection = 0
-        ErrorAction        = "Stop"
+        ErrorAction        = 'Stop'
     }
     if ($Body) {
         $invokeRestMesthodParameters.Body = $Body
