@@ -13,14 +13,14 @@
         <meta name="author" content="Ryan Bolger">
       
       
-        <link rel="canonical" href="https://poshac.me/docs/v4/Plugins/WebSelfHost/">
+        <link rel="canonical" href="https://poshac.me/docs/v4/Plugins/CoreNetworks/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.6">
     
     
       
-        <title>WebSelfHost - Posh-ACME</title>
+        <title>CoreNetworks - Posh-ACME</title>
       
     
     
@@ -54,16 +54,16 @@
     
   
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Posh-ACME - WebSelfHost" />
+  <meta property="og:title" content="Posh-ACME - CoreNetworks" />
   <meta property="og:description" content="Documentation for the Posh-ACME PowerShell module" />
-  <meta property="og:url" content="https://poshac.me/docs/v4/Plugins/WebSelfHost/" />
+  <meta property="og:url" content="https://poshac.me/docs/v4/Plugins/CoreNetworks/" />
   <meta property="og:image" content="https://poshac.me/docs/v4/assets/images/social-card.png" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Posh-ACME - WebSelfHost" />
+  <meta name="twitter:title" content="Posh-ACME - CoreNetworks" />
   <meta name="twitter:description" content="Documentation for the Posh-ACME PowerShell module" />
   <meta name="twitter:image" content="https://poshac.me/docs/v4/assets/images/social-card.png" />
 
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#how-to-use-the-webselfhost-plugin" class="md-skip">
+        <a href="#how-to-use-the-core-networks-dns-plugin" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              WebSelfHost
+              CoreNetworks
             
           </span>
         </div>
@@ -971,11 +971,58 @@
             
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../CoreNetworks/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          CoreNetworks
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         CoreNetworks
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    Setup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-plugin" class="md-nav__link">
+    Using the Plugin
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1475,98 +1522,11 @@
             
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          WebSelfHost
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../WebSelfHost/" class="md-nav__link">
         WebSelfHost
       </a>
-      
-        
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#setup" class="md-nav__link">
-    Setup
-  </a>
-  
-    <nav class="md-nav" aria-label="Setup">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-only-prerequisites" class="md-nav__link">
-    Windows Only Prerequisites
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#additional-considerations" class="md-nav__link">
-    Additional Considerations
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-the-plugin" class="md-nav__link">
-    Using the Plugin
-  </a>
-  
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#default-functionality" class="md-nav__link">
-    Default functionality
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#non-standard-port" class="md-nav__link">
-    Non-standard port
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1832,51 +1792,11 @@
     Setup
   </a>
   
-    <nav class="md-nav" aria-label="Setup">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#windows-only-prerequisites" class="md-nav__link">
-    Windows Only Prerequisites
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#additional-considerations" class="md-nav__link">
-    Additional Considerations
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
   <a href="#using-the-plugin" class="md-nav__link">
     Using the Plugin
-  </a>
-  
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#default-functionality" class="md-nav__link">
-    Default functionality
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#non-standard-port" class="md-nav__link">
-    Non-standard port
   </a>
   
 </li>
@@ -1893,34 +1813,22 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/rmbolger/Posh-ACME/edit/main/docs/Plugins/WebSelfHost.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/rmbolger/Posh-ACME/edit/main/docs/Plugins/CoreNetworks.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="how-to-use-the-webselfhost-plugin">How To Use the WebSelfHost Plugin<a class="headerlink" href="#how-to-use-the-webselfhost-plugin" title="Permanent link">&para;</a></h1>
-<p>This is an HTTP challenge plugin that works by temporarily running an HTTP listener to directly respond to challenge requests from the ACME server. It is commonly used when your certificate will not be used with an existing web server or the server is not listening on port 80. It can also be used with an existing web server if you are willing to temporarily stop the server during the certificate issuance process, but this requires additional scripting. The plugin will not automatically stop and restart the other web server.</p>
+                <h1 id="how-to-use-the-core-networks-dns-plugin">How To Use the Core Networks DNS Plugin<a class="headerlink" href="#how-to-use-the-core-networks-dns-plugin" title="Permanent link">&para;</a></h1>
+<p>This plugin works against the <a href="https://www.core-networks.de/">Core Networks</a> DNS provider. It is assumed that you have already setup an (API)Account and created the DNS zone(s) you will be working against.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<h3 id="windows-only-prerequisites">Windows Only Prerequisites<a class="headerlink" href="#windows-only-prerequisites" title="Permanent link">&para;</a></h3>
-<p>When running on Windows, the HttpListener class depends on a kernel mode web server called http.sys. Because it's a system-level service, non-administrator users can't use it without an explicit URL reservation that gives them permission. Open an elevated PowerShell session and run the following to see the current list of URL reservations.</p>
-<div class="highlight"><pre><span></span><code><span class="go">netsh http show urlacl</span>
-</code></pre></div>
-<p>Modern Windows versions will have a bunch of these even in a default install for various system components and services. We need to add one that matches what the plugin will be trying to use. By default, it will use <code>http://+:80/.well-known/acme-challenge/</code>. The easiest thing to do is create the reservation and give permissions to "Everyone". It's perfectly reasonable to only grant permissions to the user or group who will need it as well. But you will need to <a href="https://docs.microsoft.com/en-us/windows/win32/http/add-urlacl">adjust the command line</a> appropriately with the target user/group instead of an sddl string.</p>
-<div class="highlight"><pre><span></span><code><span class="go">netsh http add urlacl url=http://+:80/.well-known/acme-challenge/ sddl=D:(A;;GX;;;S-1-1-0)</span>
-</code></pre></div>
-<p>If you will be running the listener on an alternate port, make sure your reservation also uses the alternate port. Also keep in mind that the ACME validation server will always request challenges on port 80. So if you're using an alternate port, make sure there's an appropriate port forward if it's behind NAT or an HTTP redirect if another server is in front of it.</p>
-<h3 id="additional-considerations">Additional Considerations<a class="headerlink" href="#additional-considerations" title="Permanent link">&para;</a></h3>
-<p>Regardless of the underlying OS, you need to make sure the listener won't conflict with other software running on the system. If port 80 is in use, you will need to run the listener on an alternate port. But keep in mind, the ACME challenge validations must be served from port 80 on the internet-facing side of things. Often, there will be port forwarding or a reverse proxy in place that maps the internet-facing port 80 to an internal alternate port.</p>
+<p>On your account <a href="https://iface.core-networks.de/general/api/accounts">profile page</a>, click <code>Add Access</code>. Give it custom a username and a strong password. Record the value to use later. You won't be able to go back and look it up after leaving the page.</p>
+<p>At the moment, no Internationalized Domain Name (IDN) are supported.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>No plugin args are required if you will be using the default port 80 and 120 second timeout. Otherwise, you may use <code>WSHPort</code> and <code>WSHTimeout</code> respectively.</p>
-<h3 id="default-functionality">Default functionality<a class="headerlink" href="#default-functionality" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">WebSelfHost</span> <span class="n">-PluginArgs</span> <span class="p">@{}</span>
-</code></pre></div>
-<h2 id="non-standard-port">Non-standard port<a class="headerlink" href="#non-standard-port" title="Permanent link">&para;</a></h2>
+<p>Your username and password are used with the <code>CoreNetworksCred</code> PSCredential parameter. There is also an optional <code>CoreNetworksApiRoot</code> parameter that currently defaults to <code>https://beta.api.core-networks.de</code>. Unless Core Networks changes that URL when the API is out of beta, you won't need to worry about it.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">WSHPort</span> <span class="p">=</span> <span class="n">8000</span>
+    <span class="n">CoreNetworksCred</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span>
 <span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">WebSelfHost</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">CoreNetworks</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 
                   
@@ -1943,7 +1851,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../WebRoot/" class="md-footer__link md-footer__link--prev" aria-label="Previous: WebRoot" rel="prev">
+        <a href="../Constellix/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Constellix" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1952,20 +1860,20 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              WebRoot
+              Constellix
             </div>
           </div>
         </a>
       
       
         
-        <a href="../Windows/" class="md-footer__link md-footer__link--next" aria-label="Next: Windows" rel="next">
+        <a href="../DMEasy/" class="md-footer__link md-footer__link--next" aria-label="Next: DMEasy" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Windows
+              DMEasy
             </div>
           </div>
           <div class="md-footer__button md-icon">

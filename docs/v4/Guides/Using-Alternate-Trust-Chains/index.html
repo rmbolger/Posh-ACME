@@ -971,6 +971,18 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Plugins/CoreNetworks/" class="md-nav__link">
+        CoreNetworks
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Plugins/DMEasy/" class="md-nav__link">
         DMEasy
       </a>
@@ -1678,6 +1690,33 @@
     Serving the Alternate Chain from Windows
   </a>
   
+    <nav class="md-nav" aria-label="Serving the Alternate Chain from Windows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-1-manually-using-psexec" class="md-nav__link">
+    Option 1: Manually using PsExec
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-2-import-via-registry-file" class="md-nav__link">
+    Option 2: Import via Registry File
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trigger-cert-chain-rebuild" class="md-nav__link">
+    Trigger Cert Chain Rebuild
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1801,6 +1840,33 @@
     Serving the Alternate Chain from Windows
   </a>
   
+    <nav class="md-nav" aria-label="Serving the Alternate Chain from Windows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-1-manually-using-psexec" class="md-nav__link">
+    Option 1: Manually using PsExec
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-2-import-via-registry-file" class="md-nav__link">
+    Option 2: Import via Registry File
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trigger-cert-chain-rebuild" class="md-nav__link">
+    Trigger Cert Chain Rebuild
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1829,7 +1895,7 @@
 <li><a href="https://letsencrypt.org/2020/12/21/extending-android-compatibility.html">Extending Android Device Compatibility for Let's Encrypt Certificates</a></li>
 <li><a href="https://community.letsencrypt.org/t/production-chain-changes/150739">Production Chain Changes</a></li>
 </ul>
-<p>Your default choice is currently the longer chain that builds to the expiring <code>DST Root CA X3</code> 3rd party certificate which should be compatible with almost all Android devices until 2024. The alternate choice is the shorter chain that builds to the <code>ISRG Root X1</code> self-signed certificate which doesn't expire until 2035.</p>
+<p>Your default choice is currently the longer chain that builds to the expired <code>DST Root CA X3</code> self-signed certificate which should be compatible with almost all Android devices until 2024. The alternate choice is the shorter chain that builds to the <code>ISRG Root X1</code> self-signed certificate which doesn't expire until 2035.</p>
 <p>Ultimately, your choice should depend on the clients that are connecting to your service. But if you don't know, it's probably safest to just leave the default. Let's Encrypt also has a <a href="https://letsencrypt.org/docs/certificate-compatibility/">Certificate Compatibility</a> page that can help.</p>
 <p>It is also a perfectly valid option to switch to a different <a href="../ACME-CA-Comparison/">public ACME CA</a> either permanently or until the dust settles on the DST Root expiration.</p>
 <h2 id="picking-an-alternate-chain">Picking an Alternate Chain<a class="headerlink" href="#picking-an-alternate-chain" title="Permanent link">&para;</a></h2>
@@ -1856,14 +1922,48 @@
 </div>
 <h2 id="serving-the-alternate-chain-from-windows">Serving the Alternate Chain from Windows<a class="headerlink" href="#serving-the-alternate-chain-from-windows" title="Permanent link">&para;</a></h2>
 <p>While the <code>-PreferredChain</code> option will make Posh-ACME download the alternate chain for the files in your config, you may notice that on Windows your website/application is still serving the default chain. Unlike many Linux applications that have explicit configuration options for chain configuration, applications that use the Windows certificate store usually rely on the underlying operating system to decide what chain to serve with the leaf certificate.</p>
-<p>There does not seem to be a way to differentiate the chains being served based on application. All websites and applications using leaf certs from the same Intermediate CA will serve the same chain. But it is possible to influence which chain based on the contents of the <code>Intermediate Certification Authorities</code> cert store.</p>
-<p>Both chains start with the same <a href="https://letsencrypt.org/certs/lets-encrypt-r3.der">R3 intermediate</a> cert (Thumbprint: a053375bfe84e8b748782c7cee15827a6af5a405) signed by <code>ISRG Root X1</code> and should be added to your Intermediate cert store if it's not already there. If you wish to serve the short chain, this is all you need assuming the <a href="https://letsencrypt.org/certs/isrgrootx1.der">self-signed ISRG Root X1</a> is in your Trusted Root store as well.</p>
-<p>If you want to serve the longer chain, you will also need to add the <a href="https://letsencrypt.org/certs/isrg-root-x2-cross-signed.der">cross-signed ISRG Root X1</a> cert (Thumbprint: 933c6ddee95c9c41a40f9f50493d82be03ad87bf) to the Intermediate cert store. Windows will find this cross-signed cert before it finds the self-signed copy in Trusted Roots and add it to the chain being served by the applications.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>These suggestions are based on the observed behavior of Windows Server 2019 and 2022 prior to the expiration of <code>DST Root CA X3</code>. This document will be updated if the behavior changes following that expiration.</p>
+<p>There does not seem to be a way to differentiate the chains being served based on application. All websites and applications using leaf certs from the same Intermediate CA will serve the same chain. But it is possible to influence which chain based on the by manipulating the contents of the various Windows trust stores.</p>
+<p>The default chain that Windows picks for an LE cert following the expiration of <code>DST Root CA X3</code> is actually Let's Encrypt's shorter "alternate" chain which does not include the cross-signed copy of <code>ISRG Root X1</code> needed for old Android compatibility. Convincing Windows to serve Let's Encrypt's longer "default" chain that does support old Android devices currently requires a hack that involves un-trusting the legitimate self-signed <code>ISRG Root X1</code> on the user account hosting your service. In the case of IIS, that usually means the local SYSTEM account.</p>
+<p>There are a number of different ways to make the modifications, but generally speaking the following needs to happen in the cert stores associated with the user running the service.</p>
+<ul>
+<li>Add the <a href="https://letsencrypt.org/certs/isrgrootx1.der">self-signed ISRG Root X1</a> certificate to <code>Untrusted Certificates</code>.</li>
+<li>Add the <a href="https://letsencrypt.org/certs/isrg-root-x1-cross-signed.der">cross-signed ISRG Root X1</a> certificate to <code>Intermediate Certification Authorities</code>.</li>
+<li>Add the <a href="https://letsencrypt.org/certs/lets-encrypt-r3.der">current R3</a> certificate to <code>Intermediate Certification Authorities</code>. <em>(This one may already exist here)</em></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This process is an unsupported hack and will partially break certificate validation against sites/services using Let's Encrypt certificates when accessed by software or web browsers on this user account. It should not affect validation for other users on the system.</p>
 </div>
-<p>The changes require a reboot to take effect.</p>
+<h3 id="option-1-manually-using-psexec">Option 1: Manually using PsExec<a class="headerlink" href="#option-1-manually-using-psexec" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Download the 3 certificates linked above (2 versions of ISRG Root X1 and a copy of R3)</li>
+<li>Download Microsoft's <a href="https://docs.microsoft.com/en-us/sysinternals/downloads/psexec">PsExec</a> utility and run the following from an admin prompt to open the Certificate Manager for the SYSTEM user.</li>
+</ul>
+<div class="highlight"><pre><span></span><code>psexec.exe -i -s certmgr.msc
+</code></pre></div>
+<ul>
+<li>Navigate to <code>Untrusted Certificates</code> and expand</li>
+<li>Right click it, select <code>All Tasks</code> - <code>Import</code></li>
+<li>Browse to the <strong>self-signed</strong> ISRG Root X1 you downloaded and complete the wizard to import it</li>
+<li>Navigate to <code>Intermediate Certification Authorities</code> and expand</li>
+<li>Right click it, select <code>All Tasks</code> - <code>Import</code></li>
+<li>Browse to the <strong>cross-signed</strong> ISRG Root X1 you downloaded and complete the wizard to import it</li>
+<li>Look for an existing copy of <code>R3</code> issued by <code>ISRG Root X1</code> and expiring in 2025. <em>(It's okay if there are multiple copies listed)</em></li>
+<li>If it doesn't exist, import it the same way you did for the cross-signed ISRG Root X1</li>
+</ul>
+<h3 id="option-2-import-via-registry-file">Option 2: Import via Registry File<a class="headerlink" href="#option-2-import-via-registry-file" title="Permanent link">&para;</a></h3>
+<p>Many find it easier to import a registry file containing the necessary cert changes. I've created the following two that can allow you to switch back and forth between the "default" and "alternate" chain configurations.</p>
+<ul>
+<li><a href="../../assets/files/LetsEncrypt-DefaultChain-SYSTEM.reg.txt">LetsEncrypt-DefaultChain-SYSTEM.reg</a></li>
+<li><a href="../../assets/files/LetsEncrypt-AltChain-SYSTEM.reg.txt">LetsEncrypt-AltChain-SYSTEM.reg</a></li>
+</ul>
+<p>The first one imports the 3 certs as described in the manual method. The second one deletes them. Download the one you want, remove the <code>.txt</code> extension so it becomes <code>.reg</code>, and double-click to import it.</p>
+<h3 id="trigger-cert-chain-rebuild">Trigger Cert Chain Rebuild<a class="headerlink" href="#trigger-cert-chain-rebuild" title="Permanent link">&para;</a></h3>
+<p>In order for the cert changes to take effect, the most reliable method is to reboot the server. If you are unable or don't want to reboot, you may also be able to trigger a chain rebuild by causing IIS to rebind the certificate on your site.</p>
+<p>On Windows Server 2012 R2 or newer, you can use the following command to rebind the cert as long as you know the certificate thumbprint.  From PowerShell:</p>
+<div class="highlight"><pre><span></span><code><span class="p">&amp;</span> <span class="nv">$env:SystemRoot</span><span class="p">\</span><span class="n">system32</span><span class="p">\</span><span class="n">inetsrv</span><span class="p">\</span><span class="n">appcmd</span><span class="p">.</span><span class="n">exe</span> <span class="n">renew</span> <span class="n">binding</span> <span class="p">/</span><span class="n">oldcert</span><span class="p">:</span><span class="n">THUMBPRINT</span> <span class="p">/</span><span class="n">newcert</span><span class="p">:</span><span class="n">THUMBPRINT</span>
+</code></pre></div>
+<p>On earlier OSes, you can try modifying the binding from IIS Manager or just delete and re-create it. But again, the most reliable way is a reboot.</p>
                 
               
               
