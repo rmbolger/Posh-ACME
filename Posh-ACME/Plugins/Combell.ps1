@@ -299,12 +299,22 @@ function Get-CombellAuthorizationHeaderValue {
         [Parameter(Mandatory, Position = 1)]
         [string]$ApiSecret,
         [Parameter(Mandatory, Position = 2)]
+<<<<<<< Updated upstream
+=======
+        [ValidateSet('GET', 'PUT', 'POST', 'DELETE')]
+>>>>>>> Stashed changes
         [string]$Method,
         [Parameter(Mandatory, Position = 3)]
         [string]$Path,
         [Parameter(Position = 4)]
         [string]$Body
     )
+
+    Write-Verbose "-ApiKey: $ApiKey";
+    Write-Verbose "-ApiSecret: $ApiSecret";
+    Write-Verbose "-Method: $Method";
+    Write-Verbose "-Path: $Path";
+    Write-Verbose "-Body: $Body";
 
     $urlEncodedPath = [System.Net.WebUtility]::UrlEncode("/v2/$Path");
     $unixTimestamp = [int][double]::Parse((Get-Date -UFormat %s));
@@ -314,6 +324,7 @@ function Get-CombellAuthorizationHeaderValue {
     $hmacInputValue = "${ApiKey}$($Method.ToLowerInvariant())${urlEncodedPath}${unixTimestamp}${nonce}";
 
     if ($Body) {
+<<<<<<< Updated upstream
         $md5Algorithm = New-Object System.Security.Cryptography.MD5CryptoServiceProvider;
         $bodyAsByteArray = [Text.Encoding]::UTF8.GetBytes($Body);
         $bodyAsHashedBase64String = [Convert]::ToBase64String($md5Algorithm.ComputeHash($bodyAsByteArray));
@@ -324,6 +335,19 @@ function Get-CombellAuthorizationHeaderValue {
     $hmacAlgorithm.Key = [Text.Encoding]::UTF8.GetBytes($ApiSecret);
     $hmacInputValueAsByteArray = [Text.Encoding]::UTF8.GetBytes($hmacInputValue);
     $hmacSignature = [Convert]::ToBase64String($hmacAlgorithm.ComputeHash($hmacInputValueAsByteArray));
+=======
+        Write-Verbose "Body is not empty; add to hmac input value"
+        $hashAlgorithm = New-Object System.Security.Cryptography.MD5CryptoServiceProvider;
+        $bodyAsByteArray = [Text.Encoding]::ASCII.GetBytes($Body);
+        $bodyAsHashedBase64String = [Convert]::ToBase64String($hashAlgorithm.ComputeHash($bodyAsByteArray));
+        $hmacInputValue += $bodyAsHashedBase64String;
+    }
+
+    $hashAlgorithm = New-Object System.Security.Cryptography.HMACSHA256;
+    $hashAlgorithm.Key = [Text.Encoding]::ASCII.GetBytes($ApiSecret);
+    $hmacInputValueAsByteArray = [Text.Encoding]::ASCII.GetBytes($hmacInputValue);
+    $hmacSignature = [Convert]::ToBase64String($hashAlgorithm.ComputeHash($hmacInputValueAsByteArray));
+>>>>>>> Stashed changes
 
     return "hmac ${ApiKey}:${hmacSignature}:${nonce}:${unixTimestamp}";
 
@@ -371,13 +395,52 @@ function Send-CombellHttpRequest {
         [string]$ApiSecret
     )
 
+    Write-Debug "-Path: $Path";
+    Write-Debug "-Method: $Method";
+    Write-Debug "-ApiKey: $ApiKey";
+    Write-Debug "-ApiSecret: $ApiSecret";
+
     $uri = [uri]"https://api.combell.com/v2/$Path";
+<<<<<<< Updated upstream
     $authorizationHeaderValue = Get-CombellAuthorizationHeaderValue $ApiKey $ApiSecret $Method $Path $Body;
 
     $headers = @{
         Authorization = $authorizationHeaderValue
         Accept        = 'application/json'
     }
+=======
+    #$headers = @{
+    #    Authorization = Get-CombellAuthorizationHeaderValue `
+    #        -ApiKey $ApiKey `
+    #        -ApiSecret $ApiSecret `
+    #        -Method $Method `
+    #        -Path $Path `
+    #        -Body $Body
+    #    Accept        = "application/json"
+    #}
+    #Write-Verbose "Authorization: $($headers.Authorization)";
+    #$invokeRestMesthodParameters = @{
+    #    Method             = $Method
+    #    Uri                = $uri
+    #    Headers            = $headers
+    #    ContentType        = "application/json"
+    #    MaximumRedirection = 0
+    #    ErrorAction        = "Stop"
+    #}
+    #####
+    $urlEncodedPath = [System.Net.WebUtility]::UrlEncode("/v2/$Path");
+    $unixTimestamp = [int][double]::Parse((Get-Date -UFormat %s));
+    $nonce = (New-Guid).ToString()
+
+    # Docs @ https://api.combell.com/v2/documentation#section/Authentication
+    $hmacInputValue = "${ApiKey}$($Method.ToLowerInvariant())${urlEncodedPath}${unixTimestamp}${nonce}$(if ($Body) { Get-MD5Hash $Body})";
+    $hmacSignature = Get-HMACSHA256Hash $ApiSecret $hmacInputValue;
+    $authorizationHeaderValue = "hmac ${ApiKey}:${hmacSignature}:${nonce}:${unixTimestamp}";
+    $headers = @{
+        Authorization = $authorizationHeaderValue
+        Accept        = "application/json"
+    }   
+>>>>>>> Stashed changes
     $invokeRestMesthodParameters = @{
         Method             = $Method
         Uri                = $uri
@@ -386,6 +449,7 @@ function Send-CombellHttpRequest {
         MaximumRedirection = 0
         ErrorAction        = 'Stop'
     }
+    #####
     if ($Body) {
         $invokeRestMesthodParameters.Body = $Body
     }
@@ -393,7 +457,11 @@ function Send-CombellHttpRequest {
     try {
         $Stopwatch = New-Object -TypeName System.Diagnostics.Stopwatch;
         $Stopwatch.Start();
+<<<<<<< Updated upstream
         Invoke-RestMethod @invokeRestMesthodParameters -UseBasicParsing #@script:UseBasic
+=======
+        Invoke-RestMethod @invokeRestMesthodParameters #@script:UseBasic
+>>>>>>> Stashed changes
         $Stopwatch.Stop();
         Write-Verbose "$Method $uri - OK ($($Stopwatch.ElapsedMilliseconds) ms)";
     }
@@ -402,4 +470,33 @@ function Send-CombellHttpRequest {
         Write-Error "$Method $uri - $($_) ($($Stopwatch.ElapsedMilliseconds) ms)";
         throw;
     }
+}
+
+### TODO DELETE BELOW
+
+function Get-HMACSHA256Hash {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, Position = 0)]
+        [string]$Key,
+        [Parameter(Mandatory, Position = 1)]
+        [string]$Message
+    )
+
+    $hashAlgorithm = New-Object System.Security.Cryptography.HMACSHA256
+    $hashAlgorithm.Key = [Text.Encoding]::ASCII.GetBytes($Key)
+    $messageAsByteArray = [Text.Encoding]::ASCII.GetBytes($Message)
+    return [Convert]::ToBase64String($hashAlgorithm.ComputeHash($messageAsByteArray))
+}
+
+function Get-MD5Hash {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, Position = 0)]
+        [string]$Message
+    )
+
+    $hashAlgorithm = New-Object System.Security.Cryptography.MD5CryptoServiceProvider
+    $messageAsByteArray = [Text.Encoding]::ASCII.GetBytes($Message)
+    return [Convert]::ToBase64String($hashAlgorithm.ComputeHash($messageAsByteArray))
 }
