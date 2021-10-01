@@ -19,25 +19,27 @@ function Add-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        <#
-        Add plugin specific parameters here. Make sure their names are
-        unique across all existing plugins. But make sure common ones
-        across this plugin are the same.
-        #>
-        [Parameter(ParameterSetName = 'Secure', Mandatory)]
-        [securestring]$CombellApiKey,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory)]
+        [Parameter(Mandatory, ParameterSetName = 'Secure', Position = 2)]
+        [SecureString]$CombellApiKey,
+        [Parameter(Mandatory, ParameterSetName = 'Insecure', Position = 2)]
         [string]$CombellApiKeyInsecure,
-        [Parameter(ParameterSetName = 'Secure', Mandatory)]
-        [securestring]$CombellApiSecret,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory)]
+        [Parameter(Mandatory, ParameterSetName = 'Secure', Position = 3)]
+        [SecureString]$CombellApiSecret,
+        [Parameter(Mandatory, ParameterSetName = 'Insecure', Position = 3)]
         [string]$CombellApiSecretInsecure,
-        <##>
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
+    # Convert the SecureString parameters in the 'Secure' parameter set name to type string.
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $CombellApiKeyInsecure = (New-Object PSCredential ("userName", $CombellApiKey)).GetNetworkCredential().Password;
+        $CombellApiSecretInsecure = (New-Object PSCredential ("userName", $CombellApiSecret)).GetNetworkCredential().Password;
+    }
+    
+
     # $RecordName contains the fully qualified domain name (FQDN); use it to get the domain name
+    # Todo get zone; see Remove-DnsTxt - Steven Volckaert, 1 October 2021.
 
 
     # Docs @ https://api.combell.com/v2/documentation#tag/DNS-records/paths/~1dns~1{domainName}~1records/post
@@ -100,10 +102,6 @@ function Add-DnsTxt {
         -Method "PUT" `
         -Path "dns/$DomainName/records/$($txtRecordToUpdate.id)" | Out-Null;
 
-
-    # Do work here to add the TXT record. Remember to add @script:UseBasic
-    # to all calls to Invoke-RestMethod or Invoke-WebRequest.
-
     <#
     .SYNOPSIS
         Add a DNS TXT record via the Combell API.
@@ -117,11 +115,25 @@ function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
+    .PARAMETER CombellApiKey
+        The Combell API key associated with your account. This SecureString version should only be used on Windows.
+
+    .PARAMETER CombellApiKeyInsecure
+        The Combell API key associated with your account. Use this String version on non-Windows operating systems.
+
+    .PARAMETER CombellApiSecret
+        The Combell API secret associated with your account. This SecureString version should only be used on Windows.
+
+    .PARAMETER CombellApiKeyInsecure
+        The Combell API secret associated with your account. Use this String version on non-Windows operating systems.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value'
+        $combellApiKey = Read-Host "Combell API key" -AsSecureString
+        $combellApiSecret = Read-Host "Combell API secret" -AsSecureString
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $combellApiKey $combellApiSecret
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -229,25 +241,23 @@ function Remove-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        <#
-        Add plugin specific parameters here. Make sure their names are
-        unique across all existing plugins. But make sure common ones
-        across this plugin are the same.
-        #>
-        [Parameter(ParameterSetName = 'Secure', Mandatory)]
-        [securestring]$CombellApiKey,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory)]
+        [Parameter(Mandatory, ParameterSetName = 'Secure', Position = 2)]
+        [SecureString]$CombellApiKey,
+        [Parameter(Mandatory, ParameterSetName = 'Insecure', Position = 2)]
         [string]$CombellApiKeyInsecure,
-        [Parameter(ParameterSetName = 'Secure', Mandatory)]
-        [securestring]$CombellApiSecret,
-        [Parameter(ParameterSetName = 'Insecure', Mandatory)]
+        [Parameter(Mandatory, ParameterSetName = 'Secure', Position = 3)]
+        [SecureString]$CombellApiSecret,
+        [Parameter(Mandatory, ParameterSetName = 'Insecure', Position = 3)]
         [string]$CombellApiSecretInsecure,
-        <##>
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # TODO convert securestring to normal string, if provided
+    # Convert the SecureString parameters in the 'Secure' parameter set name to type string.
+    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+        $CombellApiKeyInsecure = (New-Object PSCredential ("userName", $CombellApiKey)).GetNetworkCredential().Password;
+        $CombellApiSecretInsecure = (New-Object PSCredential ("userName", $CombellApiSecret)).GetNetworkCredential().Password;
+    }
 
     $zoneName = Find-CombellZone $RecordName $CombellApiKeyInsecure $CombellApiSecretInsecure
     Write-Verbose "Found domain zone ""$zoneName"" for record ""$RecordName"".";
@@ -263,7 +273,7 @@ function Remove-DnsTxt {
     $numberOfTxtRecords = ($txtRecords | Measure-Object).Count;
 
     if ($numberOfTxtRecords -eq 0) {
-        Write-Verbose "Domain ""$zoneName"" contains 0 TXT records that match record name ""$shortRecordName""; abort."
+        Write-Verbose "Domain ""$zoneName"" contains 0 TXT records that match record name ""$shortRecordName"" and content ""$TxtValue""; abort."
         return;
     }
 
@@ -291,13 +301,29 @@ function Remove-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
+    .PARAMETER CombellApiKey
+        The Combell API key associated with your account. This SecureString version should only be used on Windows.
+
+    .PARAMETER CombellApiKeyInsecure
+        The Combell API key associated with your account. Use this String version on non-Windows operating systems.
+
+    .PARAMETER CombellApiSecret
+        The Combell API secret associated with your account. This SecureString version should only be used on Windows.
+
+    .PARAMETER CombellApiKeyInsecure
+        The Combell API secret associated with your account. Use this String version on non-Windows operating systems.
+
     .PARAMETER ExtraParams
-        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this
+        function supports.
 
     .EXAMPLE
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value'
+        $combellApiKey = Read-Host "Combell API key" -AsSecureString
+        $combellApiSecret = Read-Host "Combell API secret" -AsSecureString
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $combellApiKey $combellApiSecret
 
-        Removes a TXT record for the specified site with the specified value.
+        Removes a TXT record for the specified site with the specified value. If multiple records exist with the same
+        record name and the same content, this cmdlet deletes all of them.
     #>
 }
 
@@ -315,7 +341,8 @@ function Save-DnsTxt {
         This provider does not require calling this function to commit changes to DNS records.
 
     .PARAMETER ExtraParams
-        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this
+        function supports.
     #>
 }
 
@@ -373,12 +400,7 @@ function Send-CombellHttpRequest {
     $nonce = (New-Guid).ToString()
 
     # Docs @ https://api.combell.com/v2/documentation#section/Authentication
-    $hmacInputValue = "${ApiKey}$($Method.ToLowerInvariant())${urlEncodedPath}${unixTimestamp}${nonce}";
-
-    if ($Body) {
-        $hmacInputValue += Get-MD5Hash $Body;
-    }
-
+    $hmacInputValue = "${ApiKey}$($Method.ToLowerInvariant())${urlEncodedPath}${unixTimestamp}${nonce}$(if ($Body) { Get-MD5Hash $Body})";
     $hmacSignature = Get-HMACSHA256Hash $ApiSecret $hmacInputValue;
     $authorizationHeaderValue = "hmac ${ApiKey}:${hmacSignature}:${nonce}:${unixTimestamp}";
     $headers = @{
@@ -403,22 +425,12 @@ function Send-CombellHttpRequest {
         $Stopwatch.Start();
         Invoke-RestMethod @invokeRestMesthodParameters #@script:UseBasic
         $Stopwatch.Stop();
-        Write-Verbose "$Method $uri - OK ($($Stopwatch.ElapsedMilliseconds) ms)"
+        Write-Verbose "$Method $uri - OK ($($Stopwatch.ElapsedMilliseconds) ms)";
     }
     catch {
         $Stopwatch.Stop();
-        Write-Verbose "$Method $uri - $($_.Exception.Response.StatusCode.value__) $($_.Exception.StatusDescription) ($($Stopwatch.ElapsedMilliseconds) ms) - $($_)"
-
-        throw
-
-        # TODO Ignore 404
-
-        # ignore 404 errors and just return $null
-        # otherwise, let it through
-        #if ([Net.HttpStatusCode]::NotFound -eq $_.Exception.Response.StatusCode) {
-        #    return $null
-        #}
-        #else { throw }
+        Write-Error "$Method $uri - $($_.Exception.Response.StatusCode.value__) ($($Stopwatch.ElapsedMilliseconds) ms) - $($_)";
+        throw;
     }
 }
 
@@ -479,19 +491,6 @@ function Find-CombellZone {
     }
 
     throw "No domain zone found for ""$RecordName"".";
-}
-
-function Get-CombellDomains {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory, Position = 0)]
-        [string]$ApiKey,
-        [Parameter(Mandatory, Position = 0)]
-        [string]$ApiSecret
-    )
-
-    $domains = Send-CombellHttpRequest -ApiKey $ApiKey -ApiSecret $ApiSecret -Method GET -Path "domains?take=1000";
-    $domains;
 }
 
 function Get-CombellDnsRecords {
