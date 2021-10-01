@@ -291,6 +291,46 @@ function Find-CombellZone {
     throw "No domain zone found for ""$RecordName"".";
 }
 
+function Get-CombellAuthorizationHeaderValue {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, Position = 0)]
+        [string]$CombellApiKeyInsecure,
+        [Parameter(Mandatory, Position = 1)]
+        [string]$CombellApiSecretInsecure,
+        [Parameter(Mandatory, Position = 2)]
+        [string]$Path,
+        [Parameter(Position = 3)]
+        [string]$Body
+    )
+
+    $urlEncodedPath = [System.Net.WebUtility]::UrlEncode("/v2/$Path");
+    $unixTimestamp = [int][double]::Parse((Get-Date -UFormat %s));
+    $nonce = (New-Guid).ToString();
+
+    $hmacInputValue = "${ApiKey}$($Method.ToLowerInvariant())${urlEncodedPath}${unixTimestamp}${nonce}";
+
+    if ($Body) {
+        $hashAlgorithm = New-Object System.Security.Cryptography.MD5CryptoServiceProvider;
+        $bodyAsByteArray = [Text.Encoding]::ASCII.GetBytes($Body);
+        $bodyAsHashedBase64String = [Convert]::ToBase64String($hashAlgorithm.ComputeHash($bodyAsByteArray));
+        $hmacInputValue += $bodyAsHashedBase64String;
+    }
+
+    $hashAlgorithm = New-Object System.Security.Cryptography.HMACSHA256;
+    $hashAlgorithm.Key = [Text.Encoding]::ASCII.GetBytes($CombellApiSecretInsecure);
+    $hmacInputValueAsByteArray = [Text.Encoding]::ASCII.GetBytes($hmacInputValue);
+    $hmacSignature = [Convert]::ToBase64String($hashAlgorithm.ComputeHash($hmacInputValueAsByteArray));
+
+    return "hmac ${ApiKey}:${hmacSignature}:${nonce}:${unixTimestamp}";
+
+    <#
+    .SYNOPSIS
+        Gets the value of the Authorization header.
+        See https://api.combell.com/v2/documentation#section/Authentication for more information.
+    #>
+}
+
 function Get-CombellTxtRecords {
     [CmdletBinding()]
     param(
@@ -313,33 +353,6 @@ function Get-CombellTxtRecords {
     return @($txtRecords | Where-Object { $_.record_name -eq $ShortRecordName });
 }
 
-function Get-HMACSHA256Hash {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory, Position = 0)]
-        [string]$Key,
-        [Parameter(Mandatory, Position = 1)]
-        [string]$Message
-    )
-
-    $hashAlgorithm = New-Object System.Security.Cryptography.HMACSHA256
-    $hashAlgorithm.Key = [Text.Encoding]::ASCII.GetBytes($Key)
-    $messageAsByteArray = [Text.Encoding]::ASCII.GetBytes($Message)
-    return [Convert]::ToBase64String($hashAlgorithm.ComputeHash($messageAsByteArray))
-}
-
-function Get-MD5Hash {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory, Position = 0)]
-        [string]$Message
-    )
-
-    $hashAlgorithm = New-Object System.Security.Cryptography.MD5CryptoServiceProvider
-    $messageAsByteArray = [Text.Encoding]::ASCII.GetBytes($Message)
-    return [Convert]::ToBase64String($hashAlgorithm.ComputeHash($messageAsByteArray))
-}
-
 function Send-CombellHttpRequest {
     [CmdletBinding()]
     param(
@@ -349,36 +362,25 @@ function Send-CombellHttpRequest {
         [ValidateSet('GET', 'PUT', 'POST', 'DELETE')]
         [string]$Method = 'GET',
         [string]$Body,
-        [string]$AcceptHeader = 'application/json',
-        [string]$ApiHost = 'api.combell.com',
         [Parameter(Mandatory)]
         [string]$ApiKey,
         [Parameter(Mandatory)]
         [string]$ApiSecret
     )
 
-    $uri = [uri]"https://$($ApiHost)/v2/$Path"
-    $urlEncodedPath = [System.Net.WebUtility]::UrlEncode("/v2/$Path");
-    $unixTimestamp = [int][double]::Parse((Get-Date -UFormat %s));
-    $nonce = (New-Guid).ToString()
-
-    # Docs @ https://api.combell.com/v2/documentation#section/Authentication
-    $hmacInputValue = "${ApiKey}$($Method.ToLowerInvariant())${urlEncodedPath}${unixTimestamp}${nonce}$(if ($Body) { Get-MD5Hash $Body})";
-    $hmacSignature = Get-HMACSHA256Hash $ApiSecret $hmacInputValue;
-    $authorizationHeaderValue = "hmac ${ApiKey}:${hmacSignature}:${nonce}:${unixTimestamp}";
+    $uri = [uri]"https://api.combell.com/v2/$Path";
     $headers = @{
-        Authorization = $authorizationHeaderValue
-        Accept        = $AcceptHeader
-    }   
+        Authorization = Get-CombellAuthorizationHeaderValue $CombellApiKeyInsecure $CombellApiSecretInsecure $Path $Body
+        Accept        = "application/json"
+    }
     $invokeRestMesthodParameters = @{
         Method             = $Method
         Uri                = $uri
         Headers            = $headers
-        ContentType        = 'application/json'
+        ContentType        = "application/json"
         MaximumRedirection = 0
-        ErrorAction        = 'Stop'
+        ErrorAction        = "Stop"
     }
-
     if ($Body) {
         $invokeRestMesthodParameters.Body = $Body
     }
@@ -386,7 +388,7 @@ function Send-CombellHttpRequest {
     try {
         $Stopwatch = New-Object -TypeName System.Diagnostics.Stopwatch;
         $Stopwatch.Start();
-        Invoke-RestMethod @invokeRestMesthodParameters #@script:UseBasic
+        Invoke-RestMethod @invokeRestMesthodParameters @script:UseBasic
         $Stopwatch.Stop();
         Write-Verbose "$Method $uri - OK ($($Stopwatch.ElapsedMilliseconds) ms)";
     }
