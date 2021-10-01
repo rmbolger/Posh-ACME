@@ -82,7 +82,7 @@ psexec.exe -i -s certmgr.msc
 
 ### Option 2: Import via Registry File
 
-Many find it easier to import a registry file containing the necessary cert changes. I've created the following two that can allow you to switch back and forth between the "default" and "alternate" chain configurations.
+Many find it easier to import a registry file containing the necessary cert changes. Here are two that allow you to switch back and forth between the "default" and "alternate" chain configurations.
 
 - [LetsEncrypt-DefaultChain-SYSTEM.reg](../assets/files/LetsEncrypt-DefaultChain-SYSTEM.reg.txt)
 - [LetsEncrypt-AltChain-SYSTEM.reg](../assets/files/LetsEncrypt-AltChain-SYSTEM.reg.txt)
@@ -100,3 +100,52 @@ On Windows Server 2012 R2 or newer, you can use the following command to rebind 
 ```
 
 On earlier OSes, you can try modifying the binding from IIS Manager or just delete and re-create it. But again, the most reliable way is a reboot.
+
+## Verify the Chain Being Served
+
+If your website is exposed to the Internet, you can use a number of web based SSL checkers to verify which chain is being served by your site. Here are a couple popular ones:
+
+- [Qualys SSL Labs](https://www.ssllabs.com/ssltest/)
+- [Namecheap SSL Checker](https://decoder.link/sslchecker/)
+
+If your website or service is only listening on your internal network, the most common way to check the chain is using OpenSSL. It's usually pre-installed on Linux and MacOS. But you'll have to download and install it for Windows. A popular distribution is available from [Shining Light Productions](https://slproweb.com/products/Win32OpenSSL.html). All you should need is the "Light" Win64 version of whatever is the latest build.
+
+Run the following to check your site where `SERVER` is the hostname or IP of your server.
+
+```
+openssl s_client -connect SERVER:443
+```
+
+If your server requires using an SNI hostname, you can use this alternative:
+
+```
+openssl s_client -connect SERVER:443 -servername HOSTNAME
+```
+
+The output will be quite long and you may need to Ctrl-C to cancel the command. But the output you're looking for should be within the first 10 lines of output. There will be a block of text between two sets of `---` characters that should look like either of these:
+
+Default/Long Chain:
+
+```
+---
+Certificate chain
+ 0 s:CN = example.com
+   i:C = US, O = Let's Encrypt, CN = R3
+ 1 s:C = US, O = Let's Encrypt, CN = R3
+   i:C = US, O = Internet Security Research Group, CN = ISRG Root X1
+ 2 s:C = US, O = Internet Security Research Group, CN = ISRG Root X1
+   i:O = Digital Signature Trust Co., CN = DST Root CA X3
+---
+```
+
+Alternate/Short Chain:
+
+```
+---
+Certificate chain
+ 0 s:CN = example.com
+   i:C = US, O = Let's Encrypt, CN = R3
+ 1 s:C = US, O = Let's Encrypt, CN = R3
+   i:C = US, O = Internet Security Research Group, CN = ISRG Root X1
+---
+```
