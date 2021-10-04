@@ -37,53 +37,32 @@ function Add-DnsTxt {
         $CombellApiSecretInsecure = (New-Object PSCredential ("userName", $CombellApiSecret)).GetNetworkCredential().Password;
     }
 
+    $cmdletName = "Add-DnsTxt";
     $zoneName = Find-CombellZone $RecordName $CombellApiKeyInsecure $CombellApiSecretInsecure;
-    Write-Verbose "Found domain '$zoneName' for record '$RecordName'.";
-    $shortRecordName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.');
-    $txtRecords = Get-CombellTxtRecords $zoneName $shortRecordName $CombellApiKeyInsecure $CombellApiSecretInsecure;
+    Write-Verbose "${cmdletName}: Find domain '$zoneName' for record '$RecordName' - OK";
+    $relativeRecordName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.');
+    $txtRecords = Get-CombellTxtRecords $zoneName $relativeRecordName $TxtValue $CombellApiKeyInsecure $CombellApiSecretInsecure;
     $numberOfTxtRecords = $txtRecords.Length;
 
-    if ($numberOfTxtRecords -eq 0) {
-        Write-Verbose "Domain ""$zoneName"" contains 0 TXT records that match record name ""$shortRecordName""; add TXT record { ""record_name"": ""$shortRecordName"", ""content"": ""$TxtValue"" }."
-        $requestBody = @{
-            type        = "TXT"
-            record_name = $shortRecordName
-            ttl         = 60
-            content     = $TxtValue
-        } | ConvertTo-Json -Compress
-
-        Send-CombellHttpRequest `
-            -ApiKey $CombellApiKeyInsecure `
-            -ApiSecret $CombellApiSecretInsecure `
-            -Body $requestBody `
-            -Method POST `
-            -Path "dns/$zoneName/records" | Out-Null;
-
+    if ($numberOfTxtRecords -gt 0) {
+        Write-Verbose "${cmdletName}: Domain '$zoneName' contains $numberOfTxtRecords TXT record$(if ($numberOfTxtRecords -gt 1) { "s" }) that match$(if ($numberOfTxtRecords -eq 1) { "es" }) record name ""$relativeRecordName"" and content ""$TxtValue""; abort."
         return;
     }
 
-    $txtRecordToUpdate = $txtRecords | Select-Object -First 1;   
-    $txtRecordDisplayName = "{ ""id"": ""$($txtRecordToUpdate.id)"", ""record_name"": ""$($txtRecordToUpdate.record_name)"", ""content"": ""$($txtRecordToUpdate.content)"" }";
-    Write-Verbose "Domain ""$zoneName"" contains $numberOfTxtRecords TXT record$(if ($numberOfTxtRecords -gt 1) { "s" }) that match$(if ($numberOfTxtRecords -eq 1) { "es" }) record name ""$shortRecordName""; update TXT record $txtRecordDisplayName with { ""content"": ""$TxtValue"" }."
-
-    if ($txtRecordToUpdate.content -ceq $TxtValue) {
-        Write-Verbose "TXT record $txtRecordDisplayName already has { ""content"": ""$TxtValue"" }; abort.";
-        return;
-    }
-
+    Write-Verbose "${cmdletName}: Domain '$zoneName' contains 0 TXT records that match record name ""$relativeRecordName"" and content ""$TxtValue""; add TXT record { ""record_name"": ""$relativeRecordName"", ""content"": ""$TxtValue"" }."
     $requestBody = @{
         type        = "TXT"
-        record_name = $shortRecordName
+        record_name = $relativeRecordName
         ttl         = 60
         content     = $TxtValue
-    } | ConvertTo-Json -Compress;
+    } | ConvertTo-Json -Compress
 
     Send-CombellHttpRequest `
         -ApiKey $CombellApiKeyInsecure `
         -ApiSecret $CombellApiSecretInsecure `
         -Body $requestBody `
-        -Method PUT `
-        -Path "dns/$zoneName/records/$($txtRecordToUpdate.id)" | Out-Null;
+        -Method POST `
+        -Path "dns/$zoneName/records" | Out-Null;
 
     <#
     .SYNOPSIS
@@ -147,22 +126,22 @@ function Remove-DnsTxt {
         $CombellApiSecretInsecure = (New-Object PSCredential ("userName", $CombellApiSecret)).GetNetworkCredential().Password;
     }
 
+    $cmdletName = "Remove-DnsTxt";
     $zoneName = Find-CombellZone $RecordName $CombellApiKeyInsecure $CombellApiSecretInsecure;
-    Write-Verbose "Found domain zone ""$zoneName"" for record ""$RecordName"".";
-    $shortRecordName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.');
-    $txtRecords = Get-CombellTxtRecords $zoneName $shortRecordName $CombellApiKeyInsecure $CombellApiSecretInsecure `
-    | Where-Object { $_.content -ceq $TxtValue };
+    Write-Verbose "${cmdletName}: Find domain '$zoneName' for record '$RecordName' - OK";
+    $relativeRecordName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.');
+    $txtRecords = Get-CombellTxtRecords $zoneName $relativeRecordName $TxtValue $CombellApiKeyInsecure $CombellApiSecretInsecure;
     $numberOfTxtRecords = $txtRecords.Length;
 
     if ($numberOfTxtRecords -eq 0) {
-        Write-Verbose "Domain ""$zoneName"" contains 0 TXT records that match record name ""$shortRecordName"" and content ""$TxtValue""; abort."
+        Write-Verbose "${cmdletName}: Domain '$zoneName' contains 0 TXT records that match record name '$relativeRecordName' and content ""$TxtValue""; abort."
         return;
     }
 
-    Write-Verbose "Domain ""$zoneName"" contains $numberOfTxtRecords TXT record$(if ($numberOfTxtRecords -gt 1) { "s" }) that match$(if ($numberOfTxtRecords -eq 1) { "es" }) record name ""$shortRecordName"" and content ""$TxtValue""; delete $numberOfTxtRecords record$(if ($numberOfTxtRecords -gt 1) { "s" })."
+    Write-Verbose "${cmdletName}: Domain '$zoneName' contains $numberOfTxtRecords TXT record$(if ($numberOfTxtRecords -gt 1) { "s" }) that match$(if ($numberOfTxtRecords -eq 1) { "es" }) record name '$relativeRecordName' and content ""$TxtValue""; delete $numberOfTxtRecords record$(if ($numberOfTxtRecords -gt 1) { "s" })."
 
     foreach ($txtRecord in $txtRecords) {
-        Write-Verbose "Delete TXT record $txtRecord";
+        Write-Verbose "${cmdletName}: Delete TXT record $txtRecord";
         Send-CombellHttpRequest `
             -ApiKey $CombellApiKeyInsecure `
             -ApiSecret $CombellApiSecretInsecure `
@@ -172,10 +151,10 @@ function Remove-DnsTxt {
 
     <#
     .SYNOPSIS
-        Remove a DNS TXT record from <My DNS Server/Provider>
+        Remove a DNS TXT record via the Combell API.
 
     .DESCRIPTION
-        Description for <My DNS Server/Provider>
+        Remove a DNS TXT record via the Combell API.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -288,7 +267,7 @@ function Find-CombellZone {
         }
     }
 
-    throw "No domain zone found for record '$RecordName'.";
+    throw "FATAL: No domain zone found for record '$RecordName'.";
 }
 
 function Get-CombellAuthorizationHeaderValue {
@@ -338,10 +317,12 @@ function Get-CombellTxtRecords {
         [Parameter(Mandatory, Position = 0)]
         [string]$DomainName,
         [Parameter(Mandatory, Position = 1)]
-        [string]$ShortRecordName,
+        [string]$RelativeRecordName,
         [Parameter(Mandatory, Position = 2)]
-        [string]$CombellApiKeyInsecure,
+        [string]$TxtValue,
         [Parameter(Mandatory, Position = 3)]
+        [string]$CombellApiKeyInsecure,
+        [Parameter(Mandatory, Position = 4)]
         [string]$CombellApiSecretInsecure
     )
 
@@ -349,9 +330,8 @@ function Get-CombellTxtRecords {
         -ApiKey $CombellApiKeyInsecure `
         -ApiSecret $CombellApiSecretInsecure `
         -Method GET `
-        -Path "dns/$DomainName/records?type=TXT&record_name=$ShortRecordName";
-
-    return @($txtRecords | Where-Object { $_.record_name -eq $ShortRecordName });
+        -Path "dns/$DomainName/records?type=TXT&record_name=$RelativeRecordName";
+    return @($txtRecords | Where-Object { $_.record_name -eq $RelativeRecordName -and $_.content -ceq $TxtValue });
 }
 
 function Send-CombellHttpRequest {
@@ -391,7 +371,7 @@ function Send-CombellHttpRequest {
     try {
         $Stopwatch = New-Object -TypeName System.Diagnostics.Stopwatch;
         $Stopwatch.Start();
-        Invoke-RestMethod @invokeRestMesthodParameters -UseBasicParsing #@script:UseBasic
+        Invoke-RestMethod @invokeRestMesthodParameters @script:UseBasic
         $Stopwatch.Stop();
         Write-Verbose "$Method $uri - OK ($($Stopwatch.ElapsedMilliseconds) ms)";
     }

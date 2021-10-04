@@ -24,16 +24,16 @@ $pArgs = @{
     CombellApiSecret = (Read-Host "Combell API secret" -AsSecureString)
 }
 
-Publish-Challenge example.com (Get-PAAccount) "test-record-1" Combell $pArgs -Verbose
-Publish-Challenge example.com (Get-PAAccount) "test-record-2" Combell $pArgs -Verbose
-Publish-Challenge example.com (Get-PAAccount) "test-record-3" Combell $pArgs -Verbose
+Publish-Challenge example.com (Get-PAAccount) test1 Combell $pArgs -Verbose
+Publish-Challenge example.com (Get-PAAccount) test2 Combell $pArgs -Verbose
+Publish-Challenge example.com (Get-PAAccount) test3 Combell $pArgs -Verbose
 
 # Check in the Combell "DNS & forwarding management" (https://my.combell.com/en/product/dns) portal whether the test
 # records exist. 
 
-Unpublish-Challenge example.com (Get-PAAccount) "test-record-1" Combell $pArgs -Verbose
-Unpublish-Challenge example.com (Get-PAAccount) "test-record-2" Combell $pArgs -Verbose
-Unpublish-Challenge example.com (Get-PAAccount) "test-record-3" Combell $pArgs -Verbose
+Unpublish-Challenge example.com (Get-PAAccount) test1 Combell $pArgs -Verbose
+Unpublish-Challenge example.com (Get-PAAccount) test2 Combell $pArgs -Verbose
+Unpublish-Challenge example.com (Get-PAAccount) test3 Combell $pArgs -Verbose
 ```
 
 ## Using the Plugin
