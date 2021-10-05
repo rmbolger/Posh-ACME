@@ -1,4 +1,6 @@
-# How to use the Combell DNS plugin
+title: Combell
+
+# How To Use the Combell DNS Plugin
 
 This plugin works with the [Combell][1] DNS provider. We assume you have already setup an account and have created the
 DNS domain zone(s) you'll be working with.
@@ -8,7 +10,7 @@ DNS domain zone(s) you'll be working with.
 
 See the [Combell API Documentation][2] the [Plugin Development Guide][3] on Posh-ACME Docs for more information.
 
-## Getting started with the Combell DNS plugin
+## Setup
 
 Navigate to the [Dashboard / Settings / API / Users](https://my.combell.com/en/settings/api/users) section and activate
 the API key for the required user. Use the API key and API secret found on this page.
@@ -49,7 +51,7 @@ Use the `String` versions at your own risk. This is insecure because they will b
 Posh-ACME for later renewals; see [Parameter Types](https://poshac.me/docs/v4/Plugins/Plugin-Development-Guide/#parameter-types)
 on the Plugin Development Guide for more information.
 
-### Windows or any other operating system running PowerShell 6.2 or later
+### On Windows or any other operating system running PowerShell 6.2 or later
 
 ``` powershell
 $pArgs = @{
@@ -59,7 +61,7 @@ $pArgs = @{
 New-PACertificate example.com -Plugin Combell -PluginArgs $pArgs
 ```
 
-### Any other operating system
+### On any other operating system
 
 ``` powershell
 $pArgs = @{

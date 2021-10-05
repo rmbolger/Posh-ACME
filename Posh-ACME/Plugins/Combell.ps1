@@ -1,15 +1,3 @@
-# [Writing a Validation Plugin for Posh-ACME](https://poshac.me/docs/v4/Plugins/Plugin-Development-Guide/)
-#
-# Tips for developing this plugin
-# 1) 'dot source' the Combell.ps1 plugin:
-# 
-#     PS C:\Users\Steven Volckaert\Repos\stevenvolckaert\Posh-ACME\Posh-ACME\Plugins> . .\Combell.ps1
-#
-#  So: Add ". .\Combell.ps1" before every command:
-#
-#    PS C:\Users\Steven Volckaert\Repos\stevenvolckaert\Posh-ACME\Posh-ACME\Plugins> . .\Combell.ps1 ; Get-DnsRecords "skardev.com" -Verbose
-#
-
 function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
@@ -238,6 +226,11 @@ function Find-CombellZone {
     # If you find a better solution, feel free to submit an issue.
     # See https://api.combell.com/v2/documentation#operation/Domains for more information.
     # - Steven Volckaert, 30 September 2021.
+    # TODO Although undocumented, it appears it might be possible to retrieve the total number of domains from some
+    #      custom HTTP headers. Consider removing the 'take' query parameter, which defaults back to maximum 25 items
+    #      per response, and sending addtional HTTP requests if the HTTP header(s) indicate more domains exist.
+    #      Implementing this requires further investigation; if you need this, feel free to submit a pull request or
+    #      an issue - Steven Volckaert, 5 October 2021.
     try {
         $zones = Send-CombellHttpRequest `
             -ApiKey $CombellApiKeyInsecure `
