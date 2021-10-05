@@ -280,7 +280,7 @@ function Get-RrDnsZone {
                     Write-Debug "Failed to operate against Reg.Ru API. Check your login, password and allowed IPs."
                     throw $response.error_text
                 }
-                elseif ($Selected.error_code -ne 'DOMAIN_NOT_FOUND') {
+                elseif ($Selected.error_code -notin 'DOMAIN_NOT_FOUND','INVALID_DOMAIN_NAME_FORMAT') {
                     throw "Reg.Ru API threw unexpected error: $($response.error_text)"
                 }
                 $response = $null
