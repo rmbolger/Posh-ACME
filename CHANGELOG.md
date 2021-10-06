@@ -1,3 +1,9 @@
+## 4.10.0 (2021-10-06)
+
+* Added new DNS plugin [CoreNetworks](https://www.core-networks.de/) (Thanks @dwydler)
+* Fix for Regru plugin bug caused by provider API change (#392)
+* Fix Submit-Renewal duplicating orders that have a custom name (#393)
+
 ## 4.9.0 (2021-09-21)
 
 * Added new DNS plugin [ISPConfig](https://www.ispconfig.org/)
