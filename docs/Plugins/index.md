@@ -24,6 +24,7 @@ BlueCat | [BlueCat Address Manager](https://www.bluecatnetworks.com/platform/man
 Cloudflare | [Cloudflare DNS](https://www.cloudflare.com/dns) | [Usage Guide](Cloudflare.md) | :white_check_mark:
 ClouDNS | [ClouDNS](https://www.cloudns.net/aff/id/224075/) | [Usage Guide](ClouDNS.md) | :white_check_mark:
 Constellix | [Constellix](https://constellix.com/) | [Usage Guide](Constellix.md) | :white_check_mark:
+CoreNetworks | [Core Networks](https://www.core-networks.de/) | [Usage Guide](CoreNetworks.md) | :white_check_mark:
 DeSEC | [DeSEC DNS](https://desec.io/#!/en/product/dnshosting) | [Usage Guide](DeSEC.md) | :white_check_mark:
 DMEasy | [DNS Made Easy](https://dnsmadeeasy.com/) | [Usage Guide](DMEasy.md) | :white_check_mark:
 DNSimple | [DNSimple DNS](https://dnsimple.com/r/c9b80a2f227e49) | [Usage Guide](DNSimple.md) | :white_check_mark:
@@ -75,7 +76,6 @@ These plugins have been committed to the main development branch and are pending
 
 Plugin | Provider | Guide | Core Compatible
 ------ | -------- | ----- | ---------------
-CoreNetworks | [Core Networks](https://www.core-networks.de/) | [Usage Guide](CoreNetworks.md) | :white_check_mark:
 
 ### Notes
 
