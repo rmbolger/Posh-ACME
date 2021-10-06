@@ -85,6 +85,7 @@ function Submit-Renewal {
                 }
 
                 # common params
+                $certParams.Name                = $order.Name
                 $certParams.Plugin              = $order.Plugin
                 $certParams.PluginArgs          = $order | Get-PAPluginArgs
                 $certParams.DnsAlias            = $order.DnsAlias
