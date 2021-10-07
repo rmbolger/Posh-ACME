@@ -7,29 +7,23 @@ function Add-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(Mandatory, ParameterSetName = 'Secure', Position = 2)]
+        [Parameter(Mandatory, Position = 2)]
         [SecureString]$CombellApiKey,
-        [Parameter(Mandatory, ParameterSetName = 'Insecure', Position = 2)]
-        [string]$CombellApiKeyInsecure,
-        [Parameter(Mandatory, ParameterSetName = 'Secure', Position = 3)]
+        [Parameter(Mandatory, Position = 3)]
         [SecureString]$CombellApiSecret,
-        [Parameter(Mandatory, ParameterSetName = 'Insecure', Position = 3)]
-        [string]$CombellApiSecretInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # Convert the SecureString parameters in the 'Secure' parameter set name to type string.
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $CombellApiKeyInsecure = (New-Object PSCredential ("userName", $CombellApiKey)).GetNetworkCredential().Password;
-        $CombellApiSecretInsecure = (New-Object PSCredential ("userName", $CombellApiSecret)).GetNetworkCredential().Password;
-    }
+    # Convert the SecureString parameters to type String.
+    $ApiKey = (New-Object PSCredential ("userName", $CombellApiKey)).GetNetworkCredential().Password;
+    $ApiSecret = (New-Object PSCredential ("userName", $CombellApiSecret)).GetNetworkCredential().Password;
 
     $cmdletName = "Add-DnsTxt";
-    $zoneName = Find-CombellZone $RecordName $CombellApiKeyInsecure $CombellApiSecretInsecure;
+    $zoneName = Find-CombellZone $RecordName $ApiKey $ApiSecret;
     Write-Verbose "${cmdletName}: Find domain '$zoneName' for record '$RecordName' - OK";
     $relativeRecordName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.');
-    $txtRecords = Get-CombellTxtRecords $zoneName $relativeRecordName $TxtValue $CombellApiKeyInsecure $CombellApiSecretInsecure;
+    $txtRecords = Get-CombellTxtRecords $zoneName $relativeRecordName $TxtValue $ApiKey $ApiSecret;
     $numberOfTxtRecords = $txtRecords.Length;
 
     if ($numberOfTxtRecords -gt 0) {
@@ -45,12 +39,7 @@ function Add-DnsTxt {
         content     = $TxtValue
     } | ConvertTo-Json -Compress
 
-    Send-CombellHttpRequest `
-        -ApiKey $CombellApiKeyInsecure `
-        -ApiSecret $CombellApiSecretInsecure `
-        -Body $requestBody `
-        -Method POST `
-        -Path "dns/$zoneName/records" | Out-Null;
+    Send-CombellHttpRequest POST "dns/$zoneName/records" $ApiKey $ApiSecret $requestBody | Out-Null;
 
     <#
     .SYNOPSIS
@@ -66,19 +55,14 @@ function Add-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER CombellApiKey
-        The Combell API key associated with your account. This SecureString version should only be used on Windows.
-
-    .PARAMETER CombellApiKeyInsecure
-        The Combell API key associated with your account. Use this String version on non-Windows operating systems.
+        The Combell API key associated with your account.
 
     .PARAMETER CombellApiSecret
-        The Combell API secret associated with your account. This SecureString version should only be used on Windows.
+        The Combell API secret associated with your account.
 
-    .PARAMETER CombellApiKeyInsecure
-        The Combell API secret associated with your account. Use this String version on non-Windows operating systems.
-
-    .PARAMETER ExtraParams
-        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+   .PARAMETER ExtraParams
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this
+        function supports.
 
     .EXAMPLE
         $combellApiKey = Read-Host "Combell API key" -AsSecureString
@@ -96,29 +80,23 @@ function Remove-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(Mandatory, ParameterSetName = 'Secure', Position = 2)]
+        [Parameter(Mandatory, Position = 2)]
         [SecureString]$CombellApiKey,
-        [Parameter(Mandatory, ParameterSetName = 'Insecure', Position = 2)]
-        [string]$CombellApiKeyInsecure,
-        [Parameter(Mandatory, ParameterSetName = 'Secure', Position = 3)]
+        [Parameter(Mandatory, Position = 3)]
         [SecureString]$CombellApiSecret,
-        [Parameter(Mandatory, ParameterSetName = 'Insecure', Position = 3)]
-        [string]$CombellApiSecretInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # Convert the SecureString parameters in the 'Secure' parameter set name to type string.
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $CombellApiKeyInsecure = (New-Object PSCredential ("userName", $CombellApiKey)).GetNetworkCredential().Password;
-        $CombellApiSecretInsecure = (New-Object PSCredential ("userName", $CombellApiSecret)).GetNetworkCredential().Password;
-    }
+    # Convert the SecureString parameters to type String.
+    $ApiKey = (New-Object PSCredential ("userName", $CombellApiKey)).GetNetworkCredential().Password;
+    $ApiSecret = (New-Object PSCredential ("userName", $CombellApiSecret)).GetNetworkCredential().Password;
 
     $cmdletName = "Remove-DnsTxt";
-    $zoneName = Find-CombellZone $RecordName $CombellApiKeyInsecure $CombellApiSecretInsecure;
+    $zoneName = Find-CombellZone $RecordName $ApiKey $ApiSecret;
     Write-Verbose "${cmdletName}: Find domain '$zoneName' for record '$RecordName' - OK";
     $relativeRecordName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.');
-    $txtRecords = Get-CombellTxtRecords $zoneName $relativeRecordName $TxtValue $CombellApiKeyInsecure $CombellApiSecretInsecure;
+    $txtRecords = Get-CombellTxtRecords $zoneName $relativeRecordName $TxtValue $ApiKey $ApiSecret;
     $numberOfTxtRecords = $txtRecords.Length;
 
     if ($numberOfTxtRecords -eq 0) {
@@ -130,11 +108,7 @@ function Remove-DnsTxt {
 
     foreach ($txtRecord in $txtRecords) {
         Write-Verbose "${cmdletName}: Delete TXT record $txtRecord";
-        Send-CombellHttpRequest `
-            -ApiKey $CombellApiKeyInsecure `
-            -ApiSecret $CombellApiSecretInsecure `
-            -Method DELETE `
-            -Path "dns/$zoneName/records/$($txtRecord.id)" | Out-Null;
+        Send-CombellHttpRequest DELETE "dns/$zoneName/records/$($txtRecord.id)" $ApiKey $ApiSecret | Out-Null;
     }
 
     <#
@@ -151,16 +125,10 @@ function Remove-DnsTxt {
         The value of the TXT record.
 
     .PARAMETER CombellApiKey
-        The Combell API key associated with your account. This SecureString version should only be used on Windows.
-
-    .PARAMETER CombellApiKeyInsecure
-        The Combell API key associated with your account. Use this String version on non-Windows operating systems.
+        The Combell API key associated with your account.
 
     .PARAMETER CombellApiSecret
-        The Combell API secret associated with your account. This SecureString version should only be used on Windows.
-
-    .PARAMETER CombellApiKeyInsecure
-        The Combell API secret associated with your account. Use this String version on non-Windows operating systems.
+        The Combell API secret associated with your account.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this
@@ -205,9 +173,9 @@ function Find-CombellZone {
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
-        [string]$CombellApiKeyInsecure,
+        [string]$ApiKey,
         [Parameter(Mandatory, Position = 2)]
-        [string]$CombellApiSecretInsecure
+        [string]$ApiSecret
     )
 
     # Setup a module variable to cache the record to zone mapping, so it's quicker to find later.
@@ -227,18 +195,12 @@ function Find-CombellZone {
     # See https://api.combell.com/v2/documentation#operation/Domains for more information.
     # - Steven Volckaert, 30 September 2021.
     # TODO Although undocumented, it appears it might be possible to retrieve the total number of domains from some
-    #      custom HTTP headers. Consider removing the 'take' query parameter, which defaults back to maximum 25 items
-    #      per response, and sending addtional HTTP requests if the HTTP header(s) indicate more domains exist.
-    #      Implementing this requires further investigation; if you need this, feel free to submit a pull request or
-    #      an issue - Steven Volckaert, 5 October 2021.
-    try {
-        $zones = Send-CombellHttpRequest `
-            -ApiKey $CombellApiKeyInsecure `
-            -ApiSecret $CombellApiSecretInsecure `
-            -Method GET `
-            -Path "domains?take=1000";
-    }
-    catch { throw }
+    #      custom HTTP response headers. So: Consider removing the 'take' query parameter, which will default back to
+    #      maximum 25 items per response, and sending addtional HTTP requests if the HTTP header(s) indicate that more
+    #      domains exist.
+    #      Implementing this requires further investigation though, so if you need this, feel free to submit a pull
+    #      request or an issue - Steven Volckaert, 5 October 2021.   
+    $zones = Send-CombellHttpRequest GET "domains?take=1000" $ApiKey $ApiSecret;
 
     # We need to find the deepest sub-zone that can hold the record and add it there, except if there is only the apex
     # zone. So for a $RecordName like _acme-challenge.site1.sub1.sub2.example.com, we need to search the zone from
@@ -314,16 +276,13 @@ function Get-CombellTxtRecords {
         [Parameter(Mandatory, Position = 2)]
         [string]$TxtValue,
         [Parameter(Mandatory, Position = 3)]
-        [string]$CombellApiKeyInsecure,
+        [string]$ApiKey,
         [Parameter(Mandatory, Position = 4)]
-        [string]$CombellApiSecretInsecure
+        [string]$ApiSecret
     )
 
     $txtRecords = Send-CombellHttpRequest `
-        -ApiKey $CombellApiKeyInsecure `
-        -ApiSecret $CombellApiSecretInsecure `
-        -Method GET `
-        -Path "dns/$DomainName/records?type=TXT&record_name=$RelativeRecordName";
+        GET "dns/$DomainName/records?type=TXT&record_name=$RelativeRecordName" $ApiKey $ApiSecret;
     return @($txtRecords | Where-Object { $_.record_name -eq $RelativeRecordName -and $_.content -ceq $TxtValue });
 }
 
@@ -331,15 +290,16 @@ function Send-CombellHttpRequest {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory, Position = 0)]
-        [string]$Path,
-        [Parameter(Position = 1)]
         [ValidateSet('GET', 'PUT', 'POST', 'DELETE')]
-        [string]$Method = 'GET',
-        [string]$Body,
-        [Parameter(Mandatory)]
+        [string]$Method,
+        [Parameter(Mandatory, Position = 1)]
+        [string]$Path,
+        [Parameter(Mandatory, Position = 2)]
         [string]$ApiKey,
-        [Parameter(Mandatory)]
-        [string]$ApiSecret
+        [Parameter(Mandatory, Position = 3)]
+        [string]$ApiSecret,
+        [Parameter(Position = 4)]
+        [string]$Body
     )
 
     $uri = [uri]"https://api.combell.com/v2/$Path";
