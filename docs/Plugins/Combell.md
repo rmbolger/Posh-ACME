@@ -25,6 +25,13 @@ API key for the required administrator(s):
 
 The API key and API secret will now appear. You'll need them in the next section **Using the Plugin**.
 
+### IP address whitelisting
+
+The Combell API can only be accessed from registered IP addresses.
+
+Navigate to [Dashboard / Settings / API / IP restrictions](https://my.combell.com/en/settings/api/ip-restrictions) and
+add your public IP address(es) to the whitelist.
+
 ## Using the Plugin
 
 Both the API key and API secret have to be passed to the plugin as a `SecureString`, which is supported on Windows
