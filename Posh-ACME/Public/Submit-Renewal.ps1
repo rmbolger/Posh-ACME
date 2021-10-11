@@ -85,6 +85,7 @@ function Submit-Renewal {
                 }
 
                 # common params
+                $certParams.Name                = $order.Name
                 $certParams.Plugin              = $order.Plugin
                 $certParams.PluginArgs          = $order | Get-PAPluginArgs
                 $certParams.DnsAlias            = $order.DnsAlias
@@ -156,7 +157,7 @@ function Submit-Renewal {
                 }
 
                 # restore the old current account
-                if ($oldAcct) { $oldAccount | Set-PAAccount }
+                if ($oldAcct) { $oldAcct | Set-PAAccount }
 
                 break
             }

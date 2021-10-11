@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.9.0'
+ModuleVersion = '4.10.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,16 +83,11 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.9.0 (2021-09-21)
+## 4.10.0 (2021-10-06)
 
-* Added new DNS plugin [ISPConfig](https://www.ispconfig.org/)
-* Fixed the DOCean plugin when used with accounts that have more than 20 zones. (#384) (Thanks @Xpyder)
-* Fixed a bug in the DOCean plugin that prevented publishing records against the zone apex.
-* Fixed a bug using `Set-PAOrder -PreferredChain` on an existing but expired order that was recently upgraded from Posh-ACME 3.x.
-* Fixed renewal window calculation for certs that have lifetimes shorter or longer than 90 days. (#382) (Thanks @lookcloser)
-  * Due to the bug, certs with lifetimes longer than 90 days would renew early and certs with lifetimes shorter than 90 days would renew late or potentially not at all. Because the renewal window is calculated and saved at finalization time, the new module version won't fix the value on existing orders. It will only fix future orders/renewals.
-  * If you want to scan for and fix any orders that might have been affected by this bug, you can use the script posted here: https://github.com/rmbolger/Posh-ACME/issues/382#issuecomment-922128237
-* Fixed a benign bug with object serialization in PS 5.1 that was saving the dynamic attributes on server/account/order objects.
+* Added new DNS plugin [CoreNetworks](https://www.core-networks.de/) (Thanks @dwydler)
+* Fix for Regru plugin bug caused by provider API change (#392)
+* Fix Submit-Renewal duplicating orders that have a custom name (#393)
 '@
 
     }
