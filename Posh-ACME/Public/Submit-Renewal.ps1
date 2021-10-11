@@ -157,7 +157,7 @@ function Submit-Renewal {
                 }
 
                 # restore the old current account
-                if ($oldAcct) { $oldAccount | Set-PAAccount }
+                if ($oldAcct) { $oldAcct | Set-PAAccount }
 
                 break
             }
