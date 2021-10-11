@@ -12,8 +12,18 @@ See the [Combell API Documentation][2] the [Plugin Development Guide][3] on Posh
 
 ## Setup
 
-Navigate to the [Dashboard / Settings / API / Users](https://my.combell.com/en/settings/api/users) section and activate
-the API key for the required user. Use the API key and API secret found on this page in the next section.
+The Combell API can be activated for any administrator in the Combell account.
+
+To add administrators, navigate to [Dashboard / Settings / Administrators](https://my.combell.com/en/user-management/administrators). Click the **Invite administrator** button to add an administrator.
+
+Click the **Permissions** button next to an administrator's name, and ensure the administrator's permssions is configured as **All rights** (_"User <UserName> has access to all the products in this customer account"_).
+
+Next, navigate to [Dashboard / Settings / API / Users](https://my.combell.com/en/settings/api/users) and activate the
+API key for the required administrator(s):
+- Click the **API key** button next to the administrator's user name;
+- Click the **Activate the API key** button (_"Activate an API key for this user."_);
+
+The API key and API secret will now appear. You'll need them in the next section **Using the Plugin**.
 
 ## Using the Plugin
 
