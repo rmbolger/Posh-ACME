@@ -16,19 +16,19 @@ function Add-DnsTxt {
     )
 
     # Convert the SecureString parameters to type String.
-    $ApiKey = (New-Object PSCredential ("userName", $CombellApiKey)).GetNetworkCredential().Password;
-    $ApiSecret = (New-Object PSCredential ("userName", $CombellApiSecret)).GetNetworkCredential().Password;
+    $ApiKey = [pscredential]::new('a', $CombellApiKey).GetNetworkCredential().Password
+    $ApiSecret = [pscredential]::new('a', $CombellApiSecret).GetNetworkCredential().Password
 
-    $cmdletName = "Add-DnsTxt";
-    $zoneName = Find-CombellZone $RecordName $ApiKey $ApiSecret;
-    Write-Verbose "${cmdletName}: Find domain '$zoneName' for record '$RecordName' - OK";
-    $relativeRecordName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.');
-    $txtRecords = Get-CombellTxtRecords $zoneName $relativeRecordName $TxtValue $ApiKey $ApiSecret;
-    $numberOfTxtRecords = $txtRecords.Length;
+    $cmdletName = "Add-DnsTxt"
+    $zoneName = Find-CombellZone $RecordName $ApiKey $ApiSecret
+    Write-Verbose "${cmdletName}: Find domain '$zoneName' for record '$RecordName' - OK"
+    $relativeRecordName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $txtRecords = Get-CombellTxtRecords $zoneName $relativeRecordName $TxtValue $ApiKey $ApiSecret
+    $numberOfTxtRecords = $txtRecords.Length
 
     if ($numberOfTxtRecords -gt 0) {
         Write-Verbose "${cmdletName}: Domain '$zoneName' contains $numberOfTxtRecords TXT record$(if ($numberOfTxtRecords -gt 1) { "s" }) that match$(if ($numberOfTxtRecords -eq 1) { "es" }) record name ""$relativeRecordName"" and content ""$TxtValue""; abort."
-        return;
+        return
     }
 
     Write-Verbose "${cmdletName}: Domain '$zoneName' contains 0 TXT records that match record name ""$relativeRecordName"" and content ""$TxtValue""; add TXT record { ""record_name"": ""$relativeRecordName"", ""content"": ""$TxtValue"" }."
@@ -39,7 +39,7 @@ function Add-DnsTxt {
         content     = $TxtValue
     } | ConvertTo-Json -Compress
 
-    Send-CombellHttpRequest POST "dns/$zoneName/records" $ApiKey $ApiSecret $requestBody | Out-Null;
+    Send-CombellHttpRequest POST "dns/$zoneName/records" $ApiKey $ApiSecret $requestBody | Out-Null
 
     <#
     .SYNOPSIS
@@ -89,26 +89,26 @@ function Remove-DnsTxt {
     )
 
     # Convert the SecureString parameters to type String.
-    $ApiKey = (New-Object PSCredential ("userName", $CombellApiKey)).GetNetworkCredential().Password;
-    $ApiSecret = (New-Object PSCredential ("userName", $CombellApiSecret)).GetNetworkCredential().Password;
+    $ApiKey = [pscredential]::new('a', $CombellApiKey).GetNetworkCredential().Password
+    $ApiSecret = [pscredential]::new('a', $CombellApiSecret).GetNetworkCredential().Password
 
-    $cmdletName = "Remove-DnsTxt";
-    $zoneName = Find-CombellZone $RecordName $ApiKey $ApiSecret;
-    Write-Verbose "${cmdletName}: Find domain '$zoneName' for record '$RecordName' - OK";
-    $relativeRecordName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.');
-    $txtRecords = Get-CombellTxtRecords $zoneName $relativeRecordName $TxtValue $ApiKey $ApiSecret;
-    $numberOfTxtRecords = $txtRecords.Length;
+    $cmdletName = "Remove-DnsTxt"
+    $zoneName = Find-CombellZone $RecordName $ApiKey $ApiSecret
+    Write-Verbose "${cmdletName}: Find domain '$zoneName' for record '$RecordName' - OK"
+    $relativeRecordName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $txtRecords = Get-CombellTxtRecords $zoneName $relativeRecordName $TxtValue $ApiKey $ApiSecret
+    $numberOfTxtRecords = $txtRecords.Length
 
     if ($numberOfTxtRecords -eq 0) {
         Write-Verbose "${cmdletName}: Domain '$zoneName' contains 0 TXT records that match record name '$relativeRecordName' and content ""$TxtValue""; abort."
-        return;
+        return
     }
 
     Write-Verbose "${cmdletName}: Domain '$zoneName' contains $numberOfTxtRecords TXT record$(if ($numberOfTxtRecords -gt 1) { "s" }) that match$(if ($numberOfTxtRecords -eq 1) { "es" }) record name '$relativeRecordName' and content ""$TxtValue""; delete $numberOfTxtRecords record$(if ($numberOfTxtRecords -gt 1) { "s" })."
 
     foreach ($txtRecord in $txtRecords) {
-        Write-Verbose "${cmdletName}: Delete TXT record $txtRecord";
-        Send-CombellHttpRequest DELETE "dns/$zoneName/records/$($txtRecord.id)" $ApiKey $ApiSecret | Out-Null;
+        Write-Verbose "${cmdletName}: Delete TXT record $txtRecord"
+        Send-CombellHttpRequest DELETE "dns/$zoneName/records/$($txtRecord.id)" $ApiKey $ApiSecret | Out-Null
     }
 
     <#
@@ -199,8 +199,8 @@ function Find-CombellZone {
     #      maximum 25 items per response, and sending addtional HTTP requests if the HTTP header(s) indicate that more
     #      domains exist.
     #      Implementing this requires further investigation though, so if you need this, feel free to submit a pull
-    #      request or an issue - Steven Volckaert, 5 October 2021.   
-    $zones = Send-CombellHttpRequest GET "domains?take=1000" $ApiKey $ApiSecret;
+    #      request or an issue - Steven Volckaert, 5 October 2021.
+    $zones = Send-CombellHttpRequest GET "domains?take=1000" $ApiKey $ApiSecret
 
     # We need to find the deepest sub-zone that can hold the record and add it there, except if there is only the apex
     # zone. So for a $RecordName like _acme-challenge.site1.sub1.sub2.example.com, we need to search the zone from
@@ -222,7 +222,7 @@ function Find-CombellZone {
         }
     }
 
-    throw "FATAL: No domain zone found for record '$RecordName'.";
+    throw "FATAL: No domain zone found for record '$RecordName'."
 }
 
 function Get-CombellAuthorizationHeaderValue {
@@ -240,24 +240,24 @@ function Get-CombellAuthorizationHeaderValue {
         [string]$Body
     )
 
-    $urlEncodedPath = [System.Net.WebUtility]::UrlEncode("/v2/$Path");
-    $unixTimestamp = [System.DateTimeOffset]::Now.ToUnixTimeSeconds().ToString();
-    $nonce = (New-Guid).ToString();
-    $hmacInputValue = "${ApiKey}$($Method.ToLowerInvariant())${urlEncodedPath}${unixTimestamp}${nonce}";
+    $urlEncodedPath = [System.Net.WebUtility]::UrlEncode("/v2/$Path")
+    $unixTimestamp = [System.DateTimeOffset]::Now.ToUnixTimeSeconds().ToString()
+    $nonce = (New-Guid).ToString()
+    $hmacInputValue = "${ApiKey}$($Method.ToLowerInvariant())${urlEncodedPath}${unixTimestamp}${nonce}"
 
     if ($Body) {
-        $md5Algorithm = New-Object System.Security.Cryptography.MD5CryptoServiceProvider;
-        $bodyAsByteArray = [Text.Encoding]::UTF8.GetBytes($Body);
-        $bodyAsHashedBase64String = [Convert]::ToBase64String($md5Algorithm.ComputeHash($bodyAsByteArray));
-        $hmacInputValue += $bodyAsHashedBase64String;
+        $md5Algorithm = New-Object System.Security.Cryptography.MD5CryptoServiceProvider
+        $bodyAsByteArray = [Text.Encoding]::UTF8.GetBytes($Body)
+        $bodyAsHashedBase64String = [Convert]::ToBase64String($md5Algorithm.ComputeHash($bodyAsByteArray))
+        $hmacInputValue += $bodyAsHashedBase64String
     }
 
-    $hmacAlgorithm = New-Object System.Security.Cryptography.HMACSHA256;
-    $hmacAlgorithm.Key = [Text.Encoding]::UTF8.GetBytes($ApiSecret);
-    $hmacInputValueAsByteArray = [Text.Encoding]::UTF8.GetBytes($hmacInputValue);
-    $hmacSignature = [Convert]::ToBase64String($hmacAlgorithm.ComputeHash($hmacInputValueAsByteArray));
+    $hmacAlgorithm = New-Object System.Security.Cryptography.HMACSHA256
+    $hmacAlgorithm.Key = [Text.Encoding]::UTF8.GetBytes($ApiSecret)
+    $hmacInputValueAsByteArray = [Text.Encoding]::UTF8.GetBytes($hmacInputValue)
+    $hmacSignature = [Convert]::ToBase64String($hmacAlgorithm.ComputeHash($hmacInputValueAsByteArray))
 
-    return "hmac ${ApiKey}:${hmacSignature}:${nonce}:${unixTimestamp}";
+    return "hmac ${ApiKey}:${hmacSignature}:${nonce}:${unixTimestamp}"
 
     <#
     .SYNOPSIS
@@ -282,8 +282,8 @@ function Get-CombellTxtRecords {
     )
 
     $txtRecords = Send-CombellHttpRequest `
-        GET "dns/$DomainName/records?type=TXT&record_name=$RelativeRecordName" $ApiKey $ApiSecret;
-    return @($txtRecords | Where-Object { $_.record_name -eq $RelativeRecordName -and $_.content -ceq $TxtValue });
+        GET "dns/$DomainName/records?type=TXT&record_name=$RelativeRecordName" $ApiKey $ApiSecret
+    return @($txtRecords | Where-Object { $_.record_name -eq $RelativeRecordName -and $_.content -ceq $TxtValue })
 }
 
 function Send-CombellHttpRequest {
@@ -302,8 +302,8 @@ function Send-CombellHttpRequest {
         [string]$Body
     )
 
-    $uri = [uri]"https://api.combell.com/v2/$Path";
-    $authorizationHeaderValue = Get-CombellAuthorizationHeaderValue $ApiKey $ApiSecret $Method $Path $Body;
+    $uri = [uri]"https://api.combell.com/v2/$Path"
+    $authorizationHeaderValue = Get-CombellAuthorizationHeaderValue $ApiKey $ApiSecret $Method $Path $Body
 
     $headers = @{
         Accept        = 'application/json'
@@ -322,15 +322,15 @@ function Send-CombellHttpRequest {
     }
 
     try {
-        $Stopwatch = New-Object -TypeName System.Diagnostics.Stopwatch;
-        $Stopwatch.Start();
+        $Stopwatch = New-Object -TypeName System.Diagnostics.Stopwatch
+        $Stopwatch.Start()
         Invoke-RestMethod @invokeRestMesthodParameters @script:UseBasic
-        $Stopwatch.Stop();
-        Write-Verbose "$Method $uri - OK ($($Stopwatch.ElapsedMilliseconds) ms)";
+        $Stopwatch.Stop()
+        Write-Verbose "$Method $uri - OK ($($Stopwatch.ElapsedMilliseconds) ms)"
     }
     catch {
-        $Stopwatch.Stop();
-        Write-Error "$Method $uri - FAILED ($($Stopwatch.ElapsedMilliseconds) ms) - $($_)";
-        throw;
+        $Stopwatch.Stop()
+        Write-Error "$Method $uri - FAILED ($($Stopwatch.ElapsedMilliseconds) ms) - $($_)"
+        throw
     }
 }
