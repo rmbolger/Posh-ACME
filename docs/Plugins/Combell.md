@@ -2,19 +2,22 @@ title: Combell
 
 # How To Use the Combell DNS Plugin
 
-This plugin works with the [Combell][1] DNS provider. We assume you have already setup an account and have created the
-DNS domain zone(s) you'll be working with.
-
-[Combell NV][1] is a hosting provider based in Belgium. Besides offering hosting solutions, Combell NV is also an 
+[Combell NV][1] is a hosting provider based in Belgium. Besides offering hosting solutions, Combell NV is an 
 [ICANN Accredited Registrar under IANA number 1467](https://www.icann.org/en/accredited-registrars?sort-direction=asc&sort-param=name&page=1&iana-number=1467&country=Belgium).
 
-See the [Combell API Documentation][2] the [Plugin Development Guide][3] on Posh-ACME Docs for more information.
+This plugin works with the [Combell][1] DNS provider by using the Combell Reseller API.
+
+| **:warning: WARNING** | The Combell Reseller API (also referred to as the _Combell API_), is _only_ available for reseller accounts, which are more expensive than a normal accounts. A free trial is available - see [reseller hosting](https://www.combell.com/en/reseller-hosting) for more information. ―Steven Volckaert, 12 October 2021. |
+| :---: | :--- |
+
+The remainder of this document assumes you have a reseller account and have created the DNS domain zone(s) you'll be
+working with.
 
 ## Setup
 
-The Combell API can be activated for any administrator in the Combell account.
+The Combell API can be activated for any administrator in the Combell reseller account.
 
-To add administrators, navigate to [Dashboard / Settings / Administrators](https://my.combell.com/en/user-management/administrators). Click the **Invite administrator** button to add an administrator.
+To add administrators, navigate to [Dashboard / Settings / Administrators](https://my.combell.com/en/user-management/administrators), and click the **Invite administrator** button to add an administrator.
 
 Click the **Permissions** button next to an administrator's name, and ensure the administrator's permssions is configured as **All rights** (_"User <UserName> has access to all the products in this customer account"_).
 
