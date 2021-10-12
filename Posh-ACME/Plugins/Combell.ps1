@@ -198,9 +198,10 @@ function Find-CombellZone {
     #      custom HTTP response headers. So: Consider removing the 'take' query parameter, which will default back to
     #      maximum 25 items per response, and sending addtional HTTP requests if the HTTP header(s) indicate that more
     #      domains exist.
-    #      Implementing this requires further investigation though, so if you need this, feel free to submit a pull
-    #      request or an issue - Steven Volckaert, 5 October 2021.
-    $zones = Send-CombellHttpRequest GET "domains?take=1000" $ApiKey $ApiSecret
+    #      Implementing this requires further investigation though (start by reading
+    #      https://api.combell.com/v2/documentation#section/Conventions/Pagination), so if you need this, feel free to
+    #      submit a pull request or an issue - Steven Volckaert, 5 October 2021.   
+    $zones = Send-CombellHttpRequest GET "domains?take=1000" $ApiKey $ApiSecret;
 
     # We need to find the deepest sub-zone that can hold the record and add it there, except if there is only the apex
     # zone. So for a $RecordName like _acme-challenge.site1.sub1.sub2.example.com, we need to search the zone from
