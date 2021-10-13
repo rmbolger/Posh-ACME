@@ -7,7 +7,7 @@ title: Combell
 
 This plugin works with the [Combell][1] DNS provider by using the Combell Reseller API.
 
-| **:warning: WARNING** | The Combell Reseller API (also referred to as the _Combell API_), is _only_ available for reseller accounts, which are more expensive than a normal accounts. A free trial is available - see [reseller hosting](https://www.combell.com/en/reseller-hosting) for more information. ―Steven Volckaert, 12 October 2021. |
+| **:warning: WARNING** | The Combell Reseller API (also referred to as the _Combell API_), is _only_ available for reseller accounts, which are more expensive than normal accounts. A free trial is available - see [reseller hosting](https://www.combell.com/en/reseller-hosting) for more information. ―Steven Volckaert, 12 October 2021. |
 | :---: | :--- |
 
 The remainder of this document assumes you have a reseller account and have created the DNS domain zone(s) you'll be
