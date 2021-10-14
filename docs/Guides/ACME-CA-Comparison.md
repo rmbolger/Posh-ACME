@@ -8,7 +8,7 @@ As more public certificate authorities hop on the [ACME][rfc00] bandwagon, it is
 | ----                       | -------------- | :------------:     | ------------- | ----------                                                              | -----------    | ------------------           | -----                                                    |
 | [Let's&nbsp;Encrypt][le01] | 100 names      | :white_check_mark: | 90 days       | [Chains][le06]                                                          | [Policy][le02] | [RSA + ECC][le10]            | [Service Status][le09]<br />[Staging Environment][le03]  |
 | [BuyPass][bp01]            | 5 names        | :x:                | 180 days      | [Roots][bp04] "Go SSL"                                                  | [Policy][bp02] | [RSA + ECC][bp05]            | [Test Environment][bp03]                                 |
-| [ZeroSSL][z01]             | 100+ names     | :white_check_mark: | 90 days       | RSA [Iss][z02]/[Root][z03]<br />ECC [Iss1][z04]/[Iss2][z05]/[Root][z06] | ??             | [RSA + ECC][z07]             |                                                          |
+| [ZeroSSL][z01]             | 100+ names     | :white_check_mark: | 90 days       | RSA [Iss1][z02]/[Iss2][z03]/[Root][z04]<br />ECC [Iss1][z05]/[Iss2][z06]/[Root][z07] | ??             | [RSA + ECC][z08]             |                                                          |
 | [SSL.com][ss01]            | 1 name + www   | :x:                | 90 days       | RSA [Iss][ss02]/[Root][ss03]<br />ECC [Iss][ss06]/[Root][ss07]          | ??             | [RSA][ss04]<br />[ECC][ss05] | See Warning below                                        |
 
 * Wildcard names (if supported) count towards Subject Alternative Name (SAN) limits.
@@ -74,11 +74,12 @@ Some of the features in the ACME protocol are optional. Others are mandatory, bu
 [bp05]: https://api.buypass.com/acme/directory
 [z01]: https://zerossl.com/
 [z02]: https://crt.sh/?q=c81a8bd1f9cf6d84c525f378ca1d3f8c30770e34
-[z03]: https://crt.sh/?q=2b8f1b57330dbba2d07a6c51f70ee90ddab9ad8e
-[z04]: https://crt.sh/?q=7f95276d4951499fd756df344aa24fb38ceaf678
-[z05]: https://crt.sh/?q=ca7788c32da1e4b7863a4fb57d00b55ddacbc7f9
-[z06]: https://crt.sh/?q=d1eb23a46d17d68fd92564c2f1f1601764d8e349
-[z07]: https://acme.zerossl.com/v2/DV90
+[z03]: https://crt.sh/?q=d89e3bd43d5d909b47a18977aa9d5ce36cee184c
+[z04]: https://crt.sh/?q=d1eb23a46d17d68fd92564c2f1f1601764d8e349
+[z05]: https://crt.sh/?q=7f95276d4951499fd756df344aa24fb38ceaf678
+[z06]: https://crt.sh/?q=ca7788c32da1e4b7863a4fb57d00b55ddacbc7f9
+[z07]: https://crt.sh/?q=d1eb23a46d17d68fd92564c2f1f1601764d8e349
+[z08]: https://acme.zerossl.com/v2/DV90
 [ss01]: https://www.ssl.com/
 [ss02]: https://crt.sh/?q=33ee4e370a8d90fd4b1445e672226c4b829cc6d2
 [ss03]: https://crt.sh/?q=b7ab3308d1ea4477ba1480125a6fbda936490cbb
