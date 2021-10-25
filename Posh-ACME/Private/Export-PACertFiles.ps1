@@ -45,7 +45,7 @@ function Export-PACertFiles {
                 $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
             } catch { throw }
 
-            $pems = Split-PemChain -ChainBytes $response.Content
+            $pems = @(Split-PemChain -ChainBytes $response.Content)
 
             # Do some basic validation to make sure we got what we were expecting.
             $cert = Import-Pem -InputString ($pems[0] -join "`n")
@@ -91,7 +91,7 @@ function Export-PACertFiles {
                 try {
                     $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
                 } catch {throw}
-                $pems = Split-PemChain -ChainBytes $response.Content
+                $pems = @(Split-PemChain -ChainBytes $response.Content)
 
                 # write additional chain files as chain1.cer,chain2.cer,etc.
                 $altChainFile = Join-Path $Order.Folder "chain$($i+1).cer"

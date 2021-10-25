@@ -35,5 +35,8 @@ function Install-PACertificate {
             NotExportable = $NotExportable.IsPresent
         }
         Import-PfxCertInternal @importArgs
+
+        Import-WindowsChain -ChainFile $PACertificate.ChainFile -StoreLocation $StoreLocation
+
     }
 }
