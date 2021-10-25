@@ -7,11 +7,10 @@ title: Combell
 
 This plugin works with the [Combell][1] DNS provider by using the Combell Reseller API.
 
-| **:warning: WARNING** | The Combell Reseller API (also referred to as the _Combell API_), is _only_ available for reseller accounts, which are more expensive than normal accounts. A free trial is available - see [reseller hosting](https://www.combell.com/en/reseller-hosting) for more information. ―Steven Volckaert, 12 October 2021. |
-| :---: | :--- |
+!!! warning
+    The Combell Reseller API (also referred to as the _Combell API_), is _only_ available for reseller accounts, which are more expensive than normal accounts. A free trial is available - see [reseller hosting](https://www.combell.com/en/reseller-hosting) for more information. |
 
-The remainder of this document assumes you have a reseller account and have created the DNS domain zone(s) you'll be
-working with.
+The remainder of this document assumes you have a reseller account and have created the DNS domain zone(s) you'll be working with.
 
 ## Setup
 
@@ -37,10 +36,7 @@ add your public IP address(es) to the whitelist.
 
 ## Using the Plugin
 
-Both the API key and API secret have to be passed to the plugin as a `SecureString`, which is supported on Windows
-running PowerShell 5.1 or later, or on any other operating system running PowerShell 6.2 or later.
-
-Using `SecureString` ensures the API key and API secret are saved to disk in encrypted form by Posh-ACME for later
+The API Key and Secret and used with the `CombellApiKey` and `CombellApiSecret` parameters as SecureString values. Using SecureString ensures the values are saved to disk in encrypted form by Posh-ACME for later
 renewals.
 
 ``` powershell
@@ -55,8 +51,6 @@ New-PACertificate example.com -Plugin Combell -PluginArgs $pArgs
 
 - [Combell.com][1].
 - [Combell API Documentation][2].
-- [Plugin Development Guide][3]. Posh-ACME Docs.
 
 [1]: https://www.combell.com/
 [2]: https://api.combell.com/v2/documentation
-[3]: https://poshac.me/docs/v4/Plugins/Plugin-Development-Guide/
