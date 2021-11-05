@@ -7,13 +7,32 @@ function Start-SleepProgress {
         [string]$Status='Sleeping...'
     )
 
-    $end = (Get-DateTimeOffsetNow).AddSeconds($Seconds)
+    # Because Write-Progress fouls up some automation environments, we're not
+    # going to use it unless the user has explicitly requested it with an
+    # environment variable.
 
-    while ($end -gt (Get-DateTimeOffsetNow)) {
-        $secLeft = ($end - (Get-DateTimeOffsetNow)).TotalSeconds
-        $percent = ($Seconds - $secLeft) / $Seconds * 100
-        Write-Progress $Activity $Status -SecondsRemaining $secLeft -PercentComplete $percent
-        Start-Sleep -Milliseconds 500
+    $now = Get-DateTimeOffsetNow
+    $nextStatus = $now.AddSeconds(60)
+    $end = $now.AddSeconds($Seconds)
+
+    while ($end -gt $now) {
+        $secLeft = [Math]::Round(($end-$now).TotalSeconds)
+
+        if (-not [String]::IsNullOrEmpty($env:POSHACME_SHOW_PROGRESS)) {
+            $percent = ($Seconds - $secLeft) / $Seconds * 100
+            Write-Progress $Activity $Status -SecondsRemaining $secLeft -PercentComplete $percent
+        }
+
+        if ($now -gt $nextStatus) {
+            Write-Verbose "$secLeft seconds remaining to sleep"
+            $nextStatus = $now.AddSeconds(60)
+        }
+
+        Start-Sleep -Milliseconds 1000
+        $now = Get-DateTimeOffsetNow
     }
-    Write-Progress $Activity $Status -SecondsRemaining 0 -Completed
+
+    if (-not [String]::IsNullOrEmpty($env:POSHACME_SHOW_PROGRESS)) {
+        Write-Progress $Activity $Status -SecondsRemaining 0 -Completed
+    }
 }
