@@ -93,11 +93,8 @@ function Export-PluginArgs {
         # but we have to pre-serialize things like SecureString and PSCredential
         # first because ConvertTo-Json can't deal with those natively.
 
-        # determine whether we're using a custom key
-        $encParam = @{}
-        if (-not [String]::IsNullOrEmpty($acct.sskey)) {
-            $encParam.Key = $acct.sskey | ConvertFrom-Base64Url -AsByteArray
-        }
+        # get the encryption parameter
+        $encParam = Get-EncryptionParam -Account $acct -EA Stop
 
         $pDataSafe = @{}
         foreach ($key in $pData.Keys) {

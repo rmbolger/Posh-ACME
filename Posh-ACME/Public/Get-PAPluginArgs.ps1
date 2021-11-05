@@ -18,7 +18,7 @@ function Get-PAPluginArgs {
     }
 
     Process {
-        trap { $PSCmdlet.ThrowTerminatingError($PSItem) }
+        trap { $PSCmdlet.WriteError($_); return }
 
         # try to find an order using the specified parameters
         $order = Get-PAOrder @PSBoundParameters
@@ -42,11 +42,8 @@ function Get-PAPluginArgs {
             # drop support for PS 5.1.
             $pDataSafe = Get-Content $pDataFile -Raw -Encoding utf8 -EA Ignore | ConvertFrom-Json
 
-            # determine whether we're using a custom key
-            $encParam = @{}
-            if (-not [String]::IsNullOrEmpty($acct.sskey)) {
-                $encParam.Key = $acct.sskey | ConvertFrom-Base64Url -AsByteArray
-            }
+            # get the encryption parameter
+            $encParam = Get-EncryptionParam -Account $acct -EA Stop
 
             # Convert it to a hashtable and do our custom deserialization on SecureString
             # and PSCredential objects.
