@@ -35,12 +35,60 @@ function Update-PluginEncryption {
 
         # update and save the account with the new key
         if ($NewKey) {
-            Write-Debug "Saving account $ID json with new sskey."
-            $script:Acct | Add-Member 'sskey' $NewKey -Force
+
+            # if a vault name environment variable is defined,
+            # try to save it in the vault
+            if (-not [string]::IsNullOrWhiteSpace($env:POSHACME_VAULT_NAME)) {
+                try {
+                    $vaultName = $env:POSHACME_VAULT_NAME
+
+                    # make sure we have the necessary SecretManagement commands available
+                    if (-not (Get-Command 'Unlock-SecretVault' -EA Ignore) -or
+                        -not (Get-Command 'Get-Secret' -EA Ignore) )
+                    {
+                        throw "Commands associated with SecretManagement module not found. Make sure Microsoft.PowerShell.SecretManagement is installed and accessible."
+                    }
+
+                    # if a vault password is defined, explicitly unlock the vault
+                    if (-not [string]::IsNullOrEmpty($env:POSHACME_VAULT_PASS)) {
+                        $ssPass = ConvertTo-SecureString $env:POSHACME_VAULT_PASS -AsPlainText -Force
+                        Unlock-SecretVault -Name $vaultName -Password $ssPass
+                    }
+
+                    # get or create the vault guid
+                    $vaultGuid = $script:Acct.VaultGuid
+                    if ([string]::IsNullOrWhiteSpace($vaultGuid)) {
+                        $vaultGuid = (New-Guid).ToString().Replace('-','')
+                    }
+
+                    # build the secret name
+                    $secretName = "$($env:POSHACME_VAULT_SECRETPREFIX)poshacme_$($vaultGuid)_sskey"
+
+                    Write-Debug "Saving account $ID with sskey 'VAULT' and guid '$vaultGuid' to vault '$vaultName'."
+                    Set-Secret -Vault $vaultName -Name $secretName -Secret $NewKey -EA Stop
+                    $script:Acct | Add-Member 'sskey' 'VAULT' -Force
+                    $script:Acct | Add-Member 'VaultGuid' $vaultGuid -Force
+                }
+                catch {
+                    Write-Warning "Unable to save encryption key to secret vault. $($_.Exception.Message)"
+
+                    # just save the key onto the account
+                    Write-Debug "Saving account $ID with new sskey."
+                    $script:Acct | Add-Member 'sskey' $NewKey -Force
+                }
+            }
+            else {
+                # just save the key onto the account
+                Write-Debug "Saving account $ID with new sskey."
+                $script:Acct | Add-Member 'sskey' $NewKey -Force
+            }
+
         } else {
-            Write-Debug "Saving account $ID json with null sskey."
+            # remove the key
+            Write-Debug "Saving account $ID with null sskey."
             $script:Acct | Add-Member 'sskey' $null -Force
         }
+
         $acctFile = Join-Path $server.Folder "$ID\acct.json"
         $script:Acct | Select-Object -Property * -ExcludeProperty id,Folder |
             ConvertTo-Json -Depth 5 |
