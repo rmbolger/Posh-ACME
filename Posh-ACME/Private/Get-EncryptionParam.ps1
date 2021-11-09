@@ -35,11 +35,12 @@ function Get-EncryptionParam {
         }
 
         # build the secret name
-        if ([String]::IsNullOrEmpty($Account.VaultGuid)) {
-            Write-Error "Unable to retrieve encryption key. Missing VaultGuid property on account object."
-            return @{}
+        if ([String]::IsNullOrEmpty($env:POSHACME_VAULT_SECRET_TEMPLATE)) {
+            $secretName = 'poshacme_{0}_sskey' -f $Account.VaultGuid
+        } else {
+            Write-Debug "Using custom secret template: $($env:POSHACME_VAULT_SECRET_TEMPLATE)"
+            $secretName = $env:POSHACME_VAULT_SECRET_TEMPLATE -f $Account.VaultGuid
         }
-        $secretName = "$($env:POSHACME_VAULT_SECRETPREFIX)poshacme_$($Account.VaultGuid)_sskey"
 
         # if a vault password is defined, explicitly unlock the vault
         if (-not [string]::IsNullOrEmpty($env:POSHACME_VAULT_PASS)) {

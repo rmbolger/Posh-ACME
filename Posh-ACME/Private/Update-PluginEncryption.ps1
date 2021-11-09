@@ -62,7 +62,12 @@ function Update-PluginEncryption {
                     }
 
                     # build the secret name
-                    $secretName = "$($env:POSHACME_VAULT_SECRETPREFIX)poshacme_$($vaultGuid)_sskey"
+                    if ([String]::IsNullOrEmpty($env:POSHACME_VAULT_SECRET_TEMPLATE)) {
+                        $secretName = 'poshacme-{0}-sskey' -f $vaultGuid
+                    } else {
+                        Write-Debug "Using custom secret template: $($env:POSHACME_VAULT_SECRET_TEMPLATE)"
+                        $secretName = $env:POSHACME_VAULT_SECRET_TEMPLATE -f $vaultGuid
+                    }
 
                     Write-Debug "Saving account $ID with sskey 'VAULT' and guid '$vaultGuid' to vault '$vaultName'."
                     Set-Secret -Vault $vaultName -Name $secretName -Secret $NewKey -EA Stop
@@ -76,8 +81,7 @@ function Update-PluginEncryption {
                     Write-Debug "Saving account $ID with new sskey."
                     $script:Acct | Add-Member 'sskey' $NewKey -Force
                 }
-            }
-            else {
+            } else {
                 # just save the key onto the account
                 Write-Debug "Saving account $ID with new sskey."
                 $script:Acct | Add-Member 'sskey' $NewKey -Force

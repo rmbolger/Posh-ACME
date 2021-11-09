@@ -2,7 +2,7 @@
 
 The Posh-ACME 4.0 release added a new per-account option for encrypting secure plugin arguments on disk that enables better config portability between users/systems and improves the encryption available on non-Windows platforms. The only downside to the feature is that the encryption key was stored alongside the main config which enables anyone with read access to the config the ability to decrypt the plugin parameters.
 
-In Posh-ACME 4.11.0, you can now utilize the Microsoft [SecretManagement](https://devblogs.microsoft.com/powershell/secretmanagement-and-secretstore-are-generally-available/) module to store the encryption key in a variety of local, on-prem, and cloud secret stores using supported [vault extensions](https://www.powershellgallery.com/packages?q=%5BSecretManagement%5D).
+In Posh-ACME 4.11.0, you can now utilize the Microsoft [SecretManagement](https://devblogs.microsoft.com/powershell/secretmanagement-and-secretstore-are-generally-available/) module to store the encryption key in a variety of local, on-prem, and cloud secret stores using supported [vault extensions](https://www.powershellgallery.com/packages?q=Tags%3A%22SecretManagement%22).
 
 !!! warning
     Some vault extensions are read-only and don't allow for creation of new secrets. The vault extensions supported by Posh-ACME must allow for secret creation using arbitrary name values.
@@ -50,7 +50,7 @@ The verbose output should indicate the name of the secret that was added to the 
 Get-SecretInfo -Vault $env:POSHACME_VAULT_NAME -Name '*poshacme*'
 ```
 
-If there was a problem accessing the vault, an error is thrown and the module falls back to storing the key with the account object. You can verify the current configuration for an account by checking the `VaultGuid` and `sskey` properties on account objects like this:
+If there was a problem accessing the vault, an warning is thrown and the module falls back to storing the key with the account object. You can verify the current configuration for an account by checking the `VaultGuid` and `sskey` properties on account objects like this:
 
 ```powershell
 Get-PAAccount -List | Select-Object id,sskey,VaultGuid
