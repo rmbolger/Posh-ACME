@@ -107,18 +107,18 @@ function Set-PAAccount {
             if ([String]::IsNullOrEmpty($acct.sskey) -and $UseAltPluginEncryption)
             {
                 Write-Verbose "Adding new sskey for account $($acct.ID)"
-                Update-PluginEncryption $acct.ID -NewKey (New-AesKey)
+                Set-AltPluginEncryption $acct.ID -NewKey (New-AesKey)
             }
             elseif (-not [String]::IsNullOrEmpty($acct.sskey) -and
                     'UseAltPluginEncryption' -in $PSBoundParameters.Keys -and
                     -not $UseAltPluginEncryption)
             {
                 Write-Verbose "Removing sskey for account $($acct.ID)"
-                Update-PluginEncryption $acct.ID -NewKey $null
+                Set-AltPluginEncryption $acct.ID -NewKey $null
             }
             elseif (-not [String]::IsNullOrEmpty($acct.sskey) -and $ResetAltPluginEncryption) {
                 Write-Verbose "Changing sskey for account $($acct.ID)"
-                Update-PluginEncryption $acct.ID -NewKey (New-AesKey)
+                Set-AltPluginEncryption $acct.ID -NewKey (New-AesKey)
             }
         }
 
