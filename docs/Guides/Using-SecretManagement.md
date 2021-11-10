@@ -18,14 +18,14 @@ You will also need to register a new vault and make note of the vault name. It w
 Some vaults can be configured with a password such that retrieving a secret requires first unlocking the vault with the password. In order to use a vault with Posh-ACME, you have three options.
 
 - Configure the vault so a password is not required.
-- Unlock the vault with a sufficient timeout prior to calling Posh-ACME functions.
 - Provide the vault password using the `POSHACME_VAULT_PASS` environment variable.
+- Prior to calling Posh-ACME functions, unlock or pre-authenticate to the vault so Posh-ACME can call `Get-Secret` without error.
 
 ### Secret Names and Customization
 
-Posh-ACME will store a single secret in the vault per ACME account using the feature. The name of each secret will use the following template by default, `poshacme_<guid>_sskey`. The GUID is a unique value generated for each account the first time the feature is used and stored as a property called `VaultGuid` on the account object. This ensures that using the same vault for multiple accounts does not result in secret naming conflicts.
+Each account configured to use alternative plugin encryption will store a single secret in the vault. The name of each secret will use the following template by default, `poshacme-{0}-sskey`. The `{0}` is replaced with a unique GUID value generated for each account the first time the feature is used and stored as a property called `VaultGuid` on the account object. This ensures that using the same vault for multiple accounts does not result in secret naming conflicts.
 
-You may optionally create an environment variable called `POSHACME_VAULT_SECRETPREFIX` to specify a custom string prefix for the secret name. With a custom prefix, the template becomes `<prefix>poshacme_<guid>_sskey`.
+You may optionally create an environment variable called `POSHACME_VAULT_SECRET_TEMPLATE` to override the default template. Be sure to include `{0}` in your template string to make sure there are no conflicts between accounts.
 
 ## Using a Vault
 
@@ -47,6 +47,7 @@ Set-PAAccount -UseAltPluginEncryption -Verbose
 The verbose output should indicate the name of the secret that was added to the vault specified by your environment variables. You should also be able to list all the secrets associated with Posh-ACME by running the following:
 
 ```powershell
+# change the search string if you're using a custom template
 Get-SecretInfo -Vault $env:POSHACME_VAULT_NAME -Name '*poshacme*'
 ```
 
@@ -78,14 +79,9 @@ If the vault access disruption is only temporary, the module will be able to con
 
 ### Rotating the Vault Key
 
-If you believe the encryption key may have been compromised, you can rotate it by either disabling and re-enabling alternative plugin encryption or using the `ResetAltPluginEncryption` switch on `Set-PAAccount`.
+If you believe the encryption key may have been compromised, you can rotate it by using the `ResetAltPluginEncryption` switch on `Set-PAAccount`.
 
 ```powershell
-# Option 1: Disable/Enable
-Set-PAAccount -UseAltPluginEncryption:$false
-Set-PAAccount -UseAltPluginEncryption
-
-# Option 2: Reset
 Set-PAAccount -ResetAltPluginEncryption
 ```
 
