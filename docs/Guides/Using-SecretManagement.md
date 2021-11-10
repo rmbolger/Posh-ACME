@@ -1,6 +1,6 @@
 # Using SecretManagement
 
-The Posh-ACME 4.0 release added a new per-account option for encrypting secure plugin arguments on disk that enables better config portability between users/systems and improves the encryption available on non-Windows platforms. The only downside to the feature is that the encryption key was stored alongside the main config which enables anyone with read access to the config the ability to decrypt the plugin parameters.
+The alternative plugin encryption option added in Posh-ACME 4.0 allows for encrypting secure plugin arguments on disk with better config portability between users/systems and improves the encryption available on non-Windows platforms. The only downside to the feature is that the encryption key was stored with the main config which enables anyone with read access to the files the ability to decrypt the plugin parameters.
 
 In Posh-ACME 4.11.0, you can now utilize the Microsoft [SecretManagement](https://devblogs.microsoft.com/powershell/secretmanagement-and-secretstore-are-generally-available/) module to store the encryption key in a variety of local, on-prem, and cloud secret stores using supported [vault extensions](https://www.powershellgallery.com/packages?q=Tags%3A%22SecretManagement%22).
 
@@ -19,13 +19,17 @@ Some vaults can be configured with a password such that retrieving a secret requ
 
 - Configure the vault so a password is not required.
 - Provide the vault password using the `POSHACME_VAULT_PASS` environment variable.
-- Prior to calling Posh-ACME functions, unlock or pre-authenticate to the vault so Posh-ACME can call `Get-Secret` without error.
+- Prior to calling Posh-ACME functions, unlock or pre-authenticate to the vault so Posh-ACME can call `Set-Secret` and `Get-Secret` without error.
 
 ### Secret Names and Customization
 
-Each account configured to use alternative plugin encryption will store a single secret in the vault. The name of each secret will use the following template by default, `poshacme-{0}-sskey`. The `{0}` is replaced with a unique GUID value generated for each account the first time the feature is used and stored as a property called `VaultGuid` on the account object. This ensures that using the same vault for multiple accounts does not result in secret naming conflicts.
+Each account configured to use alternative plugin encryption will store a single secret in the vault. The name of each secret will use the following template:
 
-You may optionally create an environment variable called `POSHACME_VAULT_SECRET_TEMPLATE` to override the default template. Be sure to include `{0}` in your template string to make sure there are no conflicts between accounts.
+> `poshacme-{0}-sskey`
+
+The `{0}` is replaced with a unique GUID value generated for each account the first time the feature is used and stored as a property called `VaultGuid` on the account object. This ensures that using the same vault for multiple accounts does not result in secret naming conflicts.
+
+You may optionally create an environment variable called `POSHACME_VAULT_SECRET_TEMPLATE` to override the default template. Be sure to include `{0}` in your template string to make sure there are no conflicts between accounts. Also, be aware that some vaults have restrictions on the characters allowed in a secret name.
 
 ## Using a Vault
 
