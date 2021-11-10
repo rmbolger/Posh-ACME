@@ -211,7 +211,7 @@ function New-PAAccount {
 
     # add a new AES key if specified
     if ($UseAltPluginEncryption) {
-        Set-AltPluginEncryption -ID $acct.id -NewKey (New-AesKey)
+        $acct | Set-AltPluginEncryption -Enable
         $acct = Get-PAAccount
     }
 

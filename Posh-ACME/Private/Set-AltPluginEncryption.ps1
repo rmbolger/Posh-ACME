@@ -4,7 +4,9 @@ function Set-AltPluginEncryption {
         [Parameter(Mandatory,Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [Alias('Name')]
         [string]$ID,
-        [string]$NewKey
+        [Parameter(Mandatory)]
+        [switch]$Enable,
+        [switch]$Reset
     )
 
     Begin {
@@ -12,15 +14,27 @@ function Set-AltPluginEncryption {
         if (-not ($server = Get-PAServer)) {
             throw "No ACME server configured. Run Set-PAServer first."
         }
+
+        # save the current account to revert to if necessary
+        $revertToAccount = Get-PAAccount
     }
 
     Process {
 
         # set the specified account as current and prepare to revert when we're done
-        $revertToAccount = Get-PAAccount
         if ($revertToAccount -and $revertToAccount.id -ne $ID) {
             Write-Debug "Temporarily switching to account '$ID'"
             Set-PAAccount -ID $ID
+        }
+
+        # return early if there's nothing to do
+        $oldSSKey = $script:Acct.sskey
+        if ($Enable -and -not $Reset -and -not [String]::IsNullOrWhiteSpace($oldSSKey)) {
+            Write-Debug "AltPluginEncryption is already enabled on account '$ID'."
+            return
+        } elseif (-not $Enable -and [String]::IsNullOrWhiteSpace($oldSSKey)) {
+            Write-Debug "AltPluginEncryption is already disabled on account '$ID'."
+            return
         }
 
         # grab a copy of the orders and plugin args before we break
@@ -33,11 +47,12 @@ function Set-AltPluginEncryption {
         })
         Write-Debug "Order data found for $($orderData.Count) orders."
 
-        # update and save the account with the new key
-        if ($NewKey) {
+        if ($Enable) {
 
-            # if a vault name environment variable is defined,
-            # try to save it in the vault
+            # generate a new key in case we need it
+            $newSSKey = New-AesKey
+
+            # check for vault config
             if (-not [string]::IsNullOrWhiteSpace($env:POSHACME_VAULT_NAME)) {
                 try {
                     $vaultName = $env:POSHACME_VAULT_NAME
@@ -69,8 +84,20 @@ function Set-AltPluginEncryption {
                         $secretName = $env:POSHACME_VAULT_SECRET_TEMPLATE -f $vaultGuid
                     }
 
-                    Write-Debug "Saving account $ID with sskey 'VAULT' and guid '$vaultGuid' to vault '$vaultName'."
-                    Set-Secret -Vault $vaultName -Name $secretName -Secret $NewKey -EA Stop
+                    # check for an existing key value
+                    $oldSecret = Get-Secret -Vault $vaultName -Name $secretName -AsPlainText -EA Ignore
+
+                    if ($Reset -or -not $oldSecret) {
+                        # attempt to write a new vault key
+                        Write-Debug "Attempting to add new secret '$secretName' to vault '$vaultName'."
+                        Set-Secret -Vault $vaultName -Name $secretName -Secret $newSSKey -EA Stop
+                        Write-Verbose "Enabling AltPluginEncryption for account '$ID' with new vault key."
+                    } else {
+                        # use the existing vault key
+                        Write-Verbose "Enabling AltPluginEncryption for account '$ID' with existing vault key."
+                        $newSSKey = $oldSecret
+                    }
+
                     $script:Acct | Add-Member 'sskey' 'VAULT' -Force
                     $script:Acct | Add-Member 'VaultGuid' $vaultGuid -Force
                 }
@@ -79,17 +106,17 @@ function Set-AltPluginEncryption {
 
                     # just save the key onto the account
                     Write-Debug "Saving account $ID with new sskey."
-                    $script:Acct | Add-Member 'sskey' $NewKey -Force
+                    $script:Acct | Add-Member 'sskey' $newSSKey -Force
                 }
             } else {
                 # just save the key onto the account
                 Write-Debug "Saving account $ID with new sskey."
-                $script:Acct | Add-Member 'sskey' $NewKey -Force
+                $script:Acct | Add-Member 'sskey' $newSSKey -Force
             }
 
         } else {
             # remove the key
-            Write-Debug "Saving account $ID with null sskey."
+            Write-Verbose "Disabling AltPluginEncryption for account '$ID'"
             $script:Acct | Add-Member 'sskey' $null -Force
         }
 
@@ -103,9 +130,14 @@ function Set-AltPluginEncryption {
             Write-Debug "Re-exporting plugin args for order '$($_.Order.Name)' with plugins $($_.Order.Plugin -join ',') and data $($_.PluginArgs | ConvertTo-Json -Depth 5)"
             Export-PluginArgs @_ -IgnoreExisting
         }
+    }
 
-        # revert the active account if necessary
-        if ($revertToAccount -and $revertToAccount.id -ne $ID) {
+    End {
+        $curAcct = Get-PAAccount
+        Write-Debug "revert id = $($revertToAccount.id), cur id = $($curAcct.id)"
+        if ($revertToAccount -and
+            (-not $curAcct -or ($curAcct.id -ne $revertToAccount.id) ))
+        {
             Write-Debug "Reverting to previously active account '$($revertToAccount.id)'"
             Set-PAAccount -ID $revertToAccount.id
         }

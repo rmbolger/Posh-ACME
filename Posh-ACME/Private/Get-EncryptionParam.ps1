@@ -36,7 +36,7 @@ function Get-EncryptionParam {
 
         # build the secret name
         if ([String]::IsNullOrEmpty($env:POSHACME_VAULT_SECRET_TEMPLATE)) {
-            $secretName = 'poshacme_{0}_sskey' -f $Account.VaultGuid
+            $secretName = 'poshacme-{0}-sskey' -f $Account.VaultGuid
         } else {
             Write-Debug "Using custom secret template: $($env:POSHACME_VAULT_SECRET_TEMPLATE)"
             $secretName = $env:POSHACME_VAULT_SECRET_TEMPLATE -f $Account.VaultGuid
