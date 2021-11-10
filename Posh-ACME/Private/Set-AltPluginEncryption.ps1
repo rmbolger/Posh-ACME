@@ -21,8 +21,8 @@ function Set-AltPluginEncryption {
 
     Process {
 
-        # set the specified account as current and prepare to revert when we're done
-        if ($revertToAccount -and $revertToAccount.id -ne $ID) {
+        # set the specified account as current
+        if (-not $revertToAccount -or $revertToAccount.id -ne $ID) {
             Write-Debug "Temporarily switching to account '$ID'"
             Set-PAAccount -ID $ID
         }
@@ -134,7 +134,6 @@ function Set-AltPluginEncryption {
 
     End {
         $curAcct = Get-PAAccount
-        Write-Debug "revert id = $($revertToAccount.id), cur id = $($curAcct.id)"
         if ($revertToAccount -and
             (-not $curAcct -or ($curAcct.id -ne $revertToAccount.id) ))
         {

@@ -105,6 +105,7 @@ function Set-PAAccount {
                 Enable = $UseAltPluginEncryption.IsPresent
                 Reset = $ResetAltPluginEncryption.IsPresent
             }
+            if ($encSplat.Reset) { $encSplat.Enable = $true }
             $acct | Set-AltPluginEncryption @encSplat
         }
 
