@@ -41,7 +41,9 @@ Checkout the main branch of the repository and run `mkdocs serve` to self-host a
 
 ## Unit Tests
 
-The tests in this project now use [Pester v5](https://pester.dev/docs/quick-start). My overall code coverage is still pretty low. So if you're handy at writing tests or have suggestions to improve the existing ones, suggestions and pull requests are most welcome. The recommended way to run the tests is in a separate PowerShell process due to some limitations in how Pester is able to test internal module stuff. For example:
+The tests in this project now use [Pester v5](https://pester.dev/docs/quick-start). You will also need to have the `Microsoft.PowerShell.SecretManagement` module installed, but no vault extension modules or configuration is required.
+
+My overall code coverage is still pretty low. So if you're handy at writing tests or have suggestions to improve the existing ones, suggestions and pull requests are most welcome. The recommended way to run the tests is in a separate PowerShell process due to some limitations in how Pester is able to test internal module stuff. For example:
 
 ```powershell
 cd \path\to\Posh-ACME
