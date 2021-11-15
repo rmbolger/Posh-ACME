@@ -14,9 +14,13 @@ function Add-DnsTxt {
         $ExtraParams
     )
 
+    if (-not $script:CoreNetworksToken) {
+        $script:CoreNetworksToken = Get-CoreNetworksAuthToken $CoreNetworksApiRoot $CoreNetworksCred
+    }
+
     ### Authentication at the API via authentication token, which must be sent in the headers of every request.
     $headers = @{
-        Authorization="Bearer $(Get-CoreNetworksAuthToken $CoreNetworksApiRoot $CoreNetworksCred)"
+        Authorization="Bearer $($script:CoreNetworksToken)"
     }
 
     ### Search und find the dns zone of the (sub)domain  (for example: example.com).
@@ -102,9 +106,13 @@ function Remove-DnsTxt {
         $ExtraParams
     )
 
+    if (-not $script:CoreNetworksToken) {
+        $script:CoreNetworksToken = Get-CoreNetworksAuthToken $CoreNetworksApiRoot $CoreNetworksCred
+    }
+
     ### Authentication at the API via authentication token, which must be sent in the headers of every request.
     $headers = @{
-        Authorization="Bearer $(Get-CoreNetworksAuthToken $CoreNetworksApiRoot $CoreNetworksCred)"
+        Authorization="Bearer $($script:CoreNetworksToken)"
     }
 
     ### Search und find the dns zone of the (sub)domain  (for example: example.com).
@@ -191,9 +199,13 @@ function Save-DnsTxt {
     # return early if there's nothing to commit
     if (-not $script:CoreNetworksZones) { return }
 
+    if (-not $script:CoreNetworksToken) {
+        $script:CoreNetworksToken = Get-CoreNetworksAuthToken $CoreNetworksApiRoot $CoreNetworksCred
+    }
+
     # get a fresh auth token
     $headers = @{
-        Authorization="Bearer $(Get-CoreNetworksAuthToken $CoreNetworksApiRoot $CoreNetworksCred)"
+        Authorization="Bearer $($script:CoreNetworksToken)"
     }
 
     # commit each unique zone
