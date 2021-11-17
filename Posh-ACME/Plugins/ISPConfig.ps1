@@ -57,6 +57,7 @@ function Add-DnsTxt {
                             data = $TxtValue
                             active = 'Y'
                             ttl = 60
+                            stamp = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
                         }
 
                     }
