@@ -98,28 +98,15 @@ function Set-PAAccount {
 
         $saveAccount = $false
 
-        # deal with local changes
+        # deal with encryption changes
         if ('UseAltPluginEncryption' -in $PSBoundParameters.Keys -or $ResetAltPluginEncryption) {
 
-            # UseAltPluginEncryption takes precedence over ResetAltPluginEncryption
-            # So if Use:$false + Reset is specified, the key is removed rather than rotated
-
-            if ([String]::IsNullOrEmpty($acct.sskey) -and $UseAltPluginEncryption)
-            {
-                Write-Verbose "Adding new sskey for account $($acct.ID)"
-                Update-PluginEncryption $acct.ID -NewKey (New-AesKey)
+            $encSplat = @{
+                Enable = $UseAltPluginEncryption.IsPresent
+                Reset = $ResetAltPluginEncryption.IsPresent
             }
-            elseif (-not [String]::IsNullOrEmpty($acct.sskey) -and
-                    'UseAltPluginEncryption' -in $PSBoundParameters.Keys -and
-                    -not $UseAltPluginEncryption)
-            {
-                Write-Verbose "Removing sskey for account $($acct.ID)"
-                Update-PluginEncryption $acct.ID -NewKey $null
-            }
-            elseif (-not [String]::IsNullOrEmpty($acct.sskey) -and $ResetAltPluginEncryption) {
-                Write-Verbose "Changing sskey for account $($acct.ID)"
-                Update-PluginEncryption $acct.ID -NewKey (New-AesKey)
-            }
+            if ($encSplat.Reset) { $encSplat.Enable = $true }
+            $acct | Set-AltPluginEncryption @encSplat
         }
 
         # deal with server side changes
