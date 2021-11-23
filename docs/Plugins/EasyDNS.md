@@ -21,7 +21,7 @@ The API Token is used with the `EDToken` string parameter. The API Key is used w
 ```powershell
 $pArgs = @{
     EDToken = 'xxxxxxxxxxxxxxxx'
-    EDKey = (Read-Host 'Key' -AsSecureString)
+    EDKeySecure = (Read-Host 'Key' -AsSecureString)
 }
 New-PACertificate example.com -Plugin EasyDNS -PluginArgs $pArgs
 ```
