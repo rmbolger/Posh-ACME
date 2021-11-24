@@ -77,6 +77,7 @@ These plugins have been committed to the main development branch and are pending
 Plugin | Provider | Guide | Core Compatible
 ------ | -------- | ----- | ---------------
 Combell | [Combell](https://www.combell.com/) | [Usage Guide](Combell.md) | :white_check_mark:
+TotalUptime | [TotalUptime](https://totaluptime.com/solutions/cloud-dns-service/) | [Usage Guide](TotalUptime.md) | :white_check_mark:
 
 ### Notes
 
