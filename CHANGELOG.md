@@ -10,7 +10,7 @@
 * Added auth token caching to CoreNetworks plugin to avoid getting rate limited. (#403)
 * Fixed ISPConfig plugin throwing Incorrect datetime value errors when adding records (#404)
 * Fixed a bug with `Submit-Renewal -AllAccounts` that would prevent restoring the original active account. (Thanks @markpizz) (#395)
-* Fixed usage example in EasyDns guide. (Thanks @webprofusion_chrisc) (#407)
+* Fixed usage example in EasyDns guide. (Thanks @webprofusion-chrisc) (#407)
 
 ## 4.10.0 (2021-10-06)
 
