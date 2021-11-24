@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.10.0'
+ModuleVersion = '4.11.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,11 +83,19 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.10.0 (2021-10-06)
+## 4.11.0 (2021-11-24)
 
-* Added new DNS plugin [CoreNetworks](https://www.core-networks.de/) (Thanks @dwydler)
-* Fix for Regru plugin bug caused by provider API change (#392)
-* Fix Submit-Renewal duplicating orders that have a custom name (#393)
+* Added [SecretManagement](https://devblogs.microsoft.com/powershell/secretmanagement-and-secretstore-are-generally-available/) support! See [this guide](https://poshac.me/docs/v4/Guides/Using-SecretManagement/) for details.
+* Added new DNS plugins:
+  * [Combell](https://www.combell.com/) (Thanks @stevenvolckaert)
+  * [TotalUptime](https://totaluptime.com/solutions/cloud-dns-service/) (Thanks @CirotheSilver)
+* `Install-PACertificate` and the `-Install` switch on orders will now import associated chain certificates into the Intermediate cert store if they don't already exist. (#397)
+* `New-PAOrder` will now throw an error if the order object returned by the ACME server matches an existing order with a different name. (#401)
+* The progress bar for DNS propagation is now disabled by default unless a POSHACME_SHOW_PROGRESS environment variable is defined. A verbose message will be written once per minute as an alternative. (#402)
+* Added auth token caching to CoreNetworks plugin to avoid getting rate limited. (#403)
+* Fixed ISPConfig plugin throwing Incorrect datetime value errors when adding records (#404)
+* Fixed a bug with `Submit-Renewal -AllAccounts` that would prevent restoring the original active account. (Thanks @markpizz) (#395)
+* Fixed usage example in EasyDns guide. (Thanks @webprofusion_chrisc) (#407)
 '@
 
     }

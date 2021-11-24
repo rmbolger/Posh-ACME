@@ -23,6 +23,7 @@ Beget | [Beget.com](https://beget.com) | [Usage Guide](Beget.md) | :white_check_
 BlueCat | [BlueCat Address Manager](https://www.bluecatnetworks.com/platform/management/bluecat-address-manager/) | [Usage Guide](BlueCat.md) | :x:
 Cloudflare | [Cloudflare DNS](https://www.cloudflare.com/dns) | [Usage Guide](Cloudflare.md) | :white_check_mark:
 ClouDNS | [ClouDNS](https://www.cloudns.net/aff/id/224075/) | [Usage Guide](ClouDNS.md) | :white_check_mark:
+Combell | [Combell](https://www.combell.com/) | [Usage Guide](Combell.md) | :white_check_mark:
 Constellix | [Constellix](https://constellix.com/) | [Usage Guide](Constellix.md) | :white_check_mark:
 CoreNetworks | [Core Networks](https://www.core-networks.de/) | [Usage Guide](CoreNetworks.md) | :white_check_mark:
 DeSEC | [DeSEC DNS](https://desec.io/#!/en/product/dnshosting) | [Usage Guide](DeSEC.md) | :white_check_mark:
@@ -64,6 +65,7 @@ Route53 | [AWS Route53](https://aws.amazon.com/route53/) | [Usage Guide](Route53
 Selectel | [Selectel.ru](https://selectel.ru/en/services/additional/dns/) | [Usage Guide](Selectel.md) | :white_check_mark:
 SimpleDNSPlus | [Simple DNS Plus](https://simpledns.com/) | [Usage Guide](SimpleDNSPlus.md) | :white_check_mark:
 Simply | [Simply](https://www.simply.com/) (formerly UnoEuro) | [Usage Guide](Simply.md) | :white_check_mark:
+TotalUptime | [TotalUptime](https://totaluptime.com/solutions/cloud-dns-service/) | [Usage Guide](TotalUptime.md) | :white_check_mark:
 UKFast | [UKFast](https://ukfast.co.uk) | [Usage Guide](UKFast.md) | :white_check_mark:
 Windows | [Microsoft Windows DNS](https://www.microsoft.com/en-us/cloud-platform/windows-server) | [Usage Guide](Windows.md) | Windows-Only<sup>[1](#windows)</sup>
 Yandex | [Yandex DNS](https://connect.yandex.com/) | [Usage Guide](Yandex.md) | :white_check_mark:
@@ -76,8 +78,6 @@ These plugins have been committed to the main development branch and are pending
 
 Plugin | Provider | Guide | Core Compatible
 ------ | -------- | ----- | ---------------
-Combell | [Combell](https://www.combell.com/) | [Usage Guide](Combell.md) | :white_check_mark:
-TotalUptime | [TotalUptime](https://totaluptime.com/solutions/cloud-dns-service/) | [Usage Guide](TotalUptime.md) | :white_check_mark:
 
 ### Notes
 
