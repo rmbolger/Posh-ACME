@@ -14,7 +14,6 @@ function Add-DnsTxt {
         $ExtraParams
     )
 
-
     #Find apex domain for record
     $DomainMetadata = Find-TotalUptimeDomain -RecordName $RecordName -TotalUptimeCredential $TotalUptimeCredential -TotalUptimeApiRoot $TotalUptimeApiRoot
     if (-not $DomainMetadata) {
@@ -24,27 +23,36 @@ function Add-DnsTxt {
 
     #strip domain component from record
     $recShort = ($RecordName -ireplace [regex]::Escape($DomainMetadata.domainName), [string]::Empty).TrimEnd('.')
-
     if ($recShort -eq [string]::Empty) {
         $recShort = '@'
     }
     Write-Debug "Stripped record name to $recShort"
 
-    $DomainID = $DomainMetadata.id
+    $txtRecord = Find-TotalUptimeTXTRecord -DomainID $DomainMetadata.id -RecordName $recShort -TxtContent $TxtValue -TotalUptimeCredential $TotalUptimeCredential -TotalUptimeApiRoot $TotalUptimeApiRoot
+    if ($txtRecord) {
+        Write-Debug 'Record already exists, nothing to do'
+        return
+    }
 
     #Build Request
-    $RequestUri = "$TotalUptimeApiRoot/CloudDNS/Domain/$DomainID/TXTRecord"
-    $RequestHeaders = @{
-        Authorization  = ("Basic {0}" -f (ConvertTo-TotalUptimeBasicHTTPAuthString -Credential $TotalUptimeCredential));
-        Accept         = "application/json"
-        'Content-Type' = "application/x-www-form-urlencoded"
+    $reqParams = @{
+        Uri = "$TotalUptimeApiRoot/CloudDNS/Domain/$($DomainMetadata.id)/TXTRecord"
+        Method = 'Post'
+        Headers = @{
+            Authorization  = ("Basic {0}" -f (ConvertTo-TotalUptimeBasicHTTPAuthString -Credential $TotalUptimeCredential));
+            Accept         = "application/json"
+            'Content-Type' = "application/x-www-form-urlencoded"
+        }
+        Body = @{
+            txtHostName = $recShort;
+            txtText     = $TxtValue;
+            txtTTL      = 60;
+        } | ConvertTo-Json -Compress
+        Verbose = $false
+        ErrorAction = 'Stop'
     }
-    $RequestBody = @{
-        txtHostName = $recShort;
-        txtText     = $TxtValue;
-        txtTTL      = 60;
-    }
-    $Response = Invoke-RestMethod -Method Post -Uri $RequestUri -Headers $RequestHeaders -Body ($RequestBody | ConvertTo-Json -Compress) @script:UseBasic
+    Write-Debug "POST $($reqParams.Uri)`n$($reqParams.Body)"
+    $Response = Invoke-RestMethod @reqParams @script:UseBasic
 
     #failure throw error
     if ($Response.status -ne 'Success') {
@@ -68,7 +76,7 @@ function Add-DnsTxt {
 
     .PARAMETER TotalUptimeCredential
         The API username and password required to authenticate.
-    
+
     .PARAMETER TotalUptimeApiRoute
         The API root URL. defaults to https://api.totaluptime.com
 
@@ -96,7 +104,6 @@ function Remove-DnsTxt {
         $ExtraParams
     )
 
-
     #Find apex domain for record
     $DomainMetadata = Find-TotalUptimeDomain -RecordName $RecordName -TotalUptimeCredential $TotalUptimeCredential -TotalUptimeApiRoot $TotalUptimeApiRoot
     if (-not $DomainMetadata) {
@@ -112,28 +119,30 @@ function Remove-DnsTxt {
     $txtRecord = Find-TotalUptimeTXTRecord -DomainID $DomainMetadata.id -RecordName $recShort -TxtContent $TxtValue -TotalUptimeCredential $TotalUptimeCredential -TotalUptimeApiRoot $TotalUptimeApiRoot
     if (-not $txtRecord) {
         Write-Debug 'No record found, nothing to do'
-    }
-    else {
-        $RecordID = $txtRecord.id
-        $DomainID = $DomainMetadata.id
-        #Build Request
-        $RequestUri = "$TotalUptimeApiRoot/CloudDNS/Domain/$DomainID/TXTRecord/$RecordID"
-        $RequestHeaders = @{
-            Authorization = ("Basic {0}" -f (ConvertTo-TotalUptimeBasicHTTPAuthString -Credential $TotalUptimeCredential));
-            Accept        = "application/json"
-        }
-    
-        $Response = Invoke-RestMethod -Method Delete -Uri $RequestUri -Headers $RequestHeaders
-        
-        # throw error on failure
-        if ($Response.status -ne 'Success') {
-            throw $Response.message
-        } else {
-            Write-Debug $Response.message
-        }
+        return
     }
 
+    #Build Request
+    $reqParams = @{
+        Uri = "$TotalUptimeApiRoot/CloudDNS/Domain/$($DomainMetadata.id)/TXTRecord/$($txtRecord.id)"
+        Method = 'Delete'
+        Headers = @{
+            Authorization = 'Basic {0}' -f (ConvertTo-TotalUptimeBasicHTTPAuthString -Credential $TotalUptimeCredential)
+            Accept        = 'application/json'
+        }
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
 
+    Write-Debug "DELETE $($reqParams.Uri)"
+    $Response = Invoke-RestMethod @reqParams @script:UseBasic
+
+    # throw error on failure
+    if ($Response.status -ne 'Success') {
+        throw $Response.message
+    } else {
+        Write-Debug $Response.message
+    }
 
 
     <#
@@ -151,7 +160,7 @@ function Remove-DnsTxt {
 
     .PARAMETER TotalUptimeCredential
         The API username and password required to authenticate.
-    
+
     .PARAMETER TotalUptimeApiRoute
         The API root URL. defaults to https://api.totaluptime.com
 
@@ -215,7 +224,7 @@ function Find-TotalUptimeDomain {
     )
 
     #retrieve domains in account
-    $Domains = Get-TotalUptimeDomains -TotalUptimeCredential $TotalUptimeCredential -TotalUptimeApiRoot $TotalUptimeApiRoot
+    $Domains = Get-TotalUptimeDomains -TotalUptimeCredential $TotalUptimeCredential -TotalUptimeApiRoot $TotalUptimeApiRoot -EA Stop
     $DomainNames = $Domains.rows.domainName
 
     #check if domain is in domain list
@@ -249,13 +258,13 @@ function Find-TotalUptimeTXTRecord {
     $TXTRecords = Get-TotalUptimeTXTRecords -DomainID $DomainID -TotalUptimeCredential $TotalUptimeCredential -TotalUptimeApiRoot $TotalUptimeApiRoot
 
     #filter by name an content
-    return $TXTRecords.rows | Where-Object { ($_.txtHostName -eq $RecordName) -and ($_.txtText -eq $TxtContent) }
-    
+    $TXTRecords.rows | Where-Object { ($_.txtHostName -eq $RecordName) -and ($_.txtText -eq $TxtContent) }
 }
 
 # API Calls
 
 function Get-TotalUptimeDomains {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
         [pscredential]$TotalUptimeCredential,
@@ -263,36 +272,41 @@ function Get-TotalUptimeDomains {
     )
 
     #Build Request
-    $RequestUri = "$TotalUptimeApiRoot/CloudDNS/Domain/All"
-    $RequestHeaders = @{
-        Authorization = ("Basic {0}" -f (ConvertTo-TotalUptimeBasicHTTPAuthString -Credential $TotalUptimeCredential));
-        Accept        = "application/json"
+    $reqParams = @{
+        Uri = "$TotalUptimeApiRoot/CloudDNS/Domain/All"
+        Headers = @{
+            Authorization = 'Basic {0}' -f (ConvertTo-TotalUptimeBasicHTTPAuthString -Credential $TotalUptimeCredential)
+            Accept = 'application/json'
+        }
+        Verbose = $false
+        ErrorAction = 'Stop'
     }
-    
-    #Execute Request
-    $Response = Invoke-RestMethod -Method Get -Uri $RequestUri -Headers $RequestHeaders @script:UseBasic
-    
-    return $Response
 
+    #Execute Request
+    Write-Debug "GET $($reqParams.Uri)"
+    Invoke-RestMethod @reqParams @script:UseBasic
 }
 
 function Get-TotalUptimeTXTRecords {
+    [CmdletBinding()]
     param(
-        [parameter(Mandatory = $true)]$DomainID,
+        [Parameter(Mandatory)]$DomainID,
         [pscredential]$TotalUptimeCredential,
         [string]$TotalUptimeApiRoot = 'https://api.totaluptime.com'
     )
-    
+
     #Build Request
-    $RequestUri = "$TotalUptimeApiRoot/CloudDNS/Domain/$DomainID/TXTRecord/All"
-    $RequestHeaders = @{
-        Authorization = ("Basic {0}" -f (ConvertTo-TotalUptimeBasicHTTPAuthString -Credential $TotalUptimeCredential));
-        Accept        = "application/json"
+    $reqParams = @{
+        Uri = "$TotalUptimeApiRoot/CloudDNS/Domain/$DomainID/TXTRecord/All"
+        Headers = @{
+            Authorization = ("Basic {0}" -f (ConvertTo-TotalUptimeBasicHTTPAuthString -Credential $TotalUptimeCredential));
+            Accept        = "application/json"
+        }
+        Verbose = $false
+        ErrorAction = 'Stop'
     }
 
     #Execute Request
-    $Response = Invoke-RestMethod -Method Get -Uri $RequestUri -Headers $RequestHeaders @script:UseBasic
-
-    return $Response
+    Write-Debug "GET $($reqParams.Uri)"
+    Invoke-RestMethod @reqParams @script:UseBasic
 }
-
