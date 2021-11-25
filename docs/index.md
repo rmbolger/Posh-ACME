@@ -19,9 +19,10 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - Account key rollover support
 - [OCSP Must-Staple](https://scotthelme.co.uk/ocsp-must-staple/) support
 - DNS challenge [CNAME support](Guides/Using-DNS-Challenge-Aliases.md)
-- Multiple ACME accounts supported per ACME CA.
+- Multiple ACME accounts supported per ACME CA
 - External Account Binding support for ACME CAs that require it [(Guide)](Guides/External-Account-Binding.md)
 - Preferred Chain support to use alternative CA trust chains [(Guide)](Guides/Using-Alternate-Trust-Chains.md)
+- PowerShell [SecretManagement](https://devblogs.microsoft.com/powershell/secretmanagement-and-secretstore-are-generally-available/) support [(Guide)](Guides/Using-SecretManagement.md)
 
 ## Installation (Stable)
 
