@@ -16,6 +16,10 @@ If you are using a network share as the web root, make sure PowerShell is runnin
 
 The web root is specified using the `WRPath` parameter. If you don't want the plugin to put the files in a `\.well-known\acme-challenge` sub-folder, you must also specify `WRExactPath = $true` in your plugin args.
 
+!!! note
+    `WRPath` can be set to an array of paths instead of just one. This can be useful with multiple web servers running behind a load balancer.
+
+
 ### Default functionality
 
 ```powershell
