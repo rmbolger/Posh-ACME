@@ -16,58 +16,58 @@ function Update-PAOrder {
     Process {
 
         if (-not $SaveOnly -and
-            (-not $order.expires -or (Get-DateTimeOffsetNow) -lt ([DateTimeOffset]::Parse($order.expires))) )
+            (-not $Order.expires -or (Get-DateTimeOffsetNow) -lt ([DateTimeOffset]::Parse($Order.expires))) )
         {
 
-            Write-Debug "Refreshing order '$($order.Name)'"
+            Write-Debug "Refreshing order '$($Order.Name)'"
 
             # build the header
             $header = @{
                 alg   = $acct.alg;
                 kid   = $acct.location;
                 nonce = $script:Dir.nonce;
-                url   = $order.location;
+                url   = $Order.location;
             }
 
             # send the request
             try {
                 $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
             } catch [AcmeException] {
-                Write-Warning "ACME Exception querying order details for '$($order.Name)': $($_.Exception.Message)"
+                Write-Warning "ACME Exception querying order details for '$($Order.Name)': $($_.Exception.Message)"
                 return
             }
 
             $respObj = $response.Content | ConvertFrom-Json
 
             # update the things that could have changed
-            $order | Add-Member 'status' $respObj.status -Force
-            $order | Add-Member 'expires' (Repair-ISODate $respObj.expires) -Force
+            $Order | Add-Member 'status' $respObj.status -Force
+            $Order | Add-Member 'expires' (Repair-ISODate $respObj.expires) -Force
             if ($respObj.certificate) {
-                $order | Add-Member 'certificate' $respObj.certificate -Force
+                $Order | Add-Member 'certificate' $respObj.certificate -Force
             }
 
         } elseif (-not $SaveOnly) {
             # Let's Encrypt no longer returns order details for expired orders
             # https://github.com/letsencrypt/boulder/commit/83aafd18842e093483d6701b92419ca8f7f1855b
             # So don't bother asking if we know it's already expired.
-            Write-Debug "Order '$($order.Name)' is expired. Skipping server refresh."
+            Write-Debug "Order '$($Order.Name)' is expired. Skipping server refresh."
         }
 
         # Make sure the order folder exists
-        if (-not (Test-Path $order.Folder -PathType Container)) {
-            New-Item -ItemType Directory -Path $order.Folder -Force -EA Stop | Out-Null
+        if (-not (Test-Path $Order.Folder -PathType Container)) {
+            New-Item -ItemType Directory -Path $Order.Folder -Force -EA Stop | Out-Null
         }
 
         # Make a copy of the order so we can tweak it without messing up our existing copy
-        $orderCopy = $order | ConvertTo-Json -Depth 10 | ConvertFrom-Json
+        $orderCopy = $Order | ConvertTo-Json -Depth 10 | ConvertFrom-Json
 
         # Add an obfuscated PfxPass property to satisfy some requests for it to not be in plain text.
-        $orderCopy | Add-Member 'PfxPassB64U' ($order.PfxPass | ConvertTo-Base64Url)
+        $orderCopy | Add-Member 'PfxPassB64U' ($Order.PfxPass | ConvertTo-Base64Url)
 
         # Save the copy to disk without the dynamic Name/Folder or plain text PfxPass
         $orderCopy | Select-Object -Property * -ExcludeProperty Name,Folder,PfxPass |
             ConvertTo-Json -Depth 10 |
-            Out-File (Join-Path $order.Folder 'order.json') -Force -EA Stop
+            Out-File (Join-Path $Order.Folder 'order.json') -Force -EA Stop
     }
 
 }
