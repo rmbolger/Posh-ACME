@@ -91,7 +91,7 @@ function Submit-OrderFinalize {
         # now we poll
         for ($tries=1; $tries -le 30; $tries++) {
 
-            $Order = Get-PAOrder $Order.MainDomain -Refresh
+            $Order = $Order | Get-PAOrder -Refresh
 
             if ($Order.status -eq 'invalid') {
                 try { throw "Order '$($Order.Name)' status is invalid." }
