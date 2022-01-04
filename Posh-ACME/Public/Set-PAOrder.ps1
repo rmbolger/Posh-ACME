@@ -244,9 +244,11 @@ function Set-PAOrder {
 
             # update the current order ref if necessary
             $curOrderFile = (Join-Path $acct.Folder 'current-order.txt')
-            if (($modCurrentOrder -or -not $NoSwitch) -and $order.Name -ne (Get-Content $curOrderFile -EA Ignore)) {
-                Write-Debug "Updating current-order.txt"
-                $order.Name | Out-File $curOrderFile -Force -EA Stop
+            if ($modCurrentOrder -or -not $NoSwitch) {
+                if ($order.Name -ne (Get-Content $curOrderFile -EA Ignore)) {
+                    Write-Debug "Updating current-order.txt"
+                    $order.Name | Out-File $curOrderFile -Force -EA Stop
+                }
                 $script:Order = $order
             }
 
