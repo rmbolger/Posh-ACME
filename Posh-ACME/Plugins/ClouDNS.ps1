@@ -311,15 +311,15 @@ function Find-CDZone {
     for ($i=0; $i -lt ($pieces.Count-1); $i++) {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
-        try {
-            $response = Invoke-CDAPI $CommonBody "/get-zone-info.json?&domain-name=$zoneTest"
+        $response = Invoke-CDAPI $CommonBody "/get-zone-info.json?&domain-name=$zoneTest"
 
-            # check for results
-            if ($response) {
-                $script:CDRecordZones.$RecordName = $response.name
-                return $response.name
-            }
-        } catch { Write-Debug ($_.Exception.Message) }
+        # check for results
+        if ($response.name) {
+            $script:CDRecordZones.$RecordName = $response.name
+            return $response.name
+        } elseif ($response.statusDescription -ne 'Missing domain-name') {
+            throw "ClouDNS API Error: $($response.statusDescription)"
+        }
     }
 
     throw "No zone found for $RecordName"
@@ -338,32 +338,30 @@ function Get-CDTxtRecord {
         [hashtable]$CommonBody
     )
 
-    try {
-        Write-Debug "Fetching TXT records for $RecordShortName in $ZoneName"
-        $response = Invoke-CDAPI $CommonBody "/records.json?domain-name=$ZoneName&type=TXT&host=$RecordShortName"
+    Write-Debug "Fetching TXT records for $RecordShortName in $ZoneName"
+    $response = Invoke-CDAPI $CommonBody "/records.json?domain-name=$ZoneName&type=TXT&host=$RecordShortName"
 
-        # ClouDNS made some weird choices here for how they return data vs an empty result.
-        # The docs claim the response will be an array with records or presumably an empty
-        # array if there are no results. However, an array is *only* returned when there are
-        # no results. When there are results, it's returned as a dictionary of dictionaries
-        # instead of an array of dictionaries. Here's an example.
-        #
-        # {
-        #   "131173240": {"id":"131173240","type":"TXT","host":"test","record":"asdf"},
-        #   "131173243": {"id":"131173243","type":"TXT","host":"test","record":"qwer"}
-        # }
+    # ClouDNS made some weird choices here for how they return data vs an empty result.
+    # The docs claim the response will be an array with records or presumably an empty
+    # array if there are no results. However, an array is *only* returned when there are
+    # no results. When there are results, it's returned as a dictionary of dictionaries
+    # instead of an array of dictionaries. Here's an example.
+    #
+    # {
+    #   "131173240": {"id":"131173240","type":"TXT","host":"test","record":"asdf"},
+    #   "131173243": {"id":"131173243","type":"TXT","host":"test","record":"qwer"}
+    # }
 
-        if (-not $response -or $response -is [array]) { return $null }
-        else {
-            # pull out all of the inner results
-            $recs = $response | Get-Member -MemberType NoteProperty | ForEach-Object { $response.($_.name) }
+    if (-not $response -or $response -is [array]) { return $null }
+    else {
+        # pull out all of the inner results
+        $recs = $response | Get-Member -MemberType NoteProperty | ForEach-Object { $response.($_.name) }
 
-            # return only the record that matches the value we're looking for
-            # which will return an empty set if not found
-            Write-Debug "Checking for $TxtValue in the results"
-            return ($recs | Where-Object { $_.record -eq $TxtValue })
-        }
-    } catch { throw }
+        # return only the record that matches the value we're looking for
+        # which will return an empty set if not found
+        Write-Debug "Checking for $TxtValue in the results"
+        return ($recs | Where-Object { $_.record -eq $TxtValue })
+    }
 }
 
 function Test-CDIsUpdated {
@@ -387,21 +385,22 @@ function Invoke-CDAPI {
         [Parameter(Mandatory,Position=0)]
         [hashtable]$body,
         [Parameter(Position=1)]
-        [string]$QueryAdditions,
+        [string]$QueryAdditions='',
         [Microsoft.PowerShell.Commands.WebRequestMethod]$Method=([Microsoft.PowerShell.Commands.WebRequestMethod]::Get)
     )
 
     # ClouDNS's API is one that always returns HTTP 200 even on failure. So we're going to wrap it
     # and throw errors when we get a JSON error response.
 
-    $apiBase = 'https://api.cloudns.net/dns'
-    if ($QueryAdditions) { $apiBase += $QueryAdditions }
-
-    $response = Invoke-RestMethod $apiBase -Body $body -Method $Method @script:UseBasic -EA Stop
-
-    if ($response.status -and $response.status -eq 'failed') {
-        throw "ClouDNS API Error: $($response.statusDescription)"
+    $queryParams = @{
+        Uri = 'https://api.cloudns.net/dns{0}' -f $QueryAdditions
+        Method = $Method
+        Body = $body
+        Verbose = $false
+        ErrorAction = 'Stop'
     }
+    Write-Debug "$($Method.ToString().ToUpper()) $($queryParams.Uri)"
+    $response = Invoke-RestMethod @queryParams @script:UseBasic
 
     return $response
 }
