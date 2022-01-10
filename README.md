@@ -20,7 +20,7 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - Multiple ACME accounts supported per ACME CA.
 - External Account Binding support for ACME CAs that require it [(Guide)](https://poshac.me/docs/Guides/External-Account-Binding/)
 - Preferred Chain support to use alternative CA trust chains [(Guide)](https://poshac.me/docs/Guides/Using-Alternate-Trust-Chains/)
-- PowerShell [SecretManagement](https://devblogs.microsoft.com/powershell/secretmanagement-and-secretstore-are-generally-available/) support [(Guide)](https://poshac.me/docs/Guides/Using-SecretManagement/)
+- PowerShell [SecretManagement](https://devblogs.microsoft.com/powershell/secretmanagement-and-secretstore-are-generally-available/) support [(Guide)](https://poshac.me/docs/v4/Guides/Using-SecretManagement/)
 
 
 ## Installation (Stable)
