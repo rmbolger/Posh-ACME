@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.11.0'
+ModuleVersion = '4.12.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,19 +83,12 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.11.0 (2021-11-24)
+## 4.12.0 (2022-01-13)
 
-* Added [SecretManagement](https://devblogs.microsoft.com/powershell/secretmanagement-and-secretstore-are-generally-available/) support! See [this guide](https://poshac.me/docs/v4/Guides/Using-SecretManagement/) for details.
-* Added new DNS plugins:
-  * [Combell](https://www.combell.com/) (Thanks @stevenvolckaert)
-  * [TotalUptime](https://totaluptime.com/solutions/cloud-dns-service/) (Thanks @CirotheSilver)
-* `Install-PACertificate` and the `-Install` switch on orders will now import associated chain certificates into the Intermediate cert store if they don't already exist. (#397)
-* `New-PAOrder` will now throw an error if the order object returned by the ACME server matches an existing order with a different name. (#401)
-* The progress bar for DNS propagation is now disabled by default unless a POSHACME_SHOW_PROGRESS environment variable is defined. A verbose message will be written once per minute as an alternative. (#402)
-* Added auth token caching to CoreNetworks plugin to avoid getting rate limited. (#403)
-* Fixed ISPConfig plugin throwing Incorrect datetime value errors when adding records (#404)
-* Fixed a bug with `Submit-Renewal -AllAccounts` that would prevent restoring the original active account. (Thanks @markpizz) (#395)
-* Fixed usage example in EasyDns guide. (Thanks @webprofusion_chrisc) (#407)
+* The WebRoot plugin now supports multiple paths for the `WRPath` parameter. (#411)
+* ClouDNS plugin error handling was modified so that invalid credential errors are properly surfaced instead of just throwing generic "zone not found" errors. (#414)
+* Fixed a potential bug with `Submit-OrderFinalize` when multiple orders have the same MainDomain property.
+* Fixed `New-PACertificate` not properly updating an existing order with updated order params (#412)
 '@
 
     }

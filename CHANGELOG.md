@@ -1,3 +1,10 @@
+## 4.12.0 (2022-01-13)
+
+* The WebRoot plugin now supports multiple paths for the `WRPath` parameter. (#411)
+* ClouDNS plugin error handling was modified so that invalid credential errors are properly surfaced instead of just throwing generic "zone not found" errors. (#414)
+* Fixed a potential bug with `Submit-OrderFinalize` when multiple orders have the same MainDomain property.
+* Fixed `New-PACertificate` not properly updating an existing order with updated order params (#412)
+
 ## 4.11.0 (2021-11-24)
 
 * Added [SecretManagement](https://devblogs.microsoft.com/powershell/secretmanagement-and-secretstore-are-generally-available/) support! See [this guide](https://poshac.me/docs/v4/Guides/Using-SecretManagement/) for details.
