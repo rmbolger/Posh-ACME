@@ -1914,6 +1914,10 @@
 <p>If you are using a network share as the web root, make sure PowerShell is running as a user with permissions to write to that share. There is currently no way to specify explicit credentials.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p>The web root is specified using the <code>WRPath</code> parameter. If you don't want the plugin to put the files in a <code>\.well-known\acme-challenge</code> sub-folder, you must also specify <code>WRExactPath = $true</code> in your plugin args.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>WRPath</code> can be set to an array of paths instead of just one. This can be useful with multiple web servers running behind a load balancer.</p>
+</div>
 <h3 id="default-functionality">Default functionality<a class="headerlink" href="#default-functionality" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">WRPath</span> <span class="p">=</span> <span class="s1">&#39;C:\inetpub\wwwroot&#39;</span>
