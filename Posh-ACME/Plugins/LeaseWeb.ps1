@@ -28,7 +28,7 @@ function Add-DnsTxt {
     $rec = Get-LSWTxtRecord $RecordName $zone $LSWApiBase $authHeader
 
     if ($rec) {
-        if ($TxtValue -in $rec.content) {
+        if ("`"$TxtValue`"" -in $rec.content) {
             Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
         } else {
             # update the existing record
@@ -36,7 +36,7 @@ function Add-DnsTxt {
                 Uri = "$LSWApiBase/hosting/v2/domains/$zone/resourceRecordSets/$RecordName/TXT"
                 Method = 'PUT'
                 Body = [ordered]@{
-                    content = $rec.content + @( $TxtValue )
+                    content = $rec.content + @( "`"$TxtValue`"" )
                     ttl = 60
                 } | ConvertTo-Json
                 Headers = $authHeader
@@ -58,7 +58,7 @@ function Add-DnsTxt {
             Body = [ordered]@{
                 name = $RecordName
                 type = 'TXT'
-                content = @( $TxtValue )
+                content = @( "`"$TxtValue`"" )
                 ttl = 60
             } | ConvertTo-Json
             Headers = $authHeader
@@ -131,7 +131,7 @@ function Remove-DnsTxt {
     # check for existing record
     $rec = Get-LSWTxtRecord $RecordName $zone $LSWApiBase $authHeader
 
-    if ($rec -and $TxtValue -in $rec.content) {
+    if ($rec -and "`"$TxtValue`"" -in $rec.content) {
         if ($rec.content.Count -eq 1) {
             # delete the record entirely
             $queryParams = @{
@@ -153,7 +153,7 @@ function Remove-DnsTxt {
                 Uri = "$LSWApiBase/hosting/v2/domains/$zone/resourceRecordSets/$RecordName/TXT"
                 Method = 'PUT'
                 Body = [ordered]@{
-                    content = $rec.content | Where-Object { $_ -ne $TxtValue }
+                    content = $rec.content | Where-Object { $_ -ne "`"$TxtValue`"" }
                     ttl = 60
                 } | ConvertTo-Json
                 Headers = $authHeader
