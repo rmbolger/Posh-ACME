@@ -153,7 +153,7 @@ function Remove-DnsTxt {
                 Uri = "$LSWApiBase/hosting/v2/domains/$zone/resourceRecordSets/$RecordName/TXT"
                 Method = 'PUT'
                 Body = [ordered]@{
-                    content = $rec.content | Where-Object { $_ -ne "`"$TxtValue`"" }
+                    content = @( $rec.content | Where-Object { $_ -ne "`"$TxtValue`"" } )
                     ttl = 60
                 } | ConvertTo-Json
                 Headers = $authHeader
