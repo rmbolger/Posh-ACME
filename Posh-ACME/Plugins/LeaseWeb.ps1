@@ -33,9 +33,9 @@ function Add-DnsTxt {
         } else {
             # update the existing record
             $queryParams = @{
-                Uri = "$LSWApiBase/domains/$zone/resourceRecordSets/$RecordName/TXT"
+                Uri = "$LSWApiBase/hosting/v2/domains/$zone/resourceRecordSets/$RecordName/TXT"
                 Method = 'PUT'
-                Body = @{
+                Body = [ordered]@{
                     content = $rec.content + @( $TxtValue )
                     ttl = 60
                 } | ConvertTo-Json
@@ -46,14 +46,16 @@ function Add-DnsTxt {
             }
             Write-Debug "PUT $($queryParams.Uri)`n$($queryParams.Body)"
             Write-Verbose "Adding TXT record value $TxtValue to $RecordName"
-            Invoke-RestMethod @queryParams @script:UseBasic
+            try {
+                Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
+            } catch { throw }
         }
     } else {
         # create a new record from scratch
         $queryParams = @{
-            Uri = "$LSWApiBase/domains/$zone/resourceRecordSets"
+            Uri = "$LSWApiBase/hosting/v2/domains/$zone/resourceRecordSets"
             Method = 'POST'
-            Body = @{
+            Body = [ordered]@{
                 name = $RecordName
                 type = 'TXT'
                 content = @( $TxtValue )
@@ -66,7 +68,9 @@ function Add-DnsTxt {
         }
         Write-Debug "POST $($queryParams.Uri)`n$($queryParams.Body)"
         Write-Verbose "Adding new TXT record for $RecordName"
-        Invoke-RestMethod @queryParams @script:UseBasic
+        try {
+            Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
+        } catch { throw }
     }
 
 
@@ -131,7 +135,7 @@ function Remove-DnsTxt {
         if ($rec.content.Count -eq 1) {
             # delete the record entirely
             $queryParams = @{
-                Uri = "$LSWApiBase/domains/$zone/resourceRecordSets/$RecordName/TXT"
+                Uri = "$LSWApiBase/hosting/v2/domains/$zone/resourceRecordSets/$RecordName/TXT"
                 Method = 'DELETE'
                 Headers = $authHeader
                 ContentType = 'application/json'
@@ -140,13 +144,15 @@ function Remove-DnsTxt {
             }
             Write-Debug "DELETE $($queryParams.Uri)"
             Write-Verbose "Removing TXT record for $RecordName"
-            Invoke-RestMethod @queryParams @script:UseBasic
+            try {
+                Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
+            } catch { throw }
         } else {
             # update the record to remove this value
             $queryParams = @{
-                Uri = "$LSWApiBase/domains/$zone/resourceRecordSets/$RecordName/TXT"
+                Uri = "$LSWApiBase/hosting/v2/domains/$zone/resourceRecordSets/$RecordName/TXT"
                 Method = 'PUT'
-                Body = @{
+                Body = [ordered]@{
                     content = $rec.content | Where-Object { $_ -ne $TxtValue }
                     ttl = 60
                 } | ConvertTo-Json
@@ -157,7 +163,9 @@ function Remove-DnsTxt {
             }
             Write-Debug "PUT $($queryParams.Uri)`n$($queryParams.Body)"
             Write-Verbose "Removing TXT record value $TxtValue from $RecordName"
-            Invoke-RestMethod @queryParams @script:UseBasic
+            try {
+                Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
+            } catch { throw }
         }
     } else {
         Write-Debug "Could not find record $RecordName with $TxtValue to delete. Nothing to do."
@@ -255,8 +263,8 @@ function Find-LSWZone {
             Write-Debug "GET $($queryParams.Uri)"
             $response = Invoke-RestMethod @queryParams @script:UseBasic
         } catch {
-            # 404 responses mean the zone wasn't found, so skip to the next check
-            if (404 -eq $_.Exception.Response.StatusCode) {
+            # 400/404 responses mean the zone wasn't found, so skip to the next check
+            if ($_.Exception.Response.StatusCode -in 400,404) {
                 continue
             }
             # re-throw anything else
@@ -288,7 +296,7 @@ function Get-LSWTxtRecord {
 
     try {
         $queryParams = @{
-            Uri = "$ApiBase/domains/$ZoneName/resourceRecordSets/$RecordName/TXT"
+            Uri = "$ApiBase/hosting/v2/domains/$ZoneName/resourceRecordSets/$RecordName/TXT"
             Headers = $AuthHeader
             ContentType = 'application/json'
             ErrorAction = 'Stop'
@@ -297,7 +305,7 @@ function Get-LSWTxtRecord {
         Write-Debug "GET $($queryParams.Uri)"
         $response = Invoke-RestMethod @queryParams @script:UseBasic
     } catch {
-        # 404 responses mean the zone wasn't found, so skip to the next check
+        # 404 responses mean the record wasn't found, so just return
         if (404 -eq $_.Exception.Response.StatusCode) {
             return
         }
