@@ -1,3 +1,8 @@
+## 4.13.0 (2022-03-07)
+
+* Added new DNS plugin [LeaseWeb](https://www.leaseweb.com/)
+* Simply plugin migrated to v2 of the API. No changes should be necessary for existing users.
+
 ## 4.12.0 (2022-01-13)
 
 * The WebRoot plugin now supports multiple paths for the `WRPath` parameter. (#411)

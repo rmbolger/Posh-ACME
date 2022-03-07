@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.12.0'
+ModuleVersion = '4.13.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,12 +83,10 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.12.0 (2022-01-13)
+## 4.13.0 (2022-03-07)
 
-* The WebRoot plugin now supports multiple paths for the `WRPath` parameter. (#411)
-* ClouDNS plugin error handling was modified so that invalid credential errors are properly surfaced instead of just throwing generic "zone not found" errors. (#414)
-* Fixed a potential bug with `Submit-OrderFinalize` when multiple orders have the same MainDomain property.
-* Fixed `New-PACertificate` not properly updating an existing order with updated order params (#412)
+* Added new DNS plugin [LeaseWeb](https://www.leaseweb.com/)
+* Simply plugin migrated to v2 of the API. No changes should be necessary for existing users.
 '@
 
     }
