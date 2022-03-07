@@ -13,14 +13,14 @@
         <meta name="author" content="Ryan Bolger">
       
       
-        <link rel="canonical" href="https://poshac.me/docs/v4/Plugins/DNSPod/">
+        <link rel="canonical" href="https://poshac.me/docs/v4/Plugins/LeaseWeb/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.6">
     
     
       
-        <title>DNSPod - Posh-ACME</title>
+        <title>LeaseWeb - Posh-ACME</title>
       
     
     
@@ -54,16 +54,16 @@
     
   
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Posh-ACME - DNSPod" />
+  <meta property="og:title" content="Posh-ACME - LeaseWeb" />
   <meta property="og:description" content="Documentation for the Posh-ACME PowerShell module" />
-  <meta property="og:url" content="https://poshac.me/docs/v4/Plugins/DNSPod/" />
+  <meta property="og:url" content="https://poshac.me/docs/v4/Plugins/LeaseWeb/" />
   <meta property="og:image" content="https://poshac.me/docs/v4/assets/images/social-card.png" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Posh-ACME - DNSPod" />
+  <meta name="twitter:title" content="Posh-ACME - LeaseWeb" />
   <meta name="twitter:description" content="Documentation for the Posh-ACME PowerShell module" />
   <meta name="twitter:image" content="https://poshac.me/docs/v4/assets/images/social-card.png" />
 
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#how-to-use-the-dnspod-dns-plugin" class="md-skip">
+        <a href="#how-to-use-the-leaseweb-dns-plugin" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              DNSPod
+              LeaseWeb
             
           </span>
         </div>
@@ -1007,58 +1007,11 @@
             
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          DNSPod
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../DNSPod/" class="md-nav__link">
         DNSPod
       </a>
-      
-        
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#setup" class="md-nav__link">
-    Setup
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-the-plugin" class="md-nav__link">
-    Using the Plugin
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1318,11 +1271,58 @@
             
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../LeaseWeb/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          LeaseWeb
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         LeaseWeb
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    Setup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-plugin" class="md-nav__link">
+    Using the Plugin
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1873,28 +1873,21 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/rmbolger/Posh-ACME/edit/main/docs/Plugins/DNSPod.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/rmbolger/Posh-ACME/edit/main/docs/Plugins/LeaseWeb.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="how-to-use-the-dnspod-dns-plugin">How To Use the DNSPod DNS Plugin<a class="headerlink" href="#how-to-use-the-dnspod-dns-plugin" title="Permanent link">&para;</a></h1>
-<p>This plugin works against the <a href="https://dnspod.com/">DNSPod</a> provider. It is assumed that you have already setup an account and created the domain you will be working against.</p>
+                <h1 id="how-to-use-the-leaseweb-dns-plugin">How To Use the LeaseWeb DNS Plugin<a class="headerlink" href="#how-to-use-the-leaseweb-dns-plugin" title="Permanent link">&para;</a></h1>
+<p>This plugin works against the <a href="https://www.leaseweb.com/">LeaseWeb</a> DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<p>As of November 13, 2020, DNSPod was integrated with Tencent Cloud and slightly changed how their API works. Instead of authenticating with your normal website login credentials, you must create an API token to use instead.</p>
-<p>Login to the console and go to the <a href="https://console.dnspod.com/account/token">Key Management</a> section. Create a new key and make a note of its ID and Token values.</p>
+<p>Create your API key from the <a href="https://secure.leaseweb.com/">Customer Portal</a> and make a note of it for later.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>The API key ID is used with the <code>DNSPodKeyId</code> string parameter. The key token is used with <code>DNSPodKeyToken</code> as a SecureString.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>The <code>DNSPodKeyTokenInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
-</div>
-<p>There is also a <code>DNSPodApiRoot</code> optional parameter that defaults to the API root for dnspod.com. If you are using dnspod.cn, you may specify <code>https://dnsapi.cn</code> instead for this parameter.</p>
+<p>The API key is used with the <code>LSWApiKey</code> SecureString parameter.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">DNSPodKeyID</span> <span class="p">=</span> <span class="s1">&#39;111&#39;</span>
-    <span class="n">DNSPodToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;Enter Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+    <span class="n">LSWApiKey</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="n">-Prompt</span> <span class="s1">&#39;API Key&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
 <span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">DNSPod</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">LeaseWeb</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
                 
                   
@@ -1917,7 +1910,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../DMEasy/" class="md-footer__link md-footer__link--prev" aria-label="Previous: DMEasy" rel="prev">
+        <a href="../Infomaniak/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Infomaniak" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1926,20 +1919,20 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              DMEasy
+              Infomaniak
             </div>
           </div>
         </a>
       
       
         
-        <a href="../DNSimple/" class="md-footer__link md-footer__link--next" aria-label="Next: DNSimple" rel="next">
+        <a href="../Linode/" class="md-footer__link md-footer__link--next" aria-label="Next: Linode" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              DNSimple
+              Linode
             </div>
           </div>
           <div class="md-footer__button md-icon">
