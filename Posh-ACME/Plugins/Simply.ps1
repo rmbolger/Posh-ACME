@@ -13,6 +13,7 @@ function Add-DnsTxt {
         [securestring]$SimplyAPIKey,
         [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$SimplyAPIKeyInsecure,
+        [string]$SimplyAPIRoot = 'https://api.simply.com/2',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -20,9 +21,12 @@ function Add-DnsTxt {
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
         $SimplyAPIKeyInsecure = [pscredential]::new('a',$SimplyAPIKey).GetNetworkCredential().Password
     }
-    $apiRoot = "https://api.simply.com/1/$SimplyAccount/$SimplyAPIKeyInsecure/my/products"
 
-    $zoneID,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $apiRoot
+    # Setup Basic Auth creds
+    $encodedCreds = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($SimplyAccount):$($SimplyAPIKeyInsecure)"))
+    $authHeader = @{Authorization = "Basic $encodedCreds"}
+
+    $zoneID,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $authHeader $SimplyAPIRoot
 
     if ($rec) {
         Write-Verbose "Record $RecordName already contains $TxtValue. Nothing to do."
@@ -39,14 +43,15 @@ function Add-DnsTxt {
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
         try {
             $postParams = @{
-                Uri = "$apiRoot/$zoneID/dns/records"
+                Uri = "{0}/my/products/{1}/dns/records" -f $SimplyAPIRoot,$zoneID
                 Method = 'POST'
+                Headers = $authHeader
                 Body = $body
                 ContentType = 'application/json'
                 ErrorAction = 'Stop'
                 Verbose = $false
             }
-            Write-Debug "POST $(SimplyRedactKey $postParams.Uri)`n$body"
+            Write-Debug "POST $($postParams.Uri)`n$body"
             Invoke-RestMethod @postParams @script:UseBasic | Out-Null
         }
         catch {
@@ -72,6 +77,8 @@ function Add-DnsTxt {
         The API Key associated with the account as a SecureString value.
     .PARAMETER SimplyAPIKeyInsecure
         (DEPRECATED) The API Key associated with the account as a standard string value.
+    .PARAMETER SimplyAPIRoot
+        The base URL for the Simply v2 API
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
@@ -95,6 +102,7 @@ function Remove-DnsTxt {
         [securestring]$SimplyAPIKey,
         [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$SimplyAPIKeyInsecure,
+        [string]$SimplyAPIRoot = 'https://api.simply.com/2',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -102,21 +110,25 @@ function Remove-DnsTxt {
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
         $SimplyAPIKeyInsecure = [pscredential]::new('a',$SimplyAPIKey).GetNetworkCredential().Password
     }
-    $apiRoot = "https://api.simply.com/1/$SimplyAccount/$SimplyAPIKeyInsecure/my/products"
 
-    $zoneID,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $apiRoot
+    # Setup Basic Auth creds
+    $encodedCreds = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($SimplyAccount):$($SimplyAPIKeyInsecure)"))
+    $authHeader = @{Authorization = "Basic $encodedCreds"}
+
+    $zoneID,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $authHeader $SimplyAPIRoot
 
     if ($rec) {
 
         Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
         try {
             $delParams = @{
-                Uri = "$apiRoot/$zoneID/dns/records/$($rec.record_id)"
+                Uri = "{0}/my/products/{1}/dns/records/{2}" -f $SimplyAPIRoot,$zoneID,$rec.record_id
+                Headers = $authHeader
                 Method = 'DELETE'
                 ErrorAction = 'Stop'
                 Verbose = $false
             }
-            Write-Debug "DELETE $(SimplyRedactKey $delParams.Uri)"
+            Write-Debug "DELETE $($delParams.Uri)"
             Invoke-RestMethod @delParams @script:UseBasic | Out-Null
         }
         catch {
@@ -143,6 +155,8 @@ function Remove-DnsTxt {
         The API Key associated with the account as a SecureString value.
     .PARAMETER SimplyAPIKeyInsecure
         (DEPRECATED) The API Key associated with the account as a standard string value.
+    .PARAMETER SimplyAPIRoot
+        The base URL for the Simply v2 API
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
@@ -184,6 +198,8 @@ function Get-SimplyTXTRecord {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
+        [hashtable]$AuthHeader,
+        [Parameter(Mandatory,Position=3)]
         [string]$ApiRoot
     )
 
@@ -200,11 +216,12 @@ function Get-SimplyTXTRecord {
         # query all of the domains on the account
         try {
             $getParams = @{
-                Uri = $ApiRoot
+                Uri = '{0}/my/products' -f $ApiRoot
+                Headers = $AuthHeader
                 ErrorAction = 'Stop'
                 Verbose = $false
             }
-            Write-Debug "GET $(SimplyRedactKey $getParams.Uri)"
+            Write-Debug "GET $($getParams.Uri)"
             $products = (Invoke-RestMethod @getParams @script:UseBasic).products
         } catch { throw }
 
@@ -237,11 +254,12 @@ function Get-SimplyTXTRecord {
     # query the zone records and check for the one we care about
     try {
         $getParams = @{
-            Uri = "$ApiRoot/$zoneID/dns/records"
+            Uri = '{0}/my/products/{1}/dns/records' -f $ApiRoot,$zoneID
+            Headers = $AuthHeader
             ErrorAction = 'Stop'
             Verbose = $false
         }
-        Write-Debug "GET $(SimplyRedactKey $getParams.Uri)"
+        Write-Debug "GET $($getParams.Uri)"
         $response = Invoke-RestMethod @getParams @script:UseBasic
     }
     catch {
@@ -265,21 +283,4 @@ function Get-SimplyTXTRecord {
         throw "Unexpected response from Simply: $($response.message)."
     }
 
-}
-
-function SimplyRedactKey {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory,Position=0)]
-        [string]$Uri
-    )
-
-    # Simply's API auth puts the API secret right in the URL which makes logging what we're
-    # doing unintentionally expose that secret in the logs. We're going to try and redact
-    # the value before we log it.
-    # https://api.simply.com/1/S012345/ABCDEFGHIJKLMNOP/my/products"
-    #                                  [  5th index   ]
-    $pieces = $Uri.Split('/')
-    $pieces[5] = 'XXXXXXXX'
-    return ($pieces -join '/')
 }
