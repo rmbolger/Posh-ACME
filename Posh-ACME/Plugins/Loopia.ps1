@@ -225,7 +225,7 @@ function Format-LoopiaXmlBody {
 
     # add the record object if necessary
     if ($TxtValue) {
-        $xml += "<param><struct><member><name>type</name><value><string>TXT</string></value></member><member><name>priority</name><value><int>0</int></value></member><member><name>ttl</name><value><int>300</int></value></member><member><name>rdata</name><value><string>$TxtValue</string></value></member></struct></param>"
+        $xml += "<param><value><struct><member><name>type</name><value><string>TXT</string></value></member><member><name>priority</name><value><int>0</int></value></member><member><name>ttl</name><value><int>300</int></value></member><member><name>rdata</name><value><string>$TxtValue</string></value></member></struct></value></param>"
     } elseif ($RecordID) {
         $xml += "<param><value><int>$RecordID</int></value></param>"
     }
