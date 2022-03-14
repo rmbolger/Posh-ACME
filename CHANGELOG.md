@@ -1,6 +1,6 @@
 ## 4.13.1 (2022-03-14)
 
-* Fixed Loopia plugin after an upstream API change broke it.
+* Fixed Loopia plugin after an upstream API change broke it. (Thanks @AlexanderRydberg)
 
 ## 4.13.0 (2022-03-07)
 
