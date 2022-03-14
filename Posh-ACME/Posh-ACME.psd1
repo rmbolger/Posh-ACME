@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.13.0'
+ModuleVersion = '4.13.1'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,10 +83,9 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.13.0 (2022-03-07)
+## 4.13.1 (2022-03-14)
 
-* Added new DNS plugin [LeaseWeb](https://www.leaseweb.com/)
-* Simply plugin migrated to v2 of the API. No changes should be necessary for existing users.
+* Fixed Loopia plugin after an upstream API change broke it.
 '@
 
     }

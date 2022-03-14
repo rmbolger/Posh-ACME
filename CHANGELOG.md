@@ -1,3 +1,7 @@
+## 4.13.1 (2022-03-14)
+
+* Fixed Loopia plugin after an upstream API change broke it.
+
 ## 4.13.0 (2022-03-07)
 
 * Added new DNS plugin [LeaseWeb](https://www.leaseweb.com/)
