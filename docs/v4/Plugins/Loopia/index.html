@@ -1899,7 +1899,7 @@ that you have already set up an account and registered or transferred the domain
 <p class="admonition-title">Warning</p>
 <p>The <code>LoopiaPassInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
 </div>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">@{</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">LoopiaUser</span> <span class="p">=</span> <span class="s1">&#39;username@loopiaapi&#39;</span>
     <span class="n">LoopiaPass</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;Password&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
 <span class="p">}</span>
