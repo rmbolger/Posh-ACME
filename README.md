@@ -75,7 +75,7 @@ $pArgs = @{
 New-PACertificate $certNames -AcceptTOS -Contact $email -Plugin FakeDNS -PluginArgs $pArgs
 ```
 
-To learn how to use a specific plugins, check out `Get-PAPlugin <PluginName> -Guide`. There's also a [tutorial](Tutorial) for a more in-depth guide to using the module.
+To learn how to use a specific plugins, check out `Get-PAPlugin <PluginName> -Guide`. There's also a [tutorial](https://poshac.me/docs/v4/Tutorial) for a more in-depth guide to using the module.
 
 The output of `New-PACertificate` is an object that contains various properties about the certificate you generated. Only a subset of the properties are displayed by default. To see the full list including the filesystem paths to any certificate files that were generated, pipe the original output to `Format-List` or use `Get-PACertificate | Format-List`. You can also get the path to the server's config using `(Get-PAServer).Folder`.
 
