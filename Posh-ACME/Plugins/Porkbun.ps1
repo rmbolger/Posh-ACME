@@ -201,7 +201,7 @@ function Get-PorkbunDomainInfo
         Write-Debug "Found domain `"$NameToCheck`"";
         return New-Object 'PSObject' -Property @{ Domain = $NameToCheck; Records = $ResultData.records; };
     }
-    throw "No matching domain could be found for `"$LongName`" on this Porkbun account. Check that the domain is correct, and that your API key and secret are entered correctly.";
+    throw "No matching domain could be found for `"$LongName`" on this Porkbun account. Check that the domain is correct, that your API key and secret are entered correctly, and that you've enabled API access for this domain in the settings.";
 
     <#
     .SYNOPSIS
