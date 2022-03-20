@@ -1,6 +1,3 @@
-using namespace Systen;
-using namespace Microsoft.PowerShell.Commands;
-
 # API Documentation: https://porkbun.com/api/json/v3/documentation
 
 function Get-CurrentPluginType { 'dns-01' }
@@ -33,16 +30,35 @@ function Add-DnsTxt
     [string] $RecordNameShort = ($RecordName -ireplace [Regex]::Escape($DomainName), [string]::Empty).TrimEnd('.');
 
     # Get any existing TXT record(s) that already match what we want to create
-    [object[]] $EqualRecords = @($DomainInfo.Records | Where-Object { ($_.type -EQ 'TXT') -AND ($_.name -eq $RecordNameShort) -AND ($_.content -EQ $TxtValue) });
+    [object[]] $EqualRecords = @($DomainInfo.Records | Where-Object { ($_.type -EQ 'TXT') -AND ($_.name -eq $RecordName) -AND ($_.content -EQ $TxtValue) });
 
     if ($EqualRecords.Count -EQ 0)
     {
         Write-Debug 'This record does not exist yet, creating it';
-        [string] $RequestBody = "{`"secretapikey`": `"$APISecret`", `"apikey`": `"$APIKey`", `"name`": `"$RecordNameShort`", `"type`": `"TXT`", `"content`": `"$TxtValue`"}";
-        [string] $RequestURL = "https://porkbun.com/api/json/v3/dns/create/$DomainName";
+        $bodyObject = @{
+            name = $RecordNameShort
+            type = 'TXT'
+            content = $TxtValue
+            apikey = $APIKey
+            secretapikey = $APISecret
+        }
 
-        Write-Debug "Creating record `"$RecordNameShort`" on domain `"$DomainName`"";
-        [BasicHtmlWebResponseObject] $APIResult = Invoke-WebRequest -URI $RequestURL -Body $RequestBody -Method 'POST' @script:UseBasic;
+        Write-Verbose "Creating record `"$RecordNameShort`" with value `"$TxtValue`" on domain `"$DomainName`""
+        $queryParams = @{
+            Uri = "https://porkbun.com/api/json/v3/dns/create/$DomainName"
+            Method = 'POST'
+            Body = $bodyObject | ConvertTo-Json
+            ErrorAction = 'Stop'
+            Verbose = $false
+        }
+
+        # sanitize credentials for logging
+        $bodyObject.apikey = 'XXXXXXXX'
+        $bodyObject.secretapikey = 'XXXXXXXX'
+        Write-Debug "POST $($queryParams.Uri)`n$($bodyObject | ConvertTo-Json)"
+
+        $APIResult = Invoke-WebRequest @queryParams @script:UseBasic
+
         if ($APIResult.StatusCode -NE 200) { throw "API returned status $($APIResult.StatusCode)"; }
         $ResultData = ConvertFrom-Json $APIResult.Content;
         if ($ResultData.status -NE 'SUCCESS') { throw "API returned result $($ResultData.status)"; }
@@ -115,11 +131,17 @@ function Remove-DnsTxt
         foreach($RecordToDelete in $EqualRecords)
         {
             $RecordID = $RecordToDelete.id;
-            [string] $RequestBody = "{`"secretapikey`": `"$APISecret`", `"apikey`": `"$APIKey`"}";
-            [string] $RequestURL = "https://porkbun.com/api/json/v3/dns/delete/$DomainName/$RecordID";
 
-            Write-Debug "Deleting record ID `"$RecordID`" on domain `"$DomainName`"";
-            [BasicHtmlWebResponseObject] $APIResult = Invoke-WebRequest -URI $RequestURL -Body $RequestBody -Method 'POST' @script:UseBasic;
+            Write-Verbose "Deleting record ID `"$RecordID`" on domain `"$DomainName`""
+            $queryParams = @{
+                Uri = "https://porkbun.com/api/json/v3/dns/delete/$DomainName/$RecordID"
+                Method = 'POST'
+                Body = "{`"secretapikey`": `"$APISecret`", `"apikey`": `"$APIKey`"}"
+                ErrorAction = 'Stop'
+                Verbose = $false
+            }
+            Write-Debug "POST $($queryParams.Uri)"
+            $APIResult = Invoke-WebRequest @queryParams @script:UseBasic
             if ($APIResult.StatusCode -NE 200) { throw "API returned status $($APIResult.StatusCode)"; }
             $ResultData = ConvertFrom-Json $APIResult.Content;
             if ($ResultData.status -NE 'SUCCESS') { throw "API returned result $($ResultData.status)"; }
@@ -172,12 +194,13 @@ function Save-DnsTxt
 
 function Get-PorkbunDomainInfo
 {
+    [CmdletBinding()]
     param
     (
         [string] $PorkbunAPIKey,
         [string] $PorkbunSecret,
         [string] $LongName
-    );
+    )
 
     [string] $RequestBody = "{`"secretapikey`": `"$PorkbunSecret`", `"apikey`": `"$PorkbunAPIKey`"}";
 
@@ -187,12 +210,28 @@ function Get-PorkbunDomainInfo
     for ([int]$i = 0; $i -LT $MaxIndex; $i++)
     {
         [string] $NameToCheck = [string]::Join('.', $Sections[$i .. $MaxIndex]);
-        [string] $RequestURL = "https://porkbun.com/api/json/v3/dns/retrieve/$NameToCheck";
         Write-Debug "Querying API for `"$NameToCheck`"";
 
-        try { [BasicHtmlWebResponseObject] $APIResult = Invoke-WebRequest -URI $RequestURL -Body $RequestBody -Method 'POST' @script:UseBasic; }
-        catch [InvalidOperationException] { Write-Debug "Could not find domain `"$NameToCheck`"."; continue; }
-        catch { Write-Debug "Something went wrong while checking domain `"$NameToCheck`""; throw; }
+        try {
+            $queryParams = @{
+                Uri = "https://porkbun.com/api/json/v3/dns/retrieve/$NameToCheck"
+                Method = 'POST'
+                Body = $RequestBody
+                ErrorAction = 'Stop'
+                Verbose = $false
+            }
+            Write-Debug "POST $($queryParams.Uri)"
+            $APIResult = Invoke-WebRequest @queryParams @script:UseBasic
+        }
+        catch {
+            if ($_.Exception.Response.StatusCode -eq 400) {
+                Write-Debug "Could not find domain `"$NameToCheck`"."
+                continue
+            } else {
+                Write-Debug "Something went wrong while checking domain `"$NameToCheck`""
+                throw
+            }
+        }
 
         if ($APIResult.StatusCode -NE 200) { Write-Debug "API returned code $($APIResult.StatusCode) for domain `"$NameToCheck`""; continue; }
         $ResultData = ConvertFrom-Json $APIResult.Content;
