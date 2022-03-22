@@ -61,27 +61,22 @@ $notAfter = $notBefore.AddYears(5)
 
 #### Password Based Principal
 
-The `New-AzADServicePrincipal` function will generate a password for us, so all we have to do is give it a name and specify our expiration dates. We'll also use `-SkipAssignment` to prevent the default functionality of giving it the Contributor role on the subscription.
+The `New-AzADServicePrincipal` function will generate a password for us, so all we have to do is give it a name and specify our expiration dates.
 
 ```powershell
 $spParams = @{
     DisplayName = 'PoshACME'
     StartDate = $notBefore
     EndDate = $notAfter
-    SkipAssignment = $true
 }
 $sp = New-AzADServicePrincipal @spParams
 ```
 
-You'll use your new credential with either the `AZAppCred` plugin parameter or `AZAppUsername` and `AZAppPasswordInsecure` plugin parameters. The username is in the `ApplicationId` property and the password is in `Secret`. Here's how to save a reference to them for later.
+You'll use your new credential with the `AZAppCred` plugin parameter. The username is in the `AppId` property and the password is in `PasswordCredentials.SecretText`. Here's how to create the credential object for later.
 
 ```powershell
-# For AZAppCred
-$appCred = [pscredential]::new($sp.ApplicationId,$sp.Secret)
-
-# For AZAppUsername and AZAppPasswordInsecure
-$appUser = $appCred.UserName
-$appPass = $appCred.GetNetworkCredential().Password
+$spPass = $sp.PasswordCredentials.SecretText | ConvertTo-SecureString -AsPlainText -Force
+$appCred = [pscredential]::new($sp.AppId,$spPass)
 ```
 
 #### Certificate Based Principal on Windows
@@ -122,7 +117,7 @@ $sp = New-AzADServicePrincipal @spParams
 You'll use your new credential with the `AZAppUsername` and `AZCertThumbprint` plugin parameters. Here's how to save a reference to them for later.
 
 ```powershell
-$appUser = $sp.ApplicationId.ToString()
+$appUser = $sp.AppId
 $thumbprint = $cert.Thumbprint
 ```
 
@@ -162,7 +157,7 @@ rm poshacme.crt poshacme.key
 You'll use your new credential with the `AZAppUsername`, `AZCertPfx`, and `AZPfxPassSecure` plugin parameters. Here's how to save a reference to them for later.
 
 ```powershell
-$appUser = $sp.ApplicationId.ToString()
+$appUser = $sp.AppId
 # modify the path and/or password as appropriate
 $certPfx = (Resolve-Path './poshacme.pfx').ToString()
 # remember to use the password you used with openssl
@@ -176,7 +171,7 @@ Now we'll tie everything together by assigning the service principal we created 
 ```powershell
 # modify the ResourceGroupName as appropriate for your environment
 $raParams = @{
-    ApplicationId = $sp.ApplicationId
+    ApplicationId = $sp.AppId
     ResourceGroupName = 'MyZones'
     RoleDefinitionName = 'DNS TXT Contributor'
 }
