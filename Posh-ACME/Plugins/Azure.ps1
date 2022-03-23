@@ -73,7 +73,7 @@ function Add-DnsTxt {
     Write-Verbose "Sending updated $($rec.name)"
     Write-Debug $recBody
     try {
-        $response = Invoke-RestMethod "$($script:AZEnvironment.ResourceManagerUrl)$($rec.id)?api-version=2018-03-01-preview" `
+        $response = Invoke-RestMethod "$($script:AZEnvironment.ResourceManagerUrl)$($rec.id)?api-version=2018-05-01" `
             -Method Put -Body $recBody -Headers $script:AZToken.AuthHeader `
             -ContentType 'application/json' @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
@@ -233,7 +233,7 @@ function Remove-DnsTxt {
     if ($txtVals.Count -eq 0) {
         Write-Verbose "Deleting $($rec.name). No values left."
         try {
-            Invoke-RestMethod "$($script:AZEnvironment.ResourceManagerUrl)$($rec.id)?api-version=2018-03-01-preview" `
+            Invoke-RestMethod "$($script:AZEnvironment.ResourceManagerUrl)$($rec.id)?api-version=2018-05-01" `
                 -Method Delete -Headers $script:AZToken.AuthHeader @script:UseBasic | Out-Null
             return
         } catch { throw }
@@ -245,7 +245,7 @@ function Remove-DnsTxt {
     Write-Verbose "Sending updated $($rec.name)"
     Write-Debug $recBody
     try {
-        $response = Invoke-RestMethod "$($script:AZEnvironment.ResourceManagerUrl)$($rec.id)?api-version=2018-03-01-preview" `
+        $response = Invoke-RestMethod "$($script:AZEnvironment.ResourceManagerUrl)$($rec.id)?api-version=2018-05-01" `
             -Method Put -Body $recBody -Headers $script:AZToken.AuthHeader `
             -ContentType 'application/json' @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
@@ -634,7 +634,7 @@ function Get-AZZoneId {
     # subscription. There's also no way to filter the list server side and the maximum results
     # per query is 100. So we basically have to keep querying until there's no 'nextLink' in
     # the response.
-    $url = "$($script:AZEnvironment.ResourceManagerUrl)/subscriptions/$($AZSubscriptionId)/providers/Microsoft.Network/dnszones?api-version=2018-03-01-preview"
+    $url = "$($script:AZEnvironment.ResourceManagerUrl)/subscriptions/$($AZSubscriptionId)/providers/Microsoft.Network/dnszones?api-version=2018-05-01"
     $zones = @()
     do {
         Write-Debug "Querying zones list page"
@@ -713,7 +713,7 @@ function Get-AZTxtRecord {
     # query the specific record we're looking to modify
     Write-Verbose "Querying $RecordName"
     try {
-        $rec = Invoke-RestMethod "$($script:AZEnvironment.ResourceManagerUrl)$($recID)?api-version=2018-03-01-preview" `
+        $rec = Invoke-RestMethod "$($script:AZEnvironment.ResourceManagerUrl)$($recID)?api-version=2018-05-01" `
             -Headers $script:AZToken.AuthHeader @script:UseBasic
     } catch {}
 
