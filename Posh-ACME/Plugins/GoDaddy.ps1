@@ -35,11 +35,18 @@ function Add-DnsTxt {
         throw "Unable to find matching zone for $RecordName."
     }
     $recShort = ($RecordName -ireplace [regex]::Escape($zone), [string]::Empty).TrimEnd('.')
+    if ($recShort -eq '') { $recShort = '@' }
 
     # Get a list of existing TXT records for this record name
     try {
-        $recs = Invoke-RestMethod "$apiRoot/$zone/records/TXT/$recShort" `
-            -Headers $headers @script:UseBasic -EA Stop
+        $queryParams = @{
+            Uri = "$apiRoot/$zone/records/TXT/$recShort"
+            Headers = $headers
+            ErrorAction = 'Stop'
+            Verbose = $false
+        }
+        Write-Debug "GET $($queryParams.Uri)"
+        $recs = Invoke-RestMethod @queryParams @script:UseBasic
     } catch { throw }
 
     if (-not $recs -or $TxtValue -notin $recs.data) {
@@ -61,10 +68,18 @@ function Add-DnsTxt {
         }
 
         try {
-            Write-Debug "Sending $bodyJson"
-            Invoke-RestMethod "$apiRoot/$zone/records/TXT/$recShort" `
-                -Method Put -Headers $headers -Body $bodyJson `
-                -ContentType 'application/json' @script:UseBasic -EA Stop | Out-Null
+            Write-Verbose "Adding a new TXT record for $recShort with value $TxtValue"
+            $queryParams = @{
+                Uri = "$apiRoot/$zone/records/TXT/$recShort"
+                Method = 'Put'
+                Body = $bodyJson
+                Headers = $headers
+                ContentType = 'application/json'
+                ErrorAction = 'Stop'
+                Verbose = $false
+            }
+            Write-Debug "PUT $($queryParams.Uri)`n$bodyJson"
+            Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
         } catch { throw }
 
     } else {
@@ -143,11 +158,18 @@ function Remove-DnsTxt {
         throw "Unable to find matching zone for $RecordName."
     }
     $recShort = ($RecordName -ireplace [regex]::Escape($zone), [string]::Empty).TrimEnd('.')
+    if ($recShort -eq '') { $recShort = '@' }
 
     # Get a list of existing TXT records for this record name
     try {
-        $recs = Invoke-RestMethod "$apiRoot/$zone/records/TXT/$recShort" `
-            -Headers $headers @script:UseBasic -EA Stop
+        $queryParams = @{
+            Uri = "$apiRoot/$zone/records/TXT/$recShort"
+            Headers = $headers
+            ErrorAction = 'Stop'
+            Verbose = $false
+        }
+        Write-Debug "GET $($queryParams.Uri)"
+        $recs = Invoke-RestMethod @queryParams @script:UseBasic
     } catch { throw }
 
     if (-not $recs -or $TxtValue -notin $recs.data) {
@@ -169,10 +191,18 @@ function Remove-DnsTxt {
         }
 
         try {
-            Write-Debug "Sending $bodyJson"
-            Invoke-RestMethod "$apiRoot/$zone/records/TXT/$recShort" `
-                -Method Put -Headers $headers -Body $bodyJson `
-                -ContentType 'application/json' @script:UseBasic -EA Stop | Out-Null
+            Write-Verbose "Removing a TXT record for $recShort with value $TxtValue"
+            $queryParams = @{
+                Uri = "$apiRoot/$zone/records/TXT/$recShort"
+                Method = 'Put'
+                Body = $bodyJson
+                Headers = $headers
+                ContentType = 'application/json'
+                ErrorAction = 'Stop'
+                Verbose = $false
+            }
+            Write-Debug "PUT $($queryParams.Uri)`n$bodyJson"
+            Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
         } catch { throw }
 
     }
@@ -259,36 +289,40 @@ function Find-GDZone {
         return $script:GDRecordZones.$RecordName
     }
 
-    # We need to find the closest/deepest
-    # sub-zone that would hold the record rather than just adding it to the apex. So for something
-    # like _acme-challenge.site1.sub1.sub2.example.com, we'd look for zone matches in the following
-    # order:
-    # - site1.sub1.sub2.example.com
-    # - sub1.sub2.example.com
-    # - sub2.example.com
-    # - example.com
+    # We need to find the closest/deepest sub-zone that would hold
+    # the record rather than just adding it to the apex.
     $pieces = $RecordName.Split('.')
     for ($i=0; $i -lt ($pieces.Count-1); $i++) {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
 
+        # Even though GoDaddy doesn't officially support sub-zone DNS hosting, it's possible
+        # to add a "domain" that is technically a sub-zone of an actual domain registered
+        # elsewhere and just delegate to GoDaddy's nameservers. The web UI and API won't list
+        # it as a domain in the normal domain list. But you can modify its records if you know
+        # the zone name. We're going to search for the zone name by querying for its NS records.
+
         try {
-            $domain = Invoke-RestMethod "$ApiRoot/$zoneTest" -Headers $AuthHeader @script:UseBasic -EA Stop
+            $queryParams = @{
+                Uri = "$ApiRoot/$zoneTest/records/NS"
+                Headers = $AuthHeader
+                ErrorAction = 'Stop'
+                Verbose = $false
+            }
+            Write-Debug "GET $($queryParams.Uri)"
+            # no error means we found the zone
+            Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
         } catch {
-            # re-throw anything except a 404 because it just means the zone doesn't exist
-            if (404 -ne $_.Exception.Response.StatusCode.value__) {
+            # The NS check may throw either a 404 (Not Found) or a 422 (Unprocessable Entity) when
+            # the zone is not found. Ignore those and re-throw anything else
+            if ($_.Exception.Response.StatusCode -notin 404,422) {
                 throw
             }
             continue
         }
 
-        if ($domain.status -in 'ACTIVE','PENDING_DNS_ACTIVE') {
-            $zoneName = $domain.domain
-            $script:GDRecordZones.$RecordName = $zoneName
-            return $zoneName
-        } else {
-            Write-Debug "Found $zoneTest, but status was $($domain.status)"
-        }
+        $script:GDRecordZones.$RecordName = $zoneTest
+        return $zoneTest
     }
 
     return $null
