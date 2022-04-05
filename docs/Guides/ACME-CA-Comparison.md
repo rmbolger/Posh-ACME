@@ -4,18 +4,21 @@ As more public certificate authorities hop on the [ACME][rfc00] bandwagon, it is
 
 ## ACME CA Info
 
-| Name                       | Free SAN Limit | Free Wildcards     | Free Lifetime | Chain Info                                                              | Rate Limits    | Directory Endpoint           | Notes                                                    |
-| ----                       | -------------- | :------------:     | ------------- | ----------                                                              | -----------    | ------------------           | -----                                                    |
-| [Let's&nbsp;Encrypt][le01] | 100 names      | :white_check_mark: | 90 days       | [Chains][le06]                                                          | [Policy][le02] | [RSA + ECC][le10]            | [Service Status][le09]<br />[Staging Environment][le03]  |
-| [BuyPass][bp01]            | 5 names        | :x:                | 180 days      | [Roots][bp04] "Go SSL"                                                  | [Policy][bp02] | [RSA + ECC][bp05]            | [Test Environment][bp03]                                 |
-| [ZeroSSL][z01]             | 100+ names     | :white_check_mark: | 90 days       | RSA [Iss1][z02]/[Iss2][z03]/[Root][z04]<br />ECC [Iss1][z05]/[Iss2][z06]/[Root][z07] | ??             | [RSA + ECC][z08]             |                                                          |
-| [SSL.com][ss01]            | 1 name + www   | :x:                | 90 days       | RSA [Iss][ss02]/[Root][ss03]<br />ECC [Iss][ss06]/[Root][ss07]          | ??             | [RSA][ss04]<br />[ECC][ss05] | See Warning below                                        |
+| Name                       | Free SAN Limit | Free Wildcards     | Free Lifetime | Chain Info                                                                           | Rate Limits    | Directory Endpoint           | Notes                                                    |
+| ----                       | -------------- | :------------:     | ------------- | ----------                                                                           | -----------    | ------------------           | -----                                                    |
+| [Let's&nbsp;Encrypt][le01] | 100 names      | :white_check_mark: | 90 days       | [Chains][le06]                                                                       | [Policy][le02] | [RSA + ECC][le10]            | [Service Status][le09]<br />[Staging Environment][le03]  |
+| [BuyPass][bp01]            | 5 names        | :x:                | 180 days      | [Roots][bp04] "Go SSL"                                                               | [Policy][bp02] | [RSA + ECC][bp05]            | [Test Environment][bp03]                                 |
+| [ZeroSSL][z01]             | 100+ names     | :white_check_mark: | 90 days       | RSA [Iss1][z02]/[Iss2][z03]/[Root][z04]<br />ECC [Iss1][z05]/[Iss2][z06]/[Root][z07] | ??             | [RSA + ECC][z08]             | [Staging Endpoint][gc06]<br />[Quick Start][gc07]        |
+| [SSL.com][ss01]            | 1 name + www   | :x:                | 90 days       | RSA [Iss][ss02]/[Root][ss03]<br />ECC [Iss][ss06]/[Root][ss07]                       | ??             | [RSA][ss04]<br />[ECC][ss05] | See Warning below                                        |
+| [Google][gc01]             | 100+ names     | :white_check_mark: | 90* days      | [Iss][gc02]/[Root][gc03]                                                             | [Policy][gc04] | [RSA + ECC][gc05]            | See Notes below                                          |
 
 * Wildcard names (if supported) count towards Subject Alternative Name (SAN) limits.
 * `1 name + www` means one domain name plus its www name variant such as `example.com` and `www.example.com`
 * Using Let's Encrypt's ECDSA-only chain currently requires your ACME account be [added to an allow-list](https://community.letsencrypt.org/t/ecdsa-availability-in-production-environment/150679). Otherwise, your ECDSA cert will be signed by the RSA chain.
 * ZeroSSL supports a custom REST API that some clients use instead of pure ACME.
 * **SSL.com Warning:** If your SSL.com account has funds available, you will be charged for a paid 1-year certificate instead of a free 90-day certificate. There is no known way to request only a free certificate.
+* Google certs have a 90 day lifetime by default but can be requested for shorter lifetimes down to 1 day. The recommended minimum lifetime is 3 days.
+* Google certs do not currently support punycode/IDN domains.
 
 ## ACME Spec and Feature Support
 
@@ -23,18 +26,19 @@ Some of the features in the ACME protocol are optional. Others are mandatory, bu
 
 *NOTE: Multi-perspective validation is not technically part of the ACME protocol. But it is an important security feature for the integrity of domain validation.*
 
-| Feature                                      | [Let's&nbsp;Encrypt][le01] | [BuyPass][bp01]                              | [ZeroSSL][z01]     | [SSL.com][ss01]                              |
-| -------                                      | :------------------------: | :-------------:                              | :------------:     | :-------------:                              |
-| [(EAB) External<br />Account Binding][rfc01] | n/a                        | n/a                                          | Required*          | Required                                     |
-| [Multi-perspective<br />Validation][le05]    | :white_check_mark:         | :x:                                          | :x:                | :x:                                          |
-| [Account<br />Key Rollover][rfc02]           | :white_check_mark:         | :white_check_mark:                           | :x:                | :x:*                                         |
-| [Account<br />Deactivation][rfc03]           | :white_check_mark:         | :white_check_mark:                           | :white_check_mark: | :white_check_mark:                           |
-| [Account<br />Orders][rfc04]                 | :x: *([Planned][le07])*    | :x:                                          | :x:                | :x:*                                         |
-| [IP Address<br />Identifiers][rfc05]         | :x: *([Planned][le08])*    | :x:                                          | :x:*               | :x:                                          |
-| [Pre-Authorization][rfc06]                   | :x:                        | :white_check_mark:                           | :x:                | :x:                                          |
-| [Authorization<br />Deactivation][rfc07]     | :white_check_mark:         | :white_check_mark:                           | :white_check_mark: | :white_check_mark:                           |
-| [Cert<br />Revocation][rfc08]                | :white_check_mark:         | :warning:<br />*(Only using account key)*    | :white_check_mark: | :white_check_mark:                           |
-| [Challenge<br />Retrying][rfc09]             | :x:                        | :warning:<br />*(Client must request retry)* | :white_check_mark: | :warning:<br />*(Client must request retry)* |
+| Feature                                      | [Let's&nbsp;Encrypt][le01] | [BuyPass][bp01]                              | [ZeroSSL][z01]     | [SSL.com][ss01]                              | [Google][gc01]     |
+| -------                                      | :------------------------: | :-------------:                              | :------------:     | :-------------:                              | :------------:     |
+| [(EAB) External<br />Account Binding][rfc01] | n/a                        | n/a                                          | Required*          | Required                                     | Required*          |
+| [Multi-perspective<br />Validation][le05]    | :white_check_mark:         | :x:                                          | :x:                | :x:                                          | :white_check_mark: |
+| [Account<br />Key Rollover][rfc02]           | :white_check_mark:         | :white_check_mark:                           | :x:                | :x:*                                         | :white_check_mark: |
+| [Account<br />Deactivation][rfc03]           | :white_check_mark:         | :white_check_mark:                           | :white_check_mark: | :white_check_mark:                           | :white_check_mark: |
+| [Account<br />Orders][rfc04]                 | :x: *([Planned][le07])*    | :x:                                          | :x:                | :x:*                                         | :x:                |
+| [IP Address<br />Identifiers][rfc05]         | :x: *([Planned][le08])*    | :x:                                          | :x:*               | :x:                                          | :x:                |
+| [Pre-Authorization][rfc06]                   | :x:                        | :white_check_mark:                           | :x:                | :x:                                          | :x:                |
+| [Authorization<br />Deactivation][rfc07]     | :white_check_mark:         | :white_check_mark:                           | :white_check_mark: | :white_check_mark:                           | :white_check_mark: |
+| [Cert<br />Revocation][rfc08]                | :white_check_mark:         | :warning:<br />*(Only using account key)*    | :white_check_mark: | :white_check_mark:                           | :white_check_mark: |
+| [Challenge<br />Retrying][rfc09]             | :x:                        | :warning:<br />*(Client must request retry)* | :white_check_mark: | :warning:<br />*(Client must request retry)* | :x:                |
+| Variable Cert Lifetime                       | :x:                        | :x:                                          | :x:                | :x:                                          | :white_check_mark: |
 
 * :white_check_mark: = Feature supported
 * :x: = Feature unsupported
@@ -44,6 +48,7 @@ Some of the features in the ACME protocol are optional. Others are mandatory, bu
 * SSL.com requires an email address in the ACME account contact field, but doesn't enforce it on creation time. Instead, it throws an "badCSR" error when you try to finalize an order from an account with an empty address.
 * ZeroSSL's EAB credentials can only be used once to establish a new ACME account. Creating additional accounts requires generating new EAB credentials.
 * ZeroSSL does support IP address based certificates, but not via the ACME protocol.
+* Google's EAB credentials can only be used once to establish a new ACME account and expire after 7 days if not used. Creating additional accounts requires generating new EAB credentials.
 
 
 [wk01]: https://en.wikipedia.org/wiki/Domain-validated_certificate
@@ -87,3 +92,10 @@ Some of the features in the ACME protocol are optional. Others are mandatory, bu
 [ss05]: https://acme.ssl.com/sslcom-dv-ecc
 [ss06]: https://crt.sh/?q=9219612e901c4904f9835ee8c2add54ff0b797fd
 [ss07]: https://crt.sh/?q=c3197c3924e654af1bc4ab20957ae2c30e13026a
+[gc01]: https://cloud.google.com/certificate-manager/docs/public-ca
+[gc02]: https://crt.sh/?q=9c0b252a678a087fbee496a44377f7556ac605e7
+[gc03]: https://crt.sh/?q=e1c950e6ef22f84c5645728b922060d7d5a7a3e8
+[gc04]: https://cloud.google.com/certificate-manager/docs/quotas
+[gc05]: https://dv.acme-v02.api.pki.goog/directory
+[gc06]: https://dv.acme-v02.test-api.pki.goog/directory
+[gc07]: https://cloud.google.com/certificate-manager/docs/public-ca-tutorial
