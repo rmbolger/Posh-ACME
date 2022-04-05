@@ -34,7 +34,7 @@ function New-PAAccount {
 
     # make sure the external account binding parameters were specified if this ACME
     # server requires them.
-    if ($server.meta -and $server.meta.externalAccountRequired -and
+    if (-not $OnlyReturnExisting -and $server.meta -and $server.meta.externalAccountRequired -and
         (-not $ExtAcctKID -or -not $ExtAcctHMACKey))
     {
         try { throw "The current ACME server requires external account credentials to create a new ACME account. Please run New-PAAccount with the ExtAcctKID and ExtAcctHMACKey parameters." }
