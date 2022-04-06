@@ -45,6 +45,8 @@ $script:WellKnownDirs = @{
     BUYPASS_PROD = 'https://api.buypass.com/acme/directory'
     BUYPASS_TEST = 'https://api.test4.buypass.no/acme/directory'
     ZEROSSL_PROD = 'https://acme.zerossl.com/v2/DV90'
+    GOOGLE_PROD = 'https://dv.acme-v02.api.pki.goog/directory'
+    GOOGLE_STAGE = 'https://dv.acme-v02.test-api.pki.goog/directory'
 }
 $script:HEADER_NONCE = 'Replay-Nonce'
 $script:USER_AGENT = "Posh-ACME/4.13.1 PowerShell/$($PSVersionTable.PSVersion)"
