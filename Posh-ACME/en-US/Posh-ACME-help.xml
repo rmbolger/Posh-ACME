@@ -7260,6 +7260,17 @@ Set-PAOrder example.com -Plugin FakeDNS -PluginArgs $pArgs</dev:code>
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>UseAltAccountRefresh</maml:name>
+          <maml:description>
+            <maml:para>Some ACME CAs do not properly support the standard method to refresh account data. If specified, the module will use an alternate method to refresh account data that seems to work with these CAs.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
@@ -7339,6 +7350,18 @@ Set-PAOrder example.com -Plugin FakeDNS -PluginArgs $pArgs</dev:code>
         <maml:name>NoSwitch</maml:name>
         <maml:description>
           <maml:para>If specified, the currently active ACME server will not be changed to the server being modified.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>UseAltAccountRefresh</maml:name>
+        <maml:description>
+          <maml:para>Some ACME CAs do not properly support the standard method to refresh account data. If specified, the module will use an alternate method to refresh account data that seems to work with these CAs.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>

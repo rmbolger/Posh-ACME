@@ -14,6 +14,7 @@ function Set-PAServer {
         [switch]$SkipCertificateCheck,
         [Parameter(ValueFromPipelineByPropertyName)]
         [switch]$DisableTelemetry,
+        [switch]$UseAltAccountRefresh,
         [switch]$NoRefresh,
         [switch]$NoSwitch
     )
@@ -70,6 +71,7 @@ function Set-PAServer {
                     Folder = Join-Path (Get-ConfigRoot) $Name
                     DisableTelemetry = $DisableTelemetry.IsPresent
                     SkipCertificateCheck = $SkipCertificateCheck.IsPresent
+                    UseAltAccountRefresh = $UseAltAccountRefresh.IsPresent
                     newAccount = $null
                     newOrder = $null
                     newNonce = $null
@@ -78,6 +80,18 @@ function Set-PAServer {
                     meta = $null
                     nonce = $null
                 }
+
+                # If UseAltAccountRefresh was specified, set it to true by default
+                # for CAs we know have problems like Google, SSL.com, and DigiCert
+                if (-not $PSBoundParameters.ContainsKey('UseAltAccountRefresh') -and
+                    ($DirectoryUrl -like '*.pki.goog/*' -or
+                     $DirectoryUrl -like '*.ssl.com/*' -or
+                     $DirectoryUrl -like '*.digicert.com/*')
+                ) {
+                    $newDir.UseAltAccountRefresh = $true
+                    $UseAltAccountRefresh = [switch]::Present
+                }
+
             }
         }
         elseif ($Name) {
@@ -160,6 +174,10 @@ function Set-PAServer {
         if ($newDir.SkipCertificateCheck -ne $SkipCertificateCheck.IsPresent) {
             Write-Debug "Setting SkipCertificateCheck value to $($SkipCertificateCheck.IsPresent)"
             $newDir | Add-Member 'SkipCertificateCheck' $SkipCertificateCheck.IsPresent -Force
+        }
+        if ($newDir.UseAltAccountRefresh -ne $UseAltAccountRefresh.IsPresent) {
+            Write-Debug "Setting UseAltAccountRefresh value to $($UseAltAccountRefresh.IsPresent)"
+            $newDir | Add-Member 'UseAltAccountRefresh' $UseAltAccountRefresh.IsPresent -Force
         }
 
         # save the object to disk except for the dynamic properties

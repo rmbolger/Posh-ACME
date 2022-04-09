@@ -38,16 +38,29 @@ function Update-PAAccount {
         Write-Debug "Refreshing account $($acct.id)"
 
         # build the header
-        $header = @{
-            alg   = $acct.alg;
-            kid   = $acct.location;
-            nonce = $script:Dir.nonce;
-            url   = $acct.location;
+        if (-not $server.UseAltAccountRefresh) {
+            Write-Debug "Refreshing account $($acct.id)"
+            $header = @{
+                alg   = $acct.alg
+                kid   = $acct.location
+                nonce = $script:Dir.nonce
+                url   = $acct.location
+            }
+            $payload = [string]::Empty
+        } else {
+            Write-Debug "Refreshing account $($acct.id) using newAccount endpoint"
+            $header = @{
+                alg   = $acct.alg
+                jwk   = ($acct.key | ConvertFrom-Jwk | ConvertTo-Jwk -PublicOnly)
+                nonce = $script:Dir.nonce
+                url   = $script:Dir.newAccount
+            }
+            $payload = '{"onlyReturnExisting": true}'
         }
 
         # send the request
         try {
-            $response = Invoke-ACME $header ([String]::Empty) $acct -EA Stop
+            $response = Invoke-ACME $header $payload $acct -EA Stop
         } catch { throw }
 
         $respObj = $response.Content | ConvertFrom-Json
@@ -55,6 +68,15 @@ function Update-PAAccount {
         # update the things that could have changed
         $acct | Add-Member 'status' $respObj.status -Force
         $acct | Add-Member 'contact' $respObj.contact -Force
+
+        if ($payload -ne [string]::Empty) {
+            if ($response.Headers.ContainsKey('Location')) {
+                $loc = $response.Headers['Location'] | Select-Object -First 1
+                $acct | Add-Member 'location' $loc -Force
+            } else {
+                Write-Warning 'No Location header found in newAccount output'
+            }
+        }
 
         # save it to disk without the dynamic properties
         $acctFile = Join-Path $server.Folder "$($acct.id)\acct.json"

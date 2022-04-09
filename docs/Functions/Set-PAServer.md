@@ -15,7 +15,7 @@ Set the current ACME server and/or its configuration.
 
 ```powershell
 Set-PAServer [[-DirectoryUrl] <String>] [-Name <String>] [-NewName <String>] [-SkipCertificateCheck]
- [-DisableTelemetry] [-NoRefresh] [-NoSwitch] [<CommonParameters>]
+ [-DisableTelemetry] [-UseAltAccountRefresh] [-NoRefresh] [-NoSwitch] [<CommonParameters>]
 ```
 
 ## Description
@@ -162,6 +162,21 @@ Aliases:
 Required: False
 Position: Named
 Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UseAltAccountRefresh
+Some ACME CAs do not properly support the standard method to refresh account data. If specified, the module will use an alternate method to refresh account data that seems to work with these CAs.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
