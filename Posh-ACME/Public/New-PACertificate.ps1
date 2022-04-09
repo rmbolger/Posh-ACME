@@ -64,7 +64,6 @@ function New-PACertificate {
     $acct = Get-PAAccount
     $acctListParams = @{
         List = $true
-        Refresh = $true
         Status = 'valid'
     }
     if ('Contact' -in $PSBoundParameters.Keys) { $acctListParams.Contact = $Contact }

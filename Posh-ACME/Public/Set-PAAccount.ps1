@@ -81,9 +81,6 @@ function Set-PAAccount {
 
         # switch the current account unless told not to or it's not changing
         if (-not $NoSwitch) {
-            # refresh the cached copy
-            Update-PAAccount $acct.id
-
             Write-Debug "Switching to account $($acct.id)"
 
             # save it as current
