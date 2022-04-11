@@ -17,6 +17,8 @@ function New-PAOrder {
         [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
         [string[]]$Plugin,
         [hashtable]$PluginArgs,
+        [ValidateRange(0, 3650)]
+        [int]$LifetimeDays,
         [string[]]$DnsAlias,
         [Parameter(ParameterSetName='FromScratch')]
         [Parameter(ParameterSetName='ImportKey')]
@@ -170,6 +172,16 @@ function New-PAOrder {
         }
 
     }
+
+    # add the requested certificate lifetime if specified
+    if ($LifetimeDays) {
+        $now = [DateTimeOffset]::UtcNow
+        $notBefore = $now.ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture)
+        $notAfter = $now.AddDays($LifetimeDays).ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture)
+        $payload.notBefore = $notBefore
+        $payload.notAfter = $notAfter
+    }
+
     $payloadJson = $payload | ConvertTo-Json -Depth 5 -Compress
 
     # send the request
@@ -250,6 +262,7 @@ function New-PAOrder {
         UseSerialValidation = $UseSerialValidation.IsPresent
         PreferredChain      = $PreferredChain
         AlwaysNewKey        = $AlwaysNewKey.IsPresent
+        LifetimeDays        = $null
     }
 
     # override AlwaysNewKey if they're importing the private key
@@ -274,6 +287,9 @@ function New-PAOrder {
     }
     if ('DnsAlias' -in $PSBoundParameters.Keys) {
         $order.DnsAlias = @($DnsAlias)
+    }
+    if ('LifetimeDays' -in $PSBoundParameters.Keys) {
+        $order.LifetimeDays = $LifetimeDays
     }
 
     # add the Name and Folder properties

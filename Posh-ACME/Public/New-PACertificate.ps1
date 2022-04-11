@@ -24,6 +24,8 @@ function New-PACertificate {
         [Alias('DnsPlugin')]
         [string[]]$Plugin,
         [hashtable]$PluginArgs,
+        [ValidateRange(0, 3650)]
+        [int]$LifetimeDays,
         [string[]]$DnsAlias,
         [Parameter(ParameterSetName='FromScratch')]
         [switch]$OCSPMustStaple,
@@ -121,6 +123,7 @@ function New-PACertificate {
     # - has different KeyLength
     # - has different SANs
     # - has different CSR
+    # - has different Lifetime
     $order = Get-PAOrder -Name $Name -Refresh
     $oldOrder = $null
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
@@ -130,7 +133,8 @@ function New-PACertificate {
         ($order.status -eq 'pending' -and (Get-DateTimeOffsetNow) -gt ([DateTimeOffset]::Parse($order.expires))) -or
         $CertKeyLength -ne $order.KeyLength -or
         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') -or
-        ($csrDetails -and $csrDetails.Base64Url -ne $order.CSRBase64Url ) )
+        ($csrDetails -and $csrDetails.Base64Url -ne $order.CSRBase64Url ) -or
+        ($LifetimeDays -and $LifetimeDays -ne $order.LifetimeDays) )
     {
 
         $oldOrder = $order
@@ -182,6 +186,7 @@ function New-PACertificate {
 
         # add common explicit order parameters backed up by old order params
         @(  'Plugin'
+            'LifetimeDays'
             'DnsAlias'
             'DnsSleep'
             'ValidationTimeout'

@@ -17,17 +17,17 @@ Request a new certificate
 ```powershell
 New-PACertificate [-Domain] <String[]> [-Name <String>] [-Contact <String[]>] [-CertKeyLength <String>]
  [-AlwaysNewKey] [-AcceptTOS] [-AccountKeyLength <String>] [-DirectoryUrl <String>] [-Plugin <String[]>]
- [-PluginArgs <Hashtable>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-FriendlyName <String>]
- [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-Install] [-UseSerialValidation] [-Force]
- [-DnsSleep <Int32>] [-ValidationTimeout <Int32>] [-PreferredChain <String>] [<CommonParameters>]
+ [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple]
+ [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-Install] [-UseSerialValidation]
+ [-Force] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>] [-PreferredChain <String>] [<CommonParameters>]
 ```
 
 ### FromCSR
 ```powershell
 New-PACertificate [-CSRPath] <String> [-Name <String>] [-Contact <String[]>] [-AcceptTOS]
  [-AccountKeyLength <String>] [-DirectoryUrl <String>] [-Plugin <String[]>] [-PluginArgs <Hashtable>]
- [-DnsAlias <String[]>] [-UseSerialValidation] [-Force] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
- [-PreferredChain <String>] [<CommonParameters>]
+ [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-UseSerialValidation] [-Force] [-DnsSleep <Int32>]
+ [-ValidationTimeout <Int32>] [-PreferredChain <String>] [<CommonParameters>]
 ```
 
 ## Description
@@ -41,7 +41,7 @@ This is the primary function for this module and is capable executing the entire
 New-PACertificate 'example.com','www.example.com' -AcceptTOS
 ```
 
-This is the bare minimum necessary to create a certificate for a basic domain (plus the `www` alt name). It prompt you to add the required DNS TXT record manually. You can omit the `-AcceptTOS` parameter if you already have an ACME account configured.
+This is the bare minimum necessary to create a certificate for a basic domain (plus the `www` alt name). It prompts you to add the required DNS TXT record manually. You can omit the `-AcceptTOS` parameter if you already have an ACME account configured.
 
 ### Example 2: Wildcard Certificate with Contact
 
@@ -463,6 +463,22 @@ If no match, the default offered chain will be used.
 
 ```yaml
 Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LifetimeDays
+
+How long in days the certificate should be valid for. NOTE: Many CAs do not support this feature and have fixed lifetime values. Some may ignore the request. Others may throw an error if specified.
+
+```yaml
+Type: Int32
 Parameter Sets: (All)
 Aliases:
 

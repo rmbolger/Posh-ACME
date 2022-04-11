@@ -20,6 +20,9 @@ function Set-PAOrder {
         [Parameter(ParameterSetName='Edit')]
         [hashtable]$PluginArgs,
         [Parameter(ParameterSetName='Edit')]
+        [ValidateRange(0, 3650)]
+        [int]$LifetimeDays,
+        [Parameter(ParameterSetName='Edit')]
         [string[]]$DnsAlias,
         [Parameter(ParameterSetName='Edit')]
         [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
@@ -202,6 +205,12 @@ function Set-PAOrder {
             ) {
                 Write-Verbose "Setting UseSerialValidation to $($UseSerialValidation.IsPresent)"
                 $order | Add-Member 'UseSerialValidation' $UseSerialValidation.IsPresent -Force
+                $saveChanges = $true
+            }
+
+            if ('LifetimeDays' -in $psbKeys -and $LifetimeDays -ne $order.LifetimeDays) {
+                Write-Verbose "Setting LifetimeDays to $LifetimeDays"
+                $order.LifetimeDays = $LifetimeDays
                 $saveChanges = $true
             }
 

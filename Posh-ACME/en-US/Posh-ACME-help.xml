@@ -3030,6 +3030,18 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>LifetimeDays</maml:name>
+          <maml:description>
+            <maml:para>How long in days the certificate should be valid for. NOTE: Many CAs do not support this feature and have fixed lifetime values. Some may ignore the request. Others may throw an error if specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
       <command:syntaxItem>
         <maml:name>New-PACertificate</maml:name>
@@ -3194,6 +3206,18 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
             <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>LifetimeDays</maml:name>
+          <maml:description>
+            <maml:para>How long in days the certificate should be valid for. NOTE: Many CAs do not support this feature and have fixed lifetime values. Some may ignore the request. Others may throw an error if specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
@@ -3465,6 +3489,18 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>LifetimeDays</maml:name>
+        <maml:description>
+          <maml:para>How long in days the certificate should be valid for. NOTE: Many CAs do not support this feature and have fixed lifetime values. Some may ignore the request. Others may throw an error if specified.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
     </command:parameters>
     <command:inputTypes />
     <command:returnValues>
@@ -3485,7 +3521,7 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
         <maml:title>------------- Example 1: Basic Manual Certificate -------------</maml:title>
         <dev:code>New-PACertificate 'example.com','www.example.com' -AcceptTOS</dev:code>
         <dev:remarks>
-          <maml:para>This is the bare minimum necessary to create a certificate for a basic domain (plus the `www` alt name). It prompt you to add the required DNS TXT record manually. You can omit the `-AcceptTOS` parameter if you already have an ACME account configured.</maml:para>
+          <maml:para>This is the bare minimum necessary to create a certificate for a basic domain (plus the `www` alt name). It prompts you to add the required DNS TXT record manually. You can omit the `-AcceptTOS` parameter if you already have an ACME account configured.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
@@ -3785,6 +3821,18 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>LifetimeDays</maml:name>
+          <maml:description>
+            <maml:para>How long in days the certificate should be valid for. NOTE: Many CAs do not support this feature and have fixed lifetime values. Some may ignore the request. Others may throw an error if specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
       <command:syntaxItem>
         <maml:name>New-PAOrder</maml:name>
@@ -4009,6 +4057,18 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>LifetimeDays</maml:name>
+          <maml:description>
+            <maml:para>How long in days the certificate should be valid for. NOTE: Many CAs do not support this feature and have fixed lifetime values. Some may ignore the request. Others may throw an error if specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
       <command:syntaxItem>
         <maml:name>New-PAOrder</maml:name>
@@ -4151,6 +4211,18 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
             <maml:uri />
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>LifetimeDays</maml:name>
+          <maml:description>
+            <maml:para>How long in days the certificate should be valid for. NOTE: Many CAs do not support this feature and have fixed lifetime values. Some may ignore the request. Others may throw an error if specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
       </command:syntaxItem>
     </command:syntax>
@@ -4406,6 +4478,18 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
           <maml:uri />
         </dev:type>
         <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>LifetimeDays</maml:name>
+        <maml:description>
+          <maml:para>How long in days the certificate should be valid for. NOTE: Many CAs do not support this feature and have fixed lifetime values. Some may ignore the request. Others may throw an error if specified.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes />
@@ -6862,6 +6946,18 @@ Set-PAAccount -UseAltPluginEncryption:$false</dev:code>
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>LifetimeDays</maml:name>
+          <maml:description>
+            <maml:para>How long in days the certificate should be valid for. This will only affect future renewals of this order. NOTE: Many CAs do not support this feature and have fixed lifetime values. Some may ignore the request. Use a value of 0 to revert to the CAs default lifetime.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
@@ -7116,6 +7212,18 @@ Set-PAAccount -UseAltPluginEncryption:$false</dev:code>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>LifetimeDays</maml:name>
+        <maml:description>
+          <maml:para>How long in days the certificate should be valid for. This will only affect future renewals of this order. NOTE: Many CAs do not support this feature and have fixed lifetime values. Some may ignore the request. Use a value of 0 to revert to the CAs default lifetime.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes />

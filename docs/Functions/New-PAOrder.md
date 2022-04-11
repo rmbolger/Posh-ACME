@@ -16,24 +16,26 @@ Create a new order on the current ACME account.
 ### FromScratch (Default)
 ```powershell
 New-PAOrder [-Domain] <String[]> [[-KeyLength] <String>] [-Name <String>] [-Plugin <String[]>]
- [-PluginArgs <Hashtable>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-AlwaysNewKey] [-FriendlyName <String>]
- [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-Install] [-UseSerialValidation] [-DnsSleep <Int32>]
- [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Force] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-AlwaysNewKey]
+ [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-Install] [-UseSerialValidation]
+ [-DnsSleep <Int32>] [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Force] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ### ImportKey
 ```powershell
 New-PAOrder [-Domain] <String[]> -KeyFile <String> [-Name <String>] [-Plugin <String[]>]
- [-PluginArgs <Hashtable>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-AlwaysNewKey] [-FriendlyName <String>]
- [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-Install] [-UseSerialValidation] [-DnsSleep <Int32>]
- [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Force] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-AlwaysNewKey]
+ [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-Install] [-UseSerialValidation]
+ [-DnsSleep <Int32>] [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Force] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ### FromCSR
 ```powershell
 New-PAOrder [-CSRPath] <String> [-Name <String>] [-Plugin <String[]>] [-PluginArgs <Hashtable>]
- [-DnsAlias <String[]>] [-UseSerialValidation] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
- [-PreferredChain <String>] [-Force] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-UseSerialValidation] [-DnsSleep <Int32>]
+ [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Force] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## Description
@@ -426,6 +428,22 @@ Prompts you for confirmation before running the cmdlet.
 Type: SwitchParameter
 Parameter Sets: (All)
 Aliases: cf
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LifetimeDays
+
+How long in days the certificate should be valid for. NOTE: Many CAs do not support this feature and have fixed lifetime values. Some may ignore the request. Others may throw an error if specified.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
 
 Required: False
 Position: Named

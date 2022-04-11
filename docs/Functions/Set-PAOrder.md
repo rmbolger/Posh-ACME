@@ -16,10 +16,10 @@ Switch to or modify an order.
 ### Edit (Default)
 ```powershell
 Set-PAOrder [[-MainDomain] <String>] [-Name <String>] [-NoSwitch] [-Plugin <String[]>]
- [-PluginArgs <Hashtable>] [-DnsAlias <String[]>] [-NewName <String>] [-FriendlyName <String>]
- [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-Install] [-OCSPMustStaple] [-DnsSleep <Int32>]
- [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-AlwaysNewKey] [-UseSerialValidation] [-WhatIf]
- [-Confirm] [<CommonParameters>]
+ [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-NewName <String>]
+ [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-Install] [-OCSPMustStaple]
+ [-DnsSleep <Int32>] [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-AlwaysNewKey]
+ [-UseSerialValidation] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### Revoke
@@ -395,6 +395,22 @@ Prompts you for confirmation before running the cmdlet.
 Type: SwitchParameter
 Parameter Sets: (All)
 Aliases: cf
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LifetimeDays
+
+How long in days the certificate should be valid for. This will only affect future renewals of this order. NOTE: Many CAs do not support this feature and have fixed lifetime values. Some may ignore the request. Use a value of 0 to revert to the CAs default lifetime.
+
+```yaml
+Type: Int32
+Parameter Sets: Edit
+Aliases:
 
 Required: False
 Position: Named
