@@ -966,6 +966,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-lifetimedays" class="md-nav__link">
+    -LifetimeDays
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#commonparameters" class="md-nav__link">
     CommonParameters
   </a>
@@ -1675,6 +1682,18 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Plugins/Porkbun/" class="md-nav__link">
+        Porkbun
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Plugins/RFC2136/" class="md-nav__link">
         RFC2136
       </a>
@@ -2313,6 +2332,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-lifetimedays" class="md-nav__link">
+    -LifetimeDays
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#commonparameters" class="md-nav__link">
     CommonParameters
   </a>
@@ -2354,10 +2380,10 @@
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
 <h3 id="edit-default">Edit (Default)<a class="headerlink" href="#edit-default" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Set-PAOrder</span> <span class="p">[[</span><span class="n">-MainDomain</span><span class="p">]</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-Name</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-NoSwitch</span><span class="p">]</span> <span class="p">[</span><span class="n">-Plugin</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">[]&gt;]</span>
- <span class="p">[</span><span class="n">-PluginArgs</span> <span class="p">&lt;</span><span class="n">Hashtable</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-DnsAlias</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">[]&gt;]</span> <span class="p">[</span><span class="n">-NewName</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-FriendlyName</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span>
- <span class="p">[</span><span class="n">-PfxPass</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-PfxPassSecure</span> <span class="p">&lt;</span><span class="n">SecureString</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-Install</span><span class="p">]</span> <span class="p">[</span><span class="n">-OCSPMustStaple</span><span class="p">]</span> <span class="p">[</span><span class="n">-DnsSleep</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span>
- <span class="p">[</span><span class="n">-ValidationTimeout</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-PreferredChain</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-AlwaysNewKey</span><span class="p">]</span> <span class="p">[</span><span class="n">-UseSerialValidation</span><span class="p">]</span> <span class="p">[</span><span class="n">-WhatIf</span><span class="p">]</span>
- <span class="p">[</span><span class="n">-Confirm</span><span class="p">]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
+ <span class="p">[</span><span class="n">-PluginArgs</span> <span class="p">&lt;</span><span class="n">Hashtable</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-LifetimeDays</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-DnsAlias</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">[]&gt;]</span> <span class="p">[</span><span class="n">-NewName</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span>
+ <span class="p">[</span><span class="n">-FriendlyName</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-PfxPass</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-PfxPassSecure</span> <span class="p">&lt;</span><span class="n">SecureString</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-Install</span><span class="p">]</span> <span class="p">[</span><span class="n">-OCSPMustStaple</span><span class="p">]</span>
+ <span class="p">[</span><span class="n">-DnsSleep</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-ValidationTimeout</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-PreferredChain</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-AlwaysNewKey</span><span class="p">]</span>
+ <span class="p">[</span><span class="n">-UseSerialValidation</span><span class="p">]</span> <span class="p">[</span><span class="n">-WhatIf</span><span class="p">]</span> <span class="p">[</span><span class="n">-Confirm</span><span class="p">]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h3 id="revoke">Revoke<a class="headerlink" href="#revoke" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Set-PAOrder</span> <span class="p">[[</span><span class="n">-MainDomain</span><span class="p">]</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-Name</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-RevokeCert</span><span class="p">]</span> <span class="p">[</span><span class="n">-Force</span><span class="p">]</span> <span class="p">[</span><span class="n">-NoSwitch</span><span class="p">]</span> <span class="p">[</span><span class="n">-WhatIf</span><span class="p">]</span> <span class="p">[</span><span class="n">-Confirm</span><span class="p">]</span>
@@ -2652,6 +2678,18 @@ The cmdlet is not run.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SwitchParameter</span>
 <span class="nt">Parameter Sets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">(All)</span>
 <span class="nt">Aliases</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cf</span>
+
+<span class="nt">Required</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="nt">Position</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Named</span>
+<span class="nt">Default value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="nt">Accept pipeline input</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="nt">Accept wildcard characters</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+</code></pre></div>
+<h3 id="-lifetimedays">-LifetimeDays<a class="headerlink" href="#-lifetimedays" title="Permanent link">&para;</a></h3>
+<p>How long in days the certificate should be valid for. This will only affect future renewals of this order. NOTE: Many CAs do not support this feature and have fixed lifetime values. Some may ignore the request. Use a value of 0 to revert to the CAs default lifetime.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Int32</span>
+<span class="nt">Parameter Sets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Edit</span>
+<span class="nt">Aliases</span><span class="p">:</span>
 
 <span class="nt">Required</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
 <span class="nt">Position</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Named</span>

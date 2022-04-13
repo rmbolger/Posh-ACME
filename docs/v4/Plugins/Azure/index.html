@@ -1576,6 +1576,18 @@
   
   
     <li class="md-nav__item">
+      <a href="../Porkbun/" class="md-nav__link">
+        Porkbun
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../RFC2136/" class="md-nav__link">
         RFC2136
       </a>
@@ -2192,22 +2204,17 @@
 <span class="nv">$notAfter</span> <span class="p">=</span> <span class="nv">$notBefore</span><span class="p">.</span><span class="n">AddYears</span><span class="p">(</span><span class="n">5</span><span class="p">)</span>
 </code></pre></div>
 <h4 id="password-based-principal">Password Based Principal<a class="headerlink" href="#password-based-principal" title="Permanent link">&para;</a></h4>
-<p>The <code>New-AzADServicePrincipal</code> function will generate a password for us, so all we have to do is give it a name and specify our expiration dates. We'll also use <code>-SkipAssignment</code> to prevent the default functionality of giving it the Contributor role on the subscription.</p>
+<p>The <code>New-AzADServicePrincipal</code> function will generate a password for us, so all we have to do is give it a name and specify our expiration dates.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$spParams</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">DisplayName</span> <span class="p">=</span> <span class="s1">&#39;PoshACME&#39;</span>
     <span class="n">StartDate</span> <span class="p">=</span> <span class="nv">$notBefore</span>
     <span class="n">EndDate</span> <span class="p">=</span> <span class="nv">$notAfter</span>
-    <span class="n">SkipAssignment</span> <span class="p">=</span> <span class="nv">$true</span>
 <span class="p">}</span>
 <span class="nv">$sp</span> <span class="p">=</span> <span class="nb">New-AzADServicePrincipal</span> <span class="nv">@spParams</span>
 </code></pre></div>
-<p>You'll use your new credential with either the <code>AZAppCred</code> plugin parameter or <code>AZAppUsername</code> and <code>AZAppPasswordInsecure</code> plugin parameters. The username is in the <code>ApplicationId</code> property and the password is in <code>Secret</code>. Here's how to save a reference to them for later.</p>
-<div class="highlight"><pre><span></span><code><span class="c"># For AZAppCred</span>
-<span class="nv">$appCred</span> <span class="p">=</span> <span class="no">[pscredential]</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="nv">$sp</span><span class="p">.</span><span class="n">ApplicationId</span><span class="p">,</span><span class="nv">$sp</span><span class="p">.</span><span class="n">Secret</span><span class="p">)</span>
-
-<span class="c"># For AZAppUsername and AZAppPasswordInsecure</span>
-<span class="nv">$appUser</span> <span class="p">=</span> <span class="nv">$appCred</span><span class="p">.</span><span class="n">UserName</span>
-<span class="nv">$appPass</span> <span class="p">=</span> <span class="nv">$appCred</span><span class="p">.</span><span class="n">GetNetworkCredential</span><span class="p">().</span><span class="n">Password</span>
+<p>You'll use your new credential with the <code>AZAppCred</code> plugin parameter. The username is in the <code>AppId</code> property and the password is in <code>PasswordCredentials.SecretText</code>. Here's how to create the credential object for later.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$spPass</span> <span class="p">=</span> <span class="nv">$sp</span><span class="p">.</span><span class="n">PasswordCredentials</span><span class="p">.</span><span class="n">SecretText</span> <span class="p">|</span> <span class="nb">ConvertTo-SecureString</span> <span class="n">-AsPlainText</span> <span class="n">-Force</span>
+<span class="nv">$appCred</span> <span class="p">=</span> <span class="no">[pscredential]</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="nv">$sp</span><span class="p">.</span><span class="n">AppId</span><span class="p">,</span><span class="nv">$spPass</span><span class="p">)</span>
 </code></pre></div>
 <h4 id="certificate-based-principal-on-windows">Certificate Based Principal on Windows<a class="headerlink" href="#certificate-based-principal-on-windows" title="Permanent link">&para;</a></h4>
 <p>Before we can create a certificate based credential, we have to actually create a certificate to use with it. Self-signed certs are fine here because we're only using them to sign data and Azure just needs to verify the signature using the public key we will associate with the principal.</p>
@@ -2243,7 +2250,7 @@
 <span class="nv">$sp</span> <span class="p">=</span> <span class="nb">New-AzADServicePrincipal</span> <span class="nv">@spParams</span>
 </code></pre></div>
 <p>You'll use your new credential with the <code>AZAppUsername</code> and <code>AZCertThumbprint</code> plugin parameters. Here's how to save a reference to them for later.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$appUser</span> <span class="p">=</span> <span class="nv">$sp</span><span class="p">.</span><span class="n">ApplicationId</span><span class="p">.</span><span class="n">ToString</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$appUser</span> <span class="p">=</span> <span class="nv">$sp</span><span class="p">.</span><span class="n">AppId</span>
 <span class="nv">$thumbprint</span> <span class="p">=</span> <span class="nv">$cert</span><span class="p">.</span><span class="n">Thumbprint</span>
 </code></pre></div>
 <h4 id="certificate-based-principal-on-non-windows">Certificate Based Principal on non-Windows<a class="headerlink" href="#certificate-based-principal-on-non-windows" title="Permanent link">&para;</a></h4>
@@ -2276,7 +2283,7 @@
 <span class="c"># that only the process running Posh-ACME can read them.</span>
 </code></pre></div>
 <p>You'll use your new credential with the <code>AZAppUsername</code>, <code>AZCertPfx</code>, and <code>AZPfxPassSecure</code> plugin parameters. Here's how to save a reference to them for later.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$appUser</span> <span class="p">=</span> <span class="nv">$sp</span><span class="p">.</span><span class="n">ApplicationId</span><span class="p">.</span><span class="n">ToString</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$appUser</span> <span class="p">=</span> <span class="nv">$sp</span><span class="p">.</span><span class="n">AppId</span>
 <span class="c"># modify the path and/or password as appropriate</span>
 <span class="nv">$certPfx</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Resolve-Path</span> <span class="s1">&#39;./poshacme.pfx&#39;</span><span class="p">).</span><span class="n">ToString</span><span class="p">()</span>
 <span class="c"># remember to use the password you used with openssl</span>
@@ -2286,7 +2293,7 @@
 <p>Now we'll tie everything together by assigning the service principal we created to the custom Role we created and the Resource Group that contains our DNS zones. If your zones are in more than one resource group, just repeat this for each one. If you used your own method for creating a service princpal, just use <code>Get-AzAdServicePrincipal</code> to get a reference to it first.</p>
 <div class="highlight"><pre><span></span><code><span class="c"># modify the ResourceGroupName as appropriate for your environment</span>
 <span class="nv">$raParams</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">ApplicationId</span> <span class="p">=</span> <span class="nv">$sp</span><span class="p">.</span><span class="n">ApplicationId</span>
+    <span class="n">ApplicationId</span> <span class="p">=</span> <span class="nv">$sp</span><span class="p">.</span><span class="n">AppId</span>
     <span class="n">ResourceGroupName</span> <span class="p">=</span> <span class="s1">&#39;MyZones&#39;</span>
     <span class="n">RoleDefinitionName</span> <span class="p">=</span> <span class="s1">&#39;DNS TXT Contributor&#39;</span>
 <span class="p">}</span>
