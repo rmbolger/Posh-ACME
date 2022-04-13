@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.13.1'
+ModuleVersion = '4.14.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,9 +83,21 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.13.1 (2022-03-14)
+## 4.14.0 (2022-04-12)
 
-* Fixed Loopia plugin after an upstream API change broke it.
+* Added new DNS plugin [Porkbun](https://porkbun.com/) (Thanks @CaiB)
+* Added server shortcuts for Google's new ACME CA, GOOGLE_PROD and GOOGLE_STAGE.
+* Added server shortcuts for SSL.com, SSLCOM_RSA and SSLCOM_ECC.
+* Added `UseAltAccountRefresh` switch to `Set-PAServer` to workaround CAs that don't yet support direct account refreshes such as Google, SSL.com, and DigiCert. (#372) (#394)
+  * New configs should have this set by default for CAs known to need it. But you will need to explicitly set it on any existing configs for these CAs.
+* Added `LifetimeDays` param on `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder` to enable user requested cert lifetimes for ACME CAs that support the feature.
+  * Google's CA is the only free ACME CA known to currently support this and the order lifetime cannot be changed once it is created. Setting a new value on an existing order will only change the lifetime on subsequent renewals.
+* Updated Azure plugin to use the latest stable API version.
+* Updated Azure guide to account for breaking changes in the Az module.
+* Fixed GoDaddy plugin when using it with delegated sub-zones. (#430)
+* Fixed `New-PAAccount` when importing an existing key on CAs that require external account binding.
+* Reduced the number of account refreshes that happen as part of normal operations.
+
 '@
 
     }
