@@ -25,7 +25,7 @@ function Export-CertPfx {
     # in some cases doesn't like the empty string default we were using previously. So we'll
     # use the subject CN value unless something non-empty was passed in.
     if ([String]::IsNullOrWhiteSpace($FriendlyName)) {
-        $FriendlyName = $cert.Subject.GetValueList([Org.BouncyCastle.Asn1.X509.X509Name]::CN)[0]
+        $FriendlyName = $cert.SubjectDN.GetValueList([Org.BouncyCastle.Asn1.X509.X509Name]::CN)[0]
     }
 
     # create a new Pkcs12Store
