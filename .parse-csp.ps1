@@ -9,11 +9,13 @@ param()
 
 $sha256 = [Security.Cryptography.SHA256]::Create()
 
+#Get-ChildItem *.html -Recurse | %{ Write-Verbose $_.FullName }
+
 # grab the raw contents of all generated HTML files
 $html = Get-ChildItem *.html -Recurse | Get-Content -Raw
 
 # create regex as necessary
-$reScript = [regex]'<script>(?<src>.*)</script>'
+$reScript = [regex]'<script>(?<src>[^<]*)</script>'
 $reStyle = [regex]'<style>(?<src>.*)</style>'
 
 # find all script instances
@@ -23,6 +25,7 @@ $reScript.Matches($html) | ForEach-Object {
 }  | Group-Object | ForEach-Object {
 
     $content = $_.Name
+    Write-Verbose $content
 
     $tagBytes = [Text.Encoding]::UTF8.GetBytes($content)
     $tagHash = [Convert]::ToBase64String($sha256.ComputeHash($tagBytes))
