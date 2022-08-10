@@ -34,7 +34,7 @@ For testing against the Demo environment, set the parameter `PortsEnvironment` t
 Set-PAServer -Name LE_STAGE
 New-PAAccount -Contact 'yourname@example.com' -AcceptTOS
 $pluginArgs = @{
-    PortsApiKey = 'p/5up3r+5ecur3=ap1_k3y-h3re'
+    PortsApiKey = (Read-Host 'Ports API key' -AsSecureString)
     PortsEnvironment = 'Demo'
 }
 

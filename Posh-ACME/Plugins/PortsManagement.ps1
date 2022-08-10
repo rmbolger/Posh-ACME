@@ -8,7 +8,7 @@ function Add-DnsTxt {
         [string]$TxtValue,
 
         [Parameter(Mandatory)]
-        [string]$PortsApiKey,
+        [SecureString]$PortsApiKey,
 
         [Parameter()]
         [ValidateSet('Production','Demo')]
@@ -65,8 +65,7 @@ function Add-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $PortsApiKey = Read-Host 'API key'
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -PortsApiKey $PortsApiKey
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -PortsApiKey (Read-Host 'Ports API key' -AsSecureString)
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -82,7 +81,7 @@ function Remove-DnsTxt {
         [string]$TxtValue,
 
         [Parameter(Mandatory)]
-        [string]$PortsApiKey,
+        [SecureString]$PortsApiKey,
 
         [Parameter()]
         [ValidateSet('Production','Demo')]
@@ -129,8 +128,7 @@ function Remove-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $PortsApiKey = Read-Host 'API key'
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -PortsApiKey $PortsApiKey
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -PortsApiKey (Read-Host 'Ports API key' -AsSecureString)
 
         Removes a TXT record for the specified site with the specified value.
     #>
@@ -213,16 +211,19 @@ function Connect-Ports {
     param(
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [string]$ApiKey,
+        [securestring]$ApiKey,
 
         [Parameter()]
         [ValidateSet('Production', 'Demo')]
         [string]$Environment = 'Production'
     )
 
+    # Convert from user inputted SecureString API key to the API's expected plain text API key
+    $ApiKeyInsecure = [PSCredential]::new('a',$ApiKey).GetNetworkCredential().Password
+
     # Set script-wide variables for the Ports API environment and API key
     $script:PortsApiRoot = Get-PortsApiRootUrl -Environment $Environment
-    $script:PortsApiKey = $ApiKey
+    $script:PortsApiKey = $ApiKeyInsecure
     
     # setup a tracking variable for modified records
     if (-not $script:PortsModifiedRecs) { $script:PortsModifiedRecs = @{} }
