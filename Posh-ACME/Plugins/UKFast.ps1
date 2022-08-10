@@ -62,26 +62,19 @@ function Add-DnsTxt {
     <#
     .SYNOPSIS
         Add a DNS TXT record to UKFast SafeDNS
-
     .DESCRIPTION
         Add a DNS TXT record to UKFast SafeDNS
-
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
-
     .PARAMETER TxtValue
         The value of the TXT record.
-
     .PARAMETER UKFastApiKey
         An API Application Key generated on the UKFast website with Read/Write access.
-
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
-
     .EXAMPLE
         $key = Read-Host -AsSecureString
         Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -UKFastApiKey $key
-
         Adds a TXT record for the specified site with the specified value. Key passed in as securestring.
     #>
 }
@@ -140,26 +133,19 @@ function Remove-DnsTxt {
     <#
     .SYNOPSIS
         Remove a DNS TXT record from UKFast SafeDNS
-
     .DESCRIPTION
         Remove a DNS TXT record from UKFast SafeDNS
-
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
-
     .PARAMETER TxtValue
         The value of the TXT record.
-
     .PARAMETER UKFastApiKey
         An API Application Key generated on the UKFast website with Read/Write access.
-
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
-
     .EXAMPLE
         $key = Read-Host -AsSecureString
         Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -UKFastApiKey $key
-
         Removes a TXT record for the specified site with the specified value. Key passed in as securestring.
     #>
 }
@@ -174,10 +160,8 @@ function Save-DnsTxt {
     <#
     .SYNOPSIS
         Not required.
-
     .DESCRIPTION
         This provider does not require calling this function to commit changes to DNS records.
-
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     #>
@@ -210,27 +194,35 @@ function Find-UKFastZone {
         return $script:UKFastRecordZones.$RecordName
     }
 
-    try {
-        Write-Debug "GET $ApiRoot/zones"
-        $zones = (Invoke-RestMethod "$ApiRoot/zones" @RestParams @script:UseBasic).Data
-    } catch { throw }
+    $pages = 1
+    for ($i=0; $i -lt $pages; $i++)
+    {
+        $page = $i+1
 
-    # Since UKFast could be hosting both apex and sub-zones, we need to find the closest/deepest
-    # sub-zone that would hold the record rather than just adding it to the apex. So for something
-    # like _acme-challenge.site1.sub1.sub2.example.com, we'd look for zone matches in the following
-    # order:
-    # - site1.sub1.sub2.example.com
-    # - sub1.sub2.example.com
-    # - sub2.example.com
-    # - example.com
+        try {
+            Write-Debug "GET $ApiRoot/zones"
+            $response = (Invoke-RestMethod "$ApiRoot/zones?page=$page" @RestParams @script:UseBasic)
+        } catch { throw }
+        $zones = $response.data
+        $pages = $response.meta.pagination.total_pages
 
-    $pieces = $RecordName.Split('.')
-    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
-        Write-Debug "Checking $zoneTest"
-        if ($zoneTest -in $zones.name) {
-            $script:UKFastRecordZones.$RecordName = $zoneTest
-            return $zoneTest
+        # Since UKFast could be hosting both apex and sub-zones, we need to find the closest/deepest
+        # sub-zone that would hold the record rather than just adding it to the apex. So for something
+        # like _acme-challenge.site1.sub1.sub2.example.com, we'd look for zone matches in the following
+        # order:
+        # - site1.sub1.sub2.example.com
+        # - sub1.sub2.example.com
+        # - sub2.example.com
+        # - example.com
+
+        $pieces = $RecordName.Split('.')
+        for ($x=0; $x -lt ($pieces.Count-1); $x++) {
+            $zoneTest = $pieces[$x..($pieces.Count-1)] -join '.'
+            Write-Debug "Checking $zoneTest"
+            if ($zoneTest -in $zones.name) {
+                $script:UKFastRecordZones.$RecordName = $zoneTest
+                return $zoneTest
+            }
         }
     }
 
