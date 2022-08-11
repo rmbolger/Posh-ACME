@@ -19,11 +19,11 @@ If you have been given access to the demo environment, you should be able to fin
 
 ## Using the Plugin
 
-With your API key, pass it to the plugin using the `PortsApiKey` parameter.
+With your API key, pass it to the plugin using the `PortsApiKey` parameter as a SecureString.
 
 ```powershell
 $pArgs = @{
-    PortsApiKey = 'p/5up3r+5ecur3=ap1_k3y-h3re'
+    PortsApiKey = (Read-Host -Prompt 'Ports API key' -AsSecureString)
 }
 New-PACertificate example.com -Plugin PortsManagement -PluginArgs $pArgs
 ```
