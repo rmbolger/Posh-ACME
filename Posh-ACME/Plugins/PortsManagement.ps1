@@ -20,10 +20,6 @@ function Add-DnsTxt {
 
     Connect-Ports -ApiKey $PortsApiKey -Environment $PortsEnvironment
 
-    if (-not (Find-PortsZone -RecordName $RecordName )) {
-        throw "Unable to find Ports Management hosted zone for $RecordName"
-    }
-
     # check for an existing record
     Write-Debug "Checking for existing record"
     $ExistingTXTrecords = Get-PortsDnsRecord -RecordName $RecordName -RecordType TXT
@@ -92,10 +88,6 @@ function Remove-DnsTxt {
     )
 
     Connect-Ports -ApiKey $PortsApiKey -Environment $PortsEnvironment
-
-    if (-not (Find-PortsZone -RecordName $RecordName)) {
-        throw "Unable to find Ports Management hosted zone for $RecordName"
-    }
 
     # check for an existing record
     Write-Debug "Checking for existing record"
@@ -347,7 +339,17 @@ function Add-PortsDnsRecord {
         [string]$Comment
     )
 
-    $ZoneID = Find-PortsZone -RecordName $RecordName
+    if (-not ($ZoneID = Find-PortsZone -RecordName $RecordName)) {
+        $PSCmdlet.ThrowTerminatingError(
+                [System.Management.Automation.ErrorRecord]::new(
+                    "Unable to find Ports Management hosted zone for '$RecordName'",
+                    'PortsDnsZoneNotFound',
+                    [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                    $RecordName # Offending object
+                )
+            )
+    }
+
     # Strip the tailing identified zone from record name
     $RecShort = ($RecordName -ireplace [regex]::Escape($ZoneId), [string]::Empty).TrimEnd('.')
     if ($RecShort -eq [string]::Empty) {
@@ -409,7 +411,17 @@ function Remove-PortsDnsRecord {
         [string]$RecordData
     )
 
-    $ZoneID = Find-PortsZone -RecordName $RecordName
+    if (-not ($ZoneID = Find-PortsZone -RecordName $RecordName)) {
+        $PSCmdlet.ThrowTerminatingError(
+                [System.Management.Automation.ErrorRecord]::new(
+                    "Unable to find Ports Management hosted zone for '$RecordName'",
+                    'PortsDnsZoneNotFound',
+                    [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                    $RecordName # Offending object
+                )
+            )
+    }
+
     # Strip the tailing identified zone from record name
     $RecShort = ($RecordName -ireplace [regex]::Escape($ZoneId), [string]::Empty).TrimEnd('.')
     if ($RecShort -eq [string]::Empty) {
@@ -459,7 +471,16 @@ function Get-PortsDnsRecord {
         [string]$RecordType
     )
 
-    $ZoneID = Find-PortsZone -RecordName $RecordName
+    if (-not ($ZoneID = Find-PortsZone -RecordName $RecordName)) {
+        $PSCmdlet.ThrowTerminatingError(
+                [System.Management.Automation.ErrorRecord]::new(
+                    "Unable to find Ports Management hosted zone for '$RecordName'",
+                    'PortsDnsZoneNotFound',
+                    [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                    $RecordName # Offending object
+                )
+            )
+    }
     # Strip the tailing identified zone from record name
     $RecShort = ($RecordName -ireplace [regex]::Escape($ZoneId), [string]::Empty).TrimEnd('.')
     if ($RecShort -eq [string]::Empty) {
