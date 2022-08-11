@@ -135,6 +135,8 @@ function Save-DnsTxt {
     <#
     .SYNOPSIS
         Not required.
+        The Ports Management API applies changes directly. No saving/comitting required.
+        Review and publish functionality is for the web interface only. 
 
     .DESCRIPTION
         This provider does not require calling this function to commit changes to DNS records.
@@ -148,12 +150,9 @@ function Save-DnsTxt {
 # Helper Functions
 ############################
 
-# Add a commented link to API docs if they exist.
+# Ports Management API reference: 
+# https://demo.ports.management/pmapi-doc/openapi-ui/index.html#/
 
-# Add additional functions here if necessary.
-
-# Try to follow verb-noun naming guidelines.
-# https://msdn.microsoft.com/en-us/library/ms714428
 
 
 function Get-PortsApiRootUrl {
