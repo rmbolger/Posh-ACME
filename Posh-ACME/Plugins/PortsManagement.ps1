@@ -247,7 +247,7 @@ function Invoke-PortsRestMethod {
     $RestSplat = @{
         Method      = $Method
         Uri         = $script:PortsConfig.ApiRoot + $Endpoint
-        ContentType = 'application/json'
+        ContentType = 'application/json; charset=utf-8'
         Headers     = @{
             # Extract plain text credential from Ports Config
             'X-API-KEY' = $script:PortsConfig.ApiCredential.GetNetworkCredential().Password
