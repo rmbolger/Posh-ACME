@@ -24,7 +24,7 @@ function Add-DnsTxt {
     Write-Debug "Checking for existing record"
     $ExistingTXTrecords = Get-PortsDnsRecord -RecordName $RecordName -RecordType TXT
 
-    if ($ExistingTXTrecords.Where{ $_.rdata -eq $TxtValue }) {
+    if ($ExistingTXTrecords | Where-Object { $_.rdata -eq $TxtValue }) {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
         return
     }
@@ -501,7 +501,7 @@ function Remove-PortsDnsRecord {
     $ExistingRecords = Get-PortsDnsRecord -RecordName $RecordName -RecordType $RecordType
 
     # We must only remove records with the given value, not all records of the matching record type for the same record name
-    $NewRecords = $ExistingRecords.Where{ $_.'rdata' -ne $RecordData }
+    $NewRecords = $ExistingRecords | Where-Object { $_.'rdata' -ne $RecordData }
 
     $RequestData = @{
         data = @{
