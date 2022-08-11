@@ -20,7 +20,7 @@ function Add-DnsTxt {
 
     Connect-Ports -ApiKey $PortsApiKey -Environment $PortsEnvironment
 
-    if (-not ($ZoneID = Find-PortsZone -RecordName $RecordName )) {
+    if (-not (Find-PortsZone -RecordName $RecordName )) {
         throw "Unable to find Ports Management hosted zone for $RecordName"
     }
 
@@ -93,7 +93,7 @@ function Remove-DnsTxt {
 
     Connect-Ports -ApiKey $PortsApiKey -Environment $PortsEnvironment
 
-    if (-not ($ZoneID = Find-PortsZone -RecordName $RecordName )) {
+    if (-not (Find-PortsZone -RecordName $RecordName)) {
         throw "Unable to find Ports Management hosted zone for $RecordName"
     }
 
