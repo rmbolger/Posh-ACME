@@ -18,7 +18,7 @@ function Add-DnsTxt {
         $ExtraParams
     )
 
-    Connect-Ports -ApiKey $PortsApiKey -Environment $PortsEnvironment
+    Set-PortsConfig -ApiKey $PortsApiKey -Environment $PortsEnvironment
 
     # check for an existing record
     Write-Debug "Checking for existing record"
@@ -87,7 +87,7 @@ function Remove-DnsTxt {
         $ExtraParams
     )
 
-    Connect-Ports -ApiKey $PortsApiKey -Environment $PortsEnvironment
+    Set-PortsConfig -ApiKey $PortsApiKey -Environment $PortsEnvironment
 
     # check for an existing record
     Write-Debug "Checking for existing record"
@@ -198,7 +198,7 @@ function Get-PortsApiRootUrl {
         Retrieves the base URL for demo use    
     #>
 }
-function Connect-Ports {
+function Set-PortsConfig {
     param(
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
@@ -209,15 +209,10 @@ function Connect-Ports {
         [string]$Environment = 'Production'
     )
 
-    # Convert from user inputted SecureString API key to the API's expected plain text API key
-    $ApiKeyInsecure = [PSCredential]::new('a', $ApiKey).GetNetworkCredential().Password
-
-    # Set script-wide variables for the Ports API environment and API key
-    $script:PortsApiRoot = Get-PortsApiRootUrl -Environment $Environment
-    $script:PortsApiKey = $ApiKeyInsecure
-    
-    # setup a tracking variable for modified records
-    if (-not $script:PortsModifiedRecs) { $script:PortsModifiedRecs = @{} }
+    $script:PortsConfig = @{
+        ApiRoot = Get-PortsApiRootUrl -Environment $Environment
+        ApiCredential = [PSCredential]::new('a', $ApiKey)
+    }
 }
 
 function Invoke-PortsRestMethod {
@@ -237,13 +232,25 @@ function Invoke-PortsRestMethod {
         [Parameter(Position = 3, HelpMessage = 'Used to limit returned result count from supported endpoints')]
         [int]$ResultSize
     )
+
+    if (-not $script:PortsConfig) {
+        $PSCmdlet.ThrowTerminatingError(
+            [System.Management.Automation.ErrorRecord]::new(
+                "Ports configuration not set. Please initialise settings with 'Set-PortsConfig' before making any API calls.",
+                'PortsConfigurationNotSet',
+                [System.Management.Automation.ErrorCategory]::NotSpecified,
+                $script:PortsConfig
+            )
+        )
+    }
     
     $RestSplat = @{
         Method      = $Method
-        Uri         = $script:PortsApiRoot + $Endpoint
+        Uri         = $script:PortsConfig.ApiRoot + $Endpoint
         ContentType = 'application/json'
         Headers     = @{
-            'X-API-KEY' = $script:PortsApikey
+            # Extract plain text credential from Ports Config
+            'X-API-KEY' = $script:PortsConfig.ApiCredential.GetNetworkCredential().Password
         }
     }
     Write-Debug "$Method $($RestSplat.Uri)"
@@ -304,8 +311,7 @@ function Invoke-PortsRestMethod {
         The Ports Management API endpoint to make a request to, for example /v1/zones
     
     .EXAMPLE
-        Invoke-PortsRestMethod -Endpoint '/v1/zones' -Method 'GET' -ApiKey 'p/5up3r+5ecur3=ap1_k3y-h3re'
-
+        Invoke-PortsRestMethod -Endpoint '/v1/zones' -Method 'GET'
         Retrieves all zones 
     #>
 }
@@ -435,7 +441,7 @@ function Add-PortsDnsRecord {
 
     $BodyJson = ConvertTo-Json -InputObject $RequestData -Depth 10 -Compress
     try {
-        Invoke-PortsRestMethod -Method Patch -Endpoint "/v1/zones/$ZoneID" -Body $BodyJson
+        Invoke-PortsRestMethod -Method Patch -Endpoint "/v1/zones/$ZoneID" -Body $BodyJson | Out-Null
     }
     catch {
         $PortsError = $PSItem.ErrorDetails.Message | ConvertFrom-Json
@@ -514,7 +520,7 @@ function Remove-PortsDnsRecord {
     }
 
     $BodyJson = ConvertTo-Json -InputObject $RequestData -Depth 10 -Compress
-    Invoke-PortsRestMethod -Method Patch -Endpoint "/v1/zones/$ZoneID" -Body $BodyJson
+    Invoke-PortsRestMethod -Method Patch -Endpoint "/v1/zones/$ZoneID" -Body $BodyJson | Out-Null
 
 }
 
