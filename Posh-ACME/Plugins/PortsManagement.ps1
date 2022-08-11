@@ -2,16 +2,16 @@ function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
-        [Parameter(Mandatory,Position=1)]
+        [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
 
         [Parameter(Mandatory)]
         [SecureString]$PortsApiKey,
 
         [Parameter()]
-        [ValidateSet('Production','Demo')]
+        [ValidateSet('Production', 'Demo')]
         [string]$PortsEnvironment = 'Production',
 
         [Parameter(ValueFromRemainingArguments)]
@@ -33,7 +33,7 @@ function Add-DnsTxt {
         RecordName = $RecordName
         RecordType = 'TXT'
         RecordData = $TxtValue
-        Comment = "Added by Posh-ACME on $(Get-Date -Format 'o')"
+        Comment    = "Added by Posh-ACME on $(Get-Date -Format 'o')"
     }
     Add-PortsDnsRecord @DnsRecordParams | Out-Null
 
@@ -70,17 +70,17 @@ function Add-DnsTxt {
 function Remove-DnsTxt {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
 
-        [Parameter(Mandatory,Position=1)]
+        [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
 
         [Parameter(Mandatory)]
         [SecureString]$PortsApiKey,
 
         [Parameter()]
-        [ValidateSet('Production','Demo')]
+        [ValidateSet('Production', 'Demo')]
         [string]$PortsEnvironment = 'Production',
 
         [Parameter(ValueFromRemainingArguments)]
@@ -210,7 +210,7 @@ function Connect-Ports {
     )
 
     # Convert from user inputted SecureString API key to the API's expected plain text API key
-    $ApiKeyInsecure = [PSCredential]::new('a',$ApiKey).GetNetworkCredential().Password
+    $ApiKeyInsecure = [PSCredential]::new('a', $ApiKey).GetNetworkCredential().Password
 
     # Set script-wide variables for the Ports API environment and API key
     $script:PortsApiRoot = Get-PortsApiRootUrl -Environment $Environment
@@ -223,35 +223,75 @@ function Connect-Ports {
 function Invoke-PortsRestMethod {
     [CmdLetBinding()]
     param (
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [ValidateNotNullOrEmpty()]
         [string]$Endpoint,
 
-        [Parameter(Mandatory, Position=1)]
+        [Parameter(Mandatory, Position = 1)]
         [Microsoft.PowerShell.Commands.WebRequestMethod]
         $Method,
 
-        [Parameter(Position=2)]
-        [string]$Body
-    )
+        [Parameter(Position = 2)]
+        [string]$Body,
 
-    
-    $Url = $script:PortsApiRoot + $Endpoint
+        [Parameter(Position = 3, HelpMessage = 'Used to limit returned result count from supported endpoints')]
+        [int]$ResultSize
+    )
     
     $RestSplat = @{
-        Method = $Method
-        Uri = $Url
+        Method      = $Method
+        Uri         = $script:PortsApiRoot + $Endpoint
         ContentType = 'application/json'
-        Headers = @{
+        Headers     = @{
             'X-API-KEY' = $script:PortsApikey
         }
     }
-    Write-Debug "$Method $Url"
+    Write-Debug "$Method $($RestSplat.Uri)"
     if ($PSBoundParameters.Keys -contains 'Body') { 
         $RestSplat.Body = $Body 
         Write-Debug "Body: $Body"
     }
-    Invoke-RestMethod @RestSplat @script:UseBasic -ErrorAction 'Stop'
+
+    $Response = Invoke-RestMethod @RestSplat @script:UseBasic -ErrorAction 'Stop'
+    Write-Debug "Response metadata: $($Response.meta)"
+
+    # Validate that our result returns in an expected format
+    if ($Response -and $null -eq $Response.meta.invocationId) {
+        Write-Debug
+        $PSCmdlet.ThrowTerminatingError(
+            [System.Management.Automation.ErrorRecord]::new(
+                "API response did not contain expected metadata",
+                'PortsApiMetadataMissing',
+                [System.Management.Automation.ErrorCategory]::InvalidData,
+                $Response
+            )
+        )
+    }
+
+    $AllResults = $Response.data
+    if ($Response.meta.total -le $Response.meta.limit) {
+        return $AllResults
+    }
+
+    Write-Debug "Response returned paginated. Not all results were included in first request. Starting loop through pages."
+    $BaseUri = $RestSplat.Uri
+    # Loop through pages with offset and collect all results into array
+    $AllResults += do {
+        # Construct a new Uri with the pagination parameters
+        $RestSplat.Uri = $BaseUri + "?offset=$($Response.meta.offset + $Response.meta.limit)"
+        Write-Debug "$Method $($RestSplat.Uri)"
+        if ($PSBoundParameters.Keys -contains 'Body') { 
+            $RestSplat.Body = $Body 
+            Write-Debug "Body: $Body"
+        }
+        $Response = Invoke-RestMethod @RestSplat @script:UseBasic -ErrorAction 'Stop'
+        Write-Debug "Response metadata: $($Response.meta)"
+        # Output data to array
+        $Response.data
+    } while ($Response.meta.total -gt ($Response.meta.offset + $Response.meta.limit))
+    
+    return $AllResults     
+
 
     <#
     .SYNOPSIS
@@ -273,7 +313,7 @@ function Invoke-PortsRestMethod {
 function Find-PortsZone {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [string]$RecordName
     )
 
@@ -292,23 +332,25 @@ function Find-PortsZone {
     # We need to find the zone ID for the closest/deepest sub-zone that would
     # contain the record.
     $Pieces = $RecordName.Split('.')
-    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+    for ($i = 0; $i -lt ($pieces.Count - 1); $i++) {
 
-        $ZoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
+        $ZoneTest = $pieces[$i..($pieces.Count - 1)] -join '.'
         Write-Debug "Checking $zoneTest"
         $Response = $null
 
         try {
             $Response = Invoke-PortsRestMethod -Endpoint "/v1/zones/$ZoneTest" -Method "Get"
-        } catch {
+        }
+        catch {
             if (400 -eq $_.Exception.Response.StatusCode.value__) {
                 Write-Debug "Zone not found: $zoneTest"
-            } else { throw }
+            }
+            else { throw }
         }
 
         if ($Response) {
             Write-Debug "Reponse data received for $ZoneTest"
-            $ZoneID = $Response.data[0].id
+            $ZoneID = $Response[0].id
             $script:PortsRecordZones.$RecordName = $ZoneID
             return $ZoneID
         }
@@ -321,14 +363,14 @@ function Add-PortsDnsRecord {
     #Reference: https://demo.ports.management/pmapi-doc/openapi-ui/index.html#/dns/patch_v1_zones__name_
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
 
-        [Parameter(Mandatory,Position=1)]
-        [ValidateSet('A','AAAA','CAA','CNAME','DNAME','LOC','MX','NAPTR','NS','PTR','RP','SRV','SSHFP','TLSA','TXT')]
+        [Parameter(Mandatory, Position = 1)]
+        [ValidateSet('A', 'AAAA', 'CAA', 'CNAME', 'DNAME', 'LOC', 'MX', 'NAPTR', 'NS', 'PTR', 'RP', 'SRV', 'SSHFP', 'TLSA', 'TXT')]
         [string]$RecordType,
 
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(Mandatory, Position = 2)]
         [string]$RecordData,
 
         [Parameter()]
@@ -340,13 +382,13 @@ function Add-PortsDnsRecord {
 
     if (-not ($ZoneID = Find-PortsZone -RecordName $RecordName)) {
         $PSCmdlet.ThrowTerminatingError(
-                [System.Management.Automation.ErrorRecord]::new(
-                    "Unable to find Ports Management hosted zone for '$RecordName'",
-                    'PortsDnsZoneNotFound',
-                    [System.Management.Automation.ErrorCategory]::ObjectNotFound,
-                    $RecordName # Offending object
-                )
+            [System.Management.Automation.ErrorRecord]::new(
+                "Unable to find Ports Management hosted zone for '$RecordName'",
+                'PortsDnsZoneNotFound',
+                [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                $RecordName # Offending object
             )
+        )
     }
 
     # Strip the tailing identified zone from record name
@@ -362,8 +404,8 @@ function Add-PortsDnsRecord {
 
     $NewRecords = @()
     $ExistingRecords = Get-PortsDnsRecord -RecordName $RecordName -RecordType $RecordType
-    if ($ExistingRecords) {$NewRecords += $ExistingRecords}
-    $NewRecordData = @{rdata = $RecordData}
+    if ($ExistingRecords) { $NewRecords += $ExistingRecords }
+    $NewRecordData = @{rdata = $RecordData }
 
     if ($PSBoundParameters.Keys -contains 'TTL') {
         $NewRecordData['ttl'] = $TTL
@@ -377,8 +419,8 @@ function Add-PortsDnsRecord {
 
     $RequestData = @{
         data = @{
-            type = 'zone'
-            id = $ZoneID
+            type       = 'zone'
+            id         = $ZoneID
             attributes = @{
                 records = @{
                     $RecShort = @{
@@ -392,33 +434,51 @@ function Add-PortsDnsRecord {
     }
 
     $BodyJson = ConvertTo-Json -InputObject $RequestData -Depth 10 -Compress
-    Invoke-PortsRestMethod -Method Patch -Endpoint "/v1/zones/$ZoneID" -Body $BodyJson
+    try {
+        Invoke-PortsRestMethod -Method Patch -Endpoint "/v1/zones/$ZoneID" -Body $BodyJson
+    }
+    catch {
+        $PortsError = $PSItem.ErrorDetails.Message | ConvertFrom-Json
+        if ($PortsError.error.message -eq "Zones with pending updates can't be updated by API") {
+            $PSCmdlet.ThrowTerminatingError(
+                [System.Management.Automation.ErrorRecord]::new(
+                    "Zones with pending updates can't be updated by API. Check Ports Management for zone: '$ZoneID'",
+                    'PortsDnsZonePendingUpdates',
+                    [System.Management.Automation.ErrorCategory]::ResourceBusy,
+                    $ZoneID # Offending object
+                )
+            )
+        }
+        else {
+            throw
+        }    
+    }
 }
 
 function Remove-PortsDnsRecord {
     #Reference: https://demo.ports.management/pmapi-doc/openapi-ui/index.html#/dns/patch_v1_zones__name_
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
 
-        [Parameter(Mandatory,Position=1)]
-        [ValidateSet('A','AAAA','CAA','CNAME','DNAME','LOC','MX','NAPTR','NS','PTR','RP','SRV','SSHFP','TLSA','TXT')]
+        [Parameter(Mandatory, Position = 1)]
+        [ValidateSet('A', 'AAAA', 'CAA', 'CNAME', 'DNAME', 'LOC', 'MX', 'NAPTR', 'NS', 'PTR', 'RP', 'SRV', 'SSHFP', 'TLSA', 'TXT')]
         [string]$RecordType,
 
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(Mandatory, Position = 2)]
         [string]$RecordData
     )
 
     if (-not ($ZoneID = Find-PortsZone -RecordName $RecordName)) {
         $PSCmdlet.ThrowTerminatingError(
-                [System.Management.Automation.ErrorRecord]::new(
-                    "Unable to find Ports Management hosted zone for '$RecordName'",
-                    'PortsDnsZoneNotFound',
-                    [System.Management.Automation.ErrorCategory]::ObjectNotFound,
-                    $RecordName # Offending object
-                )
+            [System.Management.Automation.ErrorRecord]::new(
+                "Unable to find Ports Management hosted zone for '$RecordName'",
+                'PortsDnsZoneNotFound',
+                [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                $RecordName # Offending object
             )
+        )
     }
 
     # Strip the tailing identified zone from record name
@@ -435,12 +495,12 @@ function Remove-PortsDnsRecord {
     $ExistingRecords = Get-PortsDnsRecord -RecordName $RecordName -RecordType $RecordType
 
     # We must only remove records with the given value, not all records of the matching record type for the same record name
-    $NewRecords = $ExistingRecords.Where{$_.'rdata' -ne $RecordData}
+    $NewRecords = $ExistingRecords.Where{ $_.'rdata' -ne $RecordData }
 
     $RequestData = @{
         data = @{
-            type = 'zone'
-            id = $ZoneID
+            type       = 'zone'
+            id         = $ZoneID
             attributes = @{
                 records = @{
                     $RecShort = @{
@@ -462,23 +522,23 @@ function Get-PortsDnsRecord {
     #Reference: https://demo.ports.management/pmapi-doc/openapi-ui/index.html#/dns/get_v1_zones__name_
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
 
-        [Parameter(Position=1)]
-        [ValidateSet('A','AAAA','CAA','CNAME','DNAME','LOC','MX','NAPTR','NS','PTR','RP','SRV','SSHFP','TLSA','TXT')]
+        [Parameter(Position = 1)]
+        [ValidateSet('A', 'AAAA', 'CAA', 'CNAME', 'DNAME', 'LOC', 'MX', 'NAPTR', 'NS', 'PTR', 'RP', 'SRV', 'SSHFP', 'TLSA', 'TXT')]
         [string]$RecordType
     )
 
     if (-not ($ZoneID = Find-PortsZone -RecordName $RecordName)) {
         $PSCmdlet.ThrowTerminatingError(
-                [System.Management.Automation.ErrorRecord]::new(
-                    "Unable to find Ports Management hosted zone for '$RecordName'",
-                    'PortsDnsZoneNotFound',
-                    [System.Management.Automation.ErrorCategory]::ObjectNotFound,
-                    $RecordName # Offending object
-                )
+            [System.Management.Automation.ErrorRecord]::new(
+                "Unable to find Ports Management hosted zone for '$RecordName'",
+                'PortsDnsZoneNotFound',
+                [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                $RecordName # Offending object
             )
+        )
     }
     # Strip the tailing identified zone from record name
     $RecShort = ($RecordName -ireplace [regex]::Escape($ZoneId), [string]::Empty).TrimEnd('.')
@@ -487,9 +547,9 @@ function Get-PortsDnsRecord {
     }
 
     $Response = Invoke-PortsRestMethod -Method GET -Endpoint "/v1/zones/$ZoneID"
-    $Records = $Response.data.attributes.records.$RecShort
+    $Records = $Response.attributes.records.$RecShort
     if ($PSBoundParameters.Keys -contains 'RecordType') {
-        $Records = $Records.$RecordType
+        return $Records.$RecordType
     }
     return $Records
 }
