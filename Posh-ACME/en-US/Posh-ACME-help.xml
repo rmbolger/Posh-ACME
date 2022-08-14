@@ -3042,6 +3042,17 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>UseModernPfxEncryption</maml:name>
+          <maml:description>
+            <maml:para>If specified, PFX files generated from this order will use AES256 with SHA256 for the private key encryption instead of the default which is RC2-40-CBC. This can affect compatibility with some crypto libraries and tools. Most notably, OpenSSL 3.x requires the newer options to avoid using "legacy" mode. But it breaks compatibility with OpenSSL 1.0.x.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
       <command:syntaxItem>
         <maml:name>New-PACertificate</maml:name>
@@ -3501,6 +3512,18 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>UseModernPfxEncryption</maml:name>
+        <maml:description>
+          <maml:para>If specified, PFX files generated from this order will use AES256 with SHA256 for the private key encryption instead of the default which is RC2-40-CBC. This can affect compatibility with some crypto libraries and tools. Most notably, OpenSSL 3.x requires the newer options to avoid using "legacy" mode. But it breaks compatibility with OpenSSL 1.0.x.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
     </command:parameters>
     <command:inputTypes />
     <command:returnValues>
@@ -3833,6 +3856,17 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>UseModernPfxEncryption</maml:name>
+          <maml:description>
+            <maml:para>If specified, PFX files generated from this order will use AES256 with SHA256 for the private key encryption instead of the default which is RC2-40-CBC. This can affect compatibility with some crypto libraries and tools. Most notably, OpenSSL 3.x requires the newer options to avoid using "legacy" mode. But it breaks compatibility with OpenSSL 1.0.x.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
       <command:syntaxItem>
         <maml:name>New-PAOrder</maml:name>
@@ -4068,6 +4102,17 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>UseModernPfxEncryption</maml:name>
+          <maml:description>
+            <maml:para>If specified, PFX files generated from this order will use AES256 with SHA256 for the private key encryption instead of the default which is RC2-40-CBC. This can affect compatibility with some crypto libraries and tools. Most notably, OpenSSL 3.x requires the newer options to avoid using "legacy" mode. But it breaks compatibility with OpenSSL 1.0.x.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
       </command:syntaxItem>
       <command:syntaxItem>
@@ -4490,6 +4535,18 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>UseModernPfxEncryption</maml:name>
+        <maml:description>
+          <maml:para>If specified, PFX files generated from this order will use AES256 with SHA256 for the private key encryption instead of the default which is RC2-40-CBC. This can affect compatibility with some crypto libraries and tools. Most notably, OpenSSL 3.x requires the newer options to avoid using "legacy" mode. But it breaks compatibility with OpenSSL 1.0.x.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes />
@@ -6958,6 +7015,17 @@ Set-PAAccount -UseAltPluginEncryption:$false</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>UseModernPfxEncryption</maml:name>
+          <maml:description>
+            <maml:para>If specified, PFX files generated from this order will use AES256 with SHA256 for the private key encryption instead of the default which is RC2-40-CBC. This can affect compatibility with some crypto libraries and tools. Most notably, OpenSSL 3.x requires the newer options to avoid using "legacy" mode. But it breaks compatibility with OpenSSL 1.0.x.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
@@ -7224,6 +7292,18 @@ Set-PAAccount -UseAltPluginEncryption:$false</dev:code>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>UseModernPfxEncryption</maml:name>
+        <maml:description>
+          <maml:para>If specified, PFX files generated from this order will use AES256 with SHA256 for the private key encryption instead of the default which is RC2-40-CBC. This can affect compatibility with some crypto libraries and tools. Most notably, OpenSSL 3.x requires the newer options to avoid using "legacy" mode. But it breaks compatibility with OpenSSL 1.0.x.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes />

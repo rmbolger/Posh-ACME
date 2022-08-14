@@ -17,9 +17,9 @@ Switch to or modify an order.
 ```powershell
 Set-PAOrder [[-MainDomain] <String>] [-Name <String>] [-NoSwitch] [-Plugin <String[]>]
  [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-NewName <String>]
- [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-Install] [-OCSPMustStaple]
- [-DnsSleep <Int32>] [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-AlwaysNewKey]
- [-UseSerialValidation] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-UseModernPfxEncryption]
+ [-Install] [-OCSPMustStaple] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>] [-PreferredChain <String>]
+ [-AlwaysNewKey] [-UseSerialValidation] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### Revoke
@@ -409,6 +409,22 @@ How long in days the certificate should be valid for. This will only affect futu
 
 ```yaml
 Type: Int32
+Parameter Sets: Edit
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UseModernPfxEncryption
+
+If specified, PFX files generated from this order will use AES256 with SHA256 for the private key encryption instead of the default which is RC2-40-CBC. This can affect compatibility with some crypto libraries and tools. Most notably, OpenSSL 3.x requires the newer options to avoid using "legacy" mode. But it breaks compatibility with OpenSSL 1.0.x.
+
+```yaml
+Type: SwitchParameter
 Parameter Sets: Edit
 Aliases:
 
