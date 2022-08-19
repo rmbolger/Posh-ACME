@@ -60,6 +60,7 @@ NS1 | [NS1 DNS](https://ns1.com) | [Usage Guide](NS1.md) | :white_check_mark:
 OVH | [OVH.com](https://www.ovh.com) | [Usage Guide](OVH.md) | :white_check_mark:
 PointDNS | [PointDNS](https://pointhq.com/) | [Usage Guide](PointDNS.md) | :white_check_mark:
 Porkbun | [Porkbun](https://porkbun.com/) | [Usage Guide](Porkbun.md) | :white_check_mark:
+PortsManagement | [PortsManagement](https://portsgroup.com/en/service/ports-management/) | [Usage Guide](PortsManagement.md) | :white_check_mark:
 Rackspace | [Rackspace Cloud DNS](https://www.rackspace.com/cloud/dns) | [Usage Guide](Rackspace.md) | :white_check_mark:
 Regru | [Reg.ru](https://reg.ru/) and [Reg.com](https://reg.com/) | [Usage Guide](Regru.md) | :white_check_mark:
 RFC2136 | [RFC 2136](https://tools.ietf.org/html/rfc2136) | [Usage Guide](RFC2136.md) | :white_check_mark:
