@@ -152,6 +152,9 @@ function Export-PACertFiles {
             FriendlyName = $Order.FriendlyName;
             PfxPass      = $Order.PfxPass;
         }
+        if ($Order.UseModernPfxEncryption) {
+            $pfxParams.UseModernPfxEncryption = $true
+        }
         Export-CertPfx @pfxParams
         $pfxParams.OutputFile = $pfxFullFile
         Export-CertPfx @pfxParams -ChainFile $chainFile

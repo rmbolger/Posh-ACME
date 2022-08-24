@@ -37,6 +37,8 @@ function New-PACertificate {
         [ValidateScript({Test-SecureStringNotNullOrEmpty $_ -ThrowOnFail})]
         [securestring]$PfxPassSecure,
         [Parameter(ParameterSetName='FromScratch')]
+        [switch]$UseModernPfxEncryption,
+        [Parameter(ParameterSetName='FromScratch')]
         [ValidateScript({Test-WinOnly -ThrowOnFail})]
         [switch]$Install,
         [switch]$UseSerialValidation,
@@ -150,14 +152,15 @@ function New-PACertificate {
         else {
             # set the defaults based on what was passed in
             $orderParams = @{
-                Domain         = $Domain
-                Name           = $Name
-                KeyLength      = $CertKeyLength
-                OCSPMustStaple = $OCSPMustStaple
-                AlwaysNewKey   = $AlwaysNewKey
-                FriendlyName   = $FriendlyName
-                PfxPass        = $PfxPass
-                Install        = $Install
+                Domain                 = $Domain
+                Name                   = $Name
+                KeyLength              = $CertKeyLength
+                OCSPMustStaple         = $OCSPMustStaple
+                AlwaysNewKey           = $AlwaysNewKey
+                FriendlyName           = $FriendlyName
+                PfxPass                = $PfxPass
+                UseModernPfxEncryption = $UseModernPfxEncryption
+                Install                = $Install
             }
 
             # add values from the old order if they exist and weren't overrridden
@@ -167,6 +170,7 @@ function New-PACertificate {
                     'AlwaysNewKey'
                     'FriendlyName'
                     'PfxPass'
+                    'UseModernPfxEncryption'
                     'Install' ) | ForEach-Object {
 
                     if ($oldOrder.$_ -and $_ -notin $psbKeys) {
@@ -221,6 +225,7 @@ function New-PACertificate {
             'Install'
             'FriendlyName'
             'PfxPass'
+            'UseModernPfxEncryption'
             'Install'
             'DnsSleep'
             'ValidationTimeout'

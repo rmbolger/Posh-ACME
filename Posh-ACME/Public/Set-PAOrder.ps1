@@ -37,6 +37,8 @@ function Set-PAOrder {
         [ValidateScript({Test-SecureStringNotNullOrEmpty $_ -ThrowOnFail})]
         [securestring]$PfxPassSecure,
         [Parameter(ParameterSetName='Edit')]
+        [switch]$UseModernPfxEncryption,
+        [Parameter(ParameterSetName='Edit')]
         [switch]$Install,
         [Parameter(ParameterSetName='Edit')]
         [switch]$OCSPMustStaple,
@@ -212,6 +214,15 @@ function Set-PAOrder {
                 Write-Verbose "Setting LifetimeDays to $LifetimeDays"
                 $order.LifetimeDays = $LifetimeDays
                 $saveChanges = $true
+            }
+
+            if ('UseModernPfxEncryption' -in $psbKeys -and
+                (-not $order.UseModernPfxEncryption -or $UseModernPfxEncryption.IsPresent -ne $order.UseModernPfxEncryption)
+            ) {
+                Write-Verbose "Setting UseModernPfxEncryption to $($UseModernPfxEncryption.IsPresent)"
+                $order | Add-Member 'UseModernPfxEncryption' $UseModernPfxEncryption.IsPresent -Force
+                $saveChanges = $true
+                $rewritePfx = $true
             }
 
             if ($saveChanges) {

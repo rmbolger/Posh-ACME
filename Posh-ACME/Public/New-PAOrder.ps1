@@ -38,6 +38,9 @@ function New-PAOrder {
         [securestring]$PfxPassSecure,
         [Parameter(ParameterSetName='FromScratch')]
         [Parameter(ParameterSetName='ImportKey')]
+        [switch]$UseModernPfxEncryption,
+        [Parameter(ParameterSetName='FromScratch')]
+        [Parameter(ParameterSetName='ImportKey')]
         [switch]$Install,
         [switch]$UseSerialValidation,
         [int]$DnsSleep=120,
@@ -290,6 +293,9 @@ function New-PAOrder {
     }
     if ('LifetimeDays' -in $PSBoundParameters.Keys) {
         $order.LifetimeDays = $LifetimeDays
+    }
+    if ('UseModernPfxEncryption' -in $PSBoundParameters.Keys) {
+        $order | Add-Member UseModernPfxEncryption $UseModernPfxEncryption.IsPresent -Force
     }
 
     # add the Name and Folder properties

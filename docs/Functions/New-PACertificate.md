@@ -18,8 +18,9 @@ Request a new certificate
 New-PACertificate [-Domain] <String[]> [-Name <String>] [-Contact <String[]>] [-CertKeyLength <String>]
  [-AlwaysNewKey] [-AcceptTOS] [-AccountKeyLength <String>] [-DirectoryUrl <String>] [-Plugin <String[]>]
  [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple]
- [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-Install] [-UseSerialValidation]
- [-Force] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>] [-PreferredChain <String>] [<CommonParameters>]
+ [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-UseModernPfxEncryption]
+ [-Install] [-UseSerialValidation] [-Force] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
+ [-PreferredChain <String>] [<CommonParameters>]
 ```
 
 ### FromCSR
@@ -480,6 +481,22 @@ How long in days the certificate should be valid for. NOTE: Many CAs do not supp
 ```yaml
 Type: Int32
 Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UseModernPfxEncryption
+
+If specified, PFX files generated from this order will use AES256 with SHA256 for the private key encryption instead of the default which is RC2-40-CBC. This can affect compatibility with some crypto libraries and tools. Most notably, OpenSSL 3.x requires the newer options to avoid using "legacy" mode. But it breaks compatibility with OpenSSL 1.0.x.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: FromScratch
 Aliases:
 
 Required: False
