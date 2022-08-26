@@ -12,7 +12,7 @@ DotNetFrameworkVersion = '4.7.1'
 
 # Assemblies that must be loaded prior to importing this module
 RequiredAssemblies = @(
-    'lib\BC.Crypto.1.8.8.2-netstandard2.0.dll'
+    'lib\BC.Crypto.1.9.0-netstandard2.0.dll'
     'System.Net.Http'
 )
 
