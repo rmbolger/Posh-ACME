@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.14.0'
+ModuleVersion = '4.15.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,21 +83,18 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.14.0 (2022-04-12)
+## 4.15.0 (2022-08-26)
 
-* Added new DNS plugin [Porkbun](https://porkbun.com/) (Thanks @CaiB)
-* Added server shortcuts for Google's new ACME CA, GOOGLE_PROD and GOOGLE_STAGE.
-* Added server shortcuts for SSL.com, SSLCOM_RSA and SSLCOM_ECC.
-* Added `UseAltAccountRefresh` switch to `Set-PAServer` to workaround CAs that don't yet support direct account refreshes such as Google, SSL.com, and DigiCert. (#372) (#394)
-  * New configs should have this set by default for CAs known to need it. But you will need to explicitly set it on any existing configs for these CAs.
-* Added `LifetimeDays` param on `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder` to enable user requested cert lifetimes for ACME CAs that support the feature.
-  * Google's CA is the only free ACME CA known to currently support this and the order lifetime cannot be changed once it is created. Setting a new value on an existing order will only change the lifetime on subsequent renewals.
-* Updated Azure plugin to use the latest stable API version.
-* Updated Azure guide to account for breaking changes in the Az module.
-* Fixed GoDaddy plugin when using it with delegated sub-zones. (#430)
-* Fixed `New-PAAccount` when importing an existing key on CAs that require external account binding.
-* Reduced the number of account refreshes that happen as part of normal operations.
-
+* PAOrder objects now have a flag to optionally use modern encryption options on generated PFX files. This will prevent the need to use "legacy" mode when reading the files with OpenSSL 3.x. However, it breaks compatibility with OpenSSL 1.0.x and earlier.
+  * You can use the `-UseModernPfxEncryption` flag with `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder`. When used with `Set-PAOrder`, existing PFX files will be re-written based on the flag's new value.
+  * Use `Set-PAOrder -UseModernPfxEncryption:$false` to switch back to the default setting.
+  * The default for new orders will likely remain off until Posh-ACME 5.x is released.
+* Added new DNS plugin [PortsManagement](https://portsgroup.com/) (Thanks @wemmer)
+* The GCloud plugin has a new optional parameter, `GCProjectId` that takes one or more string values. This is only required if the DNS zones to modify don't reside in the same project as the service account referenced by `GCKeyFile` or they reside in multiple projects. When used, be sure to include all project IDs including the one referenced by `GCKeyFile`.
+* Added Google's new free ACME CA to the CA comparison doc
+* Upgraded the embedded BouncyCastle library to 1.9.0
+* Fixed UKFast plugin to support paging for accounts with many domains (Thanks @0x4c6565)
+* Fixed PFX friendly name generation when not provided in the order.
 '@
 
     }
