@@ -9,6 +9,7 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$GCKeyFile,
+        [string[]]$GCProjectId,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -17,19 +18,25 @@ function Add-DnsTxt {
     # https://cloud.google.com/dns/api/v1beta2/
 
     Connect-GCloudDns $GCKeyFile
-    $token = $script:GCToken
+    if (-not $GCProjectId) { $GCProjectId = @($script:GCToken.DefaultProject) }
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (!($zoneID = Find-GCZone $RecordName)) {
-        throw "Unable to find Google hosted zone for $RecordName"
+    if (-not ($zoneID,$projID = Find-GCZone $RecordName $GCProjectId)) {
+        throw "Unable to find Google hosted zone for $RecordName in project(s) $($GCProjectId -join ',')"
     }
 
-    $recRoot = "https://www.googleapis.com/dns/v1beta2/projects/$($token.ProjectID)/managedZones/$zoneID"
+    $recRoot = "https://www.googleapis.com/dns/v1beta2/projects/$projID/managedZones/$zoneID"
 
     # query the current txt record set
+    $queryParams = @{
+        Uri = '{0}/rrsets?type=TXT&name={1}.' -f $recRoot,$RecordName
+        Headers = $script:GCToken.AuthHeader
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
     try {
-        $response = Invoke-RestMethod "$recRoot/rrsets?type=TXT&name=$RecordName." `
-            -Headers $script:GCToken.AuthHeader @script:UseBasic
+        Write-Debug "GET $($queryParams.Uri)"
+        $response = Invoke-RestMethod @queryParams @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
     } catch { throw }
     $rrsets = $response.rrsets
@@ -37,12 +44,16 @@ function Add-DnsTxt {
     if ($rrsets.Count -eq 0) {
         # create a new record from scratch
         Write-Debug "Creating new record for $RecordName"
-        $changeBody = @{additions=@(@{
-            name="$RecordName.";
-            type='TXT';
-            ttl=10;
-            rrdatas=@("`"$TxtValue`"")
-        })}
+        $changeBody = @{
+            additions = @(
+                @{
+                    name    = "$RecordName."
+                    type    = 'TXT'
+                    ttl     = 10
+                    rrdatas = @("`"$TxtValue`"")
+                }
+            )
+        }
     } else {
         if ("`"$TxtValue`"" -in $rrsets[0].rrdatas) {
             Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
@@ -56,18 +67,24 @@ function Add-DnsTxt {
         $toDelete = $rrsets[0] | ConvertTo-Json | ConvertFrom-Json
         $rrsets[0].rrdatas += "`"$TxtValue`""
         $changeBody = @{
-            deletions=@($toDelete);
-            additions=@($rrsets[0]);
+            deletions = @($toDelete)
+            additions = @($rrsets[0])
         }
     }
 
     Write-Verbose "Sending update for $RecordName"
-    Write-Debug ($changeBody | ConvertTo-Json -Depth 5)
+    $queryParams = @{
+        Uri         = "$recRoot/changes"
+        Method      = 'Post'
+        Body        = ($changeBody | ConvertTo-Json -Depth 5)
+        Headers     = $script:GCToken.AuthHeader
+        ContentType = 'application/json'
+        Verbose     = $false
+        ErrorAction = 'Stop'
+    }
     try {
-        $response = Invoke-RestMethod "$recRoot/changes" -Method Post `
-            -Body ($changeBody | ConvertTo-Json -Depth 5) `
-            -Headers $script:GCToken.AuthHeader `
-            -ContentType 'application/json' @script:UseBasic
+        Write-Debug "POST $($queryParams.Uri)`n$($changeBody | ConvertTo-Json -Depth 5)"
+        $response = Invoke-RestMethod @queryParams @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
     } catch { throw }
 
@@ -86,6 +103,9 @@ function Add-DnsTxt {
 
     .PARAMETER GCKeyFile
         Path to a service account JSON file that contains the account's private key and other metadata. This should have been downloaded when originally creating the service account.
+
+    .PARAMETER GCProjectId
+        The Project ID (or IDs) that contain the DNS zones you will be modifying. This is only required if the GCKeyFile references an account in a different project than the DNS zone or you have zones in multiple projects. When using this parameter, include the project ID associated with the GCKeyFile in addition to any others you need.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -114,19 +134,25 @@ function Remove-DnsTxt {
     # https://cloud.google.com/dns/api/v1beta2/
 
     Connect-GCloudDns $GCKeyFile
-    $token = $script:GCToken
+    if (-not $GCProjectId) { $GCProjectId = @($script:GCToken.DefaultProject) }
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (!($zoneID = Find-GCZone $RecordName)) {
-        throw "Unable to find Google hosted zone for $RecordName"
+    if (-not ($zoneID,$projID = Find-GCZone $RecordName $GCProjectId)) {
+        throw "Unable to find Google hosted zone for $RecordName in project(s) $($GCProjectId -join ',')"
     }
 
-    $recRoot = "https://www.googleapis.com/dns/v1beta2/projects/$($token.ProjectID)/managedZones/$zoneID"
+    $recRoot = "https://www.googleapis.com/dns/v1beta2/projects/$projID/managedZones/$zoneID"
 
     # query the current txt record set
+    $queryParams = @{
+        Uri = '{0}/rrsets?type=TXT&name={1}.' -f $recRoot,$RecordName
+        Headers = $script:GCToken.AuthHeader
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
     try {
-        $response = Invoke-RestMethod "$recRoot/rrsets?type=TXT&name=$RecordName." `
-            -Headers $script:GCToken.AuthHeader @script:UseBasic
+        Write-Debug "GET $($queryParams.Uri)"
+        $response = Invoke-RestMethod @queryParams @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
     } catch { throw }
     $rrsets = $response.rrsets
@@ -145,21 +171,31 @@ function Remove-DnsTxt {
         # the last one, we just want to delete it.
         Write-Debug "Removing from $RecordName with $($rrsets[0].Count) existing value(s)"
         $changeBody = @{
-            deletions=@(($rrsets[0] | ConvertTo-Json | ConvertFrom-Json))
+            deletions = @(
+                ($rrsets[0] | ConvertTo-Json | ConvertFrom-Json)
+            )
         }
         if ($rrsets[0].rrdatas.Count -gt 1) {
-            $rrsets[0].rrdatas = @($rrsets[0].rrdatas | Where-Object { $_ -ne "`"$TxtValue`"" })
+            $rrsets[0].rrdatas = @(
+                $rrsets[0].rrdatas | Where-Object { $_ -ne "`"$TxtValue`"" }
+            )
             $changeBody.additions = @($rrsets[0])
         }
     }
 
     Write-Verbose "Sending update for $RecordName"
-    Write-Debug ($changeBody | ConvertTo-Json -Depth 5)
+    $queryParams = @{
+        Uri         = "$recRoot/changes"
+        Method      = 'Post'
+        Body        = ($changeBody | ConvertTo-Json -Depth 5)
+        Headers     = $script:GCToken.AuthHeader
+        ContentType = 'application/json'
+        Verbose     = $false
+        ErrorAction = 'Stop'
+    }
     try {
-        $response = Invoke-RestMethod "$recRoot/changes" -Method Post `
-            -Body ($changeBody | ConvertTo-Json -Depth 5) `
-            -Headers $script:GCToken.AuthHeader `
-            -ContentType 'application/json' @script:UseBasic
+        Write-Debug "POST $($queryParams.Uri)`n$($changeBody | ConvertTo-Json -Depth 5)"
+        $response = Invoke-RestMethod @queryParams @script:UseBasic
         Write-Debug ($response | ConvertTo-Json -Depth 5)
     } catch { throw }
 
@@ -178,6 +214,9 @@ function Remove-DnsTxt {
 
     .PARAMETER GCKeyFile
         Path to a service account JSON file that contains the account's private key and other metadata. This should have been downloaded when originally creating the service account.
+
+    .PARAMETER GCProjectId
+        The Project ID (or IDs) that contain the DNS zones you will be modifying. This is only required if the GCKeyFile references an account in a different project than the DNS zone or you have zones in multiple projects. When using this parameter, include the project ID associated with the GCKeyFile in addition to any others you need.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -270,11 +309,11 @@ function Connect-GCloudDns {
 
     # build the claim set for DNS read/write
     $jwtClaim = @{
-        iss   = $GCKeyObj.client_email;
-        aud   = $GCKeyObj.token_uri;
-        scope = 'https://www.googleapis.com/auth/ndev.clouddns.readwrite';
-        exp   = ($unixNow + 3600).ToString();
-        iat   = $unixNow.ToString();
+        iss   = $GCKeyObj.client_email
+        aud   = $GCKeyObj.token_uri
+        scope = 'https://www.googleapis.com/auth/ndev.clouddns.readwrite'
+        exp   = ($unixNow + 3600).ToString()
+        iat   = $unixNow.ToString()
     }
     Write-Debug "Claim set: $($jwtClaim | ConvertTo-Json)"
 
@@ -294,9 +333,11 @@ function Connect-GCloudDns {
 
     # save a custom token to memory
     $script:GCToken = @{
-        AuthHeader = @{Authorization="$($response.token_type) $($response.access_token)"};
-        Expires    = (Get-DateTimeOffsetNow).AddSeconds($response.expires_in - 300);
-        ProjectID  = $GCKeyObj.project_id;
+        AuthHeader = @{
+            Authorization = "$($response.token_type) $($response.access_token)"
+        }
+        Expires = (Get-DateTimeOffsetNow).AddSeconds($response.expires_in - 300)
+        DefaultProject = $GCKeyObj.project_id
     }
 
 }
@@ -305,7 +346,9 @@ function Find-GCZone {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [string]$RecordName
+        [string]$RecordName,
+        [Parameter(Mandatory,Position=1)]
+        [string[]]$GCProjectId
     )
 
     # setup a module variable to cache the record to zone mapping
@@ -317,14 +360,27 @@ function Find-GCZone {
         return $script:GCRecordZones.$RecordName
     }
 
-    $token = $script:GCToken
-    $projRoot = "https://www.googleapis.com/dns/v1beta2/projects/$($token.ProjectID)"
+    # get the list of available zones across the projects we have IDs for
+    $zones = @($GCProjectId | ForEach-Object {
+        $projID = $_
+        $queryParams = @{
+            Uri = "https://www.googleapis.com/dns/v1beta2/projects/$projID/managedZones"
+            Headers = $script:GCToken.AuthHeader
+            Verbose = $false
+            ErrorAction = 'Stop'
+        }
+        Write-Debug "GET $($queryParams.Uri)"
+        try {
+            Invoke-RestMethod @queryParams @script:UseBasic |
+                Select-Object -ExpandProperty managedZones |
+                Where-Object { $_.visibility -eq 'public' } |
+                Select-Object id,dnsName,@{L='projID';E={$projID}}
+        } catch { throw }
+    })
 
-    # get the list of available zones
-    try {
-        $zones = (Invoke-RestMethod "$projRoot/managedZones" `
-            -Headers $script:GCToken.AuthHeader @script:UseBasic).managedZones | Where-Object {$_.visibility -eq "public"}
-    } catch { throw }
+    if ($zones.Count -eq 0) {
+        throw "No managed zones found"
+    }
 
     # Since Google could be hosting both apex and sub-zones, we need to find the closest/deepest
     # sub-zone that would hold the record rather than just adding it to the apex. So for something
@@ -340,10 +396,11 @@ function Find-GCZone {
         $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )."
         Write-Debug "Checking $zoneTest"
 
-        if ($zoneTest -in $zones.dnsName) {
-            $zoneID = ($zones | Where-Object { $_.dnsName -eq $zoneTest }).id
-            $script:GCRecordZones.$RecordName = $zoneID
-            return $zoneID
+        if ($zoneMatch = $zones | Where-Object { $_.dnsName -eq $zoneTest }) {
+            $zoneID = $zoneMatch.id
+            $projID = $zoneMatch.projID
+            $script:GCRecordZones.$RecordName = @($zoneID,$projID)
+            return @($zoneID,$projID)
         }
     }
 

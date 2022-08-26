@@ -10,7 +10,7 @@ We need to create a service account and give it permission to add TXT records to
 
 ### Create a Custom Role
 
-It's always a good idea to limit a service account's access to only what is needed to perform its function. So rather than giving it the default `DNS Administrator` role, we'll create a custom one that is less dangerous. Start by going to the [IAM Roles](https://console.cloud.google.com/iam-admin/roles) page and make sure the correct project is selected.
+It's always a good idea to limit a service account's access to only what is needed to perform its function. So rather than giving it the default `DNS Administrator` role, we'll create a custom one that is less dangerous. Start by going to the [IAM Roles](https://console.cloud.google.com/iam-admin/roles) page and make sure the project containing your DNS zone is selected.
 
 - Filter the Roles for "dns" and find the `DNS Administrator` role
 - Open the context menu for the role and click `Create role from this role`
@@ -45,12 +45,27 @@ Start by going to the [Service accounts](https://console.cloud.google.com/iam-ad
 - Click `Create`
 - A JSON file should be automatically downloaded. **Don't lose it**.
 
+If you have multiple projects with DNS zones that this account will need to modify, you can grant cross-project access by creating the same `DNS Zone Editor` role in the other projects and then granting the role to this service account by referencing its Principal ID which usually looks like `<id>@<project>.iam.gserviceaccount.com`.
+
 ## Using the Plugin
 
-The only plugin argument you need is the path to the JSON account file you downloaded. The plugin will cache the contents of this file on each use in case the original gets deleted or moved. But as long as it still exists, the real file will take precedence over the cached copy so you can update it in the future if necessary.
+If all of your DNS zones are in the same project as your service account, the only plugin argument you need is `GCKeyFile` which is the path to the JSON account file you downloaded. The plugin will cache the contents of this file on each use in case the original gets deleted or moved. But as long as it still exists, the real file will take precedence over the cached copy so you can update it in the future if necessary.
 
 ```powershell
-New-PACertificate example.com -Plugin GCloud -PluginArgs @{GCKeyFile='<path to json>'}
+$pArgs = @{
+  GCKeyFile = '<path to json>'
+}
+New-PACertificate example.com -Plugin GCloud -PluginArgs $pArgs
+```
+
+If your DNS zones are in a different project than your service account or if you have zones that span multiple projects, you will also need to supply the `GCProjectId` parameter with all of the project IDs that contain your DNS zones (including the one associated with the service account).
+
+```powershell
+$pArgs = @{
+  GCKeyFile = '<path to json>'
+  GCProjectId = 'project1','project2'
+}
+New-PACertificate example.com -Plugin GCloud -PluginArgs $pArgs
 ```
 
 ## App Engine Compatibility Note
