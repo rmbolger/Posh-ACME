@@ -22,23 +22,27 @@ As more public certificate authorities hop on the [ACME][rfc00] bandwagon, it is
 
 ## ACME Spec and Feature Support
 
-Some of the features in the ACME protocol are optional. Others are mandatory, but not yet supported by some implementations. Here is the status of those various features in each CA.
+Some of the features in the ACME protocol are optional. Others are mandatory but not yet supported by some implementations. Here is the status of those various features in each CA.
 
-*NOTE: Multi-perspective validation is not technically part of the ACME protocol. But it is an important security feature for the integrity of domain validation.*
+!!! note
+    Multi-perspective validation is not part of the ACME protocol but is an important security feature for the integrity of domain validation.
+    SXG Support is also not part of the ACME protocol but is a notable feature among free ACME CAs.
 
-| Feature                                      | [Let's&nbsp;Encrypt][le01] | [BuyPass][bp01]                              | [ZeroSSL][z01]     | [SSL.com][ss01]                              | [Google][gc01]     |
-| -------                                      | :------------------------: | :-------------:                              | :------------:     | :-------------:                              | :------------:     |
-| [(EAB) External<br />Account Binding][rfc01] | n/a                        | n/a                                          | Required*          | Required                                     | Required*          |
-| [Multi-perspective<br />Validation][le05]    | :white_check_mark:         | :x:                                          | :x:                | :x:                                          | :white_check_mark: |
-| [Account<br />Key Rollover][rfc02]           | :white_check_mark:         | :white_check_mark:                           | :x:                | :x:*                                         | :white_check_mark: |
-| [Account<br />Deactivation][rfc03]           | :white_check_mark:         | :white_check_mark:                           | :white_check_mark: | :white_check_mark:                           | :white_check_mark: |
-| [Account<br />Orders][rfc04]                 | :x: *([Planned][le07])*    | :x:                                          | :x:                | :x:*                                         | :x:                |
-| [IP Address<br />Identifiers][rfc05]         | :x: *([Planned][le08])*    | :x:                                          | :x:*               | :x:                                          | :x:                |
-| [Pre-Authorization][rfc06]                   | :x:                        | :white_check_mark:                           | :x:                | :x:                                          | :x:                |
-| [Authorization<br />Deactivation][rfc07]     | :white_check_mark:         | :white_check_mark:                           | :white_check_mark: | :white_check_mark:                           | :white_check_mark: |
-| [Cert<br />Revocation][rfc08]                | :white_check_mark:         | :warning:<br />*(Only using account key)*    | :white_check_mark: | :white_check_mark:                           | :white_check_mark: |
-| [Challenge<br />Retrying][rfc09]             | :x:                        | :warning:<br />*(Client must request retry)* | :white_check_mark: | :warning:<br />*(Client must request retry)* | :x:                |
-| Variable Cert Lifetime                       | :x:                        | :x:                                          | :x:                | :x:                                          | :white_check_mark: |
+| Feature                                      | [Let's&nbsp;Encrypt][le01] | [BuyPass][bp01]                              | [ZeroSSL][z01]     | [SSL.com][ss01]                              | [Google][gc01]      |
+| -------                                      | :------------------------: | :-------------:                              | :------------:     | :-------------:                              | :------------:      |
+| [(EAB) External<br />Account Binding][rfc01] | n/a                        | n/a                                          | Required*          | Required                                     | Required*           |
+| [Multi-perspective<br />Validation][le05]    | :white_check_mark:         | :x:                                          | :x:                | :x:                                          | :white_check_mark:  |
+| [Account<br />Key Rollover][rfc02]           | :white_check_mark:         | :white_check_mark:                           | :x:                | :x:*                                         | :white_check_mark:  |
+| [Account<br />Deactivation][rfc03]           | :white_check_mark:         | :white_check_mark:                           | :white_check_mark: | :white_check_mark:                           | :white_check_mark:  |
+| [Account<br />Orders][rfc04]                 | :x: *([Planned][le07])*    | :x:                                          | :x:                | :x:*                                         | :x:                 |
+| [IP Address<br />Identifiers][rfc05]         | :x: *([Planned][le08])*    | :x:                                          | :x:*               | :x:                                          | :x:                 |
+| [Pre-Authorization][rfc06]                   | :x:                        | :white_check_mark:                           | :x:                | :x:                                          | :x:                 |
+| [Authorization<br />Deactivation][rfc07]     | :white_check_mark:         | :white_check_mark:                           | :white_check_mark: | :white_check_mark:                           | :white_check_mark:  |
+| [Cert<br />Revocation][rfc08]                | :white_check_mark:         | :warning:<br />*(Only using account key)*    | :white_check_mark: | :white_check_mark:                           | :white_check_mark:  |
+| [Challenge<br />Retrying][rfc09]             | :x:                        | :warning:<br />*(Client must request retry)* | :white_check_mark: | :warning:<br />*(Client must request retry)* | :x:                 |
+| Variable Cert Lifetime                       | :x:                        | :x:                                          | :x:                | :x:                                          | :white_check_mark:  |
+| [SXG Support][gc09]                          | :x:                        | :x:                                          | :x:                | :x:                                          | :white_check_mark:* |
+
 
 * :white_check_mark: = Feature supported
 * :x: = Feature unsupported
@@ -49,6 +53,7 @@ Some of the features in the ACME protocol are optional. Others are mandatory, bu
 * ZeroSSL's EAB credentials can only be used once to establish a new ACME account. Creating additional accounts requires generating new EAB credentials.
 * ZeroSSL does support IP address based certificates, but not via the ACME protocol.
 * Google's EAB credentials can only be used once to establish a new ACME account and expire after 7 days if not used. Creating additional accounts requires generating new EAB credentials.
+* For Google SXG Certificates, you must use a different ACME directory endpoint. [https://dv-sxg.acme-v02.api.pki.goog/directory][gc08]
 
 
 [wk01]: https://en.wikipedia.org/wiki/Domain-validated_certificate
@@ -99,3 +104,5 @@ Some of the features in the ACME protocol are optional. Others are mandatory, bu
 [gc05]: https://dv.acme-v02.api.pki.goog/directory
 [gc06]: https://dv.acme-v02.test-api.pki.goog/directory
 [gc07]: https://cloud.google.com/certificate-manager/docs/public-ca-tutorial
+[gc08]: https://dv-sxg.acme-v02.api.pki.goog/directory
+[gc09]: https://web.dev/signed-exchanges/
