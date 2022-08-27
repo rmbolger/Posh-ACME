@@ -1479,6 +1479,18 @@
   
   
     <li class="md-nav__item">
+      <a href="../PortsManagement/" class="md-nav__link">
+        PortsManagement
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../RFC2136/" class="md-nav__link">
         RFC2136
       </a>
@@ -1949,7 +1961,7 @@
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>We need to create a service account and give it permission to add TXT records to the zone(s) we'll be issuing certificates for.</p>
 <h3 id="create-a-custom-role">Create a Custom Role<a class="headerlink" href="#create-a-custom-role" title="Permanent link">&para;</a></h3>
-<p>It's always a good idea to limit a service account's access to only what is needed to perform its function. So rather than giving it the default <code>DNS Administrator</code> role, we'll create a custom one that is less dangerous. Start by going to the <a href="https://console.cloud.google.com/iam-admin/roles">IAM Roles</a> page and make sure the correct project is selected.</p>
+<p>It's always a good idea to limit a service account's access to only what is needed to perform its function. So rather than giving it the default <code>DNS Administrator</code> role, we'll create a custom one that is less dangerous. Start by going to the <a href="https://console.cloud.google.com/iam-admin/roles">IAM Roles</a> page and make sure the project containing your DNS zone is selected.</p>
 <ul>
 <li>Filter the Roles for "dns" and find the <code>DNS Administrator</code> role</li>
 <li>Open the context menu for the role and click <code>Create role from this role</code></li>
@@ -1982,9 +1994,20 @@
 <li>Click <code>Create</code></li>
 <li>A JSON file should be automatically downloaded. <strong>Don't lose it</strong>.</li>
 </ul>
+<p>If you have multiple projects with DNS zones that this account will need to modify, you can grant cross-project access by creating the same <code>DNS Zone Editor</code> role in the other projects and then granting the role to this service account by referencing its Principal ID which usually looks like <code>&lt;id&gt;@&lt;project&gt;.iam.gserviceaccount.com</code>.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>The only plugin argument you need is the path to the JSON account file you downloaded. The plugin will cache the contents of this file on each use in case the original gets deleted or moved. But as long as it still exists, the real file will take precedence over the cached copy so you can update it in the future if necessary.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">GCloud</span> <span class="n">-PluginArgs</span> <span class="p">@{</span><span class="n">GCKeyFile</span><span class="p">=</span><span class="s1">&#39;&lt;path to json&gt;&#39;</span><span class="p">}</span>
+<p>If all of your DNS zones are in the same project as your service account, the only plugin argument you need is <code>GCKeyFile</code> which is the path to the JSON account file you downloaded. The plugin will cache the contents of this file on each use in case the original gets deleted or moved. But as long as it still exists, the real file will take precedence over the cached copy so you can update it in the future if necessary.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+  <span class="n">GCKeyFile</span> <span class="p">=</span> <span class="s1">&#39;&lt;path to json&gt;&#39;</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">GCloud</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
+</code></pre></div>
+<p>If your DNS zones are in a different project than your service account or if you have zones that span multiple projects, you will also need to supply the <code>GCProjectId</code> parameter with all of the project IDs that contain your DNS zones (including the one associated with the service account).</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+  <span class="n">GCKeyFile</span> <span class="p">=</span> <span class="s1">&#39;&lt;path to json&gt;&#39;</span>
+  <span class="n">GCProjectId</span> <span class="p">=</span> <span class="s1">&#39;project1&#39;</span><span class="p">,</span><span class="s1">&#39;project2&#39;</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">GCloud</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
 <h2 id="app-engine-compatibility-note">App Engine Compatibility Note<a class="headerlink" href="#app-engine-compatibility-note" title="Permanent link">&para;</a></h2>
 <p>If you're planning on uploading your certificate to Google App Engine, it has been reported that it only supports RSA based certificates. So don't use an ECC key option. It also requires the private key to be in PKCS#1 format and the module currently outputs the key as PKCS#8. You can convert it with openssl using the following command:</p>

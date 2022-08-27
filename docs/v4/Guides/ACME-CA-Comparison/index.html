@@ -1403,6 +1403,18 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Plugins/PortsManagement/" class="md-nav__link">
+        PortsManagement
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Plugins/RFC2136/" class="md-nav__link">
         RFC2136
       </a>
@@ -1935,7 +1947,7 @@
 <td>RSA <a href="https://crt.sh/?q=c81a8bd1f9cf6d84c525f378ca1d3f8c30770e34">Iss1</a>/<a href="https://crt.sh/?q=d89e3bd43d5d909b47a18977aa9d5ce36cee184c">Iss2</a>/<a href="https://crt.sh/?q=d1eb23a46d17d68fd92564c2f1f1601764d8e349">Root</a><br />ECC <a href="https://crt.sh/?q=7f95276d4951499fd756df344aa24fb38ceaf678">Iss1</a>/<a href="https://crt.sh/?q=ca7788c32da1e4b7863a4fb57d00b55ddacbc7f9">Iss2</a>/<a href="https://crt.sh/?q=d1eb23a46d17d68fd92564c2f1f1601764d8e349">Root</a></td>
 <td>??</td>
 <td><a href="https://acme.zerossl.com/v2/DV90">RSA + ECC</a></td>
-<td></td>
+<td><a href="https://dv.acme-v02.test-api.pki.goog/directory">Staging Endpoint</a><br /><a href="https://cloud.google.com/certificate-manager/docs/public-ca-tutorial">Quick Start</a></td>
 </tr>
 <tr>
 <td><a href="https://www.ssl.com/">SSL.com</a></td>
@@ -1947,6 +1959,16 @@
 <td><a href="https://acme.ssl.com/sslcom-dv-rsa">RSA</a><br /><a href="https://acme.ssl.com/sslcom-dv-ecc">ECC</a></td>
 <td>See Warning below</td>
 </tr>
+<tr>
+<td><a href="https://cloud.google.com/certificate-manager/docs/public-ca">Google</a></td>
+<td>100+ names</td>
+<td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
+<td>90* days</td>
+<td><a href="https://crt.sh/?q=9c0b252a678a087fbee496a44377f7556ac605e7">Iss</a>/<a href="https://crt.sh/?q=e1c950e6ef22f84c5645728b922060d7d5a7a3e8">Root</a></td>
+<td><a href="https://cloud.google.com/certificate-manager/docs/quotas">Policy</a></td>
+<td><a href="https://dv.acme-v02.api.pki.goog/directory">RSA + ECC</a></td>
+<td>See Notes below</td>
+</tr>
 </tbody>
 </table>
 <ul>
@@ -1955,10 +1977,16 @@
 <li>Using Let's Encrypt's ECDSA-only chain currently requires your ACME account be <a href="https://community.letsencrypt.org/t/ecdsa-availability-in-production-environment/150679">added to an allow-list</a>. Otherwise, your ECDSA cert will be signed by the RSA chain.</li>
 <li>ZeroSSL supports a custom REST API that some clients use instead of pure ACME.</li>
 <li><strong>SSL.com Warning:</strong> If your SSL.com account has funds available, you will be charged for a paid 1-year certificate instead of a free 90-day certificate. There is no known way to request only a free certificate.</li>
+<li>Google certs have a 90 day lifetime by default but can be requested for shorter lifetimes down to 1 day. The recommended minimum lifetime is 3 days.</li>
+<li>Google certs do not currently support punycode/IDN domains.</li>
 </ul>
 <h2 id="acme-spec-and-feature-support">ACME Spec and Feature Support<a class="headerlink" href="#acme-spec-and-feature-support" title="Permanent link">&para;</a></h2>
-<p>Some of the features in the ACME protocol are optional. Others are mandatory, but not yet supported by some implementations. Here is the status of those various features in each CA.</p>
-<p><em>NOTE: Multi-perspective validation is not technically part of the ACME protocol. But it is an important security feature for the integrity of domain validation.</em></p>
+<p>Some of the features in the ACME protocol are optional. Others are mandatory but not yet supported by some implementations. Here is the status of those various features in each CA.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Multi-perspective validation is not part of the ACME protocol but is an important security feature for the integrity of domain validation.
+SXG Support is also not part of the ACME protocol but is a notable feature among free ACME CAs.</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -1967,6 +1995,7 @@
 <th align="center"><a href="https://www.buypass.com/">BuyPass</a></th>
 <th align="center"><a href="https://zerossl.com/">ZeroSSL</a></th>
 <th align="center"><a href="https://www.ssl.com/">SSL.com</a></th>
+<th align="center"><a href="https://cloud.google.com/certificate-manager/docs/public-ca">Google</a></th>
 </tr>
 </thead>
 <tbody>
@@ -1976,6 +2005,7 @@
 <td align="center">n/a</td>
 <td align="center">Required*</td>
 <td align="center">Required</td>
+<td align="center">Required*</td>
 </tr>
 <tr>
 <td><a href="https://letsencrypt.org/2020/02/19/multi-perspective-validation.html">Multi-perspective<br />Validation</a></td>
@@ -1983,6 +2013,7 @@
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
+<td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
 </tr>
 <tr>
 <td><a href="https://datatracker.ietf.org/doc/html/rfc8555#section-7.3.5">Account<br />Key Rollover</a></td>
@@ -1990,9 +2021,11 @@
 <td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" />*</td>
+<td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
 </tr>
 <tr>
 <td><a href="https://datatracker.ietf.org/doc/html/rfc8555#section-7.3.6">Account<br />Deactivation</a></td>
+<td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
 <td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
 <td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
 <td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
@@ -2004,12 +2037,14 @@
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" />*</td>
+<td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
 </tr>
 <tr>
 <td><a href="https://datatracker.ietf.org/doc/html/rfc8738">IP Address<br />Identifiers</a></td>
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /> <em>(<a href="https://github.com/letsencrypt/boulder/issues/2706">Planned</a>)</em></td>
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" />*</td>
+<td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
 </tr>
 <tr>
@@ -2018,9 +2053,11 @@
 <td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
+<td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
 </tr>
 <tr>
 <td><a href="https://datatracker.ietf.org/doc/html/rfc8555#section-7.5.2">Authorization<br />Deactivation</a></td>
+<td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
 <td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
 <td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
 <td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
@@ -2032,6 +2069,7 @@
 <td align="center"><img alt="⚠" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/26a0.svg" title=":warning:" /><br /><em>(Only using account key)</em></td>
 <td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
 <td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
+<td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
 </tr>
 <tr>
 <td><a href="https://datatracker.ietf.org/doc/html/rfc8555#section-8.2">Challenge<br />Retrying</a></td>
@@ -2039,6 +2077,23 @@
 <td align="center"><img alt="⚠" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/26a0.svg" title=":warning:" /><br /><em>(Client must request retry)</em></td>
 <td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
 <td align="center"><img alt="⚠" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/26a0.svg" title=":warning:" /><br /><em>(Client must request retry)</em></td>
+<td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
+</tr>
+<tr>
+<td>Variable Cert Lifetime</td>
+<td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
+<td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
+<td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
+<td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
+<td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
+</tr>
+<tr>
+<td><a href="https://web.dev/signed-exchanges/">SXG Support</a></td>
+<td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
+<td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
+<td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
+<td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
+<td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" />*</td>
 </tr>
 </tbody>
 </table>
@@ -2051,6 +2106,8 @@
 <li>SSL.com requires an email address in the ACME account contact field, but doesn't enforce it on creation time. Instead, it throws an "badCSR" error when you try to finalize an order from an account with an empty address.</li>
 <li>ZeroSSL's EAB credentials can only be used once to establish a new ACME account. Creating additional accounts requires generating new EAB credentials.</li>
 <li>ZeroSSL does support IP address based certificates, but not via the ACME protocol.</li>
+<li>Google's EAB credentials can only be used once to establish a new ACME account and expire after 7 days if not used. Creating additional accounts requires generating new EAB credentials.</li>
+<li>For Google SXG Certificates, you must use a different ACME directory endpoint. <a href="https://dv-sxg.acme-v02.api.pki.goog/directory">https://dv-sxg.acme-v02.api.pki.goog/directory</a></li>
 </ul>
                 
               
