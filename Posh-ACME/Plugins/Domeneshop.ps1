@@ -226,24 +226,23 @@ function Invoke-DomeneshopAPI {
 
     $apiRoot = 'https://api.domeneshop.no/v0/domains'
     if ($QueryAdditions) { $apiRoot += $QueryAdditions }
-    if ($Body) {
-        $response = Invoke-RestMethod  `
-            -Method $Method `
-            -Uri $apiRoot `
-            -Headers $apiAuthorization.Headers `
-            -ContentType "application/json" `
-            -Body $Body `
-            @script:UseBasic `
-            -ErrorAction Stop
+
+    $queryParams = @{
+        Uri = $apiRoot
+        Method = $Method
+        Headers = $apiAuthorization.Headers
+        ContentType = 'application/json'
+        ErrorAction = 'Stop'
+        Verbose = $false
     }
-    else {
-        $response = Invoke-RestMethod  `
-            -Method $Method `
-            -Uri $apiRoot `
-            -Headers $apiAuthorization.Headers `
-            -ContentType "application/json" `
-            @script:UseBasic `
-            -ErrorAction Stop    }
+    Write-Debug ('{0} {1}' -f $queryParams.Method,$queryParams.Uri)
+    if ($Body) {
+        $queryParams.Body = $Body
+        Write-Debug $Body
+    }
+    $response = Invoke-RestMethod @queryParams @script:UseBasic
+
+    Write-Debug "Response: $($response | ConvertTo-Json)"
 
     return $response
 }
@@ -300,6 +299,7 @@ function Get-DomeneshopTxtRecord {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
+        [AllowEmptyString()]
         [string]$RecordShortName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
@@ -310,14 +310,14 @@ function Get-DomeneshopTxtRecord {
     )
 
     try {
-        Write-Debug ("Fetching TXT records for {0} in zone id {1}" -f $RecordShortName, $ZoneID)
+        Write-Debug ("Fetching TXT records for '{0}' in zone id {1}" -f $RecordShortName, $ZoneID)
 
         $querystring = ("/{0}/dns" -f $ZoneID)
         $response = Invoke-DomeneshopAPI -apiAuthorization $apiAuthorization -QueryAdditions $querystring | `
             Where-Object -FilterScript { $_.type -ieq 'txt' -and $_.data -eq $TxtValue }
 
-        if (!$response) { Write-Debug ("No TXT record {0} found in zone {1} at Domeneshop" -f $RecordShortName, $ZoneID) }
-        else { Write-Debug ("Found TXT record {0} in zone id {1} at Domeneshop" -f $RecordShortName, $ZoneID) }
+        if (!$response) { Write-Debug ("No TXT record '{0}' found in zone {1} at Domeneshop" -f $RecordShortName, $ZoneID) }
+        else { Write-Debug ("Found TXT record '{0}' in zone id {1} at Domeneshop" -f $RecordShortName, $ZoneID) }
 
         return $response
 
