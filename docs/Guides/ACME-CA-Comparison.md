@@ -40,7 +40,7 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 | [Authorization<br />Deactivation][rfc07]     | :white_check_mark:         | :white_check_mark:                           | :white_check_mark: | :white_check_mark:                           | :white_check_mark:  |
 | [Cert<br />Revocation][rfc08]                | :white_check_mark:         | :warning:<br />*(Only using account key)*    | :white_check_mark: | :white_check_mark:                           | :white_check_mark:  |
 | [Challenge<br />Retrying][rfc09]             | :x:                        | :warning:<br />*(Client must request retry)* | :white_check_mark: | :warning:<br />*(Client must request retry)* | :x:                 |
-| Variable Cert Lifetime                       | :x:                        | :x:                                          | :x:                | :x:                                          | :white_check_mark:  |
+| [Variable Cert Lifetime][rfc10]              | :x:                        | :x:                                          | :x:                | :x:                                          | :white_check_mark:  |
 | [SXG Support][gc09]                          | :x:                        | :x:                                          | :x:                | :x:                                          | :white_check_mark:* |
 
 
@@ -77,6 +77,7 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 [rfc07]: https://datatracker.ietf.org/doc/html/rfc8555#section-7.5.2
 [rfc08]: https://datatracker.ietf.org/doc/html/rfc8555#section-7.6
 [rfc09]: https://datatracker.ietf.org/doc/html/rfc8555#section-8.2
+[rfc10]: https://datatracker.ietf.org/doc/html/rfc8555#section-7.1.3
 [bp01]: https://www.buypass.com/
 [bp02]: https://community.buypass.com/t/m2r5cj/rate-limits
 [bp03]: https://api.test4.buypass.no/acme/directory
