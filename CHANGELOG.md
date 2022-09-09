@@ -1,3 +1,8 @@
+## 4.15.1 (2022-09-09)
+
+* Reverted the embedded BouncyCastle library back to 1.8.8 due to version conflicts with Az.KeyVault in PowerShell 6+. This is temporary while a suitable workaround for version conflicts in other modules is explored.
+* Fixed Domeneshop plugin when publishing apex TXT records and added more API output to debug messages.
+
 ## 4.15.0 (2022-08-26)
 
 * PAOrder objects now have a flag to optionally use modern encryption options on generated PFX files. This will prevent the need to use "legacy" mode when reading the files with OpenSSL 3.x. However, it breaks compatibility with OpenSSL 1.0.x and earlier.

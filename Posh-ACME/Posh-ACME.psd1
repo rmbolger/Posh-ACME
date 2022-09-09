@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.15.0'
+ModuleVersion = '4.15.1'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,18 +83,10 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.15.0 (2022-08-26)
+## 4.15.1 (2022-09-09)
 
-* PAOrder objects now have a flag to optionally use modern encryption options on generated PFX files. This will prevent the need to use "legacy" mode when reading the files with OpenSSL 3.x. However, it breaks compatibility with OpenSSL 1.0.x and earlier.
-  * You can use the `-UseModernPfxEncryption` flag with `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder`. When used with `Set-PAOrder`, existing PFX files will be re-written based on the flag's new value.
-  * Use `Set-PAOrder -UseModernPfxEncryption:$false` to switch back to the default setting.
-  * The default for new orders will likely remain off until Posh-ACME 5.x is released.
-* Added new DNS plugin [PortsManagement](https://portsgroup.com/) (Thanks @wemmer)
-* The GCloud plugin has a new optional parameter, `GCProjectId` that takes one or more string values. This is only required if the DNS zones to modify don't reside in the same project as the service account referenced by `GCKeyFile` or they reside in multiple projects. When used, be sure to include all project IDs including the one referenced by `GCKeyFile`.
-* Added Google's new free ACME CA to the CA comparison doc
-* Upgraded the embedded BouncyCastle library to 1.9.0
-* Fixed UKFast plugin to support paging for accounts with many domains (Thanks @0x4c6565)
-* Fixed PFX friendly name generation when not provided in the order.
+* Reverted the embedded BouncyCastle library back to 1.8.8 due to version conflicts with Az.KeyVault in PowerShell 6+. This is temporary while a suitable workaround for version conflicts in other modules is explored.
+* Fixed Domeneshop plugin when publishing apex TXT records and added more API output to debug messages.
 '@
 
     }
