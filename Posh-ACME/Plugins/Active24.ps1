@@ -1,35 +1,29 @@
-# (c)2022, Pavel Zakavec
-
 function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName='Secure')]
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
-        [securestring]$Token,
-        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
-        [string]$TokenInsecure,
+        [Parameter(Mandatory,Position=2)]
+        [securestring]$A24Token,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # get the plaintext version of the token
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $TokenInsecure = [pscredential]::new('a',$Token).GetNetworkCredential().Password
-    }
+    $A24TokenInsecure = [pscredential]::new('a',$A24Token).GetNetworkCredential().Password
 
     $apiRoot = 'https://api.active24.com'
     $restParams = @{
-        Headers = @{Authorization="Bearer $TokenInsecure"}
+        Headers = @{Authorization="Bearer $A24TokenInsecure"}
         ContentType = 'application/json'
     }
 
     # get the zone name for our record
-    $zoneName = Find-DSZone $RecordName $restParams
+    $zoneName = Find-A24Zone $RecordName $restParams
     if ([String]::IsNullOrWhiteSpace($zoneName)) {
         throw "Unable to find zone for $RecordName in account $acctID"
     }
@@ -65,11 +59,8 @@ function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER Token
+    .PARAMETER A24Token
         The access API token for Active24
-
-    .PARAMETER TokenInsecure
-        (DEPRECATED) The access API token for Active24.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -83,33 +74,29 @@ function Add-DnsTxt {
 }
 
 function Remove-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName='Secure')]
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
-        [securestring]$Token,
-        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
-        [string]$TokenInsecure,
+        [Parameter(Mandatory,Position=2)]
+        [securestring]$A24Token,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # get the plaintext version of the token
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $TokenInsecure = [pscredential]::new('a',$Token).GetNetworkCredential().Password
-    }
+    $A24TokenInsecure = [pscredential]::new('a',$A24Token).GetNetworkCredential().Password
 
     $apiRoot = 'https://api.active24.com'
     $restParams = @{
-        Headers = @{Authorization="Bearer $TokenInsecure"}
+        Headers = @{Authorization="Bearer $A24TokenInsecure"}
         ContentType = 'application/json'
     }
 
     # get the zone name for our record
-    $zoneName = Find-DSZone $RecordName $restParams
+    $zoneName = Find-A24Zone $RecordName $restParams
     if ([String]::IsNullOrWhiteSpace($zoneName)) {
         throw "Unable to find zone for $RecordName in account $acctID"
     }
@@ -145,11 +132,8 @@ function Remove-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER Token
+    .PARAMETER A24Token
         The access API token for Active24.
-
-    .PARAMETER TokenInsecure
-        (DEPRECATED) The access API token for Active24.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -187,7 +171,7 @@ function Save-DnsTxt {
 # API Docs
 # https://api.active24.com/swagger-ui.html
 
-function Find-DSZone {
+function Find-A24Zone {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
@@ -198,11 +182,11 @@ function Find-DSZone {
 
     # setup a module variable to cache the record to zone mapping
     # so it's quicker to find later
-    if (!$script:DSRecordZones) { $script:DSRecordZones = @{} }
+    if (!$script:A24RecordZones) { $script:A24RecordZones = @{} }
 
     # check for the record in the cache
-    if ($script:DSRecordZones.ContainsKey($RecordName)) {
-        return $script:DSRecordZones.$RecordName
+    if ($script:A24RecordZones.ContainsKey($RecordName)) {
+        return $script:A24RecordZones.$RecordName
     }
 
     $apiRoot = 'https://api.active24.com'
@@ -223,7 +207,7 @@ function Find-DSZone {
         try {
             # if the call succeeds, the zone exists, so we don't care about the actualy response
             $null = Invoke-RestMethod "$apiRoot/dns/$zoneTest/records/v1" @RestParams -Method Get
-            $script:DSRecordZones.$RecordName = $zoneTest
+            $script:A24RecordZones.$RecordName = $zoneTest
             return $zoneTest
         } catch {
             Write-Debug ($_.ToString())
