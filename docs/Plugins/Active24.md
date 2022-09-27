@@ -22,14 +22,11 @@ First, [login](https://customer.active24.com/) to your account. Tokens are place
 
 ## Using the Plugin
 
-With your token value, you'll need to set the `Token` SecureString parameter.
-
-!!! warning
-    The `TokenInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
+With your token value, you'll need to set the `A24Token` SecureString parameter.
 
 ```powershell
 $pArgs = @{
-    Token = (Read-Host "Active24 Token" -AsSecureString)
+    A24Token = (Read-Host "Active24 Token" -AsSecureString)
 }
 New-PACertificate example.com -Plugin Active24 -PluginArgs $pArgs
 ```
