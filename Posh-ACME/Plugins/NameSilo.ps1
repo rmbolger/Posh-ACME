@@ -226,7 +226,7 @@ function Find-NameSiloZone {
     if ($response -and $response.namesilo.reply.code -ne 300) {
         throw "Unexpected response from NameSilo API: $($response.namesilo.reply.detail)"
     }
-    $domains = @($response.namesilo.reply.domains.domain)
+    $domains = @($response.namesilo.reply.domains.domain | Select-Object -ExpandProperty "#text")
 
     # find the closest match based on the record name
     $pieces = $RecordName.Split('.')
