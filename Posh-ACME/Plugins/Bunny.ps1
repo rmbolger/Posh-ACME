@@ -45,7 +45,7 @@ function Add-DnsTxt {
         # add new record
         try {
             Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
-            $bodyJson = @{Name = $recShort; Value = $TxtValue; ttl = 300; Type = 3 } | ConvertTo-Json -Compress
+            $bodyJson = @{Name = $recShort; Value = $TxtValue; ttl = 15; Type = 3 } | ConvertTo-Json -Compress
             Invoke-RestMethod "$apiRoot/$($zoneResult.Id)/records" -Method Put -Body $bodyJson @restParams | Out-Null
         }
         catch { throw }
