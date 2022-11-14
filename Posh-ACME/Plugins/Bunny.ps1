@@ -21,6 +21,7 @@ function Add-DnsTxt {
     $restParams = @{
         Headers     = @{AccessKey = "$AccessKeyInsecure" }
         ContentType = 'application/json'
+        ErrorAction = 'Stop'
     }
 
     # get the zone id for our record
@@ -35,7 +36,7 @@ function Add-DnsTxt {
     # check if TXT record with this value already exists
     try {
         $recShort = ($RecordName -ireplace [regex]::Escape($zoneResult.ZoneName), [string]::Empty).TrimEnd('.')
-        $resultSet = (Invoke-RestMethod "$apiRoot/$($zoneResult.Id)" @restParams -Method Get) 
+        $resultSet = (Invoke-RestMethod "$apiRoot/$($zoneResult.Id)" @restParams -Method Get)
         $existingRecs = $resultSet.Records | ? { $_.Name -eq $recShort -and $_.Type -eq 3 -and $_.Value -eq $TxtValue }
     }
     catch { throw }
@@ -43,7 +44,7 @@ function Add-DnsTxt {
     if ($existingRecs.Count -eq 0) {
         # add new record
         try {
-            Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"    
+            Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
             $bodyJson = @{Name = $recShort; Value = $TxtValue; ttl = 300; Type = 3 } | ConvertTo-Json -Compress
             Invoke-RestMethod "$apiRoot/$($zoneResult.Id)/records" -Method Put -Body $bodyJson @restParams | Out-Null
         }
@@ -100,6 +101,7 @@ function Remove-DnsTxt {
     $restParams = @{
         Headers     = @{AccessKey = "$AccessKeyInsecure" }
         ContentType = 'application/json'
+        ErrorAction = 'Stop'
     }
 
     # get the zone id for our record
@@ -113,7 +115,7 @@ function Remove-DnsTxt {
     # get all the instances of the record
     try {
         $recShort = ($RecordName -ireplace [regex]::Escape($zoneResult.ZoneName), [string]::Empty).TrimEnd('.')
-        $resultSet = (Invoke-RestMethod "$apiRoot/$($zoneResult.Id)" @restParams -Method Get) 
+        $resultSet = (Invoke-RestMethod "$apiRoot/$($zoneResult.Id)" @restParams -Method Get)
         $existingRecs = $resultSet.Records | ? { $_.Name -eq $recShort -and $_.Type -eq 3 -and $_.Value -eq $TxtValue }
     }
     catch { throw }
@@ -122,10 +124,10 @@ function Remove-DnsTxt {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     }
     else {
-     
+
         # delete record
         try {
-            Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"            
+            Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
             Invoke-RestMethod "$apiRoot/$($zoneResult.Id)/records/$($existingRecs[0].Id)" -Method Delete  @restParams | Out-Null
         }
         catch { throw }
@@ -205,7 +207,7 @@ function Find-BunnyZone {
     $zoneResult = $null
 
     try {
-        
+
         [Object[]]$Zones = Invoke-RestMethod $apiUrl @RestParams -Method Get
 
         Write-Debug "Search for the zone from longest to shortest set of FQDN pieces"
@@ -217,7 +219,7 @@ function Find-BunnyZone {
                 Write-Debug "Check for results"
                 [Object[]]$result = @($Zones.Items | Where-Object { $_.Domain -eq $zoneTest })
                 if ($result.Count -gt 0) {
-                       
+
                     $zoneResult = @{
                         Id       = $result.Id
                         ZoneName = $result.Domain
@@ -229,7 +231,7 @@ function Find-BunnyZone {
                 throw
             }
         }
-      
+
     }
     catch { Write-Debug "Caught an error, $($_.Exception.Message)"; throw }
 
