@@ -22,7 +22,7 @@ AutoDNS | [AutoDNS](https://help.internetx.com/x/Qwfj) XML Gateway | [Usage Guid
 Azure | [Microsoft Azure DNS](https://azure.microsoft.com/en-us/services/dns/) | [Usage Guide](Azure.md) | :white_check_mark:
 Beget | [Beget.com](https://beget.com) | [Usage Guide](Beget.md) | :white_check_mark:
 BlueCat | [BlueCat Address Manager](https://www.bluecatnetworks.com/platform/management/bluecat-address-manager/) | [Usage Guide](BlueCat.md) | :x:
-Bunny | [Bunny.net](https://bunny.net/) | [Usage Guide](Bunny.md) | :white_check_mark:
+Bunny | [Bunny.net](https://bunny.net?ref=4lxlzoj50y) | [Usage Guide](Bunny.md) | :white_check_mark:
 Cloudflare | [Cloudflare DNS](https://www.cloudflare.com/dns) | [Usage Guide](Cloudflare.md) | :white_check_mark:
 ClouDNS | [ClouDNS](https://www.cloudns.net/aff/id/224075/) | [Usage Guide](ClouDNS.md) | :white_check_mark:
 Combell | [Combell](https://www.combell.com/) | [Usage Guide](Combell.md) | :white_check_mark:
@@ -77,13 +77,6 @@ Yandex | [Yandex DNS](https://connect.yandex.com/) | [Usage Guide](Yandex.md) | 
 Zilore| [Zilore](https://zilore.com/?r=1f752c82378516890a5200006eae8469) | [Usage Guide](Zilore.md) | :white_check_mark:
 Zonomi | [Zonomi DNS](https://zonomi.com) | [Usage Guide](Zonomi.md) | :white_check_mark:
 
-### In Development
-
-These plugins have been committed to the main development branch and are pending inclusion in an official release.
-
-Plugin | Provider | Guide | Core Compatible
------- | -------- | ----- | ---------------
-
 ### Notes
 
  - <a name="windows">1</a>: When using the Windows DNS plugin on Windows from PowerShell Core, you must be on PowerShell 7+ to use the DnsServer module via implicit remoting.
@@ -98,10 +91,3 @@ Plugin | Notes | Guide
 ------ | ----- | -----
 WebRoot | Copies challenge files to a location on the filesystem. | [Usage Guide](WebRoot.md)
 WebSelfHost | Runs a self-hosted web server to answer challenge requests | [Usage Guide](WebSelfHost.md)
-
-### In Development
-
-These plugins have been committed to the main repo and are pending inclusion in an official release.
-
-Plugin | Notes | Guide
------- | ----- | -----
