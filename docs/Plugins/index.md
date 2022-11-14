@@ -22,6 +22,7 @@ AutoDNS | [AutoDNS](https://help.internetx.com/x/Qwfj) XML Gateway | [Usage Guid
 Azure | [Microsoft Azure DNS](https://azure.microsoft.com/en-us/services/dns/) | [Usage Guide](Azure.md) | :white_check_mark:
 Beget | [Beget.com](https://beget.com) | [Usage Guide](Beget.md) | :white_check_mark:
 BlueCat | [BlueCat Address Manager](https://www.bluecatnetworks.com/platform/management/bluecat-address-manager/) | [Usage Guide](BlueCat.md) | :x:
+Bunny | [Bunny.net](https://bunny.net/) | [Usage Guide](Bunny.md) | :white_check_mark:
 Cloudflare | [Cloudflare DNS](https://www.cloudflare.com/dns) | [Usage Guide](Cloudflare.md) | :white_check_mark:
 ClouDNS | [ClouDNS](https://www.cloudns.net/aff/id/224075/) | [Usage Guide](ClouDNS.md) | :white_check_mark:
 Combell | [Combell](https://www.combell.com/) | [Usage Guide](Combell.md) | :white_check_mark:
