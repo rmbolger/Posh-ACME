@@ -1,50 +1,53 @@
 function New-PAOrder {
-    [CmdletBinding(SupportsShouldProcess,DefaultParameterSetName='FromScratch')]
+    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'FromScratch')]
     [OutputType('PoshACME.PAOrder')]
     param(
-        [Parameter(ParameterSetName='FromScratch',Mandatory,Position=0)]
-        [Parameter(ParameterSetName='ImportKey',Mandatory,Position=0)]
+        [Parameter(ParameterSetName = 'FromScratch', Mandatory, Position = 0)]
+        [Parameter(ParameterSetName = 'ImportKey', Mandatory, Position = 0)]
         [string[]]$Domain,
-        [Parameter(ParameterSetName='FromCSR',Mandatory,Position=0)]
+        [Parameter(ParameterSetName = 'FromCSR', Mandatory, Position = 0)]
         [string]$CSRPath,
-        [Parameter(ParameterSetName='FromScratch',Position=1)]
-        [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
-        [string]$KeyLength='2048',
-        [Parameter(ParameterSetName='ImportKey',Mandatory)]
+        [Parameter(ParameterSetName = 'FromScratch', Position = 1)]
+        [ValidateScript({ Test-ValidKeyLength $_ -ThrowOnFail })]
+        [string]$KeyLength = '2048',
+        [Parameter(ParameterSetName = 'ImportKey', Mandatory)]
         [string]$KeyFile,
-        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [ValidateScript({ Test-ValidFriendlyName $_ -ThrowOnFail })]
         [string]$Name,
-        [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
+        [ValidateScript({ Test-ValidPlugin $_ -ThrowOnFail })]
         [string[]]$Plugin,
         [hashtable]$PluginArgs,
         [ValidateRange(0, 3650)]
         [int]$LifetimeDays,
         [string[]]$DnsAlias,
-        [Parameter(ParameterSetName='FromScratch')]
-        [Parameter(ParameterSetName='ImportKey')]
+        [Parameter(ParameterSetName = 'FromScratch')]
+        [Parameter(ParameterSetName = 'ImportKey')]
         [switch]$OCSPMustStaple,
-        [Parameter(ParameterSetName='FromScratch')]
-        [Parameter(ParameterSetName='ImportKey')]
+        [Parameter(ParameterSetName = 'FromScratch')]
+        [Parameter(ParameterSetName = 'ImportKey')]
         [switch]$AlwaysNewKey,
-        [Parameter(ParameterSetName='FromScratch')]
-        [Parameter(ParameterSetName='ImportKey')]
+        [Parameter(ParameterSetName = 'FromScratch')]
+        [Parameter(ParameterSetName = 'ImportKey')]
+        [string]$Subject,
+        [Parameter(ParameterSetName = 'FromScratch')]
+        [Parameter(ParameterSetName = 'ImportKey')]
         [string]$FriendlyName,
-        [Parameter(ParameterSetName='FromScratch')]
-        [Parameter(ParameterSetName='ImportKey')]
-        [string]$PfxPass='poshacme',
-        [Parameter(ParameterSetName='FromScratch')]
-        [Parameter(ParameterSetName='ImportKey')]
-        [ValidateScript({Test-SecureStringNotNullOrEmpty $_ -ThrowOnFail})]
+        [Parameter(ParameterSetName = 'FromScratch')]
+        [Parameter(ParameterSetName = 'ImportKey')]
+        [string]$PfxPass = 'poshacme',
+        [Parameter(ParameterSetName = 'FromScratch')]
+        [Parameter(ParameterSetName = 'ImportKey')]
+        [ValidateScript({ Test-SecureStringNotNullOrEmpty $_ -ThrowOnFail })]
         [securestring]$PfxPassSecure,
-        [Parameter(ParameterSetName='FromScratch')]
-        [Parameter(ParameterSetName='ImportKey')]
+        [Parameter(ParameterSetName = 'FromScratch')]
+        [Parameter(ParameterSetName = 'ImportKey')]
         [switch]$UseModernPfxEncryption,
-        [Parameter(ParameterSetName='FromScratch')]
-        [Parameter(ParameterSetName='ImportKey')]
+        [Parameter(ParameterSetName = 'FromScratch')]
+        [Parameter(ParameterSetName = 'ImportKey')]
         [switch]$Install,
         [switch]$UseSerialValidation,
-        [int]$DnsSleep=120,
-        [int]$ValidationTimeout=60,
+        [int]$DnsSleep = 120,
+        [int]$ValidationTimeout = 60,
         [string]$PreferredChain,
         [switch]$Force
     )
@@ -87,18 +90,19 @@ function New-PAOrder {
         }
 
         # override the existing PfxPass parameter
-        $PfxPass = [pscredential]::new('u',$PfxPassSecure).GetNetworkCredential().Password
+        $PfxPass = [pscredential]::new('u', $PfxPassSecure).GetNetworkCredential().Password
         $PSBoundParameters.PfxPass = $PfxPass
     }
 
     # check for an existing order
     if ($Name) {
         $order = Get-PAOrder -Name $Name
-    } else {
+    }
+    else {
         $order = Get-PAOrder -MainDomain $Domain[0]
 
         # set the default Name to a filesystem friendly version of the first domain
-        $Name = $Domain[0].Replace('*','!')
+        $Name = $Domain[0].Replace('*', '!')
     }
 
     # separate the SANs
@@ -117,18 +121,20 @@ function New-PAOrder {
              ($order.status -eq 'pending' -and (Get-DateTimeOffsetNow) -gt ([DateTimeOffset]::Parse($order.expires))) ))) {
             # do nothing
 
-        # confirm if previous order is still in progress
-        } elseif ($order -and $order.status -in 'pending','ready','processing') {
+            # confirm if previous order is still in progress
+        }
+        elseif ($order -and $order.status -in 'pending', 'ready', 'processing') {
 
             if (-not $PSCmdlet.ShouldContinue("Do you wish to overwrite?",
-                "Existing order with status $($order.status).")) { return }
+                    "Existing order with status $($order.status).")) { return }
 
-        # confirm if previous order not up for renewal
-        } elseif ($order -and $order.status -eq 'valid' -and
+            # confirm if previous order not up for renewal
+        }
+        elseif ($order -and $order.status -eq 'valid' -and
                     (Get-DateTimeOffsetNow) -lt ([DateTimeOffset]::Parse($order.RenewAfter))) {
 
             if (-not $PSCmdlet.ShouldContinue("Do you wish to overwrite?",
-                "Existing order has not reached suggested renewal window.")) { return }
+                    "Existing order has not reached suggested renewal window.")) { return }
         }
     }
 
@@ -152,7 +158,7 @@ function New-PAOrder {
     $reIPv4 = [regex]'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
 
     # build the payload object
-    $payload = @{identifiers=@()}
+    $payload = @{identifiers = @() }
     foreach ($d in $Domain) {
 
         # IP identifiers (RFC8738) are an extension to the original ACME protocol
@@ -168,10 +174,10 @@ function New-PAOrder {
             Write-Debug "$d identified as IP address. Attempting to parse."
             $ip = [ipaddress]$d
 
-            $payload.identifiers += @{type='ip';value=$ip.ToString()}
+            $payload.identifiers += @{type = 'ip'; value = $ip.ToString() }
         }
         else {
-            $payload.identifiers += @{type='dns';value=$d}
+            $payload.identifiers += @{type = 'dns'; value = $d }
         }
 
     }
@@ -189,12 +195,12 @@ function New-PAOrder {
 
     # send the request
     try {
-        $response = Invoke-ACME $header $payloadJson $acct -EA Stop
-    } catch { throw }
-
+        $response = Invoke-ACME $header $payloadJson $acct #-EA Stop
+    }
+    catch { throw }
     # process the response
     $order = $response.Content | ConvertFrom-Json
-    $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
+    $order.PSObject.TypeNames.Insert(0, 'PoshACME.PAOrder')
 
     # fix any dates that may have been parsed by PSCore's JSON serializer
     $order.expires = Repair-ISODate $order.expires
@@ -204,7 +210,8 @@ function New-PAOrder {
         $location = $response.Headers['Location'] | Select-Object -First 1
         Write-Debug "Adding location $location"
         $order | Add-Member -MemberType NoteProperty -Name 'location' -Value $location
-    } else {
+    }
+    else {
         try { throw 'No Location header found in newOrder output' }
         catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
@@ -237,7 +244,7 @@ function New-PAOrder {
     # just by parsing it. So we need to query the details for each one in order to put them
     # in the right order
     $auths = Get-PAAuthorization $order.authorizations
-    for ($i=0; $i -lt $order.identifiers.Count; $i++) {
+    for ($i = 0; $i -lt $order.identifiers.Count; $i++) {
         $auth = $auths | Where-Object { $_.fqdn -eq $order.identifiers[$i].value }
         $order.authorizations[$i] = $auth.location
     }
@@ -259,6 +266,7 @@ function New-PAOrder {
         DnsAlias            = $null
         DnsSleep            = $DnsSleep
         ValidationTimeout   = $ValidationTimeout
+        Subject             = $Subject
         FriendlyName        = $FriendlyName
         PfxPass             = $PfxPass
         Install             = $Install.IsPresent
@@ -334,12 +342,12 @@ function New-PAOrder {
     }
 
     # backup any old certs/requests that might exist
-    $oldFiles = Get-ChildItem (Join-Path $order.Folder *) -Include cert.cer,cert.pfx,chain.cer,fullchain.cer,fullchain.pfx
+    $oldFiles = Get-ChildItem (Join-Path $order.Folder *) -Include cert.cer, cert.pfx, chain.cer, fullchain.cer, fullchain.pfx
     $oldFiles | Move-Item -Destination { "$($_.FullName).bak" } -Force
 
     # remove old chain files
     Get-ChildItem (Join-Path $order.Folder 'chain*.cer') -Exclude chain.cer |
-        Remove-Item -Force
+    Remove-Item -Force
 
     # Make a local copy of the private key if it was specified.
     if ('ImportKey' -eq $PSCmdlet.ParameterSetName) {

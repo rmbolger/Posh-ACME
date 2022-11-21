@@ -2,7 +2,7 @@ function New-Csr {
     [CmdletBinding()]
     [OutputType('System.String')]
     param(
-        [Parameter(Mandatory,Position=0)]
+        [Parameter(Mandatory, Position = 0)]
         [PSTypeName('PoshACME.PAOrder')]$Order
     )
 
@@ -22,15 +22,17 @@ function New-Csr {
 
         if ($Order.KeyLength -notlike 'ec-*') {
             $sigAlgo = 'SHA256WITHRSA'
-        } else {
+        }
+        else {
             $keySize = [int]$Order.KeyLength.Substring(3)
             if ($keySize -eq 256) { $sigAlgo = 'SHA256WITHECDSA' }
             elseif ($keySize -eq 384) { $sigAlgo = 'SHA384WITHECDSA' }
             elseif ($keySize -eq 521) { $sigAlgo = 'SHA512WITHECDSA' }
         }
 
-    # Nope, new key needed
-    } else {
+        # Nope, new key needed
+    }
+    else {
 
         Write-Verbose "Creating new private key for the certificate request."
 
@@ -48,11 +50,12 @@ function New-Csr {
             elseif ($keySize -eq 521) { $sigAlgo = 'SHA512WITHECDSA' }
 
             $ecGen = New-Object Org.BouncyCastle.Crypto.Generators.ECKeyPairGenerator
-            $genParam = New-Object Org.BouncyCastle.Crypto.Parameters.ECKeyGenerationParameters -ArgumentList $curveOid,$sRandom
+            $genParam = New-Object Org.BouncyCastle.Crypto.Parameters.ECKeyGenerationParameters -ArgumentList $curveOid, $sRandom
             $ecGen.Init($genParam)
             $keyPair = $ecGen.GenerateKeyPair()
 
-        } else {
+        }
+        else {
 
             # RSA key
             Write-Debug "Creating BC RSA keypair of type $($Order.KeyLength)"
@@ -60,7 +63,7 @@ function New-Csr {
             $sigAlgo = 'SHA256WITHRSA'
 
             $rsaGen = New-Object Org.BouncyCastle.Crypto.Generators.RsaKeyPairGenerator
-            $genParam = New-Object Org.BouncyCastle.Crypto.KeyGenerationParameters -ArgumentList $sRandom,$keySize
+            $genParam = New-Object Org.BouncyCastle.Crypto.KeyGenerationParameters -ArgumentList $sRandom, $keySize
             $rsaGen.Init($genParam)
             $keyPair = $rsaGen.GenerateKeyPair()
 
@@ -74,7 +77,12 @@ function New-Csr {
     # start building the cert request
 
     # create the subject
-    $subject = New-Object Org.BouncyCastle.Asn1.X509.X509Name("CN=$($Order.MainDomain)")
+    if ($order.Subject) {
+        $subject = New-Object Org.BouncyCastle.Asn1.X509.X509Name("$($Order.Subject)")
+    }
+    else {
+        $subject = New-Object Org.BouncyCastle.Asn1.X509.X509Name("CN=$($Order.MainDomain)")
+    }
 
     # create a .NET Dictionary to hold our extensions because that's what BouncyCastle needs
     $extDict = New-Object 'Collections.Generic.Dictionary[Org.BouncyCastle.Asn1.DerObjectIdentifier,Org.BouncyCastle.Asn1.X509.X509Extension]'
@@ -84,7 +92,8 @@ function New-Csr {
     if ($Order.KeyLength -like 'ec-*') {
         # Only DigitalSignature on ECC certs because KeyEncipherment not supported
         $keyUsage = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($true, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.KeyUsage([Org.BouncyCastle.Asn1.X509.KeyUsage]::DigitalSignature))))
-    } else {
+    }
+    else {
         # DigitalSignature and KeyEncipherment on RSA certs
         $keyUsage = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($true, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.KeyUsage([Org.BouncyCastle.Asn1.X509.KeyUsage]::DigitalSignature -bor [Org.BouncyCastle.Asn1.X509.KeyUsage]::KeyEncipherment))))
     }
@@ -105,7 +114,7 @@ function New-Csr {
             Write-Warning "Skipping unexpected identifier type '$($_.type)' with value '$($_.value)'."
         }
     }
-    $sans = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.GeneralNames(@(,$genNames)))))
+    $sans = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.GeneralNames(@(, $genNames)))))
 
     # add them to a DerSet object
     $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::BasicConstraints, $basicConstraints)
@@ -117,16 +126,16 @@ function New-Csr {
     # add OCSP Must Staple if requested
     if ($Order.OCSPMustStaple) {
         Write-Debug "Adding OCSP Must-Staple"
-        $mustStaple = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(@(,[byte[]](0x30,0x03,0x02,0x01,0x05)))))
+        $mustStaple = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(@(, [byte[]](0x30, 0x03, 0x02, 0x01, 0x05)))))
         $extDict.Add((New-Object Org.BouncyCastle.Asn1.DerObjectIdentifier('1.3.6.1.5.5.7.1.24')), $mustStaple)
     }
 
     # build the extensions DerSet
     $extensions = New-Object Org.BouncyCastle.Asn1.X509.X509Extensions($extDict)
-    $extDerSet = New-Object Org.BouncyCastle.Asn1.DerSet(New-Object Org.BouncyCastle.Asn1.Pkcs.AttributePkcs([Org.BouncyCastle.Asn1.Pkcs.PkcsObjectIdentifiers]::Pkcs9AtExtensionRequest,(New-Object Org.BouncyCastle.Asn1.DerSet($extensions))))
+    $extDerSet = New-Object Org.BouncyCastle.Asn1.DerSet(New-Object Org.BouncyCastle.Asn1.Pkcs.AttributePkcs([Org.BouncyCastle.Asn1.Pkcs.PkcsObjectIdentifiers]::Pkcs9AtExtensionRequest, (New-Object Org.BouncyCastle.Asn1.DerSet($extensions))))
 
     # create the request object
-    $req = New-Object Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest($sigAlgo,$subject,$keyPair.Public,$extDerSet,$keyPair.Private)
+    $req = New-Object Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest($sigAlgo, $subject, $keyPair.Public, $extDerSet, $keyPair.Private)
 
     # export the csr to a file
     Export-Pem $req $reqFile

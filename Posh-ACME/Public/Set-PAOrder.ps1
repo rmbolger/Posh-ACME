@@ -1,56 +1,59 @@
 function Set-PAOrder {
-    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName='Edit')]
+    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'Edit')]
     param(
-        [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
+        [Parameter(Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [string]$MainDomain,
         [Parameter(ValueFromPipelineByPropertyName)]
-        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [ValidateScript({ Test-ValidFriendlyName $_ -ThrowOnFail })]
         [string]$Name,
-        [Parameter(ParameterSetName='Revoke', Mandatory)]
+        [Parameter(ParameterSetName = 'Revoke', Mandatory)]
         [switch]$RevokeCert,
-        [Parameter(ParameterSetName='Revoke')]
+        [Parameter(ParameterSetName = 'Revoke')]
         [switch]$Force,
-        [Parameter(ParameterSetName='Edit')]
-        [Parameter(ParameterSetName='Revoke')]
+        [Parameter(ParameterSetName = 'Edit')]
+        [Parameter(ParameterSetName = 'Revoke')]
         [switch]$NoSwitch,
-        [Parameter(ParameterSetName='Edit')]
-        [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
+        [Parameter(ParameterSetName = 'Edit')]
+        [ValidateScript({ Test-ValidPlugin $_ -ThrowOnFail })]
         [Alias('DnsPlugin')]
         [string[]]$Plugin,
-        [Parameter(ParameterSetName='Edit')]
+        [Parameter(ParameterSetName = 'Edit')]
         [hashtable]$PluginArgs,
-        [Parameter(ParameterSetName='Edit')]
+        [Parameter(ParameterSetName = 'Edit')]
         [ValidateRange(0, 3650)]
         [int]$LifetimeDays,
-        [Parameter(ParameterSetName='Edit')]
+        [Parameter(ParameterSetName = 'Edit')]
         [string[]]$DnsAlias,
-        [Parameter(ParameterSetName='Edit')]
-        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
+        [Parameter(ParameterSetName = 'Edit')]
+        [ValidateScript({ Test-ValidFriendlyName $_ -ThrowOnFail })]
         [string]$NewName,
-        [Parameter(ParameterSetName='Edit')]
+        [Parameter(ParameterSetName = 'Edit')]
+        [ValidateNotNullOrEmpty()]
+        [string]$Subject,
+        [Parameter(ParameterSetName = 'Edit')]
         [ValidateNotNullOrEmpty()]
         [string]$FriendlyName,
-        [Parameter(ParameterSetName='Edit')]
+        [Parameter(ParameterSetName = 'Edit')]
         [ValidateNotNullOrEmpty()]
         [string]$PfxPass,
-        [Parameter(ParameterSetName='Edit')]
-        [ValidateScript({Test-SecureStringNotNullOrEmpty $_ -ThrowOnFail})]
+        [Parameter(ParameterSetName = 'Edit')]
+        [ValidateScript({ Test-SecureStringNotNullOrEmpty $_ -ThrowOnFail })]
         [securestring]$PfxPassSecure,
-        [Parameter(ParameterSetName='Edit')]
+        [Parameter(ParameterSetName = 'Edit')]
         [switch]$UseModernPfxEncryption,
-        [Parameter(ParameterSetName='Edit')]
+        [Parameter(ParameterSetName = 'Edit')]
         [switch]$Install,
-        [Parameter(ParameterSetName='Edit')]
+        [Parameter(ParameterSetName = 'Edit')]
         [switch]$OCSPMustStaple,
-        [Parameter(ParameterSetName='Edit')]
+        [Parameter(ParameterSetName = 'Edit')]
         [int]$DnsSleep,
-        [Parameter(ParameterSetName='Edit')]
+        [Parameter(ParameterSetName = 'Edit')]
         [int]$ValidationTimeout,
-        [Parameter(ParameterSetName='Edit')]
+        [Parameter(ParameterSetName = 'Edit')]
         [string]$PreferredChain,
-        [Parameter(ParameterSetName='Edit')]
+        [Parameter(ParameterSetName = 'Edit')]
         [switch]$AlwaysNewKey,
-        [Parameter(ParameterSetName='Edit')]
+        [Parameter(ParameterSetName = 'Edit')]
         [switch]$UseSerialValidation
     )
 
@@ -71,7 +74,7 @@ function Set-PAOrder {
             }
 
             # override the existing PfxPass parameter
-            $PfxPass = [pscredential]::new('u',$PfxPassSecure).GetNetworkCredential().Password
+            $PfxPass = [pscredential]::new('u', $PfxPassSecure).GetNetworkCredential().Password
             $PSBoundParameters.PfxPass = $PfxPass
         }
     }
@@ -145,6 +148,13 @@ function Set-PAOrder {
                 Write-Verbose "Setting DnsAlias to $($DnsAlias -join ',')"
                 $order.DnsAlias = @($DnsAlias)
                 $saveChanges = $true
+            }
+
+            if ('Subject' -in $psbKeys -and $Subject -ne $order.Subject) {
+                Write-Verbose "Setting Subject to '$Subject'"
+                $order.Subject = $Subject
+                $saveChanges = $true
+                $rewritePfx = $true
             }
 
             if ('FriendlyName' -in $psbKeys -and $FriendlyName -ne $order.FriendlyName) {
@@ -235,7 +245,8 @@ function Set-PAOrder {
                 $cert = $order | Get-PACertificate
                 if ($rewriteCer -and $cert) {
                     Export-PACertFiles $order
-                } elseif ($rewritePfx -and $cert) {
+                }
+                elseif ($rewritePfx -and $cert) {
                     Export-PACertFiles $order -PfxOnly
                 }
             }
@@ -246,7 +257,8 @@ function Set-PAOrder {
                 $newFolder = Join-Path $acct.Folder $NewName
                 if (Test-Path $newFolder) {
                     Write-Error "Failed to rename PAOrder '$($order.Name)'. The path '$newFolder' already exists."
-                } else {
+                }
+                else {
                     try {
                         # rename the dir folder
                         Write-Debug "Renaming '$($order.Name)' order folder to $newFolder"
@@ -273,7 +285,8 @@ function Set-PAOrder {
             }
 
 
-        } else {
+        }
+        else {
             # RevokeCert was specified
 
             # make sure the order has a cert to revoke and that it's not already expired
@@ -296,7 +309,7 @@ function Set-PAOrder {
             # confirm revocation unless -Force was used
             if (-not $Force) {
                 if (-not $PSCmdlet.ShouldContinue("Are you sure you wish to revoke the certificate for order '$($order.Name)'?",
-                "Revoking a certificate is irreversible and may immediately break any services using it.")) {
+                        "Revoking a certificate is irreversible and may immediately break any services using it.")) {
                     Write-Verbose "Revocation aborted for order '$($order.Name)'."
                     return
                 }
@@ -307,10 +320,11 @@ function Set-PAOrder {
             # grab the cert file contents, strip the headers, and join the lines
             $certStart = -1; $certEnd = -1;
             $certLines = Get-Content $certFile
-            for ($i=0; $i -lt $certLines.Count; $i++) {
+            for ($i = 0; $i -lt $certLines.Count; $i++) {
                 if ($certLines[$i] -eq '-----BEGIN CERTIFICATE-----') {
                     $certStart = $i + 1
-                } elseif ($certLines[$i] -eq '-----END CERTIFICATE-----') {
+                }
+                elseif ($certLines[$i] -eq '-----END CERTIFICATE-----') {
                     $certEnd = $i - 1
                     break
                 }
@@ -334,7 +348,8 @@ function Set-PAOrder {
             # send the request
             try {
                 Invoke-ACME $header $payloadJson $acct -EA Stop | Out-Null
-            } catch { throw }
+            }
+            catch { throw }
 
             # refresh the order
             Update-PAOrder $order
