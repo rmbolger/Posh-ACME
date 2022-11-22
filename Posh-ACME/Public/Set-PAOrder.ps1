@@ -29,6 +29,9 @@ function Set-PAOrder {
         [string]$NewName,
         [Parameter(ParameterSetName='Edit')]
         [ValidateNotNullOrEmpty()]
+        [string]$Subject,
+        [Parameter(ParameterSetName='Edit')]
+        [ValidateNotNullOrEmpty()]
         [string]$FriendlyName,
         [Parameter(ParameterSetName='Edit')]
         [ValidateNotNullOrEmpty()]
@@ -144,6 +147,13 @@ function Set-PAOrder {
             if ('DnsAlias' -in $psbKeys) {
                 Write-Verbose "Setting DnsAlias to $($DnsAlias -join ',')"
                 $order.DnsAlias = @($DnsAlias)
+                $saveChanges = $true
+            }
+
+            if ('Subject' -in $psbKeys -and $Subject -ne $order.Subject) {
+                Write-Verbose "Setting Subject to '$Subject'"
+                Write-Warning "Changing the value of Subject only affects future certificates generated with this order. It can not change the state of an existing certificate."
+                $order.Subject = $Subject
                 $saveChanges = $true
             }
 

@@ -30,6 +30,8 @@ function New-PACertificate {
         [Parameter(ParameterSetName='FromScratch')]
         [switch]$OCSPMustStaple,
         [Parameter(ParameterSetName='FromScratch')]
+        [string]$Subject,
+        [Parameter(ParameterSetName='FromScratch')]
         [string]$FriendlyName,
         [Parameter(ParameterSetName='FromScratch')]
         [string]$PfxPass='poshacme',
@@ -157,6 +159,7 @@ function New-PACertificate {
                 KeyLength              = $CertKeyLength
                 OCSPMustStaple         = $OCSPMustStaple
                 AlwaysNewKey           = $AlwaysNewKey
+                Subject                = $Subject
                 FriendlyName           = $FriendlyName
                 PfxPass                = $PfxPass
                 UseModernPfxEncryption = $UseModernPfxEncryption
@@ -168,6 +171,7 @@ function New-PACertificate {
             if ($oldOrder) {
                 @(  'OCSPMustStaple'
                     'AlwaysNewKey'
+                    'Subject'
                     'FriendlyName'
                     'PfxPass'
                     'UseModernPfxEncryption'
@@ -223,6 +227,7 @@ function New-PACertificate {
             'PluginArgs'
             'DnsAlias'
             'Install'
+            'Subject'
             'FriendlyName'
             'PfxPass'
             'UseModernPfxEncryption'

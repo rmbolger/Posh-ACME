@@ -2926,6 +2926,18 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Subject</maml:name>
+          <maml:description>
+            <maml:para>Sets the x509 "Subject" field in the certificate request that gets sent to the ACME server. By default, it is set to 'CN=FQDN' where 'FQDN' is the first name in the Domain parameter. For public certificate authorities issuing DV certificates, anything other than a DNS name from the list of domains will either be rejected or stripped from the finalized certificate.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>FriendlyName</maml:name>
           <maml:description>
             <maml:para>Set a friendly name for the certificate. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Defaults to the first item in the Domain parameter.</maml:para>
@@ -3393,6 +3405,18 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Subject</maml:name>
+        <maml:description>
+          <maml:para>Sets the x509 "Subject" field in the certificate request that gets sent to the ACME server. By default, it is set to 'CN=FQDN' where 'FQDN' is the first name in the Domain parameter. For public certificate authorities issuing DV certificates, anything other than a DNS name from the list of domains will either be rejected or stripped from the finalized certificate.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>FriendlyName</maml:name>
         <maml:description>
           <maml:para>Set a friendly name for the certificate. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Defaults to the first item in the Domain parameter.</maml:para>
@@ -3718,6 +3742,18 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Subject</maml:name>
+          <maml:description>
+            <maml:para>Sets the x509 "Subject" field in the certificate request that gets sent to the ACME server. By default, it is set to 'CN=FQDN' where 'FQDN' is the first name in the Domain parameter. For public certificate authorities issuing DV certificates, anything other than a DNS name from the list of domains will either be rejected or stripped from the finalized certificate.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>FriendlyName</maml:name>
           <maml:description>
             <maml:para>Set a friendly name for the certificate. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Defaults to the first item in the Domain parameter.</maml:para>
@@ -3963,6 +3999,18 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
             <maml:uri />
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Subject</maml:name>
+          <maml:description>
+            <maml:para>Sets the x509 "Subject" field in the certificate request that gets sent to the ACME server. By default, it is set to 'CN=FQDN' where 'FQDN' is the first name in the Domain parameter. For public certificate authorities issuing DV certificates, anything other than a DNS name from the list of domains will either be rejected or stripped from the finalized certificate.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>FriendlyName</maml:name>
@@ -4391,6 +4439,18 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
           <maml:uri />
         </dev:type>
         <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Subject</maml:name>
+        <maml:description>
+          <maml:para>Sets the x509 "Subject" field in the certificate request that gets sent to the ACME server. By default, it is set to 'CN=FQDN' where 'FQDN' is the first name in the Domain parameter. For public certificate authorities issuing DV certificates, anything other than a DNS name from the list of domains will either be rejected or stripped from the finalized certificate.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>FriendlyName</maml:name>
@@ -6866,6 +6926,18 @@ Set-PAAccount -UseAltPluginEncryption:$false</dev:code>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Subject</maml:name>
+          <maml:description>
+            <maml:para>Sets the x509 "Subject" field in the certificate request that gets sent to the ACME server. By default, it is set to 'CN=FQDN' where 'FQDN' is the first name in the Domain parameter. For public certificate authorities issuing DV certificates, anything other than a DNS name from the list of domains will either be rejected or stripped from the finalized certificate.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>FriendlyName</maml:name>
           <maml:description>
             <maml:para>The friendly name for the certificate and subsequent renewals. This will populate the "Friendly Name" field in the Windows certificate store when the PFX is imported. Must not be an empty string.</maml:para>
@@ -7129,6 +7201,18 @@ Set-PAAccount -UseAltPluginEncryption:$false</dev:code>
         <maml:name>NewName</maml:name>
         <maml:description>
           <maml:para>The new name for this ACME order.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Subject</maml:name>
+        <maml:description>
+          <maml:para>Sets the x509 "Subject" field in the certificate request that gets sent to the ACME server. By default, it is set to 'CN=FQDN' where 'FQDN' is the first name in the Domain parameter. For public certificate authorities issuing DV certificates, anything other than a DNS name from the list of domains will either be rejected or stripped from the finalized certificate.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>

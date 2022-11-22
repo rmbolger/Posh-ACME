@@ -17,7 +17,7 @@ Request a new certificate
 ```powershell
 New-PACertificate [-Domain] <String[]> [-Name <String>] [-Contact <String[]>] [-CertKeyLength <String>]
  [-AlwaysNewKey] [-AcceptTOS] [-AccountKeyLength <String>] [-DirectoryUrl <String>] [-Plugin <String[]>]
- [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple]
+ [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-Subject <String>]
  [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-UseModernPfxEncryption]
  [-Install] [-UseSerialValidation] [-Force] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
  [-PreferredChain <String>] [<CommonParameters>]
@@ -313,6 +313,21 @@ Aliases:
 Required: False
 Position: Named
 Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Subject
+Sets the x509 "Subject" field in the certificate request that gets sent to the ACME server. By default, it is set to 'CN=FQDN' where 'FQDN' is the first name in the Domain parameter. For public certificate authorities issuing DV certificates, anything other than a DNS name from the list of domains will either be rejected or stripped from the finalized certificate.
+
+```yaml
+Type: String
+Parameter Sets: FromScratch
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

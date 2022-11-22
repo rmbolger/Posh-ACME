@@ -74,7 +74,11 @@ function New-Csr {
     # start building the cert request
 
     # create the subject
-    $subject = New-Object Org.BouncyCastle.Asn1.X509.X509Name("CN=$($Order.MainDomain)")
+    if ($Order.Subject) {
+        $subject = New-Object Org.BouncyCastle.Asn1.X509.X509Name($Order.Subject)
+    } else {
+        $subject = New-Object Org.BouncyCastle.Asn1.X509.X509Name("CN=$($Order.MainDomain)")
+    }
 
     # create a .NET Dictionary to hold our extensions because that's what BouncyCastle needs
     $extDict = New-Object 'Collections.Generic.Dictionary[Org.BouncyCastle.Asn1.DerObjectIdentifier,Org.BouncyCastle.Asn1.X509.X509Extension]'

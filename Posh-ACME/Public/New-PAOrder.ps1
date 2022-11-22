@@ -28,6 +28,9 @@ function New-PAOrder {
         [switch]$AlwaysNewKey,
         [Parameter(ParameterSetName='FromScratch')]
         [Parameter(ParameterSetName='ImportKey')]
+        [string]$Subject,
+        [Parameter(ParameterSetName='FromScratch')]
+        [Parameter(ParameterSetName='ImportKey')]
         [string]$FriendlyName,
         [Parameter(ParameterSetName='FromScratch')]
         [Parameter(ParameterSetName='ImportKey')]
@@ -259,6 +262,7 @@ function New-PAOrder {
         DnsAlias            = $null
         DnsSleep            = $DnsSleep
         ValidationTimeout   = $ValidationTimeout
+        Subject             = $Subject
         FriendlyName        = $FriendlyName
         PfxPass             = $PfxPass
         Install             = $Install.IsPresent

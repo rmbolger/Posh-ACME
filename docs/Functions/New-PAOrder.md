@@ -17,18 +17,18 @@ Create a new order on the current ACME account.
 ```powershell
 New-PAOrder [-Domain] <String[]> [[-KeyLength] <String>] [-Name <String>] [-Plugin <String[]>]
  [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-AlwaysNewKey]
- [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-UseModernPfxEncryption]
- [-Install] [-UseSerialValidation] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>] [-PreferredChain <String>]
- [-Force] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>]
+ [-UseModernPfxEncryption] [-Install] [-UseSerialValidation] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
+ [-PreferredChain <String>] [-Force] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### ImportKey
 ```powershell
 New-PAOrder [-Domain] <String[]> -KeyFile <String> [-Name <String>] [-Plugin <String[]>]
  [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-AlwaysNewKey]
- [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-UseModernPfxEncryption]
- [-Install] [-UseSerialValidation] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>] [-PreferredChain <String>]
- [-Force] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>]
+ [-UseModernPfxEncryption] [-Install] [-UseSerialValidation] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
+ [-PreferredChain <String>] [-Force] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### FromCSR
@@ -257,6 +257,21 @@ Aliases:
 Required: False
 Position: Named
 Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Subject
+Sets the x509 "Subject" field in the certificate request that gets sent to the ACME server. By default, it is set to 'CN=FQDN' where 'FQDN' is the first name in the Domain parameter. For public certificate authorities issuing DV certificates, anything other than a DNS name from the list of domains will either be rejected or stripped from the finalized certificate.
+
+```yaml
+Type: String
+Parameter Sets: FromScratch, ImportKey
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
