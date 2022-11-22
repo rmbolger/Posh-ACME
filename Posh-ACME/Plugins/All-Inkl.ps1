@@ -212,7 +212,7 @@ function Get-KasLoginDataFromParameters {
     # check which parameter to use and set KAS auth type accordingly
     if ('plain' -eq $paramSetName) {
         $secureAuthData = $KasPwd
-        $kasAuthType = 'sha1'
+        $kasAuthType = 'plain'
     }
     elseif ('sha1' -eq $paramSetName) {
         $secureAuthData = $KasPwdHash
@@ -226,11 +226,6 @@ function Get-KasLoginDataFromParameters {
     # get plaintext from securestring
     $kasAuthData = [pscredential]::new('a',$secureAuthData).GetNetworkCredential().Password
 
-    # when user provided plaintext password, compute sha1 of the password
-    if ('plain' -eq $paramSetName) {
-        $kasAuthData = [System.BitConverter]::ToString($(New-Object System.Security.Cryptography.SHA1CryptoServiceProvider).ComputeHash($([system.Text.Encoding]::UTF8).GetBytes($kasAuthData))).Replace("-", "")
-    }
-
     # return the effective authentication data
     return @{ kas_login=$KasUsername; kas_auth_type=$kasAuthType; kas_auth_data=$kasAuthData }
 
@@ -242,10 +237,9 @@ function Get-KasLoginDataFromParameters {
         KAS API supports three different login types: plain/sha1/session
         see https://kasapi.kasserver.com/dokumentation/phpdoc/
 
-        This plugin uses the types 'sha1' & 'session'.
-        This method accepts the parameters for type 'plain', but the data is converted to 'sha1' before being sent to the API.
-
         By using the type 'session' it is possible to reuse existing sessions when Posh-ACME is used as a part of a larger script.
+
+        All-Inkl.com users have received warnings that sha1 auth option may be discontinued as of Dec 2022.
 
     .PARAMETER paramSetName
         The name of the paramSet that was detected by the public methods of this plugin.
