@@ -75,7 +75,7 @@ function New-Csr {
 
     # create the subject
     if ($Order.Subject) {
-        $subject = New-Object Org.BouncyCastle.Asn1.X509.X509Name("$($Order.Subject)")
+        $subject = New-Object Org.BouncyCastle.Asn1.X509.X509Name($Order.Subject)
     } else {
         $subject = New-Object Org.BouncyCastle.Asn1.X509.X509Name("CN=$($Order.MainDomain)")
     }

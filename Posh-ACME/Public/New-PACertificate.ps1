@@ -171,6 +171,7 @@ function New-PACertificate {
             if ($oldOrder) {
                 @(  'OCSPMustStaple'
                     'AlwaysNewKey'
+                    'Subject'
                     'FriendlyName'
                     'PfxPass'
                     'UseModernPfxEncryption'

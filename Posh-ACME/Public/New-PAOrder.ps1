@@ -194,6 +194,7 @@ function New-PAOrder {
     try {
         $response = Invoke-ACME $header $payloadJson $acct -EA Stop
     } catch { throw }
+
     # process the response
     $order = $response.Content | ConvertFrom-Json
     $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')

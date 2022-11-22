@@ -152,9 +152,9 @@ function Set-PAOrder {
 
             if ('Subject' -in $psbKeys -and $Subject -ne $order.Subject) {
                 Write-Verbose "Setting Subject to '$Subject'"
+                Write-Warning "Changing the value of Subject only affects future certificates generated with this order. It can not change the state of an existing certificate."
                 $order.Subject = $Subject
                 $saveChanges = $true
-                $rewritePfx = $true
             }
 
             if ('FriendlyName' -in $psbKeys -and $FriendlyName -ne $order.FriendlyName) {
