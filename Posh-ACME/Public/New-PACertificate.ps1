@@ -1,52 +1,52 @@
 function New-PACertificate {
-    [CmdletBinding(DefaultParameterSetName = 'FromScratch')]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+    [CmdletBinding(DefaultParameterSetName='FromScratch')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText','')]
     param(
-        [Parameter(ParameterSetName = 'FromScratch', Mandatory, Position = 0)]
+        [Parameter(ParameterSetName='FromScratch',Mandatory,Position=0)]
         [string[]]$Domain,
-        [Parameter(ParameterSetName = 'FromCSR', Mandatory, Position = 0)]
+        [Parameter(ParameterSetName='FromCSR',Mandatory,Position=0)]
         [string]$CSRPath,
-        [ValidateScript({ Test-ValidFriendlyName $_ -ThrowOnFail })]
+        [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
         [string]$Name,
         [string[]]$Contact,
-        [Parameter(ParameterSetName = 'FromScratch')]
-        [ValidateScript({ Test-ValidKeyLength $_ -ThrowOnFail })]
-        [string]$CertKeyLength = '2048',
-        [Parameter(ParameterSetName = 'FromScratch')]
+        [Parameter(ParameterSetName='FromScratch')]
+        [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
+        [string]$CertKeyLength='2048',
+        [Parameter(ParameterSetName='FromScratch')]
         [switch]$AlwaysNewKey,
         [switch]$AcceptTOS,
-        [ValidateScript({ Test-ValidKeyLength $_ -ThrowOnFail })]
-        [string]$AccountKeyLength = 'ec-256',
-        [ValidateScript({ Test-ValidDirUrl $_ -ThrowOnFail })]
+        [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
+        [string]$AccountKeyLength='ec-256',
+        [ValidateScript({Test-ValidDirUrl $_ -ThrowOnFail})]
         [Alias('location')]
-        [string]$DirectoryUrl = 'LE_PROD',
-        [ValidateScript({ Test-ValidPlugin $_ -ThrowOnFail })]
+        [string]$DirectoryUrl='LE_PROD',
+        [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
         [Alias('DnsPlugin')]
         [string[]]$Plugin,
         [hashtable]$PluginArgs,
         [ValidateRange(0, 3650)]
         [int]$LifetimeDays,
         [string[]]$DnsAlias,
-        [Parameter(ParameterSetName = 'FromScratch')]
+        [Parameter(ParameterSetName='FromScratch')]
         [switch]$OCSPMustStaple,
-        [Parameter(ParameterSetName = 'FromScratch')]
+        [Parameter(ParameterSetName='FromScratch')]
         [string]$Subject,
-        [Parameter(ParameterSetName = 'FromScratch')]
+        [Parameter(ParameterSetName='FromScratch')]
         [string]$FriendlyName,
-        [Parameter(ParameterSetName = 'FromScratch')]
-        [string]$PfxPass = 'poshacme',
-        [Parameter(ParameterSetName = 'FromScratch')]
-        [ValidateScript({ Test-SecureStringNotNullOrEmpty $_ -ThrowOnFail })]
+        [Parameter(ParameterSetName='FromScratch')]
+        [string]$PfxPass='poshacme',
+        [Parameter(ParameterSetName='FromScratch')]
+        [ValidateScript({Test-SecureStringNotNullOrEmpty $_ -ThrowOnFail})]
         [securestring]$PfxPassSecure,
-        [Parameter(ParameterSetName = 'FromScratch')]
+        [Parameter(ParameterSetName='FromScratch')]
         [switch]$UseModernPfxEncryption,
-        [Parameter(ParameterSetName = 'FromScratch')]
-        [ValidateScript({ Test-WinOnly -ThrowOnFail })]
+        [Parameter(ParameterSetName='FromScratch')]
+        [ValidateScript({Test-WinOnly -ThrowOnFail})]
         [switch]$Install,
         [switch]$UseSerialValidation,
         [switch]$Force,
-        [int]$DnsSleep = 120,
-        [int]$ValidationTimeout = 60,
+        [int]$DnsSleep=120,
+        [int]$ValidationTimeout=60,
         [string]$PreferredChain
     )
 
@@ -57,8 +57,7 @@ function New-PACertificate {
     # one unless explicitly specified.
     if (-not (Get-PAServer) -or 'DirectoryUrl' -in $psbKeys) {
         Set-PAServer -DirectoryUrl $DirectoryUrl
-    }
-    else {
+    } else {
         # refresh the directory info (which should also get a fresh nonce)
         Set-PAServer
     }
@@ -70,7 +69,7 @@ function New-PACertificate {
     # accounts, create a new one.
     $acct = Get-PAAccount
     $acctListParams = @{
-        List   = $true
+        List = $true
         Status = 'valid'
     }
     if ('Contact' -in $PSBoundParameters.Keys) { $acctListParams.Contact = $Contact }
@@ -81,8 +80,7 @@ function New-PACertificate {
         Write-Verbose "Creating a new $AccountKeyLength account with contact: $($Contact -join ', ')"
         try { $acct = New-PAAccount @PSBoundParameters -EA Stop }
         catch { $PSCmdlet.ThrowTerminatingError($_) }
-    }
-    elseif ($accts.Count -gt 0 -and (-not $acct -or $acct.id -notin $accts.id)) {
+    } elseif ($accts.Count -gt 0 -and (-not $acct -or $acct.id -notin $accts.id)) {
         # we got matches, but there's no current account or the current one doesn't match
         # so set the first match as current
         $acct = $accts[0]
@@ -109,13 +107,13 @@ function New-PACertificate {
         }
 
         # override the existing PfxPass parameter
-        $PfxPass = [pscredential]::new('u', $PfxPassSecure).GetNetworkCredential().Password
+        $PfxPass = [pscredential]::new('u',$PfxPassSecure).GetNetworkCredential().Password
         $PSBoundParameters.PfxPass = $PfxPass
     }
 
     # Generate an appropriate name if one wasn't specified
     if (-not $Name) {
-        $Name = $Domain[0].Replace('*', '!')
+        $Name = $Domain[0].Replace('*','!')
         Write-Verbose "Order name not specified, using '$Name'"
     }
 
@@ -134,13 +132,14 @@ function New-PACertificate {
     $oldOrder = $null
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
     if ($Force -or -not $order -or
-        $order.status -in 'invalid', 'deactivated' -or
+        $order.status -in 'invalid','deactivated' -or
         ($order.status -eq 'valid' -and $order.RenewAfter -and (Get-DateTimeOffsetNow) -ge ([DateTimeOffset]::Parse($order.RenewAfter))) -or
         ($order.status -eq 'pending' -and (Get-DateTimeOffsetNow) -gt ([DateTimeOffset]::Parse($order.expires))) -or
         $CertKeyLength -ne $order.KeyLength -or
         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') -or
         ($csrDetails -and $csrDetails.Base64Url -ne $order.CSRBase64Url ) -or
-        ($LifetimeDays -and $LifetimeDays -ne $order.LifetimeDays) ) {
+        ($LifetimeDays -and $LifetimeDays -ne $order.LifetimeDays) )
+    {
 
         $oldOrder = $order
 
@@ -149,7 +148,7 @@ function New-PACertificate {
             # most values will be pulled from the CSR
             $orderParams = @{
                 CSRPath = $CSRPath
-                Name    = $Name
+                Name = $Name
             }
         }
         else {
@@ -203,8 +202,7 @@ function New-PACertificate {
 
             if ($_ -in $psbKeys) {
                 $orderParams.$_ = $PSBoundParameters.$_
-            }
-            elseif ($oldOrder -and $oldOrder.$_) {
+            } elseif ($oldOrder -and $oldOrder.$_) {
                 $orderParams.$_ = $oldOrder.$_
             }
         }
@@ -217,8 +215,7 @@ function New-PACertificate {
         Write-Debug "New order params: `n$($orderParams | ConvertTo-Json -Depth 5)"
         $order = New-PAOrder @orderParams -Force
 
-    }
-    else {
+    } else {
         # set the existing order as active and override explicit order properties that
         # don't need to trigger a new order
         Write-Verbose "Using existing order '$($order.Name)' with status $($order.status)"
@@ -276,8 +273,7 @@ function New-PACertificate {
 
         Complete-PAOrder
 
-    }
-    elseif ($order.CertExpires) {
+    } elseif ($order.CertExpires) {
         Write-Warning "This certificate order has already been completed. Use -Force to overwrite the current certificate."
     }
 }
