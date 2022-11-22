@@ -17,9 +17,9 @@ Switch to or modify an order.
 ```powershell
 Set-PAOrder [[-MainDomain] <String>] [-Name <String>] [-NoSwitch] [-Plugin <String[]>]
  [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-NewName <String>]
- [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-UseModernPfxEncryption]
- [-Install] [-OCSPMustStaple] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>] [-PreferredChain <String>]
- [-AlwaysNewKey] [-UseSerialValidation] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>]
+ [-UseModernPfxEncryption] [-Install] [-OCSPMustStaple] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
+ [-PreferredChain <String>] [-AlwaysNewKey] [-UseSerialValidation] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### Revoke
@@ -196,6 +196,21 @@ Accept wildcard characters: False
 
 ### -NewName
 The new name for this ACME order.
+
+```yaml
+Type: String
+Parameter Sets: Edit
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Subject
+Sets the x509 "Subject" field in the certificate request that gets sent to the ACME server. By default, it is set to 'CN=FQDN' where 'FQDN' is the first name in the Domain parameter. For public certificate authorities issuing DV certificates, anything other than a DNS name from the list of domains will either be rejected or stripped from the finalized certificate.
 
 ```yaml
 Type: String
