@@ -31,6 +31,7 @@ theme:
     - navigation.expand
 
   icon:
+    logo: simple/powershell
     repo: fontawesome/brands/github
 
   palette:
@@ -53,6 +54,7 @@ plugins:
   # Using awesome-pages for semi-auto sub-sections until this issue is resolved
   # https://github.com/mkdocs/mkdocs/issues/714
   - awesome-pages
+  - social
 
 # Customization
 extra:
