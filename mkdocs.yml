@@ -29,6 +29,7 @@ theme:
     - navigation.tabs
     - navigation.sections
     - navigation.expand
+    - navigation.indexes
 
   icon:
     logo: simple/powershell

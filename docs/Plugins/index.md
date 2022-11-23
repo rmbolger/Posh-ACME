@@ -6,7 +6,8 @@ To request support for a particular DNS provider, please submit an [issue](https
 
 If you are running Posh-ACME on PowerShell Core from a non-Windows OS, check the `PS Core Compatible` column to make sure the plugin is supported. Also check the usage guide for non-Windows specific instructions.
 
-*NOTE: Some of the provider links below are affiliate links which help reduce my out of pocket costs maintaining these plugins. I'd be most grateful if you use them when signing up for new service.*
+!!! note
+    Some of the provider links below are affiliate links which help reduce my out of pocket costs maintaining these plugins. I would be most grateful if you use them when signing up for new service.
 
 ### Released
 

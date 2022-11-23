@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 # Tutorial
 
 ## Picking a Server

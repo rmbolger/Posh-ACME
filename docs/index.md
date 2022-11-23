@@ -1,4 +1,8 @@
+---
 title: Home
+hide:
+  - navigation
+---
 
 # Posh-ACME
 
@@ -15,7 +19,7 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - Support for pre-created certificate requests (CSR)
 - PEM and PFX output files
 - No elevated Windows privileges required *(unless using `-Install` switch)*
-- Cross platform PowerShell support. [(FAQ)](FAQ.md#does-posh-acme-work-cross-platform-on-powershell-core)
+- Cross platform PowerShell support. [(FAQ)](FAQ/index.md#does-posh-acme-work-cross-platform-on-powershell-core)
 - Account key rollover support
 - [OCSP Must-Staple](https://scotthelme.co.uk/ocsp-must-staple/) support
 - DNS challenge [CNAME support](Guides/Using-DNS-Challenge-Aliases.md)

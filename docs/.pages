@@ -1,7 +1,9 @@
 nav:
   - index.md
-  - Tutorial.md
+  - Tutorial
   - Functions
   - Plugins
   - Guides
-  - 'FAQ': 'FAQ.md'
+  - FAQ
+
+collapse_single_pages: true
