@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.15.1'
+ModuleVersion = '4.16.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,10 +83,15 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.15.1 (2022-09-09)
+## 4.16.0 (2022-11-22)
 
-* Reverted the embedded BouncyCastle library back to 1.8.8 due to version conflicts with Az.KeyVault in PowerShell 6+. This is temporary while a suitable workaround for version conflicts in other modules is explored.
-* Fixed Domeneshop plugin when publishing apex TXT records and added more API output to debug messages.
+* New DNS plugins
+  * [Active24](https://www.active24.cz/) (Thanks @pastelka)
+  * [Bunny.net](https://bunny.net/) (Thanks @webprofusion-chrisc)
+* Added `-Subject` parameter to `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder` which will override the default x509 Subject field in the certificate request sent to the ACME CA. This can be useful for private CAs that allow for additional attributes in the Subject that public CAs don't.
+* Fix for undocumented NameSilo API change. (Thanks @rkone)
+* Fix for All-Inkl plugin that makes the plaintext `KasPwd` parameter actually send plaintext since All-Inkl has deprecated the SHA1 option.
+
 '@
 
     }
