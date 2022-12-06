@@ -2475,66 +2475,70 @@
 <table>
 <thead>
 <tr>
-<th>Name</th>
-<th>Free SAN Limit</th>
-<th align="center">Free Wildcards</th>
-<th>Free Lifetime</th>
-<th>Chain Info</th>
-<th>Rate Limits</th>
-<th>Directory Endpoint</th>
-<th>Notes</th>
+<th></th>
+<th align="center"><a href="https://letsencrypt.org/">Let's&nbsp;Encrypt</a></th>
+<th align="center"><a href="https://www.buypass.com/">BuyPass</a></th>
+<th align="center"><a href="https://zerossl.com/">ZeroSSL</a></th>
+<th align="center"><a href="https://www.ssl.com/">SSL.com</a></th>
+<th align="center"><a href="https://cloud.google.com/certificate-manager/docs/public-ca">Google</a></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><a href="https://letsencrypt.org/">Let's&nbsp;Encrypt</a></td>
-<td>100 names</td>
-<td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
-<td>90 days</td>
-<td><a href="https://letsencrypt.org/certificates/">Chains</a></td>
-<td><a href="https://letsencrypt.org/docs/rate-limits/">Policy</a></td>
-<td><a href="https://acme-v02.api.letsencrypt.org/directory">RSA + ECC</a></td>
-<td><a href="https://letsencrypt.status.io/">Service Status</a><br /><a href="https://letsencrypt.org/docs/staging-environment/">Staging Environment</a></td>
+<td>Free SAN Limit</td>
+<td align="center">100 names</td>
+<td align="center">5 names</td>
+<td align="center">100+ names</td>
+<td align="center">1 name + www</td>
+<td align="center">100+ names</td>
 </tr>
 <tr>
-<td><a href="https://www.buypass.com/">BuyPass</a></td>
-<td>5 names</td>
+<td>Free Wildcards</td>
+<td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
-<td>180 days</td>
-<td><a href="https://www.buypass.com/security/buypass-root-certificates">Roots</a> "Go SSL"</td>
-<td><a href="https://community.buypass.com/t/m2r5cj/rate-limits">Policy</a></td>
-<td><a href="https://api.buypass.com/acme/directory">RSA + ECC</a></td>
-<td><a href="https://api.test4.buypass.no/acme/directory">Test Environment</a></td>
-</tr>
-<tr>
-<td><a href="https://zerossl.com/">ZeroSSL</a></td>
-<td>100+ names</td>
 <td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
-<td>90 days</td>
-<td>RSA <a href="https://crt.sh/?q=c81a8bd1f9cf6d84c525f378ca1d3f8c30770e34">Iss1</a>/<a href="https://crt.sh/?q=d89e3bd43d5d909b47a18977aa9d5ce36cee184c">Iss2</a>/<a href="https://crt.sh/?q=d1eb23a46d17d68fd92564c2f1f1601764d8e349">Root</a><br />ECC <a href="https://crt.sh/?q=7f95276d4951499fd756df344aa24fb38ceaf678">Iss1</a>/<a href="https://crt.sh/?q=ca7788c32da1e4b7863a4fb57d00b55ddacbc7f9">Iss2</a>/<a href="https://crt.sh/?q=d1eb23a46d17d68fd92564c2f1f1601764d8e349">Root</a></td>
-<td>??</td>
-<td><a href="https://acme.zerossl.com/v2/DV90">RSA + ECC</a></td>
-<td><a href="https://dv.acme-v02.test-api.pki.goog/directory">Staging Endpoint</a><br /><a href="https://cloud.google.com/certificate-manager/docs/public-ca-tutorial">Quick Start</a></td>
-</tr>
-<tr>
-<td><a href="https://www.ssl.com/">SSL.com</a></td>
-<td>1 name + www</td>
 <td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
-<td>90 days</td>
-<td>RSA <a href="https://crt.sh/?q=33ee4e370a8d90fd4b1445e672226c4b829cc6d2">Iss</a>/<a href="https://crt.sh/?q=b7ab3308d1ea4477ba1480125a6fbda936490cbb">Root</a><br />ECC <a href="https://crt.sh/?q=9219612e901c4904f9835ee8c2add54ff0b797fd">Iss</a>/<a href="https://crt.sh/?q=c3197c3924e654af1bc4ab20957ae2c30e13026a">Root</a></td>
-<td>??</td>
-<td><a href="https://acme.ssl.com/sslcom-dv-rsa">RSA</a><br /><a href="https://acme.ssl.com/sslcom-dv-ecc">ECC</a></td>
-<td>See Warning below</td>
+<td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
 </tr>
 <tr>
-<td><a href="https://cloud.google.com/certificate-manager/docs/public-ca">Google</a></td>
-<td>100+ names</td>
+<td>Free Lifetime</td>
+<td align="center">90 days</td>
+<td align="center">180 days</td>
+<td align="center">90 days</td>
+<td align="center">90 days</td>
+<td align="center">1*-90 days</td>
+</tr>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/Internationalized_domain_name">IDN</a> Support</td>
 <td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
-<td>90* days</td>
-<td><a href="https://crt.sh/?q=9c0b252a678a087fbee496a44377f7556ac605e7">Iss</a>/<a href="https://crt.sh/?q=e1c950e6ef22f84c5645728b922060d7d5a7a3e8">Root</a></td>
-<td><a href="https://cloud.google.com/certificate-manager/docs/quotas">Policy</a></td>
-<td><a href="https://dv.acme-v02.api.pki.goog/directory">RSA + ECC</a></td>
-<td>See Notes below</td>
+<td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
+<td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
+<td align="center"><img alt="✅" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2705.svg" title=":white_check_mark:" /></td>
+<td align="center"><img alt="❌" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/274c.svg" title=":x:" /></td>
+</tr>
+<tr>
+<td>Chain Info</td>
+<td align="center"><a href="https://letsencrypt.org/certificates/">Chains</a></td>
+<td align="center"><a href="https://www.buypass.com/security/buypass-root-certificates">Roots</a> "Go SSL"</td>
+<td align="center">RSA <a href="https://crt.sh/?q=c81a8bd1f9cf6d84c525f378ca1d3f8c30770e34">Iss1</a>/<a href="https://crt.sh/?q=d89e3bd43d5d909b47a18977aa9d5ce36cee184c">Iss2</a>/<a href="https://crt.sh/?q=d1eb23a46d17d68fd92564c2f1f1601764d8e349">Root</a><br />ECC <a href="https://crt.sh/?q=7f95276d4951499fd756df344aa24fb38ceaf678">Iss1</a>/<a href="https://crt.sh/?q=ca7788c32da1e4b7863a4fb57d00b55ddacbc7f9">Iss2</a>/<a href="https://crt.sh/?q=d1eb23a46d17d68fd92564c2f1f1601764d8e349">Root</a></td>
+<td align="center">RSA <a href="https://crt.sh/?q=33ee4e370a8d90fd4b1445e672226c4b829cc6d2">Iss</a>/<a href="https://crt.sh/?q=b7ab3308d1ea4477ba1480125a6fbda936490cbb">Root</a><br />ECC <a href="https://crt.sh/?q=9219612e901c4904f9835ee8c2add54ff0b797fd">Iss</a>/<a href="https://crt.sh/?q=c3197c3924e654af1bc4ab20957ae2c30e13026a">Root</a></td>
+<td align="center"><a href="https://crt.sh/?q=9c0b252a678a087fbee496a44377f7556ac605e7">Iss</a>/<a href="https://crt.sh/?q=e1c950e6ef22f84c5645728b922060d7d5a7a3e8">Root</a></td>
+</tr>
+<tr>
+<td>Rate Limits</td>
+<td align="center"><a href="https://letsencrypt.org/docs/rate-limits/">Policy</a></td>
+<td align="center"><a href="https://community.buypass.com/t/m2r5cj/rate-limits">Policy</a></td>
+<td align="center">??</td>
+<td align="center">??</td>
+<td align="center"><a href="https://cloud.google.com/certificate-manager/docs/quotas">Policy</a></td>
+</tr>
+<tr>
+<td>Notes</td>
+<td align="center"><a href="https://letsencrypt.status.io/">Service Status</a><br /><a href="https://letsencrypt.org/docs/staging-environment/">Staging Environment</a></td>
+<td align="center"><a href="https://api.test4.buypass.no/acme/directory">Test Environment</a></td>
+<td align="center">See Notes below</td>
+<td align="center">See Warning below</td>
+<td align="center"><a href="https://dv.acme-v02.test-api.pki.goog/directory">Staging Endpoint</a><br /><a href="https://cloud.google.com/certificate-manager/docs/public-ca-tutorial">Quick Start</a></td>
 </tr>
 </tbody>
 </table>
@@ -2544,8 +2548,7 @@
 <li>Using Let's Encrypt's ECDSA-only chain currently requires your ACME account be <a href="https://community.letsencrypt.org/t/ecdsa-availability-in-production-environment/150679">added to an allow-list</a>. Otherwise, your ECDSA cert will be signed by the RSA chain.</li>
 <li>ZeroSSL supports a custom REST API that some clients use instead of pure ACME.</li>
 <li><strong>SSL.com Warning:</strong> If your SSL.com account has funds available, you will be charged for a paid 1-year certificate instead of a free 90-day certificate. There is no known way to request only a free certificate.</li>
-<li>Google certs have a 90 day lifetime by default but can be requested for shorter lifetimes down to 1 day. The recommended minimum lifetime is 3 days.</li>
-<li>Google certs do not currently support punycode/IDN domains.</li>
+<li>Google certs have a 90 day lifetime by default but can be requested for shorter lifetimes down to 1 day if supported by your ACME client. The recommended minimum lifetime is 3 days.</li>
 </ul>
 <h2 id="acme-spec-and-feature-support">ACME Spec and Feature Support<a class="headerlink" href="#acme-spec-and-feature-support" title="Permanent link">&para;</a></h2>
 <p>Some of the features in the ACME protocol are optional. Others are mandatory but not yet supported by some implementations. Here is the status of those various features in each CA.</p>
