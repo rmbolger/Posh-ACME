@@ -4,21 +4,23 @@ As more public certificate authorities hop on the [ACME][rfc00] bandwagon, it is
 
 ## ACME CA Info
 
-| Name                       | Free SAN Limit | Free Wildcards     | Free Lifetime | Chain Info                                                                           | Rate Limits    | Directory Endpoint           | Notes                                                    |
-| ----                       | -------------- | :------------:     | ------------- | ----------                                                                           | -----------    | ------------------           | -----                                                    |
-| [Let's&nbsp;Encrypt][le01] | 100 names      | :white_check_mark: | 90 days       | [Chains][le06]                                                                       | [Policy][le02] | [RSA + ECC][le10]            | [Service Status][le09]<br />[Staging Environment][le03]  |
-| [BuyPass][bp01]            | 5 names        | :x:                | 180 days      | [Roots][bp04] "Go SSL"                                                               | [Policy][bp02] | [RSA + ECC][bp05]            | [Test Environment][bp03]                                 |
-| [ZeroSSL][z01]             | 100+ names     | :white_check_mark: | 90 days       | RSA [Iss1][z02]/[Iss2][z03]/[Root][z04]<br />ECC [Iss1][z05]/[Iss2][z06]/[Root][z07] | ??             | [RSA + ECC][z08]             | [Staging Endpoint][gc06]<br />[Quick Start][gc07]        |
-| [SSL.com][ss01]            | 1 name + www   | :x:                | 90 days       | RSA [Iss][ss02]/[Root][ss03]<br />ECC [Iss][ss06]/[Root][ss07]                       | ??             | [RSA][ss04]<br />[ECC][ss05] | See Warning below                                        |
-| [Google][gc01]             | 100+ names     | :white_check_mark: | 90* days      | [Iss][gc02]/[Root][gc03]                                                             | [Policy][gc04] | [RSA + ECC][gc05]            | See Notes below                                          |
+|                     | [Let's&nbsp;Encrypt][le01] | [BuyPass][bp01]        | [ZeroSSL][z01]     | [SSL.com][ss01]    | [Google][gc01]     |
+| -------             | :------------------------: | :-------------:        | :------------:     | :-------------:    | :------------:     |
+| Free SAN Limit      | 100 names                  | 5 names                | 100+ names         | 1 name + www       | 100+ names         |
+| Free Wildcards      | :white_check_mark:         | :x:                    | :white_check_mark: | :x:                | :white_check_mark: |
+| Free Lifetime       | 90 days                    | 180 days               | 90 days            | 90 days            | 1*-90 days         |
+| [IDN][wk02] Support | :white_check_mark:         | :white_check_mark:     | :white_check_mark: | :white_check_mark: | :x:                |
+| Chain Info          | [Chains][le06]             | [Roots][bp04] "Go SSL" | RSA [Iss1][z02]/[Iss2][z03]/[Root][z04]<br />ECC [Iss1][z05]/[Iss2][z06]/[Root][z07] | RSA [Iss][ss02]/[Root][ss03]<br />ECC [Iss][ss06]/[Root][ss07] | [Iss][gc02]/[Root][gc03] |
+| Rate Limits         | [Policy][le02]             | [Policy][bp02]         | ??                 | ??                 | [Policy][gc04]     |
+| Notes               | [Service Status][le09]<br />[Staging Environment][le03] | [Test Environment][bp03] | See Notes below | See Warning below | [Staging Endpoint][gc06]<br />[Quick Start][gc07] |
+
 
 * Wildcard names (if supported) count towards Subject Alternative Name (SAN) limits.
 * `1 name + www` means one domain name plus its www name variant such as `example.com` and `www.example.com`
 * Using Let's Encrypt's ECDSA-only chain currently requires your ACME account be [added to an allow-list](https://community.letsencrypt.org/t/ecdsa-availability-in-production-environment/150679). Otherwise, your ECDSA cert will be signed by the RSA chain.
 * ZeroSSL supports a custom REST API that some clients use instead of pure ACME.
 * **SSL.com Warning:** If your SSL.com account has funds available, you will be charged for a paid 1-year certificate instead of a free 90-day certificate. There is no known way to request only a free certificate.
-* Google certs have a 90 day lifetime by default but can be requested for shorter lifetimes down to 1 day. The recommended minimum lifetime is 3 days.
-* Google certs do not currently support punycode/IDN domains.
+* Google certs have a 90 day lifetime by default but can be requested for shorter lifetimes down to 1 day if supported by your ACME client. The recommended minimum lifetime is 3 days.
 
 ## ACME Spec and Feature Support
 
@@ -57,6 +59,7 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 
 
 [wk01]: https://en.wikipedia.org/wiki/Domain-validated_certificate
+[wk02]: https://en.wikipedia.org/wiki/Internationalized_domain_name
 [le01]: https://letsencrypt.org/
 [le02]: https://letsencrypt.org/docs/rate-limits/
 [le03]: https://letsencrypt.org/docs/staging-environment/
