@@ -118,3 +118,13 @@ $pArgs = @{
 }
 New-PACertificate example.com -Plugin OVH -PluginArgs $pArgs
 ```
+
+#### Troubleshooting
+
+If you get the following error:
+
+```powershell
+Submit-ChallengeValidation : {"message":"Query out of time","httpCode":"400 Bad Request","errorCode":"QUERY_TIME_OUT"}
+```
+
+Then either your clock has the incorrect time, or your time zone is wrong. You have to fix that, or better set up the clock to auto-adjust.
