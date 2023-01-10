@@ -14,7 +14,8 @@ the API Secret to IONOSTokenSecure
 
 
 $pArgs = @{
-	 IONOSPublicPrefix = (Read-Host 'API Public Prefix')
-     IONOSTokenSecure = (Read-Host 'API Secret' -AsSecureString)
+	IONOSPublicPrefix = (Read-Host 'API Public Prefix')
+	IONOSTokenSecure = (Read-Host 'API Secret' -AsSecureString)
 	}
+	
 New-PACertificate example.com -Plugin IONOS -PluginArgs $pArgs
