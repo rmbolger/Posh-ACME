@@ -232,7 +232,7 @@ Function Find-IONOSZone {
 		$response = Invoke-RestMethod $ApiRoot @restParams
 	} catch { throw }
 
-	# We need to find the closest/deepest
+    # We need to find the closest/deepest
     # sub-zone that would hold the record rather than just adding it to the apex. So for something
     # like _acme-challenge.site1.sub1.sub2.example.com, we'd look for zone matches in the following
     # order:
