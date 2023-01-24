@@ -71,6 +71,7 @@ Route53 | [AWS Route53](https://aws.amazon.com/route53/) | [Usage Guide](Route53
 Selectel | [Selectel.ru](https://selectel.ru/en/services/additional/dns/) | [Usage Guide](Selectel.md) | :white_check_mark:
 SimpleDNSPlus | [Simple DNS Plus](https://simpledns.com/) | [Usage Guide](SimpleDNSPlus.md) | :white_check_mark:
 Simply | [Simply](https://www.simply.com/) (formerly UnoEuro) | [Usage Guide](Simply.md) | :white_check_mark:
+SSHProxy | Custom SSH Script | [Usage Guide](SSHProxy.md) | :white_check_mark:
 TotalUptime | [TotalUptime](https://totaluptime.com/solutions/cloud-dns-service/) | [Usage Guide](TotalUptime.md) | :white_check_mark:
 UKFast | [UKFast](https://ukfast.co.uk) | [Usage Guide](UKFast.md) | :white_check_mark:
 Windows | [Microsoft Windows DNS](https://www.microsoft.com/en-us/cloud-platform/windows-server) | [Usage Guide](Windows.md) | Windows-Only<sup>[1](#windows)</sup>
