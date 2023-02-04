@@ -10,13 +10,13 @@ You will need to generate an API Token if you haven't already done so. Follow th
 
 ## Using the Plugin
 
-You will need to provide the API Public Prefix to `IONOSPublicPrefix` and
-the API Secret to `IONOSTokenSecure`.
+You will need to provide the API Public Prefix to `IONOSKeyPrefix` and
+the API Secret to `IONOSKeySecret`.
 
 ```powershell
 $pArgs = @{
-	IONOSPublicPrefix = (Read-Host 'API Public Prefix')
-	IONOSTokenSecure = (Read-Host 'API Secret' -AsSecureString)
+	IONOSKeyPrefix = (Read-Host 'API Public Prefix')
+	IONOSKeySecret = (Read-Host 'API Secret' -AsSecureString)
 }
 	
 New-PACertificate example.com -Plugin IONOS -PluginArgs $pArgs

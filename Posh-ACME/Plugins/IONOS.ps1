@@ -1,117 +1,111 @@
-Function Get-CurrentPluginType { 'dns-01' }
+function Get-CurrentPluginType { 'dns-01' }
 
-Function Add-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName='Secure')]
+function Add-DnsTxt {
+    [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position = 0)]
+        [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
-        [Parameter(Mandatory,Position = 1)]
+        [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position = 2)]
-        [string]$IONOSPublicPrefix,
-        [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
-        [securestring]$IONOSTokenSecure,
-        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
-        [string]$IONOSToken,
+        [Parameter(Mandatory,Position=2)]
+        [string]$IONOSKeyPrefix,
+        [Parameter(Mandatory,Position=3)]
+        [securestring]$IONOSKeySecret,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-
     $ApiRoot = "https://api.hosting.ionos.com/dns/v1/zones"
-    
+
     # un-secure the password
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $IONOSToken = [pscredential]::new('a',$IONOSTokenSecure).GetNetworkCredential().Password
-    }
-    $IONOSToken = "$IONOSPublicPrefix.$IONOSToken"
+    $IONOSKeySecretInsecure = [pscredential]::new('a',$IONOSKeySecret).GetNetworkCredential().Password
+    $ApiKey = "$IONOSKeyPrefix.$IONOSKeySecretInsecure"
 
     $RestParams = @{
-               'Header' = @{
-                            'X-API-Key' = $IONOSToken
-                            'accept' = 'application/json'
-                            }
-               }
-
+        Headers = @{
+            'X-API-Key' = $ApiKey
+            'Accept' = 'application/json'
+        }
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
 
     # find ZoneID to check, if the records exists
     if (-not ($zone = Find-IONOSZone $RecordName $RestParams $ApiRoot)) {
-						 
         throw "Unable to find matching zone for $RecordName"
     }
 
     # query the current text records
     try {
-        Write-Verbose "Searching for existing TXT record" 
-        $recs = Invoke-RestMethod "$ApiRoot/$($zone.id)" @RestParams
+        $uri = "$ApiRoot/$($zone.id)?recordType=TXT"
+        Write-Debug "GET $uri"
+        Write-Verbose "Searching for existing TXT record"
+        $recs = Invoke-RestMethod $uri @RestParams @script:UseBasic
     } catch { throw }
 
     # check for a matching record
     $rec = $recs.records | Where-Object {
-        $_.type -eq 'TXT' -and
         $_.name -eq $RecordName -and
-        $_.content -like "*$TxtValue*"
+        $_.content -eq "`"$TxtValue`""
     }
 
     if ($rec) {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
     } else {
+        $RestParams.Uri = "$ApiRoot/$($zone.id)/records"
         $RestParams.Method = 'POST'
-        $RestParams.Header['Content-Type'] = 'application/json'
+        $RestParams.ContentType = 'application/json'
         # create body schema for request
-        $RestParams.Body = @{
-            name = $RecordName;
-            type = 'TXT';
-            content = $TxtValue;
-            ttl  = 3600;
-            disabled = 'false';
-            prio = 0
-        } 
-        # convert to expected json format
-        $RestParams.Body = ConvertTo-Json @($RestParams.Body)
-        
-       try {
-            Write-Verbose "Add Record $RecordName with value $TxtValue." 
-            Invoke-RestMethod "$ApiRoot/$($zone.id)/records" @RestParams | Out-Null
-       } catch { throw }
+        $RestParams.Body = ConvertTo-Json @(,@{
+            name     = $RecordName
+            type     = 'TXT'
+            content  = $TxtValue
+            ttl      = 60
+            disabled = 'false'
+            prio     = 0
+        })
+
+        try {
+            Write-Debug "POST $($RestParams.Uri)`n$($RestParams.Body)"
+            Write-Verbose "Add Record $RecordName with value $TxtValue."
+            Invoke-RestMethod @RestParams @script:UseBasic | Out-Null
+        } catch { throw }
     }
+
+<#
+.SYNOPSIS
+    Add a DNS TXT record to IONOS.
+.DESCRIPTION
+    Uses the IONOS DNS API to add or update a DNS TXT record.
+.PARAMETER RecordName
+    The fully qualified name of the TXT record.
+.PARAMETER TxtValue
+    The value of the TXT record.
+.PARAMETER IONOSKeyPrefix
+    The public prefix value for your API key.
+.PARAMETER IONOSKeySecret
+    The secret associated with your API key.
+.PARAMETER ExtraParams
+    This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+.EXAMPLE
+    $secret = Read-Host 'API Secret' -AsSecureString
+    Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -IONOSKeyPrefix 'xxxxxx' -IONOSKeySecret $secret
+
+    Adds or updates the specified TXT record with the specified value.
+#>
 }
 
-    <#
-    .SYNOPSIS
-        Add a DNS TXT record to IONOS.
-    .DESCRIPTION
-        Uses the IONOS DNS API to add or update a DNS TXT record.
-    .PARAMETER RecordName
-        The fully qualified name of the TXT record.
-    .PARAMETER TxtValue
-        The value of the TXT record.
-    .PARAMETER IONOSToken
-        The API token for your IONOS account.
-    .PARAMETER IONOSTokenInsecure
-        (DEPRECATED) The API token for your IONOS account.
-    .PARAMETER ExtraParams
-        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
-    .EXAMPLE
-        $token = Read-Host 'Token' -AsSecureString
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -IONOSToken $token
-
-        Adds or updates the specified TXT record with the specified value.
-    #>
-
-Function Remove-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName='Secure')]
+function Remove-DnsTxt {
+    [CmdletBinding()]
     param(
-        [Parameter(Mandatory,Position = 0)]
+        [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
-        [Parameter(Mandatory,Position = 1)]
+        [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position = 2)]
-        [string]$IONOSPublicPrefix,
-        [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
-        [securestring]$IONOSTokenSecure,
-        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
-        [string]$IONOSToken,
+        [Parameter(Mandatory,Position=2)]
+        [string]$IONOSKeyPrefix,
+        [Parameter(Mandatory,Position=3)]
+        [securestring]$IONOSKeySecret,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -119,71 +113,73 @@ Function Remove-DnsTxt {
     $ApiRoot = "https://api.hosting.ionos.com/dns/v1/zones"
 
     # un-secure the password
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $IONOSToken = [pscredential]::new('a',$IONOSTokenSecure).GetNetworkCredential().Password
-    }
-    $IONOSToken = "$IONOSPublicPrefix.$IONOSToken"
+    $IONOSKeySecretInsecure = [pscredential]::new('a',$IONOSKeySecret).GetNetworkCredential().Password
+    $ApiKey = "$IONOSKeyPrefix.$IONOSKeySecretInsecure"
 
     $RestParams = @{
-               'Header' = @{
-                            'X-API-Key' = $IONOSToken
-                            'accept' = 'application/json'
-                            }
-               }
+        Headers = @{
+            'X-API-Key' = $ApiKey
+            'Accept' = 'application/json'
+        }
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
 
     # find ZoneID to check, if the records exists
     if (-not ($zone = Find-IONOSZone $RecordName $RestParams $ApiRoot)) {
-						 
         throw "Unable to find matching zone for $RecordName"
     }
-    
+
     # query the current text records
     try {
-        Write-Verbose "Searching for existing TXT record" 
-        $recs = Invoke-RestMethod "$ApiRoot/$($zone.id)" @RestParams 
+        $uri = "$ApiRoot/$($zone.id)?recordType=TXT"
+        Write-Debug "GET $uri"
+        Write-Verbose "Searching for existing TXT record"
+        $recs = Invoke-RestMethod $uri @RestParams @script:UseBasic
     } catch { throw }
 
     # check for a matching record
     $rec = $recs.records | Where-Object {
-        $_.type -eq 'TXT' -and
         $_.name -eq $RecordName -and
-        $_.content -like "*$TxtValue*"
+        $_.content -eq "`"$TxtValue`""
     }
 
     if ($rec) {
         try {
+            $uri = "$ApiRoot/$($zone.id)/records/$($rec.Id)"
             $RestParams.Method = 'DELETE'
-            Write-Verbose "Remove Record $RecordName ($($rec.Id)) with value $TxtValue." 
-            Invoke-RestMethod "$ApiRoot/$($zone.id)/records/$($rec.Id)" @RestParams | Out-Null
+            Write-Debug "DELETE $uri"
+            Write-Verbose "Remove Record $RecordName ($($rec.Id)) with value $TxtValue."
+            Invoke-RestMethod $uri @RestParams @script:UseBasic | Out-Null
         } catch { throw }
     } else {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     }
 
-    <#
-    .SYNOPSIS
-        Remove a DNS TXT record from IONOS.
-    .DESCRIPTION
-        Uses the IONOS DNS API to remove DNS TXT record.
-    .PARAMETER RecordName
-        The fully qualified name of the TXT record.
-    .PARAMETER TxtValue
-        The value of the TXT record.
-    .PARAMETER IONOSToken
-        The API token for your IONOS account.
-    .PARAMETER IONOSTokenInsecure
-        (DEPRECATED) The API token for your IONOS account.
-    .PARAMETER ExtraParams
-        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
-    .EXAMPLE
-        $token = Read-Host 'Token' -AsSecureString
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -IONOSToken $token
+<#
+.SYNOPSIS
+    Remove a DNS TXT record from IONOS.
+.DESCRIPTION
+    Uses the IONOS DNS API to remove DNS TXT record.
+.PARAMETER RecordName
+    The fully qualified name of the TXT record.
+.PARAMETER TxtValue
+    The value of the TXT record.
+.PARAMETER IONOSKeyPrefix
+    The public prefix value for your API key.
+.PARAMETER IONOSKeySecret
+    The secret associated with your API key.
+.PARAMETER ExtraParams
+    This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+.EXAMPLE
+    $secret = Read-Host 'API Secret' -AsSecureString
+    Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -IONOSKeyPrefix 'xxxxxx' -IONOSKeySecret $secret
 
-        Removes the specified TXT record with the specified value.
-    #>
+    Removes the specified TXT record with the specified value.
+#>
 }
 
-Function Save-DnsTxt {
+function Save-DnsTxt {
     [CmdletBinding()]
     param(
         [Parameter(ValueFromRemainingArguments)]
@@ -206,17 +202,17 @@ Function Save-DnsTxt {
 # API Docs
 # https://developer.hosting.ionos.de/docs/dns
 
-Function Find-IONOSZone {
+function Find-IONOSZone {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory, Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory, Position=1)]
-        [hashtable]$restParams,
+        [hashtable]$RestParams,
         [Parameter(Mandatory, Position=2)]
         [string]$ApiRoot
     )
-	
+
 	# setup a module variable to cache the record to zone mapping
     # so it's quicker to find later
     if (!$script:IONOSRecordZones) { $script:IONOSRecordZones = @{} }
@@ -226,10 +222,10 @@ Function Find-IONOSZone {
         Write-Debug "Result from Cache $($script:IONOSRecordZones.$RecordName.Name)"
         return $script:IONOSRecordZones.$RecordName
     }
-	
+
 	# first, get all Zones, Zone to get is identified by 'ZoneID'.
     try {
-		$response = Invoke-RestMethod $ApiRoot @restParams
+		$response = Invoke-RestMethod $ApiRoot @RestParams @script:UseBasic
 	} catch { throw }
 
     # We need to find the closest/deepest
@@ -243,7 +239,7 @@ Function Find-IONOSZone {
 	$pieces = $RecordName.Split('.')
 	    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
-        Write "Checking $zoneTest" #Write-Debug
+        Write-Debug "Checking $zoneTest"
 
         $zone = $response | Select-Object id,name |
             Where-Object { $_.name -eq $zoneTest }
