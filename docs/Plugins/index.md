@@ -51,6 +51,7 @@ HurricaneElectric | [Hurricane Electric DNS](https://dns.he.net/) | [Usage Guide
 IBMSoftLayer | [IBM Cloud DNS](https://www.ibm.com/cloud/dns) | [Usage Guide](IBMSoftLayer.md) | :white_check_mark:
 Infoblox | [Infoblox NIOS](https://www.infoblox.com) | [Usage Guide](Infoblox.md) | :white_check_mark:
 Infomaniak | [Infomaniak](https://www.infomaniak.com) | [Usage Guide](Infomaniak.md) | :white_check_mark:
+IONOS | [IONOS](https://www.ionos.de/) | [Usage Guide](IONOS.md) | :white_check_mark:
 ISPConfig | [ISPConfig](https://www.ispconfig.org/) | [Usage Guide](ISPConfig.md) | :white_check_mark:
 LeaseWeb | [LeaseWeb](https://www.leaseweb.com/) | [Usage Guide](LeaseWeb.md) | :white_check_mark:
 Linode | [Linode DNS](https://www.linode.com/?r=4dfd67cf6f1e384ce626f2943620186344bb2ccf) | [Usage Guide](Linode.md) | :white_check_mark:
