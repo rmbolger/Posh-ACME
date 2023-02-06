@@ -111,7 +111,10 @@ function Set-PAServer {
 
         # update the cert validation state before we try to refresh
         if ('SkipCertificateCheck' -in $PSBoundParameters.Keys) {
-            Set-CertValidation $SkipCertificateCheck.IsPresent
+            Set-CertValidation -Skip $SkipCertificateCheck.IsPresent
+        }
+        elseif ($curDir -and $curDir.SkipCertificateCheck) {
+            Set-CertValidation -Skip $true
         }
 
         # refresh the server details if they don't already exist or NoRefresh
@@ -166,16 +169,22 @@ function Set-PAServer {
             }
         }
 
-        # update switch param details if necessary
-        if ($newDir.DisableTelemetry -ne $DisableTelemetry.IsPresent) {
+        # update switch param details if specified and necessary
+        if ($PSBoundParameters.ContainsKey('DisableTelemetry') -and
+            $newDir.DisableTelemetry -ne $DisableTelemetry.IsPresent)
+        {
             Write-Debug "Setting DisableTelemetry value to $($DisableTelemetry.IsPresent)"
             $newDir | Add-Member 'DisableTelemetry' $DisableTelemetry.IsPresent -Force
         }
-        if ($newDir.SkipCertificateCheck -ne $SkipCertificateCheck.IsPresent) {
+        if ($PSBoundParameters.ContainsKey('SkipCertificateCheck') -and
+            $newDir.SkipCertificateCheck -ne $SkipCertificateCheck.IsPresent)
+        {
             Write-Debug "Setting SkipCertificateCheck value to $($SkipCertificateCheck.IsPresent)"
             $newDir | Add-Member 'SkipCertificateCheck' $SkipCertificateCheck.IsPresent -Force
         }
-        if ($newDir.UseAltAccountRefresh -ne $UseAltAccountRefresh.IsPresent) {
+        if ($PSBoundParameters.ContainsKey('UseAltAccountRefresh') -and
+            $newDir.UseAltAccountRefresh -ne $UseAltAccountRefresh.IsPresent)
+        {
             Write-Debug "Setting UseAltAccountRefresh value to $($UseAltAccountRefresh.IsPresent)"
             $newDir | Add-Member 'UseAltAccountRefresh' $UseAltAccountRefresh.IsPresent -Force
         }
