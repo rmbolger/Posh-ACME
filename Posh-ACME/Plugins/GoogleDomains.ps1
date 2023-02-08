@@ -7,13 +7,21 @@ function Add-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(Mandatory, Position = 2)]
+        [Parameter(ParameterSetName="Single", Mandatory, Position=2)]
         [string]$RootDomain,
-        [Parameter(Mandatory, Position = 3)]
+        [Parameter(ParameterSetName="Single", Mandatory, Position=3)]
         [securestring]$AccessToken,
+        [Parameter(ParameterSetName="Multiple", Mandatory, Position=2)]
+        [hashtable]$DomainTokens,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    if ($DomainTokens){
+        $result = Find-GDDomainToken $RecordName $DomainTokens
+        $RootDomain = $result.RootDomain
+        $AccessToken = $result.AccessToken
+    }
 
     # get the plaintext version of the token
     $AccessKeyInsecure = [pscredential]::new('a', $AccessToken).GetNetworkCredential().Password
@@ -74,14 +82,22 @@ function Remove-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(Mandatory, Position = 2)]
+        [Parameter(ParameterSetName="Single", Mandatory, Position=2)]
         [string]$RootDomain,
-        [Parameter(Mandatory, Position = 3)]
+        [Parameter(ParameterSetName="Single", Mandatory, Position=3)]
         [securestring]$AccessToken,
+        [Parameter(ParameterSetName="Multiple", Mandatory, Position=2)]
+        [hashtable]$DomainTokens,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
+    if ($DomainTokens){
+        $result = Find-GDDomainToken $RecordName $DomainTokens
+        $RootDomain = $result.RootDomain
+        $AccessToken = $result.AccessToken
+    }
+    
       # get the plaintext version of the token
       $AccessTokenInsecure = [pscredential]::new('a', $AccessToken).GetNetworkCredential().Password
 
@@ -133,3 +149,44 @@ function Remove-DnsTxt {
         Remove a TXT record for the specified site with the specified value on Windows.
     #>
     }
+
+############################
+# Helper Functions
+############################
+
+# if using optional domain/token hashtable, lookup most specific matching info
+
+function Find-GDDomainToken {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [string] $RecordName,
+        [Parameter(Mandatory,Position=1)]
+        [hashtable] $DomainTokens
+    )
+
+    [string] $matchedDomain
+    [securestring] $matchedToken
+
+    foreach ($key in $DomainTokens.Keys) 
+    {
+        $domain = $key.Replace('*.','')
+
+        # find most specific matching domain compared to our record name
+        if ($RecordName.EndsWith("."+$domain) -And $matchedDomain.Length -lt $key.Length ){
+            $matchedDomain = $domain
+            $matchedToken = $DomainTokens[$key]
+        }
+    }
+
+    if ($matchedDomain -And $matchedToken){
+        Write-Verbose "$RecordName matched to $matchedDomain in DomainTokens"
+
+        return @{
+            RootDomain = $matchedDomain
+            AccessToken = $matchedToken
+        }
+    } else {       
+        throw "Failed to find find matching root domain and access token in DomainTokens for $RecordName"
+    }
+}
