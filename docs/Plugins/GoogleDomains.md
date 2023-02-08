@@ -23,11 +23,10 @@ New-PACertificate example.com -Plugin GoogleDomains -PluginArgs $pArgs
 As tokens are specific to individual root domains you can optionally instead supply a list of domain/token pairs for use when building multi-domain SAN certificates
 ```powershell
 $pArgs = @{
-    DomainTokens = @{
-        "example.com" = <secure string with example.com token>
-        "otherexample.com" = <secure string with otherexample.com token>
+    DomainTokensInsecure = @{
+        "example.com" = "EXAMPLETOKEN=="
     }
 }
 
-New-PACertificate example.com -Plugin GoogleDomains -PluginArgs $pArgs
+New-PACertificate www.example.com -Plugin GoogleDomains -PluginArgs $pArgs
 ```

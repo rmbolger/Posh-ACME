@@ -11,25 +11,27 @@ function Add-DnsTxt {
         [string]$RootDomain,
         [Parameter(ParameterSetName="Single", Mandatory, Position=3)]
         [securestring]$AccessToken,
-        [Parameter(ParameterSetName="Multiple", Mandatory, Position=2)]
-        [hashtable]$DomainTokens,
+        [Parameter(ParameterSetName="MultipleInsecure", Position=2)]
+        [hashtable]$DomainTokensInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    if ($DomainTokens){
-        $result = Find-GDDomainToken $RecordName $DomainTokens
-        $RootDomain = $result.RootDomain
-        $AccessToken = $result.AccessToken
-    }
+    $AccessTokenInsecure = ""
 
-    # get the plaintext version of the token
-    $AccessKeyInsecure = [pscredential]::new('a', $AccessToken).GetNetworkCredential().Password
+    if ($DomainTokensInsecure){
+        $result = Find-GDDomainToken $RecordName $DomainTokensInsecure
+        $RootDomain = $result.RootDomain
+        $AccessTokenInsecure = $result.AccessToken
+    }
+     else {
+        $AccessTokenInsecure = [pscredential]::new('a', $AccessToken).GetNetworkCredential().Password
+     }
 
     $apiRoot = "https://acmedns.googleapis.com/v1/acmeChallengeSets/$($RootDomain)"
 
     $jsonPayload = @{
-            accessToken = $AccessKeyInsecure
+            accessToken = $AccessTokenInsecure
             recordsToAdd = @(
                     @{
                         fqdn=$RecordName
@@ -64,6 +66,9 @@ function Add-DnsTxt {
     .PARAMETER AccessToken
         The API Token Secret
 
+    .PARAMETER DomainTokensInsecure
+        Optional hashtable of domain/token pairs for working with multiple domains.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -86,39 +91,42 @@ function Remove-DnsTxt {
         [string]$RootDomain,
         [Parameter(ParameterSetName="Single", Mandatory, Position=3)]
         [securestring]$AccessToken,
-        [Parameter(ParameterSetName="Multiple", Mandatory, Position=2)]
-        [hashtable]$DomainTokens,
+        [Parameter(ParameterSetName="MultipleInsecure", Mandatory, Position=2)]
+        [hashtable]$DomainTokensInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    if ($DomainTokens){
-        $result = Find-GDDomainToken $RecordName $DomainTokens
-        $RootDomain = $result.RootDomain
-        $AccessToken = $result.AccessToken
-    }
     
-      # get the plaintext version of the token
-      $AccessTokenInsecure = [pscredential]::new('a', $AccessToken).GetNetworkCredential().Password
+    $AccessTokenInsecure = ""
 
-      $apiRoot = "https://acmedns.googleapis.com/v1/acmeChallengeSets/$($RootDomain)"
+    if ($DomainTokensInsecure){
+        $result = Find-GDDomainToken $RecordName $DomainTokensInsecure
+        $RootDomain = $result.RootDomain
+        $AccessTokenInsecure = $result.AccessToken
+    }
+    else {
+        $AccessTokenInsecure = [pscredential]::new('a', $AccessToken).GetNetworkCredential().Password
+    }
 
-      $jsonPayload = @{
-            accessToken = $AccessTokenInsecure
-            recordsToRemove = @(
-                    @{
-                        fqdn=$RecordName
-                        digest=$TxtValue
-                    }
-            )
-        } | ConvertTo-Json
 
-      # add new record
-      try {
-          Write-Verbose "Deleting a TXT record for $RecordName with value $TxtValue"
-          Invoke-RestMethod "$($apiRoot):rotateChallenges" -Method POST -Body $jsonPayload -ContentType 'application/json' -ErrorAction Stop | Out-Null
-      }
-      catch { throw }
+    $apiRoot = "https://acmedns.googleapis.com/v1/acmeChallengeSets/$($RootDomain)"
+
+    $jsonPayload = @{
+        accessToken = $AccessTokenInsecure
+        recordsToRemove = @(
+                @{
+                    fqdn=$RecordName
+                    digest=$TxtValue
+                }
+        )
+    } | ConvertTo-Json
+
+    # add new record
+    try {
+        Write-Verbose "Deleting a TXT record for $RecordName with value $TxtValue"
+        Invoke-RestMethod "$($apiRoot):rotateChallenges" -Method POST -Body $jsonPayload -ContentType 'application/json' -ErrorAction Stop | Out-Null
+    }
+    catch { throw }
 
     <#
     .SYNOPSIS
@@ -138,6 +146,9 @@ function Remove-DnsTxt {
 
     .PARAMETER AccessToken
         The API Token Secret
+    
+    .PARAMETER DomainTokensInsecure
+        Optional hashtable of domain/token pairs for working with multiple domains.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -148,7 +159,23 @@ function Remove-DnsTxt {
 
         Remove a TXT record for the specified site with the specified value on Windows.
     #>
-    }
+}
+
+function Save-DnsTxt {
+    [CmdletBinding()]
+    param(
+        [Parameter(ValueFromRemainingArguments, DontShow)]
+        $ExtraParams
+    )
+    <#
+    .SYNOPSIS
+        Not required.
+    .DESCRIPTION
+        This provider does not require calling this function to commit changes to DNS records.
+    .PARAMETER ExtraParams
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+    #>
+}
 
 ############################
 # Helper Functions
@@ -166,7 +193,7 @@ function Find-GDDomainToken {
     )
 
     [string] $matchedDomain
-    [securestring] $matchedToken
+    [string] $matchedToken
 
     foreach ($key in $DomainTokens.Keys) 
     {
