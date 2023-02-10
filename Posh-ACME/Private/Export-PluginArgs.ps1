@@ -26,6 +26,34 @@ function Export-PluginArgs {
         if (-not ($acct = Get-PAAccount)) {
             throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
         }
+
+        function SecureSerialize {
+            [CmdletBinding()]
+            param(
+                [object]$SecVar,
+                [hashtable]$EncParam
+            )
+
+            if ($SecVar -is [securestring]) {
+                return [pscustomobject]@{
+                    origType = 'securestring'
+                    value = $SecVar | ConvertFrom-SecureString @EncParam
+                }
+            } elseif ($SecVar -is [pscredential]) {
+                return [pscustomobject]@{
+                    origType = 'pscredential'
+                    user = $SecVar.Username
+                    pass = $SecVar.Password | ConvertFrom-SecureString @EncParam
+                }
+            } elseif ($SecVar -is [array]) {
+                $safeArray = foreach ($var in $SecVar) { SecureSerialize $var $EncParam }
+                return $safeArray
+            } else {
+                # for now, assume everything else is safe to auto serialize and just
+                # return the original object
+                return $SecVar
+            }
+        }
     }
 
     Process {
@@ -98,23 +126,7 @@ function Export-PluginArgs {
 
         $pDataSafe = @{}
         foreach ($key in $pData.Keys) {
-            if ($pData.$key -is [securestring]) {
-                $pDataSafe.$key = [pscustomobject]@{
-                    origType = 'securestring'
-                    value = $pData.$key | ConvertFrom-SecureString @encParam
-                }
-            }
-            elseif ($pData.$key -is [pscredential]) {
-                $pDataSafe.$key = [pscustomobject]@{
-                    origType = 'pscredential'
-                    user = $pData.$key.Username
-                    pass = $pData.$key.Password | ConvertFrom-SecureString @encParam
-                }
-            }
-            else {
-                # for now, assume everything else is safe to auto serialize
-                $pDataSafe.$key = $pData.$key
-            }
+            $pDataSafe.$key = SecureSerialize $pData.$key $encParam
         }
 
         # build the path to the existing plugin data file and export it

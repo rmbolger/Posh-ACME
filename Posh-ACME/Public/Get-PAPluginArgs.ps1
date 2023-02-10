@@ -15,6 +15,43 @@ function Get-PAPluginArgs {
             try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
             catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
+
+        function SecureDeserialize {
+            [CmdletBinding()]
+            param(
+                [object]$SafeVal,
+                [hashtable]$EncParam
+            )
+
+            if ($SafeVal -is [pscustomobject]) {
+                if ($SafeVal.origType) {
+                    if ('pscredential' -eq $SafeVal.origType) {
+                        return [pscredential]::new(
+                            $SafeVal.user,($SafeVal.pass | ConvertTo-SecureString @EncParam)
+                        )
+                    }
+                    elseif ('securestring' -eq $SafeVal.origType) {
+                        return $SafeVal.value | ConvertTo-SecureString @EncParam
+                    }
+                } else {
+                    Write-Debug "PluginArg deserialized as custom object we don't recognize. Treating as hashtable."
+                    # We're going to assume all custom objects that don't have an 'origType' property
+                    # were hashtables that we can safely convert back.
+                    $subHT = @{}
+                    foreach ($subprop in $SafeVal.PSObject.Properties) {
+                        $subHT[$subprop.Name] = $subprop.Value
+                    }
+                    return $subHT
+                }
+            }
+            elseif ($SafeVal -is [array]) {
+                $converted = foreach ($val in $SafeVal) { SecureDeserialize $val $EncParam }
+                return $converted
+            }
+            else {
+                return $SafeVal
+            }
+        }
     }
 
     Process {
@@ -48,31 +85,7 @@ function Get-PAPluginArgs {
             # Convert it to a hashtable and do our custom deserialization on SecureString
             # and PSCredential objects.
             foreach ($prop in $pDataSafe.PSObject.Properties) {
-                if ($prop.TypeNameOfValue -eq 'System.Management.Automation.PSCustomObject') {
-                    if ($prop.Value.origType) {
-                        if ('pscredential' -eq $prop.Value.origType) {
-                            $pData[$prop.Name] = [pscredential]::new(
-                                $prop.Value.user,($prop.Value.pass | ConvertTo-SecureString @encParam)
-                            )
-                        }
-                        elseif ('securestring' -eq $prop.Value.origType) {
-                            $pData[$prop.Name] = $prop.Value.value | ConvertTo-SecureString @encParam
-                        }
-                    }
-                    else {
-                        Write-Debug "PluginArg $($prop.Name) deserialized as custom object we don't recognize. Treating as hashtable."
-                        # We're going to assume all custom objects that don't have an 'origType' property
-                        # were hashtables that we can safely convert back.
-                        $subHT = @{}
-                        foreach ($subprop in $prop.Value.PSObject.Properties) {
-                            $subHT[$subprop.Name] = $subprop.Value
-                        }
-                        $pData[$prop.Name] = $subHT
-                    }
-                }
-                else {
-                    $pData[$prop.Name] = $prop.Value
-                }
+                $pData[$prop.Name] = SecureDeserialize $prop.Value $encParam
             }
         }
 
