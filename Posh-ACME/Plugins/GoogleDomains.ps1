@@ -7,45 +7,47 @@ function Add-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(ParameterSetName="Single", Mandatory, Position=2)]
-        [string]$RootDomain,
-        [Parameter(ParameterSetName="Single", Mandatory, Position=3)]
-        [securestring]$AccessToken,
-        [Parameter(ParameterSetName="MultipleInsecure", Position=2)]
-        [hashtable]$DomainTokensInsecure,
+        [Parameter(Mandatory)]
+        [pscredential[]]$GDomCredential,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $AccessTokenInsecure = ""
-
-    if ($DomainTokensInsecure){
-        $result = Find-GDDomainToken $RecordName $DomainTokensInsecure
-        $RootDomain = $result.RootDomain
-        $AccessTokenInsecure = $result.AccessToken
+    # get the cred that matches the record
+    $cred = $GDomCredential | Where-Object {
+        $RecordName -like "*$($_.UserName)"
     }
-     else {
-        $AccessTokenInsecure = [pscredential]::new('a', $AccessToken).GetNetworkCredential().Password
-     }
+    if (-not $cred) {
+        throw "GDomCredential did not contain any matches for $RecordName."
+    }
+    $domain = $cred.UserName
+    $token = $cred.GetNetworkCredential().Password
 
-    $apiRoot = "https://acmedns.googleapis.com/v1/acmeChallengeSets/$($RootDomain)"
-
-    $jsonPayload = @{
-            accessToken = $AccessTokenInsecure
+    # The API doesn't care if you try to add a record that already exists.
+    # So just send it regardless of whether it exists or not.
+    $postParams = @{
+        Uri = "https://acmedns.googleapis.com/v1/acmeChallengeSets/$($domain):rotateChallenges"
+        Method = 'POST'
+        Body = @{
+            accessToken = $token
             recordsToAdd = @(
-                    @{
-                        fqdn=$RecordName
-                        digest=$TxtValue
-                   }
+                @{
+                    fqdn = $RecordName
+                    digest = $TxtValue
+                }
             )
-          } | ConvertTo-Json
+        } | ConvertTo-Json
+        ContentType = 'application/json'
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
 
     # add new record
     try {
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
-        Invoke-RestMethod "$($apiRoot):rotateChallenges" -Method POST -Body $jsonPayload -ContentType 'application/json' -ErrorAction Stop | Out-Null
-    }
-    catch { throw }
+        Write-Debug "POST $($postParams.Uri)`n$($postParams.Body.Replace($token,'<REDACTED>'))"
+        $null = Invoke-RestMethod @postParams @script:UseBasic
+    } catch { throw }
 
     <#
     .SYNOPSIS
@@ -59,24 +61,18 @@ function Add-DnsTxt {
 
     .PARAMETER TxtValue
         The value of the TXT record.
-    
-    .PARAMETER RootDomain
-        The root domain being managed, as shown in Google Domains
 
-    .PARAMETER AccessToken
-        The API Token Secret
-
-    .PARAMETER DomainTokensInsecure
-        Optional hashtable of domain/token pairs for working with multiple domains.
+    .PARAMETER GDomCredential
+        One or more PSCredential objects where the username is a domain hosted in Google Domains and the password is the ACME DNS API Token for that domain.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $accessToken = Read-Host "Access Token" -AsSecureString
-        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'example.com' $accessToken
+        $cred = Get-Credential -Username 'example.com'
+        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -GDomCredential $cred
 
-        Adds a TXT record for the specified site with the specified value on Windows.
+        Adds a TXT record for the specified site and value with the specified credential.
     #>
 }
 
@@ -87,53 +83,54 @@ function Remove-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(ParameterSetName="Single", Mandatory, Position=2)]
-        [string]$RootDomain,
-        [Parameter(ParameterSetName="Single", Mandatory, Position=3)]
-        [securestring]$AccessToken,
-        [Parameter(ParameterSetName="MultipleInsecure", Mandatory, Position=2)]
-        [hashtable]$DomainTokensInsecure,
+        [Parameter(Mandatory)]
+        [pscredential[]]$GDomCredential,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-    
-    $AccessTokenInsecure = ""
 
-    if ($DomainTokensInsecure){
-        $result = Find-GDDomainToken $RecordName $DomainTokensInsecure
-        $RootDomain = $result.RootDomain
-        $AccessTokenInsecure = $result.AccessToken
+    # get the cred that matches the record
+    $cred = $GDomCredential | Where-Object {
+        $RecordName -like "*$($_.UserName)"
     }
-    else {
-        $AccessTokenInsecure = [pscredential]::new('a', $AccessToken).GetNetworkCredential().Password
+    if (-not $cred) {
+        throw "GDomCredential did not contain any matches for $RecordName."
     }
+    $domain = $cred.UserName
+    $token = $cred.GetNetworkCredential().Password
 
-
-    $apiRoot = "https://acmedns.googleapis.com/v1/acmeChallengeSets/$($RootDomain)"
-
-    $jsonPayload = @{
-        accessToken = $AccessTokenInsecure
-        recordsToRemove = @(
+    # The API doesn't care if you try to remove a record that doesn't exist.
+    # So try to delete regardless of whether it exists or not.
+    $postParams = @{
+        Uri = "https://acmedns.googleapis.com/v1/acmeChallengeSets/$($domain):rotateChallenges"
+        Method = 'POST'
+        Body = @{
+            accessToken = $token
+            recordsToRemove = @(
                 @{
-                    fqdn=$RecordName
-                    digest=$TxtValue
+                    fqdn = $RecordName
+                    digest = $TxtValue
                 }
-        )
-    } | ConvertTo-Json
-
-    # add new record
-    try {
-        Write-Verbose "Deleting a TXT record for $RecordName with value $TxtValue"
-        Invoke-RestMethod "$($apiRoot):rotateChallenges" -Method POST -Body $jsonPayload -ContentType 'application/json' -ErrorAction Stop | Out-Null
+            )
+        } | ConvertTo-Json
+        ContentType = 'application/json'
+        Verbose = $false
+        ErrorAction = 'Stop'
     }
-    catch { throw }
+
+    # remove record
+    try {
+        Write-Verbose "Removing a TXT record for $RecordName with value $TxtValue"
+        Write-Debug "POST $($postParams.Uri)`n$($postParams.Body.Replace($token,'<REDACTED>'))"
+        $null = Invoke-RestMethod @postParams @script:UseBasic
+    } catch { throw }
 
     <#
     .SYNOPSIS
         Remove an ACME Challenge DNS TXT record from Google Domains.
 
     .DESCRIPTION
-       Remove an ACME Challenge DNS TXT record from Google Domains.
+        Remove an ACME Challenge DNS TXT record from Google Domains.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -141,23 +138,17 @@ function Remove-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    ..PARAMETER RootDomain
-        The root domain being managed, as shown in Google Domains
-
-    .PARAMETER AccessToken
-        The API Token Secret
-    
-    .PARAMETER DomainTokensInsecure
-        Optional hashtable of domain/token pairs for working with multiple domains.
+    .PARAMETER GDomCredential
+        One or more PSCredential objects where the username is a domain hosted in Google Domains and the password is the ACME DNS API Token for that domain.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $accessToken = Read-Host "Access Token" -AsSecureString
-        PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'example.com' $accessToken
+        $cred = Get-Credential -Username 'example.com'
+        PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -GDomCredential $cred
 
-        Remove a TXT record for the specified site with the specified value on Windows.
+        Removes a TXT record for the specified site and value with the specified credential.
     #>
 }
 
@@ -181,39 +172,4 @@ function Save-DnsTxt {
 # Helper Functions
 ############################
 
-# if using optional domain/token hashtable, lookup most specific matching info
-
-function Find-GDDomainToken {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory,Position=0)]
-        [string] $RecordName,
-        [Parameter(Mandatory,Position=1)]
-        [hashtable] $DomainTokens
-    )
-
-    [string] $matchedDomain
-    [string] $matchedToken
-
-    foreach ($key in $DomainTokens.Keys) 
-    {
-        $domain = $key.Replace('*.','')
-
-        # find most specific matching domain compared to our record name
-        if ($RecordName.EndsWith("."+$domain) -And $matchedDomain.Length -lt $key.Length ){
-            $matchedDomain = $domain
-            $matchedToken = $DomainTokens[$key]
-        }
-    }
-
-    if ($matchedDomain -And $matchedToken){
-        Write-Verbose "$RecordName matched to $matchedDomain in DomainTokens"
-
-        return @{
-            RootDomain = $matchedDomain
-            AccessToken = $matchedToken
-        }
-    } else {       
-        throw "Failed to find find matching root domain and access token in DomainTokens for $RecordName"
-    }
-}
+# https://developers.google.com/domains/acme-dns/

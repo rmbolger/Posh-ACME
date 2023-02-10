@@ -1,32 +1,32 @@
-title: Google Domains
+title: GoogleDomains
 
 # How To Use the Google Domains Plugin
 
-This plugin uses the Google Domains ACME challenge API for DNS which is a special purpose API exclusively for DNS based ACME challenges. Note that Google Cloud DNS (see the GCloud plugin) and Google Domains are two distinct products and they use different APIs. You will typically need the Google Domains plugin if you have registered a domain with Google Domains but you are not using Google Cloud for your DNS.
+This plugin is for domains registered with [Google Domains](https://domains.google/) **and** using its native DNS service. Do not confuse it with [Google Cloud DNS](https://cloud.google.com/dns) which should use the [GCloud](GCloud.md) plugin instead.
 
 ## Setup
 
-With your domain selected in the Google Domains interface, browse to the Security section and choose Create Token under `DNS ACME API`. Copy the secret token value that is generated, this will be used as your access token.
+With your domain selected in the Google Domains interface, browse to the Security section and choose Create Token under `DNS ACME API`. Save the secret token value that is generated. You will provide it to the plugin along with the root domain.
 
 ## Using the Plugin
 
-You need to supply your root domain as registered with Google Domains, and your access token.
+To generate a certificate that is comprised of names all within a single domain, you will pass the root domain and the access token as a PSCredential object to the `GDomCredential` parameter where the username is the root domain and the password is the access token.
 
 ```powershell
 $pArgs = @{
-    RootDomain = "example.com"
-    AccessToken = (Read-Host "Access Token" -AsSecureString)
+    GDomCredential = Get-Credential -Username example.com
 }
-New-PACertificate example.com -Plugin GoogleDomains -PluginArgs $pArgs
+New-PACertificate 'example.com','www.example.com' -Plugin GoogleDomains -PluginArgs $pArgs
 ```
 
-As tokens are specific to individual root domains you can optionally instead supply a list of domain/token pairs for use when building multi-domain SAN certificates
+If you are generating a certificate that uses names from multiple domains, make sure you have an access token for each domain and provide an array of PSCredential objects to the `GDomCredential` parameter for each unique domain in your cert.
+
 ```powershell
 $pArgs = @{
-    DomainTokensInsecure = @{
-        "example.com" = "EXAMPLETOKEN=="
-    }
+    GDomCredential = @(
+        (Get-Credential -Username example.com)
+        (Get-Credential -Username example.net)
+    )
 }
-
-New-PACertificate www.example.com -Plugin GoogleDomains -PluginArgs $pArgs
+New-PACertificate 'www.example.com','www.example.net' -Plugin GoogleDomains -PluginArgs $pArgs
 ```
