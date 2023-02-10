@@ -44,7 +44,7 @@ Easyname | [easyname.com](https://www.easyname.com/) | [Usage Guide](Easyname.md
 FreeDNS | [Free DNS](https://freedns.afraid.org) | [Usage Guide](FreeDNS.md) | :white_check_mark:
 Gandi | [Gandi LiveDNS](https://www.gandi.net) | [Usage Guide](Gandi.md) | :white_check_mark:
 GCloud | [Google Cloud DNS](https://cloud.google.com/dns) | [Usage Guide](GCloud.md) | :white_check_mark:
-Google Domains | [Google Domains](https://domains.google.com/) | [Usage Guide](GoogleDomains.md) | :white_check_mark:
+Google Domains | [Google Domains](https://domains.google/) | [Usage Guide](GoogleDomains.md) | :white_check_mark:
 GoDaddy | [GoDaddy](https://www.godaddy.com) | [Usage Guide](GoDaddy.md) | :white_check_mark:
 Hetzner | [Hetzner](https://hetzner.de/) | [Usage Guide](Hetzner.md) | :white_check_mark:
 HostingDe | [Hosting.de](https://hosting.de) | [Usage Guide](HostingDe.md) | :white_check_mark:
