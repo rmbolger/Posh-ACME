@@ -13,6 +13,7 @@ function Add-DnsTxt {
         [uri]$ACMEUri,
         [string[]]$ACMEAllowFrom,
         [hashtable]$ACMERegistration,
+        [pscredential]$ACMECredential,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -40,16 +41,38 @@ function Add-DnsTxt {
 
     # Create URI
     if ($PSCmdlet.ParameterSetName -eq "URI") {
-        $URI = $ACMEUri.AbsoluteUri.Trim("/")
+        # convert the embedded credentials if they exist
+        # and strip them from the Uri
+        if ($ACMEUri.UserInfo) {
+            $user,$pass = $ACMEUri.UserInfo.Split(':')
+            $ACMECredential = [pscredential]::new($user,($pass | ConvertTo-SecureString -AsPlainText -Force))
+        }
+        $URI = ('{0}://{1}{2}{3}' -f $ACMEUri.Scheme,$ACMEUri.Authority,$ACMEUri.PathAndQuery,$ACMEUri.Fragment).TrimEnd('/')
     } else {
         $URI = "https://$ACMEServer"
     }
 
+    # encode the credentials for passing as Basic Auth
+    if ($ACMECredential) {
+        $passPlain = $ACMECredential.GetNetworkCredential().Password
+        $encodedCreds = [Convert]::ToBase64String(
+            [Text.Encoding]::ASCII.GetBytes(
+                "$($ACMECredential.UserName):$($passPlain)"
+            )
+        )
+    }
 
     # create a new subdomain registration if necessary
     if ($RecordName -notin $ACMEReg.PSObject.Properties.Name) {
 
-        $reg = New-AcmeDnsRegistration -ACMEUri $URI -ACMEAllowFrom $ACMEAllowFrom
+        $regParams = @{
+            ACMEUri = $URI
+            ACMEAllowFrom = $ACMEAllowFrom
+        }
+        if ($encodedCreds) {
+            $regParams.EncodedCreds = $encodedCreds
+        }
+        $reg = New-AcmeDnsRegistration @regParams
 
         $ACMEReg | Add-Member $RecordName @($reg.subdomain,$reg.username,$reg.password,$reg.fulldomain)
 
@@ -66,23 +89,33 @@ function Add-DnsTxt {
     $regVals = $ACMEReg.$RecordName
 
     # create the auth header object
-    $authHead = @{'X-Api-User'=$regVals[1];'X-Api-Key'=$regVals[2]}
+    $authHead = @{
+        'X-Api-User' = $regVals[1]
+        'X-Api-Key' = $regVals[2]
+    }
+    if ($encodedCreds) {
+        $authHead.Authorization = "Basic $encodedCreds"
+    }
 
     # create the update body
     $updateBody = @{subdomain=$regVals[0];txt=$TxtValue} | ConvertTo-Json -Compress
 
+    Write-Verbose "Updating $($regVals[3]) with $TxtValue"
+    $updateParams = @{
+        Uri = "$URI/update"
+        Method = 'POST'
+        Headers = $authHead
+        Body = $updateBody
+        ContentType = 'application/json'
+        ErrorAction = 'Stop'
+        Verbose = $false
+    }
+
     # send the update
     try {
-        Write-Verbose "Updating $($regVals[3]) with $TxtValue"
-        $updateParams = @{
-            Uri = "$URI/update"
-            Method = 'POST'
-            Headers = $authHead
-            Body = $updateBody
-            ErrorAction = 'Stop'
-        }
+        Write-Debug "POST $($updateParams.Uri)`n$($updateParams.Body)"
         $response = Invoke-RestMethod @updateParams @script:UseBasic
-        Write-Debug ($response | ConvertTo-Json)
+        Write-Debug "Response:`n$($response | ConvertTo-Json)"
     } catch { throw }
 
     <#
@@ -106,6 +139,9 @@ function Add-DnsTxt {
 
     .PARAMETER ACMEAllowFrom
         A list of networks in CIDR notation that the acme-dns server should allow updates from. If not specified, the acme-dns server will not block any updates based on IP address.
+
+    .PARAMETER ACMECredential
+        The username and password required to access the acme-dns instance if your instance requires credentials.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -135,16 +171,12 @@ function Remove-DnsTxt {
     <#
     .SYNOPSIS
         Not required.
-
     .DESCRIPTION
         This provider does not require calling this function to remove DNS TXT records.
-
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
-
     .PARAMETER TxtValue
         The value of the TXT record.
-
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     #>
@@ -197,11 +229,13 @@ function Save-DnsTxt {
 
 function New-AcmeDnsRegistration {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword','')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$ACMEUri,
         [Parameter(Position=1)]
-        [string[]]$ACMEAllowFrom
+        [string[]]$ACMEAllowFrom,
+        [string]$EncodedCreds
     )
 
     # build the registration body
@@ -211,18 +245,27 @@ function New-AcmeDnsRegistration {
         $regBody = '{}'
     }
 
+    Write-Verbose "Registering new subdomain on $ACMEServer"
+    $regParams = @{
+        Uri = "$ACMEUri/register"
+        Method = 'POST'
+        Body = $regBody
+        ContentType = 'application/json'
+        ErrorAction = 'Stop'
+        Verbose = $false
+    }
+    if ($EncodedCreds) {
+        Write-Debug "Adding credential"
+        $regParams.Headers = @{
+            Authorization = "Basic $EncodedCreds"
+        }
+    }
+
     # do the registration
     try {
-        Write-Verbose "Registering new subdomain on $ACMEServer"
-        $regParams = @{
-            Uri = "$ACMEUri/register"
-            Method = 'POST'
-            Body = $regBody
-            ContentType = 'application/json'
-            ErrorAction = 'Stop'
-        }
+        Write-Debug "POST $($regParams.Uri)`n$($regParams.Body)"
         $reg = Invoke-RestMethod @regParams @script:UseBasic
-        Write-Debug ($reg | ConvertTo-Json)
+        Write-Debug "Response:`n$($reg | ConvertTo-Json)"
     } catch { throw }
 
     # return the results

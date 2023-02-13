@@ -2,17 +2,22 @@ title: AcmeDns
 
 # How To Use the AcmeDns Plugin
 
-This plugin works against [acme-dns](https://github.com/joohoi/acme-dns) which is limited DNS server implementation designed specifically to handle DNS challenges for the ACME protocol. It is useful when your actual DNS provider doesn't have a supported plugin or security policies/limitations in your environment don't allow you to use a supported plugin. Initial certificate generation requires some manual steps, but renewals can be automated just like other plugins.
+This plugin works against [acme-dns](https://github.com/joohoi/acme-dns) which is limited DNS server implementation designed specifically to handle DNS challenges for the ACME protocol. It will also work against acme-dns compatible APIs such as [Certify DNS](https://docs.certifytheweb.com/docs/dns/providers/certifydns/). It is useful when the DNS provider for your domain doesn't have a supported plugin or security policies/limitations in your environment don't allow you to use a supported plugin. Initial certificate generation requires some manual steps, but renewals can be automated just like other plugins.
 
 ## Setup
 
-While there is a publicly accessible acme-dns instance that you can use to test with at https://auth.acme-dns.io, it is not recommended for production use. Instead, you should run your own instance using the [install instructions](https://github.com/joohoi/acme-dns#installation) on the project page.
+While there is a publicly accessible acme-dns instance that you can use to test with at https://auth.acme-dns.io, it is not recommended for production use. Instead, you should run your own instance using the [install instructions](https://github.com/joohoi/acme-dns#installation) on the project page or sign up for a commercial service such as [Certify DNS](https://docs.certifytheweb.com/docs/dns/providers/certifydns/).
 
-Once you have your instance running, it needs to be accessible via HTTPS to your client and via standard DNS (port 53) to ACME servers on the Internet. Then, all you need is its hostname to use the plugin.
+Once you have your instance running, it needs to be accessible via HTTPS to your client and via standard DNS (port 53) to ACME servers on the Internet.
 
 ## Using the Plugin
 
 If your acme-dns instance is using the default configuration running with TLS on port 443, the only required parameter for the plugin is `ACMEServer` which is the hostname of your instance. If you are not using TLS, using an alternate port, or require additional uri path segments, you will need to specify the full URI using `ACMEUri` instead.
+
+It's possible to configure acme-dns to require additonal Basic authentication which is also the case with some commercial acme-dns implementations. If that is true for your instance, you may pass the credentials using `ACMECredential` or embedded within the `ACMEUri` value.
+
+!!! warning
+    It is recommended to use `ACMECredential` instead of embedding the credentials in the `ACMEUri` parameter because the URI value is not encrypted when saved to disk.
 
 There is also an optional `ACMEAllowFrom` parameter which takes an array of strings with networks specified in CIDR notation. If included, these networks will be the only ones that can send TXT record updates to the server for the registrations that get created as part of the certificate request. In some environments, it may make more sense to control network access via standard firewalls.
 
