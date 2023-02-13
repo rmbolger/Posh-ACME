@@ -7,7 +7,6 @@ function Add-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory)]
         [string]$DDNSNameserver,
         [string]$DDNSPort=53,
         [string]$DDNSKeyName,
@@ -37,10 +36,13 @@ function Add-DnsTxt {
         RecordName = "$RecordName."
         TxtValue = $TxtValue
         Action = 'add'
-        Nameserver = $DDNSNameserver
         Port = $DDNSPort
         NSUpdatePath = $DDNSExePath
     }
+    if ($Nameserver) {
+        $updateParams.Nameserver = $DDNSNameserver
+    }
+
 
     # add the TSIG params if they were included
     if ($DDNSKeyName -and $DDNSKeyType -and $DDNSKeyValueInsecure) {
@@ -123,7 +125,6 @@ function Remove-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory)]
         [string]$DDNSNameserver,
         [string]$DDNSPort=53,
         [string]$DDNSKeyName,
@@ -153,9 +154,11 @@ function Remove-DnsTxt {
         RecordName = "$RecordName."
         TxtValue = $TxtValue
         Action = 'del'
-        Nameserver = $DDNSNameserver
         Port = $DDNSPort
         NSUpdatePath = $DDNSExePath
+    }
+    if ($Nameserver) {
+        $updateParams.Nameserver = $DDNSNameserver
     }
 
     # add the TSIG params if they were included
@@ -263,7 +266,6 @@ function Send-DynamicTXTUpdate {
         [Parameter(Mandatory)]
         [ValidateSet('add','del')]
         [string]$Action,
-        [Parameter(Mandatory)]
         [string]$Nameserver,
         [int]$Port=53,
         [string]$TsigKeyName,
@@ -275,7 +277,11 @@ function Send-DynamicTXTUpdate {
     )
 
     # build the input array we're going to send to nsupdate via stdin
-    $cmds = @("server $Nameserver $Port")
+    if ($Nameserver) {
+        $cmds = @("server $Nameserver $Port")
+    } else {
+        $cmds = @()
+    }
 
     # add the zone if specified
     if ($Zone) {
