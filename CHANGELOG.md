@@ -1,3 +1,14 @@
+## 4.17.0 (2023-02-20)
+
+* New DNS plugins
+  * [Google Domains](https://domains.google/) This should be considered experimental while the Google Domains ACME API is still in testing. (Thanks @webprofusion-chrisc)
+  * [IONOS](https://www.ionos.de/) (Thanks @RLcyberTech)
+  * SSHProxy sends update requests via SSH to another server which is able to do dynamic updates against your chosen DNS provider. (Thanks @bretgiddings)
+* The `DDNSNameserver` parameter is no longer mandatory in the RFC2136 plugin which will make nsupdate try to use whatever primary nameserver is returned from an SOA query.
+* Added Basic authentication support to the AcmeDns plugin which should allow it to be used against endpoints that enforce that such as [Certify DNS](https://docs.certifytheweb.com/docs/dns/providers/certifydns/).
+* Added support for plugin parameters that are arrays of SecureString or PSCredential objects.
+* Fixed PAServer switches getting reset on `Set-PAServer` with no params (#475)
+
 ## 4.16.0 (2022-11-23)
 
 * New DNS plugins

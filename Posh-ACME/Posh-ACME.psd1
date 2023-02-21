@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.16.0'
+ModuleVersion = '4.17.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,15 +83,16 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.16.0 (2022-11-22)
+## 4.17.0 (2023-02-20)
 
 * New DNS plugins
-  * [Active24](https://www.active24.cz/) (Thanks @pastelka)
-  * [Bunny.net](https://bunny.net/) (Thanks @webprofusion-chrisc)
-* Added `-Subject` parameter to `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder` which will override the default x509 Subject field in the certificate request sent to the ACME CA. This can be useful for private CAs that allow for additional attributes in the Subject that public CAs don't.
-* Fix for undocumented NameSilo API change. (Thanks @rkone)
-* Fix for All-Inkl plugin that makes the plaintext `KasPwd` parameter actually send plaintext since All-Inkl has deprecated the SHA1 option.
-
+  * [Google Domains](https://domains.google/) This should be considered experimental while the Google Domains ACME API is still in testing. (Thanks @webprofusion-chrisc)
+  * [IONOS](https://www.ionos.de/) (Thanks @RLcyberTech)
+  * SSHProxy sends update requests via SSH to another server which is able to do dynamic updates against your chosen DNS provider. (Thanks @bretgiddings)
+* The `DDNSNameserver` parameter is no longer mandatory in the RFC2136 plugin which will make nsupdate try to use whatever primary nameserver is returned from an SOA query.
+* Added Basic authentication support to the AcmeDns plugin which should allow it to be used against endpoints that enforce that such as [Certify DNS](https://docs.certifytheweb.com/docs/dns/providers/certifydns/).
+* Added support for plugin parameters that are arrays of SecureString or PSCredential objects.
+* Fixed PAServer switches getting reset on `Set-PAServer` with no params (#475)
 '@
 
     }
