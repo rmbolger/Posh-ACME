@@ -27,6 +27,7 @@ Function Add-DnsTxt {
             Accept = 'application/json'
         }
         ContentType = 'application/json'
+        Verbose = $false
     }
 
     # find matching ZoneID to check, if the records exists already
@@ -40,8 +41,9 @@ Function Add-DnsTxt {
     # Get a list of existing TXT records for this record name
     try {
         Write-Verbose "Searching for existing TXT record"
-        $recs = Invoke-RestMethod "$apiRoot/records?zone_id=$($zone.id)" `
-            @restParams @Script:UseBasic -EA Stop
+        $query = "$apiRoot/records?zone_id=$($zone.id)"
+        Write-Debug "GET $query"
+        $recs = Invoke-RestMethod $query @restParams @Script:UseBasic -EA Stop
     } catch { throw }
 
     # check for a matching record
@@ -54,21 +56,23 @@ Function Add-DnsTxt {
     if ($rec) {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
     } else {
-        # create request body schema
-        $body = @{
-            name = $recShort
-            ttl = 600
-            type = 'TXT'
-            value = $TxtValue
-            zone_id = $zone.id
+        $queryParams = @{
+            Uri = "$apiRoot/records"
+            Method = 'POST'
+            Body = @{
+                name = $recShort
+                ttl = 600
+                type = 'TXT'
+                value = $TxtValue
+                zone_id = $zone.id
+            } | ConvertTo-Json
+            ErrorAction = 'Stop'
         }
-        $json = $body | ConvertTo-Json
 
         try {
             Write-Verbose "Add Record $RecordName with value $TxtValue."
-
-            Invoke-RestMethod "$apiRoot/records" -Method Post -Body $json `
-                @restParams @Script:UseBasic -EA Stop | Out-Null
+            Write-Debug "POST $($queryParams.Uri)`n$($queryParams.Body)"
+            Invoke-RestMethod @queryParams @restParams @Script:UseBasic | Out-Null
         } catch { throw }
     }
 
@@ -122,6 +126,7 @@ Function Remove-DnsTxt {
             Accept = 'application/json'
         }
         ContentType = 'application/json'
+        Verbose = $false
     }
 
     # find matching ZoneID to check, if the records exists already
@@ -135,8 +140,9 @@ Function Remove-DnsTxt {
     # Get a list of existing TXT records for this record name
     try {
         Write-Verbose "Searching for existing TXT record"
-        $recs = Invoke-RestMethod "$apiRoot/records?zone_id=$($zone.id)" `
-            @restParams @Script:UseBasic -EA Stop
+        $query = "$apiRoot/records?zone_id=$($zone.id)"
+        Write-Debug "GET $query"
+        $recs = Invoke-RestMethod $query @restParams @Script:UseBasic -EA Stop
     } catch { throw }
 
     # check for a matching record
@@ -149,8 +155,9 @@ Function Remove-DnsTxt {
     if ($rec) {
         try {
             Write-Verbose "Remove Record $RecordName ($($rec.Id)) with value $TxtValue."
-            Invoke-RestMethod "$apiRoot/records/$($rec.Id)" -Method Delete `
-               @restParams @Script:UseBasic -EA Stop | Out-Null
+            $query = "$apiRoot/records/$($rec.Id)"
+            Write-Debug "DELETE $query"
+            Invoke-RestMethod $query -Method Delete @restParams @Script:UseBasic -EA Stop | Out-Null
         } catch { throw }
     } else {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
@@ -239,16 +246,22 @@ Function Find-HetznerZone {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
 
-        $zone = $response.zones | Select-Object id,name |
-            Where-Object { $_.name -eq $zoneTest }
-
-        if ($zone) {
-            Write-Debug "Zone $zoneTest found."
-            $script:HetznerRecordZones.$RecordName = $zone
-            return $zone
-        } else {
-            Write-Debug "Zone $zoneTest does not exist ..."
+        try {
+            $query = "https://dns.hetzner.com/api/v1/zones?name=$zoneTest"
+            Write-Debug "GET $query"
+            $response = Invoke-RestMethod $query @RestParameters @Script:UseBasic -EA Stop
+        } catch {
+            if (404 -eq $_.Exception.Response.StatusCode) {
+                Write-Debug "Zone $zoneTest does not exist"
+                continue
+            }
+            else { throw }
         }
+
+        Write-Debug "Zone $zoneTest found"
+        $zone = $response.zones | Select-Object -First 1 id,name
+        $script:HetznerRecordZones.$RecordName = $zone
+        return $zone
     }
 
     return $null
