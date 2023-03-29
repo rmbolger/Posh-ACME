@@ -157,7 +157,7 @@ function Remove-DnsTxt {
         Port = $DDNSPort
         NSUpdatePath = $DDNSExePath
     }
-    if ($Nameserver) {
+    if ($DDNSNameserver) {
         $updateParams.Nameserver = $DDNSNameserver
     }
 
