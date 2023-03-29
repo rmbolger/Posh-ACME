@@ -161,6 +161,12 @@ function Set-PAServer {
             $newDir.revokeCert = $dirObj.revokeCert
             $newDir.meta       = $dirObj.meta
 
+            # check for the renewalInfo field
+            if ($dirObj.renewalInfo) {
+                $newDir | Add-Member 'renewalInfo' $dirObj.renewalInfo -Force
+            }
+
+
             # update the nonce value
             if ($response.Headers.ContainsKey($script:HEADER_NONCE)) {
                 $newDir.nonce = $response.Headers[$script:HEADER_NONCE] | Select-Object -First 1
