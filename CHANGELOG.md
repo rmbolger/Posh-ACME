@@ -1,3 +1,8 @@
+## 4.17.1 (2023-03-29)
+
+* Fixed Hetzner plugin for accounts with 100+ zones. (#481) (Thanks @Deutschi)
+* Fixed RFC2136 plugin ignoring the DDNSNameserver parameter when set. (#485) (Thanks @gvengel)
+
 ## 4.17.0 (2023-02-20)
 
 * New DNS plugins

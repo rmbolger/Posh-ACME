@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.17.0'
+ModuleVersion = '4.17.1'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,16 +83,10 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.17.0 (2023-02-20)
+## 4.17.1 (2023-03-29)
 
-* New DNS plugins
-  * [Google Domains](https://domains.google/) This should be considered experimental while the Google Domains ACME API is still in testing. (Thanks @webprofusion-chrisc)
-  * [IONOS](https://www.ionos.de/) (Thanks @RLcyberTech)
-  * SSHProxy sends update requests via SSH to another server which is able to do dynamic updates against your chosen DNS provider. (Thanks @bretgiddings)
-* The `DDNSNameserver` parameter is no longer mandatory in the RFC2136 plugin which will make nsupdate try to use whatever primary nameserver is returned from an SOA query.
-* Added Basic authentication support to the AcmeDns plugin which should allow it to be used against endpoints that enforce that such as [Certify DNS](https://docs.certifytheweb.com/docs/dns/providers/certifydns/).
-* Added support for plugin parameters that are arrays of SecureString or PSCredential objects.
-* Fixed PAServer switches getting reset on `Set-PAServer` with no params (#475)
+* Fixed Hetzner plugin for accounts with 100+ zones. (#481) (Thanks @Deutschi)
+* Fixed RFC2136 plugin ignoring the DDNSNameserver parameter when set. (#485) (Thanks @gvengel)
 '@
 
     }
