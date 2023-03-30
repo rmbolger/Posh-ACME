@@ -54,13 +54,10 @@ function New-PACertificate {
     # grab the set of parameter keys to make comparisons easier later
     $psbKeys = $PSBoundParameters.Keys
 
-    # Make sure we have a server set. But don't override the current
+    # Make sure we have a refreshed server. But don't override the current
     # one unless explicitly specified.
-    if (-not (Get-PAServer) -or 'DirectoryUrl' -in $psbKeys) {
+    if ('DirectoryUrl' -in $psbKeys -or -not (Get-PAServer -Refresh)) {
         Set-PAServer -DirectoryUrl $DirectoryUrl
-    } else {
-        # refresh the directory info (which should also get a fresh nonce)
-        Set-PAServer
     }
     Write-Verbose "Using ACME Server $($script:Dir.location)"
 
