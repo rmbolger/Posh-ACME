@@ -64,6 +64,14 @@ function Get-PACertificate {
                 $secPfxPass = [Security.SecureString]::new()
             }
 
+            # derive the ARI CertID value
+            # https://www.ietf.org/archive/id/draft-ietf-acme-ari-01.html#section-4.1
+            $certID = [Org.BouncyCastle.Ocsp.CertificateId]::new(
+                [Org.BouncyCastle.Asn1.Nist.NistObjectIdentifiers]::IdSha256.Id,
+                $cert,
+                $cert.SerialNumber
+            )
+
             # send the output object to the pipeline
             [pscustomobject]@{
                 PSTypeName = 'PoshACME.PACertificate'
@@ -81,6 +89,12 @@ function Get-PACertificate {
                 # the thumbprint is a SHA1 hash of the DER encoded cert which is not actually
                 # stored in the cert itself
                 Thumbprint = [BitConverter]::ToString($sha1.ComputeHash($cert.GetEncoded())).Replace('-','')
+
+                # add the ARI CertID value
+                ARICertID = ConvertTo-Base64Url $certID.ToAsn1Object().GetDerEncoded()
+
+                # add the serial
+                Serial = $cert.SerialNumber
 
                 # add the full list of SANs
                 AllSANs = @($altNames)
