@@ -14,7 +14,7 @@ function Revoke-PACertificate {
         [string]$CertFile,
         [Parameter(ParameterSetName='CertFile',ValueFromPipelineByPropertyName)]
         [string]$KeyFile,
-        [PoshACME.RevocationReasons]$Reason,
+        [RevocationReasons]$Reason,
         [switch]$Force
     )
 
@@ -171,21 +171,17 @@ function Revoke-PACertificate {
 # that ACME supports.
 # https://datatracker.ietf.org/doc/html/rfc8555#section-7.6
 # https://datatracker.ietf.org/doc/html/rfc5280#section-5.3.1
-if (-not ([System.Management.Automation.PSTypeName]'PoshACME.RevocationReasons').Type)
+if (-not ([System.Management.Automation.PSTypeName]'RevocationReasons').Type)
 {
-    Add-Type @"
-        namespace PoshACME {
-            public enum RevocationReasons {
-                keyCompromise        = 1,
-                cACompromise         = 2,
-                affiliationChanged   = 3,
-                superseded           = 4,
-                cessationOfOperation = 5,
-                certificateHold      = 6,
-                removeFromCRL        = 8,
-                privilegeWithdrawn   = 9,
-                aACompromise         = 10
-            }
-        }
-"@
+	enum RevocationReasons {
+		keyCompromise        = 1
+		cACompromise         = 2
+		affiliationChanged   = 3
+		superseded           = 4
+		cessationOfOperation = 5
+		certificateHold      = 6
+		removeFromCRL        = 8
+		privilegeWithdrawn   = 9
+		aACompromise         = 10
+	}
 }
