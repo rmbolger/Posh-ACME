@@ -1,4 +1,4 @@
-title: Simply.com
+title: Simply
 
 # How To Use the Simply.com DNS Plugin
 
@@ -6,7 +6,7 @@ This plugin works against the [Simply.com](https://www.simply.com/) DNS provider
 
 ## Setup
 
-Using Simply.com API requires only your account name or account number and API Key which can be found on the [account](https://www.simply.com/controlpanel/account/) page.
+Using the Simply.com API requires only your account name or account number and API Key which can be found in your [Control Panel](https://www.simply.com/controlpanel/) on the Account page.
 
 ## Using the Plugin
 
