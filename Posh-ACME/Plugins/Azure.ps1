@@ -385,6 +385,7 @@ function ConvertFrom-AccessToken {
     return [pscustomobject]@{
         expires_on = $claims.exp
         access_token = $AZAccessToken
+        tenant = $claims.tid
     }
 }
 
@@ -431,21 +432,32 @@ function Connect-AZTenant {
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/v1-oauth2-client-creds-grant-flow
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials
 
-    # just return if we already have a valid Bearer token
+    if ('Token' -eq $PSCmdlet.ParameterSetName) {
+        # for explicit token payloads, always overwrite the cached token value
+        Write-Debug "Attempting to parse explicit access token"
+        $token = ConvertFrom-AccessToken $AZAccessToken
+        Write-Verbose "Authenticating with provided access token for tenant $($token.tenant)"
+        $script:AZToken = [pscustomobject]@{
+            Expires    = [DateTimeOffset]::FromUnixTimeSeconds($token.expires_on).AddMinutes(-5)
+            AuthHeader = @{ Authorization = "Bearer $($token.access_token)" }
+            Tenant     = $token.tenant
+        }
+        return
+    }
+
+    # return if we already have a valid Bearer token unless the Tenant has changed
     if ($script:AZToken ) {
-        Write-Debug "Current Token Expires: $($script:AZToken.Expires)"
-        if ((Get-DateTimeOffsetNow) -lt $script:AZToken.Expires) {
-            Write-Debug "Existing token has not expired."
-            return
+        # No $AZTenantId here means IMDS which we should be fine to cache
+        if (-not $AZTenantId -or $AZTenantId -eq $script:AZToken.Tenant) {
+            Write-Debug "Current token for tenant $($script:AZToken.Tenant) expires: $($script:AZToken.Expires)"
+            if ((Get-DateTimeOffsetNow) -lt $script:AZToken.Expires) {
+                Write-Debug "Existing token has not expired."
+                return
+            }
         }
     }
 
-    if ('Token' -eq $PSCmdlet.ParameterSetName) {
-        # decode the token payload so we can check its expiration
-        Write-Verbose "Authenticating with provided access token"
-        $token = ConvertFrom-AccessToken $AZAccessToken
-
-    } elseif ('IMDS' -eq $PSCmdlet.ParameterSetName) {
+    if ('IMDS' -eq $PSCmdlet.ParameterSetName) {
         # If the module is running from an Azure resource utilizing Managed Service Identity (MSI),
         # we can get an access token via the Instance Metadata Service (IMDS):
         # https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/how-to-use-vm-token#get-a-token-using-azure-powershell
@@ -474,7 +486,7 @@ function Connect-AZTenant {
         }
 
         try {
-            $token = Invoke-RestMethod $metadataUri -Body $body -Headers $headers @script:UseBasic -EA Stop
+            $tokResponse = Invoke-RestMethod $metadataUri -Body $body -Headers $headers @script:UseBasic -EA Stop
         } catch { throw }
 
     } elseif ($PSCmdlet.ParameterSetName -in 'Credential','DeprecatedCredentialInsecure') {
@@ -490,7 +502,7 @@ function Connect-AZTenant {
         $resource = [uri]::EscapeDataString("$($script:AZEnvironment.ManagementUrl)/")
         $authBody = "grant_type=client_credentials&client_id=$clientId&client_secret=$clientSecret&resource=$resource"
         try {
-            $token = Invoke-RestMethod "$($script:AZEnvironment.ActiveDirectoryUrl)/$($AZTenantId)/oauth2/token" `
+            $tokResponse = Invoke-RestMethod "$($script:AZEnvironment.ActiveDirectoryUrl)/$($AZTenantId)/oauth2/token" `
                 -Method Post -Body $authBody @script:UseBasic -EA Stop
         } catch { throw }
 
@@ -596,17 +608,19 @@ function Connect-AZTenant {
 
         $authBody = "grant_type=client_credentials&client_id=$clientId&resource=$resource&client_assertion_type=$assertType&client_assertion=$jwt"
         try {
-            $token = Invoke-RestMethod "$($script:AZEnvironment.ActiveDirectoryUrl)/$($AZTenantId)/oauth2/token" `
+            $tokResponse = Invoke-RestMethod "$($script:AZEnvironment.ActiveDirectoryUrl)/$($AZTenantId)/oauth2/token" `
                 -Method Post -Body $authBody @script:UseBasic -EA Stop
         } catch { throw }
     }
 
-    Write-Debug "Retrieved token expiration: $($token.expires_on)"
+    Write-Debug "Retrieved token expiration: $($tokResponse.expires_on)"
+    $token = ConvertFrom-AccessToken $tokResponse.access_token
 
     # create a token object we can use for subsequent calls with a 5 min buffer on the expiration
     $script:AZToken = [pscustomobject]@{
         Expires    = [DateTimeOffset]::FromUnixTimeSeconds($token.expires_on).AddMinutes(-5)
         AuthHeader = @{ Authorization = "Bearer $($token.access_token)" }
+        Tenant     = $token.tenant
     }
 }
 
