@@ -2477,6 +2477,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#export-pluginargs-access-is-denied" class="md-nav__link">
+    Export-PluginArgs : Access is denied
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-underlying-connection-was-closed-cloud-not-establish-trust-relationship-for-the-ssltls-secure-channel" class="md-nav__link">
     The underlying connection was closed: Cloud not establish trust relationship for the SSL/TLS secure channel.
   </a>
@@ -2576,6 +2583,9 @@
 </code></pre></div>
 <h2 id="key-not-valid-for-use-in-specified-state">Key not valid for use in specified state<a class="headerlink" href="#key-not-valid-for-use-in-specified-state" title="Permanent link">&para;</a></h2>
 <p>This can happen on Windows if you try to copy the Posh-ACME profile folder to a different Windows computer or a different user's profile on the same computer. The underlying APIs used to encrypt plugin parameters using <code>SecureString</code> and <code>PSCredential</code> objects are tied to both the current computer and user and are not portable. However, you can use the <code>Set-PAAccount -UseAltPluginEncryption</code> to change the encryption used for the account to a portable AES based method and then copy the profile.</p>
+<h2 id="export-pluginargs-access-is-denied">Export-PluginArgs : Access is denied<a class="headerlink" href="#export-pluginargs-access-is-denied" title="Permanent link">&para;</a></h2>
+<p>This may happen on Windows if you're trying to run Posh-ACME over a remote or non-interactive session. By default, Posh-ACME encrypts "secure" plugin parameters before saving them to disk Windows' <a href="https://learn.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)">DPAPI</a> subsystem. This has a known limitation that requires the current user's profile to be loaded which doesn't always happen in remote or non-interactive sessions.</p>
+<p>If you run into this problem, try running <code>Set-PAAccount -UseAltPluginEncryption</code> to use an alternative encryption option that doesn't rely on DPAPI.</p>
 <h2 id="the-underlying-connection-was-closed-cloud-not-establish-trust-relationship-for-the-ssltls-secure-channel">The underlying connection was closed: Cloud not establish trust relationship for the SSL/TLS secure channel.<a class="headerlink" href="#the-underlying-connection-was-closed-cloud-not-establish-trust-relationship-for-the-ssltls-secure-channel" title="Permanent link">&para;</a></h2>
 <p>This shouldn't ever happen when using a publicly trusted certificate authority such as Let's Encrypt. If it does, an attacker or malware might be trying to <a href="https://en.wikipedia.org/wiki/Man-in-the-middle_attack">MitM</a> your connection.</p>
 <p>However if you're doing development against a test ACME server like <a href="https://github.com/letsencrypt/pebble">Pebble</a> or a private instance of <a href="https://github.com/letsencrypt/boulder">Boulder</a>, this is normal because the server is likely using a self-signed certificate. You can work around the problem by adding the <code>-SkipCertificateCheck</code> parameter to <code>Set-PAServer</code>.</p>
