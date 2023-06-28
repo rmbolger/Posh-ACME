@@ -87,6 +87,11 @@ Set-PAAccount -UseAltPluginEncryption:$false
 
 This can happen on Windows if you try to copy the Posh-ACME profile folder to a different Windows computer or a different user's profile on the same computer. The underlying APIs used to encrypt plugin parameters using `SecureString` and `PSCredential` objects are tied to both the current computer and user and are not portable. However, you can use the `Set-PAAccount -UseAltPluginEncryption` to change the encryption used for the account to a portable AES based method and then copy the profile.
 
+## Export-PluginArgs : Access is denied
+
+This may happen on Windows if you're trying to run Posh-ACME over a remote or non-interactive session. By default, Posh-ACME encrypts "secure" plugin parameters before saving them to disk Windows' [DPAPI](https://learn.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)) subsystem. This has a known limitation that requires the current user's profile to be loaded which doesn't always happen in remote or non-interactive sessions.
+
+If you run into this problem, try running `Set-PAAccount -UseAltPluginEncryption` to use an alternative encryption option that doesn't rely on DPAPI.
 
 ## The underlying connection was closed: Cloud not establish trust relationship for the SSL/TLS secure channel.
 
