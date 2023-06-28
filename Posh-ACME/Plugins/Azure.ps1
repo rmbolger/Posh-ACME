@@ -363,6 +363,10 @@ function ConvertFrom-AccessToken {
     # Anatomy of an access token
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-token-and-claims
 
+    # In this function we're extracting the tenant ID and expiration value from
+    # the claims in the payload and returning an object that includes them along
+    # with the original token value.
+
     # grab the payload section of the JWT
     $null,$payload,$null = $AZAccessToken.Split('.')
 
@@ -377,7 +381,7 @@ function ConvertFrom-AccessToken {
     # make sure the token hasn't expired
     $expires = [DateTimeOffset]::FromUnixTimeSeconds($claims.exp)
     if ((Get-DateTimeOffsetNow) -gt $expires) {
-        throw "The provided access token has expired as of $($expires.ToString('u'))"
+        throw "The provided access token expired since $($expires.ToString('u'))"
     }
 
     # return an object that contains the 'expires_on' property along with the token
