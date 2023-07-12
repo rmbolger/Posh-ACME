@@ -231,8 +231,9 @@ function Get-SimplyTXTRecord {
             $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
             Write-Debug "Checking $zoneTest"
 
-            $match = $products | Where-Object { $zoneTest -eq $_.domain.name_idn }
+            $match = $products | Where-Object { $zoneTest -eq $_.domain.name_idn } | Select-Object -First 1
             if ($match) {
+                Write-Debug "Matched object:`n$($match | ConvertTo-Json -Depth 5)"
                 # To query the records, we need the "object" id of the zone which is currently
                 # the non-punycode version of the domain name. But that's not guaranteed to always
                 # be the case. So just treat it like an arbitrary ID value.
