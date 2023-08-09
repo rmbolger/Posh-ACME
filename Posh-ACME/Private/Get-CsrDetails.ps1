@@ -2,18 +2,38 @@ function Get-CsrDetails {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
+        [Alias('CSRString')]
         [string]$CSRPath
     )
 
-    # normalize the CSR path and make sure it exists
-    $CSRPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($CSRPath)
-    if (-not (Test-Path $CSRPath -PathType Leaf)) {
-        throw "CSR file not found at $CSRPath"
+    # We're going to try to allow for CSRs being passed directly as a string value
+    # in addition to a filesystem path. Since the BC PemReader currently requires
+    # explicit BEGIN/END header and footer, we're going to assume that anything
+    # missing them is a file path.
+    if ($CSRPath -cnotlike '*CERTIFICATE REQUEST*') {
+
+        Write-Debug "CSRPath didn't match CERTIFICATE REQUEST"
+
+        # normalize the CSR path and make sure it exists
+        $CSRPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($CSRPath)
+        if (-not (Test-Path $CSRPath -PathType Leaf)) {
+            throw "CSR file not found at $CSRPath"
+        }
+
+        $importParams = @{
+            InputFile = $CSRPath
+        }
+
+    } else {
+
+        $importParams = @{
+            InputString = $CSRPath
+        }
     }
 
-    # parse the file into a [Org.BouncyCastle.Asn1.Pkcs.CertificationRequest]
+    # parse the CSR into a [Org.BouncyCastle.Asn1.Pkcs.CertificationRequest]
     Write-Debug "Attempting to import CSR pem"
-    $csr = Import-Pem -InputFile $CSRPath
+    $csr = Import-Pem @importParams
     $details = @{
         Base64Url = ConvertTo-Base64Url $csr.GetEncoded()
     }

@@ -66,11 +66,51 @@ Describe "Get-CsrDetails" {
     }
 
     Context "RSA 2048 CSR" {
-        It "Reads properly" {
+        It "Reads properly from File" {
             Copy-Item "$PSScriptRoot\TestFiles\rsa-2048-noCN-singleSAN.csr" 'TestDrive:\test.csr'
             InModuleScope Posh-ACME {
                 { Get-CsrDetails -CSRPath 'TestDrive:\test.csr' } | Should -Not -Throw
                 $result = Get-CsrDetails -CSRPath 'TestDrive:\test.csr'
+                $result.Domain         | Should -BeExactly @('example.com')
+                $result.KeyLength      | Should -BeExactly '2048'
+                $result.OCSPMustStaple | Should -BeFalse
+                { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
+            }
+        }
+
+        It "Reads properly from String" {
+            Copy-Item "$PSScriptRoot\TestFiles\rsa-2048-noCN-singleSAN.csr" 'TestDrive:\test.csr'
+            InModuleScope Posh-ACME {
+                $csrString = Get-Content 'TestDrive:\test.csr' -Raw
+                { Get-CsrDetails -CSRPath $csrString } | Should -Not -Throw
+                $result = Get-CsrDetails -CSRPath $csrString
+                $result.Domain         | Should -BeExactly @('example.com')
+                $result.KeyLength      | Should -BeExactly '2048'
+                $result.OCSPMustStaple | Should -BeFalse
+                { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
+            }
+        }
+    }
+
+    Context "RSA 2048 CSR Single Line Base64" {
+        It "Reads properly from File" {
+            Copy-Item "$PSScriptRoot\TestFiles\rsa-2048-noCN-singleSAN-singleLine.csr" 'TestDrive:\test.csr'
+            InModuleScope Posh-ACME {
+                { Get-CsrDetails -CSRPath 'TestDrive:\test.csr' } | Should -Not -Throw
+                $result = Get-CsrDetails -CSRPath 'TestDrive:\test.csr'
+                $result.Domain         | Should -BeExactly @('example.com')
+                $result.KeyLength      | Should -BeExactly '2048'
+                $result.OCSPMustStaple | Should -BeFalse
+                { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
+            }
+        }
+
+        It "Reads properly from String" {
+            Copy-Item "$PSScriptRoot\TestFiles\rsa-2048-noCN-singleSAN-singleLine.csr" 'TestDrive:\test.csr'
+            InModuleScope Posh-ACME {
+                $csrString = Get-Content 'TestDrive:\test.csr' -Raw
+                { Get-CsrDetails -CSRPath $csrString } | Should -Not -Throw
+                $result = Get-CsrDetails -CSRPath $csrString
                 $result.Domain         | Should -BeExactly @('example.com')
                 $result.KeyLength      | Should -BeExactly '2048'
                 $result.OCSPMustStaple | Should -BeFalse

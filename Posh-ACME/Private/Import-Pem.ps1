@@ -15,7 +15,8 @@ function Import-Pem {
         $InputFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($InputFile)
         $pemStr = Get-Content $InputFile -Raw
     } else {
-        # This should be a single string value with all of the line breaks intact
+        # This should be a single string value with at least the header/footer
+        # on their own line
         $pemStr = $InputString
     }
 
