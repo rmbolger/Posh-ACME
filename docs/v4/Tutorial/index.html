@@ -2654,10 +2654,10 @@
 <p>For a job that is renewing multiple certificates, it might look more like this.</p>
 <div class="highlight"><pre><span></span><code><span class="nb">Submit-Renewal</span> <span class="n">-AllOrders</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span>
     <span class="nv">$cert</span> <span class="p">=</span> <span class="nv">$_</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nv">$cert</span><span class="p">.</span><span class="n">MainDomain</span> <span class="o">-eq</span> <span class="s1">&#39;example.com&#39;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;example.com&#39;</span> <span class="n">-in</span> <span class="nv">$cert</span><span class="p">.</span><span class="n">AllSANs</span><span class="p">)</span> <span class="p">{</span>
         <span class="c"># deploy for example.com</span>
-    <span class="p">}</span> <span class="k">elseif</span> <span class="p">(</span><span class="nv">$cert</span><span class="p">.</span><span class="n">MainDomain</span> <span class="o">-eq</span> <span class="s1">&#39;example.net&#39;</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c"># deploy for example.com</span>
+    <span class="p">}</span> <span class="k">elseif</span> <span class="p">(</span><span class="s1">&#39;example.net&#39;</span> <span class="n">-in</span> <span class="nv">$cert</span><span class="p">.</span><span class="n">AllSANs</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c"># deploy for example.net</span>
     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
         <span class="c"># deploy for everything else</span>
     <span class="p">}</span>
