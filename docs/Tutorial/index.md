@@ -191,10 +191,10 @@ For a job that is renewing multiple certificates, it might look more like this.
 ```powershell
 Submit-Renewal -AllOrders | ForEach-Object {
     $cert = $_
-    if ($cert.MainDomain -eq 'example.com') {
+    if ('example.com' -in $cert.AllSANs) {
         # deploy for example.com
-    } elseif ($cert.MainDomain -eq 'example.net') {
-        # deploy for example.com
+    } elseif ('example.net' -in $cert.AllSANs) {
+        # deploy for example.net
     } else {
         # deploy for everything else
     }
