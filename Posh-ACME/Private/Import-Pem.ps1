@@ -25,6 +25,8 @@ function Import-Pem {
         $sr = [IO.StringReader]::new($pemStr)
         $reader = [Org.BouncyCastle.OpenSsl.PemReader]::new($sr)
         $pemObj = $reader.ReadObject()
+    } catch {
+        throw
     } finally {
         if ($null -ne $sr) { $sr.Close() }
     }

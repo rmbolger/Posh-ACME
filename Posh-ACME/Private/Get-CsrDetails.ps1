@@ -6,6 +6,15 @@ function Get-CsrDetails {
         [string]$CSRPath
     )
 
+    # Given a PEM formatted CSR file path or raw string value, we need to parse the
+    # request and return a hashtable with the following parsed details to the caller:
+    #
+    #   Domain    : The collection of FQDNs found in the CN and/or SAN attributes
+    #   KeyLength : The key length value using our Posh-ACME nomeclature
+    #   OCSPMustStaple : Boolean indicating whether the OCSP Must Staple flag is set
+    #   Base64Url : The Base64Url encoded bytes of the raw request
+    #   PemLines  : The original lines from the file/string PEM request content
+
     # We're going to try to allow for CSRs being passed directly as a string value
     # in addition to a filesystem path. Since the BC PemReader currently requires
     # explicit BEGIN/END header and footer, we're going to assume that anything
@@ -24,19 +33,28 @@ function Get-CsrDetails {
             InputFile = $CSRPath
         }
 
+        $details = @{
+            PemLines = Get-Content $CSRPath
+        }
+
     } else {
 
         $importParams = @{
             InputString = $CSRPath
+        }
+
+        $details = @{
+            PemLines = $CSRPath.Trim() -split "(?:`r)?`n"
         }
     }
 
     # parse the CSR into a [Org.BouncyCastle.Asn1.Pkcs.CertificationRequest]
     Write-Debug "Attempting to import CSR pem"
     $csr = Import-Pem @importParams
-    $details = @{
-        Base64Url = ConvertTo-Base64Url $csr.GetEncoded()
+    if ($csr -isnot [Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest]) {
+        throw "Specified CSR was unable to be parsed as a certificate request."
     }
+    $details.Base64Url = ConvertTo-Base64Url $csr.GetEncoded()
 
     # determine the KeyLength
     $pubKey = $csr.GetPublicKey()

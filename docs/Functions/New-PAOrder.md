@@ -118,7 +118,7 @@ This is useful for appliances that need to generate their own keys and cert requ
 ```yaml
 Type: String
 Parameter Sets: FromCSR
-Aliases:
+Aliases: CSRString
 
 Required: True
 Position: 1
