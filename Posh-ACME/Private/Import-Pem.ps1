@@ -72,27 +72,4 @@ function Import-Pem {
 
     return $pemObj
 
-    # Old info we don't need anymore
-
-    # DER uses TLV (Tag/Length/Value) triplets.
-    # First byte is the tag - https://en.wikipedia.org/wiki/X.690#Types
-    # Second byte is either the total length of the value when less than 0x80 (128)
-    #     or the number of bytes that make up the value not counting the most significant bit (the 8)
-    #     So 0x77 (less than 0x80) means length is 119 (0x77) bytes
-    #        0x82 (more than 0x80) means the length is the next 2 (0x82-0x80) bytes
-    # Value starts the byte after the length bytes end
-
-    # We need to identify enough of the DER encoded ASN.1 structure to differentiate between
-    # RSA vs EC keys in order to call the right BouncyCastle libraries to import them.
-
-    # On the keys we care about, the first tag is always a SEQUENCE (0x30) and the first
-    # tag within that sequence is an INTEGER (0x02) which is a Version field.
-    # Version = 1 always means an EC key
-    # Version = 0 either means a PKCS1 RSA key or a PKCS8 key that could be either RSA or EC
-    #           Need to check the second item in the sequence to say for sure.
-    # If Second tag is INTEGER, PKCS1 RSA key
-    # If Second tag is a SEQUENCE, PKCS8 and need to check first child for Algorithm OID
-    # Child = 1.2.840.113549.1.1.1 (RSA) [Org.BouncyCastle.Asn1.Pkcs.PkcsObjectIdentifiers]::RsaEncryption
-    # Child = 1.2.840.10045.2.1    (EC)  [Org.BouncyCastle.Asn1.X9.X9ObjectIdentifiers]::IdECPublicKey
-
 }
