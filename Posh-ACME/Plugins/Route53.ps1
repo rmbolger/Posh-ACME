@@ -380,17 +380,40 @@ function Initialize-R53Config {
                 # the module will use the IAMRole by default if nothing else is specified
                 $script:AwsCredParam = @{}
             } else {
+                # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
+                # According to the docs an instance can now be configured to allow both
+                # IMDSv1 and IMDSv2, only IMDSv2, or neither. There's no case where only
+                # IMDSv1 is available. So we're just going to query using v2 and assume
+                # the user screwed up if it doesn't work.
+
+                # For IMDSv2, first we need to get a token value to query the metadata with
+                $queryParams = @{
+                    Uri = 'http://169.254.169.254/latest/api/token'
+                    Method = 'PUT'
+                    Headers = @{'X-aws-ec2-metadata-token-ttl-seconds'=60}
+                    Verbose = $false
+                    ErrorAction = 'Stop'
+                }
+                Write-Debug "PUT $($queryParams.Uri)"
+                $imdsToken = Invoke-RestMethod @queryParams @script:UseBasic
+
                 # retrieve keys+token from the metadata service for the IAMRole
-                $credBase = "http://169.254.169.254/latest/meta-data/iam/security-credentials"
+                $queryParams = @{
+                    Uri = 'http://169.254.169.254/latest/meta-data/iam/security-credentials'
+                    Headers = @{'X-aws-ec2-metadata-token'=$imdsToken}
+                    Verbose = $false
+                    ErrorAction = 'Stop'
+                }
                 try {
-                    Write-Debug "GET $credBase"
-                    $role = Invoke-RestMethod "$credBase" -Verbose:$false @script:UseBasic
+                    Write-Debug "GET $($queryParams.Uri)"
+                    $role = Invoke-RestMethod @queryParams @script:UseBasic
                 } catch {}
                 if (-not $role) {
                     throw "No IAM Role found in the metadata service."
                 }
-                Write-Debug "GET $credBase/$role"
-                $cred = Invoke-RestMethod "$credBase/$role" -Verbose:$false @script:UseBasic
+                $queryParams.Uri = "$($queryParams.Uri)/$role"
+                Write-Debug "GET $($queryParams.Uri)"
+                $cred = Invoke-RestMethod @queryParams @script:UseBasic
 
                 $script:AwsCredParam = @{
                     AccessKey = $cred.AccessKeyId
