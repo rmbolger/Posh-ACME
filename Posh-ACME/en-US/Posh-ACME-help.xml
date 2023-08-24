@@ -3071,7 +3071,7 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="CSRString">
           <maml:name>CSRPath</maml:name>
           <maml:description>
-            <maml:para>The path to a pre-made certificate request file in PEM (Base64) format. This is useful for appliances that need to generate their own keys and cert requests.</maml:para>
+            <maml:para>Either the filesystem path to a certificate request (CSR) file in PEM (Base64) format or the raw string contents of such a file. If using the string version, the PEM header and footer must be separated by line breaks from the Base64 content just like they would be in a normal file. This is useful for appliances that need to generate their own keys and cert requests or when the private key is otherwise unavailable.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -3263,7 +3263,7 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="CSRString">
         <maml:name>CSRPath</maml:name>
         <maml:description>
-          <maml:para>The path to a pre-made certificate request file in PEM (Base64) format. This is useful for appliances that need to generate their own keys and cert requests.</maml:para>
+          <maml:para>Either the filesystem path to a certificate request (CSR) file in PEM (Base64) format or the raw string contents of such a file. If using the string version, the PEM header and footer must be separated by line breaks from the Base64 content just like they would be in a normal file. This is useful for appliances that need to generate their own keys and cert requests or when the private key is otherwise unavailable.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -4168,7 +4168,7 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="CSRString">
           <maml:name>CSRPath</maml:name>
           <maml:description>
-            <maml:para>The path to a pre-made certificate request file in PEM (Base64) format. This is useful for appliances that need to generate their own keys and cert requests.</maml:para>
+            <maml:para>Either the filesystem path to a certificate request (CSR) file in PEM (Base64) format or the raw string contents of such a file. If using the string version, the PEM header and footer must be separated by line breaks from the Base64 content just like they would be in a normal file. This is useful for appliances that need to generate their own keys and cert requests or when the private key is otherwise unavailable.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -4335,7 +4335,7 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="CSRString">
         <maml:name>CSRPath</maml:name>
         <maml:description>
-          <maml:para>The path to a pre-made certificate request file in PEM (Base64) format. This is useful for appliances that need to generate their own keys and cert requests.</maml:para>
+          <maml:para>Either the filesystem path to a certificate request (CSR) file in PEM (Base64) format or the raw string contents of such a file. If using the string version, the PEM header and footer must be separated by line breaks from the Base64 content just like they would be in a normal file. This is useful for appliances that need to generate their own keys and cert requests or when the private key is otherwise unavailable.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>

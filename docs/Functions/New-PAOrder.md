@@ -112,8 +112,7 @@ Accept wildcard characters: False
 ```
 
 ### -CSRPath
-The path to a pre-made certificate request file in PEM (Base64) format.
-This is useful for appliances that need to generate their own keys and cert requests.
+Either the filesystem path to a certificate request (CSR) file in PEM (Base64) format or the raw string contents of such a file. If using the string version, the PEM header and footer must be separated by line breaks from the Base64 content just like they would be in a normal file. This is useful for appliances that need to generate their own keys and cert requests or when the private key is otherwise unavailable.
 
 ```yaml
 Type: String
