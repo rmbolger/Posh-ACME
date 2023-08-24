@@ -5,6 +5,7 @@ function New-PACertificate {
         [Parameter(ParameterSetName='FromScratch',Mandatory,Position=0)]
         [string[]]$Domain,
         [Parameter(ParameterSetName='FromCSR',Mandatory,Position=0)]
+        [Alias('CSRString')]
         [string]$CSRPath,
         [ValidateScript({Test-ValidFriendlyName $_ -ThrowOnFail})]
         [string]$Name,

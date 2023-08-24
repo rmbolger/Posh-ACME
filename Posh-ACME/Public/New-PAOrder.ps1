@@ -6,6 +6,7 @@ function New-PAOrder {
         [Parameter(ParameterSetName='ImportKey',Mandatory,Position=0)]
         [string[]]$Domain,
         [Parameter(ParameterSetName='FromCSR',Mandatory,Position=0)]
+        [Alias('CSRString')]
         [string]$CSRPath,
         [Parameter(ParameterSetName='FromScratch',Position=1)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
@@ -60,7 +61,6 @@ function New-PAOrder {
 
     # If using a pre-generated CSR, extract the details so we can generate expected parameters
     if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
-        $CSRPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($CSRPath)
         $csrDetails = Get-CsrDetails $CSRPath
 
         $Domain = $csrDetails.Domain
@@ -316,12 +316,10 @@ function New-PAOrder {
         Export-PluginArgs -Order $order -PluginArgs $PluginArgs
     }
 
-    # Make a local copy of the specified CSR file
+    # Make a local copy of the specified CSR
     if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
         $csrDest = Join-Path $order.Folder 'request.csr'
-        if ($CSRPath -ne $csrDest) {
-            Copy-Item -Path $CSRPath -Destination $csrDest
-        }
+        Export-Pem $csrDetails.PemLines $csrDest
     }
 
     # Determine whether to remove the old private key. This is necessary if it exists

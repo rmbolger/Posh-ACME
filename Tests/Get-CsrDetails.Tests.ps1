@@ -60,13 +60,13 @@ Describe "Get-CsrDetails" {
                 $result.Domain         | Should -BeExactly @('example.com')
                 $result.KeyLength      | Should -BeExactly '2048'
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
-
+                $result.PemLines.Count | Should -Be 15
             }
         }
     }
 
     Context "RSA 2048 CSR" {
-        It "Reads properly" {
+        It "Reads properly from File" {
             Copy-Item "$PSScriptRoot\TestFiles\rsa-2048-noCN-singleSAN.csr" 'TestDrive:\test.csr'
             InModuleScope Posh-ACME {
                 { Get-CsrDetails -CSRPath 'TestDrive:\test.csr' } | Should -Not -Throw
@@ -75,6 +75,50 @@ Describe "Get-CsrDetails" {
                 $result.KeyLength      | Should -BeExactly '2048'
                 $result.OCSPMustStaple | Should -BeFalse
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
+                $result.PemLines.Count | Should -Be 19
+            }
+        }
+
+        It "Reads properly from String" {
+            Copy-Item "$PSScriptRoot\TestFiles\rsa-2048-noCN-singleSAN.csr" 'TestDrive:\test.csr'
+            InModuleScope Posh-ACME {
+                $csrString = Get-Content 'TestDrive:\test.csr' -Raw
+                { Get-CsrDetails -CSRPath $csrString } | Should -Not -Throw
+                $result = Get-CsrDetails -CSRPath $csrString
+                $result.Domain         | Should -BeExactly @('example.com')
+                $result.KeyLength      | Should -BeExactly '2048'
+                $result.OCSPMustStaple | Should -BeFalse
+                { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
+                $result.PemLines.Count | Should -Be 19
+            }
+        }
+    }
+
+    Context "RSA 2048 CSR Single Line Base64" {
+        It "Reads properly from File" {
+            Copy-Item "$PSScriptRoot\TestFiles\rsa-2048-noCN-singleSAN-singleLine.csr" 'TestDrive:\test.csr'
+            InModuleScope Posh-ACME {
+                { Get-CsrDetails -CSRPath 'TestDrive:\test.csr' } | Should -Not -Throw
+                $result = Get-CsrDetails -CSRPath 'TestDrive:\test.csr'
+                $result.Domain         | Should -BeExactly @('example.com')
+                $result.KeyLength      | Should -BeExactly '2048'
+                $result.OCSPMustStaple | Should -BeFalse
+                { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
+                $result.PemLines.Count | Should -Be 3
+            }
+        }
+
+        It "Reads properly from String" {
+            Copy-Item "$PSScriptRoot\TestFiles\rsa-2048-noCN-singleSAN-singleLine.csr" 'TestDrive:\test.csr'
+            InModuleScope Posh-ACME {
+                $csrString = Get-Content 'TestDrive:\test.csr' -Raw
+                { Get-CsrDetails -CSRPath $csrString } | Should -Not -Throw
+                $result = Get-CsrDetails -CSRPath $csrString
+                $result.Domain         | Should -BeExactly @('example.com')
+                $result.KeyLength      | Should -BeExactly '2048'
+                $result.OCSPMustStaple | Should -BeFalse
+                { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
+                $result.PemLines.Count | Should -Be 3
             }
         }
     }
@@ -89,6 +133,7 @@ Describe "Get-CsrDetails" {
                 $result.KeyLength      | Should -BeExactly "4096"
                 $result.OCSPMustStaple | Should -BeTrue
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
+                $result.PemLines.Count | Should -Be 28
             }
         }
     }
@@ -103,6 +148,7 @@ Describe "Get-CsrDetails" {
                 $result.KeyLength      | Should -BeExactly "ec-256"
                 $result.OCSPMustStaple | Should -BeFalse
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
+                $result.PemLines.Count | Should -Be 11
             }
         }
     }
@@ -117,6 +163,7 @@ Describe "Get-CsrDetails" {
                 $result.KeyLength      | Should -BeExactly "ec-521"
                 $result.OCSPMustStaple | Should -BeFalse
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
+                $result.PemLines.Count | Should -Be 13
             }
         }
     }
