@@ -8,38 +8,42 @@ function Add-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(Mandatory)]
-        [pscredential]$HECredential,
+        [pscredential[]]$HEDynCredential,
+        [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # add the new record
     Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
 
-    # get plain text versions of the pscredential we can work with
-    $HEUsername = $HECredential.UserName
-    $HEPassword = $HECredential.GetNetworkCredential().Password
+    # get the cred that matches the record
+    $cred = $HEDynCredential | Where-Object { $RecordName -eq $_.UserName }
+    if (-not $cred) {
+        throw "HEDynCredential did not contain any matches for $RecordName."
+    }
 
-    # URI escape the credentials
-    $userEscaped = [uri]::EscapeDataString($HEUsername)
-    $passEscaped = [uri]::EscapeDataString($HEPassword)
+    # get plain text password we can work with
+    $HEPassword = $cred.GetNetworkCredential().Password
 
-    # build the form body
-    $addBody = "hostname=$userEscaped&password=$passEscaped&txt=$TxtValue"
-    $iwrArgs = @{
+    # build the post query
+    $queryParams = @{
         Uri = 'https://dyn.dns.he.net/nic/update'
         Method = 'Post'
-        Body = $addBody
+        Body = @{
+            hostname = $RecordName
+            password = $HEPassword
+            txt = $TxtValue
+        }
         ErrorAction = 'Stop'
+        Verbose = $false
     }
 
     try {
-        $response = Invoke-WebRequest @iwrArgs @script:UseBasic
+        Write-Debug "POST $($queryParams.Uri)`nhostname = $RecordName, txt = $TxtValue"
+        $response = Invoke-RestMethod @queryParams @script:UseBasic
     } catch { throw }
 
-    $reStatus = '^(nochg|good)'
-
-    if (-Not($response.Content -match $reStatus)) {
-        Write-Warning "Unexpected result status while adding record: $($response.Content)"
+    if ($response -notmatch '^(nochg|good)') {
+        throw "Unexpected result status while adding record: $response"
     }
 
     <#
@@ -55,17 +59,16 @@ function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER HECredential
-        Username and password for Hurricane Electric using their Dynamic TXT API.
-
-        The username should match the hostname being used to ultimately store the challenge. The password should match the password set
-        in the user interface for the hostname.
+    .PARAMETER HEDynCredential
+        One or more PSCredential objects where the username is the full DNS record
+        name being updated and the password is the key/password for dynamically
+        updating that record.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -HECredential (Get-Credential)
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -HEDynCredential (Get-Credential)
 
         Adds a TXT record using after providing credentials in a prompt.
     #>
@@ -79,7 +82,7 @@ function Remove-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(Mandatory)]
-        [pscredential]$HECredential,
+        [pscredential[]]$HEDynCredential,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -89,6 +92,17 @@ function Remove-DnsTxt {
 
     .DESCRIPTION
         This provider does not really support deleting the TXT record that was created.
+
+    .PARAMETER RecordName
+        The fully qualified name of the TXT record.
+
+    .PARAMETER TxtValue
+        The value of the TXT record.
+
+    .PARAMETER HEDynCredential
+        One or more PSCredential objects where the username is the full DNS record
+        name being updated and the password is the key/password for dynamically
+        updating that record.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
