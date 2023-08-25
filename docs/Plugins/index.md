@@ -49,6 +49,7 @@ GoDaddy | [GoDaddy](https://www.godaddy.com) | [Usage Guide](GoDaddy.md) | :whit
 Hetzner | [Hetzner](https://hetzner.de/) | [Usage Guide](Hetzner.md) | :white_check_mark:
 HostingDe | [Hosting.de](https://hosting.de) | [Usage Guide](HostingDe.md) | :white_check_mark:
 HurricaneElectric | [Hurricane Electric DNS](https://dns.he.net/) | [Usage Guide](HurricaneElectric.md) | :white_check_mark:
+HurricaneElectricDyn | [Hurricane Electric DNS](https://dns.he.net/) | [Usage Guide](HurricaneElectricDyn.md) | :white_check_mark:
 IBMSoftLayer | [IBM Cloud DNS](https://www.ibm.com/cloud/dns) | [Usage Guide](IBMSoftLayer.md) | :white_check_mark:
 Infoblox | [Infoblox NIOS](https://www.infoblox.com) | [Usage Guide](Infoblox.md) | :white_check_mark:
 Infomaniak | [Infomaniak](https://www.infomaniak.com) | [Usage Guide](Infomaniak.md) | :white_check_mark:
