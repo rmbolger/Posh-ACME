@@ -1,11 +1,8 @@
-title: Simply
+title: SimplyCom
 
 # How To Use the Simply.com DNS Plugin
 
 This plugin works against the [Simply.com](https://www.simply.com/) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
-
-!!! warning
-    The provider has requested this plugin be renamed to `SimplyCom`. So a clone was created called `SimplyCom` that should be used instead. This version will be removed from the module in the next major release of the module.
 
 ## Setup
 
