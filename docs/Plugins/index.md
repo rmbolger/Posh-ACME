@@ -80,6 +80,7 @@ UKFast | [UKFast](https://ukfast.co.uk) | [Usage Guide](UKFast.md) | :white_chec
 Windows | [Microsoft Windows DNS](https://www.microsoft.com/en-us/cloud-platform/windows-server) | [Usage Guide](Windows.md) | Windows-Only<sup>[1](#windows)</sup>
 Yandex | [Yandex DNS](https://connect.yandex.com/) | [Usage Guide](Yandex.md) | :white_check_mark:
 Zilore| [Zilore](https://zilore.com/?r=1f752c82378516890a5200006eae8469) | [Usage Guide](Zilore.md) | :white_check_mark:
+ZoneEdit | [ZoneEdit](https://www.zoneedit.com/) | [Usage Guide](ZoneEdit.md) | :white_check_mark:
 Zonomi | [Zonomi DNS](https://zonomi.com) | [Usage Guide](Zonomi.md) | :white_check_mark:
 
 ### Notes
