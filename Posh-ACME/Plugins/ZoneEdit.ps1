@@ -15,6 +15,8 @@ function Add-DnsTxt {
         $ExtraParams
     )
 
+    # https://forum.zoneedit.com/threads/automating-changes-of-txt-records-in-dns.7394/page-2
+
     Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
 
     # get the cred that matches the record
