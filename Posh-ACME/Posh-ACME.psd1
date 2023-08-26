@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.18.0'
+ModuleVersion = '4.19.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,16 +83,15 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.18.0 (2023-06-28)
+## 4.19.0 (2023-08-26)
 
-* The `POSHACME_HOME` environment variable now supports Windows-style (surrounded by `%`) environment variable expansion. (#497)
-  * So you can set the value to `%ProgramData%\Posh-ACME` instead of needing to set it explicitly to `C:\ProgramData\Posh-ACME` for example.
-  * NOTE: This requires Windows-style environment variable strings even on non-Windows OSes.
-* The Azure plugin no longer tries to re-use cached authentication tokens when using the `AZAccessToken` parameter set. (#498)
-* Fixed a bug with the Azure plugin that broke authentication when submitting multiple orders with different credentials from different tenants. (#498)
-* Fixed a problem using Posh-ACME within AWS Lambda due to non-standard dotnet runtime assembly configs. (#418) (Thanks @garthmccormack)
-  * This fix involved changing the `RevocationReasons` enum from a .NET type to a PowerShell native enum.
-  * The change constitutes a minor breaking change which makes the enum no longer accessible from outside the module's context, but tab completion and string converted values for the `Revoke-PACertificate -Reason` parameter work exactly the same as before.
+* New DNS plugins
+  * [HurricaneElectricDyn](https://dns.he.net/) This is an alternative to the existing `HurricaneElectric` plugin that uses the DynDNS API instead of web scraping. (Thanks @jbrunink)
+  * [ZoneEdit](https://www.zoneedit.com/) (#495)
+* The `CSRPath` parameter in `New-PAOrder` and `New-PACertificate` will now accept the raw string contents of a CSR file instead of just the path to a file. (#503)
+* The `Simply` plugin has been renamed to `SimplyCom` at the request of the provider. The new version is exactly the same. The old version will remain until the next major release. Users should update their renewal configs to use the new version to prevent future breakage. `Set-PAOrder -Plugin SimplyCom`
+* Added a workaround to a temporary problem with the Simply.com API in case the issue pops up again. (#502)
+* The `Route53` plugin now uses IMDSv2 when using the IAM Role support. (#509)
 '@
 
     }

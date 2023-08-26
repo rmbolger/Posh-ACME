@@ -1,3 +1,14 @@
+## 4.19.0 (2023-08-26)
+
+* New DNS plugins
+  * [HurricaneElectricDyn](https://dns.he.net/) This is an alternative to the existing `HurricaneElectric` plugin that uses the DynDNS API instead of web scraping. (Thanks @jbrunink)
+  * [ZoneEdit](https://www.zoneedit.com/) (#495)
+* The `CSRPath` parameter in `New-PAOrder` and `New-PACertificate` will now accept the raw string contents of a CSR file instead of just the path to a file. (#503)
+* The `Simply` plugin has been renamed to `SimplyCom` at the request of the provider. The new version is exactly the same. The old version will remain until the next major release. Users should update their renewal configs to use the new version to prevent future breakage. `Set-PAOrder -Plugin SimplyCom`
+* Added a workaround to a temporary problem with the Simply.com API in case the issue pops up again. (#502)
+* The `Route53` plugin now uses IMDSv2 when using the IAM Role support. (#509)
+
+
 ## 4.18.0 (2023-06-28)
 
 * The `POSHACME_HOME` environment variable now supports Windows-style (surrounded by `%`) environment variable expansion. (#497)
