@@ -68,6 +68,13 @@ function New-PAOrder {
         $OCSPMustStaple = New-Object Management.Automation.SwitchParameter($csrDetails.OCSPMustStaple)
     }
 
+    # De-dupe the domain list if necessary
+    $domainCount = $Domain.Count
+    $Domain = $Domain | Select-Object -Unique
+    if ($domainCount -gt $Domain.Count) {
+        Write-Warning "One or more duplicate domain values found. Removing duplicates."
+    }
+
     # If importing a key, make sure it's valid so we can set the appropriate KeyLength
     if ('ImportKey' -eq $PSCmdlet.ParameterSetName) {
         $KeyFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($KeyFile)
