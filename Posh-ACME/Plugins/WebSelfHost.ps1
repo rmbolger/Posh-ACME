@@ -11,6 +11,7 @@ function Add-HttpChallenge {
         [string]$Body,
         [string]$WSHPort,
         [int]$WSHTimeout = 120,
+        [int]$WSHDelayAfterStart = 0,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -51,6 +52,9 @@ function Add-HttpChallenge {
     .PARAMETER WSHTimeout
         The number of seconds to leave the server running for before automatically stopping.
 
+    .PARAMETER WSHDelayAfterStart
+        The number of seconds to sleep after starting the HTTP listener job.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -72,6 +76,7 @@ function Remove-HttpChallenge {
         [string]$Body,
         [string]$WSHPort,
         [int]$WSHTimeout = 120,
+        [int]$WSHDelayAfterStart = 0,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -110,6 +115,9 @@ function Remove-HttpChallenge {
     .PARAMETER WSHTimeout
         The number of seconds to leave the server running for before automatically stopping.
 
+    .PARAMETER WSHDelayAfterStart
+        The number of seconds to sleep after starting the HTTP listener job.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -125,6 +133,7 @@ function Save-HttpChallenge {
     param(
         [string]$WSHPort,
         [int]$WSHTimeout = 120,
+        [int]$WSHDelayAfterStart = 0,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -141,6 +150,10 @@ function Save-HttpChallenge {
         # determine the listener prefix
         $portSuffix = if ($WSHPort) { ":$WSHPort" } else { [string]::Empty }
         $prefix = 'http://+{0}/.well-known/acme-challenge/' -f $portSuffix
+
+        # add the delay value to the timeout value so the user effectively gets the full
+        # timeout value.
+        $WSHTimeout += $WSHDelayAfterStart
 
         Write-Debug "Starting listener job with prefix $prefix"
         $script:WSHListenerJob = Start-Job -ScriptBlock {
@@ -249,6 +262,10 @@ function Save-HttpChallenge {
 
         } -ArgumentList $prefix,$script:WSHResponses,$WSHTimeout
 
+        if ($WSHDelayAfterStart -gt 0) {
+            Start-Sleep -Seconds $WSHDelayAfterStart
+        }
+
     } else {
         # STOP
         Write-Debug "Found existing listener job, time to stop"
@@ -282,6 +299,9 @@ function Save-HttpChallenge {
 
     .PARAMETER WSHTimeout
         The number of seconds to leave the server running for before automatically stopping.
+
+    .PARAMETER WSHDelayAfterStart
+        The number of seconds to sleep after starting the HTTP listener job.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.

@@ -32,6 +32,8 @@ Regardless of the underlying OS, you need to make sure the listener won't confli
 
 No plugin args are required if you will be using the default port 80 and 120 second timeout. Otherwise, you may use `WSHPort` and `WSHTimeout` respectively.
 
+There is also a `WSHDelayAfterStart` arg that can be used to add a delay between when the listener starts and when the plugin returns control to the module to validate the challenges. This can be useful if it seems like the listener isn't starting up fast enough to answer the challenge requests.
+
 ### Default functionality
 
 ```powershell
