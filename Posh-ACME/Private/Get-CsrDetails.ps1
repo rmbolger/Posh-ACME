@@ -48,7 +48,7 @@ function Get-CsrDetails {
         }
     }
 
-    # parse the CSR into a [Org.BouncyCastle.Asn1.Pkcs.CertificationRequest]
+    # parse the CSR into a [Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest]
     Write-Debug "Attempting to import CSR pem"
     $csr = Import-Pem @importParams
     if ($csr -isnot [Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest]) {

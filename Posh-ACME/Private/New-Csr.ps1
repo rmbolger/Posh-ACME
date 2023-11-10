@@ -34,7 +34,7 @@ function New-Csr {
 
         Write-Verbose "Creating new private key for the certificate request."
 
-        $sRandom = New-Object Org.BouncyCastle.Security.SecureRandom
+        $sRandom = [Org.BouncyCastle.Security.SecureRandom]::new()
 
         if ($Order.KeyLength -like 'ec-*') {
 
@@ -47,8 +47,8 @@ function New-Csr {
             elseif ($keySize -eq 384) { $sigAlgo = 'SHA384WITHECDSA' }
             elseif ($keySize -eq 521) { $sigAlgo = 'SHA512WITHECDSA' }
 
-            $ecGen = New-Object Org.BouncyCastle.Crypto.Generators.ECKeyPairGenerator
-            $genParam = New-Object Org.BouncyCastle.Crypto.Parameters.ECKeyGenerationParameters -ArgumentList $curveOid,$sRandom
+            $ecGen = [Org.BouncyCastle.Crypto.Generators.ECKeyPairGenerator]::new()
+            $genParam = [Org.BouncyCastle.Crypto.Parameters.ECKeyGenerationParameters]::new($curveOid,$sRandom)
             $ecGen.Init($genParam)
             $keyPair = $ecGen.GenerateKeyPair()
 
@@ -59,8 +59,8 @@ function New-Csr {
             $keySize = [int]$Order.KeyLength
             $sigAlgo = 'SHA256WITHRSA'
 
-            $rsaGen = New-Object Org.BouncyCastle.Crypto.Generators.RsaKeyPairGenerator
-            $genParam = New-Object Org.BouncyCastle.Crypto.KeyGenerationParameters -ArgumentList $sRandom,$keySize
+            $rsaGen = [Org.BouncyCastle.Crypto.Generators.RsaKeyPairGenerator]::new()
+            $genParam = [Org.BouncyCastle.Crypto.KeyGenerationParameters]::new($sRandom,$keySize)
             $rsaGen.Init($genParam)
             $keyPair = $rsaGen.GenerateKeyPair()
 
@@ -75,9 +75,13 @@ function New-Csr {
 
     # create the subject
     if ($Order.Subject) {
-        $subject = New-Object Org.BouncyCastle.Asn1.X509.X509Name($Order.Subject)
+        $subject = [Org.BouncyCastle.Asn1.X509.X509Name]::new($Order.Subject)
+    } elseif ($Order.MainDomain.Length -le 64) {
+        $subject = [Org.BouncyCastle.Asn1.X509.X509Name]::new("CN=$($Order.MainDomain)")
     } else {
-        $subject = New-Object Org.BouncyCastle.Asn1.X509.X509Name("CN=$($Order.MainDomain)")
+        # CN's longer than 64 characters are invalid in a CSR, so just leave it empty
+        # because the CN value is deprecated anyway
+        $subject = [Org.BouncyCastle.Asn1.X509.X509Name]::GetInstance([Org.BouncyCastle.Asn1.DerSequence]::new())
     }
 
     # create a .NET Dictionary to hold our extensions because that's what BouncyCastle needs
