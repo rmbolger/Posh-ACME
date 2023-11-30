@@ -1117,6 +1117,12 @@
         
           
         
+          
+        
+          
+        
+          
+        
       
       
         
@@ -1663,6 +1669,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Plugins/HurricaneElectricDyn/" class="md-nav__link">
+        HurricaneElectricDyn
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Plugins/IBMSoftLayer/" class="md-nav__link">
         IBMSoftLayer
       </a>
@@ -2013,6 +2033,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Plugins/SimplyCom/" class="md-nav__link">
+        SimplyCom
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Plugins/TotalUptime/" class="md-nav__link">
         TotalUptime
       </a>
@@ -2099,6 +2133,20 @@
     <li class="md-nav__item">
       <a href="../../Plugins/Zilore/" class="md-nav__link">
         Zilore
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/ZoneEdit/" class="md-nav__link">
+        ZoneEdit
       </a>
     </li>
   
@@ -2609,6 +2657,7 @@
 <li><a href="https://letsencrypt.org/docs/dst-root-ca-x3-expiration-september-2021/">DST Root CA X3 Expiration (September 2021)</a></li>
 <li><a href="https://letsencrypt.org/2020/12/21/extending-android-compatibility.html">Extending Android Device Compatibility for Let's Encrypt Certificates</a></li>
 <li><a href="https://community.letsencrypt.org/t/production-chain-changes/150739">Production Chain Changes</a></li>
+<li><a href="https://letsencrypt.org/2023/07/10/cross-sign-expiration.html">Shortening the Let's Encrypt Chain of Trust</a></li>
 </ul>
 <p>Your default choice is currently the longer chain that builds to the expired <code>DST Root CA X3</code> self-signed certificate which should be compatible with almost all Android devices until 2024. The alternate choice is the shorter chain that builds to the <code>ISRG Root X1</code> self-signed certificate which doesn't expire until 2035.</p>
 <p>Ultimately, your choice should depend on the clients that are connecting to your service. But if you don't know, it's probably safest to just leave the default. Let's Encrypt also has a <a href="https://letsencrypt.org/docs/certificate-compatibility/">Certificate Compatibility</a> page that can help.</p>
@@ -2636,6 +2685,10 @@
 <p>Changing the chain on an existing certificate will only update the files in the Posh-ACME order folder. Even if the order has the <code>Install</code> property set to <code>$true</code>, it will not re-import the current certificate to the Windows certificate store. It will only do that on the next renewal.</p>
 </div>
 <h2 id="serving-the-alternate-chain-from-windows">Serving the Alternate Chain from Windows<a class="headerlink" href="#serving-the-alternate-chain-from-windows" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>As of February 2023, the instructions in this section no longer work on up-to-date Windows instances because Microsoft issued a trust store update that explicitly disallows the system to use the expired <code>DST Root CA X3</code> cert. However, the instructions will remain for future reference and historical purposes.</p>
+</div>
 <p>While the <code>-PreferredChain</code> option will make Posh-ACME download the alternate chain for the files in your config, you may notice that on Windows your website/application is still serving the default chain. Unlike many Linux applications that have explicit configuration options for chain configuration, applications that use the Windows certificate store usually rely on the underlying operating system to decide what chain to serve with the leaf certificate.</p>
 <p>There does not seem to be a way to differentiate the chains being served based on application. All websites and applications using leaf certs from the same Intermediate CA will serve the same chain. But it is possible to influence which chain based on the by manipulating the contents of the various Windows trust stores.</p>
 <p>The default chain that Windows picks for an LE cert following the expiration of <code>DST Root CA X3</code> is actually Let's Encrypt's shorter "alternate" chain which does not include the cross-signed copy of <code>ISRG Root X1</code> needed for old Android compatibility. Convincing Windows to serve Let's Encrypt's longer "default" chain that does support old Android devices currently requires a hack that involves un-trusting the legitimate self-signed <code>ISRG Root X1</code> on the user account hosting your service. In the case of IIS, that usually means the local SYSTEM account.</p>

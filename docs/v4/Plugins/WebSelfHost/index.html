@@ -1119,6 +1119,12 @@
         
           
         
+          
+        
+          
+        
+          
+        
       
       
         
@@ -1665,6 +1671,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../HurricaneElectricDyn/" class="md-nav__link">
+        HurricaneElectricDyn
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../IBMSoftLayer/" class="md-nav__link">
         IBMSoftLayer
       </a>
@@ -2015,6 +2035,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../SimplyCom/" class="md-nav__link">
+        SimplyCom
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../TotalUptime/" class="md-nav__link">
         TotalUptime
       </a>
@@ -2189,6 +2223,20 @@
     <li class="md-nav__item">
       <a href="../Zilore/" class="md-nav__link">
         Zilore
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ZoneEdit/" class="md-nav__link">
+        ZoneEdit
       </a>
     </li>
   
@@ -2614,6 +2662,7 @@
 <p>Regardless of the underlying OS, you need to make sure the listener won't conflict with other software running on the system. If port 80 is in use, you will need to run the listener on an alternate port. But keep in mind, the ACME challenge validations must be served from port 80 on the internet-facing side of things. Often, there will be port forwarding or a reverse proxy in place that maps the internet-facing port 80 to an internal alternate port.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p>No plugin args are required if you will be using the default port 80 and 120 second timeout. Otherwise, you may use <code>WSHPort</code> and <code>WSHTimeout</code> respectively.</p>
+<p>There is also a <code>WSHDelayAfterStart</code> arg that can be used to add a delay between when the listener starts and when the plugin returns control to the module to validate the challenges. This can be useful if it seems like the listener isn't starting up fast enough to answer the challenge requests.</p>
 <h3 id="default-functionality">Default functionality<a class="headerlink" href="#default-functionality" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">WebSelfHost</span> <span class="n">-PluginArgs</span> <span class="p">@{}</span>
 </code></pre></div>

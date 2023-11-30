@@ -1464,6 +1464,12 @@
         
           
         
+          
+        
+          
+        
+          
+        
       
       
         
@@ -2010,6 +2016,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Plugins/HurricaneElectricDyn/" class="md-nav__link">
+        HurricaneElectricDyn
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Plugins/IBMSoftLayer/" class="md-nav__link">
         IBMSoftLayer
       </a>
@@ -2360,6 +2380,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Plugins/SimplyCom/" class="md-nav__link">
+        SimplyCom
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Plugins/TotalUptime/" class="md-nav__link">
         TotalUptime
       </a>
@@ -2446,6 +2480,20 @@
     <li class="md-nav__item">
       <a href="../../Plugins/Zilore/" class="md-nav__link">
         Zilore
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/ZoneEdit/" class="md-nav__link">
+        ZoneEdit
       </a>
     </li>
   
@@ -3180,11 +3228,10 @@ The first one in the list will be considered the "MainDomain" and be set as the 
 <span class="nt">Accept wildcard characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
 </code></pre></div>
 <h3 id="-csrpath">-CSRPath<a class="headerlink" href="#-csrpath" title="Permanent link">&para;</a></h3>
-<p>The path to a pre-made certificate request file in PEM (Base64) format.
-This is useful for appliances that need to generate their own keys and cert requests.</p>
+<p>Either the filesystem path to a certificate request (CSR) file in PEM (Base64) format or the raw string contents of such a file. If using the string version, the PEM header and footer must be separated by line breaks from the Base64 content just like they would be in a normal file. This is useful for appliances that need to generate their own keys and cert requests or when the private key is otherwise unavailable.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">String</span><span class="w"></span>
 <span class="nt">Parameter Sets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FromCSR</span><span class="w"></span>
-<span class="nt">Aliases</span><span class="p">:</span><span class="w"></span>
+<span class="nt">Aliases</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CSRString</span><span class="w"></span>
 
 <span class="nt">Required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
 <span class="nt">Position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
