@@ -9,6 +9,7 @@ To understand why Let's Encrypt is offering multiple trust chains and why you as
 - [DST Root CA X3 Expiration (September 2021)](https://letsencrypt.org/docs/dst-root-ca-x3-expiration-september-2021/)
 - [Extending Android Device Compatibility for Let's Encrypt Certificates](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html)
 - [Production Chain Changes](https://community.letsencrypt.org/t/production-chain-changes/150739)
+- [Shortening the Let's Encrypt Chain of Trust](https://letsencrypt.org/2023/07/10/cross-sign-expiration.html)
 
 Your default choice is currently the longer chain that builds to the expired `DST Root CA X3` self-signed certificate which should be compatible with almost all Android devices until 2024. The alternate choice is the shorter chain that builds to the `ISRG Root X1` self-signed certificate which doesn't expire until 2035.
 
@@ -46,6 +47,9 @@ Set-PAOrder -Name 'example.com' -PreferredChain 'ISRG Root X1'
     Changing the chain on an existing certificate will only update the files in the Posh-ACME order folder. Even if the order has the `Install` property set to `$true`, it will not re-import the current certificate to the Windows certificate store. It will only do that on the next renewal.
 
 ## Serving the Alternate Chain from Windows
+
+!!! warning
+    As of February 2023, the instructions in this section no longer work on up-to-date Windows instances because Microsoft issued a trust store update that explicitly disallows the system to use the expired `DST Root CA X3` cert. However, the instructions will remain for future reference and historical purposes.
 
 While the `-PreferredChain` option will make Posh-ACME download the alternate chain for the files in your config, you may notice that on Windows your website/application is still serving the default chain. Unlike many Linux applications that have explicit configuration options for chain configuration, applications that use the Windows certificate store usually rely on the underlying operating system to decide what chain to serve with the leaf certificate.
 
