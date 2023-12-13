@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.19.0'
+ModuleVersion = '4.20.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,15 +83,12 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.19.0 (2023-08-26)
+## 4.20.0 (2023-12-12)
 
-* New DNS plugins
-  * [HurricaneElectricDyn](https://dns.he.net/) This is an alternative to the existing `HurricaneElectric` plugin that uses the DynDNS API instead of web scraping. (Thanks @jbrunink)
-  * [ZoneEdit](https://www.zoneedit.com/) (#495)
-* The `CSRPath` parameter in `New-PAOrder` and `New-PACertificate` will now accept the raw string contents of a CSR file instead of just the path to a file. (#503)
-* The `Simply` plugin has been renamed to `SimplyCom` at the request of the provider. The new version is exactly the same. The old version will remain until the next major release. Users should update their renewal configs to use the new version to prevent future breakage. `Set-PAOrder -Plugin SimplyCom`
-* Added a workaround to a temporary problem with the Simply.com API in case the issue pops up again. (#502)
-* The `Route53` plugin now uses IMDSv2 when using the IAM Role support. (#509)
+* New DNS plugin [PowerDNS](https://www.powerdns.com/powerdns-authoritative-server)
+* Fixed duplicate identifiers in the `Domain` parameter causing errors with some ACME servers. Identifiers will now be deduplicated prior to being saved and sent to the ACME server. (#517)
+* Added `WSHDelayAfterStart` param to the WebSelfHost plugin which adds a configurable delay between when the challenge listener starts up and when it asks the ACME server to validate the challenges. (#518)
+* Orders where the MainDomain is longer than 64 characters will not include a CN value in the Subject field of the certificate request sent to the ACME server. CNs longer than 64 characters were already being rejected by some CAs like Let's Encrypt because the x509 spec doesn't allow for it. [More Info](https://community.letsencrypt.org/t/simplifying-issuance-for-very-long-domain-names/207924)
 '@
 
     }
