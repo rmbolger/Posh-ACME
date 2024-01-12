@@ -14,9 +14,13 @@ First it will have you agree to the ToS. Then double check that the IP address y
 
 You will need to provide your account username/email and API password as a PSCredential object to the `WedosCredential` plugin parameter.
 
+!!! warning
+    WEDOS seems to have an unusually long propagation time between when your DNS changes are committed and when they are reflected on their authoritative nameservers. The GUI warns that changes could take up to 60 minutes. But testing has show the average time is around 4-8 minutes. Be sure to use the `-DnsSleep` parameter with an appropriately long timeout
+    to avoid validation failures.
+
 ```powershell
 $pArgs = @{
     WedosCredential = (Get-Credential)
 }
-New-PACertificate example.com -Plugin WEDOS -PluginArgs $pArgs
+New-PACertificate example.com -Plugin WEDOS -PluginArgs $pArgs -DnsSleep 600
 ```
