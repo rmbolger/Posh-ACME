@@ -104,6 +104,9 @@ After logging in successfully, you should be redirected to a success page on the
 The App Key value will be used with the `OVHAppKey` parameter. The App Secret and Consumer Key values will be used with the `OVHAppSecret` and `OVHConsumerKey` SecureString parameters.
 
 !!! warning
+    The OVH API is very sensitive to the Date/Time configuration on your system. Make sure your computer is synchronized with a reliable time source. A few seconds of time skew can cause HTTP 400 errors with the error code `QUERY_TIME_OUT`.
+
+!!! warning
     The `OVHAppSecretInsecure` and `OVHConsumerKeyInsecure` parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.
 
 !!! warning
