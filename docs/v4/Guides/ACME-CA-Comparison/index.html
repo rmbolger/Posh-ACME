@@ -1125,6 +1125,8 @@
         
           
         
+          
+        
       
       
         
@@ -2091,6 +2093,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../Plugins/WEDOS/" class="md-nav__link">
+        WEDOS
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../Plugins/WebRoot/" class="md-nav__link">
         WebRoot
       </a>
@@ -2687,7 +2703,7 @@ SXG Support is also not part of the ACME protocol but is a notable feature among
 <td><a href="https://datatracker.ietf.org/doc/html/rfc8555#section-7.3.4">(EAB) External<br />Account Binding</a></td>
 <td align="center">n/a</td>
 <td align="center">n/a</td>
-<td align="center">Required*</td>
+<td align="center">Required</td>
 <td align="center">Required</td>
 <td align="center">Required*</td>
 </tr>
@@ -2788,7 +2804,6 @@ SXG Support is also not part of the ACME protocol but is a notable feature among
 <li><img alt="❓" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/2753.svg" title=":question:" /> = Support unknown or untested</li>
 <li>SSL.com throws "Missing Authentication Token" errors when making some calls against Account endpoints which is why those features are labeled Unsupported.</li>
 <li>SSL.com requires an email address in the ACME account contact field, but doesn't enforce it on creation time. Instead, it throws an "badCSR" error when you try to finalize an order from an account with an empty address.</li>
-<li>ZeroSSL's EAB credentials can only be used once to establish a new ACME account. Creating additional accounts requires generating new EAB credentials.</li>
 <li>ZeroSSL does support IP address based certificates, but not via the ACME protocol.</li>
 <li>Google's EAB credentials can only be used once to establish a new ACME account and expire after 7 days if not used. Creating additional accounts requires generating new EAB credentials.</li>
 <li>For Google SXG Certificates, you must use a different ACME directory endpoint. <a href="https://dv-sxg.acme-v02.api.pki.goog/directory">https://dv-sxg.acme-v02.api.pki.goog/directory</a></li>

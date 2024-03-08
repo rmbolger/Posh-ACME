@@ -1127,6 +1127,8 @@
         
           
         
+          
+        
       
       
         
@@ -2195,6 +2197,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../WEDOS/" class="md-nav__link">
+        WEDOS
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../WebRoot/" class="md-nav__link">
         WebRoot
       </a>
@@ -2799,6 +2815,10 @@
 <p>After logging in successfully, you should be redirected to a success page on the Posh-ACME wiki. Press Enter in the PowerShell Window to be presented with your Consumer Key value which you should save for later.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p>The App Key value will be used with the <code>OVHAppKey</code> parameter. The App Secret and Consumer Key values will be used with the <code>OVHAppSecret</code> and <code>OVHConsumerKey</code> SecureString parameters.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The OVH API is very sensitive to the Date/Time configuration on your system. Make sure your computer is synchronized with a reliable time source. A few seconds of time skew can cause HTTP 400 errors with the error code <code>QUERY_TIME_OUT</code>.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>The <code>OVHAppSecretInsecure</code> and <code>OVHConsumerKeyInsecure</code> parameters are deprecated and will be removed in the next major module version. If you are using them, please migrate to the Secure parameter set.</p>
