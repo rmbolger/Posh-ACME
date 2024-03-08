@@ -402,11 +402,18 @@ function Invoke-OVHRest {
             'X-Ovh-Consumer' = $c.ConsumerKey
         }
         ContentType = 'application/json'
+        Verbose = $false
+        ErrorAction = 'Stop'
     }
     # add the body if there is one
     if ($Body) { $restArgs.Body = $Body }
 
-    Invoke-RestMethod @restArgs @script:UseBasic -EA Stop
+    Write-Debug ('{0} {1}{2}' -f $restArgs.Method,$restArgs.Uri,(($Body) ? "`n$Body" : ''))
+    $response = Invoke-RestMethod @restArgs @script:UseBasic
+    if ($response) {
+        Write-Debug "Response:`n$response"
+    }
+    return $response
 }
 
 function Find-OVHDomain {
@@ -456,6 +463,7 @@ function Get-OVHTxtRecords {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
+        [AllowEmptyString()]
         [string]$RecordShort,
         [Parameter(Mandatory)]
         [string]$Domain
