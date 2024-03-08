@@ -32,7 +32,7 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 
 | Feature                                      | [Let's&nbsp;Encrypt][le01] | [BuyPass][bp01]                              | [ZeroSSL][z01]     | [SSL.com][ss01]                              | [Google][gc01]      |
 | -------                                      | :------------------------: | :-------------:                              | :------------:     | :-------------:                              | :------------:      |
-| [(EAB) External<br />Account Binding][rfc01] | n/a                        | n/a                                          | Required*          | Required                                     | Required*           |
+| [(EAB) External<br />Account Binding][rfc01] | n/a                        | n/a                                          | Required           | Required                                     | Required*           |
 | [Multi-perspective<br />Validation][le05]    | :white_check_mark:         | :x:                                          | :x:                | :x:                                          | :white_check_mark:  |
 | [Account<br />Key Rollover][rfc02]           | :white_check_mark:         | :white_check_mark:                           | :x:                | :x:*                                         | :white_check_mark:  |
 | [Account<br />Deactivation][rfc03]           | :white_check_mark:         | :white_check_mark:                           | :white_check_mark: | :white_check_mark:                           | :white_check_mark:  |
@@ -52,7 +52,6 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 * :question: = Support unknown or untested
 * SSL.com throws "Missing Authentication Token" errors when making some calls against Account endpoints which is why those features are labeled Unsupported.
 * SSL.com requires an email address in the ACME account contact field, but doesn't enforce it on creation time. Instead, it throws an "badCSR" error when you try to finalize an order from an account with an empty address.
-* ZeroSSL's EAB credentials can only be used once to establish a new ACME account. Creating additional accounts requires generating new EAB credentials.
 * ZeroSSL does support IP address based certificates, but not via the ACME protocol.
 * Google's EAB credentials can only be used once to establish a new ACME account and expire after 7 days if not used. Creating additional accounts requires generating new EAB credentials.
 * For Google SXG Certificates, you must use a different ACME directory endpoint. [https://dv-sxg.acme-v02.api.pki.goog/directory][gc08]
