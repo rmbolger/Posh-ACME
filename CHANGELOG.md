@@ -1,3 +1,8 @@
+## 4.21.0 (2024-03-08)
+
+* New DNS plugin [WEDOS](https://www.wedos.com/zone/)
+* Fixed OVH bug that prevented record creation at a zone apex most common when using DNS Alias support. Also added doc warning about time skew and better debug logging. (#535)
+
 ## 4.20.0 (2023-12-12)
 
 * New DNS plugin [PowerDNS](https://www.powerdns.com/powerdns-authoritative-server)

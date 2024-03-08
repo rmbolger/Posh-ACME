@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.20.0'
+ModuleVersion = '4.21.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,12 +83,10 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.20.0 (2023-12-12)
+## 4.21.0 (2024-03-08)
 
-* New DNS plugin [PowerDNS](https://www.powerdns.com/powerdns-authoritative-server)
-* Fixed duplicate identifiers in the `Domain` parameter causing errors with some ACME servers. Identifiers will now be deduplicated prior to being saved and sent to the ACME server. (#517)
-* Added `WSHDelayAfterStart` param to the WebSelfHost plugin which adds a configurable delay between when the challenge listener starts up and when it asks the ACME server to validate the challenges. (#518)
-* Orders where the MainDomain is longer than 64 characters will not include a CN value in the Subject field of the certificate request sent to the ACME server. CNs longer than 64 characters were already being rejected by some CAs like Let's Encrypt because the x509 spec doesn't allow for it. [More Info](https://community.letsencrypt.org/t/simplifying-issuance-for-very-long-domain-names/207924)
+* New DNS plugin [WEDOS](https://www.wedos.com/zone/)
+* Fixed OVH bug that prevented record creation at a zone apex most common when using DNS Alias support. Also added doc warning about time skew and better debug logging. (#535)
 '@
 
     }
