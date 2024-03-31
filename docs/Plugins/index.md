@@ -79,6 +79,7 @@ SimplyCom | [Simply.com](https://www.simply.com/) (formerly UnoEuro) | [Usage Gu
 SSHProxy | Custom SSH Script | [Usage Guide](SSHProxy.md) | :white_check_mark:
 TotalUptime | [TotalUptime](https://totaluptime.com/solutions/cloud-dns-service/) | [Usage Guide](TotalUptime.md) | :white_check_mark:
 UKFast | [UKFast](https://ukfast.co.uk) | [Usage Guide](UKFast.md) | :white_check_mark:
+WebsupportSK | [Websupport.sk](https://www.websupport.sk/?ref=NTIqFFo7Rg) | [Usage Guide](WebsupportSK.md) | :white_check_mark:
 WEDOS | [WEDOS](https://www.wedos.com/zone/) | [Usage Guide](WEDOS.md) | :white_check_mark:
 Windows | [Microsoft Windows DNS](https://www.microsoft.com/en-us/cloud-platform/windows-server) | [Usage Guide](Windows.md) | Windows-Only<sup>[1](#windows)</sup>
 Yandex | [Yandex DNS](https://connect.yandex.com/) | [Usage Guide](Yandex.md) | :white_check_mark:
