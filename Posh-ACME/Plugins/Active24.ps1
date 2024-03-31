@@ -205,8 +205,18 @@ function Find-A24Zone {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         try {
-            # if the call succeeds, the zone exists, so we don't care about the actualy response
-            $null = Invoke-RestMethod "$apiRoot/dns/$zoneTest/records/v1" @RestParams -Method Get
+            $queryParams = @{
+                Uri = '{0}/dns/{1}/records/v1' -f $apiRoot,$zoneTest
+                Method = 'GET'
+                Headers = $RestParams.Headers
+                ContentType = $RestParams.ContentType
+                Verbose = $false
+                ErrorAction = 'Stop'
+            }
+            Write-Debug "GET $($queryParams.Uri)"
+            # if the call succeeds, the zone exists, so we don't care about the actual response
+            $resp = Invoke-RestMethod @queryParams @script:UseBasic
+            Write-Debug "Response`n$($resp | ConvertTo-Json -Dep 10)"
             $script:A24RecordZones.$RecordName = $zoneTest
             return $zoneTest
         } catch {
