@@ -9,13 +9,11 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [pscredential]$WskCredential,
-        [Parameter(Mandatory,Position=3)]
-        [string[]]$WskServiceId,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $zoneName,$zoneID,$zoneRecs = Find-Zone $RecordName $WskCredential $WskServiceId
+    $zoneName,$zoneID,$zoneRecs = Find-Zone $RecordName $WskCredential
 
     $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
     if (-not $recShort) { $recShort = '@' }
@@ -38,8 +36,7 @@ function Add-DnsTxt {
             Credential = $WskCredential
             Body = $bodyJson
         }
-        $resp = Invoke-WSKRest @restArgs
-        Write-Debug ($resp | ConvertTo-Json)
+        Invoke-WSKRest @restArgs | Out-Null
     } else {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
     }
@@ -59,9 +56,6 @@ function Add-DnsTxt {
 
     .PARAMETER WskCredential
         A PSCredential object that has the API Key as the username and Secret as the password.
-
-    .PARAMETER WskServiceId
-        An array of Service ID values associated with the domains that may contain the specified record.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -83,13 +77,11 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [pscredential]$WskCredential,
-        [Parameter(Mandatory,Position=3)]
-        [string[]]$WskServiceId,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $zoneName,$zoneID,$zoneRecs = Find-Zone $RecordName $WskCredential $WskServiceId
+    $zoneName,$zoneID,$zoneRecs = Find-Zone $RecordName $WskCredential
 
     $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
     if (-not $recShort) { $recShort = '@' }
@@ -106,8 +98,7 @@ function Remove-DnsTxt {
             Method = 'DELETE'
             Credential = $WskCredential
         }
-        $resp = Invoke-WSKRest @restArgs
-        Write-Debug ($resp | ConvertTo-Json)
+        Invoke-WSKRest @restArgs | Out-Null
     }
 
     <#
@@ -125,9 +116,6 @@ function Remove-DnsTxt {
 
     .PARAMETER WskCredential
         A PSCredential object that has the API Key as the username and Secret as the password.
-
-    .PARAMETER WskServiceId
-        An array of Service ID values associated with the domains that may contain the specified record.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -165,6 +153,8 @@ function Save-DnsTxt {
 # API Docs
 # https://rest.websupport.sk/v2/docs/intro
 # https://rest.websupport.sk/v2/docs
+# https://rest.websupport.sk/docs/v1.intro
+# https://rest.websupport.sk/docs/v1.zone#zones
 
 function Invoke-WSKRest {
     [CmdletBinding()]
@@ -206,13 +196,29 @@ function Invoke-WSKRest {
         Headers = @{
             Authorization = $auth
             Accept = "application/json"
-            'X-Date' = $now.ToString('yyyy-MM-ddTHH:mm:ssZ')
-            'Accept-Language' = 'en_us'
         }
         Verbose = $false
         ErrorAction = 'Stop'
     }
     Write-Debug "$($queryParams.Method) $($queryParams.Uri)"
+
+    # 'X-Date' header is required for v2 endpoints but 'Date' is required for v1
+    # endpoints. So this conditional will be required until v2 is fleshed out enough
+    # that we can stop using v1.
+    if ($Path -like '/v1*') {
+        $queryParams.Headers.'Date' = $now.ToString('yyyy-MM-ddTHH:mm:ssZ')
+        # The v1 API requires this header be in ISO8601 format. But that's not the
+        # format it's supposed to be according to the HTTP spec.
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Date
+        #
+        # PowerShell 7 does header validation by default now and rejects the request
+        # unless you specify the SkipHeaderValidation flag.
+        if ('SkipHeaderValidation' -in (Get-Command Invoke-RestMethod).Parameters.Keys) {
+            $queryParams.SkipHeaderValidation = $true
+        }
+    } else {
+        $queryParams.Headers.'X-Date' = $now.ToString('yyyy-MM-ddTHH:mm:ssZ')
+    }
 
     if ($Body) {
         $queryParams.ContentType = 'application/json'
@@ -265,24 +271,20 @@ function Find-Zone {
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [pscredential]$Credential,
-        [Parameter(Mandatory,Position=2)]
-        [string[]]$ServiceId
+        [pscredential]$Credential
     )
 
-    foreach ($id in $ServiceId) {
-        $allrecs = Get-WskZoneRecords $Credential $id
+    # Use the v1 API to get the list of available zones and IDs
+    $zones = Invoke-WSKRest -Path /v1/user/self/zone -Credential $Credential |
+        Select-Object -Expand items
 
-        # Since the name field of a record is returned as the FQDN,
-        # the domain name will be the same as the record(s) with the
-        # shortest name.
-        $apex = ($allrecs | Sort-Object {$_.name.Length} | Select-Object -First 1).name
-        Write-Debug "Service $id = $apex"
+    foreach ($zone in $zones) {
+        if ($RecordName -like "*$($zone.name)") {
+            $allrecs = Get-WskZoneRecords $Credential $zone.id
 
-        if ($RecordName -like "*$apex") {
-            return $apex,$id,$allrecs
+            return $zone.name,$zone.id,$allrecs
         }
     }
 
-    throw "Unable to find matching zone for $RecordName using service list $($ServiceId -join ',')"
+    throw "Unable to find matching zone for $RecordName"
 }
