@@ -80,6 +80,7 @@ function Import-PluginDetail {
         'UKFast'               = [pscustomobject]@{PSTypeName = 'PoshACME.PAPluginDetail'; ChallengeType = 'dns-01'; Path = ''; Name = 'UKFast'}
         'WebRoot'              = [pscustomobject]@{PSTypeName = 'PoshACME.PAPluginDetail'; ChallengeType = 'http-01'; Path = ''; Name = 'WebRoot'}
         'WebSelfHost'          = [pscustomobject]@{PSTypeName = 'PoshACME.PAPluginDetail'; ChallengeType = 'http-01'; Path = ''; Name = 'WebSelfHost'}
+        'WebsupportSK'         = [pscustomobject]@{PSTypeName = 'PoshACME.PAPluginDetail'; ChallengeType = 'dns-01'; Path = ''; Name = 'WebsupportSK'}
         'WEDOS'                = [pscustomobject]@{PSTypeName = 'PoshACME.PAPluginDetail'; ChallengeType = 'dns-01'; Path = ''; Name = 'WEDOS'}
         'Windows'              = [pscustomobject]@{PSTypeName = 'PoshACME.PAPluginDetail'; ChallengeType = 'dns-01'; Path = ''; Name = 'Windows'}
         'Yandex'               = [pscustomobject]@{PSTypeName = 'PoshACME.PAPluginDetail'; ChallengeType = 'dns-01'; Path = ''; Name = 'Yandex'}
