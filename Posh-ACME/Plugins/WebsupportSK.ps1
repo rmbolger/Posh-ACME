@@ -62,7 +62,7 @@ function Add-DnsTxt {
 
     .EXAMPLE
         $cred = Get-Credential
-        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $cred 123456
+        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $cred
 
         Adds a TXT record for the specified site with the specified value on Windows.
     #>
@@ -122,7 +122,7 @@ function Remove-DnsTxt {
 
     .EXAMPLE
         $cred = Get-Credential
-        PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $cred 123456
+        PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $cred
 
         Removes a TXT record for the specified site with the specified value on Windows.
     #>
@@ -275,6 +275,7 @@ function Find-Zone {
     )
 
     # Use the v1 API to get the list of available zones and IDs
+    # until the v2 API has an equivalent endpoint.
     $zones = Invoke-WSKRest -Path /v1/user/self/zone -Credential $Credential |
         Select-Object -Expand items
 
