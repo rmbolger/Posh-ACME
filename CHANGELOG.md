@@ -1,3 +1,8 @@
+## 4.22.0 (2024-04-12)
+
+* New DNS plugin [WebsupportSK](https://www.websupport.sk/?ref=NTIqFFo7Rg). This will be useful to Active24 users who have been migrated to the new provider.
+* Added additional debug logging for Active24 plugin.
+
 ## 4.21.0 (2024-03-08)
 
 * New DNS plugin [WEDOS](https://www.wedos.com/zone/)

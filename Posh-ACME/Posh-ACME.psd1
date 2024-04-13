@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.21.0'
+ModuleVersion = '4.22.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,10 +83,10 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.21.0 (2024-03-08)
+## 4.22.0 (2024-04-12)
 
-* New DNS plugin [WEDOS](https://www.wedos.com/zone/)
-* Fixed OVH bug that prevented record creation at a zone apex most common when using DNS Alias support. Also added doc warning about time skew and better debug logging. (#535)
+* New DNS plugin [WebsupportSK](https://www.websupport.sk/?ref=NTIqFFo7Rg). This will be useful to Active24 users who have been migrated to the new provider.
+* Added additional debug logging for Active24 plugin.
 '@
 
     }
