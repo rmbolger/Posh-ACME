@@ -64,13 +64,13 @@ function Get-PACertificate {
                 $secPfxPass = [Security.SecureString]::new()
             }
 
-            # derive the ARI CertID value
-            # https://www.ietf.org/archive/id/draft-ietf-acme-ari-01.html#section-4.1
-            $certID = [Org.BouncyCastle.Ocsp.CertificateId]::new(
-                [Org.BouncyCastle.Asn1.Nist.NistObjectIdentifiers]::IdSha256.Id,
-                $cert,
-                $cert.SerialNumber
-            )
+            # derive the ARI ID value
+            # https://letsencrypt.org/2024/04/25/guide-to-integrating-ari-into-existing-acme-clients#step-3-constructing-the-ari-certid
+            # https://www.ietf.org/archive/id/draft-ietf-acme-ari-03.html#name-the-renewalinfo-resource
+            $akiExt = $cert.GetExtensionValue([Org.BouncyCastle.Asn1.X509.X509Extensions]::AuthorityKeyIdentifier)
+            $akiBytes = [Org.BouncyCastle.Asn1.X509.AuthorityKeyIdentifier]::GetInstance($akiExt.GetOctets()).GetKeyIdentifier()
+            $serialBytes = $cert.SerialNumber.ToByteArray()
+            $ariID = '{0}.{1}' -f (ConvertTo-Base64Url $akiBytes),(ConvertTo-Base64Url $serialBytes)
 
             # send the output object to the pipeline
             [pscustomobject]@{
@@ -90,8 +90,8 @@ function Get-PACertificate {
                 # stored in the cert itself
                 Thumbprint = [BitConverter]::ToString($sha1.ComputeHash($cert.GetEncoded())).Replace('-','')
 
-                # add the ARI CertID value
-                ARICertID = ConvertTo-Base64Url $certID.ToAsn1Object().GetDerEncoded()
+                # add the ARI ID value
+                ARIId = $ariID
 
                 # add the serial
                 Serial = $cert.SerialNumber
