@@ -408,7 +408,7 @@ function Invoke-OVHRest {
     # add the body if there is one
     if ($Body) { $restArgs.Body = $Body }
 
-    Write-Debug ('{0} {1}{2}' -f $restArgs.Method,$restArgs.Uri,(($Body) ? "`n$Body" : ''))
+    Write-Debug ('{0} {1}{2}' -f $restArgs.Method,$restArgs.Uri,"$($restArgs.Body)")
     $response = Invoke-RestMethod @restArgs @script:UseBasic
     if ($response) {
         Write-Debug "Response:`n$response"
