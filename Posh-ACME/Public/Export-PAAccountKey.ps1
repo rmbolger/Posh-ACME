@@ -23,7 +23,7 @@ function Export-PAAccountKey {
     }
 
     Process {
-        trap { $PSCmdlet.ThrowTerminatingError($PSItem) }
+        trap { $PSCmdlet.ThrowTerminatingError($_) }
 
         # throw an error if there's no current account and no ID passed in
         if (-not $ID -and -not ($acct = Get-PAAccount)) {

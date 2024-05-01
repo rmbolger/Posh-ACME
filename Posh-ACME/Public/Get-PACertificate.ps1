@@ -13,11 +13,13 @@ function Get-PACertificate {
     )
 
     Begin {
-        # Make sure we have an account configured
-        if (-not (Get-PAAccount)) {
-            try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
+        try {
+            # Make sure we have an account configured
+            if (-not (Get-PAAccount)) {
+                throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+            }
         }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
 
         # prep to calculate SHA1 thumbprints
         $sha1 = [Security.Cryptography.SHA1CryptoServiceProvider]::new()
@@ -27,7 +29,10 @@ function Get-PACertificate {
 
         # since the params in this function are a subset of the params for Get-PAOrder, we're
         # just going to pass them directly to it to get order(s) associated with the certificates
-        Get-PAOrder @PSBoundParameters | ForEach-Object {
+        if (-not ($orders = Get-PAOrder @PSBoundParameters)) {
+            return
+        }
+        $orders | ForEach-Object {
 
             $order = $_
             $certFile = Join-Path $order.Folder 'cert.cer'

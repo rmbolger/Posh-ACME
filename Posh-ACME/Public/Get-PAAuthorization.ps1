@@ -10,17 +10,18 @@ function Get-PAAuthorization {
     )
 
     Begin {
-        # Make sure there's a valid account
-        if (-not $Account) {
-            if (-not ($Account = Get-PAAccount)) {
-                try { throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first." }
-                catch { $PSCmdlet.ThrowTerminatingError($_) }
+        try {
+            # Make sure there's a valid account
+            if (-not $Account) {
+                if (-not ($Account = Get-PAAccount)) {
+                    throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first."
+                }
+            }
+            if ($Account.status -ne 'valid') {
+                throw "Account status is $($Account.status)."
             }
         }
-        if ($Account.status -ne 'valid') {
-            try { throw "Account status is $($Account.status)." }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
-        }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
     Process {

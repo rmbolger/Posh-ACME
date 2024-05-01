@@ -10,11 +10,13 @@ function Get-PAPluginArgs {
     )
 
     Begin {
-        # Make sure we have an account configured
-        if (-not ($acct = Get-PAAccount)) {
-            try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
+        try {
+            # Make sure we have an account configured
+            if (-not ($acct = Get-PAAccount)) {
+                throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+            }
         }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
 
         function SecureDeserialize {
             [CmdletBinding()]

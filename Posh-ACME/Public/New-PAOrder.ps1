@@ -53,11 +53,13 @@ function New-PAOrder {
         [switch]$Force
     )
 
-    # Make sure we have an account configured
-    if (-not ($acct = Get-PAAccount)) {
-        try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
-        catch { $PSCmdlet.ThrowTerminatingError($_) }
+    try {
+        # Make sure we have an account configured
+        if (-not ($acct = Get-PAAccount)) {
+            throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+        }
     }
+    catch { $PSCmdlet.ThrowTerminatingError($_) }
 
     # If using a pre-generated CSR, extract the details so we can generate expected parameters
     if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {

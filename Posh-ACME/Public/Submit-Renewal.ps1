@@ -18,10 +18,12 @@ function Submit-Renewal {
     Begin {
         # make sure we have an account if renewing all or a specific order
         if ($PSCmdlet.ParameterSetName -in 'Specific','AllOrders') {
-            if (-not (Get-PAAccount)) {
-                try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
-                catch { $PSCmdlet.ThrowTerminatingError($_) }
+            try {
+                if (-not (Get-PAAccount)) {
+                    throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first."
+                }
             }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
     }
 

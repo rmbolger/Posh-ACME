@@ -11,23 +11,20 @@ function Revoke-PAAuthorization {
     )
 
     Begin {
+        trap { $PSCmdlet.ThrowTerminatingError($_) }
+
         # make sure any account passed in is actually associated with the current server
         # or if no account was specified, that there's a current account.
         if (-not $Account) {
             if (-not ($Account = Get-PAAccount)) {
-                try { throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first." }
-                catch { $PSCmdlet.ThrowTerminatingError($_) }
+                throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first."
             }
-        } else {
-            if ($Account.id -notin (Get-PAAccount -List).id) {
-                try { throw "Specified account id $($Account.id) was not found in the current server's account list." }
-                catch { $PSCmdlet.ThrowTerminatingError($_) }
-            }
+        } elseif ($Account.id -notin (Get-PAAccount -List).id) {
+            throw "Specified account id $($Account.id) was not found in the current server's account list."
         }
         # make sure it's valid
         if ($Account.status -ne 'valid') {
-            try { throw "Account status is $($Account.status)." }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
+            throw "Account status is $($Account.status)."
         }
 
         # build the header template

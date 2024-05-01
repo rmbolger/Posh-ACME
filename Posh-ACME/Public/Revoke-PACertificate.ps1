@@ -19,8 +19,16 @@ function Revoke-PACertificate {
     )
 
     Begin {
-        # grab a reference to the current account if it exists
-        $acct = Get-PAAccount
+        # make sure we have a server configured
+        if (-not (Get-PAServer)) {
+            try { throw "No ACME server configured. Run Set-PAServer first." }
+            catch { $PSCmdlet.ThrowTerminatingError($_) }
+        }
+
+        try {
+            # grab a reference to the current account if it exists
+            $acct = Get-PAAccount
+        } catch {}
 
         if ($Force){
             $ConfirmPreference = 'None'
@@ -34,12 +42,21 @@ function Revoke-PACertificate {
 
         if ('MainDomain' -eq $PSCmdlet.ParameterSetName) {
 
+            if (-not $acct) {
+                try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
+                catch { $PSCmdlet.ThrowTerminatingError($_) }
+            }
+
+            if (-not $Name -and -not $MainDomain) {
+                try { throw "Please specify either MainDomain or Name parameters." }
+                catch { $PSCmdlet.WriteError($_); return }
+            }
+
             # check for a unique matching order
             if ($Name) {
-                $order = Get-PAOrder -Name $Name
-                if (-not $order) {
-                    Write-Error "No order found matching Name '$Name'."
-                    return
+                if (-not ($order = Get-PAOrder -Name $Name)) {
+                    try { throw "No order found matching Name '$Name'." }
+                    catch { $PSCmdlet.WriteError($_); return }
                 }
             } else {
                 $matchingOrders = @(Get-PAOrder -List | Where-Object { $_.MainDomain -eq $MainDomain })
@@ -47,18 +64,18 @@ function Revoke-PACertificate {
                     $order = $matchingOrders
                 } elseif ($matchingOrders.Count -ge 2) {
                     # error because we can't be sure which object to affect
-                    Write-Error "Multiple orders found for MainDomain '$MainDomain'. Please specify Name as well."
-                    return
+                    try { throw "Multiple orders found for MainDomain '$MainDomain'. Please specify Name as well." }
+                    catch { $PSCmdlet.WriteError($_); return }
                 } else {
-                    Write-Error "No order found matching MainDomain '$MainDomain'."
-                    return
+                    try { throw "No order found matching MainDomain '$MainDomain'." }
+                    catch { $PSCmdlet.WriteError($_); return }
                 }
             }
 
             # check for an existing certificate
             if (-not ($paCert = $order | Get-PACertificate)) {
                 try { throw "No existing certificate found for $MainDomain." }
-                catch { $PSCmdlet.ThrowTerminatingError($_) }
+                catch { $PSCmdlet.WriteError($_); return }
             }
 
             # set the cert file path
@@ -72,10 +89,10 @@ function Revoke-PACertificate {
                 throw "Malformed certificate file: $CertFile"
             }
         }
-        catch { $PSCmdlet.ThrowTerminatingError($_) }
+        catch { $PSCmdlet.WriteError($_); return }
 
         # remove the header/footer and convert to Base64Url as ACME expects
-        $certStr = $certStr.Replace($pemHeader,'').Replace($pemFooter,'') |
+        $certStr = $certStr.Replace($pemHeader,'').Replace($pemFooter,'').Trim() |
             ConvertTo-Base64Url -FromBase64
 
         # Now we need to decide how we're going to sign to request. It can either
@@ -85,8 +102,8 @@ function Revoke-PACertificate {
         # the cert.
         #     https://datatracker.ietf.org/doc/html/rfc5280#section-5.3.1
         #
-        # BuyPass currently only implements Account key based revocation, so we
-        # can't just default to using the Cert key when it's available.
+        # BuyPass currently only implements Account key based revocation and throws
+        # an Internal Server Error if you try to revoke via the cert key.
 
         # check the private key
         if ($KeyFile) {
@@ -131,10 +148,6 @@ function Revoke-PACertificate {
             # set the key
             $acmeParams.Key = $certKey
 
-        } elseif (-not $acct) {
-            try { throw "No ACME account configured. Run Set-PAAccount or New-PAAccount first." }
-            catch { $PSCmdlet.ThrowTerminatingError($_) }
-
         } else {
             Write-Debug "Attempting to use account key"
 
@@ -159,6 +172,7 @@ function Revoke-PACertificate {
 
         # send the request
         if ($PSCmdlet.ShouldProcess($CertFile)){
+            Write-Verbose "Sending revocation request."
             try {
                 Invoke-ACME @acmeParams | Out-Null
             } catch { $PSCmdlet.ThrowTerminatingError($_) }
