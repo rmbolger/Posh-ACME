@@ -136,7 +136,7 @@ function Save-DnsTxt {
     .SYNOPSIS
         Not required.
         The Ports Management API applies changes directly. No saving/comitting required.
-        Review and publish functionality is for the web interface only. 
+        Review and publish functionality is for the web interface only.
 
     .DESCRIPTION
         This provider does not require calling this function to commit changes to DNS records.
@@ -150,7 +150,7 @@ function Save-DnsTxt {
 # Helper Functions
 ############################
 
-# Ports Management API reference: 
+# Ports Management API reference:
 # https://demo.ports.management/pmapi-doc/openapi-ui/index.html#/
 
 
@@ -183,19 +183,19 @@ function Get-PortsApiRootUrl {
 
     .DESCRIPTION
         Find the base API URL to make REST calls against, given API version and environment.
-    
+
     .PARAMETER Environment
         The Ports Management has a 'Demo' endpoint of their API in addition to Production. Useful for testing.
-    
+
     .EXAMPLE
         Get-PortsApiRootUrl
 
         Retrieves the default base URL, for production use
-    
+
     .EXAMPLE
         Get-PortsApiRootUrl -Environment 'Demo'
 
-        Retrieves the base URL for demo use    
+        Retrieves the base URL for demo use
     #>
 }
 function Set-PortsConfig {
@@ -243,7 +243,7 @@ function Invoke-PortsRestMethod {
             )
         )
     }
-    
+
     $RestSplat = @{
         Method      = $Method
         Uri         = $script:PortsConfig.ApiRoot + $Endpoint
@@ -254,8 +254,8 @@ function Invoke-PortsRestMethod {
         }
     }
     Write-Debug "$Method $($RestSplat.Uri)"
-    if ($PSBoundParameters.Keys -contains 'Body') { 
-        $RestSplat.Body = $Body 
+    if ($PSBoundParameters.Keys -contains 'Body') {
+        $RestSplat.Body = $Body
         Write-Debug "Body: $Body"
     }
 
@@ -287,8 +287,8 @@ function Invoke-PortsRestMethod {
         # Construct a new Uri with the pagination parameters
         $RestSplat.Uri = $BaseUri + "?offset=$($Response.meta.offset + $Response.meta.limit)"
         Write-Debug "$Method $($RestSplat.Uri)"
-        if ($PSBoundParameters.Keys -contains 'Body') { 
-            $RestSplat.Body = $Body 
+        if ($PSBoundParameters.Keys -contains 'Body') {
+            $RestSplat.Body = $Body
             Write-Debug "Body: $Body"
         }
         $Response = Invoke-RestMethod @RestSplat @script:UseBasic -ErrorAction 'Stop'
@@ -296,8 +296,8 @@ function Invoke-PortsRestMethod {
         # Output data to array
         $Response.data
     } while ($Response.meta.total -gt ($Response.meta.offset + $Response.meta.limit))
-    
-    return $AllResults     
+
+    return $AllResults
 
 
     <#
@@ -306,13 +306,13 @@ function Invoke-PortsRestMethod {
 
     .DESCRIPTION
         Used for making REST API calls against the Ports Management API
-    
+
     .PARAMETER Endpoint
         The Ports Management API endpoint to make a request to, for example /v1/zones
-    
+
     .EXAMPLE
         Invoke-PortsRestMethod -Endpoint '/v1/zones' -Method 'GET'
-        Retrieves all zones 
+        Retrieves all zones
     #>
 }
 
@@ -403,7 +403,7 @@ function Add-PortsDnsRecord {
         $RecShort = '@'
     }
 
-    # Due to the Ports Management API utilizing JSON Merge (RFC 7396) for the zone records, 
+    # Due to the Ports Management API utilizing JSON Merge (RFC 7396) for the zone records,
     # we cannot add or remove individual records in an array of records.
     # Therefore we need to save the existing state of the record before making changes,
     # to allow us insert our records into the existing array.
@@ -444,7 +444,7 @@ function Add-PortsDnsRecord {
         Invoke-PortsRestMethod -Method Patch -Endpoint "/v1/zones/$ZoneID" -Body $BodyJson | Out-Null
     }
     catch {
-        $PortsError = $PSItem.ErrorDetails.Message | ConvertFrom-Json
+        $PortsError = $_.ErrorDetails.Message | ConvertFrom-Json
         if ($PortsError.error.message -eq "Zones with pending updates can't be updated by API") {
             $PSCmdlet.ThrowTerminatingError(
                 [System.Management.Automation.ErrorRecord]::new(
@@ -457,7 +457,7 @@ function Add-PortsDnsRecord {
         }
         else {
             throw
-        }    
+        }
     }
 }
 
@@ -493,7 +493,7 @@ function Remove-PortsDnsRecord {
         $RecShort = '@'
     }
 
-    # Due to the Ports Management API utilizing JSON Merge (RFC 7396) for the zone records, 
+    # Due to the Ports Management API utilizing JSON Merge (RFC 7396) for the zone records,
     # we cannot add or remove individual records in an array of records.
     # Therefore we need to save the existing state of the record before making changes,
     # to allow us remove our specific record from the existing array.

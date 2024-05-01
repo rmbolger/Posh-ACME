@@ -57,7 +57,7 @@ function Export-PluginArgs {
     }
 
     Process {
-        trap { $PSCmdlet.ThrowTerminatingError($PSItem) }
+        trap { $PSCmdlet.ThrowTerminatingError($_) }
 
         Write-Debug "Exporting plugin args for order '$($Order.Name)' with plugins $($Order.Plugin -join ',')"
 
