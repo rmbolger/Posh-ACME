@@ -53,6 +53,43 @@ function Update-PAOrder {
             Write-Debug "Order '$($Order.Name)' is expired. Skipping server refresh."
         }
 
+        # Check for ARI renewal window updates if supported and there's an unexpired cert
+        # https://www.ietf.org/archive/id/draft-ietf-acme-ari-03.html#name-getting-renewal-information
+        if (-not $SaveOnly -and ($ariBase = (Get-PAServer).renewalInfo) -and
+            $Order.CertExpires -and (Get-DateTimeOffsetNow) -lt [DateTimeOffset]::Parse($Order.CertExpires) )
+        {
+            Write-Verbose "Checking for updated renewal window via ARI"
+            $queryParams = @{
+                Uri = '{0}{1}' -f $ariBase,($Order | Get-PACertificate).ARIId
+                UserAgent = $script:USER_AGENT
+                Headers = $script:COMMON_HEADERS
+                ErrorAction = 'Stop'
+                Verbose = $false
+            }
+            try {
+                Write-Debug "GET $($queryParams.Uri)"
+                $resp = Invoke-RestMethod @queryParams @script:UseBasic
+            } catch { throw }
+
+            if ($resp.suggestedWindow) {
+                $renewAfter = $resp.suggestedWindow.start
+                if ($renewAfter -ne $Order.RenewAfter) {
+                    Write-Verbose "Updating renewal window to $renewAfter from ARI response"
+                    $Order.RenewAfter = $renewAfter
+
+                    # Warn if there's an explanation URL
+                    if ($resp.explanationUrl) {
+                        Write-Warning "The ACME Server has suggested an updated renewal window. Visit the following URL for more information:`n$($resp.explanationUrl)"
+                    }
+                }
+
+                # Warn if the new window is in the past
+                if ((Get-DateTimeOffsetNow) -gt [DateTimeOffset]::Parse($renewAfter)) {
+                    Write-Warning "The ACME Server has indicated this order's certificate should be renewed AS SOON AS POSSIBLE."
+                }
+            }
+        }
+
         # Make sure the order folder exists
         if (-not (Test-Path $Order.Folder -PathType Container)) {
             New-Item -ItemType Directory -Path $Order.Folder -Force -EA Stop | Out-Null
