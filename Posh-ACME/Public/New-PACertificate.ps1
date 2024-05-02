@@ -182,6 +182,11 @@ function New-PACertificate {
                 if ($oldOrder.KeyLength -and 'CertKeyLength' -notin $psbKeys) {
                     $orderParams.KeyLength = $oldOrder.KeyLength
                 }
+
+                # add the cert we're replacing if it exists
+                if ($cert = ($oldOrder | Get-PACertificate)) {
+                    $orderParams.ReplacesCert = $cert.ARIId
+                }
             }
 
             # Make sure FriendlyName is non-empty

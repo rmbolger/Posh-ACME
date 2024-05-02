@@ -50,7 +50,8 @@ function New-PAOrder {
         [int]$DnsSleep=120,
         [int]$ValidationTimeout=60,
         [string]$PreferredChain,
-        [switch]$Force
+        [switch]$Force,
+        [string]$ReplacesCert
     )
 
     try {
@@ -195,6 +196,12 @@ function New-PAOrder {
         $notAfter = $now.AddDays($LifetimeDays).ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture)
         $payload.notBefore = $notBefore
         $payload.notAfter = $notAfter
+    }
+
+    # Add the ARI replaces field if supported and specified
+    # https://www.ietf.org/archive/id/draft-ietf-acme-ari-03.html#name-extensions-to-the-order-obj
+    if ($ReplacesCert -and (Get-PAServer).renewalInfo) {
+        $payload.replaces = $ReplacesCert
     }
 
     $payloadJson = $payload | ConvertTo-Json -Depth 5 -Compress
