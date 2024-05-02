@@ -94,18 +94,18 @@ function Get-PACertificate {
                 ARIId = $ariID
 
                 # add the serial
-                Serial = $cert.SerialNumber
+                Serial = $cert.SerialNumber.ToString()
 
                 # add the full list of SANs
-                AllSANs = @($altNames)
+                AllSANs = [string[]]@($altNames)
 
                 # add the associated file paths whether they exist or not
-                CertFile      = Join-Path $order.Folder 'cert.cer'
-                KeyFile       = Join-Path $order.Folder 'cert.key'
-                ChainFile     = Join-Path $order.Folder 'chain.cer'
-                FullChainFile = Join-Path $order.Folder 'fullchain.cer'
-                PfxFile       = Join-Path $order.Folder 'cert.pfx'
-                PfxFullChain  = Join-Path $order.Folder 'fullchain.pfx'
+                CertFile      = (Join-Path $order.Folder 'cert.cer').ToString()
+                KeyFile       = (Join-Path $order.Folder 'cert.key').ToString()
+                ChainFile     = (Join-Path $order.Folder 'chain.cer').ToString()
+                FullChainFile = (Join-Path $order.Folder 'fullchain.cer').ToString()
+                PfxFile       = (Join-Path $order.Folder 'cert.pfx').ToString()
+                PfxFullChain  = (Join-Path $order.Folder 'fullchain.pfx').ToString()
 
                 PfxPass = $secPfxPass
             }
