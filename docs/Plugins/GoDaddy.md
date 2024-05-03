@@ -4,7 +4,8 @@ title: GoDaddy
 
 This plugin works against the [GoDaddy DNS](https://www.godaddy.com) provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against. 
 
-Note: From April 2024 GoDaddy have introduced API account limits which prevent DNS API access for customers with less than 10 domains on their account. Existing accounts that don't meet the new requirements will now receive an Access Denied error when communicating with the API.
+!!! warning
+    From April 2024 GoDaddy have introduced API account limits which prevent DNS API access for customers with less than 10 domains on their account. Existing accounts that don't meet the new requirements will now receive an Access Denied error when communicating with the API.
 
 ## Setup
 
