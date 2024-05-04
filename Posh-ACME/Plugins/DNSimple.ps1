@@ -21,23 +21,27 @@ function Add-DnsTxt {
     }
 
     $apiRoot = 'https://api.dnsimple.com/v2'
-    $restParams = @{
+    $commonParams = @{
         Headers = @{Authorization="Bearer $DSTokenInsecure"}
         ContentType = 'application/json'
+        ErrorAction = 'Stop'
+        Verbose = $false
     }
 
     # get the account ID for our token
     try {
-        $response = Invoke-RestMethod "$apiRoot/whoami" @restParams @script:UseBasic
-        if (!$response.data.account) {
+        Write-Debug "GET $apiRoot/whoami"
+        $resp = Invoke-RestMethod "$apiRoot/whoami" @commonParams @script:UseBasic
+        Write-Debug "Response:`n$($resp | ConvertTo-Json -Depth 10)"
+        if (-not $resp.data.account) {
             throw "DNSimple account data not found. Wrong token type?"
         }
-        $acctID = $response.data.account.id.ToString()
+        $acctID = $resp.data.account.id.ToString()
     } catch { throw }
     Write-Debug "Found account $acctID"
 
     # get the zone name for our record
-    $zoneName = Find-DSZone $RecordName $acctID $restParams
+    $zoneName = Find-DSZone $RecordName $acctID $commonParams
     if ([String]::IsNullOrWhiteSpace($zoneName)) {
         throw "Unable to find zone for $RecordName in account $acctID"
     }
@@ -46,17 +50,25 @@ function Add-DnsTxt {
     # get all the instances of the record
     try {
         $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
-        $recs = (Invoke-RestMethod "$apiRoot/$acctID/zones/$zoneName/records?name=$recShort&type=TXT&per_page=100" `
-            @restParams @script:UseBasic).data
+        $uri = "$apiRoot/$acctID/zones/$zoneName/records?name=$recShort&type=TXT&per_page=100"
+        Write-Debug "GET $uri"
+        $resp = Invoke-RestMethod $uri @commonParams @script:UseBasic
+        Write-Debug "Response:`n$($resp | ConvertTo-Json -Depth 10)"
+        # We're ignoring potential pagination here because there really shouldn't be more than 100
+        # TXT records with the same FQDN in the zone.
     } catch { throw }
 
-    if ($recs.Count -eq 0 -or $TxtValue -notin $recs.content) {
+    $rec = $resp.data | Where-Object { $_.content -eq "`"$TxtValue`"" }
+
+    if (-not $rec) {
         # add new record
         try {
             Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
+            $uri = "$apiRoot/$acctID/zones/$zoneName/records"
             $bodyJson = @{name=$recShort;type='TXT';content=$TxtValue;ttl=10} | ConvertTo-Json -Compress
-            Invoke-RestMethod "$apiRoot/$acctID/zones/$zoneName/records" -Method Post -Body $bodyJson `
-                @restParams @script:UseBasic | Out-Null
+            Write-Debug "POST $uri`n$bodyJson"
+            $resp = Invoke-RestMethod $uri -Method Post -Body $bodyJson @commonParams @script:UseBasic
+            Write-Debug "Response:`n$($resp | ConvertTo-Json -Depth 10)"
         } catch { throw }
     } else {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
@@ -113,23 +125,27 @@ function Remove-DnsTxt {
     }
 
     $apiRoot = 'https://api.dnsimple.com/v2'
-    $restParams = @{
+    $commonParams = @{
         Headers = @{Authorization="Bearer $DSTokenInsecure"}
         ContentType = 'application/json'
+        ErrorAction = 'Stop'
+        Verbose = $false
     }
 
     # get the account ID for our token
     try {
-        $response = Invoke-RestMethod "$apiRoot/whoami" @restParams @script:UseBasic
-        if (!$response.data.account) {
+        Write-Debug "GET $apiRoot/whoami"
+        $resp = Invoke-RestMethod "$apiRoot/whoami" @commonParams @script:UseBasic
+        Write-Debug "Response:`n$($resp | ConvertTo-Json -Depth 10)"
+        if (-not $resp.data.account) {
             throw "DNSimple account data not found. Wrong token type?"
         }
-        $acctID = $response.data.account.id.ToString()
+        $acctID = $resp.data.account.id.ToString()
     } catch { throw }
     Write-Debug "Found account $acctID"
 
     # get the zone name for our record
-    $zoneName = Find-DSZone $RecordName $acctID $restParams
+    $zoneName = Find-DSZone $RecordName $acctID $commonParams
     if ([String]::IsNullOrWhiteSpace($zoneName)) {
         throw "Unable to find zone for $RecordName in account $acctID"
     }
@@ -138,19 +154,26 @@ function Remove-DnsTxt {
     # get all the instances of the record
     try {
         $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
-        $recs = (Invoke-RestMethod "$apiRoot/$acctID/zones/$zoneName/records?name=$recShort&type=TXT&per_page=100" `
-            @restParams @script:UseBasic).data
+        $uri = "$apiRoot/$acctID/zones/$zoneName/records?name=$recShort&type=TXT&per_page=100"
+        Write-Debug "GET $uri"
+        $resp = Invoke-RestMethod $uri @commonParams @script:UseBasic
+        Write-Debug "Response:`n$($resp | ConvertTo-Json -Depth 10)"
+        # We're ignoring potential pagination here because there really shouldn't be more than 100
+        # TXT records with the same FQDN in the zone.
     } catch { throw }
 
-    if ($recs.Count -eq 0 -or $TxtValue -notin $recs.content) {
+    $rec = $resp.data | Where-Object { $_.content -eq "`"$TxtValue`"" }
+
+    if (-not $rec) {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     } else {
         # delete record
         try {
             Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
-            $recID = ($recs | Where-Object { $_.content -eq $TxtValue }).id
-            Invoke-RestMethod "$apiRoot/$acctID/zones/$zoneName/records/$recID" -Method Delete `
-                @restParams @script:UseBasic | Out-Null
+            $uri = "$apiRoot/$acctID/zones/$zoneName/records/$($rec.id)"
+            Write-Debug "DELETE $uri"
+            $resp = Invoke-RestMethod $uri -Method Delete @commonParams @script:UseBasic
+            Write-Debug "Response:`n$($resp | ConvertTo-Json -Depth 10)"
         } catch { throw }
     }
 
@@ -217,7 +240,7 @@ function Find-DSZone {
         [Parameter(Mandatory,Position=1)]
         [string]$AcctID,
         [Parameter(Mandatory,Position=2)]
-        [hashtable]$RestParams
+        [hashtable]$CommonRestParams
     )
 
     # setup a module variable to cache the record to zone mapping
@@ -246,11 +269,15 @@ function Find-DSZone {
         Write-Debug "Checking $zoneTest"
         try {
             # if the call succeeds, the zone exists, so we don't care about the actualy response
-            $null = Invoke-RestMethod "$apiRoot/$AcctID/zones/$zoneTest" @RestParams @script:UseBasic
+            $uri = "$apiRoot/$AcctID/zones/$zoneTest"
+            Write-Debug "GET $uri"
+            $null = Invoke-RestMethod $uri @CommonRestParams @script:UseBasic
             $script:DSRecordZones.$RecordName = $zoneTest
             return $zoneTest
         } catch {
-            Write-Debug ($_.ToString())
+            if ($_.Exception.StatusCode -ne 404) {
+                Write-Debug ($_.ToString())
+            }
         }
     }
 
