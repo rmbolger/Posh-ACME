@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.22.0'
+ModuleVersion = '4.23.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,10 +83,13 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.22.0 (2024-04-12)
+## 4.23.0 (2024-05-04)
 
-* New DNS plugin [WebsupportSK](https://www.websupport.sk/?ref=NTIqFFo7Rg). This will be useful to Active24 users who have been migrated to the new provider.
-* Added additional debug logging for Active24 plugin.
+* Added support for DNSimple user tokens which should allow for certs with names that span domains in multiple accounts.
+* Added warning in GoDaddy guide about newly imposed limits on API access. (Thanks @webprofusion-chrisc)
+* Fixed DNSimple plugin not removing challenge records (#548).
+* Fixed cascading errors on public functions when running with little or no existing config. (#544)
+* Fixed OVH plugin on PowerShell 5.1 by removing an accidentally added ternary operator. (#545) (Thanks @joshooaj)
 '@
 
     }

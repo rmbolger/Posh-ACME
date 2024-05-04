@@ -1,3 +1,11 @@
+## 4.23.0 (2024-05-04)
+
+* Added support for DNSimple user tokens which should allow for certs with names that span domains in multiple accounts.
+* Added warning in GoDaddy guide about newly imposed limits on API access. (Thanks @webprofusion-chrisc)
+* Fixed DNSimple plugin not removing challenge records (#548).
+* Fixed cascading errors on public functions when running with little or no existing config. (#544)
+* Fixed OVH plugin on PowerShell 5.1 by removing an accidentally added ternary operator. (#545) (Thanks @joshooaj)
+
 ## 4.22.0 (2024-04-12)
 
 * New DNS plugin [WebsupportSK](https://www.websupport.sk/?ref=NTIqFFo7Rg). This will be useful to Active24 users who have been migrated to the new provider.
