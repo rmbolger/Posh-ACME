@@ -28,24 +28,12 @@ function Add-DnsTxt {
         Verbose = $false
     }
 
-    # get the account ID for our token
-    try {
-        Write-Debug "GET $apiRoot/whoami"
-        $resp = Invoke-RestMethod "$apiRoot/whoami" @commonParams @script:UseBasic
-        Write-Debug "Response:`n$($resp | ConvertTo-Json -Depth 10)"
-        if (-not $resp.data.account) {
-            throw "DNSimple account data not found. Wrong token type?"
-        }
-        $acctID = $resp.data.account.id.ToString()
-    } catch { throw }
-    Write-Debug "Found account $acctID"
-
     # get the zone name for our record
-    $zoneName = Find-DSZone $RecordName $acctID $commonParams
-    if ([String]::IsNullOrWhiteSpace($zoneName)) {
-        throw "Unable to find zone for $RecordName in account $acctID"
+    $zoneName,$acctID = Find-DSZone $RecordName $commonParams
+    if (-not $zoneName) {
+        throw "Unable to find zone for $RecordName"
     }
-    Write-Debug "Found zone $zoneName"
+    Write-Debug "Found zone $zoneName in account $acctID"
 
     # get all the instances of the record
     try {
@@ -67,8 +55,7 @@ function Add-DnsTxt {
             $uri = "$apiRoot/$acctID/zones/$zoneName/records"
             $bodyJson = @{name=$recShort;type='TXT';content=$TxtValue;ttl=10} | ConvertTo-Json -Compress
             Write-Debug "POST $uri`n$bodyJson"
-            $resp = Invoke-RestMethod $uri -Method Post -Body $bodyJson @commonParams @script:UseBasic
-            Write-Debug "Response:`n$($resp | ConvertTo-Json -Depth 10)"
+            $null = Invoke-RestMethod $uri -Method Post -Body $bodyJson @commonParams @script:UseBasic
         } catch { throw }
     } else {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
@@ -132,24 +119,12 @@ function Remove-DnsTxt {
         Verbose = $false
     }
 
-    # get the account ID for our token
-    try {
-        Write-Debug "GET $apiRoot/whoami"
-        $resp = Invoke-RestMethod "$apiRoot/whoami" @commonParams @script:UseBasic
-        Write-Debug "Response:`n$($resp | ConvertTo-Json -Depth 10)"
-        if (-not $resp.data.account) {
-            throw "DNSimple account data not found. Wrong token type?"
-        }
-        $acctID = $resp.data.account.id.ToString()
-    } catch { throw }
-    Write-Debug "Found account $acctID"
-
     # get the zone name for our record
-    $zoneName = Find-DSZone $RecordName $acctID $commonParams
-    if ([String]::IsNullOrWhiteSpace($zoneName)) {
-        throw "Unable to find zone for $RecordName in account $acctID"
+    $zoneName,$acctID = Find-DSZone $RecordName $commonParams
+    if (-not $zoneName) {
+        throw "Unable to find zone for $RecordName"
     }
-    Write-Debug "Found zone $zoneName"
+    Write-Debug "Found zone $zoneName in account $acctID"
 
     # get all the instances of the record
     try {
@@ -172,8 +147,7 @@ function Remove-DnsTxt {
             Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
             $uri = "$apiRoot/$acctID/zones/$zoneName/records/$($rec.id)"
             Write-Debug "DELETE $uri"
-            $resp = Invoke-RestMethod $uri -Method Delete @commonParams @script:UseBasic
-            Write-Debug "Response:`n$($resp | ConvertTo-Json -Depth 10)"
+            $null = Invoke-RestMethod $uri -Method Delete @commonParams @script:UseBasic
         } catch { throw }
     }
 
@@ -238,8 +212,6 @@ function Find-DSZone {
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [string]$AcctID,
-        [Parameter(Mandatory,Position=2)]
         [hashtable]$CommonRestParams
     )
 
@@ -254,29 +226,40 @@ function Find-DSZone {
 
     $apiRoot = 'https://api.dnsimple.com/v2'
 
-    # Since the provider could be hosting both apex and sub-zones, we need to find the closest/deepest
-    # sub-zone that would hold the record rather than just adding it to the apex. So for something
-    # like _acme-challenge.site1.sub1.sub2.example.com, we'd look for zone matches in the following
-    # order:
-    # - site1.sub1.sub2.example.com
-    # - sub1.sub2.example.com
-    # - sub2.example.com
-    # - example.com
+    # DNSimple API Tokens can either be associated with a specific account or a user that has
+    # access to multiple accounts. Zones data must be queried using a specific account ID.
+    # So we need to use the /accounts endpoint to find out what accounts our token has access
+    # to and then query each one for the zone we're looking for.
 
+    Write-Debug "Checking accounts for a matching zone"
+    try {
+        $uri = "$apiRoot/accounts"
+        Write-Debug "GET $uri"
+        $resp = Invoke-RestMethod $uri @CommonRestParams @script:UseBasic
+        Write-Debug "Response:`n$($resp | ConvertTo-Json -Depth 10)"
+        $accounts = @($resp.data)
+    } catch { throw }
+
+    # try successively more generic portions of the RecordName for a zone match
     $pieces = $RecordName.Split('.')
     for ($i=0; $i -lt ($pieces.Count-1); $i++) {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
-        Write-Debug "Checking $zoneTest"
-        try {
-            # if the call succeeds, the zone exists, so we don't care about the actualy response
-            $uri = "$apiRoot/$AcctID/zones/$zoneTest"
-            Write-Debug "GET $uri"
-            $null = Invoke-RestMethod $uri @CommonRestParams @script:UseBasic
-            $script:DSRecordZones.$RecordName = $zoneTest
-            return $zoneTest
-        } catch {
-            if ($_.Exception.StatusCode -ne 404) {
-                Write-Debug ($_.ToString())
+
+        # check each account our token has access to
+        foreach ($acct in $accounts) {
+
+            try {
+                $uri = '{0}/{1}/zones/{2}' -f $apiRoot,$acct.id,$zoneTest
+                Write-Debug "GET $uri"
+                $null = Invoke-RestMethod $uri @CommonRestParams @script:UseBasic
+                # if we made it here, we found the zone
+                $script:DSRecordZones.$RecordName = $zoneTest,$acct.id
+                return @($zoneTest,$acct.id)
+            } catch {
+                # re-throw anything other than a 404
+                if ($_.Exception.StatusCode -ne 404) {
+                    throw
+                }
             }
         }
     }

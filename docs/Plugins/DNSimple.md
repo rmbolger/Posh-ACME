@@ -9,7 +9,21 @@ This plugin works against the [DNSimple](https://dnsimple.com/r/c9b80a2f227e49) 
 
 ## Setup
 
-First, [login](https://dnsimple.com/login) to your account and then go to `Account` - `API tokens` and click `New access token`. After giving it a name, it will show you the token string. Be sure to save it as you can't look it up if you forget later. You can only generate a new one. Also, make sure it is an **account** token, not a user token.
+This plugin works with both User and Account access tokens. Access tokens are generally preferred because User tokens may have access to multiple accounts. User tokens would only be necessary if the cert you're generating includes names from zones that span multiple accounts.
+
+Login to the [User Settings](https://dnsimple.com/user) section of the dashboard. For Account tokens:
+
+- Scroll to the Accounts section
+- Click the appropriate account link
+- Click `Access Tokens`
+- Click `Add`
+
+For User tokens:
+
+- Scroll to the User access tokens section
+- Click `Add`
+
+After giving the token a name, it will show you the token string. Be sure to save it as you can't look it up if you forget later. You can only generate a new one.
 
 ## Using the Plugin
 
