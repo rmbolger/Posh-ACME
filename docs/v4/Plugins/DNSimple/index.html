@@ -2622,7 +2622,20 @@
 <p>The link above is an affiliate link which reduces my out of pocket cost to maintain this plugin. I'd be most grateful if you use it when signing up for a new account.</p>
 </div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<p>First, <a href="https://dnsimple.com/login">login</a> to your account and then go to <code>Account</code> - <code>API tokens</code> and click <code>New access token</code>. After giving it a name, it will show you the token string. Be sure to save it as you can't look it up if you forget later. You can only generate a new one. Also, make sure it is an <strong>account</strong> token, not a user token.</p>
+<p>This plugin works with both User and Account access tokens. Access tokens are generally preferred because User tokens may have access to multiple accounts. User tokens would only be necessary if the cert you're generating includes names from zones that span multiple accounts.</p>
+<p>Login to the <a href="https://dnsimple.com/user">User Settings</a> section of the dashboard. For Account tokens:</p>
+<ul>
+<li>Scroll to the Accounts section</li>
+<li>Click the appropriate account link</li>
+<li>Click <code>Access Tokens</code></li>
+<li>Click <code>Add</code></li>
+</ul>
+<p>For User tokens:</p>
+<ul>
+<li>Scroll to the User access tokens section</li>
+<li>Click <code>Add</code></li>
+</ul>
+<p>After giving the token a name, it will show you the token string. Be sure to save it as you can't look it up if you forget later. You can only generate a new one.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p>With your token value, you'll need to set the <code>DSToken</code> SecureString parameter.</p>
 <div class="admonition warning">
