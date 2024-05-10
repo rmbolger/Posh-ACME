@@ -163,8 +163,9 @@ function Set-PAServer {
 
             # check for the renewalInfo field
             if ($dirObj.renewalInfo) {
-                # 2024-05-10 - Boulder (LE) is currently including a trailing
-                # "/" which we need to strip.
+                # Boulder (LE) is currently including a trailing "/" which we
+                # need to strip.
+                # Fix PR: https://github.com/letsencrypt/boulder/pull/7482
                 $ariUrl = $dirObj.renewalInfo.TrimEnd('/')
                 $newDir | Add-Member 'renewalInfo' $ariUrl -Force
             }
