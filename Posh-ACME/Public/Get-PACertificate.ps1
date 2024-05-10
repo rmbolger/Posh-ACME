@@ -72,6 +72,15 @@ function Get-PACertificate {
             $serialBytes = $cert.SerialNumber.ToByteArray()
             $ariID = '{0}.{1}' -f (ConvertTo-Base64Url $akiBytes),(ConvertTo-Base64Url $serialBytes)
 
+            # derive the draft-01 ARI ID value which Google seems to still be using
+            # https://www.ietf.org/archive/id/draft-ietf-acme-ari-01.html#section-4.1
+            $certID = [Org.BouncyCastle.Ocsp.CertificateId]::new(
+                [Org.BouncyCastle.Asn1.Nist.NistObjectIdentifiers]::IdSha256.Id,
+                $cert,
+                $cert.SerialNumber
+            )
+            $ariID01 = ConvertTo-Base64Url $certID.ToAsn1Object().GetDerEncoded()
+
             # send the output object to the pipeline
             [pscustomobject]@{
                 PSTypeName = 'PoshACME.PACertificate'
@@ -92,6 +101,7 @@ function Get-PACertificate {
 
                 # add the ARI ID value
                 ARIId = $ariID
+                ARIId01 = $ariID01
 
                 # add the serial
                 Serial = $cert.SerialNumber.ToString()
