@@ -60,7 +60,7 @@ function Update-PAOrder {
         {
             Write-Verbose "Checking for updated renewal window via ARI"
             $queryParams = @{
-                Uri = '{0}{1}' -f $ariBase,($Order | Get-PACertificate).ARIId
+                Uri = '{0}/{1}' -f $ariBase,($Order | Get-PACertificate).ARIId
                 UserAgent = $script:USER_AGENT
                 Headers = $script:COMMON_HEADERS
                 ErrorAction = 'Stop'

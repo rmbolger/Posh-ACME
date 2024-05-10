@@ -163,7 +163,10 @@ function Set-PAServer {
 
             # check for the renewalInfo field
             if ($dirObj.renewalInfo) {
-                $newDir | Add-Member 'renewalInfo' $dirObj.renewalInfo -Force
+                # 2024-05-10 - Boulder (LE) is currently including a trailing
+                # "/" which we need to strip.
+                $ariUrl = $dirObj.renewalInfo.TrimEnd('/')
+                $newDir | Add-Member 'renewalInfo' $ariUrl -Force
             }
 
 
