@@ -69,6 +69,7 @@ function Update-PAOrder {
             try {
                 Write-Debug "GET $($queryParams.Uri)"
                 $resp = Invoke-RestMethod @queryParams @script:UseBasic
+                Write-Debug "Response:`n$($resp|ConvertTo-Json)"
             } catch { throw }
 
             if ($resp.suggestedWindow) {
