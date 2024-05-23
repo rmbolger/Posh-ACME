@@ -1041,6 +1041,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-replacescert" class="md-nav__link">
+    -ReplacesCert
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#commonparameters" class="md-nav__link">
     CommonParameters
   </a>
@@ -3151,6 +3158,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-replacescert" class="md-nav__link">
+    -ReplacesCert
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#commonparameters" class="md-nav__link">
     CommonParameters
   </a>
@@ -3218,19 +3232,20 @@
  <span class="p">[</span><span class="n">-PluginArgs</span> <span class="p">&lt;</span><span class="n">Hashtable</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-LifetimeDays</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-DnsAlias</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">[]&gt;]</span> <span class="p">[</span><span class="n">-OCSPMustStaple</span><span class="p">]</span> <span class="p">[</span><span class="n">-AlwaysNewKey</span><span class="p">]</span>
  <span class="p">[</span><span class="n">-Subject</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-FriendlyName</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-PfxPass</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-PfxPassSecure</span> <span class="p">&lt;</span><span class="n">SecureString</span><span class="p">&gt;]</span>
  <span class="p">[</span><span class="n">-UseModernPfxEncryption</span><span class="p">]</span> <span class="p">[</span><span class="n">-Install</span><span class="p">]</span> <span class="p">[</span><span class="n">-UseSerialValidation</span><span class="p">]</span> <span class="p">[</span><span class="n">-DnsSleep</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-ValidationTimeout</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span>
- <span class="p">[</span><span class="n">-PreferredChain</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-Force</span><span class="p">]</span> <span class="p">[</span><span class="n">-WhatIf</span><span class="p">]</span> <span class="p">[</span><span class="n">-Confirm</span><span class="p">]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
+ <span class="p">[</span><span class="n">-PreferredChain</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-Force</span><span class="p">]</span> <span class="p">[</span><span class="n">-ReplacesCert</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-WhatIf</span><span class="p">]</span> <span class="p">[</span><span class="n">-Confirm</span><span class="p">]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h3 id="importkey">ImportKey<a class="headerlink" href="#importkey" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">New-PAOrder</span> <span class="p">[</span><span class="n">-Domain</span><span class="p">]</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">[]&gt;</span> <span class="n">-KeyFile</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;</span> <span class="p">[</span><span class="n">-Name</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-Plugin</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">[]&gt;]</span>
  <span class="p">[</span><span class="n">-PluginArgs</span> <span class="p">&lt;</span><span class="n">Hashtable</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-LifetimeDays</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-DnsAlias</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">[]&gt;]</span> <span class="p">[</span><span class="n">-OCSPMustStaple</span><span class="p">]</span> <span class="p">[</span><span class="n">-AlwaysNewKey</span><span class="p">]</span>
  <span class="p">[</span><span class="n">-Subject</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-FriendlyName</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-PfxPass</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-PfxPassSecure</span> <span class="p">&lt;</span><span class="n">SecureString</span><span class="p">&gt;]</span>
  <span class="p">[</span><span class="n">-UseModernPfxEncryption</span><span class="p">]</span> <span class="p">[</span><span class="n">-Install</span><span class="p">]</span> <span class="p">[</span><span class="n">-UseSerialValidation</span><span class="p">]</span> <span class="p">[</span><span class="n">-DnsSleep</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-ValidationTimeout</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span>
- <span class="p">[</span><span class="n">-PreferredChain</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-Force</span><span class="p">]</span> <span class="p">[</span><span class="n">-WhatIf</span><span class="p">]</span> <span class="p">[</span><span class="n">-Confirm</span><span class="p">]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
+ <span class="p">[</span><span class="n">-PreferredChain</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-Force</span><span class="p">]</span> <span class="p">[</span><span class="n">-ReplacesCert</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-WhatIf</span><span class="p">]</span> <span class="p">[</span><span class="n">-Confirm</span><span class="p">]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h3 id="fromcsr">FromCSR<a class="headerlink" href="#fromcsr" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">New-PAOrder</span> <span class="p">[</span><span class="n">-CSRPath</span><span class="p">]</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;</span> <span class="p">[</span><span class="n">-Name</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-Plugin</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">[]&gt;]</span> <span class="p">[</span><span class="n">-PluginArgs</span> <span class="p">&lt;</span><span class="n">Hashtable</span><span class="p">&gt;]</span>
  <span class="p">[</span><span class="n">-LifetimeDays</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-DnsAlias</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">[]&gt;]</span> <span class="p">[</span><span class="n">-UseSerialValidation</span><span class="p">]</span> <span class="p">[</span><span class="n">-DnsSleep</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span>
- <span class="p">[</span><span class="n">-ValidationTimeout</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-PreferredChain</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-Force</span><span class="p">]</span> <span class="p">[</span><span class="n">-WhatIf</span><span class="p">]</span> <span class="p">[</span><span class="n">-Confirm</span><span class="p">]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
+ <span class="p">[</span><span class="n">-ValidationTimeout</span> <span class="p">&lt;</span><span class="n">Int32</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-PreferredChain</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-Force</span><span class="p">]</span> <span class="p">[</span><span class="n">-ReplacesCert</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-WhatIf</span><span class="p">]</span> <span class="p">[</span><span class="n">-Confirm</span><span class="p">]</span>
+ <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
 <p>Creating an ACME order is the first step of the certificate request process.
@@ -3569,6 +3584,18 @@ The cmdlet is not run.</p>
 <p>If specified, PFX files generated from this order will use AES256 with SHA256 for the private key encryption instead of the default which is RC2-40-CBC. This can affect compatibility with some crypto libraries and tools. Most notably, OpenSSL 3.x requires the newer options to avoid using "legacy" mode. But it breaks compatibility with OpenSSL 1.0.x.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SwitchParameter</span><span class="w"></span>
 <span class="nt">Parameter Sets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FromScratch, ImportKey</span><span class="w"></span>
+<span class="nt">Aliases</span><span class="p">:</span><span class="w"></span>
+
+<span class="nt">Required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
+<span class="nt">Position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Named</span><span class="w"></span>
+<span class="nt">Default value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span><span class="w"></span>
+<span class="nt">Accept pipeline input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
+<span class="nt">Accept wildcard characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
+</code></pre></div>
+<h3 id="-replacescert">-ReplacesCert<a class="headerlink" href="#-replacescert" title="Permanent link">&para;</a></h3>
+<p>The ARI certificate ID from the ARIId parameter on a PACertificate object returned by Get-PACertificate. This is optional and only used if the server supports the ACME Renewal Information Extension (ARI).</p>
+<div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">String</span><span class="w"></span>
+<span class="nt">Parameter Sets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(All)</span><span class="w"></span>
 <span class="nt">Aliases</span><span class="p">:</span><span class="w"></span>
 
 <span class="nt">Required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
