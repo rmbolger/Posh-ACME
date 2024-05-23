@@ -72,23 +72,8 @@ function Update-PAOrder {
                 $resp = Invoke-RestMethod @queryParams @script:UseBasic
                 Write-Debug "Response:`n$($resp|ConvertTo-Json)"
             } catch {
-                # try falling back to the draft-01 ARI ID on a 400 error
-                # which is what Google responds with when you try using the draft-03 ID
-                if ($_.Exception.StatusCode -eq 400) {
-                    Write-Debug "Falling back to ARI draft-01"
-                    $queryParams.Uri = '{0}/{1}' -f $ariBase,$cert.ARIId01
-                    try {
-                        Write-Debug "GET $($queryParams.Uri)"
-                        $resp = Invoke-RestMethod @queryParams @script:UseBasic
-                        Write-Debug "Response:`n$($resp|ConvertTo-Json)"
-                    } catch {
-                        Write-Warning "ARI request failed."
-                        $PSCmdlet.WriteError($_)
-                    }
-                } else {
-                    Write-Warning "ARI request failed."
-                    $PSCmdlet.WriteError($_)
-                }
+                Write-Warning "ARI request failed."
+                $PSCmdlet.WriteError($_)
             }
 
             if ($resp.suggestedWindow) {
