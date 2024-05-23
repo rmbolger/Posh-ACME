@@ -258,7 +258,7 @@ function Find-DSZone {
                 return @($zoneTest,$acct.id)
             } catch {
                 # re-throw anything other than a 404
-                if ($_.Exception.StatusCode -ne 404) {
+                if ($_.Exception.Response.StatusCode -ne 404) {
                     throw
                 }
             }
