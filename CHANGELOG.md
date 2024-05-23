@@ -1,3 +1,7 @@
+## 4.23.1 (2024-05-23)
+
+* Fix DNSimple plugin not properly ignoring 404 API errors on PowerShell 5.1 (#549)
+
 ## 4.23.0 (2024-05-04)
 
 * Added support for DNSimple user tokens which should allow for certs with names that span domains in multiple accounts.

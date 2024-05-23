@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.23.0'
+ModuleVersion = '4.23.1'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,13 +83,9 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.23.0 (2024-05-04)
+## 4.23.1 (2024-05-23)
 
-* Added support for DNSimple user tokens which should allow for certs with names that span domains in multiple accounts.
-* Added warning in GoDaddy guide about newly imposed limits on API access. (Thanks @webprofusion-chrisc)
-* Fixed DNSimple plugin not removing challenge records (#548).
-* Fixed cascading errors on public functions when running with little or no existing config. (#544)
-* Fixed OVH plugin on PowerShell 5.1 by removing an accidentally added ternary operator. (#545) (Thanks @joshooaj)
+* Fix DNSimple plugin not properly ignoring 404 API errors on PowerShell 5.1 (#549)
 '@
 
     }
