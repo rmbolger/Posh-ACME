@@ -182,17 +182,18 @@ function New-PACertificate {
                 if ($oldOrder.KeyLength -and 'CertKeyLength' -notin $psbKeys) {
                     $orderParams.KeyLength = $oldOrder.KeyLength
                 }
-
-                # add the cert we're replacing if it exists
-                if ($cert = ($oldOrder | Get-PACertificate)) {
-                    $orderParams.ReplacesCert = $cert.ARIId
-                }
             }
 
             # Make sure FriendlyName is non-empty
             if ([String]::IsNullOrWhiteSpace($orderParams.FriendlyName)) {
                 $orderParams.FriendlyName = $Domain[0]
             }
+        }
+
+        # Add the replaced cert ID if it exists
+        # New-PAOrder will ignore it if the server doesn't support ARI
+        if ($oldOrder -and ($cert = ($oldOrder | Get-PACertificate))) {
+            $orderParams.ReplacesCert = $cert.ARIId
         }
 
         # add common explicit order parameters backed up by old order params
