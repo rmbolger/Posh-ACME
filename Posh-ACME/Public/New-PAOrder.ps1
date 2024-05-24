@@ -200,7 +200,7 @@ function New-PAOrder {
 
     # Add the ARI replaces field if supported and specified
     # https://www.ietf.org/archive/id/draft-ietf-acme-ari-03.html#name-extensions-to-the-order-obj
-    if ($ReplacesCert -and (Get-PAServer).renewalInfo) {
+    if ($ReplacesCert -and -not (Get-PAServer).DisableARI -and (Get-PAServer).renewalInfo) {
         $payload.replaces = $ReplacesCert
     }
 

@@ -15,6 +15,7 @@ function Set-PAServer {
         [Parameter(ValueFromPipelineByPropertyName)]
         [switch]$DisableTelemetry,
         [switch]$UseAltAccountRefresh,
+        [switch]$DisableARI,
         [switch]$NoRefresh,
         [switch]$NoSwitch
     )
@@ -72,6 +73,7 @@ function Set-PAServer {
                     DisableTelemetry = $DisableTelemetry.IsPresent
                     SkipCertificateCheck = $SkipCertificateCheck.IsPresent
                     UseAltAccountRefresh = $UseAltAccountRefresh.IsPresent
+                    DisableARI = $DisableARI.IsPresent
                     newAccount = $null
                     newOrder = $null
                     newNonce = $null
@@ -193,6 +195,12 @@ function Set-PAServer {
         {
             Write-Debug "Setting UseAltAccountRefresh value to $($UseAltAccountRefresh.IsPresent)"
             $newDir | Add-Member 'UseAltAccountRefresh' $UseAltAccountRefresh.IsPresent -Force
+        }
+        if ($PSBoundParameters.ContainsKey('DisableARI') -and
+            $newDir.DisableARI -ne $DisableARI.IsPresent)
+        {
+            Write-Debug "Setting DisableARI value to $($DisableARI.IsPresent)"
+            $newDir | Add-Member 'DisableARI' $DisableARI.IsPresent -Force
         }
 
         # save the object to disk except for the dynamic properties

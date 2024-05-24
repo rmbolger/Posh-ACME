@@ -55,7 +55,8 @@ function Update-PAOrder {
 
         # Check for ARI renewal window updates if supported and there's an unexpired cert
         # https://www.ietf.org/archive/id/draft-ietf-acme-ari-03.html#name-getting-renewal-information
-        if (-not $SaveOnly -and ($ariBase = (Get-PAServer).renewalInfo) -and
+        $server = Get-PAServer
+        if (-not $SaveOnly -and -not $server.DisableARI -and ($ariBase = $server.renewalInfo) -and
             $Order.CertExpires -and (Get-DateTimeOffsetNow) -lt [DateTimeOffset]::Parse($Order.CertExpires) )
         {
             Write-Verbose "Checking for updated renewal window via ARI"

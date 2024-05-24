@@ -43,7 +43,7 @@ function Submit-Renewal {
                 }
 
                 # trigger an ARI check if supported
-                if ((Get-PAServer).renewalInfo) {
+                if (-not (Get-PAServer).DisableARI -and (Get-PAServer).renewalInfo) {
                     Update-PAOrder -Order $order
                 }
 
