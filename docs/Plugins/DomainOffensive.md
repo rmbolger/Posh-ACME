@@ -6,7 +6,7 @@ This plugin works against the [Domain Offensive](https://www.do.de/) DNS provide
 
 ## Setup
 
-We need to retrieve an secret API token for the account that will be used to update DNS records. Further information can ba found at the (german) [developer docs](https://www.do.de/wiki/LetsEncrypt_-_Entwickler).
+We need to retrieve an secret API token for the account that will be used to update DNS records. Further information can be found at the (german) [developer docs](https://www.do.de/wiki/freie-ssl-tls-zertifikate-ueber-acme/).
 
 ## Using the Plugin
 
