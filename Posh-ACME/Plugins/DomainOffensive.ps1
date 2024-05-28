@@ -21,7 +21,7 @@ function Add-DnsTxt {
     }
 
     Write-Verbose "Adding $RecordName with value $TxtValue on Domain Offensive"
-    $uri = "https://www.do.de/api/letsencrypt?token=$DomOffTokenInsecure&domain=$RecordName&value=$TxtValue"
+    $uri = "https://my.do.de/api/letsencrypt?token=$DomOffTokenInsecure&domain=$RecordName&value=$TxtValue"
     try {
         $response = Invoke-RestMethod -Method Get -Uri $uri @script:UseBasic -EA Stop
     } catch { throw }
@@ -61,7 +61,7 @@ function Add-DnsTxt {
         Adds the specified TXT record with the specified value using a standard string token.
 
     .LINK
-        https://www.do.de/wiki/LetsEncrypt_-_Entwickler
+        https://www.do.de/wiki/freie-ssl-tls-zertifikate-ueber-acme/
     #>
 }
 
@@ -86,7 +86,7 @@ function Remove-DnsTxt {
     }
 
     Write-Verbose "Removing $RecordName with value $TxtValue on Domain Offensive"
-    $uri = "https://www.do.de/api/letsencrypt?token=$DomOffTokenInsecure&domain=$RecordName&action=delete"
+    $uri = "https://my.do.de/api/letsencrypt?token=$DomOffTokenInsecure&domain=$RecordName&action=delete"
     try {
         $response = Invoke-RestMethod -Method Get -Uri $uri @script:UseBasic -EA Stop
     } catch { throw }
@@ -123,7 +123,7 @@ function Remove-DnsTxt {
         Removes the specified TXT record with the specified value using a standard string token.
 
     .LINK
-        https://www.do.de/wiki/LetsEncrypt_-_Entwickler
+        https://www.do.de/wiki/freie-ssl-tls-zertifikate-ueber-acme/
     #>
 }
 
