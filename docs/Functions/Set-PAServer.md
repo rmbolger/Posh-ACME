@@ -15,7 +15,7 @@ Set the current ACME server and/or its configuration.
 
 ```powershell
 Set-PAServer [[-DirectoryUrl] <String>] [-Name <String>] [-NewName <String>] [-SkipCertificateCheck]
- [-DisableTelemetry] [-UseAltAccountRefresh] [-NoRefresh] [-NoSwitch] [<CommonParameters>]
+ [-DisableTelemetry] [-UseAltAccountRefresh] [-DisableARI] [-NoRefresh] [-NoSwitch] [<CommonParameters>]
 ```
 
 ## Description
@@ -168,6 +168,21 @@ Accept wildcard characters: False
 
 ### -UseAltAccountRefresh
 Some ACME CAs do not properly support the standard method to refresh account data. If specified, the module will use an alternate method to refresh account data that seems to work with these CAs.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DisableARI
+Explicitly disables ARI (ACME Renewal Information) for this server even if it claims to support the feature. While the ARI RFC is still in draft status, this should only be necessary if ACME servers move to a newer draft version that breaks compatibility with the version currently supported (draft-03).
 
 ```yaml
 Type: SwitchParameter

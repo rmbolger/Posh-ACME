@@ -42,6 +42,11 @@ function Submit-Renewal {
                     catch { $PSCmdlet.ThrowTerminatingError($_) }
                 }
 
+                # trigger an ARI check if supported
+                if (-not (Get-PAServer).DisableARI -and (Get-PAServer).renewalInfo) {
+                    Update-PAOrder -Order $order
+                }
+
                 # skip if the renewal window hasn't been reached and no -Force
                 if (-not $Force -and $null -ne $order.RenewAfter -and (Get-DateTimeOffsetNow) -lt ([DateTimeOffset]::Parse($order.RenewAfter))) {
                     Write-Warning "Order '$($order.Name)' is not recommended for renewal yet. Use -Force to override."
