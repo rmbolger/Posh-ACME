@@ -27,6 +27,8 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - External Account Binding support for ACME CAs that require it [(Guide)](Guides/External-Account-Binding.md)
 - Preferred Chain support to use alternative CA trust chains [(Guide)](Guides/Using-Alternate-Trust-Chains.md)
 - PowerShell [SecretManagement](https://devblogs.microsoft.com/powershell/secretmanagement-and-secretstore-are-generally-available/) support [(Guide)](Guides/Using-SecretManagement.md)
+- [ARI (ACME Renewal Information)](https://datatracker.ietf.org/doc/draft-ietf-acme-ari/) support based on draft 04.
+
 
 ## Installation (Stable)
 

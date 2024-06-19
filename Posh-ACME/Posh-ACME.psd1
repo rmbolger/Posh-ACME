@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.23.1'
+ModuleVersion = '4.24.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,9 +83,15 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.23.1 (2024-05-23)
+## 4.24.0 (2024-06-19)
 
-* Fix DNSimple plugin not properly ignoring 404 API errors on PowerShell 5.1 (#549)
+* DomainOffensive plugin updated with new API root and documentation links. (Thanks @henrikalves)
+* Added [ARI (ACME Renewal Information)](https://datatracker.ietf.org/doc/draft-ietf-acme-ari/) support based on draft 03. This should be considered experimental until the RFC is finalized.
+  * `ARIId` and `Serial` fields have been added to the output of `Get-PACertificate`
+  * `DisableARI` switch added to `Set-PAServer` which disables ARI support for the server even it would otherwise be supported. This will primarily be useful if the ARI draft changes enough to break the current support and CAs update their implementations before the module can be updated. It may also be useful for providers with existing ARI support from an older unsupported draft.
+  * `ReplacesCert` parameter added to `New-PAOrder` which takes an ARIId string as returned by `Get-PACertificate`. This will be ignored if the current ACME server doesn't support ARI or support has been explicitly disabled via `Set-PAServer`.
+  * Order refreshes now perform an ARI check if supported and not disabled. The `RenewAfter` field is updated if the response indicates it is necessary.
+  * `Submit-Renewal` now triggers an order refresh if ARI is supported and not disabled.
 '@
 
     }
