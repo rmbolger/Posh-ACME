@@ -1049,6 +1049,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-disableari" class="md-nav__link">
+    -DisableARI
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#commonparameters" class="md-nav__link">
     CommonParameters
   </a>
@@ -2839,6 +2846,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-disableari" class="md-nav__link">
+    -DisableARI
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#commonparameters" class="md-nav__link">
     CommonParameters
   </a>
@@ -2882,7 +2896,7 @@
 <p>Set the current ACME server and/or its configuration.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="nb">Set-PAServer</span> <span class="p">[[</span><span class="n">-DirectoryUrl</span><span class="p">]</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-Name</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-NewName</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-SkipCertificateCheck</span><span class="p">]</span>
- <span class="p">[</span><span class="n">-DisableTelemetry</span><span class="p">]</span> <span class="p">[</span><span class="n">-UseAltAccountRefresh</span><span class="p">]</span> <span class="p">[</span><span class="n">-NoRefresh</span><span class="p">]</span> <span class="p">[</span><span class="n">-NoSwitch</span><span class="p">]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
+ <span class="p">[</span><span class="n">-DisableTelemetry</span><span class="p">]</span> <span class="p">[</span><span class="n">-UseAltAccountRefresh</span><span class="p">]</span> <span class="p">[</span><span class="n">-DisableARI</span><span class="p">]</span> <span class="p">[</span><span class="n">-NoRefresh</span><span class="p">]</span> <span class="p">[</span><span class="n">-NoSwitch</span><span class="p">]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
 <p>Use this function to set the current ACME server or change a server's configuration settings.</p>
@@ -2993,6 +3007,18 @@ The telemetry data that gets sent by default includes Posh-ACME version, PowerSh
 </code></pre></div>
 <h3 id="-usealtaccountrefresh">-UseAltAccountRefresh<a class="headerlink" href="#-usealtaccountrefresh" title="Permanent link">&para;</a></h3>
 <p>Some ACME CAs do not properly support the standard method to refresh account data. If specified, the module will use an alternate method to refresh account data that seems to work with these CAs.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SwitchParameter</span><span class="w"></span>
+<span class="nt">Parameter Sets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(All)</span><span class="w"></span>
+<span class="nt">Aliases</span><span class="p">:</span><span class="w"></span>
+
+<span class="nt">Required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
+<span class="nt">Position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Named</span><span class="w"></span>
+<span class="nt">Default value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span><span class="w"></span>
+<span class="nt">Accept pipeline input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
+<span class="nt">Accept wildcard characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
+</code></pre></div>
+<h3 id="-disableari">-DisableARI<a class="headerlink" href="#-disableari" title="Permanent link">&para;</a></h3>
+<p>Explicitly disables ARI (ACME Renewal Information) for this server even if it claims to support the feature. While the ARI RFC is still in draft status, this should only be necessary if ACME servers move to a newer draft version that breaks compatibility with the version currently supported (draft-03).</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SwitchParameter</span><span class="w"></span>
 <span class="nt">Parameter Sets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(All)</span><span class="w"></span>
 <span class="nt">Aliases</span><span class="p">:</span><span class="w"></span>
