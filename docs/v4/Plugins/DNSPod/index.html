@@ -3616,7 +3616,7 @@
 <p>There is also a <code>DNSPodApiRoot</code> optional parameter that defaults to the API root for dnspod.com. If you are using dnspod.cn, you may specify <code>https://dnsapi.cn</code> instead for this parameter.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">DNSPodKeyID</span> <span class="p">=</span> <span class="s1">&#39;111&#39;</span>
-    <span class="n">DNSPodToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;Enter Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+    <span class="n">DNSPodKeyToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;Enter Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">DNSPod</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
