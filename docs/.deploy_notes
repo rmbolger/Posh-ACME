@@ -5,3 +5,33 @@ Be in the main branch or whatever branch contains the source docs folder:
 `--push` is optional. If you want to self-host the versioned docs, leave it out and run:
 
     mike serve -b "docsite"
+
+Add `-a IP:PORT` to bind to specific ip and port instead of localhost:8000
+
+# Mkdocs + Material prereqs
+
+CairoSVG                    2.7.1
+mike                        2.1.1
+mkdocs                      1.6.0
+mkdocs-awesome-pages-plugin 2.8.0
+mkdocs-get-deps             0.2.0
+mkdocs-material             9.5.27
+mkdocs-material-extensions  1.3.1
+pillow                      10.3.0
+
+!!! note
+    CairoSVG and Pillow are specifically for [social card support][1] and kind of
+    a pain to deal with because Cairo requires external GTK libraries which are
+    hard to come by on Windows. The Cairo docs point to resources that no longer
+    exist and GTK runtime libs are usually just embedded with the apps that use
+    them.
+
+    The easy but janky solution I found was to install this UniConverter[2] app
+    and then add `%ProgramFiles%\UniConvertor-2.0rc5\dlls` to PATH.
+
+    I also originally had an issue with the `defusedxml` python dependency which
+    was stuck on 0.5.0 for some reason and I needed to manually upgrade it to 0.7.1
+
+
+[1] https://squidfunk.github.io/mkdocs-material/setup/setting-up-social-cards/#dependencies
+[2] https://sk1project.net/uc2/download/
