@@ -22,7 +22,7 @@ There is also a `DNSPodApiRoot` optional parameter that defaults to the API root
 ```powershell
 $pArgs = @{
     DNSPodKeyID = '111'
-    DNSPodToken = (Read-Host 'Enter Token' -AsSecureString)
+    DNSPodKeyToken = (Read-Host 'Enter Token' -AsSecureString)
 }
 New-PACertificate example.com -Plugin DNSPod -PluginArgs $pArgs
 ```
