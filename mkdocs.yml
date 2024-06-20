@@ -66,8 +66,8 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/rmbolger
-    - icon: fontawesome/brands/twitter
-      link: https://twitter.com/rmbolger
+    - icon: fontawesome/brands/mastodon
+      link: https://mastodon.social/@rmbolger
     - icon: fontawesome/brands/linkedin
       link: https://linkedin.com/in/rmbolger/
   version:
