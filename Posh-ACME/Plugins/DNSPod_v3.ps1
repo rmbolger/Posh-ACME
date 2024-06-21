@@ -1,4 +1,4 @@
-function Get-CurrentPluginType { 'dns-01' }
+﻿function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
     [CmdletBinding(DefaultParameterSetName = 'Secure')]
