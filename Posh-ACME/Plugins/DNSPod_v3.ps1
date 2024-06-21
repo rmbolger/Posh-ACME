@@ -40,7 +40,7 @@ function Add-DnsTxt {
         $body = @{
             Domain     = $zoneName
             RecordType = 'TXT'
-            RecordLine = 'Ĭ��' #Ĭ��
+            RecordLine = 'Ä¬ÈÏ' #Ä¬ÈÏ
             Value      = $TxtValue
             SubDomain  = $recShort
         }
