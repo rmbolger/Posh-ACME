@@ -1,12 +1,14 @@
 function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName='Secure')]
+    [CmdletBinding(DefaultParameterSetName='PAT')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
+        [Parameter(ParameterSetName='PAT')]
+        [securestring]$GandiPAT,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$GandiToken,
         [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
@@ -15,27 +17,38 @@ function Add-DnsTxt {
         $ExtraParams
     )
 
-    # un-secure the password so we can add it to the auth header
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $GandiTokenInsecure = [pscredential]::new('a',$GandiToken).GetNetworkCredential().Password
+    # Build the appropriate auth header depending on what type of token was used.
+    $RestHeaders = @{Accept = 'application/json'}
+    if ('PAT' -eq $PSCmdlet.ParameterSetName) {
+        $pat = [pscredential]::new('a',$GandiPAT).GetNetworkCredential().Password
+        $RestHeaders.Authorization = "Bearer $pat"
     }
-    $restParams = @{
-        Headers = @{
-            'X-Api-Key' = $GandiTokenInsecure
-            Accept = 'application/json'
+    else {
+        if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+            $GandiTokenInsecure = [pscredential]::new('a',$GandiToken).GetNetworkCredential().Password
         }
-        ContentType = 'application/json'
+        $RestHeaders.'X-Api-Key' = $GandiTokenInsecure
     }
 
     # get the zone name for our record
-    $zoneName = Find-GandiZone $RecordName $restParams
+    $zoneName = Find-GandiZone $RecordName $RestHeaders
     Write-Debug "Found zone $zoneName"
 
     # find the matching TXT record if it exists
     $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    if (-not $recShort) { $recShort = '@' }
     $recUrl = "https://dns.api.gandi.net/api/v5/domains/$zoneName/records/$recShort/TXT"
     try {
-        $rec = Invoke-RestMethod $recUrl @restParams @script:UseBasic -EA Stop
+        $queryParams = @{
+            Uri = $recUrl
+            Headers = $RestHeaders
+            ContentType = 'application/json'
+            Verbose = $false
+            ErrorAction = 'Stop'
+        }
+        Write-Debug "GET $($queryParams.Uri)"
+        $rec = Invoke-RestMethod @queryParams @script:UseBasic
+        Write-Debug "Response:`n$($rec | ConvertTo-Json)"
     } catch {}
 
     if ($rec -and "`"$TxtValue`"" -in $rec.rrset_values) {
@@ -44,24 +57,28 @@ function Add-DnsTxt {
         if (-not $rec) {
             # add new record
             Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
-            $body = @{rrset_values=@("`"$TxtValue`"")}
-            Write-Debug "Sending body:`n$(($body | ConvertTo-Json))"
-            $bodyJson = $body | ConvertTo-Json -Compress
-            try {
-                Invoke-RestMethod $recUrl -Method Post -Body $bodyJson `
-                    @restParams @script:UseBasic -EA Stop | Out-Null
-            } catch { throw }
+            $queryParams = @{
+                Method = 'POST'
+                Body = (@{rrset_values=@("`"$TxtValue`"")} | ConvertTo-Json -Compress)
+            }
         } else {
             # update the existing record
             Write-Verbose "Updating a TXT record for $RecordName with value $TxtValue"
-            $body = @{rrset_values=(@($rec.rrset_values) + @("`"$TxtValue`""))}
-            Write-Debug "Sending body:`n$(($body | ConvertTo-Json))"
-            $bodyJson = $body | ConvertTo-Json -Compress
-            try {
-                Invoke-RestMethod $recUrl -Method Put -Body $bodyJson `
-                    @restParams @script:UseBasic -EA Stop | Out-Null
-            } catch { throw }
+            $queryParams = @{
+                Method = 'PUT'
+                Body = (@{rrset_values=(@($rec.rrset_values) + @("`"$TxtValue`""))} | ConvertTo-Json -Compress)
+            }
         }
+
+        $queryParams.Uri = $recUrl
+        $queryParams.Headers = $RestHeaders
+        $queryParams.ContentType = 'application/json'
+        $queryParams.Verbose = $false
+        $queryParams.ErrorAction = 'Stop'
+        try {
+            Write-Debug "$($queryParams.Method) $($queryParams.Uri)`n$($queryParams.Body)"
+            Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
+        } catch { throw }
     }
 
     <#
@@ -95,12 +112,14 @@ function Add-DnsTxt {
 }
 
 function Remove-DnsTxt {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='PAT')]
     param(
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
+        [Parameter(ParameterSetName='PAT')]
+        [securestring]$GandiPAT,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
         [securestring]$GandiToken,
         [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
@@ -109,27 +128,38 @@ function Remove-DnsTxt {
         $ExtraParams
     )
 
-    # un-secure the password so we can add it to the auth header
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $GandiTokenInsecure = [pscredential]::new('a',$GandiToken).GetNetworkCredential().Password
+    # Build the appropriate auth header depending on what type of token was used.
+    $RestHeaders = @{Accept = 'application/json'}
+    if ('PAT' -eq $PSCmdlet.ParameterSetName) {
+        $pat = [pscredential]::new('a',$GandiPAT).GetNetworkCredential().Password
+        $RestHeaders.Authorization = "Bearer $pat"
     }
-    $restParams = @{
-        Headers = @{
-            'X-Api-Key' = $GandiTokenInsecure
-            Accept = 'application/json'
+    else {
+        if ('Secure' -eq $PSCmdlet.ParameterSetName) {
+            $GandiTokenInsecure = [pscredential]::new('a',$GandiToken).GetNetworkCredential().Password
         }
-        ContentType = 'application/json'
+        $RestHeaders.'X-Api-Key' = $GandiTokenInsecure
     }
 
     # get the zone name for our record
-    $zoneName = Find-GandiZone $RecordName $restParams
+    $zoneName = Find-GandiZone $RecordName $RestHeaders
     Write-Debug "Found zone $zoneName"
 
     # find the matching TXT record if it exists
     $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    if (-not $recShort) { $recShort = '@' }
     $recUrl = "https://dns.api.gandi.net/api/v5/domains/$zoneName/records/$recShort/TXT"
     try {
-        $rec = Invoke-RestMethod $recUrl @restParams @script:UseBasic -EA Stop
+        $queryParams = @{
+            Uri = $recUrl
+            Headers = $RestHeaders
+            ContentType = 'application/json'
+            Verbose = $false
+            ErrorAction = 'Stop'
+        }
+        Write-Debug "GET $($queryParams.Uri)"
+        $rec = Invoke-RestMethod @queryParams @script:UseBasic
+        Write-Debug "Response:`n$($rec | ConvertTo-Json)"
     } catch {}
 
     if ($rec -and "`"$TxtValue`"" -in $rec.rrset_values) {
@@ -137,21 +167,28 @@ function Remove-DnsTxt {
             # remove just the value we care about
             Write-Verbose "Removing $TxtValue from TXT record for $RecordName"
             $otherVals = $rec.rrset_values | Where-Object { $_ -ne "`"$TxtValue`"" }
-            $body = @{rrset_values=@($otherVals)}
-            Write-Debug "Sending body:`n$(($body | ConvertTo-Json))"
-            $bodyJson =  $body | ConvertTo-Json -Compress
-            try {
-                Invoke-RestMethod $recUrl -Method Put -Body $bodyJson `
-                    @restParams @script:UseBasic -EA Stop | Out-Null
-            } catch { throw }
+            $queryParams = @{
+                Method = 'PUT'
+                Body = (@{rrset_values=@($otherVals)} | ConvertTo-Json -Compress)
+            }
         } else {
             # delete the whole record because this value is the last one
             Write-Verbose "Removing TXT record for $RecordName"
-            try {
-                Invoke-RestMethod $recUrl -Method Delete `
-                    @restParams @script:UseBasic -EA Stop | Out-Null
-            } catch { throw }
+            $queryParams = @{
+                Method = 'DELETE'
+            }
         }
+
+        $queryParams.Uri = $recUrl
+        $queryParams.Headers = $RestHeaders
+        $queryParams.ContentType = 'application/json'
+        $queryParams.Verbose = $false
+        $queryParams.ErrorAction = 'Stop'
+        try {
+            Write-Debug "$($queryParams.Method) $($queryParams.Uri)`n$($queryParams.Body)"
+            Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
+        } catch { throw }
+
     } else {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     }
@@ -218,7 +255,7 @@ function Find-GandiZone {
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [hashtable]$RestParams
+        [hashtable]$RestHeaders
     )
 
     # setup a module variable to cache the record to zone mapping
@@ -242,15 +279,24 @@ function Find-GandiZone {
     $pieces = $RecordName.Split('.')
     for ($i=0; $i -lt ($pieces.Count-1); $i++) {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
-        Write-Debug "Checking $zoneTest"
         try {
-            Invoke-RestMethod "https://dns.api.gandi.net/api/v5/domains/$zoneTest" `
-                @RestParams @script:UseBasic -EA Stop | Out-Null
+            $queryParams = @{
+                Uri = "https://dns.api.gandi.net/api/v5/domains/$zoneTest"
+                Headers = $RestHeaders
+                Verbose = $false
+                ErrorAction = 'Stop'
+            }
+            Write-Debug "GET $($queryParams.Uri)"
+            $resp = Invoke-RestMethod @queryParams @script:UseBasic
+            Write-Debug "Response:`n$($resp | ConvertTo-Json -Dep 10)"
             $script:GandiRecordZones.$RecordName = $zoneTest
             return $zoneTest
-        } catch {}
+        } catch {
+            if (404 -ne $_.Exception.Response.StatusCode) {
+                throw
+            }
+        }
     }
 
-    return $null
-
+    throw "Unable to find zone matching $RecordName"
 }
