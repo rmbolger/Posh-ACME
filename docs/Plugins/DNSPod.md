@@ -4,6 +4,9 @@ title: DNSPod
 
 This plugin works against the [DNSPod](https://dnspod.com/) provider. It is assumed that you have already setup an account and created the domain you will be working against.
 
+!!! warning
+    DNSPod is now integrated with Tencent Cloud and will eventually be disabling the legacy DNSPod Token authentication this plugin uses. It is recommended to switch to the [TencentDNS](TencentDNS.md) plugin instead.
+
 ## Setup
 
 As of November 13, 2020, DNSPod was integrated with Tencent Cloud and slightly changed how their API works. Instead of authenticating with your normal website login credentials, you must create an API token to use instead.
