@@ -77,6 +77,7 @@ SimpleDNSPlus | [Simple DNS Plus](https://simpledns.com/) | [Usage Guide](Simple
 Simply | [Simply.com](https://www.simply.com/) (deprecated) | [Usage Guide](Simply.md) | :white_check_mark:
 SimplyCom | [Simply.com](https://www.simply.com/) (formerly UnoEuro) | [Usage Guide](SimplyCom.md) | :white_check_mark:
 SSHProxy | Custom SSH Script | [Usage Guide](SSHProxy.md) | :white_check_mark:
+TencentDNS | [TencentDNS](https://dnspod.com/) | [Usage Guide](TencentDNS.md) | :white_check_mark:
 TotalUptime | [TotalUptime](https://totaluptime.com/solutions/cloud-dns-service/) | [Usage Guide](TotalUptime.md) | :white_check_mark:
 UKFast | [UKFast](https://ukfast.co.uk) | [Usage Guide](UKFast.md) | :white_check_mark:
 WebsupportSK | [Websupport.sk](https://www.websupport.sk/?ref=NTIqFFo7Rg) | [Usage Guide](WebsupportSK.md) | :white_check_mark:
