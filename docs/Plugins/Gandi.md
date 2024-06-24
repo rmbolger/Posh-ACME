@@ -19,7 +19,7 @@ In the PAT section, click the link for `See my personal access tokens`. Then cli
 - Select the option for `Manage domain name technical configurations` which will force the selection of `See and renew domain names`.
 - Click `Create`.
 
-Record the token value.
+Record the token value and set a reminder to create a new PAT before the old one expires.
 
 ## Using the Plugin
 
