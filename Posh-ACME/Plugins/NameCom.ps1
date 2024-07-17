@@ -122,7 +122,7 @@ function Remove-DnsTxt {
             Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
             $url = "$apiRoot/domains/$($domainName)/records/$($rec.id)"
             Write-Debug "DELETE $url"
-            Invoke-RestMethod $url -Method Delete @restParams @script:UseBasic -EA Stop | Out-Null
+            Invoke-RestMethod $url -Method Delete @restParams @script:UseBasic | Out-Null
         } catch { throw }
     } else {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
