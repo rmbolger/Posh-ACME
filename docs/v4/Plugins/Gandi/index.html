@@ -1419,6 +1419,8 @@
       
         
       
+        
+      
     
     
       
@@ -2184,6 +2186,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Using the Plugin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-for-personal-access-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example for Personal Access Token
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-for-legacy-api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example for Legacy API Key
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -2895,6 +2921,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../TencentDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    TencentDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../TotalUptime/" class="md-nav__link">
         
   
@@ -3569,6 +3616,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Using the Plugin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-for-personal-access-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example for Personal Access Token
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-for-legacy-api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example for Legacy API Key
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -3605,15 +3676,33 @@
 <h1 id="how-to-use-the-gandi-dns-plugin">How To Use the Gandi DNS Plugin<a class="headerlink" href="#how-to-use-the-gandi-dns-plugin" title="Permanent link">&para;</a></h1>
 <p>This plugin works against the <a href="https://www.gandi.net">Gandi</a> DNS provider. It is assumed that you have already setup an account and have a registered domain with an associated DNS zone you will be working against.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<p>First, login to your <a href="https://account.gandi.net">account page</a> and go to the <code>Security</code> section. There will be an option to generate or regenerate the "API Key for LiveDNS". Do that and make a record the new value.</p>
+<p>First, login to your <a href="https://account.gandi.net">account page</a> and go to the <code>Authentication Options</code> section. Down at the bottom in the <code>Developer access</code> section, there are options for <code>Personal Access Token (PAT)</code> and <code>API Key (Deprecated)</code>.</p>
+<p>It is no longer recommended to use the API Key option since it has been deprecated. But it should continue to work with the plugin as long as they allow it to. The main benefit over the PAT option is that it doesn't expire.</p>
+<p>In the PAT section, click the link for <code>See my personal access tokens</code>. Then click the <code>Create a token</code> button.</p>
+<ul>
+<li>Select the appropriate organization</li>
+<li>Give it a cosmetic name</li>
+<li>Set the expiration time (1 year is currently the max)</li>
+<li>Choose whether to limit the PAT to a specific set of domains</li>
+<li>Select the option for <code>Manage domain name technical configurations</code> which will force the selection of <code>See and renew domain names</code>.</li>
+<li>Click <code>Create</code>.</li>
+</ul>
+<p>Record the token value and set a reminder to create a new PAT before the old one expires.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>The API key is used with the <code>GandiToken</code> SecureString parameter.</p>
+<p>The Personal Access Token (PAT) is used with the <code>GandiPAT</code> SecureString parameter. If you are using the Legacy API Key option, use the <code>GandiToken</code> SecureString parameter instead.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>The <code>GandiTokenInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+<p>The <code>GandiTokenInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to one of the Secure parameter sets.</p>
 </div>
+<h3 id="example-for-personal-access-token">Example for Personal Access Token<a class="headerlink" href="#example-for-personal-access-token" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">GandiToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Gandi Token&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+    <span class="n">GandiPAT</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Personal Access Token&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Gandi</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
+</code></pre></div>
+<h3 id="example-for-legacy-api-key">Example for Legacy API Key<a class="headerlink" href="#example-for-legacy-api-key" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">GandiToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Legacy API Key&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Gandi</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>

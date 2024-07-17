@@ -1419,6 +1419,8 @@
       
         
       
+        
+      
     
     
       
@@ -2895,6 +2897,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../TencentDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    TencentDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../TotalUptime/" class="md-nav__link">
         
   
@@ -3606,6 +3629,10 @@
 <p>This plugin works against the <a href="https://www.name.com/">name.com</a> domain registrar and DNS provider. It is assumed that you have already setup an account and purchased domain you will be working against. You must also be using name.com's own DNS hosting.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>First, go to the <a href="https://www.name.com/account/settings/api">Account API Settings</a> page and create a new API token for your account. Make a note of both the token value and the username associated with the token. If the username is blank immediately following the token creation, try refreshing the page.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If you have two-step verification enabled on your account, there is an additional step to allow the API token to be used. Go to the <a href="https://www.name.com/account/settings/security">Security Settings</a> page and scroll to the bottom. There is a section called <code>Name.com API Access</code> with a slider that need to be set to the "on" position which is to the right. It should be green when set properly. Without it, the API will generate errors about two-step verification not being supported by the API.</p>
+</div>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
 <p>The username is used with the <code>NameComUsername</code> parameter and the token is used with the <code>NameComTokenSecure</code> SecureString parameter. If you are using name.com's API testing environment, you'll also need to include <code>NameComUseTestEnv=$true</code> in your plugin arguments.</p>
 <div class="admonition warning">

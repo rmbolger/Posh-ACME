@@ -1419,6 +1419,8 @@
       
         
       
+        
+      
     
     
       
@@ -2895,6 +2897,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../TencentDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    TencentDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../TotalUptime/" class="md-nav__link">
         
   
@@ -3604,6 +3627,10 @@
 
 <h1 id="how-to-use-the-dnspod-dns-plugin">How To Use the DNSPod DNS Plugin<a class="headerlink" href="#how-to-use-the-dnspod-dns-plugin" title="Permanent link">&para;</a></h1>
 <p>This plugin works against the <a href="https://dnspod.com/">DNSPod</a> provider. It is assumed that you have already setup an account and created the domain you will be working against.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>DNSPod is now integrated with Tencent Cloud and will eventually be disabling the legacy DNSPod Token authentication this plugin uses. It is recommended to switch to the <a href="../TencentDNS/">TencentDNS</a> plugin instead.</p>
+</div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>As of November 13, 2020, DNSPod was integrated with Tencent Cloud and slightly changed how their API works. Instead of authenticating with your normal website login credentials, you must create an API token to use instead.</p>
 <p>Login to the console and go to the <a href="https://console.dnspod.com/account/token">Key Management</a> section. Create a new key and make a note of its ID and Token values.</p>
