@@ -37,13 +37,13 @@ function Add-DnsTxt {
         # build the body
         $hostShort = ($RecordName -ireplace [regex]::Escape($domainName), [string]::Empty).TrimEnd('.')
         $bodyJson = @{host=$hostShort; type='TXT'; answer=$TxtValue; ttl=300} | ConvertTo-Json -Compress
-        Write-Debug "Add JSON: $bodyJson"
 
         # add the new record
         try {
             Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
             $url = "$apiRoot/domains/$($domainName)/records"
-            Invoke-RestMethod $url -Method Post -Body $bodyJson @restParams @script:UseBasic -EA Stop | Out-Null
+            Write-Debug "POST $url`n$bodyJson"
+            Invoke-RestMethod $url -Method Post -Body $bodyJson @restParams @script:UseBasic | Out-Null
         } catch { throw }
     }
 
@@ -121,6 +121,7 @@ function Remove-DnsTxt {
         try {
             Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
             $url = "$apiRoot/domains/$($domainName)/records/$($rec.id)"
+            Write-Debug "DELETE $url"
             Invoke-RestMethod $url -Method Delete @restParams @script:UseBasic -EA Stop | Out-Null
         } catch { throw }
     } else {
@@ -212,14 +213,18 @@ function Find-NameComZone {
     # the apex that we care about for later calls.
     try {
         $url = "$ApiRoot/domains/$RecordName"
-        $domain = Invoke-RestMethod $url @RestParams @script:UseBasic -EA Stop
+        Write-Debug "GET $url"
+        $domain = Invoke-RestMethod $url @RestParams @script:UseBasic
+        Write-Debug "Response:`n$($domain|ConvertTo-Json)"
 
         if ($domain -and $domain.domainName) {
             return $domain.domainName
         }
     } catch {
-        # if domain doesn't exist in their account, they throw a 404 which we'll catch
-        # here and just ignore.
+        # re-throw everything but a 404 which we can just ignore
+        if (404 -ne $_.Exception.Response.StatusCode) {
+            Get-ErrorBody $_
+        }
     }
 
     return $null
@@ -248,15 +253,14 @@ function Get-NameComTxtRecord {
     # potentially page through) all of them and filter the results on our side.
     # https://www.name.com/api-docs/DNS#ListRecords
 
-    $recs = @()
     $nextPage = ''
-    do {
+    $recs = do {
         $url = "$ApiRoot/domains/$zoneName/records$nextPage"
-        Write-Debug "Fetching records page"
-        $response = Invoke-RestMethod $url @RestParams @script:UseBasic -EA Stop
-        if ($response.records) {
-            $recs += $response.records
-        }
+        Write-Debug "GET $url"
+        $response = Invoke-RestMethod $url @RestParams @script:UseBasic
+
+        # send results to the pipeline
+        $response.records
 
         # check for paging
         if ([String]::IsNullOrWhiteSpace($response.nextPage)) { break }
@@ -283,7 +287,36 @@ function Get-RestHeaders {
             Authorization = "Basic {0}" -f [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $NameComUsername,$NameComToken)))
         }
         ContentType = 'application/json'
+        Verbose = $false
+        ErrorAction = 'Stop'
     }
 
     return $restParams
+}
+
+function Get-ErrorBody {
+    [CmdletBinding()]
+    param(
+        [object]$ex
+    )
+
+    $exType = $ex.Exception.GetType().FullName
+
+    if ('System.Net.WebException' -eq $exType) {
+
+        $response = $ex.Exception.Response
+        $sr = New-Object IO.StreamReader($response.GetResponseStream())
+        $sr.BaseStream.Position = 0
+        $sr.DiscardBufferedData()
+        $body = $sr.ReadToEnd()
+        throw $body
+
+    } elseif ('Microsoft.PowerShell.Commands.HttpResponseException' -eq $exType) {
+
+        $response = $ex.Exception.Response
+        $body = $ex.ErrorDetails.Message
+        throw $body
+
+    } else { throw }
+
 }
