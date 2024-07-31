@@ -8,14 +8,14 @@ function Add-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
-        [securestring]$ScalewayToken,
+        [securestring]$ONToken,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # get the plaintext version of the token
-    $ScalewayTokenInsecure = [pscredential]::new('a',$ScalewayToken).GetNetworkCredential().Password
-    $authHeader = @{Authorization="Bearer $ScalewayTokenInsecure"}
+    $ONTokenInsecure = [pscredential]::new('a',$ONToken).GetNetworkCredential().Password
+    $authHeader = @{Authorization="Bearer $ONTokenInsecure"}
 
     # get the zone name for our record
     $zoneName = Find-Zone $RecordName $authHeader
@@ -72,10 +72,10 @@ function Add-DnsTxt {
 
     <#
     .SYNOPSIS
-        Add a DNS TXT record to Scaleway.
+        Add a DNS TXT record to online.net.
 
     .DESCRIPTION
-        Add a DNS TXT record to Scaleway
+        Add a DNS TXT record to online.net
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -83,14 +83,14 @@ function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER ScalewayToken
-        The access API token for Scaleway
+    .PARAMETER ONToken
+        The access API token for online.net
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $token = Read-Host "Scaleway Token" -AsSecureString
+        $token = Read-Host "online.net Token" -AsSecureString
         PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
 
         Adds a TXT record for the specified site with the specified value on Windows.
@@ -105,14 +105,14 @@ function Remove-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
-        [securestring]$ScalewayToken,
+        [securestring]$ONToken,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # get the plaintext version of the token
-    $ScalewayTokenInsecure = [pscredential]::new('a',$ScalewayToken).GetNetworkCredential().Password
-    $authHeader = @{Authorization="Bearer $ScalewayTokenInsecure"}
+    $ONTokenInsecure = [pscredential]::new('a',$ONToken).GetNetworkCredential().Password
+    $authHeader = @{Authorization="Bearer $ONTokenInsecure"}
 
     # get the zone name for our record
     $zoneName = Find-Zone $RecordName $authHeader
@@ -171,10 +171,10 @@ function Remove-DnsTxt {
 
     <#
     .SYNOPSIS
-        Remove a DNS TXT record from Scaleway.
+        Remove a DNS TXT record from online.net.
 
     .DESCRIPTION
-        Remove a DNS TXT record from Scaleway.
+        Remove a DNS TXT record from online.net.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -182,14 +182,14 @@ function Remove-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER ScalewayToken
-        The access API token for Scaleway.
+    .PARAMETER ONToken
+        The access API token for online.net.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $token = Read-Host "Scaleway Token" -AsSecureString
+        $token = Read-Host "online.net Token" -AsSecureString
         PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $token
 
         Removes a TXT record for the specified site with the specified value on Windows.
@@ -232,11 +232,11 @@ function Find-Zone {
 
     # setup a module variable to cache the record to zone mapping
     # so it's quicker to find later
-    if (!$script:ScalewayRecordZones) { $script:ScalewayRecordZones = @{} }
+    if (!$script:ONRecordZones) { $script:ONRecordZones = @{} }
 
     # check for the record in the cache
-    if ($script:ScalewayRecordZones.ContainsKey($RecordName)) {
-        return $script:ScalewayRecordZones.$RecordName
+    if ($script:ONRecordZones.ContainsKey($RecordName)) {
+        return $script:ONRecordZones.$RecordName
     }
 
     # find the portion of the record that matches the zone name
@@ -256,7 +256,7 @@ function Find-Zone {
             # if the call succeeds, the zone exists, so we don't care about the actual response
             $resp = Invoke-RestMethod @queryParams @script:UseBasic
             Write-Debug "Response`n$($resp | ConvertTo-Json -Dep 10)"
-            $script:ScalewayRecordZones.$RecordName = $zoneTest
+            $script:ONRecordZones.$RecordName = $zoneTest
             return $zoneTest
         } catch {
             if (404 -ne $_.Exception.Response.StatusCode) { throw }

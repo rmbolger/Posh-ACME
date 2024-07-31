@@ -63,6 +63,7 @@ Manual | Manual Record Creation | | :white_check_mark:
 Namecheap | [Namecheap FreeDNS](https://www.namecheap.com/domains/freedns/) | [Usage Guide](Namecheap.md) | :white_check_mark:
 NameCom | [Name.com](https://www.name.com/) | [Usage Guide](NameCom.md) | :white_check_mark:
 NS1 | [NS1 DNS](https://ns1.com) | [Usage Guide](NS1.md) | :white_check_mark:
+OnlineNet | [Online.net/Scaleway](https://www.scaleway.com/en/domains-and-dns/) | [Usage Guide](OnlineNet.md) | :white_check_mark:
 OVH | [OVH.com](https://www.ovh.com) | [Usage Guide](OVH.md) | :white_check_mark:
 PointDNS | [PointDNS](https://pointhq.com/) | [Usage Guide](PointDNS.md) | :white_check_mark:
 Porkbun | [Porkbun](https://porkbun.com/) | [Usage Guide](Porkbun.md) | :white_check_mark:
