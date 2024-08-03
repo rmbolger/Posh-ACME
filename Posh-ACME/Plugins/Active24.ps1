@@ -25,7 +25,7 @@ function Add-DnsTxt {
     # get the zone name for our record
     $zoneName = Find-A24Zone $RecordName $restParams
     if ([String]::IsNullOrWhiteSpace($zoneName)) {
-        throw "Unable to find zone for $RecordName in account $acctID"
+        throw "Unable to find zone for $RecordName"
     }
     Write-Debug "Found zone $zoneName"
 
@@ -98,7 +98,7 @@ function Remove-DnsTxt {
     # get the zone name for our record
     $zoneName = Find-A24Zone $RecordName $restParams
     if ([String]::IsNullOrWhiteSpace($zoneName)) {
-        throw "Unable to find zone for $RecordName in account $acctID"
+        throw "Unable to find zone for $RecordName"
     }
     Write-Debug "Found zone $zoneName"
 
