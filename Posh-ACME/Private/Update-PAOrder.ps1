@@ -61,38 +61,42 @@ function Update-PAOrder {
         {
             Write-Verbose "Checking for updated renewal window via ARI"
             $cert = $Order | Get-PACertificate
-            $queryParams = @{
-                Uri = '{0}/{1}' -f $ariBase,$cert.ARIId
-                UserAgent = $script:USER_AGENT
-                Headers = $script:COMMON_HEADERS
-                ErrorAction = 'Stop'
-                Verbose = $false
-            }
-            try {
-                Write-Debug "GET $($queryParams.Uri)"
-                $resp = Invoke-RestMethod @queryParams @script:UseBasic
-                Write-Debug "Response:`n$($resp|ConvertTo-Json)"
-            } catch {
-                Write-Warning "ARI request failed."
-                $PSCmdlet.WriteError($_)
-            }
+            if ($cert.ARIId) {
+                $queryParams = @{
+                    Uri = '{0}/{1}' -f $ariBase,$cert.ARIId
+                    UserAgent = $script:USER_AGENT
+                    Headers = $script:COMMON_HEADERS
+                    ErrorAction = 'Stop'
+                    Verbose = $false
+                }
+                try {
+                    Write-Debug "GET $($queryParams.Uri)"
+                    $resp = Invoke-RestMethod @queryParams @script:UseBasic
+                    Write-Debug "Response:`n$($resp|ConvertTo-Json)"
+                } catch {
+                    Write-Warning "ARI request failed."
+                    $PSCmdlet.WriteError($_)
+                }
 
-            if ($resp.suggestedWindow) {
-                $renewAfter = $resp.suggestedWindow.start
-                if ($renewAfter -ne $Order.RenewAfter) {
-                    Write-Verbose "Updating renewal window to $renewAfter from ARI response"
-                    $Order.RenewAfter = $renewAfter
+                if ($resp.suggestedWindow) {
+                    $renewAfter = $resp.suggestedWindow.start
+                    if ($renewAfter -ne $Order.RenewAfter) {
+                        Write-Verbose "Updating renewal window to $renewAfter from ARI response"
+                        $Order.RenewAfter = $renewAfter
 
-                    # Warn if there's an explanation URL
-                    if ($resp.explanationUrl) {
-                        Write-Warning "The ACME Server has suggested an updated renewal window. Visit the following URL for more information:`n$($resp.explanationUrl)"
+                        # Warn if there's an explanation URL
+                        if ($resp.explanationUrl) {
+                            Write-Warning "The ACME Server has suggested an updated renewal window. Visit the following URL for more information:`n$($resp.explanationUrl)"
+                        }
+                    }
+
+                    # Warn if the new window is in the past
+                    if ((Get-DateTimeOffsetNow) -gt [DateTimeOffset]::Parse($renewAfter)) {
+                        Write-Warning "The ACME Server has indicated this order's certificate should be renewed AS SOON AS POSSIBLE."
                     }
                 }
-
-                # Warn if the new window is in the past
-                if ((Get-DateTimeOffsetNow) -gt [DateTimeOffset]::Parse($renewAfter)) {
-                    Write-Warning "The ACME Server has indicated this order's certificate should be renewed AS SOON AS POSSIBLE."
-                }
+            } else {
+                Write-Warning "Unable to check ARI renewal window because cert object is missing ARIId value."
             }
         }
 

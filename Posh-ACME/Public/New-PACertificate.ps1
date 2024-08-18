@@ -193,7 +193,9 @@ function New-PACertificate {
         # Add the replaced cert ID if it exists
         # New-PAOrder will ignore it if the server doesn't support ARI
         if ($oldOrder -and ($cert = ($oldOrder | Get-PACertificate))) {
-            $orderParams.ReplacesCert = $cert.ARIId
+            if ($cert.ARIId) {
+                $orderParams.ReplacesCert = $cert.ARIId
+            }
         }
 
         # add common explicit order parameters backed up by old order params

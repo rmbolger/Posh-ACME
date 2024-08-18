@@ -68,9 +68,14 @@ function Get-PACertificate {
             # https://letsencrypt.org/2024/04/25/guide-to-integrating-ari-into-existing-acme-clients#step-3-constructing-the-ari-certid
             # https://www.ietf.org/archive/id/draft-ietf-acme-ari-03.html#name-the-renewalinfo-resource
             $akiExt = $cert.GetExtensionValue([Org.BouncyCastle.Asn1.X509.X509Extensions]::AuthorityKeyIdentifier)
-            $akiBytes = [Org.BouncyCastle.Asn1.X509.AuthorityKeyIdentifier]::GetInstance($akiExt.GetOctets()).GetKeyIdentifier()
-            $serialBytes = $cert.SerialNumber.ToByteArray()
-            $ariID = '{0}.{1}' -f (ConvertTo-Base64Url $akiBytes),(ConvertTo-Base64Url $serialBytes)
+            if ($akiExt) {
+                $akiBytes = [Org.BouncyCastle.Asn1.X509.AuthorityKeyIdentifier]::GetInstance($akiExt.GetOctets()).GetKeyIdentifier()
+                $serialBytes = $cert.SerialNumber.ToByteArray()
+                $ariID = '{0}.{1}' -f (ConvertTo-Base64Url $akiBytes),(ConvertTo-Base64Url $serialBytes)
+            } else {
+                Write-Warning "Cert with subject $($cert.SubjectDN) and serial $($cert.SerialNumber) has no AKI extension. Unable to generate ARIId value."
+                $ariID = $null
+            }
 
             # send the output object to the pipeline
             [pscustomobject]@{
