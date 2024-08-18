@@ -209,7 +209,22 @@ function New-PAOrder {
     # send the request
     try {
         $response = Invoke-ACME $header $payloadJson $acct -EA Stop
-    } catch { throw }
+    } catch {
+        # ACME server should send HTTP 409 Conflict status if we tried to specify
+        # a 'replaces' value that has already been replaced. So if we get that,
+        # retry the request without that field included.
+        if (409 -eq $_.Exception.Data.status) {
+            Write-Warning $_.Exception.Data.detail
+            Write-Verbose "Resubmitting new order without 'replaces' field."
+            $payload.Remove('replaces')
+            $payloadJson = $payload | ConvertTo-Json -Depth 5 -Compress
+            try {
+                $response = Invoke-ACME $header $payloadJson $acct -EA Stop
+            } catch { throw }
+        } else {
+            throw
+        }
+    }
 
     # process the response
     $order = $response.Content | ConvertFrom-Json
