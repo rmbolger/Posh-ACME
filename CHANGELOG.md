@@ -1,7 +1,7 @@
 ## 4.25.0 (2024-08-18)
 
 * New DNS plugins
-  * [TencentDNS](https://dnspod.com/) which is a new plugin for DNSPod that uses the Tencent Cloud API which will eventually be required when the old DNSPod API is terminated. (#553)
+  * [TencentDNS](https://dnspod.com/) which is a new plugin for DNSPod that uses the Tencent Cloud API which will eventually be required when the old DNSPod API is terminated. (#553) (Thanks @xiaotiannet)
   * [OnlineNet](https://www.scaleway.com/en/domains-and-dns/) which is Scaleway's legacy DNS API managed through `console.online.net`. (#557)
 * Gandi plugin now supports Personal Access Tokens (PAT) auth in addition to legacy API Keys (#554)
 * NameCom plugin now has better error handling and debug logs. NameCom users with 2FA enabled should also review the user guide about a setting that could break API access. (#556)
