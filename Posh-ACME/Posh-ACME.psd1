@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.24.0'
+ModuleVersion = '4.25.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,15 +83,16 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.24.0 (2024-06-19)
+## 4.25.0 (2024-08-18)
 
-* DomainOffensive plugin updated with new API root and documentation links. (Thanks @henrikalves)
-* Added [ARI (ACME Renewal Information)](https://datatracker.ietf.org/doc/draft-ietf-acme-ari/) support based on draft 03. This should be considered experimental until the RFC is finalized.
-  * `ARIId` and `Serial` fields have been added to the output of `Get-PACertificate`
-  * `DisableARI` switch added to `Set-PAServer` which disables ARI support for the server even it would otherwise be supported. This will primarily be useful if the ARI draft changes enough to break the current support and CAs update their implementations before the module can be updated. It may also be useful for providers with existing ARI support from an older unsupported draft.
-  * `ReplacesCert` parameter added to `New-PAOrder` which takes an ARIId string as returned by `Get-PACertificate`. This will be ignored if the current ACME server doesn't support ARI or support has been explicitly disabled via `Set-PAServer`.
-  * Order refreshes now perform an ARI check if supported and not disabled. The `RenewAfter` field is updated if the response indicates it is necessary.
-  * `Submit-Renewal` now triggers an order refresh if ARI is supported and not disabled.
+* New DNS plugins
+  * [TencentDNS](https://dnspod.com/) which is a new plugin for DNSPod that uses the Tencent Cloud API which will eventually be required when the old DNSPod API is terminated. (#553)
+  * [OnlineNet](https://www.scaleway.com/en/domains-and-dns/) which is Scaleway's legacy DNS API managed through `console.online.net`. (#557)
+* Gandi plugin now supports Personal Access Tokens (PAT) auth in addition to legacy API Keys (#554)
+* NameCom plugin now has better error handling and debug logs. NameCom users with 2FA enabled should also review the user guide about a setting that could break API access. (#556)
+* Minor logging fix for Active24 plugin.
+* Fixed a bug with ARI implementation that would fail renewals when the ACME server believes the replaced cert had already been replaced. (#560)
+* Fixed a bug with ARI implementation that would throw errors when the cert being replaced did not contain an AKI extention. (#561)
 '@
 
     }
