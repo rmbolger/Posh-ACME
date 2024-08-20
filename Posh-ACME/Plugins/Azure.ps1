@@ -466,15 +466,20 @@ function Connect-AZTenant {
         # we can get an access token via the Instance Metadata Service (IMDS):
         # https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/how-to-use-vm-token#get-a-token-using-azure-powershell
         # Azure Automation apparently requires a different metadata endpoint as described here:
-        # https://docs.microsoft.com/en-us/azure/automation/enable-managed-identity-for-automation#sample-get-request
+        # https://learn.microsoft.com/en-us/azure/automation/enable-managed-identity-for-automation#get-access-token-for-system-assigned-managed-identity-using-http-get
+        # Arc-enabled Servers use the same IDENTITY_ENDPOINT as Azure Automation, but seem to require the api-version parameter where Azure Automation doesn't.
+        # https://www.thomasmaurer.ch/2022/10/use-the-azure-arc-managed-identity-with-azure-powershell/
         Write-Verbose "Authenticating with Instance Metadata Service (IMDS)"
 
-        $body = @{ resource = "$($script:AZEnvironment.ManagementUrl)/" }
+        $body = @{
+            'api-version' = '2023-07-01'
+            resource = "$($script:AZEnvironment.ManagementUrl)/"
+        }
         $headers = @{ Metadata='true' }
 
         # check for the IDENTITY_ENDPOINT environment variable
         if (-not [String]::IsNullOrWhiteSpace($env:IDENTITY_ENDPOINT)) {
-            Write-Debug "Found env IDENTITY_ENPOINT: $($env:IDENTITY_ENDPOINT)"
+            Write-Debug "Found env IDENTITY_ENDPOINT: $($env:IDENTITY_ENDPOINT)"
             $metadataUri = $env:IDENTITY_ENDPOINT
 
             # check for the IDENTITY_HEADER environment variable
@@ -486,7 +491,6 @@ function Connect-AZTenant {
             # use the default/VM metadata endpoint
             Write-Debug "Using default/VM metadata endpoint"
             $metadataUri = 'http://169.254.169.254/metadata/identity/oauth2/token'
-            $body.'api-version' = '2018-02-01'
         }
 
         try {
