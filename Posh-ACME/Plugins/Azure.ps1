@@ -374,8 +374,9 @@ function ConvertFrom-AccessToken {
     $claims = $payload | ConvertFrom-Base64Url | ConvertFrom-Json -EA Stop
 
     # make sure the audience claim is correct
-    if (-not $claims.aud -or $claims.aud -ne "$($script:AZEnvironment.ManagementUrl)/") {
-        throw "The provided access token has missing or incorrect audience claim. Expected: $($script:AZEnvironment.ManagementUrl)/"
+    if (-not $claims.aud -or $claims.aud -ne "$($script:AZEnvironment.ResourceManagerUrl)/") {
+        Write-Debug "`$claims.aud = $($claims.aud)"
+        throw "The provided access token has missing or incorrect audience claim. Expected: $($script:AZEnvironment.ResourceManagerUrl)/"
     }
 
     # make sure the token hasn't expired
@@ -468,12 +469,13 @@ function Connect-AZTenant {
         # Azure Automation apparently requires a different metadata endpoint as described here:
         # https://learn.microsoft.com/en-us/azure/automation/enable-managed-identity-for-automation#get-access-token-for-system-assigned-managed-identity-using-http-get
         # Arc-enabled Servers use the same IDENTITY_ENDPOINT as Azure Automation, but seem to require the api-version parameter where Azure Automation doesn't.
-        # https://www.thomasmaurer.ch/2022/10/use-the-azure-arc-managed-identity-with-azure-powershell/
+        # https://learn.microsoft.com/en-us/azure/azure-arc/servers/managed-identity-authentication
+        # Arc supported versions: 2021-02-01 2020-06-01 2019-11-01 2019-08-15
         Write-Verbose "Authenticating with Instance Metadata Service (IMDS)"
 
         $body = @{
-            'api-version' = '2023-07-01'
-            resource = "$($script:AZEnvironment.ManagementUrl)/"
+            'api-version' = '2021-02-01'
+            resource = "$($script:AZEnvironment.ResourceManagerUrl)/"
         }
         $headers = @{ Metadata='true' }
 
@@ -495,7 +497,26 @@ function Connect-AZTenant {
 
         try {
             $tokResponse = Invoke-RestMethod $metadataUri -Body $body -Headers $headers @script:UseBasic -EA Stop
-        } catch { throw }
+        } catch {
+            # Arc-enabled servers will send a 401 response prompting to retry with Basic auth using the contents
+            # of a local file specified in the WWW-Authenticate header.
+            if (401 -eq $_.Exception.Response.StatusCode -and ($authHeader = $_.Exception.Response.Headers['WWW-Authenticate'])) {
+                # parse the file name and get the contents
+                Write-Debug "WWW-Authenticate header: $authHeader"
+                $keyFile = $authHeader.Split('=')[1]
+                $key = Get-Content $keyFile -Raw
+                # re-try with the requested Basic auth
+                try {
+                    Write-Debug "Retrying with Basic auth using key with length $($key.Length)"
+                    $headers.Authorization = "Basic $key"
+                    $tokResponse = Invoke-RestMethod $metadataUri -Body $body -Headers $headers @script:UseBasic -EA Stop
+                } catch {
+                    throw
+                }
+            } else {
+                throw
+            }
+        }
 
     } elseif ($PSCmdlet.ParameterSetName -in 'Credential','DeprecatedCredentialInsecure') {
         # We need the plaintext password to authenticate with.
