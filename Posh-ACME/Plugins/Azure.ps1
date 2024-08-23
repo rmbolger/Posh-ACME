@@ -500,7 +500,18 @@ function Connect-AZTenant {
         } catch {
             # Arc-enabled servers will send a 401 response prompting to retry with Basic auth using the contents
             # of a local file specified in the WWW-Authenticate header.
-            if (401 -eq $_.Exception.Response.StatusCode -and ($authHeader = $_.Exception.Response.Headers['WWW-Authenticate'])) {
+            # But the way we access the headers in the response is different between PowerShell 5.1 and 7+ because
+            # the .NET types are significantly different.
+            if ($_.Exception.Response -and 401 -eq $_.Exception.Response.StatusCode) {
+                $exHeaders = $_.Exception.Response.Headers
+                if ('WwwAuthenticate' -in $exHeaders.PSObject.Properties.Name) {
+                    $authHeader = $exHeaders.WwwAuthenticate.Parameter
+                } elseif ('WWW-Authenticate' -in $exHeaders) {
+                    $authHeader = $exHeaders['WWW-Authenticate']
+                } else {
+                    Write-Debug "No WWW-Authenticate header found. Re-throwing exception"
+                    throw
+                }
                 # parse the file name and get the contents
                 Write-Debug "WWW-Authenticate header: $authHeader"
                 $keyFile = $authHeader.Split('=')[1]
