@@ -373,20 +373,16 @@ function ConvertFrom-AccessToken {
     # decode the claims
     $claims = $payload | ConvertFrom-Base64Url | ConvertFrom-Json -EA Stop
 
-    # make sure the audience claim is correct
-    if (-not $claims.aud -or $claims.aud -ne "$($script:AZEnvironment.ResourceManagerUrl)/") {
-        Write-Debug "`$claims.aud = $($claims.aud)"
-        throw "The provided access token has missing or incorrect audience claim. Expected: $($script:AZEnvironment.ResourceManagerUrl)/"
-    }
-
     # make sure the token hasn't expired
     $expires = [DateTimeOffset]::FromUnixTimeSeconds($claims.exp)
+    Write-Debug "Found exp '$($claims.exp)' in decoded access token"
     if ((Get-DateTimeOffsetNow) -gt $expires) {
         throw "The provided access token expired since $($expires.ToString('u'))"
     }
 
     # return an object that contains the 'expires_on' property along with the token
     # which is what we care about from the other normal logon methods
+    Write-Debug "Found tid '$($claims.tid)' in decoded access token"
     return [pscustomobject]@{
         expires_on = $claims.exp
         access_token = $AZAccessToken
@@ -539,7 +535,7 @@ function Connect-AZTenant {
         Write-Verbose "Authenticating with password based credential"
         $clientId = [uri]::EscapeDataString($AZAppUsername)
         $clientSecret = [uri]::EscapeDataString($AZAppPasswordInsecure)
-        $resource = [uri]::EscapeDataString("$($script:AZEnvironment.ManagementUrl)/")
+        $resource = [uri]::EscapeDataString("$($script:AZEnvironment.ResourceManagerUrl)/")
         $authBody = "grant_type=client_credentials&client_id=$clientId&client_secret=$clientSecret&resource=$resource"
         try {
             $tokResponse = Invoke-RestMethod "$($script:AZEnvironment.ActiveDirectoryUrl)/$($AZTenantId)/oauth2/token" `
@@ -625,7 +621,7 @@ function Connect-AZTenant {
         Write-Verbose "Authenticating with certificate based credential"
         $clientId = [uri]::EscapeDataString($AZAppUsername)
         $assertType = [uri]::EscapeDataString('urn:ietf:params:oauth:client-assertion-type:jwt-bearer')
-        $resource = [uri]::EscapeDataString("$($script:AZEnvironment.ManagementUrl)/")
+        $resource = [uri]::EscapeDataString("$($script:AZEnvironment.ResourceManagerUrl)/")
 
         # build the JWT
         $jwtHead = @{
