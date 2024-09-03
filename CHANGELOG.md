@@ -1,3 +1,7 @@
+## 4.25.1 (2024-09-02)
+
+* Fix Azure IMDS auth for Arc-enabled servers
+
 ## 4.25.0 (2024-08-18)
 
 * New DNS plugins

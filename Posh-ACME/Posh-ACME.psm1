@@ -51,7 +51,7 @@ $script:WellKnownDirs = @{
     SSLCOM_ECC = 'https://acme.ssl.com/sslcom-dv-ecc'
 }
 $script:HEADER_NONCE = 'Replay-Nonce'
-$script:USER_AGENT = "Posh-ACME/4.25.0 PowerShell/$($PSVersionTable.PSVersion)"
+$script:USER_AGENT = "Posh-ACME/4.25.1 PowerShell/$($PSVersionTable.PSVersion)"
 $script:COMMON_HEADERS = @{'Accept-Language'='en-us,en;q=0.5'}
 
 # Add an appropriate platform to the user-agent if possible
