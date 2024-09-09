@@ -12,13 +12,13 @@
         <meta name="author" content="Ryan Bolger">
       
       
-        <link rel="canonical" href="https://poshac.me/docs/v4/Guides/Using-Alternate-Trust-Chains/">
+        <link rel="canonical" href="https://poshac.me/docs/v4/Plugins/OnlineNet/">
       
       
-        <link rel="prev" href="../Troubleshooting-DNS-Validation/">
+        <link rel="prev" href="../OVH/">
       
       
-        <link rel="next" href="../Using-Custom-Plugins/">
+        <link rel="next" href="../PointDNS/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Using Alternate Trust Chains - Posh-ACME</title>
+        <title>OnlineNet - Posh-ACME</title>
       
     
     
@@ -61,11 +61,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Using Alternate Trust Chains - Posh-ACME" >
+        <meta  property="og:title"  content="OnlineNet - Posh-ACME" >
       
         <meta  property="og:description"  content="Documentation for the Posh-ACME PowerShell module" >
       
-        <meta  property="og:image"  content="https://poshac.me/docs/v4/assets/images/social/Guides/Using-Alternate-Trust-Chains.png" >
+        <meta  property="og:image"  content="https://poshac.me/docs/v4/assets/images/social/Plugins/OnlineNet.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -73,15 +73,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://poshac.me/docs/v4/Guides/Using-Alternate-Trust-Chains/" >
+        <meta  property="og:url"  content="https://poshac.me/docs/v4/Plugins/OnlineNet/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Using Alternate Trust Chains - Posh-ACME" >
+        <meta  name="twitter:title"  content="OnlineNet - Posh-ACME" >
       
         <meta  name="twitter:description"  content="Documentation for the Posh-ACME PowerShell module" >
       
-        <meta  name="twitter:image"  content="https://poshac.me/docs/v4/assets/images/social/Guides/Using-Alternate-Trust-Chains.png" >
+        <meta  name="twitter:image"  content="https://poshac.me/docs/v4/assets/images/social/Plugins/OnlineNet.png" >
       
     
     
@@ -104,7 +104,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#using-alternate-trust-chains" class="md-skip">
+        <a href="#how-to-use-the-onlinenet-dns-plugin" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Using Alternate Trust Chains
+              OnlineNet
             
           </span>
         </div>
@@ -304,11 +304,13 @@
         
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../Plugins/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
           
   
     
@@ -324,13 +326,11 @@
         
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../Guides/" class="md-tabs__link">
           
   
     
@@ -1256,1865 +1256,6 @@
       
   
   
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
-        
-          
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../../Plugins/" class="md-nav__link ">
-              
-  
-  <span class="md-ellipsis">
-    Plugins
-  </span>
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            Plugins
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Plugin-Development-Guide/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Plugin Development Guide
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/AcmeDns/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    AcmeDns
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Active24/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Active24
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Akamai/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Akamai
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Aliyun/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Aliyun
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/All-Inkl/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    All-Inkl
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Aurora/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Aurora
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/AutoDNS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    AutoDNS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Azure/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Azure
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Beget/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Beget
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/BlueCat/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    BlueCat
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Bunny/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Bunny
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/ClouDNS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    ClouDNS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Cloudflare/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Cloudflare
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Combell/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Combell
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Constellix/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Constellix
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/CoreNetworks/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    CoreNetworks
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/DMEasy/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    DMEasy
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/DNSPod/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    DNSPod
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/DNSimple/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    DNSimple
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/DOcean/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    DOcean
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/DeSEC/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    DeSEC
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/DomainOffensive/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    DomainOffensive
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Domeneshop/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Domeneshop
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Dreamhost/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Dreamhost
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/DuckDNS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    DuckDNS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Dynu/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Dynu
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/EasyDNS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    EasyDNS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Easyname/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Easyname
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/FreeDNS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    FreeDNS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/GCloud/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    GCloud
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Gandi/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Gandi
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/GoDaddy/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    GoDaddy
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/GoogleDomains/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    GoogleDomains
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Hetzner/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Hetzner
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/HostingDe/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    HostingDe
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/HurricaneElectric/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    HurricaneElectric
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/HurricaneElectricDyn/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    HurricaneElectricDyn
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/IBMSoftLayer/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    IBMSoftLayer
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/IONOS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    IONOS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/ISPConfig/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    ISPConfig
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Infoblox/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Infoblox
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Infomaniak/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Infomaniak
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/LeaseWeb/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    LeaseWeb
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Linode/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Linode
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Loopia/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Loopia
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/LuaDns/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    LuaDns
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/NS1/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    NS1
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/NameCom/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    NameCom
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/NameSilo/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    NameSilo
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Namecheap/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Namecheap
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/OVH/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    OVH
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/OnlineNet/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    OnlineNet
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/PointDNS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    PointDNS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Porkbun/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Porkbun
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/PortsManagement/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    PortsManagement
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/PowerDNS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    PowerDNS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/RFC2136/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    RFC2136
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Rackspace/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Rackspace
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Regru/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Regru
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Route53/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Route53
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/SSHProxy/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    SSHProxy
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Selectel/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Selectel
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/SimpleDNSPlus/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    SimpleDNSPlus
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Simply/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Simply
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/SimplyCom/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    SimplyCom
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/TencentDNS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    TencentDNS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/TotalUptime/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    TotalUptime
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/UKFast/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    UKFast
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/WEDOS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    WEDOS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/WebRoot/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    WebRoot
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/WebSelfHost/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    WebSelfHost
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/WebsupportSK/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    WebsupportSK
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Windows/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Windows
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Yandex/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Yandex
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Zilore/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Zilore
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/ZoneEdit/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    ZoneEdit
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Zonomi/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Zonomi
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
     
   
   
@@ -3124,6 +1265,138 @@
       
         
           
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         
@@ -3165,7 +1438,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
           
@@ -3174,23 +1447,23 @@
               
   
   <span class="md-ellipsis">
-    Guides
+    Plugins
   </span>
   
 
             </a>
             
               
-              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="">
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
-            Guides
+            Plugins
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -3203,11 +1476,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../ACME-CA-Comparison/" class="md-nav__link">
+      <a href="../Plugin-Development-Guide/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    ACME CA Comparison
+    Plugin Development Guide
   </span>
   
 
@@ -3224,11 +1497,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../Custom-Challenge-Validation/" class="md-nav__link">
+      <a href="../AcmeDns/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    (Advanced) Custom Challenge Validation
+    AcmeDns
   </span>
   
 
@@ -3245,11 +1518,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../Environment-Variable-Reference/" class="md-nav__link">
+      <a href="../Active24/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Environment Variable Reference
+    Active24
   </span>
   
 
@@ -3266,11 +1539,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../External-Account-Binding/" class="md-nav__link">
+      <a href="../Akamai/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    External Account Binding
+    Akamai
   </span>
   
 
@@ -3287,11 +1560,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../Find-Deprecated-PluginArgs/" class="md-nav__link">
+      <a href="../Aliyun/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Find Deprecated PluginArgs
+    Aliyun
   </span>
   
 
@@ -3308,11 +1581,977 @@
   
   
     <li class="md-nav__item">
-      <a href="../Troubleshooting-DNS-Validation/" class="md-nav__link">
+      <a href="../All-Inkl/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Troubleshooting DNS Validation
+    All-Inkl
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Aurora/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Aurora
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AutoDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    AutoDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Azure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Azure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Beget/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Beget
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../BlueCat/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    BlueCat
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Bunny/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bunny
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ClouDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ClouDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Cloudflare/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cloudflare
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Combell/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Combell
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Constellix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Constellix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CoreNetworks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CoreNetworks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DMEasy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DMEasy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DNSPod/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DNSPod
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DNSimple/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DNSimple
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DOcean/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DOcean
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DeSEC/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DeSEC
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DomainOffensive/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DomainOffensive
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Domeneshop/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Domeneshop
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Dreamhost/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dreamhost
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DuckDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DuckDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Dynu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dynu
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../EasyDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    EasyDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Easyname/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Easyname
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../FreeDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FreeDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GCloud/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GCloud
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Gandi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Gandi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GoDaddy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GoDaddy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GoogleDomains/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GoogleDomains
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Hetzner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hetzner
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HostingDe/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HostingDe
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HurricaneElectric/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HurricaneElectric
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HurricaneElectricDyn/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HurricaneElectricDyn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../IBMSoftLayer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    IBMSoftLayer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../IONOS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    IONOS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ISPConfig/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ISPConfig
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Infoblox/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Infoblox
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Infomaniak/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Infomaniak
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../LeaseWeb/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    LeaseWeb
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Linode/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Linode
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Loopia/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Loopia
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../LuaDns/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    LuaDns
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../NS1/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NS1
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../NameCom/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NameCom
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../NameSilo/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NameSilo
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Namecheap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Namecheap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../OVH/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    OVH
   </span>
   
 
@@ -3342,7 +2581,7 @@
           
   
   <span class="md-ellipsis">
-    Using Alternate Trust Chains
+    OnlineNet
   </span>
   
 
@@ -3353,7 +2592,7 @@
         
   
   <span class="md-ellipsis">
-    Using Alternate Trust Chains
+    OnlineNet
   </span>
   
 
@@ -3375,69 +2614,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#lets-encrypt-options" class="md-nav__link">
+  <a href="#setup" class="md-nav__link">
     <span class="md-ellipsis">
-      Let's Encrypt Options
+      Setup
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#picking-an-alternate-chain" class="md-nav__link">
+  <a href="#using-the-plugin" class="md-nav__link">
     <span class="md-ellipsis">
-      Picking an Alternate Chain
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#serving-the-alternate-chain-from-windows" class="md-nav__link">
-    <span class="md-ellipsis">
-      Serving the Alternate Chain from Windows
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Serving the Alternate Chain from Windows">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#option-1-manually-using-psexec" class="md-nav__link">
-    <span class="md-ellipsis">
-      Option 1: Manually using PsExec
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#option-2-import-via-registry-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      Option 2: Import via Registry File
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#trigger-cert-chain-rebuild" class="md-nav__link">
-    <span class="md-ellipsis">
-      Trigger Cert Chain Rebuild
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-the-chain-being-served" class="md-nav__link">
-    <span class="md-ellipsis">
-      Verify the Chain Being Served
+      Using the Plugin
     </span>
   </a>
   
@@ -3459,7 +2647,768 @@
   
   
     <li class="md-nav__item">
-      <a href="../Using-Custom-Plugins/" class="md-nav__link">
+      <a href="../PointDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PointDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Porkbun/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Porkbun
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PortsManagement/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PortsManagement
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PowerDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PowerDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RFC2136/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    RFC2136
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Rackspace/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rackspace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Regru/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Regru
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Route53/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Route53
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SSHProxy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SSHProxy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Selectel/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Selectel
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SimpleDNSPlus/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SimpleDNSPlus
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Simply/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Simply
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SimplyCom/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SimplyCom
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TencentDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    TencentDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TotalUptime/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    TotalUptime
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UKFast/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    UKFast
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../WEDOS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    WEDOS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../WebRoot/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    WebRoot
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../WebSelfHost/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    WebSelfHost
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../WebsupportSK/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    WebsupportSK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Windows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Windows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Yandex/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Yandex
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Zilore/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Zilore
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ZoneEdit/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ZoneEdit
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Zonomi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Zonomi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../Guides/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Guides
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/ACME-CA-Comparison/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ACME CA Comparison
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Custom-Challenge-Validation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    (Advanced) Custom Challenge Validation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Environment-Variable-Reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Environment Variable Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/External-Account-Binding/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    External Account Binding
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Find-Deprecated-PluginArgs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Find Deprecated PluginArgs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Troubleshooting-DNS-Validation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Troubleshooting DNS Validation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Alternate-Trust-Chains/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Using Alternate Trust Chains
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/Using-Custom-Plugins/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3480,7 +3429,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../Using-DNS-Challenge-Aliases/" class="md-nav__link">
+      <a href="../../Guides/Using-DNS-Challenge-Aliases/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3501,7 +3450,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../Using-SecretManagement/" class="md-nav__link">
+      <a href="../../Guides/Using-SecretManagement/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3522,7 +3471,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../Using-an-Alternate-Config-Location/" class="md-nav__link">
+      <a href="../../Guides/Using-an-Alternate-Config-Location/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3543,7 +3492,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../External-Articles/" class="md-nav__link">
+      <a href="../../Guides/External-Articles/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3651,69 +3600,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#lets-encrypt-options" class="md-nav__link">
+  <a href="#setup" class="md-nav__link">
     <span class="md-ellipsis">
-      Let's Encrypt Options
+      Setup
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#picking-an-alternate-chain" class="md-nav__link">
+  <a href="#using-the-plugin" class="md-nav__link">
     <span class="md-ellipsis">
-      Picking an Alternate Chain
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#serving-the-alternate-chain-from-windows" class="md-nav__link">
-    <span class="md-ellipsis">
-      Serving the Alternate Chain from Windows
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Serving the Alternate Chain from Windows">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#option-1-manually-using-psexec" class="md-nav__link">
-    <span class="md-ellipsis">
-      Option 1: Manually using PsExec
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#option-2-import-via-registry-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      Option 2: Import via Registry File
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#trigger-cert-chain-rebuild" class="md-nav__link">
-    <span class="md-ellipsis">
-      Trigger Cert Chain Rebuild
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-the-chain-being-served" class="md-nav__link">
-    <span class="md-ellipsis">
-      Verify the Chain Being Served
+      Using the Plugin
     </span>
   </a>
   
@@ -3734,7 +3632,7 @@
                   
 
   
-    <a href="https://github.com/rmbolger/Posh-ACME/edit/main/docs/Guides/Using-Alternate-Trust-Chains.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/rmbolger/Posh-ACME/edit/main/docs/Plugins/OnlineNet.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4v-2m10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1 2.1 2.1Z"/></svg>
     </a>
@@ -3743,129 +3641,23 @@
     
       
     
-    <a href="https://github.com/rmbolger/Posh-ACME/raw/main/docs/Guides/Using-Alternate-Trust-Chains.md" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/rmbolger/Posh-ACME/raw/main/docs/Plugins/OnlineNet.md" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.15 8.15 0 0 1-1.23-2Z"/></svg>
     </a>
   
 
 
-<h1 id="using-alternate-trust-chains">Using Alternate Trust Chains<a class="headerlink" href="#using-alternate-trust-chains" title="Permanent link">&para;</a></h1>
-<p>The ACME protocol allows for a CA to offer alternate trust chains in order to accommodate the natural lifecycle of Root and Issuing certificates. As of this writing, the only public ACME CA that currently offers alternate trust chains is Let's Encrypt. But the instructions in this guide should work for any ACME CA.</p>
-<h2 id="lets-encrypt-options">Let's Encrypt Options<a class="headerlink" href="#lets-encrypt-options" title="Permanent link">&para;</a></h2>
-<p>To understand why Let's Encrypt is offering multiple trust chains and why you as a site/service operator would choose one or the other, it is helpful to read the following posts:</p>
-<ul>
-<li><a href="https://letsencrypt.org/docs/dst-root-ca-x3-expiration-september-2021/">DST Root CA X3 Expiration (September 2021)</a></li>
-<li><a href="https://letsencrypt.org/2020/12/21/extending-android-compatibility.html">Extending Android Device Compatibility for Let's Encrypt Certificates</a></li>
-<li><a href="https://community.letsencrypt.org/t/production-chain-changes/150739">Production Chain Changes</a></li>
-<li><a href="https://letsencrypt.org/2023/07/10/cross-sign-expiration.html">Shortening the Let's Encrypt Chain of Trust</a></li>
-</ul>
-<p>Your default choice is currently the longer chain that builds to the expired <code>DST Root CA X3</code> self-signed certificate which should be compatible with almost all Android devices until 2024. The alternate choice is the shorter chain that builds to the <code>ISRG Root X1</code> self-signed certificate which doesn't expire until 2035.</p>
-<p>Ultimately, your choice should depend on the clients that are connecting to your service. But if you don't know, it's probably safest to just leave the default. Let's Encrypt also has a <a href="https://letsencrypt.org/docs/certificate-compatibility/">Certificate Compatibility</a> page that can help.</p>
-<p>It is also a perfectly valid option to switch to a different <a href="../ACME-CA-Comparison/">public ACME CA</a> either permanently or until the dust settles on the DST Root expiration.</p>
-<h2 id="picking-an-alternate-chain">Picking an Alternate Chain<a class="headerlink" href="#picking-an-alternate-chain" title="Permanent link">&para;</a></h2>
-<p><code>New-PACertificate</code>, <code>New-PAOrder</code>, and <code>Set-PAOrder</code> all have a <code>-PreferredChain</code> parameter that work the same way. You provide the common name of a certificate in the chain you want to select. For Let's Encrypt, that would be <code>ISRG Root X1</code> even though it exists in both chains. The alternate chain wins because that cert is closer to the root (it <em>is</em> the root) than the default chain.</p>
-<p>Here's an example of getting a new cert with the alternate chain using <a href="https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting">splatting</a>.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$certParams</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">Domain</span> <span class="p">=</span> <span class="s1">&#39;*.example.com&#39;</span><span class="p">,</span><span class="s1">&#39;example.com&#39;</span>
-    <span class="n">AcceptTOS</span> <span class="p">=</span> <span class="nv">$true</span>
-    <span class="n">Contact</span> <span class="p">=</span> <span class="s1">&#39;admin@example.com&#39;</span>
-    <span class="n">Plugin</span> <span class="p">=</span> <span class="s1">&#39;FakeDNS&#39;</span>
-    <span class="n">PluginArgs</span> <span class="p">=</span> <span class="p">@{</span>
-        <span class="n">FDToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;FakeDNS API Token&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="n">PreferredChain</span> <span class="p">=</span> <span class="s1">&#39;ISRG Root X1&#39;</span>
+<h1 id="how-to-use-the-onlinenet-dns-plugin">How To Use the OnlineNet DNS Plugin<a class="headerlink" href="#how-to-use-the-onlinenet-dns-plugin" title="Permanent link">&para;</a></h1>
+<p>This plugin works against the <a href="https://www.scaleway.com/en/domains-and-dns/">Online.net</a> DNS provider which is now known as Scaleway. However, this plugin only works against the legacy online.net v1 API. It is assumed that you have already setup an account and purchased the domain you will be working with that can be managed from the legacy <a href="https://console.online.net/">console.online.net</a> dashboard.</p>
+<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
+<p>Login to <a href="https://console.online.net/en/api/access">API Access</a> and record your "private access token". You can also generate a new one at will and record that instead. But only the last generated token will work.</p>
+<h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
+<p>Use your token value with the <code>ONToken</code> SecureString parameter.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">ONToken</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Online.net Token&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
 <span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="nv">@certParams</span>
-</code></pre></div>
-<p>You can also modify an existing order to use the alternate chain which will change both the current certificate files (if they exist) and future renewals.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">Set-PAOrder</span> <span class="n">-Name</span> <span class="s1">&#39;example.com&#39;</span> <span class="n">-PreferredChain</span> <span class="s1">&#39;ISRG Root X1&#39;</span>
-</code></pre></div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Changing the chain on an existing certificate will only update the files in the Posh-ACME order folder. Even if the order has the <code>Install</code> property set to <code>$true</code>, it will not re-import the current certificate to the Windows certificate store. It will only do that on the next renewal.</p>
-</div>
-<h2 id="serving-the-alternate-chain-from-windows">Serving the Alternate Chain from Windows<a class="headerlink" href="#serving-the-alternate-chain-from-windows" title="Permanent link">&para;</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>As of February 2023, the instructions in this section no longer work on up-to-date Windows instances because Microsoft issued a trust store update that explicitly disallows the system to use the expired <code>DST Root CA X3</code> cert. However, the instructions will remain for future reference and historical purposes.</p>
-</div>
-<p>While the <code>-PreferredChain</code> option will make Posh-ACME download the alternate chain for the files in your config, you may notice that on Windows your website/application is still serving the default chain. Unlike many Linux applications that have explicit configuration options for chain configuration, applications that use the Windows certificate store usually rely on the underlying operating system to decide what chain to serve with the leaf certificate.</p>
-<p>There does not seem to be a way to differentiate the chains being served based on application. All websites and applications using leaf certs from the same Intermediate CA will serve the same chain. But it is possible to influence which chain based on the by manipulating the contents of the various Windows trust stores.</p>
-<p>The default chain that Windows picks for an LE cert following the expiration of <code>DST Root CA X3</code> is actually Let's Encrypt's shorter "alternate" chain which does not include the cross-signed copy of <code>ISRG Root X1</code> needed for old Android compatibility. Convincing Windows to serve Let's Encrypt's longer "default" chain that does support old Android devices currently requires a hack that involves un-trusting the legitimate self-signed <code>ISRG Root X1</code> on the user account hosting your service. In the case of IIS, that usually means the local SYSTEM account.</p>
-<p>There are a number of different ways to make the modifications, but generally speaking the following needs to happen in the cert stores associated with the user running the service.</p>
-<ul>
-<li>Add the <a href="https://letsencrypt.org/certs/isrgrootx1.der">self-signed ISRG Root X1</a> certificate to <code>Untrusted Certificates</code>.</li>
-<li>Add the <a href="https://letsencrypt.org/certs/isrg-root-x1-cross-signed.der">cross-signed ISRG Root X1</a> certificate to <code>Intermediate Certification Authorities</code>.</li>
-<li>Add the <a href="https://letsencrypt.org/certs/lets-encrypt-r3.der">current R3</a> certificate to <code>Intermediate Certification Authorities</code>. <em>(This one may already exist here)</em></li>
-</ul>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This process is an unsupported hack and will partially break certificate validation against sites/services using Let's Encrypt certificates when accessed by software or web browsers on this user account. It should not affect validation for other users on the system.</p>
-</div>
-<h3 id="option-1-manually-using-psexec">Option 1: Manually using PsExec<a class="headerlink" href="#option-1-manually-using-psexec" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Download the 3 certificates linked above (2 versions of ISRG Root X1 and a copy of R3)</li>
-<li>Download Microsoft's <a href="https://docs.microsoft.com/en-us/sysinternals/downloads/psexec">PsExec</a> utility and run the following from an admin prompt to open the Certificate Manager for the SYSTEM user.</li>
-</ul>
-<div class="highlight"><pre><span></span><code>psexec.exe -i -s certmgr.msc
-</code></pre></div>
-<ul>
-<li>Navigate to <code>Untrusted Certificates</code> and expand</li>
-<li>Right click it, select <code>All Tasks</code> - <code>Import</code></li>
-<li>Browse to the <strong>self-signed</strong> ISRG Root X1 you downloaded and complete the wizard to import it</li>
-<li>Navigate to <code>Intermediate Certification Authorities</code> and expand</li>
-<li>Right click it, select <code>All Tasks</code> - <code>Import</code></li>
-<li>Browse to the <strong>cross-signed</strong> ISRG Root X1 you downloaded and complete the wizard to import it</li>
-<li>Look for an existing copy of <code>R3</code> issued by <code>ISRG Root X1</code> and expiring in 2025. <em>(It's okay if there are multiple copies listed)</em></li>
-<li>If it doesn't exist, import it the same way you did for the cross-signed ISRG Root X1</li>
-</ul>
-<h3 id="option-2-import-via-registry-file">Option 2: Import via Registry File<a class="headerlink" href="#option-2-import-via-registry-file" title="Permanent link">&para;</a></h3>
-<p>Many find it easier to import a registry file containing the necessary cert changes. Here are two that allow you to switch back and forth between the "default" and "alternate" chain configurations.</p>
-<ul>
-<li><a href="../../assets/files/LetsEncrypt-DefaultChain-SYSTEM.reg.txt">LetsEncrypt-DefaultChain-SYSTEM.reg</a></li>
-<li><a href="../../assets/files/LetsEncrypt-AltChain-SYSTEM.reg.txt">LetsEncrypt-AltChain-SYSTEM.reg</a></li>
-</ul>
-<p>The first one imports the 3 certs as described in the manual method. The second one deletes them. Download the one you want, remove the <code>.txt</code> extension so it becomes <code>.reg</code>, and double-click to import it.</p>
-<h3 id="trigger-cert-chain-rebuild">Trigger Cert Chain Rebuild<a class="headerlink" href="#trigger-cert-chain-rebuild" title="Permanent link">&para;</a></h3>
-<p>In order for the cert changes to take effect, the most reliable method is to reboot the server. If you are unable or don't want to reboot, you may also be able to trigger a chain rebuild by causing IIS to rebind the certificate on your site.</p>
-<p>On Windows Server 2012 R2 or newer, you can use the following command to rebind the cert as long as you know the certificate thumbprint.  From PowerShell:</p>
-<div class="highlight"><pre><span></span><code><span class="p">&amp;</span> <span class="nv">$env:SystemRoot</span><span class="p">\</span><span class="n">system32</span><span class="p">\</span><span class="n">inetsrv</span><span class="p">\</span><span class="n">appcmd</span><span class="p">.</span><span class="n">exe</span> <span class="n">renew</span> <span class="n">binding</span> <span class="p">/</span><span class="n">oldcert</span><span class="p">:</span><span class="n">THUMBPRINT</span> <span class="p">/</span><span class="n">newcert</span><span class="p">:</span><span class="n">THUMBPRINT</span>
-</code></pre></div>
-<p>On earlier OSes, you can try modifying the binding from IIS Manager or just delete and re-create it. But again, the most reliable way is a reboot.</p>
-<h2 id="verify-the-chain-being-served">Verify the Chain Being Served<a class="headerlink" href="#verify-the-chain-being-served" title="Permanent link">&para;</a></h2>
-<p>If your website is exposed to the Internet, you can use a number of web based SSL checkers to verify which chain is being served by your site. Here are a couple popular ones:</p>
-<ul>
-<li><a href="https://www.ssllabs.com/ssltest/">Qualys SSL Labs</a></li>
-<li><a href="https://decoder.link/sslchecker/">Namecheap SSL Checker</a></li>
-</ul>
-<p>If your website or service is only listening on your internal network, the most common way to check the chain is using OpenSSL. It's usually pre-installed on Linux and MacOS. But you'll have to download and install it for Windows. A popular distribution is available from <a href="https://slproweb.com/products/Win32OpenSSL.html">Shining Light Productions</a>. All you should need is the "Light" Win64 version of whatever is the latest build.</p>
-<p>Run the following to check your site where <code>SERVER</code> is the hostname or IP of your server.</p>
-<div class="highlight"><pre><span></span><code>openssl s_client -connect SERVER:443
-</code></pre></div>
-<p>If your server requires using an SNI hostname, you can use this alternative:</p>
-<div class="highlight"><pre><span></span><code>openssl s_client -connect SERVER:443 -servername HOSTNAME
-</code></pre></div>
-<p>The output will be quite long and you may need to Ctrl-C to cancel the command. But the output you're looking for should be within the first 10 lines of output. There will be a block of text between two sets of <code>---</code> characters that should look like either of these:</p>
-<p>Default/Long Chain:</p>
-<div class="highlight"><pre><span></span><code>---
-Certificate chain
- 0 s:CN = example.com
-   i:C = US, O = Let&#39;s Encrypt, CN = R3
- 1 s:C = US, O = Let&#39;s Encrypt, CN = R3
-   i:C = US, O = Internet Security Research Group, CN = ISRG Root X1
- 2 s:C = US, O = Internet Security Research Group, CN = ISRG Root X1
-   i:O = Digital Signature Trust Co., CN = DST Root CA X3
----
-</code></pre></div>
-<p>Alternate/Short Chain:</p>
-<div class="highlight"><pre><span></span><code>---
-Certificate chain
- 0 s:CN = example.com
-   i:C = US, O = Let&#39;s Encrypt, CN = R3
- 1 s:C = US, O = Let&#39;s Encrypt, CN = R3
-   i:C = US, O = Internet Security Research Group, CN = ISRG Root X1
----
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">OnlineNet</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
 
 
@@ -3899,7 +3691,7 @@ Certificate chain
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../Troubleshooting-DNS-Validation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Troubleshooting DNS Validation">
+          <a href="../OVH/" class="md-footer__link md-footer__link--prev" aria-label="Previous: OVH">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -3909,20 +3701,20 @@ Certificate chain
                 Previous
               </span>
               <div class="md-ellipsis">
-                Troubleshooting DNS Validation
+                OVH
               </div>
             </div>
           </a>
         
         
           
-          <a href="../Using-Custom-Plugins/" class="md-footer__link md-footer__link--next" aria-label="Next: Using Custom Plugins">
+          <a href="../PointDNS/" class="md-footer__link md-footer__link--next" aria-label="Next: PointDNS">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Using Custom Plugins
+                PointDNS
               </div>
             </div>
             <div class="md-footer__button md-icon">
