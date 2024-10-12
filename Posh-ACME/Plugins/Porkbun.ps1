@@ -1,5 +1,3 @@
-# API Documentation: https://porkbun.com/api/json/v3/documentation
-
 function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt
@@ -15,59 +13,57 @@ function Add-DnsTxt
         [SecureString] $PorkbunAPIKey,
         [Parameter(Mandatory, Position = 3)]
         [SecureString] $PorkbunSecret,
+        [string] $PorkbunAPIHost = 'api.porkbun.com',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
-    );
+    )
 
-    [string] $APIKey = [PSCredential]::new('Username', $PorkbunAPIKey).GetNetworkCredential().Password;
-    [string] $APISecret = [PSCredential]::new('Username', $PorkbunSecret).GetNetworkCredential().Password;
+    [string] $APIKey = [PSCredential]::new('Username', $PorkbunAPIKey).GetNetworkCredential().Password
+    [string] $APISecret = [PSCredential]::new('Username', $PorkbunSecret).GetNetworkCredential().Password
 
-    $DomainInfo = Get-PorkbunDomainInfo -PorkbunAPIKey $APIKey -PorkbunSecret $APISecret -LongName $RecordName;
+    $domainQuery = @{
+        LongName = $RecordName
+        PorkbunAPIKey = $APIKey
+        PorkbunSecret = $APISecret
+        PorkbunAPIHost = $PorkbunAPIHost
+    }
+    $DomainInfo = Get-PorkbunDomainInfo @domainQuery
 
     # Get the portion of the full name that is the domain name (e.g. 'record.name.sub.example.com' will become 'example.com')
-    [string] $DomainName = $DomainInfo.Domain;
+    [string] $DomainName = $DomainInfo.Domain
     # Get the portion of the full name that will become the record name (e.g. 'record.name.sub.example.com' will become 'record.name.sub')
-    [string] $RecordNameShort = ($RecordName -ireplace [Regex]::Escape($DomainName), [string]::Empty).TrimEnd('.');
+    [string] $RecordNameShort = ($RecordName -ireplace [Regex]::Escape($DomainName), [string]::Empty).TrimEnd('.')
 
     # Get any existing TXT record(s) that already match what we want to create
-    [object[]] $EqualRecords = @($DomainInfo.Records | Where-Object { ($_.type -EQ 'TXT') -AND ($_.name -eq $RecordName) -AND ($_.content -EQ $TxtValue) });
+    [object[]] $EqualRecords = @($DomainInfo.Records | Where-Object { ($_.type -EQ 'TXT') -AND ($_.name -eq $RecordName) -AND ($_.content -EQ $TxtValue) })
 
     if ($EqualRecords.Count -EQ 0)
     {
-        Write-Debug 'This record does not exist yet, creating it';
-        $bodyObject = @{
-            name = $RecordNameShort
-            type = 'TXT'
-            content = $TxtValue
-            apikey = $APIKey
-            secretapikey = $APISecret
-        }
-
+        Write-Debug 'This record does not exist yet, creating it'
         Write-Verbose "Creating record `"$RecordNameShort`" with value `"$TxtValue`" on domain `"$DomainName`""
         $queryParams = @{
-            Uri = "https://porkbun.com/api/json/v3/dns/create/$DomainName"
+            Uri = "https://$PorkbunAPIHost/api/json/v3/dns/create/$DomainName"
             Method = 'POST'
-            Body = $bodyObject | ConvertTo-Json
-            ErrorAction = 'Stop'
-            Verbose = $false
+            BodyObject = @{
+                name = $RecordNameShort
+                type = 'TXT'
+                content = $TxtValue
+                apikey = $APIKey
+                secretapikey = $APISecret
+            }
         }
-
-        # sanitize credentials for logging
-        $bodyObject.apikey = 'XXXXXXXX'
-        $bodyObject.secretapikey = 'XXXXXXXX'
-        Write-Debug "POST $($queryParams.Uri)`n$($bodyObject | ConvertTo-Json)"
-
-        $APIResult = Invoke-WebRequest @queryParams @script:UseBasic
-
-        if ($APIResult.StatusCode -NE 200) { throw "API returned status $($APIResult.StatusCode)"; }
-        $ResultData = ConvertFrom-Json $APIResult.Content;
-        if ($ResultData.status -NE 'SUCCESS') { throw "API returned result $($ResultData.status)"; }
-        Write-Debug 'Successfully created record.';
+        try {
+            $ResultData = Invoke-Porkbun @queryParams
+            if ($ResultData.status -NE 'SUCCESS') { throw "API returned result $($ResultData.status)" }
+            Write-Debug 'Successfully created record.'
+        } catch {
+            throw
+        }
     }
     else
     {
-        Write-Debug 'A record already exists with this value, so no creation is necessary';
-        return;
+        Write-Debug 'A record already exists with this value, so no creation is necessary'
+        return
     }
 
     <#
@@ -105,47 +101,56 @@ function Remove-DnsTxt
         [SecureString] $PorkbunAPIKey,
         [Parameter(Mandatory, Position = 3)]
         [SecureString] $PorkbunSecret,
+        [string] $PorkbunAPIHost = 'api.porkbun.com',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
-    );
+    )
 
-    [string] $APIKey = [PSCredential]::new('Username', $PorkbunAPIKey).GetNetworkCredential().Password;
-    [string] $APISecret = [PSCredential]::new('Username', $PorkbunSecret).GetNetworkCredential().Password;
+    [string] $APIKey = [PSCredential]::new('Username', $PorkbunAPIKey).GetNetworkCredential().Password
+    [string] $APISecret = [PSCredential]::new('Username', $PorkbunSecret).GetNetworkCredential().Password
 
-    $DomainInfo = Get-PorkbunDomainInfo -PorkbunAPIKey $APIKey -PorkbunSecret $APISecret -LongName $RecordName;
+    $domainQuery = @{
+        LongName = $RecordName
+        PorkbunAPIKey = $APIKey
+        PorkbunSecret = $APISecret
+        PorkbunAPIHost = $PorkbunAPIHost
+    }
+    $DomainInfo = Get-PorkbunDomainInfo @domainQuery
 
     # Get the portion of the full name that is the domain name (e.g. 'record.name.sub.example.com' will become 'example.com')
-    [string] $DomainName = $DomainInfo.Domain;
+    [string] $DomainName = $DomainInfo.Domain
 
     # Get any existing TXT record(s) that have matching content
-    [object[]] $EqualRecords = @($DomainInfo.Records | Where-Object { ($_.type -EQ 'TXT') -AND ($_.name -eq $RecordName) -AND ($_.content -EQ $TxtValue) });
+    [object[]] $EqualRecords = @($DomainInfo.Records | Where-Object { ($_.type -EQ 'TXT') -AND ($_.name -eq $RecordName) -AND ($_.content -EQ $TxtValue) })
 
     if ($EqualRecords.Count -EQ 0)
     {
-        Write-Debug 'There are no records with this content, so no deletion is necessary';
-        return;
+        Write-Debug 'There are no records with this content, so no deletion is necessary'
+        return
     }
     else
     {
-        Write-Debug "Found $($EqualRecords.Count) record(s) to delete.";
+        Write-Debug "Found $($EqualRecords.Count) record(s) to delete."
         foreach($RecordToDelete in $EqualRecords)
         {
-            $RecordID = $RecordToDelete.id;
+            $RecordID = $RecordToDelete.id
 
             Write-Verbose "Deleting record ID `"$RecordID`" on domain `"$DomainName`""
             $queryParams = @{
-                Uri = "https://porkbun.com/api/json/v3/dns/delete/$DomainName/$RecordID"
+                Uri = "https://$PorkbunAPIHost/api/json/v3/dns/delete/$DomainName/$RecordID"
                 Method = 'POST'
-                Body = "{`"secretapikey`": `"$APISecret`", `"apikey`": `"$APIKey`"}"
-                ErrorAction = 'Stop'
-                Verbose = $false
+                BodyObject = @{
+                    apikey = $APIKey
+                    secretapikey = $APISecret
+                }
             }
-            Write-Debug "POST $($queryParams.Uri)"
-            $APIResult = Invoke-WebRequest @queryParams @script:UseBasic
-            if ($APIResult.StatusCode -NE 200) { throw "API returned status $($APIResult.StatusCode)"; }
-            $ResultData = ConvertFrom-Json $APIResult.Content;
-            if ($ResultData.status -NE 'SUCCESS') { throw "API returned result $($ResultData.status)"; }
-            Write-Debug 'Successfully deleted record.';
+            try {
+                $ResultData = Invoke-Porkbun @queryParams
+                if ($ResultData.status -NE 'SUCCESS') { throw "API returned result $($ResultData.status)" }
+                Write-Debug 'Successfully deleted record.'
+            } catch {
+                throw
+            }
         }
     }
 
@@ -176,7 +181,7 @@ function Save-DnsTxt
     (
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
-    );
+    )
 
     <#
     .SYNOPSIS
@@ -192,36 +197,90 @@ function Save-DnsTxt
     #>
 }
 
+##################################
+# Helper Functions
+##################################
+
+# API Documentation: https://porkbun.com/api/json/v3/documentation
+
+function Invoke-Porkbun
+{
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Uri,
+        [string]$Method,
+        [hashtable]$BodyObject
+    )
+
+    # Porkbun seems to have some sort of rate limiting that results in HTTP 503 errors
+    # when you hit it (or maybe it's just overloaded?). But there's no documentation
+    # about it and there are no Retry-After headers in the response. So we're just
+    # going to implement a dumb retry mechanic.
+    $queryParams = @{
+        Uri = $Uri
+        Method = $Method
+        Body = ($BodyObject | ConvertTo-Json)
+        ErrorAction = 'Stop'
+        Verbose = $false
+    }
+
+    # sanitize credentials for logging
+    $BodyObject.apikey = 'REDACTED'
+    $BodyObject.secretapikey = 'REDACTED'
+
+    for ($i=0; $i -lt 3; $i++) {
+        try {
+            Write-Debug "POST $($queryParams.Uri)`n$($BodyObject|ConvertTo-Json)"
+            $ResultData = Invoke-RestMethod @queryParams @script:UseBasic
+            return $ResultData
+        }
+        catch {
+            if ($_.Exception.Response.StatusCode -eq 503) {
+                Write-Debug "API Temporarily Unavailable. Waiting and Re-trying."
+                Start-Sleep -Seconds 2
+                continue
+            } else {
+                throw
+            }
+        }
+    }
+    throw "API responding as Temporarily Unavailable. Gave up retrying."
+}
+
 function Get-PorkbunDomainInfo
 {
     [CmdletBinding()]
     param
     (
+        [Parameter(Mandatory)]
+        [string] $LongName,
+        [Parameter(Mandatory)]
         [string] $PorkbunAPIKey,
+        [Parameter(Mandatory)]
         [string] $PorkbunSecret,
-        [string] $LongName
+        [string] $PorkbunAPIHost = 'api.porkbun.com'
     )
 
-    [string] $RequestBody = "{`"secretapikey`": `"$PorkbunSecret`", `"apikey`": `"$PorkbunAPIKey`"}";
+    Write-Debug "Looking for domain `"$LongName`""
 
-    Write-Debug "Looking for domain `"$LongName`"";
-    [string[]] $Sections = $LongName.Split('.');
-    [int] $MaxIndex = $Sections.Count - 1;
-    for ([int]$i = 0; $i -LT $MaxIndex; $i++)
+    [string[]] $Sections = $LongName.Split('.')
+    [int] $MaxIndex = $Sections.Count - 1
+    for ([int]$i = 0; $i -lt $MaxIndex; $i++)
     {
-        [string] $NameToCheck = [string]::Join('.', $Sections[$i .. $MaxIndex]);
-        Write-Debug "Querying API for `"$NameToCheck`"";
+        [string] $NameToCheck = [string]::Join('.', $Sections[$i .. $MaxIndex])
+        Write-Debug "Querying API for `"$NameToCheck`""
 
         try {
             $queryParams = @{
-                Uri = "https://porkbun.com/api/json/v3/dns/retrieve/$NameToCheck"
+                Uri = "https://$PorkbunAPIHost/api/json/v3/dns/retrieve/$NameToCheck"
                 Method = 'POST'
-                Body = $RequestBody
-                ErrorAction = 'Stop'
-                Verbose = $false
+                BodyObject = @{
+                    apikey = $PorkbunAPIKey
+                    secretapikey = $PorkbunSecret
+                }
             }
-            Write-Debug "POST $($queryParams.Uri)"
-            $APIResult = Invoke-WebRequest @queryParams @script:UseBasic
+            $ResultData = Invoke-Porkbun @queryParams
         }
         catch {
             if ($_.Exception.Response.StatusCode -eq 400) {
@@ -233,26 +292,31 @@ function Get-PorkbunDomainInfo
             }
         }
 
-        if ($APIResult.StatusCode -NE 200) { Write-Debug "API returned code $($APIResult.StatusCode) for domain `"$NameToCheck`""; continue; }
-        $ResultData = ConvertFrom-Json $APIResult.Content;
-        if ($ResultData.status -NE 'SUCCESS') { Write-Debug "API returned status $($ResultData.status) for domain `"$NameToCheck`""; continue; }
+        if ($ResultData.status -NE 'SUCCESS') {
+            Write-Debug "API returned status $($ResultData.status) for domain `"$NameToCheck`""
+            continue
+        }
 
-        Write-Debug "Found domain `"$NameToCheck`"";
-        return New-Object 'PSObject' -Property @{ Domain = $NameToCheck; Records = $ResultData.records; };
+        Write-Debug "Found domain `"$NameToCheck`""
+        $domainInfo = [pscustomobject]@{
+            Domain = $NameToCheck
+            Records = $ResultData.records
+        }
+        return $domainInfo
     }
-    throw "No matching domain could be found for `"$LongName`" on this Porkbun account. Check that the domain is correct, that your API key and secret are entered correctly, and that you've enabled API access for this domain in the settings.";
+    throw "No matching domain could be found for `"$LongName`" on this Porkbun account. Check that the domain is correct, that your API key and secret are entered correctly, and that you've enabled API access for this domain in the settings."
 
     <#
     .SYNOPSIS
         Finds the domain and existing records.
     .DESCRIPTION
         Uses the Porkbun API to find the relevant domain and existing records for this full name.
+    .PARAMETER LongName
+        The combined record/domain name to query for.
     .PARAMETER PorkbunAPIKey
         The API key to use, obtained from https://porkbun.com/account/api
     .PARAMETER PorkbunSecret
         The API secret key corresponding to the API key, also obtained from https://porkbun.com/account/api (not accessible after being generated)
-    .PARAMETER LongName
-        The combined record/domain name to query for.
     .OUTPUTS
         An object containing a 'Domain' property, which contains the base domain name, and a 'Records' property which contains all currently existing records for this domain, including ones for other subdomains.
     .EXAMPLE
