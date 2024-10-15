@@ -15,6 +15,7 @@ Plugin | Provider | Guide | PS Core Compatible
 ------ | -------- | ----- | :----------------:
 AcmeDns | [acme-dns](https://github.com/joohoi/acme-dns) | [Usage Guide](AcmeDns.md) | :white_check_mark:
 Active24 | [Active24](https://Active24.com) | [Usage Guide](Active24.md) | :white_check_mark:
+AddrTools | [addr.tools](https://challenges.addr.tools) | [Usage Guide](AddrTools.md) | :white_check_mark:
 Akamai | [Akamai Edge DNS](https://www.akamai.com/products/edge-dns) | [Usage Guide](Akamai.md) | :white_check_mark:
 Aliyun | [Aliyun (Alibaba Cloud)](https://www.alibabacloud.com/product/dns) | [Usage Guide](Aliyun.md) | :white_check_mark:
 All-Inkl | [All-Inkl](https://all-inkl.com/) | [Usage Guide](All-Inkl.md) | :white_check_mark:
