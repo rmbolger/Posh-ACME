@@ -79,7 +79,7 @@ function Update-PAOrder {
                 }
 
                 if ($resp.suggestedWindow) {
-                    $renewAfter = $resp.suggestedWindow.start
+                    $renewAfter = Repair-ISODate $resp.suggestedWindow.start
                     if ($renewAfter -ne $Order.RenewAfter) {
                         Write-Verbose "Updating renewal window to $renewAfter from ARI response"
                         $Order.RenewAfter = $renewAfter
