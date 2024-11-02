@@ -1,3 +1,10 @@
+## 4.26.0 (2024-11-01)
+
+* New DNS plugin [AddrTools](https://challenges.addr.tools/) (#572)
+* Porkbun plugin updated with new API endpoint. Vendor decommissioning old endpoint on 2024-12-01. Please upgrade before then. (#570)
+* Porkbun plugin added retry mechanic to deal with rate limiting errors.
+* Fixed ARI related date parsing bug when using PowerShell 7+. (#578)
+
 ## 4.25.1 (2024-09-02)
 
 * Fix Azure IMDS auth for Arc-enabled servers
