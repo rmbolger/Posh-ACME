@@ -260,8 +260,15 @@ function Find-Zone {
     }
 
     # Get all of the domains on the account
-    $zones = Invoke-Wedos dns-domains-list $Credential | Select-Object -Expand domain
-    if (-not $zones) {
+    $wedosResponse = Invoke-Wedos dns-domains-list $Credential
+    
+    if ($null -ne $wedosResponse.domain) {
+        # Extract each domain by accessing the properties of the PSCustomObject
+        $zones = @($wedosResponse.domain.PSObject.Properties | ForEach-Object { $_.Value })
+    
+        # Debug output to confirm zones
+        Write-Debug "Found domains: $($zones | ConvertTo-Json -Depth 10)"
+    } else {
         Write-Warning "No WEDOS hosted domains found."
         return
     }
