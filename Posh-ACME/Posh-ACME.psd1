@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.25.1'
+ModuleVersion = '4.26.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -83,9 +83,12 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.25.1 (2024-09-02)
+## 4.26.0 (2024-11-01)
 
-* Fix Azure IMDS auth for Arc-enabled servers
+* New DNS plugin [AddrTools](https://challenges.addr.tools/) (#572)
+* Porkbun plugin updated with new API endpoint. Vendor decommissioning old endpoint on 2024-12-01. Please upgrade before then. (#570)
+* Porkbun plugin added retry mechanic to deal with rate limiting errors.
+* Fixed ARI related date parsing bug when using PowerShell 7+. (#578)
 '@
 
     }
