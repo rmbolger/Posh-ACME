@@ -288,6 +288,7 @@ function Find-Zone {
         # The only properties should be zone objects, so just get them all
         $zones = @($resp.domain.PSObject.Properties | ForEach-Object { $_.Value })
     }
+    Write-Debug "Found domains: $($zones | ConvertTo-Json)"
 
     if ($zones.Count -eq 0) {
         Write-Warning "No WEDOS hosted domains found."
