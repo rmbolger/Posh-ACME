@@ -32,7 +32,7 @@ function Add-DnsTxt {
             rdata = $TxtValue
             ttl = 300 # minimum
         }
-        Invoke-Wedos dns-row-add $WedosCredential -Data $data
+        $null = Invoke-Wedos dns-row-add $WedosCredential -Data $data
         if ($zone -notin $script:WedosZonesToSave) {
             $script:WedosZonesToSave += $zone
         }
@@ -97,7 +97,7 @@ function Remove-DnsTxt {
             domain = $zone
             row_id = $rec.ID
         }
-        Invoke-Wedos dns-row-delete $WedosCredential -Data $data
+        $null = Invoke-Wedos dns-row-delete $WedosCredential -Data $data
         if ($zone -notin $script:WedosZonesToSave) {
             $script:WedosZonesToSave += $zone
         }
@@ -143,7 +143,7 @@ function Save-DnsTxt {
         $data = @{
             name = $zone
         }
-        Invoke-Wedos dns-domain-commit $WedosCredential -Data $data
+        $null = Invoke-Wedos dns-domain-commit $WedosCredential -Data $data
     }
     $script:WedosZonesToSave = @()
 
@@ -260,15 +260,36 @@ function Find-Zone {
     }
 
     # Get all of the domains on the account
-    $wedosResponse = Invoke-Wedos dns-domains-list $Credential
-    
-    if ($null -ne $wedosResponse.domain) {
-        # Extract each domain by accessing the properties of the PSCustomObject
-        $zones = @($wedosResponse.domain.PSObject.Properties | ForEach-Object { $_.Value })
-    
-        # Debug output to confirm zones
-        Write-Debug "Found domains: $($zones | ConvertTo-Json -Depth 10)"
+    $resp = Invoke-Wedos dns-domains-list $Credential
+
+    # For some unknown reason, the dns-domains-list command can returns the domain data
+    # in two different ways. It seems to be account specific, but we don't have enough
+    # sample data to know why a given account uses one format or another. Maybe region
+    # specific? Maybe age of the account?
+    # Regardless, we need to account for both potential responses to get the zone data.
+    # Example 1: An array of zone objects
+    # {
+    #   "domain": [
+    #     {"name": "example.com", "type": "primary", "status": "active"},
+    #     {"name": "example.net", "type": "primary", "status": "active"}
+    #   ]
+    # }
+    # Example 2: And object with numeric keys and zone object values
+    # {
+    #   "domain": {
+    #     "24": {"name": "example.com", "type": "primary", "status": "active"},
+    #     "11": {"name": "example.net", "type": "primary", "status": "active"}
+    #   }
+    # }
+    if ($resp.domain -is [array]) {
+        # We can use the array as-is
+        $zones = $resp.domain
     } else {
+        # The only properties should be zone objects, so just get them all
+        $zones = $resp.domain.PSObject.Properties.Value
+    }
+
+    if (-not $zones) {
         Write-Warning "No WEDOS hosted domains found."
         return
     }
