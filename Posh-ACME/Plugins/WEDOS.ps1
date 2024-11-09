@@ -283,13 +283,13 @@ function Find-Zone {
     # }
     if ($resp.domain -is [array]) {
         # We can use the array as-is
-        $zones = $resp.domain
+        $zones = @($resp.domain)
     } else {
         # The only properties should be zone objects, so just get them all
-        $zones = $resp.domain.PSObject.Properties.Value
+        $zones = @($resp.domain.PSObject.Properties | ForEach-Object { $_.Value })
     }
 
-    if (-not $zones) {
+    if ($zones.Count -eq 0) {
         Write-Warning "No WEDOS hosted domains found."
         return
     }
