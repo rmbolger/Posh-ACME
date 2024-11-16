@@ -40,23 +40,3 @@ $pArgs = @{
 }
 New-PACertificate "example.com" -Plugin "INWX" -PluginArgs $pArgs
 ```
-
-
-The API key consist of two values. The X-APP-ID and X-API-KEY. Here are two examples on how you can use them:
-
-```powershell
-## The name should be value of X-APP-ID
-## The password should be value of X-API-KEY
-$pArgs = @{EuroDNS_Creds = Get-Credential}
-New-PACertificate example.com -Plugin EuroDNS -PluginArgs $pArgs
-```
-
-For a more automated approach (This method assumes you understand the risks and methods to secure the below credentials):
-
-```powershell
-$username = "My_X-APP-ID_Value"
-$password = "My_X-API-Key_Value" | ConvertTo-SecureString -AsPlainText -Force
-$cred = New-Object System.Management.Automation.PSCredential ($username, $password)
-$pArgs = @{EuroDNS_Creds = $cred}
-New-PACertificate example.com -Plugin EuroDNS -PluginArgs $pArgs
-```
