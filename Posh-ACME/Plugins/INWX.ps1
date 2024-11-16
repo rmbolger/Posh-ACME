@@ -19,7 +19,7 @@ function Add-DnsTxt {
     )
 
     # login
-    Connect-INWX $INWXUsername $INWXPassword $INWXSharedSecret
+    Connect-Inwx $INWXUsername $INWXPassword $INWXSharedSecret
 
     # set communication endpoint
     # production system at: https://api.domrobot.com
@@ -28,7 +28,7 @@ function Add-DnsTxt {
 
     # get DNS zone (main domain) and name (sub domain) belonging to the record (assumes
     # $zoneName contains the zone name containing the record)
-    $zoneName = Find-INWXZone $RecordName
+    $zoneName = Find-InwxZone $RecordName
     $recShort = $RecordName.Remove($RecordName.ToLower().LastIndexOf($zoneName.ToLower().TrimEnd(".")), $zoneName.TrimEnd(".").Length).TrimEnd(".");
     Write-Debug "RecordName: $RecordName"
     Write-Debug "zoneName: $zoneName"
@@ -91,7 +91,6 @@ function Add-DnsTxt {
         }
     }
     Remove-Variable "reqParams", "response", "responseContent"
-
 
     if ($recordIds) {
         foreach ($recordId in $recordIds) {
@@ -243,7 +242,7 @@ function Remove-DnsTxt {
     )
 
     # login
-    Connect-INWX $INWXUsername $INWXPassword $INWXSharedSecret
+    Connect-Inwx $INWXUsername $INWXPassword $INWXSharedSecret
 
     # set communication endpoint
     # production system at: https://api.domrobot.com
@@ -252,7 +251,7 @@ function Remove-DnsTxt {
 
     # get DNS zone (main domain) and name (sub domain) belonging to the record (assumes
     # $zoneName contains the zone name containing the record)
-    $zoneName = Find-INWXZone $RecordName
+    $zoneName = Find-InwxZone $RecordName
     $recShort = $RecordName.Remove($RecordName.ToLower().LastIndexOf($zoneName.ToLower().TrimEnd(".")), $zoneName.TrimEnd(".").Length).TrimEnd(".");
     Write-Debug "RecordName: $RecordName"
     Write-Debug "zoneName: $zoneName"
@@ -316,7 +315,6 @@ function Remove-DnsTxt {
         }
     }
     Remove-Variable "reqParams", "response", "responseContent"
-
 
     if ($recordIds) {
         foreach ($recordId in $recordIds) {
@@ -386,7 +384,7 @@ function Remove-DnsTxt {
         The password belonging to the username provided via -INWXUsername.
 
     .PARAMETER INWXSharedSecret
-        To be implemented, patches welcome (if you are not using 2FA, do not define this parameter).
+        To be implemented, patches welcome (if 2FA is not being used, leave this parameter undefined).
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -480,12 +478,11 @@ function Save-DnsTxt {
 # API Docs at https://www.inwx.de/en/help/apidoc
 # Result codes at https://www.inwx.de/en/help/apidoc/f/ch04.html
 #
-# There is also an OT&E test system. It provides the usual WebUI and API using a test
-# database. On the OTE system no actions will be charged. So one can test how to
-# register domains etc., an OT&E account can be created at
-# https://www.ote.inwx.de/en/customer/signup
+# There is also an OT&E test system. It provides the usual WebUI and API using a test database.
+# On the OTE system no actions will be charged. So one can test how to register domains etc..
+# An OT&E account can be created at https://www.ote.inwx.de/en/customer/signup
 
-function Connect-INWX {
+function Connect-Inwx {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
@@ -515,6 +512,10 @@ function Connect-INWX {
 
         # get shared secret as plaintext
         # $INWXSharedSecretInsecure = [pscredential]::new('a',$INWXSharedSecret).GetNetworkCredential().Password
+
+
+
+
 
         # FIXME to be implemented
         # Probably useful:
@@ -579,7 +580,7 @@ function Connect-INWX {
         }
         # unexpected
         default {
-            throw "Unexpected response from INWX (code: $($responseContent.code)). The plugin might need an update (Connect-INWX)."
+            throw "Unexpected response from INWX (code: $($responseContent.code)). The plugin might need an update (Connect-Inwx)."
         }
     }
     Remove-Variable "reqParams", "response", "responseContent"
@@ -598,8 +599,7 @@ function Connect-INWX {
         The password associated with the username provided via -INWXUsername.
 
     .PARAMETER INWXSharedSecret
-        To be implemented, patches welcome (if you are not using 2FA, do not define this parameter).
-
+        To be implemented, patches welcome (if 2FA is not being used, leave this parameter undefined).
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -607,7 +607,7 @@ function Connect-INWX {
 }
 
 
-function Find-INWXZone {
+function Find-InwxZone {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
@@ -692,7 +692,7 @@ function Find-INWXZone {
             }
             # unexpected
             default {
-                throw "Unexpected response from INWX (code: $($responseContent.code)). The plugin might need an update (Find-INWXZone)."
+                throw "Unexpected response from INWX (code: $($responseContent.code)). The plugin might need an update (Find-InwxZone)."
             }
         }
         Remove-Variable "reqParams", "response", "responseContent"
