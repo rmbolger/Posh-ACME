@@ -208,7 +208,7 @@ function Add-DnsTxt {
         The INWX Username to access the API.
 
     .PARAMETER INWXPassword
-        The password belonging to the username provided via -INWXUsername.
+        The password associated with the username provided via -INWXUsername.
 
     .PARAMETER INWXSharedSecret
         If your account is secured by mobile TAN ("2FA", "two-factor authentication"), you must define the shared secret (usually presented below the QR code during mobile TAN setup) to enable this function to generate OTP codes. The shared secret is NOT not the 6-digit code you need to enter when logging in. If you are not using 2FA, leave this parameter undefined or set it to $null..
@@ -360,7 +360,7 @@ function Remove-DnsTxt {
             Remove-Variable "reqParams", "response", "responseContent"
         }
     } else {
-        Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
+        Write-Debug "A record $RecordName with an associated value of $TxtValue does not exist. Nothing to do."
     }
     Remove-Variable "recordIds"
 
@@ -381,7 +381,7 @@ function Remove-DnsTxt {
         The INWX Username to access the API.
 
     .PARAMETER INWXPassword
-        The password belonging to the username provided via -INWXUsername.
+        The password associated with the username provided via -INWXUsername.
 
     .PARAMETER INWXSharedSecret
         If your account is secured by mobile TAN ("2FA", "two-factor authentication"), you must define the shared secret (usually presented below the QR code during mobile TAN setup) to enable this function to generate OTP codes. The shared secret is NOT not the 6-digit code you need to enter when logging in. If you are not using 2FA, leave this parameter undefined or set it to $null..
@@ -763,7 +763,7 @@ function Get-InwXOtp {
     }
 
     $hmac = New-Object -TypeName System.Security.Cryptography.HMACSHA1
-    # padwith 'A' to a multiple of 8 characters and convert base32 to bytes
+    # pad with 'A' to a multiple of 8 characters and convert base32 to bytes
     $hmac.key = $SharedSecretInsecure.ToUpper().ToCharArray() + @("A") * ((8 - $SharedSecretInsecure.Length % 8) % 8) | `
         ForEach-Object { $q = 1L } {
             $q = ($q -shl 5) -bor [Math]::Max(0, "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".IndexOf($PSItem))

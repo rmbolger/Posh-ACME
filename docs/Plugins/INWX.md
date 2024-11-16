@@ -6,7 +6,7 @@ This plugin works against the [INWX](https://www.inwx.de/) DNS provider. It is a
 
 ## Setup
 
-There is no special setup needed, as INWX uses a username and password for API authentication. However, it makes sense to set up a [dedicated API user](https://www.inwx.de/en/account) in your account with the "DNS Management" role for automation purposes. This way, nothing besides your DNS settings is at risk if your API credentials are compromised—your domain ownership and other user accounts will remain secure.
+There is no special setup required, as INWX uses a username and password for API authentication. However, it is recommended to [set up](https://www.inwx.de/en/account) a dedicated API sub-user for automation purposes, with only the "DNS Management" role assigned. This way, if your API credentials are compromised, only your DNS settings are at risk—your domain ownership and other user accounts will remain secure.
 
 ## Using the Plugin
 
