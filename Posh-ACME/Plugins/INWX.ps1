@@ -470,7 +470,6 @@ function Save-DnsTxt {
     #>
 }
 
-
 ############################
 # Helper Functions
 ############################
@@ -569,7 +568,6 @@ function Connect-Inwx {
     Remove-Variable "reqParams", "response", "responseContent"
 
     if ($2faActive) {
-
         # generate needed OTP
         if ($INWXSharedSecret) {
             $Otp = Get-InwXOtp $INWXSharedSecret
@@ -638,7 +636,6 @@ function Connect-Inwx {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     #>
 }
-
 
 function Find-InwxZone {
     [CmdletBinding()]
@@ -741,7 +738,6 @@ function Find-InwxZone {
         The DNS Resource Record of which to find the belonging DNS zone.
     #>
 }
-
 function Get-InwXOtp {
     [CmdletBinding()]
     param(
