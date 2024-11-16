@@ -45,7 +45,7 @@ function Publish-Challenge {
 
         # call the function with the required parameters and splatting the rest
         Write-Debug "Calling $Plugin plugin to add $recordName TXT with value $txtValue"
-        Add-DnsTxt -RecordName $recordName -TxtValue $txtValue @PluginArgs
+        Add-DnsTxt -RecordName $recordName.TrimEnd('.') -TxtValue $txtValue @PluginArgs
 
     } else { # http-01 is the only other challenge type we support at the moment
 
