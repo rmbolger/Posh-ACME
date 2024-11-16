@@ -211,7 +211,7 @@ function Add-DnsTxt {
         The password belonging to the username provided via -INWXUsername.
 
     .PARAMETER INWXSharedSecret
-        To be implemented, patches welcome (if 2FA is not being used, leave this parameter undefined).
+        If your account is secured by mobile TAN ("2FA", "two-factor authentication"), you must define the shared secret (usually presented below the QR code during mobile TAN setup) to enable this function to generate OTP codes. The shared secret is NOT not the 6-digit code you need to enter when logging in. If you are not using 2FA, leave this parameter undefined or set it to $null..
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -384,7 +384,7 @@ function Remove-DnsTxt {
         The password belonging to the username provided via -INWXUsername.
 
     .PARAMETER INWXSharedSecret
-        To be implemented, patches welcome (if 2FA is not being used, leave this parameter undefined).
+        If your account is secured by mobile TAN ("2FA", "two-factor authentication"), you must define the shared secret (usually presented below the QR code during mobile TAN setup) to enable this function to generate OTP codes. The shared secret is NOT not the 6-digit code you need to enter when logging in. If you are not using 2FA, leave this parameter undefined or set it to $null..
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -496,33 +496,10 @@ function Connect-Inwx {
         $ExtraConnectParams
     )
 
-    # no need to login again, we already have an authenticated session
+    # no need to log in again; an authenticated session already exists
     if ((Test-Path 'variable:script:INWXSession') -and ($script:INWXSession)) {
         Write-Debug "Login not needed, using cached INWX session."
         return
-    }
-
-    # generate needed OTP
-    if ($INWXSharedSecret) {
-        # If your account is secured by mobile TAN ("2FA", "2 factor authentication"),
-        # you also have to define the shared secret (usually presented below the QR
-        # code during mobile TAN setup) to enable this function to generate OTP codes.
-        # The shared secret is NOT not the 6 digit code you need to enter when logging
-        # in.
-
-        # get shared secret as plaintext
-        # $INWXSharedSecretInsecure = [pscredential]::new('a',$INWXSharedSecret).GetNetworkCredential().Password
-
-
-
-
-
-        # FIXME to be implemented
-        # Probably useful:
-        # - https://github.com/inwx/php-client/blob/master/src/Domrobot.php#L329
-        # - https://github.com/inwx/php-client/blob/master/src/Domrobot.php#L374-L381
-        # - https://github.com/acmesh-official/acme.sh/blob/master/dnsapi/dns_inwx.sh#L222C4-L263
-        throw "Sorry, the INWX Shared Secret / 2FA functionality is not supported yet. Patches are welcome."
     }
 
     # get password as plaintext
@@ -553,7 +530,9 @@ function Connect-Inwx {
 
     $response = $False
     $responseContent = $False
+    $2faActive = $False
     try {
+        # commented out to prevent printing the credentials: Write-Debug "$($reqParams.Method) $apiRoot`n$($reqParams.Body)"
         $response = Invoke-WebRequest @reqParams @script:UseBasic
     } catch {
         throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (unknown error)"
@@ -570,13 +549,17 @@ function Connect-Inwx {
         # 1000: Command completed successfully
         1000 {
             Write-Verbose "INWX login was successful."
+            if ($responseContent.resData.tfa -eq "GOOGLE-AUTH") {
+                Write-Verbose "2FA (Mobile TAN) is active, account needs unlocking."
+                $2faActive = $True
+            }
         }
 
         # 2200: Authentication error
         # 2400: Command failed
         {$PSItem -eq 2200 -or
          $PSItem -eq 2400} {
-            Write-Verbose "INWX login failed."
+            throw "INWX login failed. Please check your credentials."
         }
         # unexpected
         default {
@@ -584,6 +567,56 @@ function Connect-Inwx {
         }
     }
     Remove-Variable "reqParams", "response", "responseContent"
+
+    if ($2faActive) {
+
+        # generate needed OTP
+        if ($INWXSharedSecret) {
+            $Otp = Get-InwXOtp $INWXSharedSecret
+        } else {
+            throw "Mobile TAN (2FA) is active for the $INWXUsername account. Please provide the INWXSharedSecret plugin parameter or disable 2FA for the account."
+        }
+
+        # unlock account
+        # https://www.inwx.de/en/help/apidoc/f/ch02.html#account.unlock
+        $reqParams = @{}
+        $reqParams.Uri = $apiRoot
+        $reqParams.Method = "POST"
+        $reqParams.ContentType = "application/json"
+        $reqParams.WebSession = $INWXSession
+        $reqParams.Body = @{
+            "jsonrpc" = "2.0";
+            "id" = [guid]::NewGuid()
+            "method" = "account.unlock";
+            "params" = @{
+                "tan" = $Otp;
+            };
+        } | ConvertTo-Json
+
+        $response = $False
+        $responseContent = $False
+        try {
+            Write-Verbose "Deleting record $RecordName with value $TxtValue."
+            Write-Debug "$($reqParams.Method) $apiRoot`n$($reqParams.Body)"
+            $response = Invoke-WebRequest @reqParams @script:UseBasic
+        } catch {
+            throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (unknown error)."
+        }
+        if ($response -eq $False -or
+            $response.StatusCode -ne 200) {
+            throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (status code $($response.StatusCode))."
+        } else {
+            $responseContent = $response.Content | ConvertFrom-Json
+        }
+        Write-Debug "Received content:`n$($response.Content)"
+        # 1000: Command completed successfully
+        if ($responseContent.code -eq 1000) {
+            Write-Verbose "Unlocking the account was successful."
+        } else {
+            throw "Unlocking the account failed (code: $($responseContent.code))."
+        }
+        Remove-Variable "reqParams", "response", "responseContent"
+    }
 
     # save the session variable for usage in all later calls
     $script:INWXSession = $INWXSession
@@ -599,7 +632,7 @@ function Connect-Inwx {
         The password associated with the username provided via -INWXUsername.
 
     .PARAMETER INWXSharedSecret
-        To be implemented, patches welcome (if 2FA is not being used, leave this parameter undefined).
+        If your account is secured by mobile TAN ("2FA", "two-factor authentication"), you must define the shared secret (usually presented below the QR code during mobile TAN setup) to enable this function to generate OTP codes. The shared secret is NOT not the 6-digit code you need to enter when logging in. If you are not using 2FA, leave this parameter undefined or set it to $null..
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -706,5 +739,70 @@ function Find-InwxZone {
 
     .PARAMETER RecordName
         The DNS Resource Record of which to find the belonging DNS zone.
+    #>
+}
+
+function Get-InwXOtp {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [securestring]$SharedSecret,
+        [Parameter(Position=1)]
+        [int]$Length = 6,
+        [Parameter(Position=2)]
+        [int]$Window = 30
+    )
+
+    # get shared secret as plaintext
+    $SharedSecretInsecure = [pscredential]::new('a',$SharedSecret).GetNetworkCredential().Password
+    $Epoch = Get-Date -Year 1970 -Month 1 -Day 1 -Hour 0 -Minute 0 -Second 0
+
+    # wait a bit if there are only a few seconds left in the current TOTP window
+    $seconds = ([math]::floor((New-TimeSpan -Start $Epoch -End (Get-Date).ToUniversalTime()).TotalSeconds))
+    $counter = [math]::floor($seconds / $Window)
+    $nextTimeStep = ($counter + 1) * $Window
+    if (($nextTimeStep - $seconds) -le 5) {
+        Write-Debug "Current TOTP window is a bit tight, waiting a few seconds for the next one."
+        Start-Sleep -Seconds 5
+    }
+
+    $hmac = New-Object -TypeName System.Security.Cryptography.HMACSHA1
+    # padwith 'A' to a multiple of 8 characters and convert base32 to bytes
+    $hmac.key = $SharedSecretInsecure.ToUpper().ToCharArray() + @("A") * ((8 - $SharedSecretInsecure.Length % 8) % 8) | `
+        ForEach-Object { $q = 1L } {
+            $q = ($q -shl 5) -bor [Math]::Max(0, "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".IndexOf($PSItem))
+            if ($q -ge 0x10000000000L) {
+                [BitConverter]::GetBytes($q)[4..0]
+                $q = 1L
+            }
+        }
+
+    $randHash = $hmac.ComputeHash([BitConverter]::GetBytes([long]([Math]::Floor((New-TimeSpan -Start ($Epoch) -End (Get-Date).ToUniversalTime()).TotalSeconds / $Window)))[7..0])
+
+    $offset = $randhash[($randHash.Length-1)] -band 0xf
+    $fullOtp = ($randhash[$offset] -band 0x7f) -shl 24
+    $fullOtp += ($randHash[$offset + 1] -band 0xff) -shl 16
+    $fullOtp += ($randHash[$offset + 2] -band 0xff) -shl 8
+    $fullOtp += ($randHash[$offset + 3] -band 0xff)
+
+    return [int](($fullOtp % [math]::pow(10, $Length)).ToString("0" * $Length))
+
+    <#
+    .SYNOPSIS
+        Get Time-base One-Time Password Algorithm (RFC 6238)
+
+    .PARAMETER SharedSecret
+        The shared secret to use.
+
+    .PARAMETER Length
+        Length of the generated OTP. Defaults to 6.
+
+    .PARAMETER Window
+       Window of time in seconds within which the OTP code will be valid. Defaults to 30.
+
+    .EXAMPLE
+        Get-Otp (ConvertTo-SecureString -String "xxxxxxxx" -AsPlainText -Force)
+
+        Generates a 6-digit OTP code based on the shared secret "xxxxxxxx"
     #>
 }
