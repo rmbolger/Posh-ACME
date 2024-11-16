@@ -13,7 +13,7 @@ There is no special setup needed, as INWX uses a username and password for API a
 
 ## Using the Plugin
 
-You will need to provide the username as String to `INWXUsername` and the password belonging to the username as a SecureString value to `INWXPassword`.
+You will need to provide the username as String to `INWXUsername` and the password associated with the username as a SecureString value to `INWXPassword`.
 
 ```powershell
 $pArgs = @{

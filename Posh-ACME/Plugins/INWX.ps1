@@ -35,7 +35,7 @@ function Add-DnsTxt {
     Write-Debug "recShort: $recShort"
 
     # check if the record exists
-    # https://www.inwx.de/de/help/apidoc/f/ch02s15.html#nameserver.info
+    # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.info
     $reqParams = @{}
     $reqParams.Uri = $apiRoot
     $reqParams.Method = "POST"
@@ -97,7 +97,7 @@ function Add-DnsTxt {
         foreach ($recordId in $recordIds) {
             Write-Verbose "DNS record is already existing, going to update it."
             # update record
-            # https://www.inwx.de/de/help/apidoc/f/ch02s15.html#nameserver.updateRecord
+            # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.updateRecord
             $reqParams = @{}
             $reqParams.Uri = $apiRoot
             $reqParams.Method = "POST"
@@ -144,7 +144,7 @@ function Add-DnsTxt {
 
         Write-Verbose "DNS record does not exist, going to create it."
         # create record
-        # https://www.inwx.de/de/help/apidoc/f/ch02s15.html#nameserver.createRecord
+        # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.createRecord
         $reqParams = @{}
         $reqParams.Uri = $apiRoot
         $reqParams.Method = "POST"
@@ -212,7 +212,7 @@ function Add-DnsTxt {
         The password belonging to the username provided via -INWXUsername.
 
     .PARAMETER INWXSharedSecret
-        To be implemented, patches welcome (if you are not using 2FA, do not define this parameter).
+        To be implemented, patches welcome (if 2FA is not being used, leave this parameter undefined).
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -259,7 +259,7 @@ function Remove-DnsTxt {
     Write-Debug "recShort: $recShort"
 
     # check if the record exists
-    # https://www.inwx.de/de/help/apidoc/f/ch02s15.html#nameserver.info
+    # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.info
     $reqParams = @{}
     $reqParams.Uri = $apiRoot
     $reqParams.Method = "POST"
@@ -322,7 +322,7 @@ function Remove-DnsTxt {
         foreach ($recordId in $recordIds) {
             Write-Verbose "DNS record is existing, going to delete it."
             # delete record
-            # https://www.inwx.de/de/help/apidoc/f/ch02s15.html#nameserver.deleteRecord
+            # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.deleteRecord
             $reqParams = @{}
             $reqParams.Uri = $apiRoot
             $reqParams.Method = "POST"
@@ -414,7 +414,7 @@ function Save-DnsTxt {
     # or finalize changes performed by Add/Remove functions.
 
     # let's logout (best effort)
-    # https://www.inwx.de/de/help/apidoc/f/ch02.html#account.logout
+    # https://www.inwx.de/en/help/apidoc/f/ch02.html#account.logout
     $reqParams = @{}
     $reqParams.Uri = $apiRoot
     $reqParams.Method = "POST"
@@ -456,10 +456,10 @@ function Save-DnsTxt {
 
     <#
     .SYNOPSIS
-        Commits changes for pending DNS TXT record modifications to INWX and closes an existing RPC session by logging out.
+        Commits changes to pending DNS TXT record modifications to INWX and closes an existing RPC session by logging out.
 
     .DESCRIPTION
-        This function is currently a dummy which just does a clean logout as INWX does not have a "finalize" or "commit" workflow.
+        This function is currently a dummy which just does a clean logout as INWX does not support a 'finalize' or 'commit' workflow.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -482,7 +482,7 @@ function Save-DnsTxt {
 #
 # There is also an OT&E test system. It provides the usual WebUI and API using a test
 # database. On the OTE system no actions will be charged. So one can test how to
-# register domains etc.,# a OT&E account can be created at
+# register domains etc., an OT&E account can be created at
 # https://www.ote.inwx.de/en/customer/signup
 
 function Connect-INWX {
@@ -517,7 +517,10 @@ function Connect-INWX {
         # $INWXSharedSecretInsecure = [pscredential]::new('a',$INWXSharedSecret).GetNetworkCredential().Password
 
         # FIXME to be implemented
-        # Propably useful: https://github.com/acmesh-official/acme.sh/blob/master/dnsapi/dns_inwx.sh#L222C4-L263
+        # Probably useful:
+        # - https://github.com/inwx/php-client/blob/master/src/Domrobot.php#L329
+        # - https://github.com/inwx/php-client/blob/master/src/Domrobot.php#L374-L381
+        # - https://github.com/acmesh-official/acme.sh/blob/master/dnsapi/dns_inwx.sh#L222C4-L263
         throw "Sorry, the INWX Shared Secret / 2FA functionality is not supported yet. Patches are welcome."
     }
 
@@ -592,7 +595,7 @@ function Connect-INWX {
         The INWX Username to access the API.
 
     .PARAMETER INWXPassword
-        The password belonging to the username provided via -INWXUsername.
+        The password associated with the username provided via -INWXUsername.
 
     .PARAMETER INWXSharedSecret
         To be implemented, patches welcome (if you are not using 2FA, do not define this parameter).
@@ -641,7 +644,7 @@ function Find-INWXZone {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
 
         # check if the part of the domain is the zone
-        # https://www.inwx.de/de/help/apidoc/f/ch02s15.html#nameserver.info
+        # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.info
         $reqParams = @{}
         $reqParams.Uri = $apiRoot
         $reqParams.Method = "POST"
@@ -685,7 +688,7 @@ function Find-INWXZone {
             }
             # 2303: Object does not exist
             2303 {
-                Write-Debug "$zoneTest does not seem to be the zone holding the records, trying next deeper match."
+                Write-Debug "$zoneTest does not seem to be the zone holding the records, trying the next deeper match."
             }
             # unexpected
             default {
