@@ -27,7 +27,7 @@ function Add-DnsTxt {
     Write-Debug "Found zone $zoneName"
 
     # grab the relative portion of the fqdn
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     if ($recShort -eq $RecordName) { $recShort = '@' }
 
     # query for an existing record
@@ -106,7 +106,7 @@ function Remove-DnsTxt {
     Write-Debug "Found zone $zoneName"
 
     # grab the relative portion of the fqdn
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     if ($recShort -eq $RecordName) { $recShort = '@' }
 
     # query for an existing record

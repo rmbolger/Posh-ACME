@@ -38,14 +38,14 @@ Function Add-DnsTxt {
             $Records = Invoke-RestMethod "$apiBase/zones/records/all/$($zoneTest)?format=json" `
                 -ContentType 'application/json' -Headers $Headers -Method GET @script:UseBasic -EA Stop
         } catch { continue }
-        $domain = $zoneTest
-        Write-Verbose "Found $domain zone"
+        $zoneName = $zoneTest
+        Write-Verbose "Found $zoneName zone"
         break
     }
-    if (-not $domain) { throw "Unable to find zone for $RecordName" }
+    if (-not $zoneName) { throw "Unable to find zone for $RecordName" }
 
     # grab the relative portion of the fqdn
-    $recShort = ($RecordName -ireplace [regex]::Escape($domain), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 
     # check for existing record
     $rec = $Records.data | Where-Object { $_.type -eq 'TXT' -and $_.host -eq $recShort -and $_.rData -eq $TxtValue }
@@ -57,7 +57,7 @@ Function Add-DnsTxt {
 
         $body = @{
             host = $recShort
-            domain = $domain
+            domain = $zoneName
             ttl = 0
             prio = 0
             type = "txt"
@@ -65,7 +65,7 @@ Function Add-DnsTxt {
         } | ConvertTo-Json
         Write-Debug $body
 
-        Invoke-RestMethod "$apiBase/zones/records/add/$domain/txt?format=json" -Method Put `
+        Invoke-RestMethod "$apiBase/zones/records/add/$zoneName/txt?format=json" -Method Put `
             -Body $body -ContentType 'application/json' -Headers $Headers @script:UseBasic | Out-Null
     }
 
@@ -143,21 +143,21 @@ Function Remove-DnsTxt {
             $Records = Invoke-RestMethod "$apiBase/zones/records/all/$($zoneTest)?format=json" `
                 -ContentType 'application/json' -Headers $Headers -Method GET @script:UseBasic -EA Stop
         } catch { continue }
-        $domain = $zoneTest
-        Write-Verbose "Found $domain zone"
+        $zoneName = $zoneTest
+        Write-Verbose "Found $zoneName zone"
         break
     }
-    if (-not $domain) { throw "Unable to find zone for $RecordName" }
+    if (-not $zoneName) { throw "Unable to find zone for $RecordName" }
 
     # grab the relative portion of the fqdn
-    $recShort = ($RecordName -ireplace [regex]::Escape($domain), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 
     # check for existing record
     $rec = $Records.data | Where-Object { $_.type -eq 'TXT' -and $_.host -eq $recShort -and $_.rData -eq $TxtValue }
     if ($rec) {
         # remove it
         Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
-        Invoke-RestMethod "$apiBase/zones/records/$domain/$($rec.id)?format=json" -Method Delete `
+        Invoke-RestMethod "$apiBase/zones/records/$zoneName/$($rec.id)?format=json" -Method Delete `
             -ContentType 'application/json' -Headers $Headers @script:UseBasic | Out-Null
     } else {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."

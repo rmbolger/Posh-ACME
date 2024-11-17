@@ -5,37 +5,37 @@ function Add-DnsTxt {
     param(
         [Parameter(Mandatory, Position = 0)]
         [String]$RecordName,
-        
+
         [Parameter(Mandatory, Position = 1)]
         [String]$TxtValue,
-        
+
         [Parameter(Mandatory, Position = 2)]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]$AuroraCredential = [System.Management.Automation.PSCredential]::Empty,
-        
+
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [String]$AuroraApi = 'api.auroradns.eu',
-        
+
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
     Write-Debug "convert the Credential to normal String values"
     $auroraAuthorization = @{ Api = $AuroraApi; Key = $AuroraCredential.UserName; Secret = $AuroraCredential.GetNetworkCredential().Password }
- 
+
     Write-Debug "Attempting to find hosted zone for $RecordName"
     try {
         $zone = Invoke-AuroraFindZone -RecordName $RecordName @auroraAuthorization
         $ZoneID = $zone.id
         $zoneName = $zone.name
     } catch { throw }
-    
+
     if ((-not $ZoneID) -or (-not $zoneName)) {
         throw "Unable to find Aurora hosted zone for $RecordName"
     }
-    
+
     Write-Debug "Separate the portion of the name that doesn't contain the zone name"
-    $recordPath = ($RecordName -ireplace [regex]::Escape($zoneName), [String]::Empty).TrimEnd('.')
+    $recordPath = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     Write-Debug "[recordPath:$recordPath][RecordName:$RecordName]"
 
     Write-Debug "Query the existing record(s)"
@@ -86,18 +86,18 @@ function Remove-DnsTxt {
     param(
         [Parameter(Mandatory, Position = 0)]
         [String]$RecordName,
-        
+
         [Parameter(Mandatory, Position = 1)]
         [String]$TxtValue,
-        
+
         [Parameter(Mandatory, Position = 2)]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]$AuroraCredential = [System.Management.Automation.PSCredential]::Empty,
-        
+
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [String]$AuroraApi = 'api.auroradns.eu',
-        
+
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
@@ -110,13 +110,13 @@ function Remove-DnsTxt {
         $ZoneID = $zone.id
         $zoneName = $zone.name
     } catch { Write-Debug "Caught an error, $($_.Exception.Message)"; throw }
-    
+
     if ((-not $ZoneID) -or (-not $zoneName)) {
         throw "Unable to find Aurora hosted zone for $RecordName"
     }
-    
+
     Write-Debug "Separate the portion of the name that doesn't contain the zone name"
-    $recordPath = ($RecordName -ireplace [regex]::Escape($zoneName), [String]::Empty).TrimEnd('.')
+    $recordPath = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     Write-Debug "[recordPath:$recordPath][RecordName:$RecordName]"
 
     Write-Debug "Query the existing record(s)"
@@ -214,27 +214,27 @@ function Get-AuroraDNSAuthorizationHeader {
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
     https://github.com/j81blog/Posh-AuroraDNS
-#>  
+#>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
         [String]$Key,
-        
+
         [Parameter(Mandatory)]
         [String]$Secret,
-        
+
         [Parameter(Mandatory)]
         [String]$Method,
-        
+
         [Parameter(Mandatory)]
         [String]$Uri,
-        
+
         [Parameter()]
         [String]$ContentType = "application/json; charset=UTF-8",
-        
+
         [Parameter(DontShow)]
         [String]$TimeStamp = $((get-date).ToUniversalTime().ToString("yyyyMMddTHHmmssZ")),
-        
+
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
@@ -246,7 +246,7 @@ function Get-AuroraDNSAuthorizationHeader {
     $AuthorizationString = '{0}:{1}' -f $Key, $SignatureB64
     $Authorization = [Text.Encoding]::UTF8.GetBytes($AuthorizationString)
     $AuthorizationB64 = [Convert]::ToBase64String($Authorization)
-    
+
     $headers = @{
         'X-AuroraDNS-Date' = $TimeStamp
         'Authorization'    = $('AuroraDNSv1 {0}' -f $AuthorizationB64)
@@ -296,25 +296,25 @@ function Invoke-AuroraAddRecord {
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
     https://github.com/j81blog/Posh-AuroraDNS
-#> 
+#>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [String]$Key,
-        
+
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [String]$Secret,
-        
+
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [GUID[]]$ZoneID,
-        
+
         [String]$Name = '',
-        
+
         [String]$Content = '',
-        
+
         [int]$TTL = 3600,
 
         [ValidateSet('A', 'AAAA', 'CNAME', 'MX', 'NS', 'SOA', 'SRV', 'TXT', 'DS', 'PTR', 'SSHFP', 'TLSA')]
@@ -322,7 +322,7 @@ function Invoke-AuroraAddRecord {
 
         [Parameter()]
         [String]$Api = 'api.auroradns.eu',
-        
+
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
@@ -388,24 +388,24 @@ function Invoke-AuroraDeleteRecord {
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
     https://github.com/j81blog/Posh-AuroraDNS
-#> 
+#>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
         [string]$Key,
-        
+
         [Parameter(Mandatory)]
         [string]$Secret,
-        
+
         [Parameter(Mandatory)]
         [GUID[]]$ZoneID,
-        
+
         [Parameter(Mandatory)]
         [GUID[]]$RecordId,
-        
+
         [Parameter()]
         [String]$Api = 'api.auroradns.eu',
-        
+
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
@@ -418,7 +418,7 @@ function Invoke-AuroraDeleteRecord {
     $ApiUrl = 'https://{0}{1}' -f $Api, $Uri
     $AuthorizationHeader = Get-AuroraDNSAuthorizationHeader -Key $Key -Secret $Secret -Method $Method -Uri $Uri
     $restError = ''
-    
+
     Write-Debug "$Method URI: `"$ApiUrl`""
     try {
         $result = Invoke-RestMethod -Uri $ApiUrl -Headers $AuthorizationHeader -Method $Method -ErrorVariable restError @UseBasic
@@ -459,24 +459,24 @@ function Invoke-AuroraFindZone {
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
     https://github.com/j81blog/Posh-AuroraDNS
-#>  
+#>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory, Position = 0)]
         [String]$RecordName,
-        
+
         [Parameter(Mandatory, Position = 1)]
         [ValidateNotNullOrEmpty()]
         [String]$Key,
-        
+
         [Parameter(Mandatory, Position = 2)]
         [ValidateNotNullOrEmpty()]
         [String]$Secret,
-        
+
         [Parameter(Position = 3)]
         [ValidateNotNullOrEmpty()]
         [String]$Api = 'api.auroradns.eu',
-        
+
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
@@ -484,7 +484,7 @@ function Invoke-AuroraFindZone {
     try {
         [Object[]]$zones = Invoke-AuroraGetZones @auroraAuthorization
     } catch { Write-Debug "Caught an error, $($_.Exception.Message)"; throw }
-         
+
     Write-Debug "Search for the zone from longest to shortest set of FQDN pieces"
     $pieces = $RecordName.Split('.')
     for ($i = 0; $i -lt ($pieces.Count - 1); $i++) {
@@ -541,33 +541,33 @@ function Invoke-AuroraGetRecord {
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
     https://github.com/j81blog/Posh-AuroraDNS
-#>  
+#>
     [CmdletBinding(DefaultParameterSetName = 'All')]
     param(
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [String]$Key,
-        
+
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [String]$Secret,
-        
+
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [GUID[]]$ZoneID,
 
         [Parameter(ParameterSetName = 'GUID', Mandatory)]
         [GUID[]]$RecordID,
-        
+
         [Parameter(ParameterSetName = 'Named')]
         [String]$RecordName,
-        
+
         [Parameter(ParameterSetName = 'Named')]
         [String]$Co,
-        
+
         [Parameter()]
         [String]$Api = 'api.auroradns.eu',
-        
+
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
@@ -602,7 +602,7 @@ function Invoke-AuroraGetRecord {
         } else {
             Throw ($OutError.errormsg)
         }
-    } 
+    }
     if ( ($result.Count -gt 0) -and ($null -ne $result[0].id) -and (-not [String]::IsNullOrEmpty($($result[0].id))) ) {
         Write-Output $result
     } else {
@@ -634,13 +634,13 @@ function Invoke-AuroraGetZones {
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
     https://github.com/j81blog/Posh-AuroraDNS
-#>  
+#>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [String]$Key,
-        
+
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [String]$Secret,
@@ -648,7 +648,7 @@ function Invoke-AuroraGetZones {
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [String]$Api = 'api.auroradns.eu',
-        
+
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
@@ -717,25 +717,25 @@ function Invoke-AuroraSetRecord {
     Requires      : API Account => https://cp.pcextreme.nl/auroradns/users
 .LINK
     https://github.com/j81blog/Posh-AuroraDNS
-#> 
+#>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
         [string]$Key,
-        
+
         [Parameter(Mandatory)]
         [string]$Secret,
-        
+
         [Parameter(Mandatory)]
         [GUID[]]$ZoneID,
-        
+
         [Parameter(Mandatory)]
         [GUID[]]$RecordId,
-        
+
         [String]$Name,
-        
+
         [String]$Content,
-        
+
         [int]$TTL = 3600,
 
         [ValidateSet('A', 'AAAA', 'CNAME', 'MX', 'NS', 'SOA', 'SRV', 'TXT', 'DS', 'PTR', 'SSHFP', 'TLSA')]
@@ -745,7 +745,7 @@ function Invoke-AuroraSetRecord {
         [String]$Api = 'api.auroradns.eu',
 
         [Switch]$PassThru,
-        
+
         [Parameter(ValueFromRemainingArguments, DontShow)]
         $ExtraParams
     )
@@ -760,10 +760,10 @@ function Invoke-AuroraSetRecord {
     $restError = ''
 
     $Payload = @{ }
-    if ($PSBoundParameters.ContainsKey('Name')) { $Payload.Add('name', $Name) } 
-    if ($PSBoundParameters.ContainsKey('TTL')) { $Payload.Add('ttl', $TTL) } 
-    if ($PSBoundParameters.ContainsKey('Type')) { $Payload.Add('type', $Type) } 
-    if ($PSBoundParameters.ContainsKey('Content')) { $Payload.Add('content', $Content) } 
+    if ($PSBoundParameters.ContainsKey('Name')) { $Payload.Add('name', $Name) }
+    if ($PSBoundParameters.ContainsKey('TTL')) { $Payload.Add('ttl', $TTL) }
+    if ($PSBoundParameters.ContainsKey('Type')) { $Payload.Add('type', $Type) }
+    if ($PSBoundParameters.ContainsKey('Content')) { $Payload.Add('content', $Content) }
 
     $Body = $Payload | ConvertTo-Json
 

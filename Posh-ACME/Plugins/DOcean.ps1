@@ -28,7 +28,7 @@ function Add-DnsTxt {
     $recRoot = "https://api.digitalocean.com/v2/domains/$zoneName/records"
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     if ($recShort -eq [string]::Empty) {
         $recShort = '@'
     }
@@ -125,7 +125,7 @@ function Remove-DnsTxt {
     $recRoot = "https://api.digitalocean.com/v2/domains/$zoneName/records"
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     if ($recShort -eq [string]::Empty) {
         $recShort = '@'
     }

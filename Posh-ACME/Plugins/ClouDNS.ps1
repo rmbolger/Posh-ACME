@@ -31,7 +31,7 @@ function Add-DnsTxt {
     try { $zoneName = Find-CDZone $RecordName $body } catch { throw }
     Write-Debug "Found zone $zoneName"
 
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 
     # search for an existing record
     try { $rec = Get-CDTxtRecord $recShort $TxtValue $zoneName $body } catch { throw }
@@ -117,7 +117,7 @@ function Remove-DnsTxt {
     try { $zoneName = Find-CDZone $RecordName $body } catch { throw }
     Write-Debug "Found zone $zoneName"
 
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 
     # search for an existing record
     try { $rec = Get-CDTxtRecord $recShort $TxtValue $zoneName $body } catch { throw }

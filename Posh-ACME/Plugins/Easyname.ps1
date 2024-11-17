@@ -25,7 +25,7 @@ function Add-DnsTxt {
 
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
 
-        $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+        $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 
         $addParams = @{
             Uri = "https://my.easyname.com/en/domain/dns/create/domain/$zoneID"

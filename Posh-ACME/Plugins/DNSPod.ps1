@@ -51,7 +51,7 @@ function Add-DnsTxt {
         try {
             Write-Verbose "Adding $RecordName with value $TxtValue"
 
-            $recShort = ($RecordName -ireplace [regex]::Escape($zone.name), [string]::Empty).TrimEnd('.')
+            $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.name.TrimEnd('.')))$",''
             $addQuery = @{
                 Uri = "$DNSPodApiRoot/Record.Create"
                 Method = 'POST'
@@ -308,7 +308,7 @@ function Get-DNSPodTxtRecord {
     try {
 
         # separate the portion of the name that doesn't contain the zone name
-        $recShort = ($RecordName -ireplace [regex]::Escape($zone.name), [string]::Empty).TrimEnd('.')
+        $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.name.TrimEnd('.')))$",''
 
         # get record
         $recQuery = @{

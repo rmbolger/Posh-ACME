@@ -28,7 +28,7 @@ function Add-DnsTxt {
     Write-Debug $zoneName
 
     ### Grab the relative portion of the Fully Qualified Domain Name (FQDN)
-    $DnsTxtName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $DnsTxtName = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     Write-Debug $DnsTxtName
 
     # build the add record query
@@ -120,7 +120,7 @@ function Remove-DnsTxt {
     Write-Debug $zoneName
 
     ### Grab the relative portion of the Fully Qualified Domain Name (FQDN)
-    $DnsTxtName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $DnsTxtName = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     Write-Debug $DnsTxtName
 
     # build the delete record query

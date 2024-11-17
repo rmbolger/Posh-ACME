@@ -32,7 +32,7 @@ function Add-DnsTxt
     # Get the portion of the full name that is the domain name (e.g. 'record.name.sub.example.com' will become 'example.com')
     [string] $DomainName = $DomainInfo.Domain
     # Get the portion of the full name that will become the record name (e.g. 'record.name.sub.example.com' will become 'record.name.sub')
-    [string] $RecordNameShort = ($RecordName -ireplace [Regex]::Escape($DomainName), [string]::Empty).TrimEnd('.')
+    [string] $RecordNameShort = $RecordName -ireplace "\.?$([regex]::Escape($DomainName.TrimEnd('.')))$",''
 
     # Get any existing TXT record(s) that already match what we want to create
     [object[]] $EqualRecords = @($DomainInfo.Records | Where-Object { ($_.type -EQ 'TXT') -AND ($_.name -eq $RecordName) -AND ($_.content -EQ $TxtValue) })

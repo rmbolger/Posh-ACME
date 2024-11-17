@@ -24,7 +24,7 @@ function Add-DnsTxt {
     try { $oDomain = Find-DomeneshopZone -RecordName $RecordName -apiAuthorization $Private:apiAuthorization } catch { throw }
     Write-Debug ("Found zone {0} with id {1}" -f $oDomain.domain, $oDomain.id)
 
-    $recShort = ($RecordName -ireplace [regex]::Escape($oDomain.domain), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($oDomain.domain.TrimEnd('.')))$",''
 
     # search for an existing record
     try { $rec = Get-DomeneshopTxtRecord -RecordShortName $recShort -TxtValue $TxtValue -ZoneID $oDomain.id -apiAuthorization $Private:apiAuthorization } catch { throw }
@@ -102,7 +102,7 @@ function Remove-DnsTxt {
     try { $oDomain = Find-DomeneshopZone -RecordName $RecordName -apiAuthorization $Private:apiAuthorization } catch { throw }
     Write-Debug ("Found zone {0} with id {1}" -f $oDomain.domain, $oDomain.id)
 
-    $recShort = ($RecordName -ireplace [regex]::Escape($oDomain.domain), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($oDomain.domain.TrimEnd('.')))$",''
 
     # search for an existing record
     try { $rec = Get-DomeneshopTxtRecord -RecordShortName $recShort -TxtValue $TxtValue -ZoneID $oDomain.id -apiAuthorization $Private:apiAuthorization } catch { throw }

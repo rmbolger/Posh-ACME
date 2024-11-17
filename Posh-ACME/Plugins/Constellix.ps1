@@ -27,7 +27,7 @@ function Add-DnsTxt {
     }
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 
     # check for an existing record
     $rec = Get-ConstellixTXTRecord $recShort $zoneID $ConstellixKey $ConstellixSecretInsecure $apiBase
@@ -142,7 +142,7 @@ function Remove-DnsTxt {
     }
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 
     # check for an existing record
     $rec = Get-ConstellixTXTRecord $recShort $zoneID $ConstellixKey $ConstellixSecretInsecure $apiBase

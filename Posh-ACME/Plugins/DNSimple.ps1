@@ -37,7 +37,7 @@ function Add-DnsTxt {
 
     # get all the instances of the record
     try {
-        $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+        $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
         $uri = "$apiRoot/$acctID/zones/$zoneName/records?name=$recShort&type=TXT&per_page=100"
         Write-Debug "GET $uri"
         $resp = Invoke-RestMethod $uri @commonParams @script:UseBasic
@@ -128,7 +128,7 @@ function Remove-DnsTxt {
 
     # get all the instances of the record
     try {
-        $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+        $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
         $uri = "$apiRoot/$acctID/zones/$zoneName/records?name=$recShort&type=TXT&per_page=100"
         Write-Debug "GET $uri"
         $resp = Invoke-RestMethod $uri @commonParams @script:UseBasic

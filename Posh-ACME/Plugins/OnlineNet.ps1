@@ -25,7 +25,7 @@ function Add-DnsTxt {
     Write-Debug "Found zone $zoneName"
 
     # grab the relative portion of the fqdn
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     if ($recShort -eq [string]::Empty) { $recShort = '@' }
 
     $rec = Find-TxtRec $recShort $zoneName $TxtValue $authHeader
@@ -122,7 +122,7 @@ function Remove-DnsTxt {
     Write-Debug "Found zone $zoneName"
 
     # grab the relative portion of the fqdn
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     if ($recShort -eq [string]::Empty) { $recShort = '@' }
 
     $rec = Find-TxtRec $recShort $zoneName $TxtValue $authHeader

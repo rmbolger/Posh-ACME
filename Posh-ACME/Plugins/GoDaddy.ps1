@@ -34,7 +34,7 @@ function Add-DnsTxt {
     if (-not ($zone = Find-GDZone $RecordName $headers $apiRoot)) {
         throw "Unable to find matching zone for $RecordName."
     }
-    $recShort = ($RecordName -ireplace [regex]::Escape($zone), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.TrimEnd('.')))$",''
     if ($recShort -eq '') { $recShort = '@' }
 
     # Get a list of existing TXT records for this record name
@@ -157,7 +157,7 @@ function Remove-DnsTxt {
     if (-not ($zone = Find-GDZone $RecordName $headers $apiRoot)) {
         throw "Unable to find matching zone for $RecordName."
     }
-    $recShort = ($RecordName -ireplace [regex]::Escape($zone), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.TrimEnd('.')))$",''
     if ($recShort -eq '') { $recShort = '@' }
 
     # Get a list of existing TXT records for this record name

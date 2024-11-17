@@ -128,7 +128,7 @@ function Remove-DnsTxt {
     $proxy = Get-BlueCatWsdlProxy -Username $BlueCatUsername -Password $BlueCatPassword -Uri $BlueCatUri
     $view = Get-View -ConfigurationName $BlueCatConfig -ViewName $BlueCatView -BlueCatProxy $proxy
     $parentZone = Get-ParentZone -AbsoluteName $RecordName -ViewId $view.id -BlueCatProxy $proxy
-    $txtRecordName = ($RecordName -ireplace [regex]::Escape($parentZone.absoluteName), [string]::Empty).TrimEnd('.')
+    $txtRecordName = $RecordName -ireplace "\.?$([regex]::Escape($parentZone.absoluteName.TrimEnd('.')))$",''
     $txtRecords = $proxy.getEntitiesByName($parentZone.id, $txtRecordName, "TXTRecord", 0, [int16]::MaxValue)
     $txtRecords = $txtRecords | ForEach-Object { (ConvertPSObjectToHashtable -InputObject $_) + (StringToHashtable -String $_.properties) }
     $txtRecord = $txtRecords | Where-Object { $_.txt -eq $TxtValue }

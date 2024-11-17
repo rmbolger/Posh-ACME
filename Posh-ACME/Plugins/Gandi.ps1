@@ -35,7 +35,7 @@ function Add-DnsTxt {
     Write-Debug "Found zone $zoneName"
 
     # find the matching TXT record if it exists
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     if (-not $recShort) { $recShort = '@' }
     $recUrl = "https://dns.api.gandi.net/api/v5/domains/$zoneName/records/$recShort/TXT"
     try {
@@ -146,7 +146,7 @@ function Remove-DnsTxt {
     Write-Debug "Found zone $zoneName"
 
     # find the matching TXT record if it exists
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     if (-not $recShort) { $recShort = '@' }
     $recUrl = "https://dns.api.gandi.net/api/v5/domains/$zoneName/records/$recShort/TXT"
     try {

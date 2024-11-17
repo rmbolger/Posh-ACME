@@ -24,7 +24,7 @@ function Add-DnsTxt {
 
     if (-not (Find-TxtRec $RecordName $TxtValue $zone $WedosCredential)) {
         # empty string short names are ok for zone apex
-        $recShort = ($RecordName -ireplace [regex]::Escape($zone), [string]::Empty).TrimEnd('.')
+        $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.TrimEnd('.')))$",''
         $data = @{
             domain = $zone
             name = $recShort

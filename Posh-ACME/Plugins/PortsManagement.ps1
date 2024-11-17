@@ -398,7 +398,7 @@ function Add-PortsDnsRecord {
     }
 
     # Strip the tailing identified zone from record name
-    $RecShort = ($RecordName -ireplace [regex]::Escape($ZoneId), [string]::Empty).TrimEnd('.')
+    $RecShort = $RecordName -ireplace "\.?$([regex]::Escape($ZoneID.TrimEnd('.')))$",''
     if ($RecShort -eq [string]::Empty) {
         $RecShort = '@'
     }
@@ -488,7 +488,7 @@ function Remove-PortsDnsRecord {
     }
 
     # Strip the tailing identified zone from record name
-    $RecShort = ($RecordName -ireplace [regex]::Escape($ZoneId), [string]::Empty).TrimEnd('.')
+    $RecShort = $RecordName -ireplace "\.?$([regex]::Escape($ZoneID.TrimEnd('.')))$",''
     if ($RecShort -eq [string]::Empty) {
         $RecShort = '@'
     }
@@ -547,7 +547,7 @@ function Get-PortsDnsRecord {
         )
     }
     # Strip the tailing identified zone from record name
-    $RecShort = ($RecordName -ireplace [regex]::Escape($ZoneId), [string]::Empty).TrimEnd('.')
+    $RecShort = $RecordName -ireplace "\.?$([regex]::Escape($ZoneID.TrimEnd('.')))$",''
     if ($RecShort -eq [string]::Empty) {
         $RecShort = '@'
     }

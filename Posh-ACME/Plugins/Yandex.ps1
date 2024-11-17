@@ -28,7 +28,7 @@ function Add-DnsTxt {
     } catch { throw }
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 
     if ($rec) {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
