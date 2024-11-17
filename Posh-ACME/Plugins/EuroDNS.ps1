@@ -18,7 +18,7 @@ function Add-DnsTxt {
     Write-Verbose "Looking for Zonename in $($RecordName)..."
     $EuroDNSZone = $RecordName -replace "^(.+\.)?([^.]+\.[^.]+)$", '$2'
     Write-Verbose "Found: $($EuroDNSZone)"
-          
+
     # Getting DNS records
     try {
 
@@ -29,17 +29,17 @@ function Add-DnsTxt {
             $script:EuroDNSObject = Get-EuroDNSZone -EuroDNS_Domain $EuroDNSZone -EuroDNS_Creds $EuroDNS_Creds -ErrorAction Stop | ConvertFrom-Json
             Write-Verbose "Data Found. Number of Records: $($script:EuroDNSObject.records.count)"
 
-        } 
-        
+        }
+
         # assumes $EuroDNSZone contains the zone name containing the record
-        $recShort = ($RecordName -ireplace [regex]::Escape($EuroDNSZone), [string]::Empty).TrimEnd('.')
+        $recShort = $RecordName -ireplace "\.?$([regex]::Escape($EuroDNSZone.TrimEnd('.')))$",''
 
         if ($recShort -eq [string]::Empty) {
             $recShort = '@'
         }
 
         Write-debug "recShort is: $($recShort)"
-        
+
         # Don't want to add an identical record/value. Check for existing records:
         If (($recShort -in $script:EuroDNSObject.records.host) -and ($TxtValue -in $script:EuroDNSObject.records.rdata)){
 
@@ -67,7 +67,7 @@ function Add-DnsTxt {
 
         }
 
-        
+
     }
     catch {
         throw
@@ -114,21 +114,21 @@ function Remove-DnsTxt {
     Write-Verbose "Looking for Zonename in $($RecordName)..."
     $EuroDNSZone = $RecordName -replace "^(.+\.)?([^.]+\.[^.]+)$", '$2'
     Write-Verbose "Found: $($EuroDNSZone)"
-          
+
     # Getting DNS records
     try {
 
         # Checking to see if there is any data to work with. Don't want to overwrite in case we make multiple changes
-        If ( -not ($script:EuroDNSObject)) { 
+        If ( -not ($script:EuroDNSObject)) {
 
             Write-Verbose "Trying to get data from eurodns..."
             $script:EuroDNSObject = Get-EuroDNSZone -EuroDNS_Domain $EuroDNSZone -EuroDNS_Creds $EuroDNS_Creds -ErrorAction Stop | ConvertFrom-Json
             Write-Verbose "Data Found. Number of Records: $($script:EuroDNSObject.records.count)"
 
         }
-        
+
         # assumes $EuroDNSZone contains the zone name containing the record
-        $recShort = ($RecordName -ireplace [regex]::Escape($EuroDNSZone), [string]::Empty).TrimEnd('.')
+        $recShort = $RecordName -ireplace "\.?$([regex]::Escape($EuroDNSZone.TrimEnd('.')))$",''
 
         if ($recShort -eq [string]::Empty) {
             $recShort = '@'
@@ -149,7 +149,7 @@ function Remove-DnsTxt {
         }
 
         Write-Verbose "Number of Records now: $($script:EuroDNSObject.records.count)"
-        
+
     }
     catch {
 
@@ -190,9 +190,9 @@ function Save-DnsTxt {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-    
+
     # We want to confirm our changes before saving them
-    # Checking to see if we get a pass from eurodns with our new records. 
+    # Checking to see if we get a pass from eurodns with our new records.
     # If our object is not exactly in the format expected, then it will fail validation
     # so we should skip the saving.
     $EuroDNS_Confirm = $script:EuroDNSObject | Confirm-EuroDNS -EuroDNS_Creds $EuroDNS_Creds
@@ -234,20 +234,20 @@ function Save-DnsTxt {
 function Connect-EuroDNS {
     [CmdletBinding()]
     param (
-        
+
         [Parameter(Mandatory)]
         [pscredential]
         $EuroDNS_Creds
-        
+
     )
-    
+
     process {
         $EuroDNS_headers =  @{
             'Content-Type' = 'application/json'
             'X-APP-ID' = $EuroDNS_Creds.UserName
             'X-API-KEY' = $EuroDNS_Creds.GetNetworkCredential().Password
         }
-        
+
         $EuroDNS_headers
     }
 }
@@ -270,14 +270,14 @@ function Get-EuroDNSZone {
         try {
 
             $(Invoke-WebRequest -uri $url -headers $(Connect-EuroDNS $EuroDNS_Creds) -erroraction Stop @script:UseBasic).content
-            
+
         }
         catch {
             throw
         }
-        
+
     }
-    
+
 }
 
 # We need to validate data before saving it.
@@ -295,7 +295,7 @@ function Confirm-EuroDNS {
     process {
         $domain = $($EuroDNS_Data.name)
         $URL = "https://rest-api.eurodns.com/dns-zones/$($domain)/check"
-        
+
         try {
             $(Invoke-WebRequest $url -headers $(Connect-EuroDNS $EuroDNS_Creds) -Body ($EuroDNS_Data | ConvertTo-Json -Depth 10) -Method Post -erroraction Stop @script:UseBasic).content | ConvertFrom-Json -Depth 10
         }
@@ -317,10 +317,10 @@ function Save-EuroDNS {
         [Parameter(Mandatory)]
         [pscredential]
         $EuroDNS_Creds
-        
+
     )
-    
-        
+
+
     process {
 
         $domain = $($EuroDNS_Data.name)
@@ -329,12 +329,12 @@ function Save-EuroDNS {
         try {
 
             Invoke-WebRequest $url -headers $(Connect-EuroDNS $EuroDNS_Creds) -Body ($EuroDNS_Data | ConvertTo-Json -Depth 10) -Method Put -erroraction Stop @script:UseBasic | Out-Null
-            
+
         }
         catch {
             throw
         }
 
     }
-    
+
 }
