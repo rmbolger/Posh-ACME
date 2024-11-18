@@ -213,7 +213,9 @@ function New-PAOrder {
         # ACME server should send HTTP 409 Conflict status if we tried to specify
         # a 'replaces' value that has already been replaced. So if we get that,
         # retry the request without that field included.
-        if (409 -eq $_.Exception.Data.status) {
+        # It will also send HTTP 404 for various other reasons that it can't find
+        # the cert to be replaced.
+        if ($_.Exception.Data.status -in 404,409) {
             Write-Warning $_.Exception.Data.detail
             Write-Verbose "Resubmitting new order without 'replaces' field."
             $payload.Remove('replaces')
