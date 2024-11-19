@@ -83,8 +83,19 @@ function Import-PAConfig {
 
             $script:Acct = Get-PAAccount -ID $acctID
 
-            $ImportOrder = $true
+            if ($script:Acct) {
+                $ImportOrder = $true
+            } else {
+                Write-Warning "Unable to locate current account $acctID"
+                $script:Order = $null
+            }
+        } else {
+            # wipe references since we have no current account
+            $script:Acct = $null
+            $script:Order = $null
+        }
 
+        if ($script:Acct) {
             # Check for a v3 plugindata.xml file and convert it to order-specific v4
             # files.
             $pDataV3File = Join-Path $script:Acct.Folder 'plugindata.xml'
@@ -104,11 +115,6 @@ function Import-PAConfig {
 
                 Move-Item $pDataV3File (Join-Path $script:Acct.Folder 'plugindata.xml.v3') -Force
             }
-
-        } else {
-            # wipe references since we have no current account
-            $script:Acct = $null
-            $script:Order = $null
         }
     }
 
