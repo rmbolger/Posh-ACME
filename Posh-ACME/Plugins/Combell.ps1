@@ -22,7 +22,7 @@ function Add-DnsTxt {
     $cmdletName = "Add-DnsTxt"
     $zoneName = Find-CombellZone $RecordName $ApiKey $ApiSecret
     Write-Verbose "${cmdletName}: Find domain '$zoneName' for record '$RecordName' - OK"
-    $relativeRecordName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $relativeRecordName = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     $txtRecords = Get-CombellTxtRecords $zoneName $relativeRecordName $TxtValue $ApiKey $ApiSecret
     $numberOfTxtRecords = $txtRecords.Length
 
@@ -95,7 +95,7 @@ function Remove-DnsTxt {
     $cmdletName = "Remove-DnsTxt"
     $zoneName = Find-CombellZone $RecordName $ApiKey $ApiSecret
     Write-Verbose "${cmdletName}: Find domain '$zoneName' for record '$RecordName' - OK"
-    $relativeRecordName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $relativeRecordName = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     $txtRecords = Get-CombellTxtRecords $zoneName $relativeRecordName $TxtValue $ApiKey $ApiSecret
     $numberOfTxtRecords = $txtRecords.Length
 
@@ -200,7 +200,7 @@ function Find-CombellZone {
     #      domains exist.
     #      Implementing this requires further investigation though (start by reading
     #      https://api.combell.com/v2/documentation#section/Conventions/Pagination), so if you need this, feel free to
-    #      submit a pull request or an issue - Steven Volckaert, 5 October 2021.   
+    #      submit a pull request or an issue - Steven Volckaert, 5 October 2021.
     $zones = Send-CombellHttpRequest GET "domains?take=1000" $ApiKey $ApiSecret;
 
     # We need to find the deepest sub-zone that can hold the record and add it there, except if there is only the apex

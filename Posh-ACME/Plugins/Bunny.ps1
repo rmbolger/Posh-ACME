@@ -35,7 +35,7 @@ function Add-DnsTxt {
 
     # check if TXT record with this value already exists
     try {
-        $recShort = ($RecordName -ireplace [regex]::Escape($zoneResult.ZoneName), [string]::Empty).TrimEnd('.')
+        $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneResult.ZoneName.TrimEnd('.')))$",''
         $resultSet = (Invoke-RestMethod "$apiRoot/$($zoneResult.Id)" @restParams -Method Get)
         $existingRecs = $resultSet.Records | ? { $_.Name -eq $recShort -and $_.Type -eq 3 -and $_.Value -eq $TxtValue }
     }
@@ -114,7 +114,7 @@ function Remove-DnsTxt {
 
     # get all the instances of the record
     try {
-        $recShort = ($RecordName -ireplace [regex]::Escape($zoneResult.ZoneName), [string]::Empty).TrimEnd('.')
+        $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneResult.ZoneName.TrimEnd('.')))$",''
         $resultSet = (Invoke-RestMethod "$apiRoot/$($zoneResult.Id)" @restParams -Method Get)
         $existingRecs = $resultSet.Records | ? { $_.Name -eq $recShort -and $_.Type -eq 3 -and $_.Value -eq $TxtValue }
     }

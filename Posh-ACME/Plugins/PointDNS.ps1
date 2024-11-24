@@ -26,7 +26,7 @@ function Add-DnsTxt {
     }
 
     try {
-        $recShort = ($RecordName -ireplace [regex]::Escape($zone.name), [string]::Empty).TrimEnd('.')
+        $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.name.TrimEnd('.')))$",''
         $records = Get-PDZoneRecords $zone.id "TXT" $recShort $headers
     } catch { throw }
 
@@ -100,7 +100,7 @@ function Remove-DnsTxt {
     }
 
     try {
-        $recShort = ($RecordName -ireplace [regex]::Escape($zone.name), [string]::Empty).TrimEnd('.')
+        $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.name.TrimEnd('.')))$",''
         $records = Get-PDZoneRecords $zone.id "TXT" $recShort $headers
     } catch { throw }
 

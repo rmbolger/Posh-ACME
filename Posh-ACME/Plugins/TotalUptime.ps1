@@ -22,7 +22,7 @@ function Add-DnsTxt {
     Write-Debug "Found Domain ID $($DomainMetadata.id) for record $RecordName"
 
     #strip domain component from record
-    $recShort = ($RecordName -ireplace [regex]::Escape($DomainMetadata.domainName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($DomainMetadata.domainName.TrimEnd('.')))$",''
     if ($recShort -eq [string]::Empty) {
         $recShort = '@'
     }
@@ -111,7 +111,7 @@ function Remove-DnsTxt {
     }
 
     #Format recordname as short form
-    $recShort = ($RecordName -ireplace [regex]::Escape($DomainMetadata.domainName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($DomainMetadata.domainName.TrimEnd('.')))$",''
     if ($recShort -eq [string]::Empty) {
         $recShort = '@'
     }

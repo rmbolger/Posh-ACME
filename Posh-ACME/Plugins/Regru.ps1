@@ -295,7 +295,7 @@ function Get-RrTxtRecord {
     }
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneObject.dname), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneObject.dname.TrimEnd('.')))$",''
     if ($recShort -eq '') { $recShort = '@' }
 
     $rec = $zoneObject.rrs | Where-Object {

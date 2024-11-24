@@ -30,7 +30,7 @@ function Add-DnsTxt {
     Write-Debug "Found zone $zoneName"
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 
     if (-not (Test-LoopiaSubdomainExists $recShort $zoneName $creds)) {
         # we need to add the "subdomain" object before we add records to it
@@ -109,7 +109,7 @@ function Remove-DnsTxt {
     Write-Debug "Found zone $zoneName"
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 
     if (-not (Test-LoopiaSubdomainExists $recShort $zoneName $creds)) {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."

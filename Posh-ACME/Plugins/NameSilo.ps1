@@ -26,7 +26,7 @@ function Add-DnsTxt {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
     } else {
 
-        $recShort = ($RecordName -ireplace [regex]::Escape($zone), [string]::Empty).TrimEnd('.')
+        $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.TrimEnd('.')))$",''
 
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
         try {

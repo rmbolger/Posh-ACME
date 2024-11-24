@@ -162,7 +162,7 @@ Many providers will end up needing you to provide a record's relative/short name
 
 ```powershell
 # assumes $zoneName contains the zone name containing the record
-$recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+$recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 ```
 
 Keep in mind that there are cases where `$RecordName` and `$zoneName` can be identical. The code above will set `$recShort` to an empty string. Depending on the provider, this may not be the proper way to reference zone apex records. Some providers expect you to use `@`, others may want the full zone name like `example.com`. So if your provider expects something other than an empty string, make sure you account for it. Here's an example:

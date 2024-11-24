@@ -36,7 +36,7 @@ Function Add-DnsTxt {
     }
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = ($RecordName -ireplace [regex]::Escape($zone.name), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.name.TrimEnd('.')))$",''
 
     # Get a list of existing TXT records for this record name
     try {
@@ -135,7 +135,7 @@ Function Remove-DnsTxt {
     }
 
     # separate the portion of the name that doesn't contain the zone name
-    $recShort = ($RecordName -ireplace [regex]::Escape($zone.name), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.name.TrimEnd('.')))$",''
 
     # Get a list of existing TXT records for this record name
     try {

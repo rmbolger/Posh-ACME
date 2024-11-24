@@ -28,7 +28,8 @@ function Add-DnsTxt {
     try { $recs = Get-NCRecords $sld $tld $body } catch { throw }
 
     # get the short version of the record name to match against
-    $recMatch = ($RecordName -ireplace [regex]::Escape("$sld.$tld"), [string]::Empty).TrimEnd('.')
+    $zoneName = "$sld.$tld"
+    $recMatch = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 
     # check for an existing record
     if ($recs | Where-Object { $_.Name -eq $recMatch -and $_.Type -eq 'TXT' -and $_.Address -eq $TxtValue }) {
@@ -125,7 +126,8 @@ function Remove-DnsTxt {
     try { $recs = Get-NCRecords $sld $tld $body } catch { throw }
 
     # get the short version of the record name to match against
-    $recMatch = ($RecordName -ireplace [regex]::Escape("$sld.$tld"), [string]::Empty).TrimEnd('.')
+    $zoneName = "$sld.$tld"
+    $recMatch = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 
     # check for an existing record
     if ($delRec = $recs | Where-Object { $_.Name -eq $recMatch -and $_.Type -eq 'TXT' -and $_.Address -eq $TxtValue }) {

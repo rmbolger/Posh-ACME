@@ -33,7 +33,7 @@ function Add-DnsTxt {
     try { $zoneID,$zoneName = Find-IBMZone $RecordName $IBMCredential $apiBase } catch { throw }
     Write-Debug "Found zone $zoneName with ID $zoneID"
 
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 
     # search for an existing record
     try { $rec = Get-IBMTxtRecord $zoneID $recShort $TxtValue $IBMCredential $apiBase } catch { throw }
@@ -119,7 +119,7 @@ function Remove-DnsTxt {
     try { $zoneID,$zoneName = Find-IBMZone $RecordName $IBMCredential $apiBase } catch { throw }
     Write-Debug "Found zone $zoneName with ID $zoneID"
 
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 
     # search for an existing record
     try { $rec = Get-IBMTxtRecord $zoneID $recShort $TxtValue $IBMCredential $apiBase } catch { throw }

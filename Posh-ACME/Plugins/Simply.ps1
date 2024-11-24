@@ -243,7 +243,7 @@ function Get-SimplyTXTRecord {
                 if ($RecordName -eq $match.domain.name_idn) {
                     $recShort = '@'
                 } else {
-                    $recShort = ($RecordName -ireplace [regex]::Escape($match.domain.name_idn), [string]::Empty).TrimEnd('.')
+                    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($match.domain.name_idn.TrimEnd('.')))$",''
                 }
 
                 $script:SimplyRecordZones.$RecordName = $zoneID,$recShort

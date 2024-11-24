@@ -751,12 +751,13 @@ function Get-AZTxtRecord {
     )
 
     # parse the zone name from the zone id and strip it from $RecordName
-    # to get the relativeRecordSetName
+    # to get the relative name
     $zoneName = $ZoneID.Substring($ZoneID.LastIndexOf('/')+1)
-    $relName = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $relName = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     if ($relName -eq [string]::Empty) {
         $relName = '@'
     }
+    Write-Debug "zoneName = $zoneName, relName = $relName"
 
     $recID = "$ZoneID/TXT/$($relName)"
 

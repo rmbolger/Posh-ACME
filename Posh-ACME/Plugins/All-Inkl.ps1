@@ -26,7 +26,7 @@ function Add-DnsTxt {
     $settingsObj = Get-KASDNSSettings $loginData $RecordName
 
     # remove zone from record name
-    $recNameWithoutZone = ($RecordName -ireplace [regex]::Escape($settingsObj.zone), [string]::Empty).TrimEnd('.')
+    $recNameWithoutZone = $RecordName -ireplace "\.?$([regex]::Escape($settingsObj.zone.TrimEnd('.')))$",''
 
     # search for existing DNS settings for the record
     $existingSettingsItem = Find-KASDNSSettingsItemInList $settingsObj.dnsSettings $recNameWithoutZone $TxtValue
@@ -116,7 +116,7 @@ function Remove-DnsTxt {
     $settingsObj = Get-KASDNSSettings $loginData $RecordName
 
     # remove zone from record name
-    $recNameWithoutZone = ($RecordName -ireplace [regex]::Escape($settingsObj.zone), [string]::Empty).TrimEnd('.')
+    $recNameWithoutZone = $RecordName -ireplace "\.?$([regex]::Escape($settingsObj.zone.TrimEnd('.')))$",''
 
     # search for existing DNS settings for the record
     $existingSettingsItem = Find-KASDNSSettingsItemInList $settingsObj.dnsSettings $recNameWithoutZone $TxtValue

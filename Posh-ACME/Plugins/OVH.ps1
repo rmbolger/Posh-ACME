@@ -27,7 +27,7 @@ function Add-DnsTxt {
     Connect-OVH @PSBoundParameters
 
     $domain = Find-OVHDomain $RecordName
-    $recShort = ($RecordName -ireplace [regex]::Escape($domain), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($domain.TrimEnd('.')))$",''
 
     $recs = @(Get-OVHTxtRecords $recShort $domain)
 
@@ -174,7 +174,7 @@ function Remove-DnsTxt {
     Connect-OVH @PSBoundParameters
 
     $domain = Find-OVHDomain $RecordName
-    $recShort = ($RecordName -ireplace [regex]::Escape($domain), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($domain.TrimEnd('.')))$",''
 
     $recs = @(Get-OVHTxtRecords $recShort $domain)
 

@@ -236,11 +236,11 @@ function Find-DeSECRRset {
     )
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (!($domain = Find-DeSECZone $RecordName $AuthHeader)) {
+    if (!($zoneName = Find-DeSECZone $RecordName $AuthHeader)) {
         throw "Unable to find deSEC hosted zone for $RecordName"
     }
 
-    $subname = ($RecordName -ireplace [regex]::Escape($domain), [string]::Empty).TrimEnd('.')
+    $subname = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 
     # .NET thinks all URLS are Windows filenames (no trailing dot)
     # replace trailing ... with escaped %2e%2e%2e

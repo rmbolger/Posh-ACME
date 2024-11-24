@@ -35,7 +35,7 @@ function Add-DnsTxt {
         return
     } else {
         # build the body
-        $hostShort = ($RecordName -ireplace [regex]::Escape($domainName), [string]::Empty).TrimEnd('.')
+        $hostShort = $RecordName -ireplace "\.?$([regex]::Escape($domainName.TrimEnd('.')))$",''
         $bodyJson = @{host=$hostShort; type='TXT'; answer=$TxtValue; ttl=300} | ConvertTo-Json -Compress
 
         # add the new record

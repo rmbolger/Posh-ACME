@@ -24,7 +24,7 @@ function Add-DnsTxt {
     Write-Verbose "Found owned domain $($zone.domain) ($($zone.id))"
 
     $rec = Get-FDTxtRecords $zone.id $zone.domain $RecordName $TxtValue
-    $recShort = ($RecordName -ireplace [regex]::Escape($zone.domain), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.domain.TrimEnd('.')))$",''
 
     if ($rec) {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."

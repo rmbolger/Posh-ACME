@@ -15,7 +15,7 @@ function Add-DnsTxt {
 
     $zoneName,$zoneID,$zoneRecs = Find-Zone $RecordName $WskCredential
 
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     if (-not $recShort) { $recShort = '@' }
 
     # get all the instances of the record
@@ -83,7 +83,7 @@ function Remove-DnsTxt {
 
     $zoneName,$zoneID,$zoneRecs = Find-Zone $RecordName $WskCredential
 
-    $recShort = ($RecordName -ireplace [regex]::Escape($zoneName), [string]::Empty).TrimEnd('.')
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     if (-not $recShort) { $recShort = '@' }
 
     # get all the instances of the record
