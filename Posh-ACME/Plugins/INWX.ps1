@@ -25,7 +25,7 @@ function Add-DnsTxt {
     # get DNS zone (main domain) and name (sub domain) belonging to the record (assumes
     # $zoneName contains the zone name containing the record)
     $zoneName = Find-InwxZone $RecordName $INWXApiRoot
-    $recShort = $RecordName.Remove($RecordName.ToLower().LastIndexOf($zoneName.ToLower().TrimEnd(".")), $zoneName.TrimEnd(".").Length).TrimEnd(".");
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     Write-Debug "RecordName: $RecordName"
     Write-Debug "zoneName: $zoneName"
     Write-Debug "recShort: $recShort"
@@ -250,7 +250,7 @@ function Remove-DnsTxt {
     # get DNS zone (main domain) and name (sub domain) belonging to the record (assumes
     # $zoneName contains the zone name containing the record)
     $zoneName = Find-InwxZone $RecordName $INWXApiRoot
-    $recShort = $RecordName.Remove($RecordName.ToLower().LastIndexOf($zoneName.ToLower().TrimEnd(".")), $zoneName.TrimEnd(".").Length).TrimEnd(".");
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     Write-Debug "RecordName: $RecordName"
     Write-Debug "zoneName: $zoneName"
     Write-Debug "recShort: $recShort"
