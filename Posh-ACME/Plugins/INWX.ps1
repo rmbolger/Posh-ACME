@@ -22,13 +22,11 @@ function Add-DnsTxt {
     # login
     Connect-Inwx $INWXUsername $INWXPassword $INWXSharedSecret $INWXApiRoot
 
-    # get DNS zone (main domain) and name (sub domain) belonging to the record (assumes
+    # get DNS zone (main domain) belonging to the record (assumes
     # $zoneName contains the zone name containing the record)
     $zoneName = Find-InwxZone $RecordName $INWXApiRoot
-    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     Write-Debug "RecordName: $RecordName"
     Write-Debug "zoneName: $zoneName"
-    Write-Debug "recShort: $recShort"
 
     # check if the record exists
     # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.info
@@ -44,7 +42,8 @@ function Add-DnsTxt {
         "params" = @{
             "domain" = $zoneName;
             "type" = "TXT";
-            "name" = $recShort;
+            "name" = $RecordName;
+            "content" = $TxtValue;
         };
     } | ConvertTo-Json
     $reqParams.Verbose = $False
@@ -154,7 +153,7 @@ function Add-DnsTxt {
             "params" = @{
                 "domain" = $zoneName;
                 "type" = "TXT";
-                "name" = $recShort;
+                "name" = $RecordName;
                 "content" = $TxtValue;
                 "ttl" = 300;
             };
@@ -247,13 +246,11 @@ function Remove-DnsTxt {
     # login
     Connect-Inwx $INWXUsername $INWXPassword $INWXSharedSecret $INWXApiRoot
 
-    # get DNS zone (main domain) and name (sub domain) belonging to the record (assumes
+    # get DNS zone (main domain) belonging to the record (assumes
     # $zoneName contains the zone name containing the record)
     $zoneName = Find-InwxZone $RecordName $INWXApiRoot
-    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
     Write-Debug "RecordName: $RecordName"
     Write-Debug "zoneName: $zoneName"
-    Write-Debug "recShort: $recShort"
 
     # check if the record exists
     # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.info
@@ -269,7 +266,7 @@ function Remove-DnsTxt {
         "params" = @{
             "domain" = $zoneName;
             "type" = "TXT";
-            "name" = $recShort;
+            "name" = $RecordName;
             "content" = $TxtValue;
         };
     } | ConvertTo-Json
