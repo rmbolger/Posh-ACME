@@ -14,21 +14,17 @@ function Add-DnsTxt {
         [Parameter(Position=4)]
         [AllowNull()]
         [securestring]$INWXSharedSecret,
+        [string]$INWXApiRoot = "https://api.domrobot.com/jsonrpc/",
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # login
-    Connect-Inwx $INWXUsername $INWXPassword $INWXSharedSecret
-
-    # set communication endpoint
-    # production system at: https://api.domrobot.com
-    # test system at: https://api.ote.domrobot.com
-    $apiRoot = "https://api.domrobot.com/jsonrpc/"
+    Connect-Inwx $INWXUsername $INWXPassword $INWXSharedSecret $INWXApiRoot
 
     # get DNS zone (main domain) and name (sub domain) belonging to the record (assumes
     # $zoneName contains the zone name containing the record)
-    $zoneName = Find-InwxZone $RecordName
+    $zoneName = Find-InwxZone $RecordName $INWXApiRoot
     $recShort = $RecordName.Remove($RecordName.ToLower().LastIndexOf($zoneName.ToLower().TrimEnd(".")), $zoneName.TrimEnd(".").Length).TrimEnd(".");
     Write-Debug "RecordName: $RecordName"
     Write-Debug "zoneName: $zoneName"
@@ -37,7 +33,7 @@ function Add-DnsTxt {
     # check if the record exists
     # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.info
     $reqParams = @{}
-    $reqParams.Uri = $apiRoot
+    $reqParams.Uri = $INWXApiRoot
     $reqParams.Method = "POST"
     $reqParams.ContentType = "application/json"
     $reqParams.WebSession = $INWXSession
@@ -51,13 +47,14 @@ function Add-DnsTxt {
             "name" = $recShort;
         };
     } | ConvertTo-Json
+    $reqParams.Verbose = $False
 
     $response = $False
     $responseContent = $False
     $recordIds = $False
     try {
         Write-Verbose "Checking for $RecordName record(s)."
-        Write-Debug "$($reqParams.Method) $apiRoot`n$($reqParams.Body)"
+        Write-Debug "$($reqParams.Method) $INWXApiRoot`n$($reqParams.Body)"
         $response = Invoke-WebRequest @reqParams @script:UseBasic
     } catch {
         throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (unknown error)."
@@ -98,7 +95,7 @@ function Add-DnsTxt {
             # update record
             # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.updateRecord
             $reqParams = @{}
-            $reqParams.Uri = $apiRoot
+            $reqParams.Uri = $INWXApiRoot
             $reqParams.Method = "POST"
             $reqParams.ContentType = "application/json"
             $reqParams.WebSession = $INWXSession
@@ -113,12 +110,13 @@ function Add-DnsTxt {
                     "ttl" = 300;
                 };
             } | ConvertTo-Json
+            $reqParams.Verbose = $False
 
             $response = $False
             $responseContent = $False
             try {
                 Write-Verbose "Adding record $RecordName with value $TxtValue."
-                Write-Debug "$($reqParams.Method) $apiRoot`n$($reqParams.Body)"
+                Write-Debug "$($reqParams.Method) $INWXApiRoot`n$($reqParams.Body)"
                 $response = Invoke-WebRequest @reqParams @script:UseBasic
             } catch {
                 throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (unknown error)."
@@ -145,7 +143,7 @@ function Add-DnsTxt {
         # create record
         # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.createRecord
         $reqParams = @{}
-        $reqParams.Uri = $apiRoot
+        $reqParams.Uri = $INWXApiRoot
         $reqParams.Method = "POST"
         $reqParams.ContentType = "application/json"
         $reqParams.WebSession = $INWXSession
@@ -161,12 +159,13 @@ function Add-DnsTxt {
                 "ttl" = 300;
             };
         } | ConvertTo-Json
+        $reqParams.Verbose = $False
 
         $response = $False
         $responseContent = $False
         try {
             Write-Verbose "Adding record $RecordName with value $TxtValue."
-            Write-Debug "$($reqParams.Method) $apiRoot`n$($reqParams.Body)"
+            Write-Debug "$($reqParams.Method) $INWXApiRoot`n$($reqParams.Body)"
             $response = Invoke-WebRequest @reqParams @script:UseBasic
         } catch {
             throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (unknown error)."
@@ -213,6 +212,9 @@ function Add-DnsTxt {
     .PARAMETER INWXSharedSecret
         If your account is secured by mobile TAN ("2FA", "two-factor authentication"), you must define the shared secret (usually presented below the QR code during mobile TAN setup) to enable this function to generate OTP codes. The shared secret is NOT not the 6-digit code you need to enter when logging in. If you are not using 2FA, leave this parameter undefined or set it to $null..
 
+    .PARAMETER INWXApiRoot
+        The API root URL which is set to https://api.domrobot.com/jsonrpc/ by default. To test against the OTE environment, set this to https://api.ote.domrobot.com/jsonrpc/
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -237,21 +239,17 @@ function Remove-DnsTxt {
         [securestring]$INWXPassword,
         [Parameter(Position=4)]
         [securestring]$INWXSharedSecret,
+        [string]$INWXApiRoot = "https://api.domrobot.com/jsonrpc/",
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # login
-    Connect-Inwx $INWXUsername $INWXPassword $INWXSharedSecret
-
-    # set communication endpoint
-    # production system at: https://api.domrobot.com
-    # test system at: https://api.ote.domrobot.com
-    $apiRoot = "https://api.domrobot.com/jsonrpc/"
+    Connect-Inwx $INWXUsername $INWXPassword $INWXSharedSecret $INWXApiRoot
 
     # get DNS zone (main domain) and name (sub domain) belonging to the record (assumes
     # $zoneName contains the zone name containing the record)
-    $zoneName = Find-InwxZone $RecordName
+    $zoneName = Find-InwxZone $RecordName $INWXApiRoot
     $recShort = $RecordName.Remove($RecordName.ToLower().LastIndexOf($zoneName.ToLower().TrimEnd(".")), $zoneName.TrimEnd(".").Length).TrimEnd(".");
     Write-Debug "RecordName: $RecordName"
     Write-Debug "zoneName: $zoneName"
@@ -260,7 +258,7 @@ function Remove-DnsTxt {
     # check if the record exists
     # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.info
     $reqParams = @{}
-    $reqParams.Uri = $apiRoot
+    $reqParams.Uri = $INWXApiRoot
     $reqParams.Method = "POST"
     $reqParams.ContentType = "application/json"
     $reqParams.WebSession = $INWXSession
@@ -275,13 +273,14 @@ function Remove-DnsTxt {
             "content" = $TxtValue;
         };
     } | ConvertTo-Json
+    $reqParams.Verbose = $False
 
     $response = $False
     $responseContent = $False
     $recordIds = $False
     try {
         Write-Verbose "Checking for $RecordName record(s) with value $TxtValue."
-        Write-Debug "$($reqParams.Method) $apiRoot`n$($reqParams.Body)"
+        Write-Debug "$($reqParams.Method) $INWXApiRoot`n$($reqParams.Body)"
         $response = Invoke-WebRequest @reqParams @script:UseBasic
     } catch {
         throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (unknown error)."
@@ -322,7 +321,7 @@ function Remove-DnsTxt {
             # delete record
             # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.deleteRecord
             $reqParams = @{}
-            $reqParams.Uri = $apiRoot
+            $reqParams.Uri = $INWXApiRoot
             $reqParams.Method = "POST"
             $reqParams.ContentType = "application/json"
             $reqParams.WebSession = $INWXSession
@@ -334,12 +333,13 @@ function Remove-DnsTxt {
                     "id" = $recordId;
                 };
             } | ConvertTo-Json
+            $reqParams.Verbose = $False
 
             $response = $False
             $responseContent = $False
             try {
                 Write-Verbose "Deleting record $RecordName with value $TxtValue."
-                Write-Debug "$($reqParams.Method) $apiRoot`n$($reqParams.Body)"
+                Write-Debug "$($reqParams.Method) $INWXApiRoot`n$($reqParams.Body)"
                 $response = Invoke-WebRequest @reqParams @script:UseBasic
             } catch {
                 throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (unknown error)."
@@ -386,6 +386,9 @@ function Remove-DnsTxt {
     .PARAMETER INWXSharedSecret
         If your account is secured by mobile TAN ("2FA", "two-factor authentication"), you must define the shared secret (usually presented below the QR code during mobile TAN setup) to enable this function to generate OTP codes. The shared secret is NOT not the 6-digit code you need to enter when logging in. If you are not using 2FA, leave this parameter undefined or set it to $null..
 
+    .PARAMETER INWXApiRoot
+        The API root URL which is set to https://api.domrobot.com/jsonrpc/ by default. To test against the OTE environment, set this to https://api.ote.domrobot.com/jsonrpc/
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -399,14 +402,17 @@ function Remove-DnsTxt {
 function Save-DnsTxt {
     [CmdletBinding()]
     param(
+        [Parameter(Mandatory,Position=0)]
+        [string]$INWXUsername,
+        [Parameter(Mandatory,Position=1)]
+        [securestring]$INWXPassword,
+        [Parameter(Position=2)]
+        [AllowNull()]
+        [securestring]$INWXSharedSecret,
+        [string]$INWXApiRoot = "https://api.domrobot.com/jsonrpc/",
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-
-    # set communication endpoint
-    # production system at: https://api.domrobot.com
-    # test system at: https://api.ote.domrobot.com
-    $apiRoot = "https://api.domrobot.com/jsonrpc/"
 
     # There is currently no additional work to be done to save
     # or finalize changes performed by Add/Remove functions.
@@ -414,7 +420,7 @@ function Save-DnsTxt {
     # let's logout (best effort)
     # https://www.inwx.de/en/help/apidoc/f/ch02.html#account.logout
     $reqParams = @{}
-    $reqParams.Uri = $apiRoot
+    $reqParams.Uri = $INWXApiRoot
     $reqParams.Method = "POST"
     $reqParams.ContentType = "application/json"
     $reqParams.WebSession = $INWXSession
@@ -423,11 +429,12 @@ function Save-DnsTxt {
         "id" = [guid]::NewGuid()
         "method" = "account.logout";
     } | ConvertTo-Json
+    $reqParams.Verbose = $False
     $response = $False
     $responseContent = $False
     try {
         Write-Verbose "Starting INWX logout to end the session (best-effort)."
-        Write-Debug "$($reqParams.Method) $apiRoot`n$($reqParams.Body)"
+        Write-Debug "$($reqParams.Method) $INWXApiRoot`n$($reqParams.Body)"
         $response = Invoke-WebRequest @reqParams @script:UseBasic
     } catch {
         Write-Debug "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (unknown error)."
@@ -458,6 +465,18 @@ function Save-DnsTxt {
 
     .DESCRIPTION
         This function is currently a dummy which just does a clean logout as INWX does not support a 'finalize' or 'commit' workflow.
+
+    .PARAMETER INWXUsername
+        The INWX Username to access the API.
+
+    .PARAMETER INWXPassword
+        The password associated with the username provided via -INWXUsername.
+
+    .PARAMETER INWXSharedSecret
+        If your account is secured by mobile TAN ("2FA", "two-factor authentication"), you must define the shared secret (usually presented below the QR code during mobile TAN setup) to enable this function to generate OTP codes. The shared secret is NOT not the 6-digit code you need to enter when logging in. If you are not using 2FA, leave this parameter undefined or set it to $null..
+
+    .PARAMETER INWXApiRoot
+        The API root URL which is set to https://api.domrobot.com/jsonrpc/ by default. To test against the OTE environment, set this to https://api.ote.domrobot.com/jsonrpc/
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -491,6 +510,8 @@ function Connect-Inwx {
         [Parameter(Position=2)]
         [AllowNull()]
         [securestring]$INWXSharedSecret,
+        [Parameter(Position=3)]
+        [string]$INWXApiRoot = "https://api.domrobot.com/jsonrpc/",
         [Parameter(ValueFromRemainingArguments)]
         $ExtraConnectParams
     )
@@ -504,16 +525,11 @@ function Connect-Inwx {
     # get password as plaintext
     $INWXPasswordInsecure = [pscredential]::new('a',$INWXPassword).GetNetworkCredential().Password
 
-    # set communication endpoint
-    # production system at: https://api.domrobot.com
-    # test system at: https://api.ote.domrobot.com
-    $apiRoot = "https://api.domrobot.com/jsonrpc/"
-
     Write-Debug "Starting INWX login to get a session."
     # login
     # https://www.inwx.com/en/help/apidoc/f/ch02.html#account.login
     $reqParams = @{}
-    $reqParams.Uri = $apiRoot
+    $reqParams.Uri = $INWXApiRoot
     $reqParams.Method = "POST"
     $reqParams.ContentType = "application/json"
     $reqParams.SessionVariable = "INWXSession"
@@ -526,12 +542,14 @@ function Connect-Inwx {
             "pass" = $INWXPasswordInsecure;
         };
     } | ConvertTo-Json
+    $reqParams.Verbose = $False
 
     $response = $False
     $responseContent = $False
     $2faActive = $False
     try {
-        # commented out to prevent printing the credentials: Write-Debug "$($reqParams.Method) $apiRoot`n$($reqParams.Body)"
+        # commented out to prevent printing the credentials:
+        Write-Debug "$($reqParams.Method) $INWXApiRoot`n<login body redacted>"
         $response = Invoke-WebRequest @reqParams @script:UseBasic
     } catch {
         throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (unknown error)"
@@ -578,7 +596,7 @@ function Connect-Inwx {
         # unlock account
         # https://www.inwx.de/en/help/apidoc/f/ch02.html#account.unlock
         $reqParams = @{}
-        $reqParams.Uri = $apiRoot
+        $reqParams.Uri = $INWXApiRoot
         $reqParams.Method = "POST"
         $reqParams.ContentType = "application/json"
         $reqParams.WebSession = $INWXSession
@@ -590,12 +608,13 @@ function Connect-Inwx {
                 "tan" = $Otp;
             };
         } | ConvertTo-Json
+        $reqParams.Verbose = $False
 
         $response = $False
         $responseContent = $False
         try {
             Write-Verbose "Deleting record $RecordName with value $TxtValue."
-            Write-Debug "$($reqParams.Method) $apiRoot`n$($reqParams.Body)"
+            Write-Debug "$($reqParams.Method) $INWXApiRoot`n$($reqParams.Body)"
             $response = Invoke-WebRequest @reqParams @script:UseBasic
         } catch {
             throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (unknown error)."
@@ -641,7 +660,9 @@ function Find-InwxZone {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
-        [string]$RecordName
+        [string]$RecordName,
+        [Parameter(Position=1)]
+        [string]$INWXApiRoot = "https://api.domrobot.com/jsonrpc/"
     )
 
     # setup a module variable to cache the record to zone mapping
@@ -654,11 +675,6 @@ function Find-InwxZone {
     if ($script:INWXRecordZones.ContainsKey($RecordName)) {
         return $script:INWXRecordZones.$RecordName
     }
-
-    # set communication endpoint
-    # production system at: https://api.domrobot.com
-    # test system at: https://api.ote.domrobot.com
-    $apiRoot = "https://api.domrobot.com/jsonrpc/"
 
     # Since the provider could be hosting both apex and sub-zones, we need to find the closest/deepest
     # sub-zone that would hold the record rather than just adding it to the apex. So for something
@@ -676,7 +692,7 @@ function Find-InwxZone {
         # check if the part of the domain is the zone
         # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.info
         $reqParams = @{}
-        $reqParams.Uri = $apiRoot
+        $reqParams.Uri = $INWXApiRoot
         $reqParams.Method = "POST"
         $reqParams.ContentType = "application/json"
         $reqParams.WebSession = $INWXSession
@@ -688,12 +704,13 @@ function Find-InwxZone {
                 "domain" = $zoneTest;
             };
         } | ConvertTo-Json
+        $reqParams.Verbose = $False
 
         $response = $False
         $responseContent = $False
         try {
             Write-Verbose "Checking if $zoneTest is the zone holding the records."
-            Write-Debug "$($reqParams.Method) $apiRoot`n$($reqParams.Body)"
+            Write-Debug "$($reqParams.Method) $INWXApiRoot`n$($reqParams.Body)"
             $response = Invoke-WebRequest @reqParams @script:UseBasic
         } catch {
             throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (unknown error)."
