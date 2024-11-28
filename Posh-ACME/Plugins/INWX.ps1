@@ -50,7 +50,7 @@ function Add-DnsTxt {
 
     $response = $False
     $responseContent = $False
-    $recordIds = $False
+    $recordId = $False
     try {
         Write-Verbose "Checking for $RecordName record(s)."
         Write-Debug "$($reqParams.Method) $INWXApiRoot`n$($reqParams.Body)"
@@ -72,13 +72,9 @@ function Add-DnsTxt {
         {($PSItem -eq 1000 -or
           $PSItem -eq 2302)} {
             Write-Debug "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) was successful"
-            if ($responseContent.resData.count -gt 0 -and
-                $responseContent.resData.record.id) {
-                $recordIds = $responseContent.resData.record.id
-                if (-not $recordIds -is [array]) {
-                    $recordIds = @($recordIds)
-                }
-                Write-Debug "Found record(s) with ID(s) $recordIds."
+            if ($responseContent.resData.record) {
+                $recordId = $responseContent.resData.record[0].id
+                Write-Debug "Found record with ID $recordId."
             }
         }
         # unexpected
@@ -88,54 +84,8 @@ function Add-DnsTxt {
     }
     Remove-Variable "reqParams", "response", "responseContent"
 
-    if ($recordIds) {
-        foreach ($recordId in $recordIds) {
-            Write-Verbose "DNS record is already existing, going to update it."
-            # update record
-            # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.updateRecord
-            $reqParams = @{}
-            $reqParams.Uri = $INWXApiRoot
-            $reqParams.Method = "POST"
-            $reqParams.ContentType = "application/json"
-            $reqParams.WebSession = $INWXSession
-            $reqParams.Body = @{
-                "jsonrpc" = "2.0";
-                "id" = [guid]::NewGuid()
-                "method" = "nameserver.updateRecord";
-                "params" = @{
-                    "id" = $recordId;
-                    "type" = "TXT";
-                    "content" = $TxtValue;
-                    "ttl" = 300;
-                };
-            } | ConvertTo-Json
-            $reqParams.Verbose = $False
-
-            $response = $False
-            $responseContent = $False
-            try {
-                Write-Verbose "Adding record $RecordName with value $TxtValue."
-                Write-Debug "$($reqParams.Method) $INWXApiRoot`n$($reqParams.Body)"
-                $response = Invoke-WebRequest @reqParams @script:UseBasic
-            } catch {
-                throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (unknown error)."
-            }
-            if ($response -eq $False -or
-                $response.StatusCode -ne 200) {
-                throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (status code $($response.StatusCode))."
-            } else {
-                $responseContent = $response.Content | ConvertFrom-Json
-            }
-            Write-Debug "Received content:`n$($response.Content)"
-            # 1000: Command completed successfully
-            if ($responseContent.code -eq 1000) {
-                Write-Verbose "Updating the record was successful."
-            } else {
-                throw "Updating the record failed (code: $($responseContent.code))."
-            }
-            Remove-Variable "reqParams", "response", "responseContent"
-        }
-
+    if ($recordId) {
+        Write-Debug "A record $RecordName with an associated value of $TxtValue already exists. Nothing to do."
     } else {
 
         Write-Verbose "DNS record does not exist, going to create it."
@@ -187,7 +137,7 @@ function Add-DnsTxt {
         }
         Remove-Variable "reqParams", "response", "responseContent"
     }
-    Remove-Variable "recordIds"
+    Remove-Variable "recordId"
 
     <#
     .SYNOPSIS
@@ -274,7 +224,7 @@ function Remove-DnsTxt {
 
     $response = $False
     $responseContent = $False
-    $recordIds = $False
+    $recordId = $False
     try {
         Write-Verbose "Checking for $RecordName record(s) with value $TxtValue."
         Write-Debug "$($reqParams.Method) $INWXApiRoot`n$($reqParams.Body)"
@@ -296,13 +246,9 @@ function Remove-DnsTxt {
         {($PSItem -eq 1000 -or
           $PSItem -eq 2302)} {
             Write-Debug "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) was successful"
-            if ($responseContent.resData.count -gt 0 -and
-                $responseContent.resData.record.id) {
-                $recordIds = $responseContent.resData.record.id
-                if (-not $recordIds -is [array]) {
-                    $recordIds = @($recordIds)
-                }
-                Write-Debug "Found record(s) with ID(s) $recordIds."
+            if ($responseContent.resData.record) {
+                $recordId = $responseContent.resData.record[0].id
+                Write-Debug "Found record with ID $recordId."
             }
         }
         # unexpected
@@ -312,54 +258,52 @@ function Remove-DnsTxt {
     }
     Remove-Variable "reqParams", "response", "responseContent"
 
-    if ($recordIds) {
-        foreach ($recordId in $recordIds) {
-            Write-Verbose "DNS record is existing, going to delete it."
-            # delete record
-            # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.deleteRecord
-            $reqParams = @{}
-            $reqParams.Uri = $INWXApiRoot
-            $reqParams.Method = "POST"
-            $reqParams.ContentType = "application/json"
-            $reqParams.WebSession = $INWXSession
-            $reqParams.Body = @{
-                "jsonrpc" = "2.0";
-                "id" = [guid]::NewGuid()
-                "method" = "nameserver.deleteRecord";
-                "params" = @{
-                    "id" = $recordId;
-                };
-            } | ConvertTo-Json
-            $reqParams.Verbose = $False
+    if ($recordId) {
+        Write-Verbose "DNS record is existing, going to delete it."
+        # delete record
+        # https://www.inwx.de/en/help/apidoc/f/ch02s15.html#nameserver.deleteRecord
+        $reqParams = @{}
+        $reqParams.Uri = $INWXApiRoot
+        $reqParams.Method = "POST"
+        $reqParams.ContentType = "application/json"
+        $reqParams.WebSession = $INWXSession
+        $reqParams.Body = @{
+            "jsonrpc" = "2.0";
+            "id" = [guid]::NewGuid()
+            "method" = "nameserver.deleteRecord";
+            "params" = @{
+                "id" = $recordId;
+            };
+        } | ConvertTo-Json
+        $reqParams.Verbose = $False
 
-            $response = $False
-            $responseContent = $False
-            try {
-                Write-Verbose "Deleting record $RecordName with value $TxtValue."
-                Write-Debug "$($reqParams.Method) $INWXApiRoot`n$($reqParams.Body)"
-                $response = Invoke-WebRequest @reqParams @script:UseBasic
-            } catch {
-                throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (unknown error)."
-            }
-            if ($response -eq $False -or
-                $response.StatusCode -ne 200) {
-                throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (status code $($response.StatusCode))."
-            } else {
-                $responseContent = $response.Content | ConvertFrom-Json
-            }
-            Write-Debug "Received content:`n$($response.Content)"
-            # 1000: Command completed successfully
-            if ($responseContent.code -eq 1000) {
-                Write-Verbose "Deleting the record was successful."
-            } else {
-                throw "Deleting the record failed (code: $($responseContent.code))."
-            }
-            Remove-Variable "reqParams", "response", "responseContent"
+        $response = $False
+        $responseContent = $False
+        try {
+            Write-Verbose "Deleting record $RecordName with value $TxtValue."
+            Write-Debug "$($reqParams.Method) $INWXApiRoot`n$($reqParams.Body)"
+            $response = Invoke-WebRequest @reqParams @script:UseBasic
+        } catch {
+            throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (unknown error)."
         }
+        if ($response -eq $False -or
+            $response.StatusCode -ne 200) {
+            throw "INWX method call $(($reqParams.Body | ConvertFrom-Json).method) failed (status code $($response.StatusCode))."
+        } else {
+            $responseContent = $response.Content | ConvertFrom-Json
+        }
+        Write-Debug "Received content:`n$($response.Content)"
+        # 1000: Command completed successfully
+        if ($responseContent.code -eq 1000) {
+            Write-Verbose "Deleting the record was successful."
+        } else {
+            throw "Deleting the record failed (code: $($responseContent.code))."
+        }
+        Remove-Variable "reqParams", "response", "responseContent"
     } else {
         Write-Debug "A record $RecordName with an associated value of $TxtValue does not exist. Nothing to do."
     }
-    Remove-Variable "recordIds"
+    Remove-Variable "recordId"
 
     <#
     .SYNOPSIS
