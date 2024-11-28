@@ -673,15 +673,7 @@ function Find-InwxZone {
         return $script:INWXRecordZones.$RecordName
     }
 
-    # Since the provider could be hosting both apex and sub-zones, we need to find the closest/deepest
-    # sub-zone that would hold the record rather than just adding it to the apex. So for something
-    # like _acme-challenge.site1.sub1.sub2.example.com, we'd look for zone matches in the following
-    # order:
-    # - site1.sub1.sub2.example.com
-    # - sub1.sub2.example.com
-    # - sub2.example.com
-    # - example.com
-
+    # Search for the zone from longest to shortest set of FQDN pieces.
     $pieces = $RecordName.Split('.')
     for ($i=0; $i -lt ($pieces.Count-1); $i++) {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
@@ -696,7 +688,7 @@ function Find-InwxZone {
         $reqParams.Body = @{
             "jsonrpc" = "2.0";
             "id" = [guid]::NewGuid()
-            "method" = "nameserver.info";
+            "method" = "nameserver.list";
             "params" = @{
                 "domain" = $zoneTest;
             };
@@ -722,13 +714,13 @@ function Find-InwxZone {
 
         switch ($responseContent.code) {
             # 1000: Command completed successfully
-            # 2302: Object exists
-            {$PSItem -eq 1000 -or
-             $PSItem -eq 2302} {
-                Write-Verbose "$zoneTest seems to be the zone holding the records."
-                $script:INWXRecordZones.$RecordName = $zoneTest
-                return $zoneTest
-                break
+            1000 {
+                if ($responseContent.resData.count -gt 0) {
+                    Write-Verbose "$zoneTest seems to be the zone holding the records."
+                    $script:INWXRecordZones.$RecordName = $zoneTest
+                    return $zoneTest
+                    break
+                } else { continue }
             }
             # 2303: Object does not exist
             2303 {
