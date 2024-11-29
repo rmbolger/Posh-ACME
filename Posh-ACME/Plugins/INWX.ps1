@@ -688,7 +688,8 @@ function Find-InwxZone {
         The DNS Resource Record of which to find the belonging DNS zone.
     #>
 }
-function Get-InwXOtp {
+
+function Get-InwxOtp {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
@@ -699,39 +700,35 @@ function Get-InwXOtp {
         [int]$Window = 30
     )
 
-    # get shared secret as plaintext
-    $SharedSecretInsecure = [pscredential]::new('a',$SharedSecret).GetNetworkCredential().Password
-    $Epoch = Get-Date -Year 1970 -Month 1 -Day 1 -Hour 0 -Minute 0 -Second 0
-
     # wait a bit if there are only a few seconds left in the current TOTP window
-    $seconds = ([math]::floor((New-TimeSpan -Start $Epoch -End (Get-Date).ToUniversalTime()).TotalSeconds))
-    $counter = [math]::floor($seconds / $Window)
-    $nextTimeStep = ($counter + 1) * $Window
-    if (($nextTimeStep - $seconds) -le 5) {
+    $windowRemaining = $Window - ([DateTimeOffset]::Now.ToUnixTimeSeconds() % $Window)
+    if ($windowRemaining -le 5) {
         Write-Debug "Current TOTP window is a bit tight, waiting a few seconds for the next one."
         Start-Sleep -Seconds 5
     }
 
-    $hmac = New-Object -TypeName System.Security.Cryptography.HMACSHA1
-    # pad with 'A' to a multiple of 8 characters and convert base32 to bytes
-    $hmac.key = $SharedSecretInsecure.ToUpper().ToCharArray() + @("A") * ((8 - $SharedSecretInsecure.Length % 8) % 8) | `
-        ForEach-Object { $q = 1L } {
-            $q = ($q -shl 5) -bor [Math]::Max(0, "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".IndexOf($PSItem))
-            if ($q -ge 0x10000000000L) {
-                [BitConverter]::GetBytes($q)[4..0]
-                $q = 1L
-            }
-        }
+    # get shared secret as plaintext
+    $SharedSecretInsecure = [pscredential]::new('a',$SharedSecret).GetNetworkCredential().Password
 
-    $randHash = $hmac.ComputeHash([BitConverter]::GetBytes([long]([Math]::Floor((New-TimeSpan -Start ($Epoch) -End (Get-Date).ToUniversalTime()).TotalSeconds / $Window)))[7..0])
+    # decode the base32 secret to bytes and create the HMAC instance
+    $keyBytes = ConvertFrom-Base32 $SharedSecretInsecure
+    $hmac = [Security.Cryptography.HMACSHA1]::new($keyBytes)
 
-    $offset = $randhash[($randHash.Length-1)] -band 0xf
-    $fullOtp = ($randhash[$offset] -band 0x7f) -shl 24
-    $fullOtp += ($randHash[$offset + 1] -band 0xff) -shl 16
-    $fullOtp += ($randHash[$offset + 2] -band 0xff) -shl 8
-    $fullOtp += ($randHash[$offset + 3] -band 0xff)
+    # hash the lower 8 bytes of our time step value
+    $step = [long]([Math]::Floor([DateTimeOffset]::Now.ToUnixTimeSeconds() / $Window))
+    $stepHash = $hmac.ComputeHash([BitConverter]::GetBytes($step)[7..0])
 
-    return [int](($fullOtp % [math]::pow(10, $Length)).ToString("0" * $Length))
+    # extract the dynamic offset from the last byte of the hash
+    $offset = $stepHash[-1] -band 0xf
+
+    # build the raw OTP value
+    $rawOTP = ($stepHash[$offset] -band 0x7f) -shl 24
+    $rawOTP += ($stepHash[$offset + 1] -band 0xff) -shl 16
+    $rawOTP += ($stepHash[$offset + 2] -band 0xff) -shl 8
+    $rawOTP += ($stepHash[$offset + 3] -band 0xff)
+
+    # return the processed value with the correct length
+    return [int](($rawOTP % [math]::pow(10, $Length)).ToString("0" * $Length))
 
     <#
     .SYNOPSIS
@@ -751,4 +748,62 @@ function Get-InwXOtp {
 
         Generates a 6-digit OTP code based on the shared secret "xxxxxxxx"
     #>
+}
+
+function ConvertFrom-Base32 {
+    [CmdletBinding()]
+    [OutputType('System.Byte[]')]
+    param(
+        [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
+        [string]$Base32String
+    )
+
+    Begin {
+        # Base32 alphabet
+        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
+        $reBase32 = [regex]'^[A-Z2-7]+=*$'
+    }
+
+    Process {
+        # Normalize to uppercase
+        $Base32String = $Base32String.ToUpper()
+
+        try {
+            # Validate input format
+            if ($Base32String -notmatch $reBase32) {
+                throw [ArgumentException]::new("Invalid Base32 input: contains non-Base32 characters.", 'Base32String')
+            }
+            # Validate padding alignment
+            if ($Base32String.Length % 8 -ne 0) {
+                throw [ArgumentException]::new("Invalid Base32 input: length must be a multiple of 8.", 'Base32String')
+            }
+        }
+        catch {
+            $PSCmdlet.WriteError($_)
+            return
+        }
+
+        # Decode into bytes
+        $bitBuffer = 0
+        $bitCount = 0
+        $decodedBytes = [Collections.Generic.List[byte]]::new()
+
+        foreach ($char in $Base32String.TrimEnd('=').ToCharArray()) {
+            # Get the value of the character from the Base32 alphabet
+            $value = $alphabet.IndexOf($char)
+
+            # Add the 5 bits of the current character to the bit buffer
+            $bitBuffer = ($bitBuffer -shl 5) -bor $value
+            $bitCount += 5
+
+            # Extract bytes while we have enough bits (8 bits = 1 byte)
+            while ($bitCount -ge 8) {
+                $bitCount -= 8
+                $decodedBytes.Add(($bitBuffer -shr $bitCount) -band 0xFF)
+            }
+        }
+
+        # Output decoded bytes
+        [byte[]]($decodedBytes.ToArray())
+    }
 }
