@@ -14,83 +14,79 @@ function Add-DnsTxt {
         $ExtraParams
     )
 
-    # Finding our zonename (Works great for simple domains like mydomain.com. Will fail on mydomain.co.uk or mydomain.com.fr)
     Write-Verbose "Looking for Zonename in $($RecordName)..."
-    $EuroDNSResellerZone = $RecordName -replace "^(.+\.)?([^.]+\.[^.]+)$", '$2'
-    Write-Verbose "Found: $($EuroDNSResellerZone)"
-
-    # Test to see if we are working with a TLD (Top-Level Domain). This fixes the problem above where the logic will return co.uk on mydomain.co.uk
-    If ($(Get-EuroDNSResellerTLD -EuroDNSReseller_tld $($EuroDNSResellerZone) -EuroDNSReseller_Creds $EuroDNSReseller_Creds).StatusCode -eq "200") {
+    $EuroDNSResellerZone = Find-EuroDNSResellerZone -EuroDNSReseller_zone $RecordName -EuroDNSReseller_Creds $EuroDNSReseller_Creds
     
-        Write-Verbose "Found the TLD - Fixing the Zonename"
-        ## we are looking for the most top level domain possible. This ugly code will find the most top level domain.
-        $EuroDNSResellerTLDCheck = ((($RecordName -replace "^(.+\.)?([^.]+\.[^.]+)$", '$1').TrimEnd(".")).split(".")).count
-        $EuroDNSResellerZone = ((($RecordName -replace "^(.+\.)?([^.]+\.[^.]+)$", '$1').TrimEnd(".")).split("."))[$EuroDNSResellerTLDCheck - 1] + "." + $EuroDNSResellerZone
-        Write-Verbose "After fix, the ZoneName is: $EuroDNSResellerZone"
+    If ($EuroDNSResellerZone) {
 
-    } else {
-    
-        Write-Verbose "Not an TLD"
-    
-    }
-    
-          
-    # Getting DNS records
-    try {
-
-        # Checking to see if there is any data to work with. Don't want to overwrite in case we make multiple changes
-        If ( -not ($script:EuroDNSResellerObject)) {
-
-            Write-Verbose "Trying to get data from EuroDNSReseller..."
-            $script:EuroDNSResellerObject = Get-EuroDNSResellerZone -EuroDNSReseller_Domain $EuroDNSResellerZone -EuroDNSReseller_Creds $EuroDNSReseller_Creds -ErrorAction Stop | ConvertFrom-Json
-            Write-Verbose "Data Found. Number of Records: $($script:EuroDNSResellerObject.records.count)"
-
-        } 
-        
-        # assumes $EuroDNSResellerZone contains the zone name containing the record
-        $recShort = ($RecordName -ireplace [regex]::Escape($EuroDNSResellerZone), [string]::Empty).TrimEnd('.')
-
-        if ($recShort -eq [string]::Empty) {
-            $recShort = '@'
-        }
-
-        Write-debug "recShort is: $($recShort)"
-        
-        # Don't want to add an identical record/value. Check for existing records:
-        If (($recShort -in $script:EuroDNSResellerObject.records.host) -and ($TxtValue -in $script:EuroDNSResellerObject.records.rdata)){
+        # Getting DNS records
+        try {
 
             
-            Write-Verbose "Record exists already in EuroDNSReseller - Skipping..."
-            Write-Verbose "Records in object: $($script:EuroDNSResellerObject.records.host -join ",")"
-            Write-Verbose "In Zone: $($script:EuroDNSResellerObject)"
 
-        } else {
+            # Checking to see if there is any data to work with. Don't want to overwrite in case we make multiple changes
+            Write-Debug "Checking if EuroDNsResellerObject has data..."
+            If ( -not ($script:EuroDNSResellerObject)) {
+                
+                Write-Verbose "Trying to get data from EuroDNSReseller..."
+                $script:EuroDNSResellerObject = Get-EuroDNSResellerZone -EuroDNSReseller_Domain $EuroDNSResellerZone -EuroDNSReseller_Creds $EuroDNSReseller_Creds -ErrorAction Stop | ConvertFrom-Json
+                
 
-            # Create the new record (No ID needed)
-            # For new records It expects all of these fields
-            $EuroDNSResellernewRecord = [pscustomobject]@{
-                type      = "TXT"
-                host      = $recShort
-                ttl       = 3600
-                rdata     = $TxtValue
-                updated   = $false
-                locked    = $false
-                isDynDNS  = $null
-                proxy     = $null
+            } 
+
+            Write-Verbose "Data Found. Number of Records: $($script:EuroDNSResellerObject.records.count)"
+
+            
+
+            # assumes $EuroDNSResellerZone contains the zone name containing the record
+            $recShort = ($RecordName -ireplace [regex]::Escape($EuroDNSResellerZone), [string]::Empty).TrimEnd('.')
+
+            if ($recShort -eq [string]::Empty) {
+                $recShort = '@'
             }
 
-            # recreate the object with the new record
-            $script:EuroDNSResellerObject.records += @($EuroDNSResellernewRecord)
-            Write-Verbose "New object added - Number of Records now: $($script:EuroDNSResellerObject.records.count)"
+            Write-debug "recShort is: $($recShort)"
+            
+            # Don't want to add an identical record/value. Check for existing records:
+            If (($recShort -in $script:EuroDNSResellerObject.records.host) -and ($TxtValue -in $script:EuroDNSResellerObject.records.rdata)){
+
+                
+                Write-Verbose "Record exists already in EuroDNSReseller - Skipping..."
+                Write-Verbose "Records in object: $($script:EuroDNSResellerObject.records.host -join ",")"
+                Write-Verbose "In Zone: $($script:EuroDNSResellerObject)"
+
+            } else {
+
+                # Create the new record (No ID needed)
+                # For new records It expects all of these fields
+                $EuroDNSResellernewRecord = [pscustomobject]@{
+                    type      = "TXT"
+                    host      = $recShort
+                    ttl       = 3600
+                    rdata     = $TxtValue
+                    updated   = $false
+                    locked    = $false
+                    isDynDNS  = $null
+                    proxy     = $null
+                }
+
+                # recreate the object with the new record
+                $script:EuroDNSResellerObject.records += @($EuroDNSResellernewRecord)
+                Write-Verbose "New object added - Number of Records now: $($script:EuroDNSResellerObject.records.count)"
 
 
+            }
+
+            
+        }
+        catch {
+            throw
         }
 
-        
+    } else {
+        Write-Verbose "...No available domain zone found..."
     }
-    catch {
-        throw
-    }
+    
 
     <#
     .SYNOPSIS
@@ -131,65 +127,60 @@ function Remove-DnsTxt {
 
     # Checking for zonename
     Write-Verbose "Looking for Zonename in $($RecordName)..."
-    $EuroDNSResellerZone = $RecordName -replace "^(.+\.)?([^.]+\.[^.]+)$", '$2'
-    Write-Verbose "Found: $($EuroDNSResellerZone)"
-          
-    # Getting DNS records
-    try {
+    $EuroDNSResellerZone = Find-EuroDNSResellerZone -EuroDNSReseller_zone $RecordName -EuroDNSReseller_Creds $EuroDNSReseller_Creds
+    If ($EuroDNSResellerZone) {
 
-        # Test to see if we are working with a TLD (Top-Level Domain). This fixes the problem above where the logic will return co.uk on mydomain.co.uk
-        If ($(Get-EuroDNSResellerTLD -EuroDNSReseller_tld $($EuroDNSResellerZone) -EuroDNSReseller_Creds $EuroDNSReseller_Creds).StatusCode -eq "200") {
-        
-            Write-Verbose "Found the TLD - Fixing the Zonename"
-            ## we are looking for the most top level domain possible. This ugly code will find the most top level domain.
-            $EuroDNSResellerTLDCheck = ((($RecordName -replace "^(.+\.)?([^.]+\.[^.]+)$", '$1').TrimEnd(".")).split(".")).count
-            $EuroDNSResellerZone = ((($RecordName -replace "^(.+\.)?([^.]+\.[^.]+)$", '$1').TrimEnd(".")).split("."))[$EuroDNSResellerTLDCheck - 1] + "." + $EuroDNSResellerZone
-            Write-Verbose "After fix, the ZoneName is: $EuroDNSResellerZone"
+        # Getting DNS records
+        try {
 
-        } else {
-        
-            Write-Verbose "Not an TLD"
-        
-        }
+            # Checking to see if there is any data to work with. Don't want to overwrite in case we make multiple changes
+            If ( -not ($script:EuroDNSResellerObject)) { 
 
-        # Checking to see if there is any data to work with. Don't want to overwrite in case we make multiple changes
-        If ( -not ($script:EuroDNSResellerObject)) { 
+                Write-Verbose "Trying to get data from EuroDNSReseller..."
+                $script:EuroDNSResellerObject = Get-EuroDNSResellerZone -EuroDNSReseller_Domain $EuroDNSResellerZone -EuroDNSReseller_Creds $EuroDNSReseller_Creds -ErrorAction Stop | ConvertFrom-Json
 
-            Write-Verbose "Trying to get data from EuroDNSReseller..."
-            $script:EuroDNSResellerObject = Get-EuroDNSResellerZone -EuroDNSReseller_Domain $EuroDNSResellerZone -EuroDNSReseller_Creds $EuroDNSReseller_Creds -ErrorAction Stop | ConvertFrom-Json
+            }
+                       
             Write-Verbose "Data Found. Number of Records: $($script:EuroDNSResellerObject.records.count)"
 
+            
+            
+            # assumes $EuroDNSResellerZone contains the zone name containing the record
+            $recShort = ($RecordName -ireplace [regex]::Escape($EuroDNSResellerZone), [string]::Empty).TrimEnd('.')
+
+            if ($recShort -eq [string]::Empty) {
+                $recShort = '@'
+            }
+
+            # Doing a check to make sure there is something to remove
+            Write-Verbose "Searching for records to remove..."
+            If($script:EuroDNSResellerObject.records | Where-Object {($_.host -eq $recShort -and $_.rdata -eq $TxtValue)}) {
+
+                # Seaching for record to remove - Doing a not search since we only want to remove a specific record and keep all else.
+                $script:EuroDNSResellerObject.records = $script:EuroDNSResellerObject.records | Where-Object {!($_.host -eq $recShort -and $_.rdata -eq $TxtValue)}
+
+
+            } else {
+
+                Write-Verbose "Could not find any records matching. Nothing will be removed."
+
+            }
+
+            Write-Verbose "Number of Records now: $($script:EuroDNSResellerObject.records.count)"
+            
         }
-        
-        # assumes $EuroDNSResellerZone contains the zone name containing the record
-        $recShort = ($RecordName -ireplace [regex]::Escape($EuroDNSResellerZone), [string]::Empty).TrimEnd('.')
+        catch {
 
-        if ($recShort -eq [string]::Empty) {
-            $recShort = '@'
-        }
-
-        # Doing a check to make sure there is something to remove
-        Write-Verbose "Searching for records to remove..."
-        If($script:EuroDNSResellerObject.records | Where-Object {($_.host -eq $recShort -and $_.rdata -eq $TxtValue)}) {
-
-            # Seaching for record to remove - Doing a not search since we only want to remove a specific record and keep all else.
-            $script:EuroDNSResellerObject.records = $script:EuroDNSResellerObject.records | Where-Object {!($_.host -eq $recShort -and $_.rdata -eq $TxtValue)}
-
-
-        } else {
-
-            Write-Verbose "Could not find any records matching. Nothing will be removed."
+            throw
 
         }
 
-        Write-Verbose "Number of Records now: $($script:EuroDNSResellerObject.records.count)"
-        
+    } else {
+
+        Write-Verbose "...No available domain zone found..."
+
     }
-    catch {
-
-        throw
-
-    }
+    
 
 
     <#
@@ -234,6 +225,8 @@ function Save-DnsTxt {
 
         Write-Verbose "EuroDNSReseller Validation completed succesfully.. Sending data to EuroDNSReseller"
         $script:EuroDNSResellerObject | Save-EuroDNSReseller -EuroDNSReseller_Creds $EuroDNSReseller_Creds
+        Write-Debug "Cleaning EURODNSResellerObject.. "
+        $script:EuroDNSResellerObject = $null
 
     } else {
 
@@ -340,7 +333,7 @@ function Confirm-EuroDNSReseller {
         }
     }
 }
-# Saves the changes to EuroDNSReseller
+# Saves the changes to EuroDNS
 function Save-EuroDNSReseller {
     [CmdletBinding()]
     param (
@@ -374,11 +367,12 @@ function Save-EuroDNSReseller {
     
 }
 
-function Get-EuroDNSResellerTLD {
+# Looking through each subdomain until we find one that works.
+function Find-EuroDNSResellerZone {
     param (
         [Parameter(Mandatory)]
         [string]
-        $EuroDNSReseller_tld,
+        $EuroDNSReseller_zone,
         
         [Parameter(Mandatory)]
         [pscredential]
@@ -388,19 +382,75 @@ function Get-EuroDNSResellerTLD {
     )
 
     Process {
-        $URL = 'https://rest-api.EuroDNS.com/tlds?tld-name=' + $EuroDNSReseller_tld
+        
+        
+        $zonestring = $EuroDNSReseller_zone
+        # Creating a counter based on amount of subdomains.
+        $mycount = ($EuroDNSReseller_zone).split(".")
 
-        try {
+        # Testing the zone string from left to right, removing a subdomain for each failed call. Added a few checks in case of
+        ## - Domain doesn't exists
+        ## - We hit a Top-Level domain (like com or uk.org) (The API "Available Domains" will return 200 on this, but you can't really make changes on this level)
+        Write-Verbose "Number of domains to test: $($mycount.count)"
+        1..$mycount.count | ForEach-Object {
 
-            Write-Verbose "attepmting to find TLD: $($EuroDNSReseller_tld) "
-            Write-Verbose "Following URL: $($URL) "
-
-            Invoke-WebRequest -uri $url -headers $(Connect-EuroDNSReseller $EuroDNSReseller_Creds) -erroraction Stop @script:UseBasic
             
+            # We want to return nothing if a useable domain cannot be found.
+            If ($_ -eq $mycount.Count -and $skipcounter -eq $false ) {
+
+                $zonestring = $null
+
+
+            } else {
+                
+                
+                # Looking thorugh each domain starting from the left most side.
+                If ($call.StatusCode -eq '200') {
+            
+                    Write-Verbose "Found the available domain / zonename - $zonestring"
+                    $Getoutofloop = $true
+                    $Call = 0
+
+                } else {
+
+                    If (!($Getoutofloop -eq $true)) {
+                        try {
+            
+                            $body = @{
+                    
+                                domainNames = @($zonestring)
+                            }
+                    
+                            Write-Verbose "$($_).. $zonestring - testing to see if this domain is available"
+                            $call = Invoke-WebRequest  'https://rest-api.eurodns.com/das/available-domain-names' -Body $($body | ConvertTo-Json) -Headers $(Connect-EuroDNSReseller $EuroDNSReseller_Creds) -Method Post -erroraction Stop @script:UseBasic
+                    
+                            
+                        }
+                        catch {
+                    
+                            Write-Verbose "$zonestring - Domain not available.. Trying next"
+                            
+                        }
+                
+                        # Want to stop looking as soons as we find the first available domain one
+                        If ($call.StatusCode -eq '200') {
+
+                            $skipcounter = $true
+
+                        } else {
+                            
+                            # Removing each sub domain one at a time.
+                            $index = $zonestring.IndexOf('.')
+                            $zonestring = $zonestring.Substring($index + 1)
+                            $zonestring = $zonestring
+
+                        }
+                    }
+                }
+            }
         }
-        catch {
-            throw
-        }
+
+        $zonestring
         
     }
     
