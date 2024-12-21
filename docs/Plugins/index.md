@@ -42,6 +42,7 @@ DuckDNS | [Duck DNS](https://www.duckdns.org/) | [Usage Guide](DuckDNS.md) | :wh
 Dynu | [Dynu DNS](https://www.dynu.com) | [Usage Guide](Dynu.md) | :white_check_mark:
 EasyDNS | [EasyDNS](https://easydns.com/) | [Usage Guide](EasyDNS.md) | :white_check_mark:
 Easyname | [easyname.com](https://www.easyname.com/) | [Usage Guide](Easyname.md) | :white_check_mark:
+EuroDNSReseller | [EuroDNS](https://www.eurodns.com/) + Resellers | [Usage Guide](EuroDNSReseller.md) | :white_check_mark:
 FreeDNS | [Free DNS](https://freedns.afraid.org) | [Usage Guide](FreeDNS.md) | :white_check_mark:
 Gandi | [Gandi LiveDNS](https://www.gandi.net) | [Usage Guide](Gandi.md) | :white_check_mark:
 GCloud | [Google Cloud DNS](https://cloud.google.com/dns) | [Usage Guide](GCloud.md) | :white_check_mark:
