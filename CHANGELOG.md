@@ -1,3 +1,61 @@
+## 4.27.0 (2025-01-08)
+
+* New DNS Plugins
+  * [INWX](https://www.inwx.de/) (Thanks @andreashaerter)
+  * [EuroDNSReseller](https://www.eurodns.com/) Check the guide on this one. It's only currently usable by reseller partners of EuroDNS and not direct EuroDNS customers. (Thanks @zoryatix)
+* Fixed WEDOS plugin to handle different response types for dns-domains-list API call (#579)
+* Publish-Challenge and Unpublish-Challenge now strip trailing `.` chars from the RecordName they pass to plugins in order to make edge-case parsing more predictable.
+* Added additional ARI related error handling in New-PAOrder to more gracefully handle problems with the `replaces` field. (#587)
+* Added additional error handling in the config import process to better deal with unexpected config states. (#587)
+* Fixed a bug in the plugin development guide code that suggests how to parse short names from a RecordName and ZoneName value. The bug wouldn't correctly parse the short name in FQDNs that contained more than one instance of the zone name. (#584)
+* Fixed all of the plugins that had implemented the bugged short name parsing algorithm.
+  * Active24
+  * Aliyun
+  * All-Inkl
+  * Aurora
+  * AutoDNS
+  * Azure
+  * BlueCat
+  * Bunny
+  * ClouDNS
+  * Combell
+  * Constellix
+  * CoreNetworks
+  * DMEasy
+  * DNSPod
+  * DNSimple
+  * DOcean
+  * DeSEC
+  * Domeneshop
+  * EasyDNS
+  * Easyname
+  * FreeDNS
+  * Gandi
+  * GoDaddy
+  * Hetzner
+  * IBMSoftLayer
+  * ISPConfig
+  * Infomaniak
+  * Linode
+  * Loopia
+  * NameCom
+  * NameSilo
+  * Namecheap
+  * OVH
+  * OnlineNet
+  * PointDNS
+  * Porkbun
+  * PortsManagement
+  * Regru
+  * Simply
+  * SimplyCom
+  * TencentDNS
+  * TotalUptime
+  * WEDOS
+  * WebsupportSK
+  * Windows
+  * Yandex
+
 ## 4.26.0 (2024-11-01)
 
 * New DNS plugin [AddrTools](https://challenges.addr.tools/) (#572)
