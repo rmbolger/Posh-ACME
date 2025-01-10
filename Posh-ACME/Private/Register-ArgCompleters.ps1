@@ -140,4 +140,18 @@ function Register-ArgCompleters {
     $DirNameCommands = 'Get-PAServer','Set-PAServer','Remove-PAServer'
     Register-ArgumentCompleter -CommandName $DirNameCommands -ParameterName 'Name' -ScriptBlock $DirNameCompleter
 
+    # (Order)Profile
+    $OrderProfileCompleter = {
+        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+
+        # grab the existing server folders to sort through
+        $choices = (Get-PAProfile).Profile
+        $choices | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
+            [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+        }
+    }
+
+    $OrderProfileCommands = 'Get-PAProfile','New-PAOrder','New-PACertificate'
+    Register-ArgumentCompleter -CommandName $OrderProfileCommands -ParameterName 'Profile' -ScriptBlock $OrderProfileCompleter
+
 }

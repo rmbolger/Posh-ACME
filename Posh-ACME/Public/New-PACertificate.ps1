@@ -1,6 +1,7 @@
 function New-PACertificate {
     [CmdletBinding(DefaultParameterSetName='FromScratch')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText','')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidAssignmentToAutomaticVariable','')]
     param(
         [Parameter(ParameterSetName='FromScratch',Mandatory,Position=0)]
         [string[]]$Domain,
@@ -48,7 +49,8 @@ function New-PACertificate {
         [switch]$Force,
         [int]$DnsSleep=120,
         [int]$ValidationTimeout=60,
-        [string]$PreferredChain
+        [string]$PreferredChain,
+        [string]$Profile
     )
 
     # grab the set of parameter keys to make comparisons easier later
