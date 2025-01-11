@@ -151,7 +151,7 @@ function Register-ArgCompleters {
         }
     }
 
-    $OrderProfileCommands = 'Get-PAProfile','New-PAOrder','New-PACertificate'
+    $OrderProfileCommands = 'Get-PAProfile','New-PAOrder', 'Set-PAOrder','New-PACertificate'
     Register-ArgumentCompleter -CommandName $OrderProfileCommands -ParameterName 'Profile' -ScriptBlock $OrderProfileCompleter
 
 }

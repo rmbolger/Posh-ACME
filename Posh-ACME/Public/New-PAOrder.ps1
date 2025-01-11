@@ -1,7 +1,7 @@
 function New-PAOrder {
     [CmdletBinding(SupportsShouldProcess,DefaultParameterSetName='FromScratch')]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidAssignmentToAutomaticVariable','')]
     [OutputType('PoshACME.PAOrder')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidAssignmentToAutomaticVariable','')]
     param(
         [Parameter(ParameterSetName='FromScratch',Mandatory,Position=0)]
         [Parameter(ParameterSetName='ImportKey',Mandatory,Position=0)]
@@ -209,7 +209,11 @@ function New-PAOrder {
     # Add the cert profile if specified
     # https://www.ietf.org/archive/id/draft-aaron-acme-profiles-00.html
     if ($Profile) {
-        $payload.profile = $Profile
+        if ($Profile -in (Get-PAProfile).Profile) {
+            $payload.profile = $Profile
+        } else {
+            Write-Warning "Profile '$Profile' is not currently supported on this ACME server. Ignoring profile selection."
+        }
     }
 
     $payloadJson = $payload | ConvertTo-Json -Depth 5 -Compress

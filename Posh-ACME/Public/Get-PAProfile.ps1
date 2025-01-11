@@ -1,7 +1,7 @@
 function Get-PAProfile {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidAssignmentToAutomaticVariable','')]
     [OutputType('PoshACME.PAProfile')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidAssignmentToAutomaticVariable','')]
     param(
         [string]$Profile
     )

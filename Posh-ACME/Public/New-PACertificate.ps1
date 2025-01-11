@@ -207,6 +207,7 @@ function New-PACertificate {
             'DnsSleep'
             'ValidationTimeout'
             'PreferredChain'
+            'Profile'
             'UseSerialValidation' ) | ForEach-Object {
 
             if ($_ -in $psbKeys) {
@@ -243,6 +244,7 @@ function New-PACertificate {
             'DnsSleep'
             'ValidationTimeout'
             'PreferredChain'
+            'Profile'
             'UseSerialValidation' ) | ForEach-Object {
 
             if ($_ -in $psbKeys) {
