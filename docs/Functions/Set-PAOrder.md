@@ -19,7 +19,8 @@ Set-PAOrder [[-MainDomain] <String>] [-Name <String>] [-NoSwitch] [-Plugin <Stri
  [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-NewName <String>]
  [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>]
  [-UseModernPfxEncryption] [-Install] [-OCSPMustStaple] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
- [-PreferredChain <String>] [-AlwaysNewKey] [-UseSerialValidation] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-PreferredChain <String>] [-AlwaysNewKey] [-UseSerialValidation] [-Profile <String>] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ### Revoke
@@ -440,6 +441,21 @@ If specified, PFX files generated from this order will use AES256 with SHA256 fo
 
 ```yaml
 Type: SwitchParameter
+Parameter Sets: Edit
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Profile
+The name of the desired ACME certificate profile. This is checked against the profiles supported by the CA and ignored if it doesn't exist.
+
+```yaml
+Type: String
 Parameter Sets: Edit
 Aliases:
 
