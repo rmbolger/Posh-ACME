@@ -1,5 +1,6 @@
 function Set-PAOrder {
     [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName='Edit')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidAssignmentToAutomaticVariable','')]
     param(
         [Parameter(Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string]$MainDomain,
@@ -54,7 +55,9 @@ function Set-PAOrder {
         [Parameter(ParameterSetName='Edit')]
         [switch]$AlwaysNewKey,
         [Parameter(ParameterSetName='Edit')]
-        [switch]$UseSerialValidation
+        [switch]$UseSerialValidation,
+        [Parameter(ParameterSetName='Edit')]
+        [string]$Profile
     )
 
     Begin {
@@ -204,6 +207,18 @@ function Set-PAOrder {
                 $saveChanges = $true
                 $rewritePfx = $true
                 $rewriteCer = $true
+            }
+
+            if ('Profile' -in $psbKeys -and $Profile -ne $order.Profile) {
+                if ($Profile -in (Get-PAProfile).Profile) {
+                    Write-Verbose "Setting Profile to $Profile"
+                    $order | Add-Member 'Profile' $Profile -Force
+                    $saveChanges = $true
+                    $rewritePfx = $false
+                    $rewriteCer = $false
+                } else {
+                    Write-Warning "Profile '$Profile' is not currently supported on this ACME server. Ignoring profile selection."
+                }
             }
 
             if ('AlwaysNewKey' -in $psbKeys -and

@@ -19,7 +19,8 @@ New-PAOrder [-Domain] <String[]> [[-KeyLength] <String>] [-Name <String>] [-Plug
  [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-AlwaysNewKey]
  [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>]
  [-UseModernPfxEncryption] [-Install] [-UseSerialValidation] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
- [-PreferredChain <String>] [-Force] [-ReplacesCert <String>] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-PreferredChain <String>] [-Force] [-ReplacesCert <String>] [-Profile <String>] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ### ImportKey
@@ -28,15 +29,16 @@ New-PAOrder [-Domain] <String[]> -KeyFile <String> [-Name <String>] [-Plugin <St
  [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-AlwaysNewKey]
  [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>]
  [-UseModernPfxEncryption] [-Install] [-UseSerialValidation] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
- [-PreferredChain <String>] [-Force] [-ReplacesCert <String>] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-PreferredChain <String>] [-Force] [-ReplacesCert <String>] [-Profile <String>] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ### FromCSR
 ```powershell
 New-PAOrder [-CSRPath] <String> [-Name <String>] [-Plugin <String[]>] [-PluginArgs <Hashtable>]
  [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-UseSerialValidation] [-DnsSleep <Int32>]
- [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Force] [-ReplacesCert <String>] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+ [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Force] [-ReplacesCert <String>] [-Profile <String>]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## Description
@@ -485,6 +487,21 @@ Accept wildcard characters: False
 
 ### -ReplacesCert
 The ARI certificate ID from the ARIId parameter on a PACertificate object returned by Get-PACertificate. This is optional and only used if the server supports the ACME Renewal Information Extension (ARI).
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Profile
+The name of the desired ACME certificate profile. This is checked against the profiles supported by the CA and ignored if it doesn't exist.
 
 ```yaml
 Type: String

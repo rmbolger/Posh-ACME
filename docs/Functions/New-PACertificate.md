@@ -20,7 +20,7 @@ New-PACertificate [-Domain] <String[]> [-Name <String>] [-Contact <String[]>] [-
  [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-Subject <String>]
  [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-UseModernPfxEncryption]
  [-Install] [-UseSerialValidation] [-Force] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
- [-PreferredChain <String>] [<CommonParameters>]
+ [-PreferredChain <String>] [-Profile <String>] [<CommonParameters>]
 ```
 
 ### FromCSR
@@ -28,7 +28,7 @@ New-PACertificate [-Domain] <String[]> [-Name <String>] [-Contact <String[]>] [-
 New-PACertificate [-CSRPath] <String> [-Name <String>] [-Contact <String[]>] [-AcceptTOS]
  [-AccountKeyLength <String>] [-DirectoryUrl <String>] [-Plugin <String[]>] [-PluginArgs <Hashtable>]
  [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-UseSerialValidation] [-Force] [-DnsSleep <Int32>]
- [-ValidationTimeout <Int32>] [-PreferredChain <String>] [<CommonParameters>]
+ [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Profile <String>] [<CommonParameters>]
 ```
 
 ## Description
@@ -510,6 +510,21 @@ If specified, PFX files generated from this order will use AES256 with SHA256 fo
 ```yaml
 Type: SwitchParameter
 Parameter Sets: FromScratch
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Profile
+The name of the desired ACME certificate profile. This is checked against the profiles supported by the CA and ignored if it doesn't exist.
+
+```yaml
+Type: String
+Parameter Sets: (All)
 Aliases:
 
 Required: False

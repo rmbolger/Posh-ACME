@@ -101,6 +101,7 @@ function Submit-Renewal {
                 $certParams.DnsSleep            = $order.DnsSleep
                 $certParams.ValidationTimeout   = $order.ValidationTimeout
                 $certParams.PreferredChain      = $order.PreferredChain
+                $certParams.Profile             = $order.Profile
 
                 if ($order.LifetimeDays -gt 0) { $certParams.LifetimeDays = $order.LifetimeDays }
 
