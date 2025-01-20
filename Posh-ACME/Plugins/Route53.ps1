@@ -469,7 +469,6 @@ function Invoke-R53RestMethod {
     $service = 'route53'
     $terminator = 'aws4_request'
 
-
     # For some reason we need two differently formatted date strings
     $now = [DateTimeOffset]::UtcNow
     $nowDate = $now.ToString("yyyyMMdd")
@@ -592,7 +591,7 @@ function Get-R53ZoneId {
 
             # check for paging
             if ([String]::IsNullOrWhiteSpace($response.NextMarker)) { break }
-            $nextMarker = "marker=$($response.NextMarker)&"
+            $nextMarker = "marker=$($response.NextMarker)"
         } while ($true)
     }
     Write-Debug "Total zones: $($zones.Count)"
