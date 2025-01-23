@@ -7,6 +7,9 @@ This plugin works against the [GoDaddy DNS](https://www.godaddy.com) provider. I
 !!! warning
     From April 2024 GoDaddy have introduced API account limits which prevent DNS API access for customers with less than 10 domains on their account. Existing accounts that don't meet the new requirements will now receive an Access Denied error when communicating with the API.
 
+!!! warning
+    It has been reported that enabling GoDaddy's Domain Protection feature on a domain silently prevents API modification of TXT records to the domain. The API calls will appear to succeed, but only empty records get created. If you are having trouble with this plugin, please ensure Domain Protection is disabled.
+
 ## Setup
 
 We need to [generate an API key](https://developer.godaddy.com/keys) for the production GoDaddy environment.
