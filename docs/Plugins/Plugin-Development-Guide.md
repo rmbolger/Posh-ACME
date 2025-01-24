@@ -154,7 +154,7 @@ _acme-challenge.sub1.example.com                 | sub1.example.com
 _acme-challenge.site1.sub1.example.com           | sub1.example.com
 _acme-challenge.site1.sub3.sub2.sub1.example.com | sub1.example.com
 
-Many of the existing plugins have a helper function to handle this. Copy and modify their code where it makes sense but make sure helper function names are unique.
+Many of the existing plugins have a helper function to handle this. Copy and modify their code where it makes sense.
 
 ### Relative Record Names
 
