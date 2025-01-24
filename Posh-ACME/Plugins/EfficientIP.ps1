@@ -28,13 +28,12 @@ function Add-DnsTxt {
     $queryParams += @{rr_name = $RecordName}
     $queryParams += @{value1 = $TxtValue}
     $queryParams += @{rr_type = "TXT"}
-    $queryParams += @{rr_ttl = "15"}
+    $queryParams += @{rr_ttl = "1"}
 
     $queryString = ($queryParams.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }) -join '&'
     $Parameters = "dnsview_name=$($EIPView)&add_flag=new_only&check_value=yes&dns_name=$($EIPDNSName)&$($queryString)"
 
     $Response = Send-EfficientIPRequest -Parameters $Parameters -Endpoint $Endpoint -Method POST -EIPUsername $EIPUsername -EIPPassword $EIPPasswordInsecure -EIPHostname $EIPHostname
-
    <#
     .SYNOPSIS
         Add a DNS TXT record to EfficientIP SOLIDServer.
@@ -100,17 +99,17 @@ function Remove-DnsTxt {
 
         $DNSRRRecord = Get-EIPDNSRecordID -Name $RecordName -TxtValue $TxtValue -DNSName $EIPDNSName -View $EIPView -EIPUsername $EIPUsername -EIPPassword $EIPPasswordInsecure -EIPHostname $EIPHostname
         If($DNSRRRecord.count -eq 0){
-           Write-Verbose "No records exist, exiting..."
-           Break
+           Return
         }
-
-        $DNSRRRecord | % {
+    
+        $Response = $DNSRRRecord | % { 
             $ID = $_
             $Endpoint = "dns_rr_delete"
             $Parameters = "rr_id=$($ID)"
             $Response = Send-EfficientIPRequest -Parameters $Parameters -Endpoint $Endpoint -Method DELETE -EIPUsername $EIPUsername -EIPPassword $EIPPasswordInsecure -EIPHostname $EIPHostname
         }
-    }Catch{}
+
+    }Catch{ }
 
     <#
     .SYNOPSIS
@@ -190,21 +189,20 @@ Function Send-EfficientIPRequest {
       $queryParams += @{Method = $Method}
       $queryParams += @{Headers = $Headers}
       $queryParams += @{Uri = $URL}
-
-      Write-Verbose $queryParams | Out-String
+      
       Try {
          $requests = Invoke-WebRequest @queryParams @script:UseBasic
          Return $requests
       } catch {
          if($_.Exception.Response.StatusCode -eq "Unauthorized") {
-            Write-Verbose -ForegroundColor Red "`nThe EfficientIP connection failed - Unauthorized`n"
+            Write-Verbose -Verbose -ForegroundColor Red "`nThe EfficientIP connection failed - Unauthorized`n"
          } else {
-            Write-Verbose "Error connecting to EfficientIP"
-            Write-Verbose "`n($_)`n"
+            Write-Verbose -Verbose "Error connecting to EfficientIP"
+            Write-Verbose -Verbose "`n($_)`n"
          }
       }
    }
-
+   
    end {}
 }
 
@@ -221,19 +219,19 @@ Function Get-EIPDNSRecordID {
    Try{
       $Endpoint = "dns_rr_list"
       $Parameters = "WHERE=(rr_full_name='$($Name)'+AND+value1='$($TxtValue)')+AND+(dns_name='$($DNSName)'+AND+dnsview_name='$($View)')"
-
+    
       $Response = Send-EfficientIPRequest -Parameters $Parameters -Endpoint $Endpoint -Method GET -EIPUsername $EIPUsername -EIPPassword $EIPPassword -EIPHostname $EIPHostname
-
+      
       If($Response.Content -ne $null){
         $ResponseContent = $Response.Content | ConvertFrom-Json
       } else {
         return $null
       }
-
+      
       if ($ResponseContent -ne $null -and $ResponseContent.rr_id -ne $null) {
          return $ResponseContent.rr_id
       } else {
          return $null  # Or any appropriate default value you prefer
       }
-   }Catch{}
+   }Catch{ }
 }
