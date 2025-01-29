@@ -547,13 +547,52 @@ function Connect-AZTenant {
         if ('CertThumbprint' -eq $PSCmdlet.ParameterSetName) {
             Write-Debug "Looking for cert thumbprint $AZCertThumbprint"
             # Look up the cert based on the thumbprint
+            $cert = $null
+            
             # check CurrentUser first
-            if (-not ($cert = Get-Item "Cert:\CurrentUser\My\$AZCertThumbprint" -EA Ignore)) {
+            $cert = Get-Item "Cert:\CurrentUser\My\$AZCertThumbprint" -EA Ignore
+            
+            if (-not $cert) {
                 # check LocalMachine
-                if (-not ($cert = Get-Item "Cert:\LocalMachine\My\$AZCertThumbprint" -EA Ignore)) {
-                    throw "Certificate with thumbprint $AZCertThumbprint not found in CurrentUser or LocalMachine stores."
-                }
+                $cert = Get-Item "Cert:\LocalMachine\My\$AZCertThumbprint" -EA Ignore
             }
+            
+            ### 
+            # This is the new method I added in to support linux systems
+            # its entirely possible this method would work for Windows and if so may be better as its not dependant on the cert: PS-Drive provider
+            # I dont know enough to say for sure though so I just add this below, only triggers if $cert wasnt found already by previous methods
+
+            $CurrentErrorAction = $ErrorActionPreference
+            
+            if (-not $cert) {
+                # Setting Error Action to Ignore to prevent the error message from being displayed will set back after block
+                $ErrorActionPreference = "Ignore"
+            } 
+
+            if (-not $cert) {
+                # check CurrentUser .NET Style
+                $store = New-Object System.Security.Cryptography.X509Certificates.X509Store("My", "CurrentUser") 
+                $store.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::ReadOnly)
+                $cert = $store.Certificates.Find([System.Security.Cryptography.X509Certificates.X509FindType]::FindByThumbprint, $AZCertThumbprint, $false)
+                $store.Close()
+            }
+
+            if (-not $cert) {
+                # check LocalMachine .NET Style
+                $store = New-Object System.Security.Cryptography.X509Certificates.X509Store("My", "LocalMachine")
+                $store.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::ReadOnly)
+                $cert = $store.Certificates.Find([System.Security.Cryptography.X509Certificates.X509FindType]::FindByThumbprint, $AZCertThumbprint, $false)
+                $store.Close()
+            }
+
+            if (-not $cert) {
+                throw "Certificate with thumbprint $AZCertThumbprint not found in CurrentUser or LocalMachine stores."
+            }
+
+            if ($ErrorActionPreference -ne $CurrentErrorAction) {
+                $ErrorActionPreference = $CurrentErrorAction
+            }
+            
         } else {
             Write-Debug "Looking for cert pfx $AZCertPfx"
             $AZCertPfx = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($AZCertPfx)
