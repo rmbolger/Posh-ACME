@@ -8,33 +8,49 @@ function Add-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
-        [string]$EIPUsername,
+        [pscredential]$SolidCredential,
         [Parameter(Mandatory,Position=3)]
-        [securestring]$EIPPassword,
-        [Parameter(Mandatory,Position=4)]
-        [string]$EIPHostname,
-        [Parameter(Mandatory,Position=5)]
-        [string]$EIPDNSName,
-        [Parameter(Mandatory,Position=6)]
-        [string]$EIPView,
+        [string]$SolidAPIHost,
+        [Parameter(Position=4)]
+        [string]$SolidDNSServer,
+        [Parameter(Position=5)]
+        [string]$SolidView,
+        [switch]$SolidIgnoreCert,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    # convert the secure secret to a normal string
-    $EIPPasswordInsecure = [pscredential]::new('a',$EIPPassword).GetNetworkCredential().Password
+    # SOLIDServer's `dns_rr_add` allows us to add an FQDN and it will find the appropriate zone
+    # assuming the supplied Server and View contain a matching zone. The add_flag=new_edit param
+    # also allows us to do a blind add without checking if the record already exists first which
+    # is extra nice.
 
-    $Endpoint = "dns_rr_add"
-    $queryParams += @{rr_name = $RecordName}
-    $queryParams += @{value1 = $TxtValue}
-    $queryParams += @{rr_type = "TXT"}
-    $queryParams += @{rr_ttl = "1"}
+    # WARNING: If the view is left empty and there are multiple zones that match in different views,
+    # the record seems to get added to all of them. Not sure if this also applies to matching zones
+    # on different servers.
 
-    $queryString = ($queryParams.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }) -join '&'
-    $Parameters = "dnsview_name=$($EIPView)&add_flag=new_only&check_value=yes&dns_name=$($EIPDNSName)&$($queryString)"
+    $queryParams = @{
+        APIHost = $SolidAPIHost
+        Credential = $SolidCredential
+        Endpoint = 'dns_rr_add'
+        Method = 'POST'
+        Body = @{
+            rr_name = $RecordName
+            value1 = $TxtValue
+            rr_type = 'TXT'
+            rr_ttl = 30
+            add_flag = 'new_edit'
+            check_value = 'yes'
+            dns_name = $SolidDNSServer
+            dnsview_name = $SolidView
+        }
+        IgnoreCert = $SolidIgnoreCert.IsPresent
+    }
+    Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
+    $resp = Invoke-SolidRequest @queryParams
+    Write-Debug "Response: $($resp | ConvertTo-Json)"
 
-    $Response = Send-EfficientIPRequest -Parameters $Parameters -Endpoint $Endpoint -Method POST -EIPUsername $EIPUsername -EIPPassword $EIPPasswordInsecure -EIPHostname $EIPHostname
-   <#
+    <#
     .SYNOPSIS
         Add a DNS TXT record to EfficientIP SOLIDServer.
 
@@ -47,27 +63,24 @@ function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
 
-    .PARAMETER EIPUsername
-        The EfficientIP SOLIDServer Username.
+    .PARAMETER SolidCredential
+        The SOLIDServer Username and Password.
 
-    .PARAMETER EIPPassword
-        The EfficientIP SOLIDServer Password.
-
-    .PARAMETER EIPHostname
+    .PARAMETER SolidAPIHost
         The EfficientIP SOLIDServer Hostname.
 
-    .PARAMETER EIPDNSName
-        The EfficientIP SOLIDServer DNS Name.
+    .PARAMETER SolidDNSServer
+        The EfficientIP SOLIDServer DNS server.
 
-    .PARAMETER EIPView
-        The EfficientIP SOLIDServer View.
+    .PARAMETER SolidView
+        The EfficientIP SOLIDServer DNS view.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $secret = Read-Host "EIP Password" -AsSecureString
-        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'user' $secret 'eip.local' 'smart.local' 'external'
+        $cred = Get-Credential
+        PS C:\>Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $cred 'eip.local' 'smart.local' 'external'
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -81,35 +94,52 @@ function Remove-DnsTxt {
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
-        [string]$EIPUsername,
+        [pscredential]$SolidCredential,
         [Parameter(Mandatory,Position=3)]
-        [securestring]$EIPPassword,
-        [Parameter(Mandatory,Position=4)]
-        [string]$EIPHostname,
-        [Parameter(Mandatory,Position=5)]
-        [string]$EIPDNSName,
-        [Parameter(Mandatory,Position=6)]
-        [string]$EIPView,
+        [string]$SolidAPIHost,
+        [Parameter(Position=4)]
+        [string]$SolidDNSServer,
+        [Parameter(Position=5)]
+        [string]$SolidView,
+        [switch]$SolidIgnoreCert,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
-    Try{
-        # convert the secure secret to a normal string
-        $EIPPasswordInsecure = [pscredential]::new('a',$EIPPassword).GetNetworkCredential().Password
 
-        $DNSRRRecord = Get-EIPDNSRecordID -Name $RecordName -TxtValue $TxtValue -DNSName $EIPDNSName -View $EIPView -EIPUsername $EIPUsername -EIPPassword $EIPPasswordInsecure -EIPHostname $EIPHostname
-        If($DNSRRRecord.count -eq 0){
-           Return
+    # Find the rr_id of the record if it exists
+    $queryParams = @{
+        APIHost = $SolidAPIHost
+        Credential = $SolidCredential
+        Endpoint = 'dns_rr_list'
+        Method = 'GET'
+        Body = @{
+            SELECT = 'rr_id,rr_full_name,rr_type,value1,dnsview_name,vdns_parent_id'
+            WHERE = "dnszone_type='master' AND rr_full_name='$RecordName' AND rr_type='TXT' AND value1='$TxtValue'"
         }
-    
-        $Response = $DNSRRRecord | % { 
-            $ID = $_
-            $Endpoint = "dns_rr_delete"
-            $Parameters = "rr_id=$($ID)"
-            $Response = Send-EfficientIPRequest -Parameters $Parameters -Endpoint $Endpoint -Method DELETE -EIPUsername $EIPUsername -EIPPassword $EIPPasswordInsecure -EIPHostname $EIPHostname
-        }
+        IgnoreCert = $SolidIgnoreCert.IsPresent
+    }
+    # Add optional fields
+    if ($SolidDNSServer) {
+        $queryParams.Body.WHERE += " AND dns_name='$SolidDNSServer'"
+    }
+    if ($SolidView) {
+        $queryParams.Body.WHERE += " AND dnsview_name='$SolidView'"
+    }
+    $resp = Invoke-SolidRequest @queryParams
 
-    }Catch{ }
+    if ($resp.rr_id) {
+        # In case we have multiple record matches, delete all of them
+        $resp.rr_id | ForEach-Object {
+            $queryParams.Endpoint = 'dns_rr_delete'
+            $queryParams.Method = 'DELETE'
+            $queryParams.Body = @{ rr_id = $_ }
+            Write-Verbose "Removing TXT record rr_id $_ - $RecordName with value $TxtValue"
+            $resp = Invoke-SolidRequest @queryParams
+            Write-Debug "Response: $($resp | ConvertTo-Json)"
+        }
+    } else {
+        Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
+    }
 
     <#
     .SYNOPSIS
@@ -121,21 +151,27 @@ function Remove-DnsTxt {
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
 
-    .PARAMETER EIPUsername
-        The EfficientIP SOLIDServer Username.
+    .PARAMETER TxtValue
+        The value of the TXT record.
 
-    .PARAMETER EIPPassword
-        The EfficientIP SOLIDServer Password.
+    .PARAMETER SolidCredential
+        The SOLIDServer Username and Password.
 
-    .PARAMETER EIPHostname
+    .PARAMETER SolidAPIHost
         The EfficientIP SOLIDServer Hostname.
+
+    .PARAMETER SolidDNSServer
+        The EfficientIP SOLIDServer DNS server.
+
+    .PARAMETER SolidView
+        The EfficientIP SOLIDServer DNS view.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
     .EXAMPLE
-        $secret = Read-Host "EIP Password" -AsSecureString
-        PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'user' $secret 'eip.local'
+        $cred = Get-Credential
+        PS C:\>Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $cred 'eip.local' 'smart.local' 'external'
 
         Removes a TXT record for the specified site with the specified value.
     #>
@@ -163,75 +199,134 @@ function Save-DnsTxt {
 # Helper Functions
 ############################
 
-Function Send-EfficientIPRequest {
-   Param(
-      [Parameter(Mandatory,Position=0)][String]$EIPHostname,
-      [Parameter(Mandatory,Position=1)][String]$EIPUsername,
-      [Parameter(Mandatory,Position=2)][String]$EIPPassword,
-      [Parameter(Mandatory,Position=3)][String]$Endpoint,
-      [Parameter(Mandatory,Position=4)][String]$Method = "Get",
-      [Parameter(Mandatory,Position=5)][String]$Parameters
-   )
+# API docs are only available as PDF for customers
 
-   begin {}
+function Invoke-SolidRequest {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$APIHost,
+        [Parameter(Mandatory)]
+        [pscredential]$Credential,
+        [Parameter(Mandatory)]
+        [string]$Endpoint,
+        [string]$Method = 'GET',
+        [hashtable]$Body,
+        [switch]$IgnoreCert
+    )
 
-   process {
-      $basicAuthValue = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $EIPUsername, $EIPPassword)))
-      $Headers = @{
-         "Authorization"="Basic $basicAuthValue"
-         "Content-Type"="application/json"
-         "Accept"="application/json"
-         "charset"="utf-8"
-      }
-      $URI = "/rest/$($Endpoint)?$($Parameters)"
-      $URL = "https://$($EIPHostname)$($URI)"
+    # Grab the plaintext password and build Basic auth header
+    $pwdPlain = $Credential.GetNetworkCredential().Password
+    $basicAuth = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes(("{0}:{1}" -f $Credential.Username, $pwdPlain)))
 
-      $queryParams += @{Method = $Method}
-      $queryParams += @{Headers = $Headers}
-      $queryParams += @{Uri = $URL}
-      
-      Try {
-         $requests = Invoke-WebRequest @queryParams @script:UseBasic
-         Return $requests
-      } catch {
-         if($_.Exception.Response.StatusCode -eq "Unauthorized") {
-            Write-Verbose -Verbose -ForegroundColor Red "`nThe EfficientIP connection failed - Unauthorized`n"
-         } else {
-            Write-Verbose -Verbose "Error connecting to EfficientIP"
-            Write-Verbose -Verbose "`n($_)`n"
-         }
-      }
-   }
-   
-   end {}
+    # build the base query
+    $queryParams = @{
+        Uri = 'https://{0}/rest/{1}' -f $APIHost,$Endpoint
+        Method = $Method
+        Headers = @{
+            Authorization = 'Basic {0}' -f $basicAuth
+            Accept = 'application/json'
+        }
+        ErrorAction = 'Stop'
+        Verbose = $false
+    }
+    Write-Debug "$Method $($queryParams.Uri)"
+
+    # add the body if necessary
+    if ($Body) {
+        if ($Method -eq 'GET') {
+            # For GET requests, the hashtable will be automatically converted into
+            # a URL encoded querystring
+            $queryParams.Body = $Body
+        } else {
+            # Everything else is JSON
+            $queryParams.ContentType = 'application/json; charset=utf-8'
+            $queryParams.Body = $Body | ConvertTo-Json -Compress
+        }
+        Write-Debug ($Body | ConvertTo-Json)
+    }
+
+    try {
+        # ignore cert validation for the duration of the call
+        if ($SolidIgnoreCert) { Set-CertIgnoreOn }
+
+        $result = Invoke-RestMethod @queryParams @script:UseBasic
+    } catch {
+        $response = $_.Exception.Response
+        # deal with bad credentials first
+        if (401 -eq $response.StatusCode) {
+            throw "SOLIDServer returned an Unauthorized error. Check for bad credentials."
+        }
+        # The web exception types thrown between PowerShell editions are different.
+        # So we need to string match the type names in order to process each correctly.
+        $exType = $_.Exception.GetType().FullName
+
+        if ('System.Net.WebException' -eq $exType) {    # Desktop edition
+            # grab the raw response body from System.Net.HttpWebResponse
+            $sr = [IO.StreamReader]::new($response.GetResponseStream())
+            $sr.BaseStream.Position = 0
+            $sr.DiscardBufferedData()
+            $errBody = $sr.ReadToEnd()
+            $sr.Close()
+
+        } elseif ('Microsoft.PowerShell.Commands.HttpResponseException' -eq $exType) {
+            # Core edition
+            # Grab the "processed" response body
+            $errBody = $_.ErrorDetails.Message
+
+        } else { throw }
+
+        Write-Debug "Response Code $($response.StatusCode.value__), Body: `n$errBody"
+        try {
+            $result = $errBody | ConvertFrom-Json
+        } catch {
+            throw "SOLIDServer returned a non-JSON error body."
+        }
+
+    } finally {
+        # return cert validation back to normal
+        if ($SolidIgnoreCert) { Set-CertIgnoreOff }
+    }
+
+    if ($result.errno -and $result.errno -gt 0) {
+        throw "SOLIDServer returned error $($result.errno): $($result.errmsg). (Enable debug output for full error body)"
+    }
+
+    $result
 }
 
-Function Get-EIPDNSRecordID {
-   Param(
-      [Parameter(Mandatory,Position=0)][String]$EIPHostname,
-      [Parameter(Mandatory,Position=1)][String]$EIPUsername,
-      [Parameter(Mandatory,Position=2)][String]$EIPPassword,
-      [Parameter(Mandatory,Position=0)][String]$Name,
-      [Parameter(Mandatory,Position=0)][String]$TxtValue,
-      [Parameter(Mandatory,Position=1)][String]$DNSName,
-      [Parameter(Mandatory,Position=2)][String]$View
-   )
-   Try{
-      $Endpoint = "dns_rr_list"
-      $Parameters = "WHERE=(rr_full_name='$($Name)'+AND+value1='$($TxtValue)')+AND+(dns_name='$($DNSName)'+AND+dnsview_name='$($View)')"
-    
-      $Response = Send-EfficientIPRequest -Parameters $Parameters -Endpoint $Endpoint -Method GET -EIPUsername $EIPUsername -EIPPassword $EIPPassword -EIPHostname $EIPHostname
-      
-      If($Response.Content -ne $null){
-        $ResponseContent = $Response.Content | ConvertFrom-Json
-      } else {
-        return $null
-      }
-      
-      if ($ResponseContent -ne $null -and $ResponseContent.rr_id -ne $null) {
-         return $ResponseContent.rr_id
-      } else {
-         return $null  # Or any appropriate default value you prefer
-      }
-   }Catch{ }
+function Set-CertIgnoreOn {
+    [CmdletBinding()]
+    param()
+
+    if ($script:SkipCertSupported) {
+        # Core edition
+        if (-not $script:UseBasic.SkipCertificateCheck) {
+            # temporarily set skip to true
+            $script:UseBasic.SkipCertificateCheck = $true
+            # remember that we did
+            $script:SolidUnsetIgnoreAfter = $true
+        }
+
+    } else {
+        # Desktop edition
+        [CertValidation]::Ignore()
+    }
+}
+
+function Set-CertIgnoreOff {
+    [CmdletBinding()]
+    param()
+
+    if ($script:SkipCertSupported) {
+        # Core edition
+        if ($script:SolidUnsetIgnoreAfter) {
+            $script:UseBasic.SkipCertificateCheck = $false
+            Remove-Variable SolidUnsetIgnoreAfter -Scope Script
+        }
+
+    } else {
+        # Desktop edition
+        [CertValidation]::Restore()
+    }
 }
