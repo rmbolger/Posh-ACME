@@ -16,6 +16,7 @@ function Add-DnsTxt {
         [Parameter(Position=5)]
         [string]$SolidView,
         [switch]$SolidIgnoreCert,
+        [switch]$SolidTokenAuth,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -45,6 +46,7 @@ function Add-DnsTxt {
             dnsview_name = $SolidView
         }
         IgnoreCert = $SolidIgnoreCert.IsPresent
+        TokenAuth = $SolidTokenAuth.IsPresent
     }
     Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
     $resp = Invoke-SolidRequest @queryParams
@@ -75,6 +77,12 @@ function Add-DnsTxt {
     .PARAMETER SolidView
         The EfficientIP SOLIDServer DNS view.
 
+    .PARAMETER SolidIgnoreCert
+        When set, certificate validation will be disabled for connections to the SOLIDServer.
+
+    .PARAMETER SolidTokenAuth
+        When set, the username and password in SolidCredential will be used as API Token and Secret
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -102,6 +110,7 @@ function Remove-DnsTxt {
         [Parameter(Position=5)]
         [string]$SolidView,
         [switch]$SolidIgnoreCert,
+        [switch]$SolidTokenAuth,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -117,6 +126,7 @@ function Remove-DnsTxt {
             WHERE = "dnszone_type='master' AND rr_full_name='$RecordName' AND rr_type='TXT' AND value1='$TxtValue'"
         }
         IgnoreCert = $SolidIgnoreCert.IsPresent
+        TokenAuth = $SolidTokenAuth.IsPresent
     }
     # Add optional fields
     if ($SolidDNSServer) {
@@ -166,6 +176,12 @@ function Remove-DnsTxt {
     .PARAMETER SolidView
         The EfficientIP SOLIDServer DNS view.
 
+    .PARAMETER SolidIgnoreCert
+        When set, certificate validation will be disabled for connections to the SOLIDServer.
+
+    .PARAMETER SolidTokenAuth
+        When set, the username and password in SolidCredential will be used as API Token and Secret
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -212,37 +228,58 @@ function Invoke-SolidRequest {
         [string]$Endpoint,
         [string]$Method = 'GET',
         [hashtable]$Body,
-        [switch]$IgnoreCert
+        [switch]$IgnoreCert,
+        [switch]$TokenAuth
     )
-
-    # Grab the plaintext password and build Basic auth header
-    $pwdPlain = $Credential.GetNetworkCredential().Password
-    $basicAuth = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes(("{0}:{1}" -f $Credential.Username, $pwdPlain)))
 
     # build the base query
     $queryParams = @{
         Uri = 'https://{0}/rest/{1}' -f $APIHost,$Endpoint
         Method = $Method
         Headers = @{
-            Authorization = 'Basic {0}' -f $basicAuth
             Accept = 'application/json'
         }
         ErrorAction = 'Stop'
         Verbose = $false
     }
-    Write-Debug "$Method $($queryParams.Uri)"
 
     # add the body if necessary
     if ($Body) {
         if ($Method -eq 'GET') {
-            # For GET requests, the hashtable will be automatically converted into
-            # a URL encoded querystring
-            $queryParams.Body = $Body
+            # Passing a hashtable as-is to -Body would normally auto-encode into
+            # key=value querystring pairs under the hood. But when using token auth,
+            # we need to sign the full Uri+Querystring. So we're going to encode
+            # the querystring ourselves and just append it to the Uri regardless
+            # of the auth type.
+            $querystring = ConvertTo-QueryString $Body
+            $queryParams.Uri += '?{0}' -f $querystring
         } else {
             # Everything else is JSON
             $queryParams.ContentType = 'application/json; charset=utf-8'
             $queryParams.Body = $Body | ConvertTo-Json -Compress
         }
+    }
+
+    # Grab the plaintext password and build the auth header
+    $pwdPlain = $Credential.GetNetworkCredential().Password
+
+    if ($TokenAuth) {
+        $timestamp = [DateTimeOffset]::Now.ToUnixTimeSeconds()
+        Write-Debug "Using token auth with token prefix $($Credential.UserName.Substring(0,5)) at $timestamp"
+        $strToHash = "{0}`n{1}`n{2}`n{3}" -f $pwdPlain,$timestamp,$Method,$queryParams.Uri
+        $signature = Get-SHA3_256 $strToHash
+        $queryParams.Headers.'X-SDS-TS' = $timestamp
+        $queryParams.Headers.Authorization = 'SDS {0}:{1}' -f $Credential.UserName,$signature
+
+    } else {
+        Write-Debug "Using Basic auth with username $($Credential.UserName)"
+        $basicAuth = [Convert]::ToBase64String(
+            [Text.Encoding]::UTF8.GetBytes(("{0}:{1}" -f $Credential.Username, $pwdPlain))
+        )
+        $queryParams.Headers.Authorization = 'Basic {0}' -f $basicAuth
+    }
+    Write-Debug "$Method $($queryParams.Uri)"
+    if ($Method -ne 'GET') {
         Write-Debug ($Body | ConvertTo-Json)
     }
 
@@ -289,7 +326,9 @@ function Invoke-SolidRequest {
     }
 
     if ($result.errno -and $result.errno -gt 0) {
-        throw "SOLIDServer returned error $($result.errno): $($result.errmsg). (Enable debug output for full error body)"
+        $msg = $result.errmsg
+        if (-not $msg) { $msg = $result.msg }
+        throw "SOLIDServer returned error $($result.errno): $msg. (Enable debug output for full error body)"
     }
 
     $result
@@ -329,4 +368,52 @@ function Set-CertIgnoreOff {
         # Desktop edition
         [CertValidation]::Restore()
     }
+}
+
+function Get-SHA3_256 {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [string]$InputString
+    )
+
+    # PowerShell 7.4+ (.NET 8+) have a native SHA3_256 class in System.Security.Cryptography.
+    # However, it only works on Windows 11 23H2+ and Linux with OpenSSL 1.1.1+.
+    # So for everything else, we'll try to use the BouncyCastle equivalent in
+    # Org.BouncyCastle.Crypto.Digests.Sha3Digest that gets loaded by the module.
+
+    $inputBytes = [Text.Encoding]::UTF8.GetBytes($InputString)
+
+    # Try native first
+    try {
+        $sha3 = [System.Security.Cryptography.SHA3_256]::Create()
+        Write-Debug "Using Native SHA3-256"
+        $hashBytes = $sha3.ComputeHash($inputBytes)
+    } catch {
+        try {
+            $sha3 = [Org.BouncyCastle.Crypto.Digests.Sha3Digest]::new(256)
+            Write-Debug "Using BouncyCastle SHA3-256"
+            $hashBytes = [byte[]]::new($sha3.GetDigestSize())
+            $sha3.BlockUpdate($inputBytes, 0, $inputBytes.Length)
+            $null = $sha3.DoFinal($hashBytes, 0)
+        } catch {
+            throw "Unable to load SHA3_256 hashing library. Make sure Posh-ACME is imported."
+        }
+    }
+
+    return [BitConverter]::ToString($hashBytes).Replace("-", "").ToLowerInvariant()
+}
+
+function ConvertTo-QueryString {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory,Position=0)]
+        [hashtable]$InputData
+    )
+
+    Write-Debug "Converting to querystring`n$($InputData | ConvertTo-Json)"
+    $encodedPairs = foreach ($kvp in $InputData.GetEnumerator()) {
+        '{0}={1}' -f [uri]::EscapeDataString($kvp.Key),[uri]::EscapeDataString($kvp.Value)
+    }
+    return ($encodedPairs -join '&')
 }
