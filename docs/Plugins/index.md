@@ -78,6 +78,7 @@ Selectel | [Selectel.ru](https://selectel.ru/en/services/additional/dns/) | [Usa
 SimpleDNSPlus | [Simple DNS Plus](https://simpledns.com/) | [Usage Guide](SimpleDNSPlus.md) | :white_check_mark:
 Simply | [Simply.com](https://www.simply.com/) (deprecated) | [Usage Guide](Simply.md) | :white_check_mark:
 SimplyCom | [Simply.com](https://www.simply.com/) (formerly UnoEuro) | [Usage Guide](SimplyCom.md) | :white_check_mark:
+SOLIDServer | [efficient iP SOLIDserver DDI](https://efficientip.com/products/solidserver-ddi/) | [Usage Guide](SOLIDServer.md) | :white_check_mark:
 SSHProxy | Custom SSH Script | [Usage Guide](SSHProxy.md) | :white_check_mark:
 TencentDNS | [TencentDNS](https://dnspod.com/) | [Usage Guide](TencentDNS.md) | :white_check_mark:
 TotalUptime | [TotalUptime](https://totaluptime.com/solutions/cloud-dns-service/) | [Usage Guide](TotalUptime.md) | :white_check_mark:
