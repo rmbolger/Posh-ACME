@@ -280,7 +280,8 @@ function Find-DeSECZone {
 
     # get the list of available zones
     try {
-        $zones = (Invoke-deSEC "/domains/" $AuthHeader).name
+        $resp = Invoke-deSEC "/domains/" $AuthHeader
+        $zones = @($resp.name)
     } catch { throw }
 
     # Since the provider could be hosting both apex and sub-zones, we need to find the closest/deepest
@@ -328,17 +329,25 @@ function Invoke-DeSEC {
         Method = $Method
         Headers = $AuthHeader
         ErrorAction = 'Stop'
+        Verbose = $false
     }
+    Write-Debug "$($Method.ToString().ToUpper()) $($queryParams.Uri)"
+
     if ($Body) {
         $queryParams.ContentType = 'application/json'
         $queryParams.Body = $Body
+        Write-Debug $Body
     }
 
     $retryHeader = 'Retry-After'
     $retrySeconds = 30  # default in case the header is missing from the response
     do {
         $retry = $false
-        try { Invoke-RestMethod @queryParams @script:UseBasic }
+        try {
+            $resp = Invoke-WebRequest @queryParams @script:UseBasic
+            Write-Debug "Response: $($resp.Content)"
+            return ($resp.Content | ConvertFrom-Json -Depth 10)
+        }
         catch {
             # re-throw anything other than HTTP 429
             if (429 -ne $_.Exception.Response.StatusCode) {
