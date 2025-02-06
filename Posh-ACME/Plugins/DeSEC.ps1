@@ -245,16 +245,16 @@ function Find-DeSECRRset {
     # .NET thinks all URLS are Windows filenames (no trailing dot)
     # replace trailing ... with escaped %2e%2e%2e
     # https://stackoverflow.com/questions/856885/httpwebrequest-to-url-with-dot-at-the-end
-    $recordUri = "/domains/$($domain)/rrsets/$($subname)%2e%2e%2e/TXT/"
+    $recordUri = "/domains/$($zoneName)/rrsets/$($subname)%2e%2e%2e/TXT/"
     Write-Debug "$RecordName has URI: $recordUri"
 
     # get existing record
     try {
         $rrset = Invoke-deSEC $recordUri $AuthHeader
-        return $rrset, $recordUri, $domain, $subname
+        return $rrset, $recordUri, $zoneName, $subname
     } catch {
         if (404 -eq $_.Exception.Response.StatusCode) {
-            return $null, $null, $domain, $subname
+            return $null, $null, $zoneName, $subname
         }
         throw
     }
