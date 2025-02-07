@@ -545,15 +545,42 @@ function Connect-AZTenant {
     } elseif ($PSCmdlet.ParameterSetName -in 'CertThumbprint','CertFile','DeprecatedCertFile') {
 
         if ('CertThumbprint' -eq $PSCmdlet.ParameterSetName) {
-            Write-Debug "Looking for cert thumbprint $AZCertThumbprint"
             # Look up the cert based on the thumbprint
-            # check CurrentUser first
-            if (-not ($cert = Get-Item "Cert:\CurrentUser\My\$AZCertThumbprint" -EA Ignore)) {
-                # check LocalMachine
-                if (-not ($cert = Get-Item "Cert:\LocalMachine\My\$AZCertThumbprint" -EA Ignore)) {
-                    throw "Certificate with thumbprint $AZCertThumbprint not found in CurrentUser or LocalMachine stores."
+            $cert = $null
+
+            # check CurrentUser first using .NET instead of Cert:\ since the latter
+            # doesn't work on Linux
+            Write-Debug "Checking for cert thumbprint $AZCertThumbprint in CurrentUser store."
+            $cuStore = [Security.Cryptography.X509Certificates.X509Store]::new('My', 'CurrentUser')
+            try {
+                $cuStore.Open('ReadOnly')
+                $cert = $cuStore.Certificates.Find('FindByThumbprint', $AZCertThumbprint, $false)
+            } catch {
+                $PSCmdlet.WriteWarning($_)
+            } finally {
+                $cuStore.Close()
+            }
+
+            # check LocalMachine next. This works on Windows, and maybe on MacOS,
+            # but not on Linux as of PS 7.5.
+            # MethodInvocationException: Exception calling "Open" with "1" argument(s): "Unix LocalMachine X509Store is limited to the Root and CertificateAuthority stores."
+            if (-not $cert) {
+                Write-Debug "Checking for cert thumbprint $AZCertThumbprint in LocalMachine store."
+                $lmStore = [Security.Cryptography.X509Certificates.X509Store]::new('My', 'LocalMachine')
+                try {
+                    $lmStore.Open('ReadOnly')
+                    $cert = $lmStore.Certificates.Find('FindByThumbprint', $AZCertThumbprint, $false)
+                } catch {
+                    $PSCmdlet.WriteWarning($_)
+                } finally {
+                    $lmStore.Close()
                 }
             }
+
+            if (-not $cert) {
+                throw "Certificate with thumbprint $AZCertThumbprint not found in CurrentUser or LocalMachine stores."
+            }
+
         } else {
             Write-Debug "Looking for cert pfx $AZCertPfx"
             $AZCertPfx = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($AZCertPfx)
@@ -613,6 +640,7 @@ function Connect-AZTenant {
             # which for some reason doesn't allow reading of the KeySize attribute
             # which then breaks New-Jws's internal validation checks. So we need
             # to convert it to an RSACryptoServiceProvider object instead.
+            Write-Debug "Converting privatekey to RSACryptoServiceProvider"
             $keyParams = $privKey.ExportParameters($true)
             $privKey = [Security.Cryptography.RSACryptoServiceProvider]::new()
             $privKey.ImportParameters($keyParams)
