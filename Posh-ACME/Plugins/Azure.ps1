@@ -635,17 +635,7 @@ function Connect-AZTenant {
             throw "Private key invalid for certificate with thumbprint $($cert.Thumbprint)."
         }
         $privKey = $cert.PrivateKey
-        Write-Debug "private key is type $($privKey.GetType().FullName)"
-        if ($privKey -isnot [Security.Cryptography.RSACryptoServiceProvider]) {
-            # On non-Windows, the private key ends up being of type RSAOpenSsl
-            # which for some reason doesn't allow reading of the KeySize attribute
-            # which then breaks New-Jws's internal validation checks. So we need
-            # to convert it to an RSACryptoServiceProvider object instead.
-            Write-Debug "Converting privatekey to RSACryptoServiceProvider"
-            $keyParams = $privKey.ExportParameters($true)
-            $privKey = [Security.Cryptography.RSACryptoServiceProvider]::new()
-            $privKey.ImportParameters($keyParams)
-        }
+        Write-Debug "Private key is type $($privKey.GetType().FullName)"
 
         Write-Verbose "Authenticating with certificate based credential"
         $clientId = [uri]::EscapeDataString($AZAppUsername)
