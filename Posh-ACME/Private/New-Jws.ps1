@@ -28,10 +28,20 @@ function New-Jws {
         # validate the key type
         if ($Key -is [Security.Cryptography.RSA]) {
 
+            try {
+                $KeySize = $Key.KeySize
+            } catch {
+                # Non-Windows tends to sends keys as RsaOpenSsl objects whose
+                # KeySize param is write-only for some reason. So export the
+                # public modulus bytes and calculate it manually.
+                $KeySize = $Key.ExportParameters($false).Modulus.Count * 8
+                Write-Debug "RSA KeySize property get failed. Calculated from Modulus as $KeySize"
+            }
+
             # validate the key size
             # LE supports 2048-4096
             # Windows claims to support 8-bit increments (mod 128)
-            if ($Key.KeySize -lt 2048 -or $Key.KeySize -gt 4096 -or ($Key.KeySize % 128) -ne 0) {
+            if ($KeySize -lt 2048 -or $KeySize -gt 4096 -or ($KeySize % 128) -ne 0) {
                 throw "Unsupported RSA key size. Must be 2048-4096 in 8 bit increments."
             }
 
