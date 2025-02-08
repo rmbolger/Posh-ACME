@@ -2,7 +2,7 @@ class AcmeException : System.Exception
 {
     [PSObject]$Data
 
-    AcmeException($Message,$Data) : base($Message) {
+    AcmeException($Message,$Data,$Exception) : base($Message,$Exception) {
         $this.Data = $Data
     }
 }

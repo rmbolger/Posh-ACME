@@ -171,7 +171,7 @@ function Invoke-ACME {
         }
 
         # throw the converted AcmeException
-        throw [AcmeException]::new($acmeError.detail,$acmeError)
+        throw [AcmeException]::new($acmeError.detail,$acmeError,$ex)
     }
 
 
