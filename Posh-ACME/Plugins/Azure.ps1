@@ -635,6 +635,7 @@ function Connect-AZTenant {
             throw "Private key invalid for certificate with thumbprint $($cert.Thumbprint)."
         }
         $privKey = $cert.PrivateKey
+        Write-Debug "private key is type $($privKey.GetType().FullName)"
         if ($privKey -isnot [Security.Cryptography.RSACryptoServiceProvider]) {
             # On non-Windows, the private key ends up being of type RSAOpenSsl
             # which for some reason doesn't allow reading of the KeySize attribute
