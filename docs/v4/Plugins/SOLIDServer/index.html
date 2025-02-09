@@ -12,13 +12,13 @@
         <meta name="author" content="Ryan Bolger">
       
       
-        <link rel="canonical" href="https://poshac.me/docs/v4/Functions/Get-KeyAuthorization/">
+        <link rel="canonical" href="https://poshac.me/docs/v4/Plugins/SOLIDServer/">
       
       
-        <link rel="prev" href="../Export-PAAccountKey/">
+        <link rel="prev" href="../Route53/">
       
       
-        <link rel="next" href="../Get-PAAccount/">
+        <link rel="next" href="../SSHProxy/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Get-KeyAuthorization - Posh-ACME</title>
+        <title>SOLIDServer - Posh-ACME</title>
       
     
     
@@ -61,11 +61,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Get-KeyAuthorization - Posh-ACME" >
+        <meta  property="og:title"  content="SOLIDServer - Posh-ACME" >
       
         <meta  property="og:description"  content="Documentation for the Posh-ACME PowerShell module" >
       
-        <meta  property="og:image"  content="https://poshac.me/docs/v4/assets/images/social/Functions/Get-KeyAuthorization.png" >
+        <meta  property="og:image"  content="https://poshac.me/docs/v4/assets/images/social/Plugins/SOLIDServer.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -73,15 +73,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://poshac.me/docs/v4/Functions/Get-KeyAuthorization/" >
+        <meta  property="og:url"  content="https://poshac.me/docs/v4/Plugins/SOLIDServer/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Get-KeyAuthorization - Posh-ACME" >
+        <meta  name="twitter:title"  content="SOLIDServer - Posh-ACME" >
       
         <meta  name="twitter:description"  content="Documentation for the Posh-ACME PowerShell module" >
       
-        <meta  name="twitter:image"  content="https://poshac.me/docs/v4/assets/images/social/Functions/Get-KeyAuthorization.png" >
+        <meta  name="twitter:image"  content="https://poshac.me/docs/v4/assets/images/social/Plugins/SOLIDServer.png" >
       
     
     
@@ -104,7 +104,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#get-keyauthorization" class="md-skip">
+        <a href="#how-to-use-the-solidserver-dns-plugin" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Get-KeyAuthorization
+              SOLIDServer
             
           </span>
         </div>
@@ -284,13 +284,11 @@
         
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../Complete-PAOrder/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../Functions/Complete-PAOrder/" class="md-tabs__link">
           
   
     
@@ -306,11 +304,13 @@
         
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../Plugins/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
           
   
     
@@ -492,12 +492,903 @@
       
   
   
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Functions
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Functions
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Complete-PAOrder/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Complete-PAOrder
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Export-PAAccountKey/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Export-PAAccountKey
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-KeyAuthorization/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-KeyAuthorization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAAccount/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-PAAccount
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAAuthorization/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-PAAuthorization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PACertificate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-PACertificate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAOrder/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-PAOrder
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAPlugin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-PAPlugin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAPluginArgs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-PAPluginArgs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAProfile/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-PAProfile
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAServer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-PAServer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Install-PACertificate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install-PACertificate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Invoke-HttpChallengeListener/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Invoke-HttpChallengeListener
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/New-PAAccount/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    New-PAAccount
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/New-PAAuthorization/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    New-PAAuthorization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/New-PACertificate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    New-PACertificate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/New-PAOrder/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    New-PAOrder
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Publish-Challenge/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Publish-Challenge
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Remove-PAAccount/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Remove-PAAccount
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Remove-PAOrder/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Remove-PAOrder
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Remove-PAServer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Remove-PAServer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Revoke-PAAuthorization/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Revoke-PAAuthorization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Revoke-PACertificate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Revoke-PACertificate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Save-Challenge/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Save-Challenge
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Send-ChallengeAck/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Send-ChallengeAck
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Set-PAAccount/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Set-PAAccount
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Set-PAOrder/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Set-PAOrder
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Set-PAServer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Set-PAServer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Submit-ChallengeValidation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Submit-ChallengeValidation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Submit-OrderFinalize/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Submit-OrderFinalize
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Submit-Renewal/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Submit-Renewal
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Unpublish-Challenge/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Unpublish-Challenge
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
   
     
     
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
       
         
       
@@ -578,26 +1469,36 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
-            
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
   
   <span class="md-ellipsis">
-    Functions
+    Plugins
   </span>
   
 
-            <span class="md-nav__icon md-icon"></span>
-          </label>
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
-            Functions
+            Plugins
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
             
               
                 
@@ -606,11 +1507,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../Complete-PAOrder/" class="md-nav__link">
+      <a href="../Plugin-Development-Guide/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Complete-PAOrder
+    Plugin Development Guide
   </span>
   
 
@@ -627,11 +1528,1313 @@
   
   
     <li class="md-nav__item">
-      <a href="../Export-PAAccountKey/" class="md-nav__link">
+      <a href="../AcmeDns/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Export-PAAccountKey
+    AcmeDns
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Active24/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Active24
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AddrTools/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    AddrTools
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Akamai/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Akamai
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Aliyun/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Aliyun
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../All-Inkl/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    All-Inkl
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Aurora/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Aurora
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AutoDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    AutoDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Azure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Azure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Beget/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Beget
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../BlueCat/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    BlueCat
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Bunny/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bunny
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ClouDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ClouDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Cloudflare/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cloudflare
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Combell/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Combell
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Constellix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Constellix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CoreNetworks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CoreNetworks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DMEasy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DMEasy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DNSPod/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DNSPod
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DNSimple/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DNSimple
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DOcean/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DOcean
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DeSEC/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DeSEC
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DomainOffensive/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DomainOffensive
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Domeneshop/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Domeneshop
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Dreamhost/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dreamhost
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DuckDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DuckDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Dynu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dynu
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../EasyDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    EasyDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Easyname/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Easyname
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../EuroDNSReseller/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    EuroDNSReseller
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../FreeDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FreeDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GCloud/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GCloud
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Gandi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Gandi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GoDaddy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GoDaddy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GoogleDomains/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GoogleDomains
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Hetzner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hetzner
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HostingDe/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HostingDe
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HurricaneElectric/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HurricaneElectric
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HurricaneElectricDyn/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HurricaneElectricDyn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../IBMSoftLayer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    IBMSoftLayer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../INWX/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    INWX
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../IONOS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    IONOS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ISPConfig/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ISPConfig
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Infoblox/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Infoblox
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Infomaniak/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Infomaniak
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../LeaseWeb/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    LeaseWeb
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Linode/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Linode
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Loopia/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Loopia
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../LuaDns/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    LuaDns
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../NS1/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NS1
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../NameCom/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NameCom
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../NameSilo/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NameSilo
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Namecheap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Namecheap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../OVH/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    OVH
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../OnlineNet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    OnlineNet
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PointDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PointDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Porkbun/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Porkbun
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PortsManagement/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PortsManagement
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PowerDNS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PowerDNS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RFC2136/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    RFC2136
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Rackspace/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rackspace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Regru/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Regru
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Route53/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Route53
   </span>
   
 
@@ -661,7 +2864,7 @@
           
   
   <span class="md-ellipsis">
-    Get-KeyAuthorization
+    SOLIDServer
   </span>
   
 
@@ -672,7 +2875,7 @@
         
   
   <span class="md-ellipsis">
-    Get-KeyAuthorization
+    SOLIDServer
   </span>
   
 
@@ -694,168 +2897,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#synopsis" class="md-nav__link">
+  <a href="#setup" class="md-nav__link">
     <span class="md-ellipsis">
-      Synopsis
+      Setup
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#syntax" class="md-nav__link">
+  <a href="#using-the-plugin" class="md-nav__link">
     <span class="md-ellipsis">
-      Syntax
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#description" class="md-nav__link">
-    <span class="md-ellipsis">
-      Description
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      Examples
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#example-1-specific-key-auth" class="md-nav__link">
-    <span class="md-ellipsis">
-      Example 1: Specific Key Auth
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-2-dns-key-auths-for-current-order" class="md-nav__link">
-    <span class="md-ellipsis">
-      Example 2: DNS Key Auths for current order
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Parameters">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#-token" class="md-nav__link">
-    <span class="md-ellipsis">
-      -Token
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#-account" class="md-nav__link">
-    <span class="md-ellipsis">
-      -Account
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#-fordns" class="md-nav__link">
-    <span class="md-ellipsis">
-      -ForDNS
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#commonparameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      CommonParameters
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#inputs" class="md-nav__link">
-    <span class="md-ellipsis">
-      Inputs
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Inputs">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#systemstring" class="md-nav__link">
-    <span class="md-ellipsis">
-      System.String
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#outputs" class="md-nav__link">
-    <span class="md-ellipsis">
-      Outputs
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Outputs">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#systemstring_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      System.String
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#related-links" class="md-nav__link">
-    <span class="md-ellipsis">
-      Related Links
+      Using the Plugin
     </span>
   </a>
   
@@ -877,2210 +2930,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../Get-PAAccount/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Get-PAAccount
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Get-PAAuthorization/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Get-PAAuthorization
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Get-PACertificate/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Get-PACertificate
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Get-PAOrder/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Get-PAOrder
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Get-PAPlugin/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Get-PAPlugin
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Get-PAPluginArgs/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Get-PAPluginArgs
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Get-PAProfile/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Get-PAProfile
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Get-PAServer/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Get-PAServer
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Install-PACertificate/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Install-PACertificate
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Invoke-HttpChallengeListener/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Invoke-HttpChallengeListener
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../New-PAAccount/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    New-PAAccount
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../New-PAAuthorization/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    New-PAAuthorization
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../New-PACertificate/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    New-PACertificate
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../New-PAOrder/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    New-PAOrder
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Publish-Challenge/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Publish-Challenge
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Remove-PAAccount/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Remove-PAAccount
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Remove-PAOrder/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Remove-PAOrder
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Remove-PAServer/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Remove-PAServer
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Revoke-PAAuthorization/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Revoke-PAAuthorization
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Revoke-PACertificate/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Revoke-PACertificate
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Save-Challenge/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Save-Challenge
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Send-ChallengeAck/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Send-ChallengeAck
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Set-PAAccount/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Set-PAAccount
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Set-PAOrder/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Set-PAOrder
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Set-PAServer/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Set-PAServer
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Submit-ChallengeValidation/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Submit-ChallengeValidation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Submit-OrderFinalize/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Submit-OrderFinalize
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Submit-Renewal/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Submit-Renewal
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Unpublish-Challenge/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Unpublish-Challenge
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
-        
-          
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../../Plugins/" class="md-nav__link ">
-              
-  
-  <span class="md-ellipsis">
-    Plugins
-  </span>
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            Plugins
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Plugin-Development-Guide/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Plugin Development Guide
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/AcmeDns/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    AcmeDns
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Active24/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Active24
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/AddrTools/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    AddrTools
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Akamai/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Akamai
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Aliyun/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Aliyun
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/All-Inkl/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    All-Inkl
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Aurora/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Aurora
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/AutoDNS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    AutoDNS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Azure/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Azure
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Beget/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Beget
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/BlueCat/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    BlueCat
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Bunny/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Bunny
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/ClouDNS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    ClouDNS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Cloudflare/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Cloudflare
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Combell/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Combell
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Constellix/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Constellix
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/CoreNetworks/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    CoreNetworks
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/DMEasy/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    DMEasy
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/DNSPod/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    DNSPod
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/DNSimple/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    DNSimple
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/DOcean/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    DOcean
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/DeSEC/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    DeSEC
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/DomainOffensive/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    DomainOffensive
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Domeneshop/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Domeneshop
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Dreamhost/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Dreamhost
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/DuckDNS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    DuckDNS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Dynu/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Dynu
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/EasyDNS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    EasyDNS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Easyname/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Easyname
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/EuroDNSReseller/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    EuroDNSReseller
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/FreeDNS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    FreeDNS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/GCloud/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    GCloud
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Gandi/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Gandi
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/GoDaddy/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    GoDaddy
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/GoogleDomains/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    GoogleDomains
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Hetzner/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Hetzner
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/HostingDe/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    HostingDe
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/HurricaneElectric/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    HurricaneElectric
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/HurricaneElectricDyn/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    HurricaneElectricDyn
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/IBMSoftLayer/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    IBMSoftLayer
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/INWX/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    INWX
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/IONOS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    IONOS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/ISPConfig/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    ISPConfig
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Infoblox/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Infoblox
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Infomaniak/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Infomaniak
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/LeaseWeb/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    LeaseWeb
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Linode/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Linode
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Loopia/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Loopia
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/LuaDns/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    LuaDns
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/NS1/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    NS1
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/NameCom/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    NameCom
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/NameSilo/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    NameSilo
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Namecheap/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Namecheap
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/OVH/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    OVH
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/OnlineNet/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    OnlineNet
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/PointDNS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    PointDNS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Porkbun/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Porkbun
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/PortsManagement/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    PortsManagement
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/PowerDNS/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    PowerDNS
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/RFC2136/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    RFC2136
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Rackspace/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Rackspace
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Regru/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Regru
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/Route53/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Route53
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/SOLIDServer/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    SOLIDServer
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Plugins/SSHProxy/" class="md-nav__link">
+      <a href="../SSHProxy/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3101,7 +2951,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/Selectel/" class="md-nav__link">
+      <a href="../Selectel/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3122,7 +2972,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/SimpleDNSPlus/" class="md-nav__link">
+      <a href="../SimpleDNSPlus/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3143,7 +2993,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/Simply/" class="md-nav__link">
+      <a href="../Simply/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3164,7 +3014,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/SimplyCom/" class="md-nav__link">
+      <a href="../SimplyCom/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3185,7 +3035,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/TencentDNS/" class="md-nav__link">
+      <a href="../TencentDNS/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3206,7 +3056,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/TotalUptime/" class="md-nav__link">
+      <a href="../TotalUptime/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3227,7 +3077,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/UKFast/" class="md-nav__link">
+      <a href="../UKFast/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3248,7 +3098,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/WEDOS/" class="md-nav__link">
+      <a href="../WEDOS/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3269,7 +3119,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/WebRoot/" class="md-nav__link">
+      <a href="../WebRoot/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3290,7 +3140,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/WebSelfHost/" class="md-nav__link">
+      <a href="../WebSelfHost/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3311,7 +3161,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/WebsupportSK/" class="md-nav__link">
+      <a href="../WebsupportSK/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3332,7 +3182,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/Windows/" class="md-nav__link">
+      <a href="../Windows/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3353,7 +3203,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/Yandex/" class="md-nav__link">
+      <a href="../Yandex/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3374,7 +3224,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/Zilore/" class="md-nav__link">
+      <a href="../Zilore/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3395,7 +3245,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/ZoneEdit/" class="md-nav__link">
+      <a href="../ZoneEdit/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3416,7 +3266,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Plugins/Zonomi/" class="md-nav__link">
+      <a href="../Zonomi/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3865,168 +3715,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#synopsis" class="md-nav__link">
+  <a href="#setup" class="md-nav__link">
     <span class="md-ellipsis">
-      Synopsis
+      Setup
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#syntax" class="md-nav__link">
+  <a href="#using-the-plugin" class="md-nav__link">
     <span class="md-ellipsis">
-      Syntax
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#description" class="md-nav__link">
-    <span class="md-ellipsis">
-      Description
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      Examples
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#example-1-specific-key-auth" class="md-nav__link">
-    <span class="md-ellipsis">
-      Example 1: Specific Key Auth
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-2-dns-key-auths-for-current-order" class="md-nav__link">
-    <span class="md-ellipsis">
-      Example 2: DNS Key Auths for current order
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Parameters">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#-token" class="md-nav__link">
-    <span class="md-ellipsis">
-      -Token
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#-account" class="md-nav__link">
-    <span class="md-ellipsis">
-      -Account
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#-fordns" class="md-nav__link">
-    <span class="md-ellipsis">
-      -ForDNS
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#commonparameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      CommonParameters
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#inputs" class="md-nav__link">
-    <span class="md-ellipsis">
-      Inputs
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Inputs">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#systemstring" class="md-nav__link">
-    <span class="md-ellipsis">
-      System.String
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#outputs" class="md-nav__link">
-    <span class="md-ellipsis">
-      Outputs
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Outputs">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#systemstring_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      System.String
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#related-links" class="md-nav__link">
-    <span class="md-ellipsis">
-      Related Links
+      Using the Plugin
     </span>
   </a>
   
@@ -4047,7 +3747,7 @@
                   
 
   
-    <a href="https://github.com/rmbolger/Posh-ACME/edit/main/docs/Functions/Get-KeyAuthorization.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/rmbolger/Posh-ACME/edit/main/docs/Plugins/SOLIDServer.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4v-2m10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1 2.1 2.1Z"/></svg>
     </a>
@@ -4056,79 +3756,44 @@
     
       
     
-    <a href="https://github.com/rmbolger/Posh-ACME/raw/main/docs/Functions/Get-KeyAuthorization.md" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/rmbolger/Posh-ACME/raw/main/docs/Plugins/SOLIDServer.md" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.15 8.15 0 0 1-1.23-2Z"/></svg>
     </a>
   
 
 
-<h1 id="get-keyauthorization">Get-KeyAuthorization<a class="headerlink" href="#get-keyauthorization" title="Permanent link">&para;</a></h1>
-<h2 id="synopsis">Synopsis<a class="headerlink" href="#synopsis" title="Permanent link">&para;</a></h2>
-<p>Calculate a key authorization string for a challenge token.</p>
-<h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="nb">Get-KeyAuthorization</span> <span class="p">[</span><span class="n">-Token</span><span class="p">]</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;</span> <span class="p">[[</span><span class="n">-Account</span><span class="p">]</span> <span class="p">&lt;</span><span class="n">Object</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-ForDNS</span><span class="p">]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
+<h1 id="how-to-use-the-solidserver-dns-plugin">How To Use the SOLIDServer DNS Plugin<a class="headerlink" href="#how-to-use-the-solidserver-dns-plugin" title="Permanent link">&para;</a></h1>
+<p>This plugin works against <a href="https://efficientip.com/products/solidserver-ddi/">efficient iP SOLIDserver DDI</a>. It is assumed that the DNS zone(s) you will be working against are already deployed and you have the necessary credentials or API keys to modify them.</p>
+<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
+<p>SOLIDserver supports API access via both your standard username/password and more granularly scoped API tokens. API tokens are recommended because they can reduce the impact of compromised credentials when configured properly.</p>
+<p>In the <code>Administration</code> section of the UI, go to <code>Authentication &amp; Security - API tokens</code>. Here you can generate a new token whose access is restricted to the DNS module and optionally a limited lifetime. When the token is created, be sure to record the Token ID &amp; Secret values. The Secret cannot be recovered after dismissing the confirmation dialog.</p>
+<p>You may also need the DNS Server name and/or DNS View name that is hosting your zones. If there is only a single master copy of the zone your records reside in, the Server and View can likely be omitted. But if you have for example, split-horizon zones with an internal and external view, you should specify the view name in your plugin parameters.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The DNS Server and View names are case-sensitive.</p>
+</div>
+<h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
+<p>Your username and password are used with the <code>SolidCredential</code> parameter as a PSCredential object. For API tokens, use the same parameter but with the Token ID as username and Token Secret as password. For token auth, you must also include the <code>SolidTokenAuth=$true</code> switch.</p>
+<p>Your SOLIDserver IP address or hostname is used with the <code>SolidAPIHost</code> parameter. Certificate validation is enabled by default. If your server is using a self-signed certificate, you will also need to include the <code>SolidIgnoreCert=$true</code> switch.</p>
+<p>The optional DNS Server and View values are used with <code>SolidDNSServer</code> and <code>SolidView</code> parameters.</p>
+<p>Here's a basic example using standard username and password.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">SolidAPIHost</span> <span class="p">=</span> <span class="s1">&#39;mysolid.example.internal&#39;</span>
+    <span class="n">SolidCredential</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span> <span class="c"># this will prompt for username/password</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">SOLIDServer</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
-<h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
-<p>A key authorization is a string that expresses a domain holder's authorization for a specified key to satisfy a specified challenge, by concatenating the token for the challenge with a key fingerprint.</p>
-<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="example-1-specific-key-auth">Example 1: Specific Key Auth<a class="headerlink" href="#example-1-specific-key-auth" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Get-KeyAuthorization</span> <span class="s1">&#39;XxXxXxXxXxXx&#39;</span>
-</code></pre></div>
-<p>Get the key authorization for the specified token using the current account.</p>
-<h3 id="example-2-dns-key-auths-for-current-order">Example 2: DNS Key Auths for current order<a class="headerlink" href="#example-2-dns-key-auths-for-current-order" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="p">(</span><span class="nb">Get-PAOrder</span> <span class="p">|</span> <span class="nb">Get-PAAuthorization</span><span class="p">).</span><span class="n">DNS01Token</span> <span class="p">|</span> <span class="nb">Get-KeyAuthorization</span> <span class="n">-ForDNS</span>
-</code></pre></div>
-<p>Get all key authorizations for the DNS challenges in the current order using the current account.</p>
-<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
-<h3 id="-token">-Token<a class="headerlink" href="#-token" title="Permanent link">&para;</a></h3>
-<p>The token string for an ACME challenge.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">String</span>
-<span class="nt">Parameter Sets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(All)</span>
-<span class="nt">Aliases</span><span class="p">:</span>
-
-<span class="nt">Required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="nt">Position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="nt">Default value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="nt">Accept pipeline input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True (ByValue)</span>
-<span class="nt">Accept wildcard characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-</code></pre></div>
-<h3 id="-account">-Account<a class="headerlink" href="#-account" title="Permanent link">&para;</a></h3>
-<p>The ACME account associated with the challenge.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Object</span>
-<span class="nt">Parameter Sets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(All)</span>
-<span class="nt">Aliases</span><span class="p">:</span>
-
-<span class="nt">Required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="nt">Position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
-<span class="nt">Default value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="nt">Accept pipeline input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="nt">Accept wildcard characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-</code></pre></div>
-<h3 id="-fordns">-ForDNS<a class="headerlink" href="#-fordns" title="Permanent link">&para;</a></h3>
-<p>Enable this switch if you're using the key authorization value for the 'dns-01' challenge type.
-It will do a few additional manipulation steps on the value that are required for a DNS TXT record.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SwitchParameter</span>
-<span class="nt">Parameter Sets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(All)</span>
-<span class="nt">Aliases</span><span class="p">:</span>
-
-<span class="nt">Required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="nt">Position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Named</span>
-<span class="nt">Default value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="nt">Accept pipeline input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="nt">Accept wildcard characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-</code></pre></div>
-<h3 id="commonparameters">CommonParameters<a class="headerlink" href="#commonparameters" title="Permanent link">&para;</a></h3>
-<p>This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see <a href="http://go.microsoft.com/fwlink/?LinkID=113216">about_CommonParameters</a>.</p>
-<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">&para;</a></h2>
-<h3 id="systemstring">System.String<a class="headerlink" href="#systemstring" title="Permanent link">&para;</a></h3>
-<p>The token value from an ACME challenge object.</p>
-<h2 id="outputs">Outputs<a class="headerlink" href="#outputs" title="Permanent link">&para;</a></h2>
-<h3 id="systemstring_1">System.String<a class="headerlink" href="#systemstring_1" title="Permanent link">&para;</a></h3>
-<p>The key authorization value.</p>
-<h2 id="related-links">Related Links<a class="headerlink" href="#related-links" title="Permanent link">&para;</a></h2>
-<p><a href="../Get-PAAuthorization/">Get-PAAuthorization</a></p>
-<p><a href="../Submit-ChallengeValidation/">Submit-ChallengeValidation</a></p>
+<p>Here's a slightly more complicated example using API tokens, an explicit DNS view, and disabling cert validation.</p>
+<p>```powershell
+$pArgs = @{
+    SolidAPIHost = 'mysolid.example.internal'
+    SolidCredential = (Get-Credential) # this will prompt for username/password
+    SolidTokenAuth = $true
+    SolidView = 'external'
+    SolidIgnoreCert = $true
+}
+New-PACertificate example.com -Plugin SOLIDServer -PluginArgs $pArgs</p>
 
 
 
@@ -4161,7 +3826,7 @@ It will do a few additional manipulation steps on the value that are required fo
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../Export-PAAccountKey/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Export-PAAccountKey">
+          <a href="../Route53/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Route53">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -4171,20 +3836,20 @@ It will do a few additional manipulation steps on the value that are required fo
                 Previous
               </span>
               <div class="md-ellipsis">
-                Export-PAAccountKey
+                Route53
               </div>
             </div>
           </a>
         
         
           
-          <a href="../Get-PAAccount/" class="md-footer__link md-footer__link--next" aria-label="Next: Get-PAAccount">
+          <a href="../SSHProxy/" class="md-footer__link md-footer__link--next" aria-label="Next: SSHProxy">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Get-PAAccount
+                SSHProxy
               </div>
             </div>
             <div class="md-footer__button md-icon">

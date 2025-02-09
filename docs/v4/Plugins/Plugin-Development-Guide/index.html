@@ -559,6 +559,8 @@
       
         
       
+        
+      
     
     
       
@@ -774,6 +776,27 @@
   
   <span class="md-ellipsis">
     Get-PAPluginArgs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-PAProfile/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-PAProfile
   </span>
   
 
@@ -1265,6 +1288,8 @@
       
         
           
+        
+      
         
       
         
@@ -3106,6 +3131,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../SOLIDServer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SOLIDServer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../SSHProxy/" class="md-nav__link">
         
   
@@ -4287,7 +4333,7 @@ don't exist.</p>
 </tr>
 </tbody>
 </table>
-<p>Many of the existing plugins have a helper function to handle this. Copy and modify their code where it makes sense but make sure helper function names are unique.</p>
+<p>Many of the existing plugins have a helper function to handle this. Copy and modify their code where it makes sense.</p>
 <h3 id="relative-record-names">Relative Record Names<a class="headerlink" href="#relative-record-names" title="Permanent link">&para;</a></h3>
 <p>Many providers will end up needing you to provide a record's relative/short name such as <code>_acme-challenge</code> or <code>_acme-challenge.www</code> rather than the fully-qualified domain provided by <code>$RecordName</code>. To do this properly, you must first know the zone name that would contain the record. Once you have it, use the following method to separate the relative name from the zone name.</p>
 <div class="highlight"><pre><span></span><code><span class="c"># assumes $zoneName contains the zone name containing the record</span>
