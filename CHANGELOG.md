@@ -1,3 +1,15 @@
+## 4.28.0 (2025-02-08)
+
+* New [efficient iP SOLIDserver DDI](https://efficientip.com/products/solidserver-ddi/) plugin. Thanks @jamiekowalczik for the initial PR and @alexissavin for providing a test platform and API guidance.
+* Experimental support for the new [ACME Profiles](https://datatracker.ietf.org/doc/draft-aaron-acme-profiles/) extension. This is still a very early draft standard and subject to change, but Let's Encrypt is already rolling out support this year as part of their short-lived certificates initiative. More info [here](https://letsencrypt.org/2025/01/09/acme-profiles/).
+* Fixed Route53 plugin when used with accounts that have many hosted zones. (#593)
+* Fixed a bug with DeSEC plugin that was caused by the previous fix for #584. (#598)
+* Added better debug logging for DeSEC plugin.
+* Azure cert thumbprint auth now works on Linux for certs in the "CurrentUser" store. (Thanks @Eric2XU)
+* Fixed a bug with Azure cert thumbprint auth on Windows that could throw errors when using certificates with non-exportable private keys.
+* Added better debug logging for Azure plugin.
+* AcmeException objects thrown by the module now include the lower level HTTP response exception as an InnerException.
+
 ## 4.27.0 (2025-01-08)
 
 * New DNS Plugins

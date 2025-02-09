@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.27.0'
+ModuleVersion = '4.28.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -84,63 +84,17 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.27.0 (2025-01-08)
+## 4.28.0 (2025-02-08)
 
-* New DNS Plugins
-  * [INWX](https://www.inwx.de/) (Thanks @andreashaerter)
-  * [EuroDNSReseller](https://www.eurodns.com/) Check the guide on this one. It's only currently usable by reseller partners of EuroDNS and not direct EuroDNS customers. (Thanks @zoryatix)
-* Fixed WEDOS plugin to handle different response types for dns-domains-list API call (#579)
-* Publish-Challenge and Unpublish-Challenge now strip trailing `.` chars from the RecordName they pass to plugins in order to make edge-case parsing more predictable.
-* Added additional ARI related error handling in New-PAOrder to more gracefully handle problems with the `replaces` field. (#587)
-* Added additional error handling in the config import process to better deal with unexpected config states. (#587)
-* Fixed a bug in the plugin development guide code that suggests how to parse short names from a RecordName and ZoneName value. The bug wouldn't correctly parse the short name in FQDNs that contained more than one instance of the zone name. (#584)
-* Fixed all of the plugins that had implemented the bugged short name parsing algorithm.
-  * Active24
-  * Aliyun
-  * All-Inkl
-  * Aurora
-  * AutoDNS
-  * Azure
-  * BlueCat
-  * Bunny
-  * ClouDNS
-  * Combell
-  * Constellix
-  * CoreNetworks
-  * DMEasy
-  * DNSPod
-  * DNSimple
-  * DOcean
-  * DeSEC
-  * Domeneshop
-  * EasyDNS
-  * Easyname
-  * FreeDNS
-  * Gandi
-  * GoDaddy
-  * Hetzner
-  * IBMSoftLayer
-  * ISPConfig
-  * Infomaniak
-  * Linode
-  * Loopia
-  * NameCom
-  * NameSilo
-  * Namecheap
-  * OVH
-  * OnlineNet
-  * PointDNS
-  * Porkbun
-  * PortsManagement
-  * Regru
-  * Simply
-  * SimplyCom
-  * TencentDNS
-  * TotalUptime
-  * WEDOS
-  * WebsupportSK
-  * Windows
-  * Yandex
+* New [efficient iP SOLIDserver DDI](https://efficientip.com/products/solidserver-ddi/) plugin. Thanks @jamiekowalczik for the initial PR and @alexissavin for providing a test platform and API guidance.
+* Experimental support for the new [ACME Profiles](https://datatracker.ietf.org/doc/draft-aaron-acme-profiles/) extension. This is still a very early draft standard and subject to change, but Let's Encrypt is already rolling out support this year as part of their short-lived certificates initiative. More info [here](https://letsencrypt.org/2025/01/09/acme-profiles/).
+* Fixed Route53 plugin when used with accounts that have many hosted zones. (#593)
+* Fixed a bug with DeSEC plugin that was caused by the previous fix for #584. (#598)
+* Added better debug logging for DeSEC plugin.
+* Azure cert thumbprint auth now works on Linux for certs in the "CurrentUser" store. (Thanks @Eric2XU)
+* Fixed a bug with Azure cert thumbprint auth on Windows that could throw errors when using certificates with non-exportable private keys.
+* Added better debug logging for Azure plugin.
+* AcmeException objects thrown by the module now include the lower level HTTP response exception as an InnerException.
 '@
 
     }
