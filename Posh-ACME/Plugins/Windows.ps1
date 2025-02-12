@@ -14,14 +14,19 @@ function Add-DnsTxt {
         [switch]$WinUseSSL,
         [switch]$WinSkipCACheck,
         [string]$WinZoneScope,
+        [switch]$WinNoCimSession,        
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $cim = Connect-WinDns @PSBoundParameters
-    Write-Verbose "Connected to $WinServer"
-
-    $dnsParams = @{ ComputerName=$WinServer; CimSession=$cim }
+    if ($WinNoCimSession) {
+        Write-Verbose "Using local DnsServer module"
+        $dnsParams = @{ ComputerName=$WinServer }
+    } else {
+        $cim = Connect-WinDns @PSBoundParameters
+        Write-Verbose "Connected to $WinServer"
+        $dnsParams = @{ ComputerName=$WinServer; CimSession=$cim }
+    }
 
     Write-Debug "Attempting to find zone for $RecordName"
     if (!($zoneName = Find-WinZone $RecordName $dnsParams)) {
@@ -89,6 +94,9 @@ function Add-DnsTxt {
     .PARAMETER WinZoneScope
         The name of the zone scope to modify. This is generally only necessary in split-brain DNS configurations where the default scope is not external facing.
 
+    .PARAMETER WinNoCimSession
+        Indicates that the script should not use CIM sessions for DNS commandlets.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -118,14 +126,19 @@ function Remove-DnsTxt {
         [switch]$WinUseSSL,
         [switch]$WinSkipCACheck,
         [string]$WinZoneScope,
+        [switch]$WinNoCimSession,        
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    $cim = Connect-WinDns @PSBoundParameters
-    Write-Verbose "Connected to $WinServer"
-
-    $dnsParams = @{ ComputerName=$WinServer; CimSession=$cim }
+    if ($WinNoCimSession) {
+        Write-Verbose "Using local DnsServer module"
+        $dnsParams = @{ ComputerName=$WinServer }
+    } else {
+        $cim = Connect-WinDns @PSBoundParameters
+        Write-Verbose "Connected to $WinServer"
+        $dnsParams = @{ ComputerName=$WinServer; CimSession=$cim }
+    }
 
     Write-Debug "Attempting to find zone for $RecordName"
     if (!($zoneName = Find-WinZone $RecordName $dnsParams)) {
@@ -194,6 +207,9 @@ function Remove-DnsTxt {
     .PARAMETER WinZoneScope
         The name of the zone scope to modify. This is generally only necessary in split-brain DNS configurations where the default scope is not external facing.
 
+    .PARAMETER WinNoCimSession
+        Indicates that the script should not use CIM sessions for the DNS commandlets.
+
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -256,7 +272,10 @@ function Connect-WinDns {
     }
 
     # create a new CimSession if necessary
-    if (Get-CimSession -ComputerName $WinServer -EA Ignore) {
+    if ($WinNoCimSession) {
+        return $null
+    }
+    elseif (Get-CimSession -ComputerName $WinServer -EA Ignore) {
         Write-Debug "Using existing CimSession for $WinServer"
         return ((Get-CimSession -ComputerName $WinServer)[0])
     } else {
