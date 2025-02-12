@@ -39,6 +39,16 @@ $cs = New-CimSession -ComputerName dnsserver.example.com
 $cs = New-CimSession -ComputerName dnsserver.example.com -Credential (Get-Credential)
 ```
 
+Alternatively, many of the DNS commands can also be used with the `-ComputerName` parameter directly without needing to create a CimSession. This method may also require less privileges on the DNS server.
+
+```powershell
+# test by specifying the dns server's FQDN
+Get-DnsServerResourceRecord -Name dns1 -ComputerName dns1.example.com -ZoneName example.com
+
+# test by specifying the domain name, which will resolve to the DNS server
+Get-DnsServerResourceRecord -Name dns1 -ComputerName example.com -ZoneName example.com
+```
+
 In environments where one or both of the client and server are not domain joined, you may need to explicitly connect via HTTPS. This may involve extra steps during setup to enable an HTTPS listener on the server. Here is a [decent guide](https://4sysops.com/archives/powershell-remoting-over-https-with-a-self-signed-ssl-certificate/) on getting things setup with a self-signed certificate, though a trusted certificate would work as well. And here is how to test from the client machine.
 
 ```powershell
@@ -59,6 +69,9 @@ In a domain joined environment, the only required parameter is the hostname or I
 ```powershell
 # domain joined environment, no credentials or SSL needed
 New-PACertificate example.com -Plugin Windows -PluginArgs @{WinServer='dns1.example.com'}
+
+# domain joined environment, without CimSession
+New-PACertificate example.com -Plugin Windows -PluginArgs @{WinServer='dns1.example.com', WinNoCimSession=$true}
 
 # standalone environment, adding credentials and SSL flag
 $pArgs = @{
