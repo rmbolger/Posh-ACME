@@ -69,18 +69,17 @@ function Set-PAOrder {
         }
         catch { $PSCmdlet.ThrowTerminatingError($_) }
 
-        # PfxPassSecure takes precedence over PfxPass if both are specified but we
-        # need the value in plain text. So we'll just take over the PfxPass variable
-        # to use for the rest of the function.
-        if ($PfxPassSecure) {
-            # throw a warning if they also specified PfxPass
-            if ('PfxPass' -in $PSBoundParameters.Keys) {
+        if ($PfxPass) {
+            if ($PfxPassSecure) {
+                # Warn that PfxPassSecure takes precedence over PfxPass if both are specified.
                 Write-Warning "PfxPass and PfxPassSecure were both specified. Using value from PfxPassSecure."
+            } else {
+                # Convert PfxPass to PfxPassSecure so it doesn't accidentally get
+                # logged in plain text.
+                $PfxPassSecure = ConvertTo-SecureString $PfxPass -AsPlainText -Force
+                $PSBoundParameters.PfxPassSecure = $PfxPassSecure
+                $null = $PSBoundParameters.Remove('PfxPass')
             }
-
-            # override the existing PfxPass parameter
-            $PfxPass = [pscredential]::new('u',$PfxPassSecure).GetNetworkCredential().Password
-            $PSBoundParameters.PfxPass = $PfxPass
         }
     }
 
@@ -169,11 +168,15 @@ function Set-PAOrder {
                 $rewritePfx = $true
             }
 
-            if ('PfxPass' -in $psbKeys -and $PfxPass -ne $order.PfxPass) {
-                Write-Verbose "Setting PfxPass to '$PfxPass'"
-                $order.PfxPass = $PfxPass
-                $saveChanges = $true
-                $rewritePfx = $true
+            if ('PfxPassSecure' -in $psbKeys) {
+                $newPass = [pscredential]::new('a',$PfxPassSecure).GetNetworkCredential().Password
+                if ($newPass -ne $order.PfxPass) {
+                    # Don't log the actual plaintext value
+                    Write-Verbose "Setting PfxPassSecure to new value with length $($PfxPassSecure.Length)"
+                    $order.PfxPass = $newPass
+                    $saveChanges = $true
+                    $rewritePfx = $true
+                }
             }
 
             if ('Install' -in $psbKeys -and $Install.IsPresent -ne $order.Install) {
