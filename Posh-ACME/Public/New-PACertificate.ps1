@@ -135,7 +135,7 @@ function New-PACertificate {
         $order.status -in 'invalid','deactivated' -or
         ($order.status -eq 'valid' -and $order.RenewAfter -and (Get-DateTimeOffsetNow) -ge ([DateTimeOffset]::Parse($order.RenewAfter))) -or
         ($order.status -eq 'pending' -and (Get-DateTimeOffsetNow) -gt ([DateTimeOffset]::Parse($order.expires))) -or
-        $CertKeyLength -ne $order.KeyLength -or
+        ('CertKeyLength' -in $psbKeys -and $CertKeyLength -ne $order.KeyLength) -or
         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') -or
         ($csrDetails -and $csrDetails.Base64Url -ne $order.CSRBase64Url ) -or
         ($LifetimeDays -and $LifetimeDays -ne $order.LifetimeDays) )
