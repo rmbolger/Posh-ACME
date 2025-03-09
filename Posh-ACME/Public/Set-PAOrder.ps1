@@ -74,8 +74,8 @@ function Set-PAOrder {
                 # Warn that PfxPassSecure takes precedence over PfxPass if both are specified.
                 Write-Warning "PfxPass and PfxPassSecure were both specified. Using value from PfxPassSecure."
             } else {
-                # Convert PfxPass to PfxPassSecure so it doesn't accidentally get
-                # logged in plain text.
+                # Convert PfxPass to PfxPassSecure so it doesn't get logged in plain text.
+                Write-Debug "Converting PfxPass to PfxPassSecure"
                 $PfxPassSecure = ConvertTo-SecureString $PfxPass -AsPlainText -Force
                 $PSBoundParameters.PfxPassSecure = $PfxPassSecure
                 $null = $PSBoundParameters.Remove('PfxPass')
