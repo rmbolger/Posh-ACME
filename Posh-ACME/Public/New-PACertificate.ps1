@@ -128,6 +128,7 @@ function New-PACertificate {
     # - has different SANs
     # - has different CSR
     # - has different Lifetime
+    # - has different Profile
     $order = Get-PAOrder -Name $Name -Refresh
     $oldOrder = $null
     $SANs = @($Domain | Where-Object { $_ -ne $Domain[0] }) | Sort-Object
@@ -138,7 +139,8 @@ function New-PACertificate {
         ('CertKeyLength' -in $psbKeys -and $CertKeyLength -ne $order.KeyLength) -or
         ($SANs -join ',') -ne (($order.SANs | Sort-Object) -join ',') -or
         ($csrDetails -and $csrDetails.Base64Url -ne $order.CSRBase64Url ) -or
-        ($LifetimeDays -and $LifetimeDays -ne $order.LifetimeDays) )
+        ($LifetimeDays -and $LifetimeDays -ne $order.LifetimeDays) -or
+        ($Profile -and $Profile -ne $order.Profile) )
     {
 
         $oldOrder = $order
