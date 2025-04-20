@@ -171,8 +171,8 @@ function Save-DnsTxt {
 # Helper Functions
 ############################
 
-# https://kb.wedos.com/cs/wapi-api-rozhrani/zakladni-informace-wapi-api-rozhrani/wapi-zakladni-informace/
-# https://kb.wedos.com/en/wapi-api-interface/wdns-en/wapi-wdns/
+# https://kb.vedos.cz/en/wapi-manual/
+# https://kb.vedos.cz/en/wapi-dns/
 
 function Invoke-Wedos {
     [CmdletBinding()]
