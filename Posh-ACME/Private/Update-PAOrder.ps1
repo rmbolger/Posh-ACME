@@ -45,6 +45,24 @@ function Update-PAOrder {
             if ($respObj.certificate) {
                 $Order | Add-Member 'certificate' $respObj.certificate -Force
             }
+            if ($respObj.notBefore) {
+                $Order | Add-Member 'notBefore' (Repair-ISODate $respObj.notBefore) -Force
+            }
+            if ($respObj.notAfter) {
+                $Order | Add-Member 'notAfter' (Repair-ISODate $respObj.notAfter) -Force
+            }
+
+            # Work around GoDaddy ACME bug that fails to include the expires field when status = pending or valid.
+            # https://www.rfc-editor.org/rfc/rfc8555.html#section-7.1.3
+            # Check for notAfter and use [DateTime]::MaxValue if it doesn't exist.
+            if ($Order.status -in 'pending','valid' -and -not $Order.expires) {
+                if ($Order.notAfter) {
+                    $Order.expires = $Order.notAfter
+                } else {
+                    $Order.expires = '9999-12-31T23:59:59Z' # [DateTime]::MaxValue.ToString('yyyy-MM-ddTHH:mm:ssZ')
+                }
+                Write-Warning "Invalid ACME response from CA. Order object has status $($Order.status) but is missing the 'expires' field which violates RFC8555 section 7.1.3. Please notify your CA. Using alternative value $($Order.expires)."
+            }
 
         } elseif (-not $SaveOnly) {
             # Let's Encrypt no longer returns order details for expired orders
