@@ -309,8 +309,10 @@ function Find-Zone {
             Write-Debug "GET $($queryParams.Uri)"
             $response = Invoke-RestMethod @queryParams @script:UseBasic
         } catch {
-            # 404 responses mean the zone wasn't found, so skip to the next check
-            if (404 -eq $_.Exception.Response.StatusCode) {
+            # 404 responses mean the zone wasn't found
+            # 403 means the API key doesn't have access to query this particular zone
+            # In both cases, we'll ignore and keep checking
+            if (404,403 -contains $_.Exception.Response.StatusCode) {
                 continue
             }
             # re-throw anything else
