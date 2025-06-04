@@ -36,6 +36,8 @@ function Add-DnsTxt {
         [string]$AZPfxPass,
         [Parameter(ParameterSetName='Token',Mandatory)]
         [string]$AZAccessToken,
+        [Parameter(ParameterSetName='TokenSecure',Mandatory)]
+        [securestring]$AZAccessTokenSecure,
         [Parameter(ParameterSetName='IMDS',Mandatory)]
         [switch]$AZUseIMDS,
         [ValidateSet('AzureCloud', 'AzureUSGovernment', 'AzureGermanCloud', 'AzureChinaCloud')]
@@ -121,7 +123,10 @@ function Add-DnsTxt {
         (DEPRECATED) The export password for the PFX file specified by AZCertPfx.
 
     .PARAMETER AZAccessToken
-        An existing Azure access token (JWT) to use for authorization when modifying TXT records. This is useful only for short lived instances or when the Azure authentication logic lives outside the module because access tokens are only valid for 1 hour.
+        An existing Azure access token (JWT) string to use for authorization when modifying TXT records. This is useful only for short lived instances or when the Azure authentication logic lives outside the module because access tokens are only valid for 1 hour.
+
+    .PARAMETER AZAccessTokenSecure
+        An existing Azure access token (JWT) SecureString to use for authorization when modifying TXT records. This is useful only for short lived instances or when the Azure authentication logic lives outside the module because access tokens are only valid for 1 hour.
 
     .PARAMETER AZUseIMDS
         If specified, the module will attempt to authenticate using the Azure Instance Metadata Service (IMDS). This will only work if the system is running within Azure and has been assigned a Managed Service Identity (MSI).
@@ -196,6 +201,8 @@ function Remove-DnsTxt {
         [string]$AZPfxPass,
         [Parameter(ParameterSetName='Token',Mandatory)]
         [string]$AZAccessToken,
+        [Parameter(ParameterSetName='TokenSecure',Mandatory)]
+        [securestring]$AZAccessTokenSecure,
         [Parameter(ParameterSetName='IMDS',Mandatory)]
         [switch]$AZUseIMDS,
         [ValidateSet('AzureCloud', 'AzureUSGovernment', 'AzureGermanCloud', 'AzureChinaCloud')]
@@ -292,7 +299,10 @@ function Remove-DnsTxt {
         (DEPRECATED) The export password for the PFX file specified by AZCertPfx.
 
     .PARAMETER AZAccessToken
-        An existing Azure access token (JWT) to use for authorization when modifying TXT records. This is useful only for short lived instances or when the Azure authentication logic lives outside the module because access tokens are only valid for 1 hour.
+        An existing Azure access token (JWT) string to use for authorization when modifying TXT records. This is useful only for short lived instances or when the Azure authentication logic lives outside the module because access tokens are only valid for 1 hour.
+
+    .PARAMETER AZAccessTokenSecure
+        An existing Azure access token (JWT) SecureString to use for authorization when modifying TXT records. This is useful only for short lived instances or when the Azure authentication logic lives outside the module because access tokens are only valid for 1 hour.
 
     .PARAMETER AZUseIMDS
         If specified, the module will attempt to authenticate using the Azure Instance Metadata Service (IMDS). This will only work if the system is running within Azure and has been assigned a Managed Service Identity (MSI).
@@ -420,6 +430,8 @@ function Connect-AZTenant {
         [string]$AZPfxPass,
         [Parameter(ParameterSetName='Token',Mandatory)]
         [string]$AZAccessToken,
+        [Parameter(ParameterSetName='TokenSecure',Mandatory)]
+        [securestring]$AZAccessTokenSecure,
         [Parameter(ParameterSetName='IMDS',Mandatory)]
         [switch]$AZUseIMDS,
         [ValidateSet('AzureCloud', 'AzureUSGovernment', 'AzureGermanCloud', 'AzureChinaCloud')]
@@ -433,7 +445,11 @@ function Connect-AZTenant {
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/v1-oauth2-client-creds-grant-flow
     # https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials
 
-    if ('Token' -eq $PSCmdlet.ParameterSetName) {
+    if ('TokenSecure' -eq $PSCmdlet.ParameterSetName) {
+        # convert the secure token to a normal string so we can parse it
+        $AZAccessToken = [pscredential]::new('a',$AZAccessTokenSecure).GetNetworkCredential().Password
+    }
+    if ('Token','TokenSecure' -contains $PSCmdlet.ParameterSetName) {
         # for explicit token payloads, always overwrite the cached token value
         Write-Debug "Attempting to parse explicit access token"
         $token = ConvertFrom-AccessToken $AZAccessToken

@@ -208,8 +208,12 @@ $token = ($ctx.TokenCache.ReadItems() | ?{
     $_.TenantId -eq $ctx.Subscription.TenantId -and $_.Resource -eq "https://management.core.windows.net/"
 } | Select-Object -First 1).AccessToken
 
-# Az.Accounts 2.0.x or later
+# Az.Accounts 2.x-4.x
 $token = (Get-AzAccessToken -ResourceUrl "https://management.core.windows.net/" -TenantId $tenantId).Token
+
+# Az.Accounts 5.x or later, the token is returned as SecureString
+# Make sure you use the correct parameter set with the plugin.
+$tokenSecure = (Get-AzAccessToken -ResourceUrl "https://management.core.windows.net/" -TenantId $tenantId).Token
 ```
 
 Here's a similar method using Azure CLI 2.0.
