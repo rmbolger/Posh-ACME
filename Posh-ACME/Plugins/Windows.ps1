@@ -12,6 +12,7 @@ function Add-DnsTxt {
         [Parameter(Position=3)]
         [pscredential]$WinCred,
         [switch]$WinUseSSL,
+        [switch]$WinSkipCACheck,
         [string]$WinZoneScope,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -82,6 +83,9 @@ function Add-DnsTxt {
     .PARAMETER WinUseSSL
         Forces the PowerShell remoting session to run over HTTPS. Requires the server have a valid certificate that is installed and trusted by the client or added to the client's TrustedHosts list. This is primarily used when connecting to a non-domain joined DNS server.
 
+    .PARAMETER WinSkipCACheck
+        Enables the SkipCACheck session option which causes the client to not validate that the server certificate is signed by a trusted certification authority (CA).
+
     .PARAMETER WinZoneScope
         The name of the zone scope to modify. This is generally only necessary in split-brain DNS configurations where the default scope is not external facing.
 
@@ -112,6 +116,7 @@ function Remove-DnsTxt {
         [Parameter(Position=3)]
         [pscredential]$WinCred,
         [switch]$WinUseSSL,
+        [switch]$WinSkipCACheck,
         [string]$WinZoneScope,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
@@ -182,6 +187,9 @@ function Remove-DnsTxt {
 
     .PARAMETER WinUseSSL
         Forces the PowerShell remoting session to run over HTTPS. Requires the server have a valid certificate that is installed and trusted by the client or added to the client's TrustedHosts list. This is primarily used when connecting to a non-domain joined DNS server.
+
+    .PARAMETER WinSkipCACheck
+        Enables the SkipCACheck session option which causes the client to not validate that the server certificate is signed by a trusted certification authority (CA).
 
     .PARAMETER WinZoneScope
         The name of the zone scope to modify. This is generally only necessary in split-brain DNS configurations where the default scope is not external facing.
@@ -255,7 +263,10 @@ function Connect-WinDns {
         Write-Debug "Connecting to $WinServer"
         $cimParams = @{ ComputerName=$WinServer }
         if ($WinCred) { $cimParams.Credential = $WinCred }
-        if ($WinUseSSL) { $cimParams.SessionOption = (New-CimSessionOption -UseSsl) }
+        $sessionOpts = @{}
+        if ($WinUseSSL) { $sessionOpts.UseSsl = $true }
+        if ($WinSkipCACheck) { $sessionOpts.SkipCACheck = $true }
+        $cimParams.SessionOption = New-CimSessionOption @sessionOpts
         return (New-CimSession @cimParams)
     }
 
