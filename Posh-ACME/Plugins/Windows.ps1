@@ -14,7 +14,7 @@ function Add-DnsTxt {
         [switch]$WinUseSSL,
         [switch]$WinSkipCACheck,
         [string]$WinZoneScope,
-        [switch]$WinNoCimSession,        
+        [switch]$WinNoCimSession,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -126,7 +126,7 @@ function Remove-DnsTxt {
         [switch]$WinUseSSL,
         [switch]$WinSkipCACheck,
         [string]$WinZoneScope,
-        [switch]$WinNoCimSession,        
+        [switch]$WinNoCimSession,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -255,16 +255,12 @@ function Connect-WinDns {
         [Parameter(Position=1)]
         [pscredential]$WinCred,
         [switch]$WinUseSSL,
+        [switch]$WinSkipCACheck,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraConnectParams
     )
 
     # make sure required modules are available
-    if ($null -eq (Get-Module -ListAvailable 'DnsServer' -Verbose:$false)) {
-        throw "DnsServer module was not found and is required to use this plugin."
-    } else {
-        Import-Module 'DnsServer' -Verbose:$false
-    }
     if ($null -eq (Get-Module -ListAvailable 'CimCmdlets' -Verbose:$false)) {
         throw "CimCmdlets module was not found and is required to use this plugin."
     } else {
@@ -272,10 +268,7 @@ function Connect-WinDns {
     }
 
     # create a new CimSession if necessary
-    if ($WinNoCimSession) {
-        return $null
-    }
-    elseif (Get-CimSession -ComputerName $WinServer -EA Ignore) {
+    if (Get-CimSession -ComputerName $WinServer -EA Ignore) {
         Write-Debug "Using existing CimSession for $WinServer"
         return ((Get-CimSession -ComputerName $WinServer)[0])
     } else {
@@ -288,7 +281,6 @@ function Connect-WinDns {
         $cimParams.SessionOption = New-CimSessionOption @sessionOpts
         return (New-CimSession @cimParams)
     }
-
 }
 
 function Find-WinZone {
@@ -299,6 +291,13 @@ function Find-WinZone {
         [Parameter(Mandatory,Position=1)]
         [hashtable]$DnsParams
     )
+
+    # make sure required modules are available
+    if ($null -eq (Get-Module -ListAvailable 'DnsServer' -Verbose:$false)) {
+        throw "DnsServer module was not found and is required to use this plugin."
+    } else {
+        Import-Module 'DnsServer' -Verbose:$false
+    }
 
     # setup a module variable to cache the record to zone mapping
     # so it's quicker to find later
