@@ -38,8 +38,7 @@ function New-PACertificate {
         [Parameter(ParameterSetName='FromScratch')]
         [string]$PfxPass='poshacme',
         [Parameter(ParameterSetName='FromScratch')]
-        [ValidateScript({Test-SecureStringNotNullOrEmpty $_ -ThrowOnFail})]
-        [securestring]$PfxPassSecure,
+        [securestring]$PfxPassSecure=[Net.NetworkCredential]::new('','poshacme').SecurePassword,
         [Parameter(ParameterSetName='FromScratch')]
         [switch]$UseModernPfxEncryption,
         [Parameter(ParameterSetName='FromScratch')]
@@ -57,7 +56,7 @@ function New-PACertificate {
     $psbKeys = $PSBoundParameters.Keys
 
     if ('PfxPass' -in $psbKeys) {
-        if ($PfxPassSecure) {
+        if ('PfxPassSecure' -in $psbKeys) {
             # Warn that PfxPassSecure takes precedence over PfxPass if both are specified.
             Write-Warning "PfxPass and PfxPassSecure were both specified. Using value from PfxPassSecure."
         } else {

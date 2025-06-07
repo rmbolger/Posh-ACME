@@ -39,8 +39,7 @@ function New-PAOrder {
         [string]$PfxPass='poshacme',
         [Parameter(ParameterSetName='FromScratch')]
         [Parameter(ParameterSetName='ImportKey')]
-        [ValidateScript({Test-SecureStringNotNullOrEmpty $_ -ThrowOnFail})]
-        [securestring]$PfxPassSecure,
+        [securestring]$PfxPassSecure=[Net.NetworkCredential]::new('','poshacme').SecurePassword,
         [Parameter(ParameterSetName='FromScratch')]
         [Parameter(ParameterSetName='ImportKey')]
         [switch]$UseModernPfxEncryption,
@@ -95,7 +94,7 @@ function New-PAOrder {
     # PfxPassSecure takes precedence over PfxPass if both are specified but we
     # need the value in plain text. So we'll just take over the PfxPass variable
     # to use for the rest of the function.
-    if ($PfxPassSecure) {
+    if ('PfxPassSecure' -in $PSBoundParameters.Keys) {
         # throw a warning if they also specified PfxPass
         if ('PfxPass' -in $PSBoundParameters.Keys) {
             Write-Warning "PfxPass and PfxPassSecure were both specified. Using value from PfxPassSecure."
