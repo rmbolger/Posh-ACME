@@ -59,8 +59,6 @@ function New-PAAccount {
                 $Contact[$_] = "mailto:$($Contact[$_])"
             }
         }
-    } else {
-        Write-Warning "No email contacts specified for this account. Certificate expiration warnings will not be sent unless you add at least one with Set-PAAccount."
     }
 
     if ('Generate' -eq $PSCmdlet.ParameterSetName) {
