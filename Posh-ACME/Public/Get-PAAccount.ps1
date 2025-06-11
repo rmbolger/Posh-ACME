@@ -32,7 +32,7 @@ function Get-PAAccount {
         # Remove the Contact param if necessary
         if ($server.IgnoreContact -and 'Contact' -in $PSBoundParameters.Keys) {
             Write-Debug "Ignoring explicit Contact parameter."
-            $PSBoundParameters.Remove('Contact')
+            $null = $PSBoundParameters.Remove('Contact')
             $Contact = $null
         }
 
