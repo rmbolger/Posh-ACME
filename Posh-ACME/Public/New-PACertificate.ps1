@@ -78,7 +78,7 @@ function New-PACertificate {
     Write-Verbose "Using ACME Server $($server.location)"
 
     # Remove the Contact param if necessary
-    if ($server.IgnoreContacts -and 'Contact' -in $PSBoundParameters.Keys) {
+    if ($server.IgnoreContact -and 'Contact' -in $PSBoundParameters.Keys) {
         Write-Debug "Ignoring explicit Contact parameter."
         $PSBoundParameters.Remove('Contact')
         $Contact = $null

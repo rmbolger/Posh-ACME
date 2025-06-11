@@ -15,7 +15,7 @@ Set the current ACME server and/or its configuration.
 
 ```powershell
 Set-PAServer [[-DirectoryUrl] <String>] [-Name <String>] [-NewName <String>] [-SkipCertificateCheck]
- [-DisableTelemetry] [-UseAltAccountRefresh] [-DisableARI] [-IgnoreContacts] [-NoRefresh] [-NoSwitch]
+ [-DisableTelemetry] [-UseAltAccountRefresh] [-DisableARI] [-IgnoreContact] [-NoRefresh] [-NoSwitch]
  [<CommonParameters>]
 ```
 
@@ -197,7 +197,7 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -IgnoreContacts
+### -IgnoreContact
 Some ACME servers such as Let's Encrypt have chosen to stop supporting and storing contact email addresses in ACME account objects. When set, this flag causes account related functions to ignore the `-Contact` parameter which can prevent bugs in low level account matching code.
 
 ```yaml

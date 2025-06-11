@@ -7801,7 +7801,7 @@ Set-PAOrder example.com -Plugin FakeDNS -PluginArgs $pArgs</dev:code>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>IgnoreContacts</maml:name>
+          <maml:name>IgnoreContact</maml:name>
           <maml:description>
             <maml:para>Some ACME servers such as Let's Encrypt have chosen to stop supporting and storing contact email addresses in ACME account objects. When set, this flag causes account related functions to ignore the `-Contact` parameter which can prevent bugs in low level account matching code.</maml:para>
           </maml:description>
@@ -7923,7 +7923,7 @@ Set-PAOrder example.com -Plugin FakeDNS -PluginArgs $pArgs</dev:code>
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>IgnoreContacts</maml:name>
+        <maml:name>IgnoreContact</maml:name>
         <maml:description>
           <maml:para>Some ACME servers such as Let's Encrypt have chosen to stop supporting and storing contact email addresses in ACME account objects. When set, this flag causes account related functions to ignore the `-Contact` parameter which can prevent bugs in low level account matching code.</maml:para>
         </maml:description>

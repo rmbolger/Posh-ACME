@@ -16,7 +16,7 @@ function Set-PAServer {
         [switch]$DisableTelemetry,
         [switch]$UseAltAccountRefresh,
         [switch]$DisableARI,
-        [switch]$IgnoreContacts,
+        [switch]$IgnoreContact,
         [switch]$NoRefresh,
         [switch]$NoSwitch
     )
@@ -75,7 +75,7 @@ function Set-PAServer {
                     SkipCertificateCheck = $SkipCertificateCheck.IsPresent
                     UseAltAccountRefresh = $UseAltAccountRefresh.IsPresent
                     DisableARI = $DisableARI.IsPresent
-                    IgnoreContacts = $IgnoreContacts.IsPresent
+                    IgnoreContact = $IgnoreContact.IsPresent
                     newAccount = $null
                     newOrder = $null
                     newNonce = $null
@@ -96,14 +96,14 @@ function Set-PAServer {
                     $UseAltAccountRefresh = [switch]::Present
                 }
 
-                # If IgnoreContacts wasn't specified, set it to true by default
+                # If IgnoreContact wasn't specified, set it to true by default
                 # for CAs that don't support the account-level contacts field
                 # such as Let's Encrypt.
-                if (-not $PSBoundParameters.ContainsKey('IgnoreContacts') -and
+                if (-not $PSBoundParameters.ContainsKey('IgnoreContact') -and
                     ($DirectoryUrl -like '*.letsencrypt.org/*')
                 ) {
-                    $newDir.IgnoreContacts = $true
-                    $IgnoreContacts = [switch]::Present
+                    $newDir.IgnoreContact = $true
+                    $IgnoreContact = [switch]::Present
                 }
             }
         }
@@ -213,11 +213,11 @@ function Set-PAServer {
             Write-Debug "Setting DisableARI value to $($DisableARI.IsPresent)"
             $newDir | Add-Member 'DisableARI' $DisableARI.IsPresent -Force
         }
-        if ($PSBoundParameters.ContainsKey('IgnoreContacts') -and
-            $newDir.IgnoreContacts -ne $IgnoreContacts.IsPresent)
+        if ($PSBoundParameters.ContainsKey('IgnoreContact') -and
+            $newDir.IgnoreContact -ne $IgnoreContact.IsPresent)
         {
-            Write-Debug "Setting IgnoreContacts value to $($IgnoreContacts.IsPresent)"
-            $newDir | Add-Member 'IgnoreContacts' $IgnoreContacts.IsPresent -Force
+            Write-Debug "Setting IgnoreContact value to $($IgnoreContact.IsPresent)"
+            $newDir | Add-Member 'IgnoreContact' $IgnoreContact.IsPresent -Force
         }
 
         # save the object to disk except for the dynamic properties
