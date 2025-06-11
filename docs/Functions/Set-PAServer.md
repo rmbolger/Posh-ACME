@@ -15,7 +15,8 @@ Set the current ACME server and/or its configuration.
 
 ```powershell
 Set-PAServer [[-DirectoryUrl] <String>] [-Name <String>] [-NewName <String>] [-SkipCertificateCheck]
- [-DisableTelemetry] [-UseAltAccountRefresh] [-DisableARI] [-NoRefresh] [-NoSwitch] [<CommonParameters>]
+ [-DisableTelemetry] [-UseAltAccountRefresh] [-DisableARI] [-IgnoreContacts] [-NoRefresh] [-NoSwitch]
+ [<CommonParameters>]
 ```
 
 ## Description
@@ -183,6 +184,21 @@ Accept wildcard characters: False
 
 ### -DisableARI
 Explicitly disables ARI (ACME Renewal Information) for this server even if it claims to support the feature. While the ARI RFC is still in draft status, this should only be necessary if ACME servers move to a newer draft version that breaks compatibility with the version currently supported (draft-03).
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -IgnoreContacts
+Some ACME servers such as Let's Encrypt have chosen to stop supporting and storing contact email addresses in ACME account objects. When set, this flag causes account related functions to ignore the `-Contact` parameter which can prevent bugs in low level account matching code.
 
 ```yaml
 Type: SwitchParameter

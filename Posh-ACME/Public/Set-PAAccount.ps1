@@ -37,6 +37,13 @@ function Set-PAAccount {
             catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
+        # Remove the Contact param if necessary
+        if ($server.IgnoreContacts -and 'Contact' -in $PSBoundParameters.Keys) {
+            Write-Debug "Ignoring explicit Contact parameter."
+            $PSBoundParameters.Remove('Contact')
+            $Contact = $null
+        }
+
         # make sure all Contacts have a mailto: prefix which is the only
         # type of contact currently supported.
         if ($Contact.Count -gt 0) {

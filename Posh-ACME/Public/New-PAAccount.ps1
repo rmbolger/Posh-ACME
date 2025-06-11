@@ -32,6 +32,13 @@ function New-PAAccount {
         catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
+    # Remove the Contact param if necessary
+    if ($server.IgnoreContacts -and 'Contact' -in $PSBoundParameters.Keys) {
+        Write-Debug "Ignoring explicit Contact parameter."
+        $PSBoundParameters.Remove('Contact')
+        $Contact = $null
+    }
+
     # make sure the external account binding parameters were specified if this ACME
     # server requires them.
     if (-not $OnlyReturnExisting -and $server.meta -and $server.meta.externalAccountRequired -and

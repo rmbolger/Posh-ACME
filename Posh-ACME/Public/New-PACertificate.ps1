@@ -74,7 +74,15 @@ function New-PACertificate {
     if ('DirectoryUrl' -in $psbKeys -or -not (Get-PAServer -Refresh)) {
         Set-PAServer -DirectoryUrl $DirectoryUrl
     }
-    Write-Verbose "Using ACME Server $($script:Dir.location)"
+    $server = Get-PAServer
+    Write-Verbose "Using ACME Server $($server.location)"
+
+    # Remove the Contact param if necessary
+    if ($server.IgnoreContacts -and 'Contact' -in $PSBoundParameters.Keys) {
+        Write-Debug "Ignoring explicit Contact parameter."
+        $PSBoundParameters.Remove('Contact')
+        $Contact = $null
+    }
 
     # Make sure we have an account set. If Contact and/or AccountKeyLength
     # were specified and don't match the current one but do match a different,

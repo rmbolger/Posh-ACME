@@ -7800,6 +7800,17 @@ Set-PAOrder example.com -Plugin FakeDNS -PluginArgs $pArgs</dev:code>
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IgnoreContacts</maml:name>
+          <maml:description>
+            <maml:para>Some ACME servers such as Let's Encrypt have chosen to stop supporting and storing contact email addresses in ACME account objects. When set, this flag causes account related functions to ignore the `-Contact` parameter which can prevent bugs in low level account matching code.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
@@ -7903,6 +7914,18 @@ Set-PAOrder example.com -Plugin FakeDNS -PluginArgs $pArgs</dev:code>
         <maml:name>DisableARI</maml:name>
         <maml:description>
           <maml:para>Explicitly disables ARI (ACME Renewal Information) for this server even if it claims to support the feature. While the ARI RFC is still in draft status, this should only be necessary if ACME servers move to a newer draft version that breaks compatibility with the version currently supported (draft-03).</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>IgnoreContacts</maml:name>
+        <maml:description>
+          <maml:para>Some ACME servers such as Let's Encrypt have chosen to stop supporting and storing contact email addresses in ACME account objects. When set, this flag causes account related functions to ignore the `-Contact` parameter which can prevent bugs in low level account matching code.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>

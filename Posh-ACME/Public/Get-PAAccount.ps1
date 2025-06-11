@@ -29,6 +29,13 @@ function Get-PAAccount {
             catch { $PSCmdlet.ThrowTerminatingError($_) }
         }
 
+        # Remove the Contact param if necessary
+        if ($server.IgnoreContacts -and 'Contact' -in $PSBoundParameters.Keys) {
+            Write-Debug "Ignoring explicit Contact parameter."
+            $PSBoundParameters.Remove('Contact')
+            $Contact = $null
+        }
+
         # make sure the Contact emails have a "mailto:" prefix
         # this may get more complex later if ACME servers support more than email based contacts
         if ($Contact.Count -gt 0) {
