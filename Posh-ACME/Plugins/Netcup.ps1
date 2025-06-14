@@ -18,10 +18,42 @@ function Add-DnsTxt {
 
     $script:NetcupEndpoint = $NetcupEndpoint
 
+    $zone,$rec = Get-NetcupTxtRecord @PSBoundParameters
 
+    if ($rec) {
+        Write-Verbose "Record $RecordName already contains $TxtValue. Nothing to do."
+        return
+    }
 
-    # Do work here to add the TXT record. Remember to add @script:UseBasic
-    # to all calls to Invoke-RestMethod or Invoke-WebRequest.
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.TrimEnd('.')))$",''
+    if (-not $recShort) { $recShort = '@' }
+
+    $queryParams = @{
+        NetcupCustNumber = $NetcupCustNumber
+        NetcupAPICredential = $NetcupAPICredential
+        Request = @{
+            action = 'updateDnsRecords'
+            param = @{
+                domainname = $zone
+                dnsrecordset = @{
+                    dnsrecords = @(@{
+                        hostname = $recShort
+                        type = 'TXT'
+                        destination = $TxtValue
+                        deleterecord = $false
+                    })
+                }
+            }
+        }
+    }
+    Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
+    $resp = Invoke-NetcupRequest @queryParams
+    if ($resp -and $resp.dnsrecords) {
+        $rec = $resp.dnsrecords | Where-Object {
+            $_.hostname -eq $recShort -and $_.destination -eq $TxtValue
+        }
+        Write-Debug "New record ID $($rec.id)"
+    }
 
     <#
     .SYNOPSIS
@@ -73,8 +105,42 @@ function Remove-DnsTxt {
 
     $script:NetcupEndpoint = $NetcupEndpoint
 
-    # Do work here to remove the TXT record. Remember to add @script:UseBasic
-    # to all calls to Invoke-RestMethod or Invoke-WebRequest.
+    $zone,$rec = Get-NetcupTxtRecord @PSBoundParameters
+
+    if (-not $rec) {
+        Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
+        return
+    }
+
+    $queryParams = @{
+        NetcupCustNumber = $NetcupCustNumber
+        NetcupAPICredential = $NetcupAPICredential
+        Request = @{
+            action = 'updateDnsRecords'
+            param = @{
+                domainname = $zone
+                dnsrecordset = @{
+                    dnsrecords = @(@{
+                        id = $rec.id
+                        hostname = $rec.hostname
+                        type = 'TXT'
+                        destination = $TxtValue
+                        deleterecord = $true
+                    })
+                }
+            }
+        }
+    }
+    Write-Verbose "Deleting TXT record $($rec.id) for $RecordName with value $TxtValue"
+    $resp = Invoke-NetcupRequest @queryParams
+    if ($resp -and $resp.dnsrecords) {
+        $rec = $resp.dnsrecords | Where-Object {
+            $_.hostname -eq $recShort -and $_.destination -eq $TxtValue
+        }
+        if (-not $rec) {
+            Write-Debug "Deleted successfully"
+        }
+    }
 
     <#
     .SYNOPSIS
@@ -208,12 +274,12 @@ function Invoke-NetcupRequest {
         $queryParams = @{
             Uri = $script:NetcupEndpoint
             Method = 'POST'
-            Body = $req | ConvertTo-Json -Compress
+            Body = $req | ConvertTo-Json -Compress -Depth 10
             ContentType = 'application/json'
             Verbose = $false
             ErrorAction = 'Stop'
         }
-        Write-Debug "POST $($queryParams.Uri)`n$($Request|ConvertTo-Json)"
+        Write-Debug "POST $($queryParams.Uri)`n$($Request|ConvertTo-Json -Depth 10)"
 
         $resp = Invoke-RestMethod @queryParams @script:UseBasic
         if ($resp.status -eq 'success') {
@@ -223,6 +289,11 @@ function Invoke-NetcupRequest {
                 Write-Debug "Netcup error $($resp.statuscode): $($resp.longmessage)"
                 New-NetcupSession $NetcupCustNumber $NetcupAPICredential
                 continue
+            } elseif ($resp.statuscode -in 5029,4013) {
+                Write-Debug "Netcup error $($resp.statuscode): $($resp.longmessage)"
+                # 5029 = "Domain not found" for infoDnsRecords
+                # 4013 = "Invalid domain name" for infoDnsRecords
+                return $null
             } else {
                 try { throw "Netcup error $($resp.statuscode): $($resp.longmessage)" }
                 catch { $PSCmdlet.ThrowTerminatingError($_) }
@@ -247,19 +318,76 @@ function Get-NetcupTxtRecord {
         [Parameter(Mandatory)]
         [int]$NetcupCustNumber,
         [Parameter(Mandatory)]
-        [pscredential]$NetcupAPICredential
+        [pscredential]$NetcupAPICredential,
+        [Parameter(ValueFromRemainingArguments)]
+        $ExtraParams2
     )
 
-    # For whatever reason, the 'listallDomains' action is only available for resellers.
-    # So we're just going to try requesting DNS records for various portions of the
-    # RecordName until we find them or run out of options.
+    $zone = $null
+    $allrecs = $null
 
-    # setup a module variable to cache the record to zone ID mapping
+    # setup a module variable to cache the record to zone mapping
     if (-not $script:NetcupRecordZones) { $script:NetcupRecordZones = @{} }
 
     # check for the record in the cache
     if ($script:NetcupRecordZones.ContainsKey($RecordName)) {
-        return $script:NetcupRecordZones.$RecordName
+        $zone = $script:NetcupRecordZones.$RecordName
     }
 
+    if (-not $zone) {
+        # For whatever reason, the 'listallDomains' action is only available for resellers.
+        # So we're just going to try 'infoDnsRecords' for various portions of the
+        # RecordName until we find them or run out of options.
+        $pieces = $RecordName.Split('.')
+        for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+            $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
+            Write-Debug "Checking $zoneTest"
+
+            $queryParams = @{
+                NetcupCustNumber = $NetcupCustNumber
+                NetcupAPICredential = $NetcupAPICredential
+                Request = @{
+                    action = 'infoDnsRecords'
+                    param = @{ domainname = $zoneTest }
+                }
+            }
+            try {
+                # a non-null result means records were returned and we found
+                # the matching zone
+                if ($resp = Invoke-NetcupRequest @queryParams) {
+                    Write-Debug "Found matching zone $zoneTest"
+                    $zone = $zoneTest
+                    $script:NetcupRecordZones.$RecordName = $zoneTest
+                    $allrecs = $resp.dnsrecords
+                    Write-Debug "Found $($allrecs.Count) existing records"
+                }
+            } catch { throw }
+        }
+    }
+
+    if (-not $allrecs) {
+        # We already have the zone from a previous call, so re-grab the current
+        # record list.
+        $queryParams = @{
+            NetcupCustNumber = $NetcupCustNumber
+            NetcupAPICredential = $NetcupAPICredential
+            Request = @{
+                action = 'infoDnsRecords'
+                param = @{ domainname = $zone }
+            }
+        }
+        $resp = Invoke-NetcupRequest @queryParams
+        $allrecs = $resp.dnsrecords
+        Write-Debug "Found $($allrecs.Count) existing records"
+    }
+
+    $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.TrimEnd('.')))$",''
+    if (-not $recShort) { $recShort = '@' }
+
+    $rec = $allrecs | Where-Object {
+        $_.type -eq 'TXT' -and
+        $_.hostname -eq $recShort -and
+        $_.destination -eq $TxtValue
+    }
+    return $zone,$rec
 }
