@@ -87,9 +87,11 @@ function Export-PluginArgs {
             }
 
             # dot source the plugin file
+            Write-Debug "Dot sourcing plugin"
             . $pluginDetail.Path
 
             # grab a reference to the appropriate Add command
+            Write-Debug "Getting command details"
             if ('dns-01' -eq $pluginDetail.ChallengeType) {
                 $cmd = Get-Command Add-DnsTxt
             } else {
@@ -97,6 +99,7 @@ function Export-PluginArgs {
             }
 
             # return the set of non-common param names
+            Write-Debug "Filtering common parameters"
             $cmd.Parameters.Keys | Where-Object {
                 ($_ -notin $ignoreParams) -and
                 ($true -notin $cmd.Parameters[$_].Attributes.ValueFromRemainingArguments)
@@ -104,6 +107,7 @@ function Export-PluginArgs {
         }
 
         # Remove any old args that may conflict with the new ones
+        Write-Debug "Looking for old keys to remove"
         foreach ($key in @($pData.Keys)) {
             if ($key -in $paramNames) {
                 Write-Debug "Removing old value for $key"
@@ -112,6 +116,7 @@ function Export-PluginArgs {
         }
 
         # Add new args to the old data
+        Write-Debug "Looking for new keys to add"
         foreach ($key in ($PluginArgs.Keys | Where-Object { $_ -in $paramNames })) {
             Write-Debug "Adding new value for $key"
             $pData.$key = $PluginArgs.$key
@@ -122,10 +127,12 @@ function Export-PluginArgs {
         # first because ConvertTo-Json can't deal with those natively.
 
         # get the encryption parameter
+        Write-Debug "Checking for encryption param"
         $encParam = Get-EncryptionParam -Account $acct -EA Stop
 
         $pDataSafe = @{}
         foreach ($key in $pData.Keys) {
+            Write-Debug "Serializing $key"
             $pDataSafe.$key = SecureSerialize $pData.$key $encParam
         }
 
