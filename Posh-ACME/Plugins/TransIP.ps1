@@ -39,7 +39,35 @@ function Get-TransIPJwtToken {
     $headers = @{ Signature = $sigB64 }
     # 4. POST to TransIP
     $response = Invoke-RestMethod -Uri "$ApiEndpoint/auth" -Method Post -Body $tokenBody -Headers $headers -ContentType "application/json"
-    return $response.token}
+    return $response.token
+
+    <#
+    .SYNOPSIS
+        Retrieves a JWT token for authenticating with the TransIP API.
+
+    .DESCRIPTION
+        Authenticates with the TransIP API by posting a signed request, returning a short-lived JWT used for subsequent API calls.
+
+    .PARAMETER CustomerName
+        Your TransIP account login.
+
+    .PARAMETER PrivateKey
+        The private RSA key as a PEM-formatted string.
+
+    .PARAMETER GlobalKey
+        Boolean indicating whether the key is global for the entire account.
+
+    .PARAMETER ApiEndpoint
+        (Optional) Override for the default TransIP API endpoint.
+
+    .RETURNS
+        The JWT token as a string.
+
+    .EXAMPLE
+        $token = Get-TransIPJwtToken -CustomerName 'transipuser' -PrivateKey $pem -GlobalKey $true
+    #>
+
+}
 
 function Find-TransIPRootDomain {
     param(
@@ -71,6 +99,31 @@ function Find-TransIPRootDomain {
     }
     # Return the matched root domain or $null if not found
     return $found
+
+    <#
+    .SYNOPSIS
+        Finds the root domain for a given DNS record.
+
+    .DESCRIPTION
+        Given a full DNS record name and an authenticated API token, queries your TransIP account and matches the record to the appropriate root domain managed under your account.
+
+    .PARAMETER RecordName
+        The full (sub)domain to locate, e.g. _acme-challenge.example.com.
+
+    .PARAMETER Token
+        TransIP API JWT token.
+
+    .PARAMETER ApiEndpoint
+        (Optional) Override for the default TransIP API endpoint.
+
+    .RETURNS
+        The best matching domain name as a string, or $null if not found.
+
+    .EXAMPLE
+        $root = Find-TransIPRootDomain -RecordName '_acme-challenge.example.com' -Token $token
+    #>
+
+
 }
 
 function Get-TransIPRelativeName {
@@ -89,6 +142,26 @@ function Get-TransIPRelativeName {
     } else {
         return $RecordName
     }
+    <#
+    .SYNOPSIS
+        Computes the relative record name for a DNS entry.
+
+    .DESCRIPTION
+        Given the full record and the root domain, returns the relative (friendly) subdomain portion as needed by the TransIP API, or '@' for the apex/root.
+
+    .PARAMETER RecordName
+        Full DNS record name, e.g. _acme-challenge.example.com
+
+    .PARAMETER RootDomain
+        The matched root domain, e.g. example.com
+
+    .RETURNS
+        The relative record name as a string.
+
+    .EXAMPLE
+        Get-TransIPRelativeName -RecordName _acme-challenge.example.com -RootDomain example.com
+    #>
+
 }
 
 function Add-DnsTxt {
@@ -142,6 +215,35 @@ function Add-DnsTxt {
 
     # Send the Add DNS request to TransIP API
     Invoke-RestMethod -Uri $postUri -Method POST -Headers $headers -Body ($body | ConvertTo-Json) -ContentType 'application/json'
+
+    <#
+    .SYNOPSIS
+        Adds a TXT record via the TransIP API.
+
+    .DESCRIPTION
+        Authenticates to the TransIP API, finds the appropriate root domain, and creates a new TXT entry for a DNS-01 ACME challenge if it does not already exist.
+
+    .PARAMETER RecordName
+        The full DNS record (e.g. _acme-challenge.example.com).
+
+    .PARAMETER TxtValue
+        The value for the TXT record.
+
+    .PARAMETER CustomerName
+        Your TransIP account login.
+
+    .PARAMETER PrivateKey
+        Your RSA private key (PEM string).
+
+    .PARAMETER GlobalKey
+        Boolean indicating whether the key is global for your TransIP account.
+
+    .PARAMETER ApiEndpoint
+        (Optional) Override for the default TransIP API endpoint.
+
+    .EXAMPLE
+        Add-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'txt-challenge' -CustomerName 'transipuser' -PrivateKey $pem -GlobalKey $true
+    #>
 }
 
 function Remove-DnsTxt {
@@ -195,6 +297,35 @@ function Remove-DnsTxt {
 
     # Send DELETE request to remove the DNS entry from TransIP
     Invoke-RestMethod -Uri $deleteUri -Method DELETE -Headers $headers -Body ($body | ConvertTo-Json) -ContentType 'application/json'
+
+    <#
+    .SYNOPSIS
+        Removes a TXT record via the TransIP API.
+
+    .DESCRIPTION
+        Authenticates to the TransIP API, finds the appropriate root domain, and deletes the specified TXT entry from your DNS records.
+
+    .PARAMETER RecordName
+        The full DNS record (e.g. _acme-challenge.example.com).
+
+    .PARAMETER TxtValue
+        The value for the TXT record to remove.
+
+    .PARAMETER CustomerName
+        Your TransIP account login.
+
+    .PARAMETER PrivateKey
+        Your RSA private key (PEM string).
+
+    .PARAMETER GlobalKey
+        Boolean indicating whether the key is global for your TransIP account.
+
+    .PARAMETER ApiEndpoint
+        (Optional) Override for the default TransIP API endpoint.
+
+    .EXAMPLE
+        Remove-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'txt-challenge' -CustomerName 'transipuser' -PrivateKey $pem -GlobalKey $true
+    #>
 }
 
 function Get-DnsTxt {
@@ -228,6 +359,35 @@ function Get-DnsTxt {
         $_.name -eq $RelativeName -and $_.type -eq "TXT"
     }
     return ($txtRecords.content)
+
+    <#
+    .SYNOPSIS
+        Retrieves TXT DNS records for a given entry.
+
+    .DESCRIPTION
+        Authenticates to the TransIP API, finds the appropriate root domain, and fetches all TXT records associated with the specified record name.
+
+    .PARAMETER RecordName
+        The full DNS record (e.g. _acme-challenge.example.com).
+
+    .PARAMETER CustomerName
+        Your TransIP account login.
+
+    .PARAMETER PrivateKey
+        Your RSA private key (PEM string).
+
+    .PARAMETER GlobalKey
+        Boolean indicating whether the key is global for your TransIP account.
+
+    .PARAMETER ApiEndpoint
+        (Optional) Override for the default TransIP API endpoint.
+
+    .RETURNS
+        An array of TXT record values.
+
+    .EXAMPLE
+        Get-DnsTxt -RecordName '_acme-challenge.example.com' -CustomerName 'transipuser' -PrivateKey $pem -GlobalKey $true
+    #>
 }
 
 # Dummy function for compatibility (not needed for TransIP)
