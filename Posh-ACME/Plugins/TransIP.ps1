@@ -1,23 +1,21 @@
-<#
+<# 
 .SYNOPSIS
     Posh-ACME DNS plugin for TransIP
 
 .DESCRIPTION
-    Implements DNS-01 for TransIP.
-    Securely supports private key input as SecureString or PEM file.
-    SecureString takes precedence.
-    Compatible with WinPS 5.1 and PowerShell 7+.
+    Implements DNS-01 for TransIP, supporting both private key authentication 
+    (as SecureString or PEM file) and JWT AccessToken.
+    Compatible with Windows Powershell 5.1 and PowerShell 7+.
     Supports both PKCS#1 and TransIP's PKCS#8 key formats on all platforms.
     PKCS#8 key format support on WinPS5.1 requires .NET 4.7.2+ / Win10+ or Server2016+  
 #>
 
-# Returns required plugin type for Posh-ACME framework (always dns-01)
 function Get-CurrentPluginType { 'dns-01' }
 
 function Get-TransIPPrivateKey {
-    param(
-        [Parameter(Mandatory=$false)][System.Security.SecureString]$PrivateKeySecureString,
-        [Parameter(Mandatory=$false)][string]$PrivateKeyFilePath
+    param (
+        [Parameter(Mandatory=$false)] [System.Security.SecureString]$PrivateKeySecureString,
+        [Parameter(Mandatory=$false)] [string]$PrivateKeyFilePath
     )
     $pem = $null
     try {
@@ -28,58 +26,55 @@ function Get-TransIPPrivateKey {
             try {
                 # Convert pointer to managed .NET string (plaintext in memory only briefly)
                 $pem = [System.Runtime.InteropServices.Marshal]::PtrToStringUni($unmanaged)
-            }
-            finally {
+            } finally {
                 # Wipe BSTR memory after use for security
                 [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($unmanaged)
             }
         } elseif ($PrivateKeyFilePath) {
-            # Otherwise, load PEM from file if the path exists
+            # Load from supplied file path (should be protected by NTFS permissions)
             if (-not (Test-Path $PrivateKeyFilePath)) {
                 throw "Private key file not found: $PrivateKeyFilePath"
             }
             $pem = Get-Content -Raw -Path $PrivateKeyFilePath
         } else {
-            # Neither SecureString nor filePath provided; fail
+            # Neither key method supplied
             throw "No private key provided. Supply -PrivateKeySecureString or -PrivateKeyFilePath."
         }
-        # If load failed, error
+        # Validate PEM string exists
         if (-not $pem) { throw "Failed to load PEM private key content." }
-        return $pem # Return PEM string (caller must clear it later!)
+        return $pem
     } finally {
-        # PEM buffer will not persist: calling code must clear as soon as possible
+        # Sensitive variables are cleared by calling code
     }
-
-    <#
-    .SYNOPSIS
-        Securely loads the RSA private key as a PEM string.
-    .DESCRIPTION
-        Loads the private key from either a SecureString (preferred) or a file path.
-        If both parameters are supplied, SecureString takes precedence.
-        Sensitive variables are cleared ASAP and never kept in memory longer than needed.
-    .PARAMETER PrivateKeySecureString
-        [SecureString] The PEM private key (preferred).
-    .PARAMETER PrivateKeyFilePath
-        [string] Path to the PEM private key file.
-    .OUTPUTS
-        [string] PEM-formatted private key string.
-    #>
-
+<# 
+.SYNOPSIS
+    Securely loads the RSA private key as a PEM string.
+.DESCRIPTION
+    Loads the private key from either a SecureString (preferred) or a file path.
+    Sensitive variables are cleared ASAP.
+.PARAMETER PrivateKeySecureString
+    Private key as SecureString.
+.PARAMETER PrivateKeyFilePath
+    File path to PEM key.
+.OUTPUTS
+    PEM-formatted private key string.
+#>
 }
 
 function Import-RsaPrivateKey {
-    param(
+    param (
         [Parameter(Mandatory)][string]$PemString
     )
-    # PowerShell 7+: just use ImportFromPem
+    # For PowerShell 7+, use the native ImportFromPem method
     if ($PSVersionTable.PSVersion.Major -ge 7) {
         $rsa = [System.Security.Cryptography.RSA]::Create()
         $rsa.ImportFromPem($PemString)
         return $rsa
     }
-    # Remove headers/footers for PKCS#1
+    # On PS5.1 — support both PKCS#1 and PKCS#8
     $clean = $PemString -replace "\r","" -replace "\n",""
     if ($clean -match '-----BEGIN RSA PRIVATE KEY-----') {
+        # PKCS#1 (classic OpenSSL)
         $base64 = ($PemString -split "\r?\n" | Where-Object {$_ -notmatch "^-+.*PRIVATE.*-+$"}) -join ""
         $keyBytes = [Convert]::FromBase64String($base64)
         $reader = New-Object System.IO.BinaryReader([System.IO.MemoryStream]::new($keyBytes))
@@ -115,120 +110,106 @@ function Import-RsaPrivateKey {
         $rsaProv.ImportParameters($rsaParams)
         return $rsaProv
     } elseif ($clean -match '-----BEGIN PRIVATE KEY-----') {
-        # Try CNG import on Win10+ with PKCS#8 DER bytes
+        # PKCS#8 (modern OpenSSL export)
         $base64 = ($PemString -split "\r?\n" | Where-Object {$_ -notmatch "^-+.*PRIVATE KEY-+$"}) -join ""
         $pkcs8bytes = [Convert]::FromBase64String($base64)
         try {
-            # Only available if .NET Framework supports CNG (.NET 4.7.2+/Win10+). Will throw otherwise.
             $cngKey = [System.Security.Cryptography.CngKey]::Import($pkcs8bytes, [System.Security.Cryptography.CngKeyBlobFormat]::Pkcs8PrivateBlob)
             $rsaCng = New-Object System.Security.Cryptography.RSACng($cngKey)
             return $rsaCng
         } catch {
-            throw "Could not import PKCS#8 key in Windows PowerShell 5.1. On this system, only '-----BEGIN RSA PRIVATE KEY-----' PKCS#1-supported. To use this PKCS#8 key, please convert it to PKCS#1 format with OpenSSL: 'openssl rsa -in key.pem -out rsakey.pem'. Error details: $_"
+            throw "Could not import PKCS#8 key in Windows PowerShell 5.1. Only supported in updated environments. Error details: $_"
         }
     } else {
         throw "Unrecognized private key PEM format. Only PKCS#1 (BEGIN RSA PRIVATE KEY) and PKCS#8 (BEGIN PRIVATE KEY) are supported."
     }
-    <#
+    <# 
     .SYNOPSIS
-        Imports a PEM-encoded RSA private key (supports PKCS#8 and PKCS#1).
+        Imports a PEM-encoded RSA private key.
     .DESCRIPTION
-        Native support for PS 7+, pure .NET decoder for PKCS#8 (BEGIN PRIVATE KEY) and PKCS#1 (BEGIN RSA PRIVATE KEY) on WinPS 5.1.
+        Supports PS7+ natively and emulates PKCS#1 parsing for PS5.1.
     .PARAMETER PemString
         PEM private key string.
     .OUTPUTS
-        [System.Security.Cryptography.RSA or System.Security.Cryptography.RSACryptoServiceProvider]
+        [System.Security.Cryptography.RSA] (PS7+) or [System.Security.Cryptography.RSACryptoServiceProvider] (PS5.1)
     #>
-
 }
 
-
 function Get-TransIPJwtToken {
-    param(
-        [Parameter(Mandatory)][string]$CustomerName,
-        [Parameter(Mandatory)][bool]$GlobalKey,
+    param (
+        [Parameter(Mandatory)] [string]$CustomerName,
+        [Parameter(Mandatory)] [bool]$GlobalKey,
         [Parameter()][System.Security.SecureString]$PrivateKeySecureString,
         [Parameter()][string]$PrivateKeyFilePath,
         [Parameter()][string]$ApiEndpoint = "https://api.transip.nl/v6"
     )
-
-    # Securely load the PEM key from provided parameter
+    # Retrieve private key contents
     $PrivateKey = Get-TransIPPrivateKey -PrivateKeySecureString $PrivateKeySecureString -PrivateKeyFilePath $PrivateKeyFilePath
-    # Convert PEM to .NET RSA object (cross-version logic)
     $rsa = Import-RsaPrivateKey -PemString $PrivateKey
 
     try {
-        # Prepare a nonce for JWT
-        $nonce = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 16 | % {[char]$_})
+        # Build a random nonce and JWT label for security and logging
+        $nonce = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 16 | ForEach-Object {[char]$_})
         $randomNum = Get-Random -Minimum 10000 -Maximum 99999
         $label = "Posh-ACME-$randomNum"
-        # JWT claims for TransIP
         $tokenBody = @{
-            login           = $CustomerName
-            nonce           = $nonce
-            global_key      = $GlobalKey
+            login = $CustomerName
+            nonce = $nonce
+            global_key = $GlobalKey
             expiration_time = "5 minutes"
-            label           = $label
+            label = $label
         } | ConvertTo-Json -Compress
-
-        # Hash and sign the payload (SHA512/PKCS#1)
-        $bodyBytes = [System.Text.Encoding]::UTF8.GetBytes($tokenBody)
-        $sigRaw = $rsa.SignData($bodyBytes,
-            [System.Security.Cryptography.HashAlgorithmName]::SHA512,
-            [System.Security.Cryptography.RSASignaturePadding]::Pkcs1)
+        # Sign the body using SHA512 PKCS#1
+        $bodyBytes = [System.Text.Encoding]::UTF8.GetBytes($tokenBody) 
+        $sigRaw = $rsa.SignData($bodyBytes,[System.Security.Cryptography.HashAlgorithmName]::SHA512,[System.Security.Cryptography.RSASignaturePadding]::Pkcs1) 
         $sigB64 = [Convert]::ToBase64String($sigRaw)
-
-        # Prepare HTTP header for signature
+        # Call TransIP /auth endpoint for JWT
         $headers = @{ Signature = $sigB64 }
-
-        # Request JWT from TransIP API
         $response = Invoke-RestMethod -Uri "$ApiEndpoint/auth" -Method Post -Body $tokenBody -Headers $headers -ContentType "application/json"
         return $response.token
-    }
-    finally {
-        # Always clear private key material as soon as possible
+    } finally {
+        # Clear private key material as soon as possible
         $PrivateKey = $null
         if ($rsa -is [System.Security.Cryptography.RSACryptoServiceProvider]) { $rsa.Clear() }
     }
-    <#
+    <# 
     .SYNOPSIS
         Retrieves a JWT token for authenticating with the TransIP API.
     .DESCRIPTION
-        Authenticates with the TransIP API by posting a signed request, returning a short-lived JWT used for subsequent API calls.
+        Authenticates with the TransIP API and returns a short-lived JWT for subsequent calls.
     .PARAMETER CustomerName
-        Your TransIP account login.
+        Your TransIP username/login.
     .PARAMETER PrivateKeySecureString
-        The private key as a SecureString (takes precedence).
+        (Preferred) Private key as SecureString.
     .PARAMETER PrivateKeyFilePath
-        Path to the PEM private key file.
+        PEM key file path.
     .PARAMETER GlobalKey
-        Boolean indicating whether the key is global for the entire account.
+        Use the global API key for account.
     .PARAMETER ApiEndpoint
-        (Optional) Override for the default TransIP API endpoint.
+        Optional override for the TransIP API endpoint.
     .RETURNS
-        The JWT token as a string.
+        JWT token string.
     .EXAMPLE
         $token = Get-TransIPJwtToken -CustomerName 'transipuser' -PrivateKeySecureString $sec -GlobalKey $true
     #>
 }
 
 function Find-TransIPRootDomain {
-    param(
-        [Parameter(Mandatory)][string]$RecordName,
-        [Parameter(Mandatory)][string]$Token,
+    param (
+        [Parameter(Mandatory)] [string]$RecordName,
+        [Parameter(Mandatory)] [string]$Token,
         [Parameter()][string]$ApiEndpoint = "https://api.transip.nl/v6"
     )
-    # Prepare bearer token for API auth
+    # Prepare Bearer authentication header
     $headers = @{ Authorization = "Bearer $Token" }
-    # Get domain list from account
+    # Get all domains under the account
     $domainList = (Invoke-RestMethod -Uri "$ApiEndpoint/domains" -Headers $headers).domains
     $found = $null
     $longest = 0
-    # For each domain registered, check if a match/parent exists
+    # Look for the most specific (longest) root domain that is part of the record
     foreach ($d in $domainList) {
         $domainName = $d.name
         if ($RecordName -eq $domainName -or $RecordName -like "*.$domainName") {
-            # Favor the most specific (longest) match
             if ($domainName.Length -gt $longest) {
                 $found = $domainName
                 $longest = $domainName.Length
@@ -236,89 +217,94 @@ function Find-TransIPRootDomain {
         }
     }
     return $found
-
-    <#
+    <# 
     .SYNOPSIS
         Finds the root domain for a given DNS record in your TransIP account.
     .DESCRIPTION
-        Given a full DNS record name and a valid TransIP API bearer token,
-        queries your TransIP account for all managed domains and matches 
-        the record to the longest (most specific) appropriate domain.
+        Given a full DNS record name, queries your TransIP domains and matches to the longest (most specific) managed domain.
     .PARAMETER RecordName
-        The full (sub)domain to locate, e.g. _acme-challenge.example.com.
+        Full (sub)domain to locate.
     .PARAMETER Token
-        TransIP API JWT token.
+        TransIP API JWT.
     .PARAMETER ApiEndpoint
-        (Optional) Override for the default TransIP API endpoint.
+        Optional override for endpoint.
     .RETURNS
-        The best matching domain name as a string, or $null if not found.
+        Domain name or $null.
     .EXAMPLE
         $root = Find-TransIPRootDomain -RecordName '_acme-challenge.example.com' -Token $token
     #>
 }
 
 function Get-TransIPRelativeName {
-    param(
+    param (
         [Parameter(Mandatory)][string]$RecordName,
         [Parameter(Mandatory)][string]$RootDomain
     )
-    # If record matches root, we want "@"
+    # If record == root, return apex/at sign
     if ($RecordName -eq $RootDomain) { return '@' }
-    # Otherwise, strip root domain from end to get relative part
     $ending = ".$RootDomain"
+    # Otherwise, remove the root domain from the record name
     if ($RecordName -like "*$ending") {
         return $RecordName.Substring(0, $RecordName.Length - $ending.Length)
     } else {
         return $RecordName
     }
-    <#
+    <# 
     .SYNOPSIS
         Computes the relative DNS record name for a DNS entry, for use with TransIP API.
     .DESCRIPTION
-        Given a full DNS record name and its root domain, returns the relative 
-        (subdomain) portion required by the TransIP API, or "@" for apex/root.
+        Converts a full record name + root into the correct relative (sub)domain for TransIP API or @ for the root.
     .PARAMETER RecordName
-        Full DNS record name, e.g. _acme-challenge.example.com
+        Full DNS record name.
     .PARAMETER RootDomain
-        The matched root domain, e.g. example.com
+        Matched root domain.
     .RETURNS
-        The relative record name as a string, or "@" if the apex/root.
+        Relative record or @.
     .EXAMPLE
         Get-TransIPRelativeName -RecordName _acme-challenge.example.com -RootDomain example.com
     #>
 }
 
 function Add-DnsTxt {
-    param(
-        [Parameter(Mandatory,Position=0)][string]$RecordName,
-        [Parameter(Mandatory,Position=1)][string]$TxtValue,
-        [Parameter(Mandatory)][string]$CustomerName,
-        [Parameter()][System.Security.SecureString]$PrivateKeySecureString,
-        [Parameter()][string]$PrivateKeyFilePath,
-        [Parameter(Mandatory)][bool]$GlobalKey,
+    [CmdletBinding(DefaultParameterSetName = 'KeyAuth')]
+    param (
+        # Authentication, key or JWT
+        [Parameter(ParameterSetName = 'KeyAuth', Mandatory=$true)] [string]$CustomerName,
+        [Parameter(ParameterSetName = 'KeyAuth')] [System.Security.SecureString]$PrivateKeySecureString,
+        [Parameter(ParameterSetName = 'KeyAuth')] [string]$PrivateKeyFilePath,
+        [Parameter(ParameterSetName = 'KeyAuth', Mandatory=$true)] [bool]$GlobalKey,
+        [Parameter(ParameterSetName = 'TokenAuth', Mandatory=$true)] [string]$AccessToken,
+        # Standard DNS and config
+        [Parameter(Mandatory=$true, Position=0)] [string]$RecordName,
+        [Parameter(Mandatory=$true, Position=1)] [string]$TxtValue,
         [Parameter()][string]$ApiEndpoint = "https://api.transip.nl/v6"
     )
-
-    # Obtain signed JWT from TransIP
-    $token = Get-TransIPJwtToken -CustomerName $CustomerName -PrivateKeySecureString $PrivateKeySecureString -PrivateKeyFilePath $PrivateKeyFilePath -GlobalKey $GlobalKey -ApiEndpoint $ApiEndpoint
+    # Decide token source: supplied or generated
+    if ($PSCmdlet.ParameterSetName -eq 'TokenAuth') {
+        # Use supplied JWT AccessToken directly
+        $token = $AccessToken
+    } else {
+        # Get new token using private key
+        $token = Get-TransIPJwtToken -CustomerName $CustomerName -PrivateKeySecureString $PrivateKeySecureString -PrivateKeyFilePath $PrivateKeyFilePath -GlobalKey $GlobalKey -ApiEndpoint $ApiEndpoint
+    }
     # Find root domain for the record
     $RootDomain = Find-TransIPRootDomain -RecordName $RecordName -Token $token -ApiEndpoint $ApiEndpoint
     if (-not $RootDomain) { throw "Could not determine root domain for $RecordName" }
-    # Convert to relative name for ACME API
+    # Strip root domain from record name for relative (sub)domain
     $RelativeName = Get-TransIPRelativeName -RecordName $RecordName -RootDomain $RootDomain
-    # Prepare API authentication
+    # Prepare Bearer header for all API calls
     $headers = @{ Authorization = "Bearer $token" }
+    # Query existing records to check for duplicates
     $getUri = "$ApiEndpoint/domains/$RootDomain/dns"
-    # Query all DNS records for this domain
     $result = Invoke-RestMethod -Uri $getUri -Method GET -Headers $headers
     $records = $result.dnsEntries
-    # If a TXT record already exists, no action needed
+    # If a TXT record for this value already exists, skip add
     $exists = $records | Where-Object { $_.name -eq $RelativeName -and $_.type -eq "TXT" -and $_.content -eq $TxtValue }
     if ($exists) {
         Write-Verbose "TXT record '$RelativeName' with value '$TxtValue' already exists at $RootDomain. No action needed."
         return
     }
-    # Prepare body for adding new TXT record
+    # None exists, so create new TXT DNS entry
     $postUri = "$ApiEndpoint/domains/$RootDomain/dns"
     $body = @{
         dnsEntry = @{
@@ -328,64 +314,70 @@ function Add-DnsTxt {
             expire  = 300
         }
     }
-    # Issue POST to add TXT record
     Invoke-RestMethod -Uri $postUri -Method POST -Headers $headers -Body ($body | ConvertTo-Json) -ContentType 'application/json'
 
-    <#
+    <# 
     .SYNOPSIS
         Adds a TXT record via the TransIP API.
     .DESCRIPTION
-        Authenticates to the TransIP API, finds the appropriate root domain, and creates a new TXT entry if not present.
-    .PARAMETER RecordName
-        The full DNS record (e.g. _acme-challenge.example.com).
-    .PARAMETER TxtValue
-        The value for the TXT record.
+        Authenticates (private key/JWT), finds the correct domain, and adds a TXT if missing.
     .PARAMETER CustomerName
-        Your TransIP account login.
+        TransIP account login.
     .PARAMETER PrivateKeySecureString
-        The private key as SecureString (preferred).
+        (Preferred) PEM private key as SecureString.
     .PARAMETER PrivateKeyFilePath
-        File path to PEM private key.
+        PEM key file path.
     .PARAMETER GlobalKey
-        Boolean indicating whether the key is global for your TransIP account.
+        Indicates whether key is global.
+    .PARAMETER AccessToken
+        JWT token. If supplied, Posh-ACME will skip Get-TransIPJwtToken.
+    .PARAMETER RecordName
+        The full DNS record (typically _acme-challenge.domain.com).
+    .PARAMETER TxtValue
+        TXT value to create.
     .PARAMETER ApiEndpoint
-        (Optional) Override for the default TransIP API endpoint.
+        (Optional) Override for TransIP API.
     .EXAMPLE
-        Add-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'txt-challenge' -CustomerName 'transipuser' -PrivateKeySecureString $sec -GlobalKey $true
+        Add-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -CustomerName 'transipuser' -PrivateKeySecureString $sec -GlobalKey $true
+    .EXAMPLE
+        Add-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -AccessToken $token
     #>
-
 }
 
 function Remove-DnsTxt {
-    param(
-        [Parameter(Mandatory,Position=0)][string]$RecordName,
-        [Parameter(Mandatory,Position=1)][string]$TxtValue,
-        [Parameter(Mandatory)][string]$CustomerName,
-        [Parameter()][System.Security.SecureString]$PrivateKeySecureString,
-        [Parameter()][string]$PrivateKeyFilePath,
-        [Parameter(Mandatory)][bool]$GlobalKey,
+    [CmdletBinding(DefaultParameterSetName = 'KeyAuth')]
+    param (
+        [Parameter(ParameterSetName = 'KeyAuth', Mandatory=$true)] [string]$CustomerName,
+        [Parameter(ParameterSetName = 'KeyAuth')] [System.Security.SecureString]$PrivateKeySecureString,
+        [Parameter(ParameterSetName = 'KeyAuth')] [string]$PrivateKeyFilePath,
+        [Parameter(ParameterSetName = 'KeyAuth', Mandatory=$true)] [bool]$GlobalKey,
+        [Parameter(ParameterSetName = 'TokenAuth', Mandatory=$true)] [string]$AccessToken,
+        [Parameter(Mandatory=$true, Position=0)] [string]$RecordName,
+        [Parameter(Mandatory=$true, Position=1)] [string]$TxtValue,
         [Parameter()][string]$ApiEndpoint = "https://api.transip.nl/v6"
     )
-
-    # Obtain signed JWT from TransIP
-    $token = Get-TransIPJwtToken -CustomerName $CustomerName -PrivateKeySecureString $PrivateKeySecureString -PrivateKeyFilePath $PrivateKeyFilePath -GlobalKey $GlobalKey -ApiEndpoint $ApiEndpoint
-    # Find root domain for the record
+    # Decide token source: supplied or generated
+    if ($PSCmdlet.ParameterSetName -eq 'TokenAuth') {
+        # Use supplied AccessToken
+        $token = $AccessToken
+    } else {
+        # Generate JWT using the given keys
+        $token = Get-TransIPJwtToken -CustomerName $CustomerName -PrivateKeySecureString $PrivateKeySecureString -PrivateKeyFilePath $PrivateKeyFilePath -GlobalKey $GlobalKey -ApiEndpoint $ApiEndpoint
+    }
+    # Identify root domain as before
     $RootDomain = Find-TransIPRootDomain -RecordName $RecordName -Token $token -ApiEndpoint $ApiEndpoint
     if (-not $RootDomain) { throw "Could not determine root domain for $RecordName" }
-    # Convert to relative name for API
+    # Relative name for deletion
     $RelativeName = Get-TransIPRelativeName -RecordName $RecordName -RootDomain $RootDomain
-    # Prepare API authentication
     $headers = @{ Authorization = "Bearer $token" }
     $getUri = "$ApiEndpoint/domains/$RootDomain/dns"
-    # Query all DNS records for this domain
     $records = (Invoke-RestMethod -Uri $getUri -Headers $headers).dnsEntries
-    # If the TXT we're asked to delete does not exist, exit
     $toDelete = $records | Where-Object { $_.name -eq $RelativeName -and $_.type -eq "TXT" -and $_.content -eq $TxtValue }
     if (-not $toDelete) {
         Write-Verbose "TXT record '$RelativeName' with value '$TxtValue' does not exist at $RootDomain. No action needed."
         return
     }
-    # Prepare request body and endpoint for deletion
+    # Build and submit delete call for DNS TXT entry
     $deleteUri = "$ApiEndpoint/domains/$RootDomain/dns/$RelativeName"
     $body = @{
         dnsEntry = @{
@@ -395,84 +387,95 @@ function Remove-DnsTxt {
             expire  = 300
         }
     }
-    # Issue DELETE call to remove DNS record
     Invoke-RestMethod -Uri $deleteUri -Method DELETE -Headers $headers -Body ($body | ConvertTo-Json) -ContentType 'application/json'
-
-    <#
+    <# 
     .SYNOPSIS
         Removes a TXT record via the TransIP API.
     .DESCRIPTION
-        Authenticates to the TransIP API, finds the root, and deletes a specific TXT record if it exists.
-    .PARAMETER RecordName
-        The full DNS record (e.g. _acme-challenge.example.com).
-    .PARAMETER TxtValue
-        The value for the TXT record to remove.
+        Authenticates (private key/JWT), finds the correct domain, and deletes a TXT if present.
     .PARAMETER CustomerName
-        Your TransIP account login.
+        TransIP account login.
     .PARAMETER PrivateKeySecureString
-        The private key as SecureString (preferred).
+        (Preferred) PEM private key as SecureString.
     .PARAMETER PrivateKeyFilePath
-        File path to PEM private key.
+        PEM key file path.
     .PARAMETER GlobalKey
-        Boolean indicating whether the key is global for your TransIP account.
+        Indicates whether key is global.
+    .PARAMETER AccessToken
+        JWT token. If supplied, Posh-ACME will skip Get-TransIPJwtToken.
+    .PARAMETER RecordName
+        The full DNS record (typically _acme-challenge.domain.com).
+    .PARAMETER TxtValue
+        TXT value to delete.
     .PARAMETER ApiEndpoint
-        (Optional) Override for the default TransIP API endpoint.
+        (Optional) Override for TransIP API.
     .EXAMPLE
-        Remove-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'txt-challenge' -CustomerName 'transipuser' -PrivateKeySecureString $sec -GlobalKey $true
+        Remove-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -CustomerName 'transipuser' -PrivateKeySecureString $sec -GlobalKey $true
+    .EXAMPLE
+        Remove-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -AccessToken $token
     #>
-
 }
 
 function Get-DnsTxt {
-    param(
-        [Parameter(Mandatory,Position=0)][string]$RecordName,
-        [Parameter(Mandatory,Position=1)][string]$CustomerName,
-        [Parameter()][System.Security.SecureString]$PrivateKeySecureString,
-        [Parameter()][string]$PrivateKeyFilePath,
-        [Parameter(Mandatory)][bool]$GlobalKey,
+    [CmdletBinding(DefaultParameterSetName = 'KeyAuth')]
+    param (
+        [Parameter(ParameterSetName = 'KeyAuth', Mandatory=$true)] [string]$CustomerName,
+        [Parameter(ParameterSetName = 'KeyAuth')] [System.Security.SecureString]$PrivateKeySecureString,
+        [Parameter(ParameterSetName = 'KeyAuth')] [string]$PrivateKeyFilePath,
+        [Parameter(ParameterSetName = 'KeyAuth', Mandatory=$true)] [bool]$GlobalKey,
+        [Parameter(ParameterSetName = 'TokenAuth', Mandatory=$true)] [string]$AccessToken,
+        [Parameter(Mandatory=$true, Position=0)] [string]$RecordName,
         [Parameter()][string]$ApiEndpoint = "https://api.transip.nl/v6"
     )
-
-    # Obtain signed JWT from TransIP
-    $token = Get-TransIPJwtToken -CustomerName $CustomerName -PrivateKeySecureString $PrivateKeySecureString -PrivateKeyFilePath $PrivateKeyFilePath -GlobalKey $GlobalKey -ApiEndpoint $ApiEndpoint
-    # Find root domain for the record
+    # Decide token source: supplied or generated
+    if ($PSCmdlet.ParameterSetName -eq 'TokenAuth') {
+        # Use AccessToken directly
+        $token = $AccessToken
+    } else {
+        # Otherwise generate using private key
+        $token = Get-TransIPJwtToken -CustomerName $CustomerName -PrivateKeySecureString $PrivateKeySecureString -PrivateKeyFilePath $PrivateKeyFilePath -GlobalKey $GlobalKey -ApiEndpoint $ApiEndpoint
+    }
+    # Find appropriate root domain
     $RootDomain = Find-TransIPRootDomain -RecordName $RecordName -Token $token -ApiEndpoint $ApiEndpoint
     if (-not $RootDomain) { throw "Could not determine root domain for $RecordName" }
-    # Convert to relative name for API
+    # Convert to relative/sub domain
     $RelativeName = Get-TransIPRelativeName -RecordName $RecordName -RootDomain $RootDomain
-    # Prepare API authentication
     $headers = @{ Authorization = "Bearer $token" }
+    # Query for all DNS records for this domain
     $getUri = "$ApiEndpoint/domains/$RootDomain/dns"
-    # Query all DNS TXT records
     $records = (Invoke-RestMethod -Uri $getUri -Headers $headers).dnsEntries
+    # Filter TXT records for the requested relative name
     $txtRecords = $records | Where-Object { $_.name -eq $RelativeName -and $_.type -eq "TXT" }
+    # Return all TXT values as array
     return ($txtRecords.content)
-
-    <#
+    <# 
     .SYNOPSIS
         Retrieves TXT DNS records for a given entry.
     .DESCRIPTION
-        Authenticates, locates root domain, and fetches all TXT records for the specified record name.
-    .PARAMETER RecordName
-        The full DNS record (e.g. _acme-challenge.example.com).
+        Authenticates (private key/JWT), finds the root domain, and lists all TXT.
     .PARAMETER CustomerName
-        Your TransIP account login.
+        TransIP account login.
     .PARAMETER PrivateKeySecureString
-        The private key as SecureString (preferred).
+        (Preferred) PEM private key as SecureString.
     .PARAMETER PrivateKeyFilePath
-        File path to PEM private key.
+        PEM key file path.
     .PARAMETER GlobalKey
-        Boolean indicating whether the key is global for your TransIP account.
+        Indicates whether key is global.
+    .PARAMETER AccessToken
+        JWT token. If supplied, Posh-ACME will skip Get-TransIPJwtToken.
+    .PARAMETER RecordName
+        The full DNS record (typically _acme-challenge.domain.com).
     .PARAMETER ApiEndpoint
-        (Optional) Override for the default TransIP API endpoint.
+        (Optional) Override for TransIP API.
     .RETURNS
-        An array of TXT record values.
+        Array of TXT values.
     .EXAMPLE
         Get-DnsTxt -RecordName '_acme-challenge.example.com' -CustomerName 'transipuser' -PrivateKeySecureString $sec -GlobalKey $true
+    .EXAMPLE
+        Get-DnsTxt -RecordName '_acme-challenge.example.com' -AccessToken $token
     #>
 }
 
-# Dummy compatibility function (Posh-ACME expects it, but does not use for TransIP)
 function Save-DnsTxt { 
     param(
         $RecordName,
@@ -483,5 +486,5 @@ function Save-DnsTxt {
         $GlobalKey,
         $ApiEndpoint
     )
-    # intentionally does nothing
+    # intentionally does nothing for TransIP
 }
