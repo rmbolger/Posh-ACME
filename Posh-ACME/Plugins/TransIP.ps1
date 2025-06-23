@@ -137,7 +137,7 @@ function Import-RsaPrivateKey {
 
 function Get-TransIPJwtToken {
     param (
-        [Parameter(Mandatory)] [string]$CustomerName,
+        [Parameter(Mandatory)] [string]$TIPCustomerName,
         [Parameter(Mandatory)] [bool]$GlobalKey,
         [Parameter()][System.Security.SecureString]$PrivateKeySecureString,
         [Parameter()][string]$PrivateKeyFilePath,
@@ -153,7 +153,7 @@ function Get-TransIPJwtToken {
         $randomNum = Get-Random -Minimum 10000 -Maximum 99999
         $label = "Posh-ACME-$randomNum"
         $tokenBody = @{
-            login = $CustomerName
+            login = $TIPCustomerName
             nonce = $nonce
             global_key = $GlobalKey
             expiration_time = "5 minutes"
@@ -177,7 +177,7 @@ function Get-TransIPJwtToken {
         Retrieves a JWT token for authenticating with the TransIP API.
     .DESCRIPTION
         Authenticates with the TransIP API and returns a short-lived JWT for subsequent calls.
-    .PARAMETER CustomerName
+    .PARAMETER TIPCustomerName
         Your TransIP username/login.
     .PARAMETER PrivateKeySecureString
         (Preferred) Private key as SecureString.
@@ -190,7 +190,7 @@ function Get-TransIPJwtToken {
     .RETURNS
         JWT token string.
     .EXAMPLE
-        $token = Get-TransIPJwtToken -CustomerName 'transipuser' -PrivateKeySecureString $sec -GlobalKey $true
+        $token = Get-TransIPJwtToken -TIPCustomerName 'transipuser' -PrivateKeySecureString $sec -GlobalKey $true
     #>
 }
 
@@ -266,18 +266,32 @@ function Get-TransIPRelativeName {
 }
 
 function Add-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName = 'KeyAuth')]
+    [CmdletBinding(DefaultParameterSetName = 'KeyAuthWithSecureString')]
     param (
-        # Authentication, key or JWT
-        [Parameter(ParameterSetName = 'KeyAuth', Mandatory=$true)] [string]$CustomerName,
-        [Parameter(ParameterSetName = 'KeyAuth')] [System.Security.SecureString]$PrivateKeySecureString,
-        [Parameter(ParameterSetName = 'KeyAuth')] [string]$PrivateKeyFilePath,
-        [Parameter(ParameterSetName = 'KeyAuth', Mandatory=$true)] [bool]$GlobalKey,
-        [Parameter(ParameterSetName = 'TokenAuth', Mandatory=$true)] [string]$AccessToken,
         # Standard DNS and config
         [Parameter(Mandatory=$true, Position=0)] [string]$RecordName,
         [Parameter(Mandatory=$true, Position=1)] [string]$TxtValue,
-        [Parameter()][string]$ApiEndpoint = "https://api.transip.nl/v6"
+        [Parameter()][string]$ApiEndpoint = "https://api.transip.nl/v6",
+
+        # Shared between KeyAuth sets
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory = $true)]
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory = $true)]
+        [string]$TIPCustomerName,
+        
+        # Private Key as a SecureString
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory = $true)]
+        [System.Security.SecureString]$PrivateKeySecureString,
+        # Private Key defined as a Filepath to a file
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory = $true)]
+        [string]$PrivateKeyFilePath,
+
+        # GlobalKey parameter mandatory when using Private Key
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory = $true)]
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory = $true)]
+        [bool]$GlobalKey,
+
+        # Supplying your own JWT auth token instead is also possible
+        [Parameter(ParameterSetName = 'TokenAuth', Mandatory=$true)] [string]$AccessToken
     )
     # Decide token source: supplied or generated
     if ($PSCmdlet.ParameterSetName -eq 'TokenAuth') {
@@ -285,7 +299,7 @@ function Add-DnsTxt {
         $token = $AccessToken
     } else {
         # Get new token using private key
-        $token = Get-TransIPJwtToken -CustomerName $CustomerName -PrivateKeySecureString $PrivateKeySecureString -PrivateKeyFilePath $PrivateKeyFilePath -GlobalKey $GlobalKey -ApiEndpoint $ApiEndpoint
+        $token = Get-TransIPJwtToken -TIPCustomerName $TIPCustomerName -PrivateKeySecureString $PrivateKeySecureString -PrivateKeyFilePath $PrivateKeyFilePath -GlobalKey $GlobalKey -ApiEndpoint $ApiEndpoint
     }
     # Find root domain for the record
     $RootDomain = Find-TransIPRootDomain -RecordName $RecordName -Token $token -ApiEndpoint $ApiEndpoint
@@ -321,7 +335,7 @@ function Add-DnsTxt {
         Adds a TXT record via the TransIP API.
     .DESCRIPTION
         Authenticates (private key/JWT), finds the correct domain, and adds a TXT if missing.
-    .PARAMETER CustomerName
+    .PARAMETER TIPCustomerName
         TransIP account login.
     .PARAMETER PrivateKeySecureString
         (Preferred) PEM private key as SecureString.
@@ -338,23 +352,39 @@ function Add-DnsTxt {
     .PARAMETER ApiEndpoint
         (Optional) Override for TransIP API.
     .EXAMPLE
-        Add-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -CustomerName 'transipuser' -PrivateKeySecureString $sec -GlobalKey $true
+        Add-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPCustomerName 'transipuser' -PrivateKeySecureString $sec -GlobalKey $true
     .EXAMPLE
         Add-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -AccessToken $token
     #>
 }
 
 function Remove-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName = 'KeyAuth')]
+    [CmdletBinding(DefaultParameterSetName = 'KeyAuthWithSecureString')]
     param (
-        [Parameter(ParameterSetName = 'KeyAuth', Mandatory=$true)] [string]$CustomerName,
-        [Parameter(ParameterSetName = 'KeyAuth')] [System.Security.SecureString]$PrivateKeySecureString,
-        [Parameter(ParameterSetName = 'KeyAuth')] [string]$PrivateKeyFilePath,
-        [Parameter(ParameterSetName = 'KeyAuth', Mandatory=$true)] [bool]$GlobalKey,
-        [Parameter(ParameterSetName = 'TokenAuth', Mandatory=$true)] [string]$AccessToken,
+        # Standard DNS and config
         [Parameter(Mandatory=$true, Position=0)] [string]$RecordName,
         [Parameter(Mandatory=$true, Position=1)] [string]$TxtValue,
-        [Parameter()][string]$ApiEndpoint = "https://api.transip.nl/v6"
+        [Parameter()][string]$ApiEndpoint = "https://api.transip.nl/v6",
+
+        # Shared between KeyAuth sets
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory = $true)]
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory = $true)]
+        [string]$TIPCustomerName,
+        
+        # Private Key as a SecureString
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory = $true)]
+        [System.Security.SecureString]$PrivateKeySecureString,
+        # Private Key defined as a Filepath to a file
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory = $true)]
+        [string]$PrivateKeyFilePath,
+
+        # GlobalKey parameter mandatory when using Private Key
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory = $true)]
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory = $true)]
+        [bool]$GlobalKey,
+
+        # Supplying your own JWT auth token instead is also possible
+        [Parameter(ParameterSetName = 'TokenAuth', Mandatory=$true)] [string]$AccessToken
     )
     # Decide token source: supplied or generated
     if ($PSCmdlet.ParameterSetName -eq 'TokenAuth') {
@@ -362,7 +392,7 @@ function Remove-DnsTxt {
         $token = $AccessToken
     } else {
         # Generate JWT using the given keys
-        $token = Get-TransIPJwtToken -CustomerName $CustomerName -PrivateKeySecureString $PrivateKeySecureString -PrivateKeyFilePath $PrivateKeyFilePath -GlobalKey $GlobalKey -ApiEndpoint $ApiEndpoint
+        $token = Get-TransIPJwtToken -TIPCustomerName $TIPCustomerName -PrivateKeySecureString $PrivateKeySecureString -PrivateKeyFilePath $PrivateKeyFilePath -GlobalKey $GlobalKey -ApiEndpoint $ApiEndpoint
     }
     # Identify root domain as before
     $RootDomain = Find-TransIPRootDomain -RecordName $RecordName -Token $token -ApiEndpoint $ApiEndpoint
@@ -393,7 +423,7 @@ function Remove-DnsTxt {
         Removes a TXT record via the TransIP API.
     .DESCRIPTION
         Authenticates (private key/JWT), finds the correct domain, and deletes a TXT if present.
-    .PARAMETER CustomerName
+    .PARAMETER TIPCustomerName
         TransIP account login.
     .PARAMETER PrivateKeySecureString
         (Preferred) PEM private key as SecureString.
@@ -410,22 +440,38 @@ function Remove-DnsTxt {
     .PARAMETER ApiEndpoint
         (Optional) Override for TransIP API.
     .EXAMPLE
-        Remove-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -CustomerName 'transipuser' -PrivateKeySecureString $sec -GlobalKey $true
+        Remove-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPCustomerName 'transipuser' -PrivateKeySecureString $sec -GlobalKey $true
     .EXAMPLE
         Remove-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -AccessToken $token
     #>
 }
 
 function Get-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName = 'KeyAuth')]
+    [CmdletBinding(DefaultParameterSetName = 'KeyAuthWithSecureString')]
     param (
-        [Parameter(ParameterSetName = 'KeyAuth', Mandatory=$true)] [string]$CustomerName,
-        [Parameter(ParameterSetName = 'KeyAuth')] [System.Security.SecureString]$PrivateKeySecureString,
-        [Parameter(ParameterSetName = 'KeyAuth')] [string]$PrivateKeyFilePath,
-        [Parameter(ParameterSetName = 'KeyAuth', Mandatory=$true)] [bool]$GlobalKey,
-        [Parameter(ParameterSetName = 'TokenAuth', Mandatory=$true)] [string]$AccessToken,
+        # Standard DNS and config
         [Parameter(Mandatory=$true, Position=0)] [string]$RecordName,
-        [Parameter()][string]$ApiEndpoint = "https://api.transip.nl/v6"
+        [Parameter()][string]$ApiEndpoint = "https://api.transip.nl/v6",
+
+        # Shared between KeyAuth sets
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory = $true)]
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory = $true)]
+        [string]$TIPCustomerName,
+        
+        # Private Key as a SecureString
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory = $true)]
+        [System.Security.SecureString]$PrivateKeySecureString,
+        # Private Key defined as a Filepath to a file
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory = $true)]
+        [string]$PrivateKeyFilePath,
+
+        # GlobalKey parameter mandatory when using Private Key
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory = $true)]
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory = $true)]
+        [bool]$GlobalKey,
+
+        # Supplying your own JWT auth token instead is also possible
+        [Parameter(ParameterSetName = 'TokenAuth', Mandatory=$true)] [string]$AccessToken
     )
     # Decide token source: supplied or generated
     if ($PSCmdlet.ParameterSetName -eq 'TokenAuth') {
@@ -433,7 +479,7 @@ function Get-DnsTxt {
         $token = $AccessToken
     } else {
         # Otherwise generate using private key
-        $token = Get-TransIPJwtToken -CustomerName $CustomerName -PrivateKeySecureString $PrivateKeySecureString -PrivateKeyFilePath $PrivateKeyFilePath -GlobalKey $GlobalKey -ApiEndpoint $ApiEndpoint
+        $token = Get-TransIPJwtToken -TIPCustomerName $TIPCustomerName -PrivateKeySecureString $PrivateKeySecureString -PrivateKeyFilePath $PrivateKeyFilePath -GlobalKey $GlobalKey -ApiEndpoint $ApiEndpoint
     }
     # Find appropriate root domain
     $RootDomain = Find-TransIPRootDomain -RecordName $RecordName -Token $token -ApiEndpoint $ApiEndpoint
@@ -453,7 +499,7 @@ function Get-DnsTxt {
         Retrieves TXT DNS records for a given entry.
     .DESCRIPTION
         Authenticates (private key/JWT), finds the root domain, and lists all TXT.
-    .PARAMETER CustomerName
+    .PARAMETER TIPCustomerName
         TransIP account login.
     .PARAMETER PrivateKeySecureString
         (Preferred) PEM private key as SecureString.
@@ -470,21 +516,24 @@ function Get-DnsTxt {
     .RETURNS
         Array of TXT values.
     .EXAMPLE
-        Get-DnsTxt -RecordName '_acme-challenge.example.com' -CustomerName 'transipuser' -PrivateKeySecureString $sec -GlobalKey $true
+        Get-DnsTxt -RecordName '_acme-challenge.example.com' -TIPCustomerName 'transipuser' -PrivateKeySecureString $sec -GlobalKey $true
     .EXAMPLE
         Get-DnsTxt -RecordName '_acme-challenge.example.com' -AccessToken $token
     #>
 }
 
 function Save-DnsTxt { 
+    [CmdletBinding()]
     param(
         $RecordName,
         $TxtValue,
-        $CustomerName,
+        $TIPCustomerName,
         $PrivateKeySecureString,
         $PrivateKeyFilePath,
         $GlobalKey,
-        $ApiEndpoint
+        $ApiEndpoint,
+        # Parameter that allows splatting plugin arguments from multiple different plugins without errors.
+        [Parameter(ValueFromRemainingArguments)]$ExtraParams
     )
     # intentionally does nothing for TransIP
 }
