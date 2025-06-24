@@ -140,8 +140,7 @@ function Get-TransIPJwtToken {
     param (
         [Parameter(Mandatory)]
         [string]$TIPUsername,
-        [Parameter(Mandatory)]
-        [bool]$TIPGlobalKey,
+        [switch]$TIPEnforceWhitelist,
         [securestring]$TIPKeyText,
         [string]$TIPKeyPath,
         [string]$TIPAPIEndpoint = "https://api.transip.nl/v6"
@@ -158,7 +157,7 @@ function Get-TransIPJwtToken {
         $tokenBody = @{
             login = $TIPUsername
             nonce = $nonce
-            global_key = $TIPGlobalKey
+            global_key = (-not $TIPEnforceWhitelist.IsPresent)
             expiration_time = "5 minutes"
             label = $label
         } | ConvertTo-Json -Compress
@@ -186,14 +185,14 @@ function Get-TransIPJwtToken {
         (Preferred) Private key as SecureString.
     .PARAMETER TIPKeyPath
         PEM key file path.
-    .PARAMETER TIPGlobalKey
-        Use the global API key for account.
+    .PARAMETER TIPEnforceWhitelist
+        Set this switch when using a key that has IP whitelisting enabled.
     .PARAMETER TIPAPIEndpoint
         Optional override for the TransIP API endpoint.
     .RETURNS
         JWT token string.
     .EXAMPLE
-        $token = Get-TransIPJwtToken -TIPUsername 'transipuser' -TIPKeyText $sec -TIPGlobalKey $true
+        $token = Get-TransIPJwtToken -TIPUsername 'transipuser' -TIPKeyText $sec -TIPEnforceWhitelist
     #>
 }
 
@@ -293,10 +292,10 @@ function Add-DnsTxt {
         [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory)]
         [string]$TIPKeyPath,
 
-        # TIPGlobalKey parameter mandatory when using Private Key
-        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory)]
-        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory)]
-        [bool]$TIPGlobalKey,
+        # Whether or not to enforce IP whitelisting for the key
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString')]
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath')]
+        [switch]$TIPEnforceWhitelist,
 
         # Supplying your own JWT auth token instead is also possible
         [Parameter(ParameterSetName = 'TokenAuth', Mandatory)]
@@ -310,7 +309,7 @@ function Add-DnsTxt {
         $token = $TIPAccessToken
     } else {
         # Get new token using private key
-        $token = Get-TransIPJwtToken -TIPUsername $TIPUsername -TIPKeyText $TIPKeyText -TIPKeyPath $TIPKeyPath -TIPGlobalKey $TIPGlobalKey -TIPAPIEndpoint $TIPAPIEndpoint
+        $token = Get-TransIPJwtToken -TIPUsername $TIPUsername -TIPKeyText $TIPKeyText -TIPKeyPath $TIPKeyPath -TIPEnforceWhitelist:$TIPEnforceWhitelist.IsPresent -TIPAPIEndpoint $TIPAPIEndpoint
     }
     # Find root domain for the record
     $RootDomain = Find-TransIPRootDomain -RecordName $RecordName -Token $token -TIPAPIEndpoint $TIPAPIEndpoint
@@ -352,8 +351,8 @@ function Add-DnsTxt {
         (Preferred) PEM private key as SecureString.
     .PARAMETER TIPKeyPath
         PEM key file path.
-    .PARAMETER TIPGlobalKey
-        Indicates whether key is global.
+    .PARAMETER TIPEnforceWhitelist
+        Set this switch when using a key that has IP whitelisting enabled.
     .PARAMETER TIPAccessToken
         JWT token. If supplied, Posh-ACME will skip Get-TransIPJwtToken.
     .PARAMETER RecordName
@@ -363,7 +362,7 @@ function Add-DnsTxt {
     .PARAMETER TIPAPIEndpoint
         (Optional) Override for TransIP API.
     .EXAMPLE
-        Add-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPUsername 'transipuser' -TIPKeyText $sec -TIPGlobalKey $true
+        Add-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPUsername 'transipuser' -TIPKeyText $sec -TIPEnforceWhitelist
     .EXAMPLE
         Add-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPAccessToken $token
     #>
@@ -390,10 +389,10 @@ function Remove-DnsTxt {
         [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory)]
         [string]$TIPKeyPath,
 
-        # TIPGlobalKey parameter mandatory when using Private Key
-        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory)]
-        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory)]
-        [bool]$TIPGlobalKey,
+        # Whether or not to enforce IP whitelisting for the key
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString')]
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath')]
+        [switch]$TIPEnforceWhitelist,
 
         # Supplying your own JWT auth token instead is also possible
         [Parameter(ParameterSetName = 'TokenAuth', Mandatory)]
@@ -407,7 +406,7 @@ function Remove-DnsTxt {
         $token = $TIPAccessToken
     } else {
         # Generate JWT using the given keys
-        $token = Get-TransIPJwtToken -TIPUsername $TIPUsername -TIPKeyText $TIPKeyText -TIPKeyPath $TIPKeyPath -TIPGlobalKey $TIPGlobalKey -TIPAPIEndpoint $TIPAPIEndpoint
+        $token = Get-TransIPJwtToken -TIPUsername $TIPUsername -TIPKeyText $TIPKeyText -TIPKeyPath $TIPKeyPath -TIPEnforceWhitelist:$TIPEnforceWhitelist:IsPresent -TIPAPIEndpoint $TIPAPIEndpoint
     }
     # Identify root domain as before
     $RootDomain = Find-TransIPRootDomain -RecordName $RecordName -Token $token -TIPAPIEndpoint $TIPAPIEndpoint
@@ -444,7 +443,7 @@ function Remove-DnsTxt {
         (Preferred) PEM private key as SecureString.
     .PARAMETER TIPKeyPath
         PEM key file path.
-    .PARAMETER TIPGlobalKey
+    .PARAMETER TIPEnforceWhitelist
         Indicates whether key is global.
     .PARAMETER TIPAccessToken
         JWT token. If supplied, Posh-ACME will skip Get-TransIPJwtToken.
@@ -455,7 +454,7 @@ function Remove-DnsTxt {
     .PARAMETER TIPAPIEndpoint
         (Optional) Override for TransIP API.
     .EXAMPLE
-        Remove-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPUsername 'transipuser' -TIPKeyText $sec -TIPGlobalKey $true
+        Remove-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPUsername 'transipuser' -TIPKeyText $sec -TIPEnforceWhitelist
     .EXAMPLE
         Remove-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPAccessToken $token
     #>
@@ -480,10 +479,10 @@ function Get-DnsTxt {
         [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory)]
         [string]$TIPKeyPath,
 
-        # TIPGlobalKey parameter mandatory when using Private Key
-        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory)]
-        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory)]
-        [bool]$TIPGlobalKey,
+        # Whether or not to enforce IP whitelisting for the key
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString')]
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath')]
+        [switch]$TIPEnforceWhitelist,
 
         # Supplying your own JWT auth token instead is also possible
         [Parameter(ParameterSetName = 'TokenAuth', Mandatory)]
@@ -497,7 +496,7 @@ function Get-DnsTxt {
         $token = $TIPAccessToken
     } else {
         # Otherwise generate using private key
-        $token = Get-TransIPJwtToken -TIPUsername $TIPUsername -TIPKeyText $TIPKeyText -TIPKeyPath $TIPKeyPath -TIPGlobalKey $TIPGlobalKey -TIPAPIEndpoint $TIPAPIEndpoint
+        $token = Get-TransIPJwtToken -TIPUsername $TIPUsername -TIPKeyText $TIPKeyText -TIPKeyPath $TIPKeyPath -TIPEnforceWhitelist:$TIPEnforceWhitelist.IsPresent -TIPAPIEndpoint $TIPAPIEndpoint
     }
     # Find appropriate root domain
     $RootDomain = Find-TransIPRootDomain -RecordName $RecordName -Token $token -TIPAPIEndpoint $TIPAPIEndpoint
@@ -523,8 +522,8 @@ function Get-DnsTxt {
         (Preferred) PEM private key as SecureString.
     .PARAMETER TIPKeyPath
         PEM key file path.
-    .PARAMETER TIPGlobalKey
-        Indicates whether key is global.
+    .PARAMETER TIPEnforceWhitelist
+        Set this switch when using a key that has IP whitelisting enabled.
     .PARAMETER TIPAccessToken
         JWT token. If supplied, Posh-ACME will skip Get-TransIPJwtToken.
     .PARAMETER RecordName
@@ -534,7 +533,7 @@ function Get-DnsTxt {
     .RETURNS
         Array of TXT values.
     .EXAMPLE
-        Get-DnsTxt -RecordName '_acme-challenge.example.com' -TIPUsername 'transipuser' -TIPKeyText $sec -TIPGlobalKey $true
+        Get-DnsTxt -RecordName '_acme-challenge.example.com' -TIPUsername 'transipuser' -TIPKeyText $sec -TIPEnforceWhitelist
     .EXAMPLE
         Get-DnsTxt -RecordName '_acme-challenge.example.com' -TIPAccessToken $token
     #>
