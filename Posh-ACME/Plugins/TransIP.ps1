@@ -12,6 +12,260 @@
 
 function Get-CurrentPluginType { 'dns-01' }
 
+function Add-DnsTxt {
+    [CmdletBinding(DefaultParameterSetName = 'KeyAuthWithSecureString')]
+    param (
+        # Standard DNS and config
+        [Parameter(Mandatory, Position=0)]
+        [string]$RecordName,
+        [Parameter(Mandatory, Position=1)]
+        [string]$TxtValue,
+
+        # Shared between KeyAuth sets
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory)]
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory)]
+        [string]$TIPUsername,
+
+        # Private Key as a SecureString
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory)]
+        [securestring]$TIPKeyText,
+        # Private Key defined as a Filepath to a file
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory)]
+        [string]$TIPKeyPath,
+
+        # Whether or not to enforce IP whitelisting for the key
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString')]
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath')]
+        [switch]$TIPEnforceWhitelist,
+
+        # Supplying your own JWT auth token instead is also possible
+        [Parameter(ParameterSetName = 'TokenAuth', Mandatory)]
+        [string]$TIPAccessToken,
+
+        [string]$TIPAPIEndpoint = "https://api.transip.nl/v6"
+    )
+    # Decide token source: supplied or generated
+    if ($PSCmdlet.ParameterSetName -eq 'TokenAuth') {
+        # Use supplied JWT TIPAccessToken directly
+        $token = $TIPAccessToken
+    } else {
+        # Get new token using private key
+        $token = Get-TransIPJwtToken -TIPUsername $TIPUsername -TIPKeyText $TIPKeyText -TIPKeyPath $TIPKeyPath -TIPEnforceWhitelist:$TIPEnforceWhitelist.IsPresent -TIPAPIEndpoint $TIPAPIEndpoint
+    }
+    # Find root domain for the record
+    $RootDomain = Find-TransIPRootDomain -RecordName $RecordName -Token $token -TIPAPIEndpoint $TIPAPIEndpoint
+    if (-not $RootDomain) { throw "Could not determine root domain for $RecordName" }
+    # Strip root domain from record name for relative (sub)domain
+    $RelativeName = Get-TransIPRelativeName -RecordName $RecordName -RootDomain $RootDomain
+
+    # Query existing records to check for duplicates
+    $queryParams = @{
+        Uri = "$TIPAPIEndpoint/domains/$RootDomain/dns"
+        Headers = @{ Authorization = "Bearer $token" }
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
+    try {
+        Write-Debug "GET $($queryParams.Uri)"
+        $result = Invoke-RestMethod @queryParams @script:UseBasic
+    } catch { throw }
+    $records = $result.dnsEntries
+    # If a TXT record for this value already exists, skip add
+    $exists = $records | Where-Object {
+        $_.name -eq $RelativeName -and $_.type -eq "TXT" -and $_.content -eq $TxtValue
+    }
+    if ($exists) {
+        Write-Verbose "TXT record '$RelativeName' with value '$TxtValue' already exists at $RootDomain. No action needed."
+        return
+    }
+    # None exists, so create new TXT DNS entry
+    $queryParams = @{
+        Uri = $queryParams.Uri
+        Method = 'POST'
+        Headers = $queryParams.Headers
+        Body = @{
+            dnsEntry = @{
+                name    = $RelativeName
+                type    = "TXT"
+                content = $TxtValue
+                expire  = 300
+            }
+        } | ConvertTo-Json
+        ContentType = 'application/json'
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
+    try {
+        Write-Debug "POST $($queryParams.Uri)`n$($queryParams.Body)"
+        $null = Invoke-RestMethod @queryParams @script:UseBasic
+    } catch { throw }
+
+    <#
+    .SYNOPSIS
+        Adds a TXT record via the TransIP API.
+    .DESCRIPTION
+        Authenticates (private key/JWT), finds the correct domain, and adds a TXT if missing.
+    .PARAMETER RecordName
+        The full DNS record (typically _acme-challenge.domain.com).
+    .PARAMETER TxtValue
+        TXT value to create.
+    .PARAMETER TIPUsername
+        TransIP account login.
+    .PARAMETER TIPKeyText
+        (Preferred) PEM private key as SecureString.
+    .PARAMETER TIPKeyPath
+        PEM key file path.
+    .PARAMETER TIPEnforceWhitelist
+        When using a key that does not require IP whitelisting, using this switch enables IP whitelisting enforcement.
+    .PARAMETER TIPAccessToken
+        A pre-authenticated JWT access token.
+    .PARAMETER TIPAPIEndpoint
+        (Optional) Override for TransIP API.
+    .EXAMPLE
+        Add-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPUsername 'transipuser' -TIPKeyText $sec -TIPEnforceWhitelist
+    .EXAMPLE
+        Add-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPAccessToken $token
+    #>
+}
+
+function Remove-DnsTxt {
+    [CmdletBinding(DefaultParameterSetName = 'KeyAuthWithSecureString')]
+    param (
+        # Standard DNS and config
+        [Parameter(Mandatory, Position=0)]
+        [string]$RecordName,
+        [Parameter(Mandatory, Position=1)]
+        [string]$TxtValue,
+
+        # Shared between KeyAuth sets
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory)]
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory)]
+        [string]$TIPUsername,
+
+        # Private Key as a SecureString
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory)]
+        [securestring]$TIPKeyText,
+        # Private Key defined as a Filepath to a file
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory)]
+        [string]$TIPKeyPath,
+
+        # Whether or not to enforce IP whitelisting for the key
+        [Parameter(ParameterSetName = 'KeyAuthWithSecureString')]
+        [Parameter(ParameterSetName = 'KeyAuthWithFilePath')]
+        [switch]$TIPEnforceWhitelist,
+
+        # Supplying your own JWT auth token instead is also possible
+        [Parameter(ParameterSetName = 'TokenAuth', Mandatory)]
+        [string]$TIPAccessToken,
+
+        [string]$TIPAPIEndpoint = "https://api.transip.nl/v6"
+    )
+    # Decide token source: supplied or generated
+    if ($PSCmdlet.ParameterSetName -eq 'TokenAuth') {
+        # Use supplied TIPAccessToken
+        $token = $TIPAccessToken
+    } else {
+        # Generate JWT using the given keys
+        $token = Get-TransIPJwtToken -TIPUsername $TIPUsername -TIPKeyText $TIPKeyText -TIPKeyPath $TIPKeyPath -TIPEnforceWhitelist:$TIPEnforceWhitelist:IsPresent -TIPAPIEndpoint $TIPAPIEndpoint
+    }
+    # Identify root domain as before
+    $RootDomain = Find-TransIPRootDomain -RecordName $RecordName -Token $token -TIPAPIEndpoint $TIPAPIEndpoint
+    if (-not $RootDomain) { throw "Could not determine root domain for $RecordName" }
+    # Relative name for deletion
+    $RelativeName = Get-TransIPRelativeName -RecordName $RecordName -RootDomain $RootDomain
+    $queryParams = @{
+        Uri = "$TIPAPIEndpoint/domains/$RootDomain/dns"
+        Headers = @{ Authorization = "Bearer $token" }
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
+    try {
+        Write-Debug "GET $($queryParams.Uri)"
+        $records = (Invoke-RestMethod @queryParams @script:UseBasic).dnsEntries
+    } catch { throw }
+    $toDelete = $records | Where-Object {
+        $_.name -eq $RelativeName -and $_.type -eq "TXT" -and $_.content -eq $TxtValue
+    }
+    if (-not $toDelete) {
+        Write-Verbose "TXT record '$RelativeName' with value '$TxtValue' does not exist at $RootDomain. No action needed."
+        return
+    }
+    # Build and submit delete call for DNS TXT entry
+    $queryParams = @{
+        Uri = "$TIPAPIEndpoint/domains/$RootDomain/dns/$RelativeName"
+        Method = 'DELETE'
+        Headers = $queryParams.Headers
+        Body = @{
+            dnsEntry = @{
+                name    = $RelativeName
+                type    = "TXT"
+                content = $TxtValue
+                expire  = 300
+            }
+        } | ConvertTo-Json
+        ContentType = 'application/json'
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
+    try {
+        Write-Debug "DELETE $($queryParams.Uri)`n$($queryParams.Body)"
+        $null = Invoke-RestMethod @queryParams @script:UseBasic
+    } catch { throw }
+
+    <#
+    .SYNOPSIS
+        Removes a TXT record via the TransIP API.
+    .DESCRIPTION
+        Authenticates (private key/JWT), finds the correct domain, and deletes a TXT if present.
+    .PARAMETER RecordName
+        The full DNS record (typically _acme-challenge.domain.com).
+    .PARAMETER TxtValue
+        TXT value to delete.
+    .PARAMETER TIPUsername
+        TransIP account login.
+    .PARAMETER TIPKeyText
+        (Preferred) PEM private key as SecureString.
+    .PARAMETER TIPKeyPath
+        PEM key file path.
+    .PARAMETER TIPEnforceWhitelist
+        When using a key that does not require IP whitelisting, using this switch enables IP whitelisting enforcement.
+    .PARAMETER TIPAccessToken
+        A pre-authenticated JWT access token.
+    .PARAMETER TIPAPIEndpoint
+        (Optional) Override for TransIP API.
+    .EXAMPLE
+        Remove-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPUsername 'transipuser' -TIPKeyText $sec -TIPEnforceWhitelist
+    .EXAMPLE
+        Remove-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPAccessToken $token
+    #>
+}
+
+function Save-DnsTxt {
+    [CmdletBinding()]
+    param(
+        [Parameter(ValueFromRemainingArguments)]
+        $ExtraParams
+    )
+    <#
+    .SYNOPSIS
+        Not required.
+
+    .DESCRIPTION
+        This provider does not require calling this function to commit changes to DNS records.
+
+    .PARAMETER ExtraParams
+        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
+    #>
+}
+
+############################
+# Helper Functions
+############################
+
+# API Docs
+# https://api.transip.nl/rest/docs.html
+
+
 function Get-TransIPPrivateKey {
     param (
         [securestring]$TIPKeyText,
@@ -192,6 +446,8 @@ function Get-TransIPJwtToken {
         Write-Debug "POST $($queryParams.Uri)`n$($tokenBody)"
         $response = Invoke-RestMethod @queryParams @script:UseBasic
         return $response.token
+    } catch {
+        throw
     } finally {
         # Clear private key material as soon as possible
         $PrivateKey = $null
@@ -211,7 +467,7 @@ function Get-TransIPJwtToken {
     .PARAMETER TIPKeyPath
         PEM key file path.
     .PARAMETER TIPEnforceWhitelist
-        Set this switch when using a key that has IP whitelisting enabled.
+        When using a key that does not require IP whitelisting, using this switch enables IP whitelisting enforcement.
     .PARAMETER TIPAPIEndpoint
         Optional override for the TransIP API endpoint.
     .RETURNS
@@ -303,234 +559,6 @@ function Get-TransIPRelativeName {
     #>
 }
 
-function Add-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName = 'KeyAuthWithSecureString')]
-    param (
-        # Standard DNS and config
-        [Parameter(Mandatory, Position=0)]
-        [string]$RecordName,
-        [Parameter(Mandatory, Position=1)]
-        [string]$TxtValue,
-
-        # Shared between KeyAuth sets
-        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory)]
-        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory)]
-        [string]$TIPUsername,
-
-        # Private Key as a SecureString
-        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory)]
-        [securestring]$TIPKeyText,
-        # Private Key defined as a Filepath to a file
-        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory)]
-        [string]$TIPKeyPath,
-
-        # Whether or not to enforce IP whitelisting for the key
-        [Parameter(ParameterSetName = 'KeyAuthWithSecureString')]
-        [Parameter(ParameterSetName = 'KeyAuthWithFilePath')]
-        [switch]$TIPEnforceWhitelist,
-
-        # Supplying your own JWT auth token instead is also possible
-        [Parameter(ParameterSetName = 'TokenAuth', Mandatory)]
-        [string]$TIPAccessToken,
-
-        [string]$TIPAPIEndpoint = "https://api.transip.nl/v6"
-    )
-    # Decide token source: supplied or generated
-    if ($PSCmdlet.ParameterSetName -eq 'TokenAuth') {
-        # Use supplied JWT TIPAccessToken directly
-        $token = $TIPAccessToken
-    } else {
-        # Get new token using private key
-        $token = Get-TransIPJwtToken -TIPUsername $TIPUsername -TIPKeyText $TIPKeyText -TIPKeyPath $TIPKeyPath -TIPEnforceWhitelist:$TIPEnforceWhitelist.IsPresent -TIPAPIEndpoint $TIPAPIEndpoint
-    }
-    # Find root domain for the record
-    $RootDomain = Find-TransIPRootDomain -RecordName $RecordName -Token $token -TIPAPIEndpoint $TIPAPIEndpoint
-    if (-not $RootDomain) { throw "Could not determine root domain for $RecordName" }
-    # Strip root domain from record name for relative (sub)domain
-    $RelativeName = Get-TransIPRelativeName -RecordName $RecordName -RootDomain $RootDomain
-
-    # Query existing records to check for duplicates
-    $queryParams = @{
-        Uri = "$TIPAPIEndpoint/domains/$RootDomain/dns"
-        Headers = @{ Authorization = "Bearer $token" }
-        Verbose = $false
-        ErrorAction = 'Stop'
-    }
-    try {
-        Write-Debug "GET $($queryParams.Uri)"
-        $result = Invoke-RestMethod @queryParams @script:UseBasic
-    } catch { throw }
-    $records = $result.dnsEntries
-    # If a TXT record for this value already exists, skip add
-    $exists = $records | Where-Object {
-        $_.name -eq $RelativeName -and $_.type -eq "TXT" -and $_.content -eq $TxtValue
-    }
-    if ($exists) {
-        Write-Verbose "TXT record '$RelativeName' with value '$TxtValue' already exists at $RootDomain. No action needed."
-        return
-    }
-    # None exists, so create new TXT DNS entry
-    $queryParams = @{
-        Uri = $queryParams.Uri
-        Method = 'POST'
-        Headers = $queryParams.Headers
-        Body = @{
-            dnsEntry = @{
-                name    = $RelativeName
-                type    = "TXT"
-                content = $TxtValue
-                expire  = 300
-            }
-        } | ConvertTo-Json
-        ContentType = 'application/json'
-        Verbose = $false
-        ErrorAction = 'Stop'
-    }
-    try {
-        Write-Debug "POST $($queryParams.Uri)`n$($queryParams.Body)"
-        $null = Invoke-RestMethod @queryParams @script:UseBasic
-    } catch { throw }
-
-    <#
-    .SYNOPSIS
-        Adds a TXT record via the TransIP API.
-    .DESCRIPTION
-        Authenticates (private key/JWT), finds the correct domain, and adds a TXT if missing.
-    .PARAMETER TIPUsername
-        TransIP account login.
-    .PARAMETER TIPKeyText
-        (Preferred) PEM private key as SecureString.
-    .PARAMETER TIPKeyPath
-        PEM key file path.
-    .PARAMETER TIPEnforceWhitelist
-        Set this switch when using a key that has IP whitelisting enabled.
-    .PARAMETER TIPAccessToken
-        JWT token. If supplied, Posh-ACME will skip Get-TransIPJwtToken.
-    .PARAMETER RecordName
-        The full DNS record (typically _acme-challenge.domain.com).
-    .PARAMETER TxtValue
-        TXT value to create.
-    .PARAMETER TIPAPIEndpoint
-        (Optional) Override for TransIP API.
-    .EXAMPLE
-        Add-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPUsername 'transipuser' -TIPKeyText $sec -TIPEnforceWhitelist
-    .EXAMPLE
-        Add-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPAccessToken $token
-    #>
-}
-
-function Remove-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName = 'KeyAuthWithSecureString')]
-    param (
-        # Standard DNS and config
-        [Parameter(Mandatory, Position=0)]
-        [string]$RecordName,
-        [Parameter(Mandatory, Position=1)]
-        [string]$TxtValue,
-
-        # Shared between KeyAuth sets
-        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory)]
-        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory)]
-        [string]$TIPUsername,
-
-        # Private Key as a SecureString
-        [Parameter(ParameterSetName = 'KeyAuthWithSecureString', Mandatory)]
-        [securestring]$TIPKeyText,
-        # Private Key defined as a Filepath to a file
-        [Parameter(ParameterSetName = 'KeyAuthWithFilePath', Mandatory)]
-        [string]$TIPKeyPath,
-
-        # Whether or not to enforce IP whitelisting for the key
-        [Parameter(ParameterSetName = 'KeyAuthWithSecureString')]
-        [Parameter(ParameterSetName = 'KeyAuthWithFilePath')]
-        [switch]$TIPEnforceWhitelist,
-
-        # Supplying your own JWT auth token instead is also possible
-        [Parameter(ParameterSetName = 'TokenAuth', Mandatory)]
-        [string]$TIPAccessToken,
-
-        [string]$TIPAPIEndpoint = "https://api.transip.nl/v6"
-    )
-    # Decide token source: supplied or generated
-    if ($PSCmdlet.ParameterSetName -eq 'TokenAuth') {
-        # Use supplied TIPAccessToken
-        $token = $TIPAccessToken
-    } else {
-        # Generate JWT using the given keys
-        $token = Get-TransIPJwtToken -TIPUsername $TIPUsername -TIPKeyText $TIPKeyText -TIPKeyPath $TIPKeyPath -TIPEnforceWhitelist:$TIPEnforceWhitelist:IsPresent -TIPAPIEndpoint $TIPAPIEndpoint
-    }
-    # Identify root domain as before
-    $RootDomain = Find-TransIPRootDomain -RecordName $RecordName -Token $token -TIPAPIEndpoint $TIPAPIEndpoint
-    if (-not $RootDomain) { throw "Could not determine root domain for $RecordName" }
-    # Relative name for deletion
-    $RelativeName = Get-TransIPRelativeName -RecordName $RecordName -RootDomain $RootDomain
-    $queryParams = @{
-        Uri = "$TIPAPIEndpoint/domains/$RootDomain/dns"
-        Headers = @{ Authorization = "Bearer $token" }
-        Verbose = $false
-        ErrorAction = 'Stop'
-    }
-    try {
-        Write-Debug "GET $($queryParams.Uri)"
-        $records = (Invoke-RestMethod @queryParams @script:UseBasic).dnsEntries
-    } catch { throw }
-    $toDelete = $records | Where-Object {
-        $_.name -eq $RelativeName -and $_.type -eq "TXT" -and $_.content -eq $TxtValue
-    }
-    if (-not $toDelete) {
-        Write-Verbose "TXT record '$RelativeName' with value '$TxtValue' does not exist at $RootDomain. No action needed."
-        return
-    }
-    # Build and submit delete call for DNS TXT entry
-    $queryParams = @{
-        Uri = "$TIPAPIEndpoint/domains/$RootDomain/dns/$RelativeName"
-        Method = 'DELETE'
-        Headers = $queryParams.Headers
-        Body = @{
-            dnsEntry = @{
-                name    = $RelativeName
-                type    = "TXT"
-                content = $TxtValue
-                expire  = 300
-            }
-        } | ConvertTo-Json
-        ContentType = 'application/json'
-        Verbose = $false
-        ErrorAction = 'Stop'
-    }
-    try {
-        Write-Debug "DELETE $($queryParams.Uri)`n$($queryParams.Body)"
-        $null = Invoke-RestMethod @queryParams @script:UseBasic
-    } catch { throw }
-
-    <#
-    .SYNOPSIS
-        Removes a TXT record via the TransIP API.
-    .DESCRIPTION
-        Authenticates (private key/JWT), finds the correct domain, and deletes a TXT if present.
-    .PARAMETER TIPUsername
-        TransIP account login.
-    .PARAMETER TIPKeyText
-        (Preferred) PEM private key as SecureString.
-    .PARAMETER TIPKeyPath
-        PEM key file path.
-    .PARAMETER TIPEnforceWhitelist
-        Indicates whether key is global.
-    .PARAMETER TIPAccessToken
-        JWT token. If supplied, Posh-ACME will skip Get-TransIPJwtToken.
-    .PARAMETER RecordName
-        The full DNS record (typically _acme-challenge.domain.com).
-    .PARAMETER TxtValue
-        TXT value to delete.
-    .PARAMETER TIPAPIEndpoint
-        (Optional) Override for TransIP API.
-    .EXAMPLE
-        Remove-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPUsername 'transipuser' -TIPKeyText $sec -TIPEnforceWhitelist
-    .EXAMPLE
-        Remove-DnsTxt -RecordName '_acme-challenge.example.com' -TxtValue 'val' -TIPAccessToken $token
-    #>
-}
-
 function Get-DnsTxt {
     [CmdletBinding(DefaultParameterSetName = 'KeyAuthWithSecureString')]
     param (
@@ -601,9 +629,9 @@ function Get-DnsTxt {
     .PARAMETER TIPKeyPath
         PEM key file path.
     .PARAMETER TIPEnforceWhitelist
-        Set this switch when using a key that has IP whitelisting enabled.
+        When using a key that does not require IP whitelisting, using this switch enables IP whitelisting enforcement.
     .PARAMETER TIPAccessToken
-        JWT token. If supplied, Posh-ACME will skip Get-TransIPJwtToken.
+        A pre-authenticated JWT access token.
     .PARAMETER RecordName
         The full DNS record (typically _acme-challenge.domain.com).
     .PARAMETER TIPAPIEndpoint
@@ -614,23 +642,5 @@ function Get-DnsTxt {
         Get-DnsTxt -RecordName '_acme-challenge.example.com' -TIPUsername 'transipuser' -TIPKeyText $sec -TIPEnforceWhitelist
     .EXAMPLE
         Get-DnsTxt -RecordName '_acme-challenge.example.com' -TIPAccessToken $token
-    #>
-}
-
-function Save-DnsTxt {
-    [CmdletBinding()]
-    param(
-        [Parameter(ValueFromRemainingArguments)]
-        $ExtraParams
-    )
-    <#
-    .SYNOPSIS
-        Not required.
-
-    .DESCRIPTION
-        This provider does not require calling this function to commit changes to DNS records.
-
-    .PARAMETER ExtraParams
-        This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     #>
 }
