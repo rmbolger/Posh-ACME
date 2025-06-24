@@ -46,19 +46,19 @@ function Get-TransIPPrivateKey {
     } finally {
         # Sensitive variables are cleared by calling code
     }
-<#
-.SYNOPSIS
-    Securely loads the RSA private key as a PEM string.
-.DESCRIPTION
-    Loads the private key from either a SecureString (preferred) or a file path.
-    Sensitive variables are cleared ASAP.
-.PARAMETER TIPKeyText
-    Private key as SecureString.
-.PARAMETER TIPKeyPath
-    File path to PEM key.
-.OUTPUTS
-    PEM-formatted private key string.
-#>
+    <#
+    .SYNOPSIS
+        Securely loads the RSA private key as a PEM string.
+    .DESCRIPTION
+        Loads the private key from either a SecureString (preferred) or a file path.
+        Sensitive variables are cleared ASAP.
+    .PARAMETER TIPKeyText
+        Private key as SecureString.
+    .PARAMETER TIPKeyPath
+        File path to PEM key.
+    .OUTPUTS
+        PEM-formatted private key string.
+    #>
 }
 
 function Import-RsaPrivateKey {
@@ -68,19 +68,25 @@ function Import-RsaPrivateKey {
     )
     # For PowerShell 7+, use the native ImportFromPem method
     if ($PSVersionTable.PSVersion.Major -ge 7) {
+        Write-Debug "Importing key via .NET"
         $rsa = [System.Security.Cryptography.RSA]::Create()
         $rsa.ImportFromPem($PemString)
         return $rsa
     }
+    Write-Debug "Parsing PEM key manually"
     # On PS5.1 — support both PKCS#1 and PKCS#8
     $clean = $PemString -replace "\r","" -replace "\n",""
     if ($clean -match '-----BEGIN RSA PRIVATE KEY-----') {
         # PKCS#1 (classic OpenSSL)
-        $base64 = ($PemString -split "\r?\n" | Where-Object {$_ -notmatch "^-+.*PRIVATE.*-+$"}) -join ""
+        $base64 = ($PemString -split "\r?\n" | Where-Object {
+            $_ -notmatch "^-+.*PRIVATE.*-+$"
+        }) -join ""
         $keyBytes = [Convert]::FromBase64String($base64)
-        $reader = New-Object System.IO.BinaryReader([System.IO.MemoryStream]::new($keyBytes))
+        $reader = [IO.BinaryReader]::new([IO.MemoryStream]::new($keyBytes))
         $twoBytes = $reader.ReadUInt16()
-        if ($twoBytes -ne 0x8130 -and $twoBytes -ne 0x8230) { throw "PEM parse error (ASN.1)" }
+        if ($twoBytes -ne 0x8130 -and $twoBytes -ne 0x8230) {
+            throw "PEM parse error (ASN.1)"
+        }
         $reader.BaseStream.Seek(15, 'Current')
         function ReadInt {
             $size = $reader.ReadByte()
@@ -97,7 +103,7 @@ function Import-RsaPrivateKey {
         $dp = ReadInt
         $dq = ReadInt
         $iq = ReadInt
-        $rsaParams = New-Object System.Security.Cryptography.RSAParameters
+        $rsaParams = [Security.Cryptography.RSAParameters]::new()
         $rsaParams.Modulus = $modulus
         $rsaParams.Exponent = $exponent
         $rsaParams.D = $d
@@ -106,16 +112,21 @@ function Import-RsaPrivateKey {
         $rsaParams.DP = $dp
         $rsaParams.DQ = $dq
         $rsaParams.InverseQ = $iq
-        $rsaProv = New-Object System.Security.Cryptography.RSACryptoServiceProvider
+        $rsaProv = [Security.Cryptography.RSACryptoServiceProvider]::new()
         $rsaProv.PersistKeyInCsp = $false
         $rsaProv.ImportParameters($rsaParams)
         return $rsaProv
     } elseif ($clean -match '-----BEGIN PRIVATE KEY-----') {
         # PKCS#8 (modern OpenSSL export)
-        $base64 = ($PemString -split "\r?\n" | Where-Object {$_ -notmatch "^-+.*PRIVATE KEY-+$"}) -join ""
+        $base64 = ($PemString -split "\r?\n" | Where-Object {
+            $_ -notmatch "^-+.*PRIVATE KEY-+$"
+        }) -join ""
         $pkcs8bytes = [Convert]::FromBase64String($base64)
         try {
-            $cngKey = [System.Security.Cryptography.CngKey]::Import($pkcs8bytes, [System.Security.Cryptography.CngKeyBlobFormat]::Pkcs8PrivateBlob)
+            $cngKey = [Security.Cryptography.CngKey]::Import(
+                $pkcs8bytes,
+                [Security.Cryptography.CngKeyBlobFormat]::Pkcs8PrivateBlob
+            )
             $rsaCng = New-Object System.Security.Cryptography.RSACng($cngKey)
             return $rsaCng
         } catch {
@@ -153,26 +164,40 @@ function Get-TransIPJwtToken {
         # Build a random nonce and JWT label for security and logging
         $nonce = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 16 | ForEach-Object {[char]$_})
         $randomNum = Get-Random -Minimum 10000 -Maximum 99999
-        $label = "Posh-ACME-$randomNum"
         $tokenBody = @{
-            login = $TIPUsername
-            nonce = $nonce
-            global_key = (-not $TIPEnforceWhitelist.IsPresent)
+            login           = $TIPUsername
+            nonce           = $nonce
+            global_key      = (-not $TIPEnforceWhitelist.IsPresent)
             expiration_time = "5 minutes"
-            label = $label
+            label           = "Posh-ACME-$randomNum"
         } | ConvertTo-Json -Compress
         # Sign the body using SHA512 PKCS#1
         $bodyBytes = [System.Text.Encoding]::UTF8.GetBytes($tokenBody)
-        $sigRaw = $rsa.SignData($bodyBytes,[System.Security.Cryptography.HashAlgorithmName]::SHA512,[System.Security.Cryptography.RSASignaturePadding]::Pkcs1)
+        $sigRaw = $rsa.SignData(
+            $bodyBytes,
+            [System.Security.Cryptography.HashAlgorithmName]::SHA512,
+            [System.Security.Cryptography.RSASignaturePadding]::Pkcs1
+        )
         $sigB64 = [Convert]::ToBase64String($sigRaw)
         # Call TransIP /auth endpoint for JWT
-        $headers = @{ Signature = $sigB64 }
-        $response = Invoke-RestMethod -Uri "$TIPAPIEndpoint/auth" -Method Post -Body $tokenBody -Headers $headers -ContentType "application/json"
+        $queryParams = @{
+            Uri = "$TIPAPIEndpoint/auth"
+            Method = 'POST'
+            Body = $tokenBody
+            Headers = @{ Signature = $sigB64 }
+            ContentType = 'application/json'
+            Verbose = $false
+            ErrorAction = 'Stop'
+        }
+        Write-Debug "POST $($queryParams.Uri)`n$($tokenBody)"
+        $response = Invoke-RestMethod @queryParams @script:UseBasic
         return $response.token
     } finally {
         # Clear private key material as soon as possible
         $PrivateKey = $null
-        if ($rsa -is [System.Security.Cryptography.RSACryptoServiceProvider]) { $rsa.Clear() }
+        if ($rsa -is [System.Security.Cryptography.RSACryptoServiceProvider]) {
+            $rsa.Clear()
+        }
     }
     <#
     .SYNOPSIS
@@ -204,10 +229,17 @@ function Find-TransIPRootDomain {
         [string]$Token,
         [string]$TIPAPIEndpoint = "https://api.transip.nl/v6"
     )
-    # Prepare Bearer authentication header
-    $headers = @{ Authorization = "Bearer $Token" }
+    $queryParams = @{
+        Uri = "$TIPAPIEndpoint/domains"
+        Headers = @{ Authorization = "Bearer $Token" }
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
     # Get all domains under the account
-    $domainList = (Invoke-RestMethod -Uri "$TIPAPIEndpoint/domains" -Headers $headers).domains
+    try {
+        Write-Debug "GET $($queryParams.Uri)"
+        $domainList = (Invoke-RestMethod @queryParams @script:UseBasic).domains
+    } catch { throw }
     $found = $null
     $longest = 0
     # Look for the most specific (longest) root domain that is part of the record
@@ -316,29 +348,48 @@ function Add-DnsTxt {
     if (-not $RootDomain) { throw "Could not determine root domain for $RecordName" }
     # Strip root domain from record name for relative (sub)domain
     $RelativeName = Get-TransIPRelativeName -RecordName $RecordName -RootDomain $RootDomain
-    # Prepare Bearer header for all API calls
-    $headers = @{ Authorization = "Bearer $token" }
+
     # Query existing records to check for duplicates
-    $getUri = "$TIPAPIEndpoint/domains/$RootDomain/dns"
-    $result = Invoke-RestMethod -Uri $getUri -Method GET -Headers $headers
+    $queryParams = @{
+        Uri = "$TIPAPIEndpoint/domains/$RootDomain/dns"
+        Headers = @{ Authorization = "Bearer $token" }
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
+    try {
+        Write-Debug "GET $($queryParams.Uri)"
+        $result = Invoke-RestMethod @queryParams @script:UseBasic
+    } catch { throw }
     $records = $result.dnsEntries
     # If a TXT record for this value already exists, skip add
-    $exists = $records | Where-Object { $_.name -eq $RelativeName -and $_.type -eq "TXT" -and $_.content -eq $TxtValue }
+    $exists = $records | Where-Object {
+        $_.name -eq $RelativeName -and $_.type -eq "TXT" -and $_.content -eq $TxtValue
+    }
     if ($exists) {
         Write-Verbose "TXT record '$RelativeName' with value '$TxtValue' already exists at $RootDomain. No action needed."
         return
     }
     # None exists, so create new TXT DNS entry
-    $postUri = "$TIPAPIEndpoint/domains/$RootDomain/dns"
-    $body = @{
-        dnsEntry = @{
-            name    = $RelativeName
-            type    = "TXT"
-            content = $TxtValue
-            expire  = 300
-        }
+    $queryParams = @{
+        Uri = $queryParams.Uri
+        Method = 'POST'
+        Headers = $queryParams.Headers
+        Body = @{
+            dnsEntry = @{
+                name    = $RelativeName
+                type    = "TXT"
+                content = $TxtValue
+                expire  = 300
+            }
+        } | ConvertTo-Json
+        ContentType = 'application/json'
+        Verbose = $false
+        ErrorAction = 'Stop'
     }
-    Invoke-RestMethod -Uri $postUri -Method POST -Headers $headers -Body ($body | ConvertTo-Json) -ContentType 'application/json'
+    try {
+        Write-Debug "POST $($queryParams.Uri)`n$($queryParams.Body)"
+        $null = Invoke-RestMethod @queryParams @script:UseBasic
+    } catch { throw }
 
     <#
     .SYNOPSIS
@@ -413,25 +464,45 @@ function Remove-DnsTxt {
     if (-not $RootDomain) { throw "Could not determine root domain for $RecordName" }
     # Relative name for deletion
     $RelativeName = Get-TransIPRelativeName -RecordName $RecordName -RootDomain $RootDomain
-    $headers = @{ Authorization = "Bearer $token" }
-    $getUri = "$TIPAPIEndpoint/domains/$RootDomain/dns"
-    $records = (Invoke-RestMethod -Uri $getUri -Headers $headers).dnsEntries
-    $toDelete = $records | Where-Object { $_.name -eq $RelativeName -and $_.type -eq "TXT" -and $_.content -eq $TxtValue }
+    $queryParams = @{
+        Uri = "$TIPAPIEndpoint/domains/$RootDomain/dns"
+        Headers = @{ Authorization = "Bearer $token" }
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
+    try {
+        Write-Debug "GET $($queryParams.Uri)"
+        $records = (Invoke-RestMethod @queryParams @script:UseBasic).dnsEntries
+    } catch { throw }
+    $toDelete = $records | Where-Object {
+        $_.name -eq $RelativeName -and $_.type -eq "TXT" -and $_.content -eq $TxtValue
+    }
     if (-not $toDelete) {
         Write-Verbose "TXT record '$RelativeName' with value '$TxtValue' does not exist at $RootDomain. No action needed."
         return
     }
     # Build and submit delete call for DNS TXT entry
-    $deleteUri = "$TIPAPIEndpoint/domains/$RootDomain/dns/$RelativeName"
-    $body = @{
-        dnsEntry = @{
-            name    = $RelativeName
-            type    = "TXT"
-            content = $TxtValue
-            expire  = 300
-        }
+    $queryParams = @{
+        Uri = "$TIPAPIEndpoint/domains/$RootDomain/dns/$RelativeName"
+        Method = 'DELETE'
+        Headers = $queryParams.Headers
+        Body = @{
+            dnsEntry = @{
+                name    = $RelativeName
+                type    = "TXT"
+                content = $TxtValue
+                expire  = 300
+            }
+        } | ConvertTo-Json
+        ContentType = 'application/json'
+        Verbose = $false
+        ErrorAction = 'Stop'
     }
-    Invoke-RestMethod -Uri $deleteUri -Method DELETE -Headers $headers -Body ($body | ConvertTo-Json) -ContentType 'application/json'
+    try {
+        Write-Debug "DELETE $($queryParams.Uri)`n$($queryParams.Body)"
+        $null = Invoke-RestMethod @queryParams @script:UseBasic
+    } catch { throw }
+
     <#
     .SYNOPSIS
         Removes a TXT record via the TransIP API.
@@ -503,10 +574,17 @@ function Get-DnsTxt {
     if (-not $RootDomain) { throw "Could not determine root domain for $RecordName" }
     # Convert to relative/sub domain
     $RelativeName = Get-TransIPRelativeName -RecordName $RecordName -RootDomain $RootDomain
-    $headers = @{ Authorization = "Bearer $token" }
     # Query for all DNS records for this domain
-    $getUri = "$TIPAPIEndpoint/domains/$RootDomain/dns"
-    $records = (Invoke-RestMethod -Uri $getUri -Headers $headers).dnsEntries
+    $queryParams = @{
+        Uri = "$TIPAPIEndpoint/domains/$RootDomain/dns"
+        Headers = @{ Authorization = "Bearer $token" }
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
+    try {
+        Write-Debug "GET $($queryParams.Uri)"
+        $records = (Invoke-RestMethod @queryParams @script:UseBasic).dnsEntries
+    } catch { throw }
     # Filter TXT records for the requested relative name
     $txtRecords = $records | Where-Object { $_.name -eq $RelativeName -and $_.type -eq "TXT" }
     # Return all TXT values as array
