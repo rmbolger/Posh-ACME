@@ -70,14 +70,24 @@ function Add-DnsTxt {
         $result = Invoke-RestMethod @queryParams @script:UseBasic
     } catch { throw }
     $records = $result.dnsEntries
-    # If a TXT record for this value already exists, skip add
-    $exists = $records | Where-Object {
-        $_.name -eq $RelativeName -and $_.type -eq "TXT" -and $_.content -eq $TxtValue
+
+    # If a TXT record already exists with the same name+type, we need to use the
+    # same TTL value on any new record we create.
+    $ttl = 300
+    $recMatch = @($records | Where-Object {
+        $_.name -eq $RelativeName -and $_.type -eq 'TXT'
+    })
+    if ($recMatch) {
+        $ttl = $recMatch[0].expire
+        Write-Debug "Using TTL $ttl from existing record"
     }
-    if ($exists) {
+
+    # If a TXT record for this value already exists, skip add
+    if ($recMatch | Where-Object { $_.content -eq $TxtValue }) {
         Write-Verbose "TXT record '$RelativeName' with value '$TxtValue' already exists at $RootDomain. No action needed."
         return
     }
+
     # None exists, so create new TXT DNS entry
     $queryParams = @{
         Uri = $queryParams.Uri
@@ -86,9 +96,9 @@ function Add-DnsTxt {
         Body = @{
             dnsEntry = @{
                 name    = $RelativeName
-                type    = "TXT"
+                type    = 'TXT'
                 content = $TxtValue
-                expire  = 300
+                expire  = $ttl
             }
         } | ConvertTo-Json
         ContentType = 'application/json'
@@ -183,13 +193,21 @@ function Remove-DnsTxt {
         Write-Debug "GET $($queryParams.Uri)"
         $records = (Invoke-RestMethod @queryParams @script:UseBasic).dnsEntries
     } catch { throw }
-    $toDelete = $records | Where-Object {
+
+    # check for matching record to delete
+    $ttl = 300
+    $recMatch = @($records | Where-Object {
         $_.name -eq $RelativeName -and $_.type -eq "TXT" -and $_.content -eq $TxtValue
-    }
-    if (-not $toDelete) {
+    })
+    if (-not ($recMatch | Where-Object { $_.content -eq $TxtValue })) {
         Write-Verbose "TXT record '$RelativeName' with value '$TxtValue' does not exist at $RootDomain. No action needed."
         return
     }
+    if ($recMatch) {
+        $ttl = $recMatch[0].expire
+        Write-Debug "Using TTL $ttl from existing record"
+    }
+
     # Build and submit delete call for DNS TXT entry
     $queryParams = @{
         Uri = "$TIPAPIEndpoint/domains/$RootDomain/dns/$RelativeName"
@@ -198,9 +216,9 @@ function Remove-DnsTxt {
         Body = @{
             dnsEntry = @{
                 name    = $RelativeName
-                type    = "TXT"
+                type    = 'TXT'
                 content = $TxtValue
-                expire  = 300
+                expire  = $ttl
             }
         } | ConvertTo-Json
         ContentType = 'application/json'
