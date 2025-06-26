@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.28.0'
+ModuleVersion = '4.29.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -84,17 +84,25 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.28.0 (2025-02-08)
+## 4.29.0 (2025-06-25)
 
-* New [efficient iP SOLIDserver DDI](https://efficientip.com/products/solidserver-ddi/) plugin. Thanks @jamiekowalczik for the initial PR and @alexissavin for providing a test platform and API guidance.
-* Experimental support for the new [ACME Profiles](https://datatracker.ietf.org/doc/draft-aaron-acme-profiles/) extension. This is still a very early draft standard and subject to change, but Let's Encrypt is already rolling out support this year as part of their short-lived certificates initiative. More info [here](https://letsencrypt.org/2025/01/09/acme-profiles/).
-* Fixed Route53 plugin when used with accounts that have many hosted zones. (#593)
-* Fixed a bug with DeSEC plugin that was caused by the previous fix for #584. (#598)
-* Added better debug logging for DeSEC plugin.
-* Azure cert thumbprint auth now works on Linux for certs in the "CurrentUser" store. (Thanks @Eric2XU)
-* Fixed a bug with Azure cert thumbprint auth on Windows that could throw errors when using certificates with non-exportable private keys.
-* Added better debug logging for Azure plugin.
-* AcmeException objects thrown by the module now include the lower level HTTP response exception as an InnerException.
+* New DNS Plugins
+  * [Netcup](https://www.netcup.com) (#602)
+  * [TransIP](https://www.transip.nl) (#622) (Thanks @Tim81)
+* Added `-IgnoreContact` switch to `Set-PAServer` (#619)
+  * ALL USERS of LET'S ENCRYPT, this switch works around a bug that causes a new account to be created for every renewal after LE shut down their automated email warning service.
+  * This option causes the module to ignore any `-Contact` parameters in functions that support it when using the associated server.
+  * It will be enabled by default on new installs that use Let's Encrypt. But existing users will need to manually enable it *OR* simply stop using the `-Contact` parameter in your scripts when using Let's Encrypt ACME endpoints.
+* Added AZAccessTokenSecure param for Azure plugin (#618)
+* Added WinSkipCACheck switch to Windows plugin (#613)
+* Added WinNoCimSession switch to Windows plugin (#600) (Thanks @rhochmayr)
+* Fix: Changing an order's PfxPass no longer shows the new value in Verbose output (#604)
+* Fix: New-PACertificate no longer shows plaintext PfxPass in debug log (#604)
+* Fixed a bug in `New-PACertificate` that would unnecessarily create a new order when an existing unfinished order could have been continued
+* Fixed a couple minor bugs related to switching profiles when creating new orders that match existing orders.
+* Fix: Added a workaround for non-compliant order response from GoDaddy's ACME implementation (#611)
+* Fixed PowerDNS plugin when using limited API key that doesn't have access to all hosted zones (#617) (Thanks @joachimcarrein)
+* Removed the Warning message when creating a new ACME account with no `-Contact` parameter.
 '@
 
     }
