@@ -41,19 +41,19 @@ function Add-DnsTxt {
                 return
             }
             # add a value the existing record
-            $rrSet.ResourceRecords += @{Value="`"$TxtValue`""}
+            $rrSet.ResourceRecords += [Amazon.Route53.Model.ResourceRecord]::new("`"$TxtValue`"")
         } else {
             # create a new rrset
-            $rrSet = New-Object Amazon.Route53.Model.ResourceRecordSet
+            $rrSet = [Amazon.Route53.Model.ResourceRecordSet]::new()
             $rrSet.Name = $RecordName
             $rrSet.Type = 'TXT'
             $rrSet.TTL = 60
-            $rrSet.ResourceRecords.Add(@{Value="`"$TxtValue`""})
+            $rrSet.ResourceRecords = [Amazon.Route53.Model.ResourceRecord]::new("`"$TxtValue`"")
         }
 
         # send the change
         Write-Verbose "Adding the record to zone ID $zoneID"
-        $change = New-Object Amazon.Route53.Model.Change
+        $change = [Amazon.Route53.Model.Change]::new()
         $change.Action = 'UPSERT'
         $change.ResourceRecordSet = $rrSet
         $null = Edit-R53ResourceRecordSet -HostedZoneId $zoneID -ChangeBatch_Change $change @script:AwsCredParam
@@ -178,7 +178,7 @@ function Remove-DnsTxt {
             return
         } else {
             # begin a change request
-            $change = New-Object Amazon.Route53.Model.Change
+            $change = [Amazon.Route53.Model.Change]::new()
             $change.ResourceRecordSet = $rrSet
 
             if ($rrSet.ResourceRecords.Count -gt 1) {
@@ -490,7 +490,7 @@ function Invoke-R53RestMethod {
     Write-Debug "StringToSign:`n$StringToSign"
 
     # https://docs.aws.amazon.com/general/latest/gr/sigv4-calculate-signature.html
-    $hmac = New-Object System.Security.Cryptography.HMACSHA256
+    $hmac = [System.Security.Cryptography.HMACSHA256]::new()
     $hmac.Key = [Text.Encoding]::UTF8.GetBytes("AWS4$SecretKey")
     $kDate = $hmac.ComputeHash([Text.Encoding]::UTF8.GetBytes($nowDate))
 
