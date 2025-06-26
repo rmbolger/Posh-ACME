@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.29.0'
+ModuleVersion = '4.29.1'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -84,25 +84,9 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.29.0 (2025-06-25)
+## 4.29.1 (2025-06-26)
 
-* New DNS Plugins
-  * [Netcup](https://www.netcup.com) (#602)
-  * [TransIP](https://www.transip.nl) (#622) (Thanks @Tim81)
-* Added `-IgnoreContact` switch to `Set-PAServer` (#619)
-  * ALL USERS of LET'S ENCRYPT, this switch works around a bug that causes a new account to be created for every renewal after LE shut down their automated email warning service.
-  * This option causes the module to ignore any `-Contact` parameters in functions that support it when using the associated server.
-  * It will be enabled by default on new installs that use Let's Encrypt. But existing users will need to manually enable it *OR* simply stop using the `-Contact` parameter in your scripts when using Let's Encrypt ACME endpoints.
-* Added AZAccessTokenSecure param for Azure plugin (#618)
-* Added WinSkipCACheck switch to Windows plugin (#613)
-* Added WinNoCimSession switch to Windows plugin (#600) (Thanks @rhochmayr)
-* Fix: Changing an order's PfxPass no longer shows the new value in Verbose output (#604)
-* Fix: New-PACertificate no longer shows plaintext PfxPass in debug log (#604)
-* Fixed a bug in `New-PACertificate` that would unnecessarily create a new order when an existing unfinished order could have been continued
-* Fixed a couple minor bugs related to switching profiles when creating new orders that match existing orders.
-* Fix: Added a workaround for non-compliant order response from GoDaddy's ACME implementation (#611)
-* Fixed PowerDNS plugin when using limited API key that doesn't have access to all hosted zones (#617) (Thanks @joachimcarrein)
-* Removed the Warning message when creating a new ACME account with no `-Contact` parameter.
+* Fix Route53 plugin when used with AWS Tools for PowerShell 5.x (#627)
 '@
 
     }

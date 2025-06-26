@@ -1,3 +1,7 @@
+## 4.29.1 (2025-06-26)
+
+* Fix Route53 plugin when used with AWS Tools for PowerShell 5.x (#627)
+
 ## 4.29.0 (2025-06-25)
 
 * New DNS Plugins
