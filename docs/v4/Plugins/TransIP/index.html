@@ -12,13 +12,13 @@
         <meta name="author" content="Ryan Bolger">
       
       
-        <link rel="canonical" href="https://poshac.me/docs/v4/Plugins/ClouDNS/">
+        <link rel="canonical" href="https://poshac.me/docs/v4/Plugins/TransIP/">
       
       
-        <link rel="prev" href="../Bunny/">
+        <link rel="prev" href="../TotalUptime/">
       
       
-        <link rel="next" href="../Cloudflare/">
+        <link rel="next" href="../UKFast/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -26,7 +26,7 @@
     
     
       
-        <title>ClouDNS - Posh-ACME</title>
+        <title>TransIP - Posh-ACME</title>
       
     
     
@@ -61,11 +61,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="ClouDNS - Posh-ACME" >
+        <meta  property="og:title"  content="TransIP - Posh-ACME" >
       
         <meta  property="og:description"  content="Documentation for the Posh-ACME PowerShell module" >
       
-        <meta  property="og:image"  content="https://poshac.me/docs/v4/assets/images/social/Plugins/ClouDNS.png" >
+        <meta  property="og:image"  content="https://poshac.me/docs/v4/assets/images/social/Plugins/TransIP.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -73,15 +73,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://poshac.me/docs/v4/Plugins/ClouDNS/" >
+        <meta  property="og:url"  content="https://poshac.me/docs/v4/Plugins/TransIP/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="ClouDNS - Posh-ACME" >
+        <meta  name="twitter:title"  content="TransIP - Posh-ACME" >
       
         <meta  name="twitter:description"  content="Documentation for the Posh-ACME PowerShell module" >
       
-        <meta  name="twitter:image"  content="https://poshac.me/docs/v4/assets/images/social/Plugins/ClouDNS.png" >
+        <meta  name="twitter:image"  content="https://poshac.me/docs/v4/assets/images/social/Plugins/TransIP.png" >
       
     
     
@@ -104,7 +104,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#how-to-use-the-cloudns-dns-plugin" class="md-skip">
+        <a href="#how-to-use-the-transip-plugin" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              ClouDNS
+              TransIP
             
           </span>
         </div>
@@ -1781,30 +1781,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    ClouDNS
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../ClouDNS/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1813,83 +1793,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      Setup
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Setup">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#optional-sub-users-and-zone-delegation" class="md-nav__link">
-    <span class="md-ellipsis">
-      (Optional) Sub Users and Zone Delegation
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-the-plugin" class="md-nav__link">
-    <span class="md-ellipsis">
-      Using the Plugin
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#standard-propagation-delay" class="md-nav__link">
-    <span class="md-ellipsis">
-      Standard Propagation Delay
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cloudns-propagation-polling" class="md-nav__link">
-    <span class="md-ellipsis">
-      ClouDNS Propagation Polling
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -3138,10 +3041,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../TransIP/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    TransIP
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -3150,6 +3073,44 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using the Plugin
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -3806,21 +3767,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Setup">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#optional-sub-users-and-zone-delegation" class="md-nav__link">
-    <span class="md-ellipsis">
-      (Optional) Sub Users and Zone Delegation
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -3829,30 +3775,6 @@
       Using the Plugin
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#standard-propagation-delay" class="md-nav__link">
-    <span class="md-ellipsis">
-      Standard Propagation Delay
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cloudns-propagation-polling" class="md-nav__link">
-    <span class="md-ellipsis">
-      ClouDNS Propagation Polling
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -3871,7 +3793,7 @@
                   
 
   
-    <a href="https://github.com/rmbolger/Posh-ACME/edit/main/docs/Plugins/ClouDNS.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/rmbolger/Posh-ACME/edit/main/docs/Plugins/TransIP.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4v-2m10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1 2.1 2.1Z"/></svg>
     </a>
@@ -3880,48 +3802,35 @@
     
       
     
-    <a href="https://github.com/rmbolger/Posh-ACME/raw/main/docs/Plugins/ClouDNS.md" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/rmbolger/Posh-ACME/raw/main/docs/Plugins/TransIP.md" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.15 8.15 0 0 1-1.23-2Z"/></svg>
     </a>
   
 
 
-<h1 id="how-to-use-the-cloudns-dns-plugin">How To Use the ClouDNS DNS Plugin<a class="headerlink" href="#how-to-use-the-cloudns-dns-plugin" title="Permanent link">&para;</a></h1>
-<p>This plugin works against the <a href="https://www.cloudns.net/aff/id/224075/">ClouDNS</a> provider. It is assumed that you have already setup an account and registered the domains or zones you will be working against.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This provider does not allow API Access on its free account tier. If you sign up for a premium plan trial and let it expire, the plugin will stop working unless you upgrade your account to premium again. Their premium plans are reasonably priced and if you are a new customer, you can help me maintain this plugin by using this <a href="https://www.cloudns.net/aff/id/224075/">affiliate link</a> when you sign up.</p>
-</div>
+<h1 id="how-to-use-the-transip-plugin">How To Use the TransIP Plugin<a class="headerlink" href="#how-to-use-the-transip-plugin" title="Permanent link">&para;</a></h1>
+<p>This plugin works against the <a href="https://www.transip.nl">TransIP</a> domain registrar and its associated alternate TLDs. It is assumed that you have already setup an account and registered the domain you will be working against.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<p>First, login to your account and go to the <a href="https://www.cloudns.net/api-settings/">API Settings</a> page. Click the <code>Add new user</code> link and set a password and optional IP whitelist. After saving, make note of the <code>auth-id</code> value for this user.</p>
-<h3 id="optional-sub-users-and-zone-delegation">(Optional) Sub Users and Zone Delegation<a class="headerlink" href="#optional-sub-users-and-zone-delegation" title="Permanent link">&para;</a></h3>
-<p>The standard API users have complete access to your account. But for a bit more security, you can create sub-users that only have access to a subset of zones on your account. Click the <code>Add new sub-user</code> link from the <a href="https://www.cloudns.net/api-settings/">API Settings</a> page. Set a password and set the <code>DNS Zones</code> value to the number of zones you'll be delegating the user to. The rest of the fields are either optional or can be set to 0.</p>
-<p>After the user is created, click the text link in the DNS Zones column for the user that should be something like "0 / X" where X is the number of zone you configured for delegation. This will pop up a dialog box and let you add the specific zones you are delegating.</p>
-<p>Make a note of the <code>sub-auth-id</code> or <code>sub-auth-user</code> name you set for later.</p>
+<p>Login to your TransIP Control Panel and navigate to the API section. API access is authenticated using an RSA private key that can optionally be restricted to an IP whitelist.</p>
+<p>If you wish to enforce IP whitelisting on the server side, add the associated address or ranges to the list. Then create a new Key Pair with the box checked to enforce IP whitelisting. Finally, save the displayed value to a file for later.</p>
+<p>If you don't want to enforce IP whitelisting or want to leave the enforcement up to the client, don't check the box when creating the key pair.</p>
+<p>It is also possible to use the plugin with a pre-authenticated access token. But they are time limited and would require manual intervention during renewal or external automation to retrieve an updated token.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>The <code>CDUserType</code> parameter must be set to either <code>auth-id</code>, <code>sub-auth-id</code>, or <code>sub-auth-user</code> depending on the type of credential you are using. The <code>CDUsername</code> parameter should be set to the ID or username of the user. The password is set using <code>CDPassword</code> as a SecureString value.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>The <code>CDPasswordInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
-</div>
-<p>By default the plugin assumes Posh-ACME's default DNS propagation delay mechanics will be used. But ClouDNS also supports a polling API to check whether record changes have propagated to the nameservers. To use this instead of the default mechanics, add a <code>CDPollPropagation = $true</code> parameter to your plugin args. By default, it will timeout after 5 minutes if the polling API never returns a success. You can override the timeout value with <code>CDPollTimeout</code> in seconds. When using CDPollPropagation, you should also set Posh-ACME's <code>DNSSleep</code> parameter to 0 unless you are using additional plugins that don't support their own form of propagation polling.</p>
-<h3 id="standard-propagation-delay">Standard Propagation Delay<a class="headerlink" href="#standard-propagation-delay" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">CDUserType</span> <span class="p">=</span> <span class="s1">&#39;auth-id&#39;</span>
-    <span class="n">CDUsername</span> <span class="p">=</span> <span class="s1">&#39;12345&#39;</span>
-    <span class="n">CDPassword</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Password&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<p>When using the typical key based authentication, the private key you created can be referenced as a file path using the <code>TIPKeyPath</code> parameter or as a SecureString value using the <code>TIPKeyText</code> parameter. If using TIPKeyPath, the file must remain in the same location for renewals. You must also supply your Control Panel username using the <code>TIPUsername</code> parameter. If the IP whitelisting box was not checked when you created the key, you may also use the <code>TIPEnforceWhitelist</code> switch to enable that enforcement.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$keyText</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="n">-AsSecureString</span> <span class="c"># this will prompt for your key</span>
+<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">TIPUsername</span> <span class="p">=</span> <span class="s1">&#39;myuser&#39;</span>
+    <span class="n">TIPKeyText</span> <span class="p">=</span> <span class="nv">$keyText</span>
 <span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">ClouDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">TransIP</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
-<h3 id="cloudns-propagation-polling">ClouDNS Propagation Polling<a class="headerlink" href="#cloudns-propagation-polling" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">CDUserType</span> <span class="p">=</span> <span class="s1">&#39;auth-id&#39;</span>
-    <span class="n">CDUsername</span> <span class="p">=</span> <span class="s1">&#39;12345&#39;</span>
-    <span class="n">CDPassword</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Password&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
-    <span class="n">CDPollPropagation</span> <span class="p">=</span> <span class="nv">$true</span>
+<p>When using a pre-authenticated access token, you may supply that using the <code>TIPAccessToken</code> string parameter.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$accessToken</span> <span class="p">=</span> <span class="nb">Read-Host</span> <span class="c"># this will prompt for your access token</span>
+<span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">TIPAccessToken</span> <span class="p">=</span> <span class="nv">$accessToken</span>
 <span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">ClouDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span> <span class="n">-DnsSleep</span> <span class="n">0</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">TransIP</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
 
 
@@ -3955,7 +3864,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../Bunny/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Bunny">
+          <a href="../TotalUptime/" class="md-footer__link md-footer__link--prev" aria-label="Previous: TotalUptime">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -3965,20 +3874,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Bunny
+                TotalUptime
               </div>
             </div>
           </a>
         
         
           
-          <a href="../Cloudflare/" class="md-footer__link md-footer__link--next" aria-label="Next: Cloudflare">
+          <a href="../UKFast/" class="md-footer__link md-footer__link--next" aria-label="Next: UKFast">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Cloudflare
+                UKFast
               </div>
             </div>
             <div class="md-footer__button md-icon">

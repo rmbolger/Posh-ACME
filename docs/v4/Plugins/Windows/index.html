@@ -1454,6 +1454,10 @@
       
         
       
+        
+      
+        
+      
     
     
       
@@ -2641,6 +2645,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../Netcup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Netcup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../OVH/" class="md-nav__link">
         
   
@@ -3003,6 +3028,27 @@
   
   <span class="md-ellipsis">
     TotalUptime
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TransIP/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    TransIP
   </span>
   
 
@@ -3876,6 +3922,13 @@
 <span class="c"># test in the context of a different user</span>
 <span class="nv">$cs</span> <span class="p">=</span> <span class="nb">New-CimSession</span> <span class="n">-ComputerName</span> <span class="n">dnsserver</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Credential</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span>
 </code></pre></div>
+<p>Alternatively, many of the DNS commands can also be used with the <code>-ComputerName</code> parameter directly without needing to create a CimSession. This method may also require less privileges on the DNS server.</p>
+<div class="highlight"><pre><span></span><code><span class="c"># test by specifying the dns server&#39;s FQDN</span>
+<span class="nb">Get-DnsServerResourceRecord</span> <span class="n">-Name</span> <span class="n">dns1</span> <span class="n">-ComputerName</span> <span class="n">dns1</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-ZoneName</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span>
+
+<span class="c"># test by specifying the domain name, which will resolve to the DNS server</span>
+<span class="nb">Get-DnsServerResourceRecord</span> <span class="n">-Name</span> <span class="n">dns1</span> <span class="n">-ComputerName</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-ZoneName</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span>
+</code></pre></div>
 <p>In environments where one or both of the client and server are not domain joined, you may need to explicitly connect via HTTPS. This may involve extra steps during setup to enable an HTTPS listener on the server. Here is a <a href="https://4sysops.com/archives/powershell-remoting-over-https-with-a-self-signed-ssl-certificate/">decent guide</a> on getting things setup with a self-signed certificate, though a trusted certificate would work as well. And here is how to test from the client machine.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$so</span> <span class="p">=</span> <span class="nb">New-CimSessionOption</span> <span class="n">-UseSsl</span>
 <span class="nv">$cs</span> <span class="p">=</span> <span class="nb">New-CimSession</span> <span class="n">-ComputerName</span> <span class="n">dnsserver</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Credential</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span> <span class="n">-SessionOptions</span> <span class="nv">$so</span>
@@ -3887,6 +3940,9 @@
 <p>In a domain joined environment, the only required parameter is the hostname or IP of the DNS server unless you want the module to use different credentials than what PowerShell is running as. In that case, you would specify credentials and optionally the <code>-WinUseSSL</code> switch. Both of those tend to be required for non-domain joined servers.</p>
 <div class="highlight"><pre><span></span><code><span class="c"># domain joined environment, no credentials or SSL needed</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Windows</span> <span class="n">-PluginArgs</span> <span class="p">@{</span><span class="n">WinServer</span><span class="p">=</span><span class="s1">&#39;dns1.example.com&#39;</span><span class="p">}</span>
+
+<span class="c"># domain joined environment, without CimSession</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Windows</span> <span class="n">-PluginArgs</span> <span class="p">@{</span><span class="n">WinServer</span><span class="p">=</span><span class="s1">&#39;dns1.example.com&#39;</span><span class="p">,</span> <span class="n">WinNoCimSession</span><span class="p">=</span><span class="nv">$true</span><span class="p">}</span>
 
 <span class="c"># standalone environment, adding credentials and SSL flag</span>
 <span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>

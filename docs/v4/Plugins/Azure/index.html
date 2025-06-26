@@ -1454,6 +1454,10 @@
       
         
       
+        
+      
+        
+      
     
     
       
@@ -2867,6 +2871,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../Netcup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Netcup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../OVH/" class="md-nav__link">
         
   
@@ -3229,6 +3254,27 @@
   
   <span class="md-ellipsis">
     TotalUptime
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TransIP/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    TransIP
   </span>
   
 
@@ -4257,8 +4303,12 @@
     <span class="nv">$_</span><span class="p">.</span><span class="n">TenantId</span> <span class="o">-eq</span> <span class="nv">$ctx</span><span class="p">.</span><span class="n">Subscription</span><span class="p">.</span><span class="n">TenantId</span> <span class="o">-and</span> <span class="nv">$_</span><span class="p">.</span><span class="n">Resource</span> <span class="o">-eq</span> <span class="s2">&quot;https://management.core.windows.net/&quot;</span>
 <span class="p">}</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="n">-First</span> <span class="n">1</span><span class="p">).</span><span class="n">AccessToken</span>
 
-<span class="c"># Az.Accounts 2.0.x or later</span>
+<span class="c"># Az.Accounts 2.x-4.x</span>
 <span class="nv">$token</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-AzAccessToken</span> <span class="n">-ResourceUrl</span> <span class="s2">&quot;https://management.core.windows.net/&quot;</span> <span class="n">-TenantId</span> <span class="nv">$tenantId</span><span class="p">).</span><span class="n">Token</span>
+
+<span class="c"># Az.Accounts 5.x or later, the token is returned as SecureString</span>
+<span class="c"># Make sure you use the correct parameter set with the plugin.</span>
+<span class="nv">$tokenSecure</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-AzAccessToken</span> <span class="n">-ResourceUrl</span> <span class="s2">&quot;https://management.core.windows.net/&quot;</span> <span class="n">-TenantId</span> <span class="nv">$tenantId</span><span class="p">).</span><span class="n">Token</span>
 </code></pre></div>
 <p>Here's a similar method using Azure CLI 2.0.
 <div class="highlight"><pre><span></span><code><span class="c"># show all subscriptions - the one marked as &quot;isDefault&quot;: true will be used to create the token</span>

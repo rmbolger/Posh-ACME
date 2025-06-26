@@ -12,13 +12,13 @@
         <meta name="author" content="Ryan Bolger">
       
       
-        <link rel="canonical" href="https://poshac.me/docs/v4/Plugins/ClouDNS/">
+        <link rel="canonical" href="https://poshac.me/docs/v4/Plugins/Netcup/">
       
       
-        <link rel="prev" href="../Bunny/">
+        <link rel="prev" href="../Namecheap/">
       
       
-        <link rel="next" href="../Cloudflare/">
+        <link rel="next" href="../OVH/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -26,7 +26,7 @@
     
     
       
-        <title>ClouDNS - Posh-ACME</title>
+        <title>Netcup - Posh-ACME</title>
       
     
     
@@ -61,11 +61,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="ClouDNS - Posh-ACME" >
+        <meta  property="og:title"  content="Netcup - Posh-ACME" >
       
         <meta  property="og:description"  content="Documentation for the Posh-ACME PowerShell module" >
       
-        <meta  property="og:image"  content="https://poshac.me/docs/v4/assets/images/social/Plugins/ClouDNS.png" >
+        <meta  property="og:image"  content="https://poshac.me/docs/v4/assets/images/social/Plugins/Netcup.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -73,15 +73,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://poshac.me/docs/v4/Plugins/ClouDNS/" >
+        <meta  property="og:url"  content="https://poshac.me/docs/v4/Plugins/Netcup/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="ClouDNS - Posh-ACME" >
+        <meta  name="twitter:title"  content="Netcup - Posh-ACME" >
       
         <meta  name="twitter:description"  content="Documentation for the Posh-ACME PowerShell module" >
       
-        <meta  name="twitter:image"  content="https://poshac.me/docs/v4/assets/images/social/Plugins/ClouDNS.png" >
+        <meta  name="twitter:image"  content="https://poshac.me/docs/v4/assets/images/social/Plugins/Netcup.png" >
       
     
     
@@ -104,7 +104,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#how-to-use-the-cloudns-dns-plugin" class="md-skip">
+        <a href="#how-to-use-the-netcup-dns-plugin" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              ClouDNS
+              Netcup
             
           </span>
         </div>
@@ -1781,30 +1781,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    ClouDNS
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../ClouDNS/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1813,83 +1793,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      Setup
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Setup">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#optional-sub-users-and-zone-delegation" class="md-nav__link">
-    <span class="md-ellipsis">
-      (Optional) Sub Users and Zone Delegation
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-the-plugin" class="md-nav__link">
-    <span class="md-ellipsis">
-      Using the Plugin
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#standard-propagation-delay" class="md-nav__link">
-    <span class="md-ellipsis">
-      Standard Propagation Delay
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cloudns-propagation-polling" class="md-nav__link">
-    <span class="md-ellipsis">
-      ClouDNS Propagation Polling
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2739,10 +2642,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../Netcup/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Netcup
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -2751,6 +2674,44 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using the Plugin
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -3806,21 +3767,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Setup">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#optional-sub-users-and-zone-delegation" class="md-nav__link">
-    <span class="md-ellipsis">
-      (Optional) Sub Users and Zone Delegation
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -3829,30 +3775,6 @@
       Using the Plugin
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Using the Plugin">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#standard-propagation-delay" class="md-nav__link">
-    <span class="md-ellipsis">
-      Standard Propagation Delay
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cloudns-propagation-polling" class="md-nav__link">
-    <span class="md-ellipsis">
-      ClouDNS Propagation Polling
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -3871,7 +3793,7 @@
                   
 
   
-    <a href="https://github.com/rmbolger/Posh-ACME/edit/main/docs/Plugins/ClouDNS.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/rmbolger/Posh-ACME/edit/main/docs/Plugins/Netcup.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4v-2m10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1 2.1 2.1Z"/></svg>
     </a>
@@ -3880,48 +3802,30 @@
     
       
     
-    <a href="https://github.com/rmbolger/Posh-ACME/raw/main/docs/Plugins/ClouDNS.md" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/rmbolger/Posh-ACME/raw/main/docs/Plugins/Netcup.md" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.15 8.15 0 0 1-1.23-2Z"/></svg>
     </a>
   
 
 
-<h1 id="how-to-use-the-cloudns-dns-plugin">How To Use the ClouDNS DNS Plugin<a class="headerlink" href="#how-to-use-the-cloudns-dns-plugin" title="Permanent link">&para;</a></h1>
-<p>This plugin works against the <a href="https://www.cloudns.net/aff/id/224075/">ClouDNS</a> provider. It is assumed that you have already setup an account and registered the domains or zones you will be working against.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This provider does not allow API Access on its free account tier. If you sign up for a premium plan trial and let it expire, the plugin will stop working unless you upgrade your account to premium again. Their premium plans are reasonably priced and if you are a new customer, you can help me maintain this plugin by using this <a href="https://www.cloudns.net/aff/id/224075/">affiliate link</a> when you sign up.</p>
-</div>
+<h1 id="how-to-use-the-netcup-dns-plugin">How To Use the Netcup DNS Plugin<a class="headerlink" href="#how-to-use-the-netcup-dns-plugin" title="Permanent link">&para;</a></h1>
+<p>This plugin works against the <a href="https://www.netcup.com">Netcup</a> domain registrar. It is assumed that you have already setup an account and registered the domains you will be working against. The domains must not be using custom DNS servers.</p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<p>First, login to your account and go to the <a href="https://www.cloudns.net/api-settings/">API Settings</a> page. Click the <code>Add new user</code> link and set a password and optional IP whitelist. After saving, make note of the <code>auth-id</code> value for this user.</p>
-<h3 id="optional-sub-users-and-zone-delegation">(Optional) Sub Users and Zone Delegation<a class="headerlink" href="#optional-sub-users-and-zone-delegation" title="Permanent link">&para;</a></h3>
-<p>The standard API users have complete access to your account. But for a bit more security, you can create sub-users that only have access to a subset of zones on your account. Click the <code>Add new sub-user</code> link from the <a href="https://www.cloudns.net/api-settings/">API Settings</a> page. Set a password and set the <code>DNS Zones</code> value to the number of zones you'll be delegating the user to. The rest of the fields are either optional or can be set to 0.</p>
-<p>After the user is created, click the text link in the DNS Zones column for the user that should be something like "0 / X" where X is the number of zone you configured for delegation. This will pop up a dialog box and let you add the specific zones you are delegating.</p>
-<p>Make a note of the <code>sub-auth-id</code> or <code>sub-auth-user</code> name you set for later.</p>
+<p>Login to the Customer Control Panel and navigate to <a href="https://www.customercontrolpanel.de/daten_aendern.php?sprung=api">Master Data - API</a>.</p>
+<p>In the <code>Creating an API Key</code> section, agree to the TOS and click <code>API key Create</code>. Record the new value that appears in the <code>API keys</code> section. This will be the username for the credential object we'll setup later. There can be many API keys associated with the account.</p>
+<p>In the <code>API management</code> section, click <code>Generate API Password</code> and then click OK. Record the password value that is displayed. It cannot be retrieved later and it will be the password for the credential object we'll setup later. Generating a new API password immediately deactivates the previous one.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>The <code>CDUserType</code> parameter must be set to either <code>auth-id</code>, <code>sub-auth-id</code>, or <code>sub-auth-user</code> depending on the type of credential you are using. The <code>CDUsername</code> parameter should be set to the ID or username of the user. The password is set using <code>CDPassword</code> as a SecureString value.</p>
+<p>The username that you use to login to the Control Panel is your customer number and is used with the <code>NetcupCustNumber</code> parameter. The API Key and Password you created earlier will be used as the Username and Password for a PSCredential parameter called <code>NetcupAPICredential</code>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>The <code>CDPasswordInsecure</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
+<p>DNS updates in Netcup take a long time to propagate to the authoritative nameservers relative to other providers. You will need to set the <code>-DnsSleep</code> parameter to at least 10 minutes, but potentially to 15-20 minutes to ensure the records are live before trying to validate the ACME challenges with Posh-ACME.</p>
 </div>
-<p>By default the plugin assumes Posh-ACME's default DNS propagation delay mechanics will be used. But ClouDNS also supports a polling API to check whether record changes have propagated to the nameservers. To use this instead of the default mechanics, add a <code>CDPollPropagation = $true</code> parameter to your plugin args. By default, it will timeout after 5 minutes if the polling API never returns a success. You can override the timeout value with <code>CDPollTimeout</code> in seconds. When using CDPollPropagation, you should also set Posh-ACME's <code>DNSSleep</code> parameter to 0 unless you are using additional plugins that don't support their own form of propagation polling.</p>
-<h3 id="standard-propagation-delay">Standard Propagation Delay<a class="headerlink" href="#standard-propagation-delay" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">CDUserType</span> <span class="p">=</span> <span class="s1">&#39;auth-id&#39;</span>
-    <span class="n">CDUsername</span> <span class="p">=</span> <span class="s1">&#39;12345&#39;</span>
-    <span class="n">CDPassword</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Password&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+    <span class="n">NetcupCustNumber</span> <span class="p">=</span> <span class="n">123456</span>
+    <span class="n">NetcupAPICredential</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Credential</span><span class="p">)</span>
 <span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">ClouDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
-</code></pre></div>
-<h3 id="cloudns-propagation-polling">ClouDNS Propagation Polling<a class="headerlink" href="#cloudns-propagation-polling" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
-    <span class="n">CDUserType</span> <span class="p">=</span> <span class="s1">&#39;auth-id&#39;</span>
-    <span class="n">CDUsername</span> <span class="p">=</span> <span class="s1">&#39;12345&#39;</span>
-    <span class="n">CDPassword</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s2">&quot;Password&quot;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
-    <span class="n">CDPollPropagation</span> <span class="p">=</span> <span class="nv">$true</span>
-<span class="p">}</span>
-<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">ClouDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span> <span class="n">-DnsSleep</span> <span class="n">0</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">Netcup</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span> <span class="n">-DnsSleep</span> <span class="n">900</span>
 </code></pre></div>
 
 
@@ -3955,7 +3859,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../Bunny/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Bunny">
+          <a href="../Namecheap/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Namecheap">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -3965,20 +3869,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Bunny
+                Namecheap
               </div>
             </div>
           </a>
         
         
           
-          <a href="../Cloudflare/" class="md-footer__link md-footer__link--next" aria-label="Next: Cloudflare">
+          <a href="../OVH/" class="md-footer__link md-footer__link--next" aria-label="Next: OVH">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Cloudflare
+                OVH
               </div>
             </div>
             <div class="md-footer__button md-icon">
