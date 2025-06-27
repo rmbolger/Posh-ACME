@@ -244,6 +244,13 @@ function New-PAOrder {
     $order = $response.Content | ConvertFrom-Json
     $order.PSObject.TypeNames.Insert(0,'PoshACME.PAOrder')
 
+    # Work around KeyFactor ACME bug that fails to include the expires field when required
+    # https://www.rfc-editor.org/rfc/rfc8555.html#section-7.1.3
+    if ($order.status -in 'pending','valid' -and -not $order.expires) {
+        $order | Add-Member 'expires' '9999-12-31T23:59:59Z' -Force # [DateTime]::MaxValue.ToString('yyyy-MM-ddTHH:mm:ssZ')
+        Write-Warning "Invalid ACME response from CA. Order object has status $($order.status) but is missing the 'expires' field which violates RFC8555 section 7.1.3. Please notify your CA. Using alternative value $($order.expires)."
+    }
+
     # fix any dates that may have been parsed by PSCore's JSON serializer
     $order.expires = Repair-ISODate $order.expires
 
