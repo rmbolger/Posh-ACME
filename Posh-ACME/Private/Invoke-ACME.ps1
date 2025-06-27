@@ -60,10 +60,13 @@ function Invoke-ACME {
         $response = Invoke-WebRequest @iwrSplat @script:UseBasic
 
         if ($response -and $response.Content) {
-            if ($response.Headers['Content-Type'] -notlike 'application/pem-certificate-chain*') {
-                Write-Debug "ACME Response: `n$($response.Content)"
+            $mimeType = $response.Headers['Content-Type']
+            if ($mimeType -like 'application/pem-certificate-chain*' -or
+                $response.Content -is [array])
+            {
+                Write-Debug "ACME Response ($mimeType) (byte-array):`n$([Text.Encoding]::UTF8.GetString($response.Content))"
             } else {
-                Write-Debug "ACME Response: (binary)"
+                Write-Debug "ACME Response ($mimeType):`n$($response.Content)"
             }
         }
 
