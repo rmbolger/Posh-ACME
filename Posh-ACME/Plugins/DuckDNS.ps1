@@ -24,13 +24,15 @@ function Add-DnsTxt {
 
     Write-Verbose "Adding TXT $TxtValue on DuckDNS for $($DuckDomain -join ',')"
     $domains = $DuckDomain -join ','
-    $uri = "https://www.duckdns.org/update?domains=$domains&token=$DuckTokenInsecure&txt=$TxtValue"
+    $uri = "https://www.duckdns.org/update?domains=$domains&token=$DuckTokenInsecure&txt=$TxtValue&verbose=true"
     try {
-        $response = Invoke-RestMethod $uri @script:UseBasic -EA Stop
+        Write-Debug "GET $($uri.Replace($DuckTokenInsecure,'REDACTED'))"
+        $response = Invoke-RestMethod $uri @script:UseBasic -Verbose:$false -EA Stop
+        Write-Debug "Response:`n$response"
     } catch { throw }
 
-    if ($response -ne 'OK') {
-        throw "Failed to add DuckDNS TXT record."
+    if ($response -notlike 'OK*') {
+        throw "Failed to add DuckDNS TXT record.`n$response"
     }
 
     <#
@@ -90,13 +92,15 @@ function Remove-DnsTxt {
 
     Write-Verbose "Clearing TXT on DuckDNS for $($DuckDomain -join ',')"
     $domains = $DuckDomain -join ','
-    $uri = "https://www.duckdns.org/update?domains=$domains&token=$DuckTokenInsecure&txt=$TxtValue&clear=true"
+    $uri = "https://www.duckdns.org/update?domains=$domains&token=$DuckTokenInsecure&txt=$TxtValue&clear=true&verbose=true"
     try {
-        $response = Invoke-RestMethod $uri @script:UseBasic -EA Stop
+        Write-Debug "GET $($uri.Replace($DuckTokenInsecure,'REDACTED'))"
+        $response = Invoke-RestMethod $uri @script:UseBasic -Verbose:$false -EA Stop
+        Write-Debug "Response:`n$response"
     } catch { throw }
 
-    if ($response -ne 'OK') {
-        throw "Failed to clear DuckDNS TXT record."
+    if ($response -notlike 'OK*') {
+        throw "Failed to clear DuckDNS TXT record.`n$response"
     }
 
     <#
