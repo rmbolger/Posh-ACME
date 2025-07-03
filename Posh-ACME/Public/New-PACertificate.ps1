@@ -170,6 +170,7 @@ function New-PACertificate {
                 AlwaysNewKey           = $AlwaysNewKey
                 Subject                = $Subject
                 FriendlyName           = $FriendlyName
+                PfxPassSecure          = $PfxPassSecure
                 UseModernPfxEncryption = $UseModernPfxEncryption
                 Install                = $Install
             }
@@ -190,6 +191,9 @@ function New-PACertificate {
                 }
                 if ($oldOrder.KeyLength -and 'CertKeyLength' -notin $psbKeys) {
                     $orderParams.KeyLength = $oldOrder.KeyLength
+                }
+                if ('PfxPassSecure' -notin $psbKeys) {
+                    $orderParams.PfxPassSecure = ConvertTo-SecureString $oldOrder.PfxPass -AsPlainText -Force
                 }
             }
 
@@ -222,14 +226,6 @@ function New-PACertificate {
             } elseif ($oldOrder -and $oldOrder.$_) {
                 $orderParams.$_ = $oldOrder.$_
             }
-        }
-
-        # Add the old PfxPass if it exists and a new one wasn't explicitly specified
-        if ($oldOrder -and 'PfxPassSecure' -notin $psbKeys) {
-            $orderParams.PfxPassSecure = ConvertTo-SecureString $oldOrder.PfxPass -AsPlainText -Force
-        } else {
-            # Otherwise use the explicit or default value
-            $orderParams.PfxPassSecure = $PfxPassSecure
         }
 
         # Add new PluginArgs if specified
