@@ -1,3 +1,10 @@
+## 4.29.2 (2025-07-15)
+
+* Fixed param set resolution error with New-PACertificate when using CSRPath/CSRString params (#629)
+* Added workaround for non-compliant order response from KeyFactor ACME provider (#626)
+* Added additional logging to DuckDNS plugin (#628)
+* Tweaked debug output for ACME responses for better human readability
+
 ## 4.29.1 (2025-06-26)
 
 * Fix Route53 plugin when used with AWS Tools for PowerShell 5.x (#627)
