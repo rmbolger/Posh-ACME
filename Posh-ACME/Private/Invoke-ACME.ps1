@@ -60,14 +60,16 @@ function Invoke-ACME {
         $response = Invoke-WebRequest @iwrSplat @script:UseBasic
 
         if ($response -and $response.Content) {
-            $mimeType = $response.Headers['Content-Type']
-            if ($mimeType -like 'application/pem-certificate-chain*' -or
-                $response.Content -is [array])
-            {
-                Write-Debug "ACME Response ($mimeType) (byte-array):`n$([Text.Encoding]::UTF8.GetString($response.Content))"
-            } else {
-                Write-Debug "ACME Response ($mimeType):`n$($response.Content)"
-            }
+            try {
+                $mimeType = $response.Headers['Content-Type']
+                if ($mimeType -like 'application/pem-certificate-chain*' -or
+                    $response.Content -is [array])
+                {
+                    Write-Debug "ACME Response ($mimeType) (byte-array):`n$([Text.Encoding]::UTF8.GetString($response.Content))"
+                } else {
+                    Write-Debug "ACME Response ($mimeType):`n$($response.Content)"
+                }
+            } catch { Write-Debug "Error decoding ACME response: $_" }
         }
 
         # update the next nonce if it was sent
