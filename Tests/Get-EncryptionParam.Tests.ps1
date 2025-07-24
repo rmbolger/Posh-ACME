@@ -11,7 +11,7 @@ Describe "Get-EncryptionParam" {
             # copy a fake config root to the test drive
             Get-ChildItem "$PSScriptRoot\TestFiles\ConfigRoot\" | Copy-Item -Dest 'TestDrive:\' -Recurse
 
-            $env:POSHACME_VAULE_NAME = $null
+            $env:POSHACME_VAULT_NAME = $null
 
             InModuleScope Posh-ACME { Import-PAConfig }
         }
@@ -32,7 +32,7 @@ Describe "Get-EncryptionParam" {
             # copy a fake config root to the test drive
             Get-ChildItem "$PSScriptRoot\TestFiles\ConfigRoot\" | Copy-Item -Dest 'TestDrive:\' -Recurse
 
-            $env:POSHACME_VAULE_NAME = $null
+            $env:POSHACME_VAULT_NAME = $null
 
             InModuleScope Posh-ACME { Import-PAConfig }
         }
