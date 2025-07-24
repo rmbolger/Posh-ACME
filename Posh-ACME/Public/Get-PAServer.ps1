@@ -80,7 +80,11 @@ function Get-PAServer {
             if ($dir -and $Refresh) {
 
                 # update and the server then recurse to return the updated data
-                Set-PAServer -DirectoryUrl $dir.location -NoSwitch
+                try {
+                    Set-PAServer -DirectoryUrl $dir.location -NoSwitch
+                } catch {
+                    Write-Warning "Failed to query ACME directory: $_"
+                }
                 Get-PAServer -DirectoryUrl $dir.location
 
             } else {
