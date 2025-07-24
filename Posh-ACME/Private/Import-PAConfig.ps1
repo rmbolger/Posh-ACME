@@ -3,7 +3,8 @@ function Import-PAConfig {
     param(
         [Parameter(Position=0)]
         [ValidateSet('Server','Account','Order')]
-        [string]$Level
+        [string]$Level,
+        [switch]$NoRefresh
     )
 
     # The config structure looks like this:
@@ -60,7 +61,11 @@ function Import-PAConfig {
         $dirUrl = [string](Get-Content (Join-Path (Get-ConfigRoot) 'current-server.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($dirUrl)) {
 
-            $script:Dir = Get-PAServer -DirectoryUrl $dirUrl -Refresh
+            if ($NoRefresh) {
+                $script:Dir = Get-PAServer -DirectoryUrl $dirUrl
+            } else {
+                $script:Dir = Get-PAServer -DirectoryUrl $dirUrl -Refresh
+            }
 
             # deal with cert validation options between PS editions
             Set-CertValidation $script:Dir.SkipCertificateCheck

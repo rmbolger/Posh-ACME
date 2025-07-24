@@ -170,7 +170,7 @@ Describe "Import-PAConfig" {
             InModuleScope Posh-ACME {
                 Mock Set-CertValidation {}
 
-                Import-PAConfig -Level 'Server'
+                Import-PAConfig -Level 'Server' -NoRefresh
 
                 $script:Dir.Folder       | Should -Be (Join-Path $TestDrive 'srvr2')
                 $script:Dir.location     | Should -Be 'https://acme2.test/directory'

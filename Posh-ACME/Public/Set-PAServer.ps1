@@ -246,7 +246,7 @@ function Set-PAServer {
         }
 
         # reload config from disk
-        Import-PAConfig -Level 'Server'
+        Import-PAConfig -Level 'Server' -NoRefresh
 
         # Show a link to the TOS if this is the server's first use.
         if ($firstUse) {

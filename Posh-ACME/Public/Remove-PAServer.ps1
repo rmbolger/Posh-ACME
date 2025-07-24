@@ -94,7 +94,7 @@ function Remove-PAServer {
         } else {
             # nothing to switch back to, so reload empty config from disk
             Remove-Item (Join-Path (Get-ConfigRoot) 'current-server.txt') -Force
-            Import-PAConfig -Level 'Server'
+            Import-PAConfig -Level 'Server' -NoRefresh
         }
     }
 }
