@@ -1,3 +1,8 @@
+## 4.29.3 (2025-07-24)
+
+* The current ACME server directory endpoint is now refreshed on module import to ensure server changes are reflected before actions are performed. If the previously used ACME server is unreachable, a warning is thrown and previously cached data is used.
+  * This should fix anyone who is getting 404 errors when renewing Let's Encrypt certs due to an unannounced change to their ARI endpoint. Users can also fix this problem without upgrading by running `Get-PAServer -Refresh`.
+
 ## 4.29.2 (2025-07-15)
 
 * Fixed param set resolution error with New-PACertificate when using CSRPath/CSRString params (#629)
