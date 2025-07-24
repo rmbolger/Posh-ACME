@@ -56,11 +56,11 @@ function Import-PAConfig {
     # start at the server level if nothing was specified or specifically requested
     if (-not $Level -or $Level -eq 'Server') {
 
-        # load the current ACME directory into memory if it exists on disk
+        # load and refresh the current ACME directory into memory if it exists on disk
         $dirUrl = [string](Get-Content (Join-Path (Get-ConfigRoot) 'current-server.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($dirUrl)) {
 
-            $script:Dir = Get-PAServer -DirectoryUrl $dirUrl
+            $script:Dir = Get-PAServer -DirectoryUrl $dirUrl -Refresh
 
             # deal with cert validation options between PS editions
             Set-CertValidation $script:Dir.SkipCertificateCheck
