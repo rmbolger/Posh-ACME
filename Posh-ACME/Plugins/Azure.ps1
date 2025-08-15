@@ -432,11 +432,12 @@ function Connect-AZTenant {
         [string]$AZAccessToken,
         [Parameter(ParameterSetName='TokenSecure',Mandatory)]
         [securestring]$AZAccessTokenSecure,
+        [string]$AzArcAgentVersion = '2021-02-01'
         [Parameter(ParameterSetName='IMDS',Mandatory)]
         [switch]$AZUseIMDS,
         [ValidateSet('AzureCloud', 'AzureUSGovernment', 'AzureGermanCloud', 'AzureChinaCloud')]
         [string]$AZEnvironment = 'AzureCloud',
-        [Parameter(ValueFromRemainingArguments)]
+        [Parameter(ValueFromRemainingArguments)],
         $ExtraConnectParams
     )
 
@@ -486,7 +487,7 @@ function Connect-AZTenant {
         Write-Verbose "Authenticating with Instance Metadata Service (IMDS)"
 
         $body = @{
-            'api-version' = '2021-02-01'
+            'api-version' = $AzArcAgentVersion
             resource = "$($script:AZEnvironment.ResourceManagerUrl)/"
         }
         $headers = @{ Metadata='true' }
@@ -854,3 +855,4 @@ function Set-AZEnvironment {
 
     $script:AZEnvironment = $CloudEnvironments[$azEnvironment]
 }
+
