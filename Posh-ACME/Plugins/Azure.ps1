@@ -40,6 +40,8 @@ function Add-DnsTxt {
         [securestring]$AZAccessTokenSecure,
         [Parameter(ParameterSetName='IMDS',Mandatory)]
         [switch]$AZUseIMDS,
+        [Parameter(ParameterSetName='IMDS')]
+        [string]$AZArcAgentAPIVersion = '2021-02-01',
         [ValidateSet('AzureCloud', 'AzureUSGovernment', 'AzureGermanCloud', 'AzureChinaCloud')]
         [string]$AZEnvironment = 'AzureCloud',
         [Parameter(ValueFromRemainingArguments)]
@@ -131,6 +133,9 @@ function Add-DnsTxt {
     .PARAMETER AZUseIMDS
         If specified, the module will attempt to authenticate using the Azure Instance Metadata Service (IMDS). This will only work if the system is running within Azure and has been assigned a Managed Service Identity (MSI).
 
+    .PARAMETER AZArcAgentAPIVersion
+        Allows overriding the `api-version` field used to reach the IMDS endpoint. Defaults to "2021-02-01". This may be necessary for legacy agents that only work with an older version.
+
     .PARAMETER AZEnvironment
         The Azure cloud environment to use. Defaults to AzureCloud.
 
@@ -205,6 +210,8 @@ function Remove-DnsTxt {
         [securestring]$AZAccessTokenSecure,
         [Parameter(ParameterSetName='IMDS',Mandatory)]
         [switch]$AZUseIMDS,
+        [Parameter(ParameterSetName='IMDS')]
+        [string]$AZArcAgentAPIVersion = '2021-02-01',
         [ValidateSet('AzureCloud', 'AzureUSGovernment', 'AzureGermanCloud', 'AzureChinaCloud')]
         [string]$AZEnvironment = 'AzureCloud',
         [Parameter(ValueFromRemainingArguments)]
@@ -306,6 +313,9 @@ function Remove-DnsTxt {
 
     .PARAMETER AZUseIMDS
         If specified, the module will attempt to authenticate using the Azure Instance Metadata Service (IMDS). This will only work if the system is running within Azure and has been assigned a Managed Service Identity (MSI).
+
+    .PARAMETER AZArcAgentAPIVersion
+        Allows overriding the `api-version` field used to reach the IMDS endpoint. Defaults to "2021-02-01". This may be necessary for legacy agents that only work with an older version.
 
     .PARAMETER AZEnvironment
         The Azure cloud environment to use. Defaults to AzureCloud.
@@ -432,12 +442,13 @@ function Connect-AZTenant {
         [string]$AZAccessToken,
         [Parameter(ParameterSetName='TokenSecure',Mandatory)]
         [securestring]$AZAccessTokenSecure,
-        [string]$AzArcAgentVersion = '2021-02-01'
         [Parameter(ParameterSetName='IMDS',Mandatory)]
         [switch]$AZUseIMDS,
+        [Parameter(ParameterSetName='IMDS')]
+        [string]$AZArcAgentAPIVersion = '2021-02-01',
         [ValidateSet('AzureCloud', 'AzureUSGovernment', 'AzureGermanCloud', 'AzureChinaCloud')]
         [string]$AZEnvironment = 'AzureCloud',
-        [Parameter(ValueFromRemainingArguments)],
+        [Parameter(ValueFromRemainingArguments)]
         $ExtraConnectParams
     )
 
@@ -487,7 +498,7 @@ function Connect-AZTenant {
         Write-Verbose "Authenticating with Instance Metadata Service (IMDS)"
 
         $body = @{
-            'api-version' = $AzArcAgentVersion
+            'api-version' = $AZArcAgentAPIVersion
             resource = "$($script:AZEnvironment.ResourceManagerUrl)/"
         }
         $headers = @{ Metadata='true' }
@@ -855,4 +866,3 @@ function Set-AZEnvironment {
 
     $script:AZEnvironment = $CloudEnvironments[$azEnvironment]
 }
-
