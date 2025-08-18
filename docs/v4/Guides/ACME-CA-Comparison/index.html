@@ -3817,7 +3817,7 @@
 <tr>
 <th></th>
 <th style="text-align: center;"><a href="https://letsencrypt.org/">Let's&nbsp;Encrypt</a></th>
-<th style="text-align: center;"><a href="https://www.buypass.com/">BuyPass</a></th>
+<th style="text-align: center;"><a href="https://www.buypass.com/">BuyPass*</a></th>
 <th style="text-align: center;"><a href="https://zerossl.com/">ZeroSSL</a></th>
 <th style="text-align: center;"><a href="https://www.ssl.com/">SSL.com</a></th>
 <th style="text-align: center;"><a href="https://cloud.google.com/certificate-manager/docs/public-ca">Google</a></th>
@@ -3885,10 +3885,10 @@
 <ul>
 <li>Wildcard names (if supported) count towards Subject Alternative Name (SAN) limits.</li>
 <li><code>1 name + www</code> means one domain name plus its www name variant such as <code>example.com</code> and <code>www.example.com</code></li>
-<li>Using Let's Encrypt's ECDSA-only chain currently requires your ACME account be <a href="https://community.letsencrypt.org/t/ecdsa-availability-in-production-environment/150679">added to an allow-list</a>. Otherwise, your ECDSA cert will be signed by the RSA chain.</li>
 <li>ZeroSSL supports a custom REST API that some clients use instead of pure ACME.</li>
 <li><strong>SSL.com Warning:</strong> If your SSL.com account has funds available, you will be charged for a paid 1-year certificate instead of a free 90-day certificate. There is no known way to request only a free certificate.</li>
 <li>Google certs have a 90 day lifetime by default but can be requested for shorter lifetimes down to 1 day if supported by your ACME client. The recommended minimum lifetime is 3 days.</li>
+<li>BuyPass has <a href="https://community.buypass.com/t/y4y130p">announced</a> it will cease offering free certs via ACME on October 15, 2025.</li>
 </ul>
 <h2 id="acme-spec-and-feature-support">ACME Spec and Feature Support<a class="headerlink" href="#acme-spec-and-feature-support" title="Permanent link">&para;</a></h2>
 <p>Some of the features in the ACME protocol are optional. Others are mandatory but not yet supported by some implementations. Here is the status of those various features in each CA.</p>
