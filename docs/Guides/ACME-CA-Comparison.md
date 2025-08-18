@@ -4,7 +4,7 @@ As more public certificate authorities hop on the [ACME][rfc00] bandwagon, it is
 
 ## ACME CA Info
 
-|                     | [Let's&nbsp;Encrypt][le01] | [BuyPass][bp01]        | [ZeroSSL][z01]     | [SSL.com][ss01]    | [Google][gc01]     |
+|                     | [Let's&nbsp;Encrypt][le01] | [BuyPass*][bp01]       | [ZeroSSL][z01]     | [SSL.com][ss01]    | [Google][gc01]     |
 | -------             | :------------------------: | :-------------:        | :------------:     | :-------------:    | :------------:     |
 | Free SAN Limit      | 100 names                  | 5 names                | 100+ names         | 1 name + www       | 100+ names         |
 | Free Wildcards      | :white_check_mark:         | :x:                    | :white_check_mark: | :x:                | :white_check_mark: |
@@ -17,10 +17,10 @@ As more public certificate authorities hop on the [ACME][rfc00] bandwagon, it is
 
 * Wildcard names (if supported) count towards Subject Alternative Name (SAN) limits.
 * `1 name + www` means one domain name plus its www name variant such as `example.com` and `www.example.com`
-* Using Let's Encrypt's ECDSA-only chain currently requires your ACME account be [added to an allow-list](https://community.letsencrypt.org/t/ecdsa-availability-in-production-environment/150679). Otherwise, your ECDSA cert will be signed by the RSA chain.
 * ZeroSSL supports a custom REST API that some clients use instead of pure ACME.
 * **SSL.com Warning:** If your SSL.com account has funds available, you will be charged for a paid 1-year certificate instead of a free 90-day certificate. There is no known way to request only a free certificate.
 * Google certs have a 90 day lifetime by default but can be requested for shorter lifetimes down to 1 day if supported by your ACME client. The recommended minimum lifetime is 3 days.
+* BuyPass has [announced](https://community.buypass.com/t/y4y130p) it will cease offering free certs via ACME on October 15, 2025.
 
 ## ACME Spec and Feature Support
 
