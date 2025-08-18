@@ -1,6 +1,6 @@
 # ACME CA Comparison
 
-As more public certificate authorities hop on the [ACME][rfc00] bandwagon, it is important to understand the details and limitations of their implementations. This page will attempt to keep track of that data.
+As more public certificate authorities hop on the [ACME][rfc00] bandwagon, it is important to understand the details and limitations of their implementations. This page will attempt to keep track of that data for public CAs offering free certificates via ACME.
 
 ## ACME CA Info
 
