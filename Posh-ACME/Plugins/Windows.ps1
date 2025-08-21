@@ -275,7 +275,7 @@ function Connect-WinDns {
         Write-Debug "Connecting to $WinServer"
         $cimParams = @{ ComputerName=$WinServer }
         if ($WinCred) { $cimParams.Credential = $WinCred }
-        $sessionOpts = @{}
+        $sessionOpts = @{Protocol='Default'}
         if ($WinUseSSL) { $sessionOpts.UseSsl = $true }
         if ($WinSkipCACheck) { $sessionOpts.SkipCACheck = $true }
         $cimParams.SessionOption = New-CimSessionOption @sessionOpts
@@ -333,3 +333,4 @@ function Find-WinZone {
 
     return $null
 }
+
