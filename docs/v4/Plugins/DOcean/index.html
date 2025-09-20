@@ -3816,11 +3816,13 @@
 <p>The link above is an affiliate link which reduces my out of pocket cost to maintain this plugin. I'd be most grateful if you use it when signing up for a new account.</p>
 </div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<p>You need to create a <a href="https://cloud.digitalocean.com/settings/api/tokens">Personal Access Token</a> so the plugin can access Digital Ocean's API.</p>
+<p>You need to create a <a href="https://cloud.digitalocean.com/account/api/tokens">Personal Access Token</a> so the plugin can access Digital Ocean's API.</p>
 <ul>
 <li>Click <code>Generate New Token</code></li>
-<li>Name: <strong>Posh-ACME</strong></li>
-<li>Check the <code>Write (optional)</code> box</li>
+<li>Token Name: <strong>Posh-ACME</strong></li>
+<li>Expiration: <em>(Personal preference, but note that regenerating a token changes the value and the new value will need to be re-added to the plugin)</em></li>
+<li>Scopes: <strong>Custom Scopes</strong></li>
+<li>Custom Scopes: Check the <code>domain</code> box which grants create, read, update, and delete for domains</li>
 <li>Click <code>Generate Token</code></li>
 <li>Copy the resulting token string somewhere safe. There's no way to retrieve it once you leave this page. You would have to delete the old one and create a new one.</li>
 </ul>
