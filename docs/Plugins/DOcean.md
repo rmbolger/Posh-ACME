@@ -9,11 +9,13 @@ This plugin works against the [Digital Ocean](https://m.do.co/c/d515942ef761) DN
 
 ## Setup
 
-You need to create a [Personal Access Token](https://cloud.digitalocean.com/settings/api/tokens) so the plugin can access Digital Ocean's API.
+You need to create a [Personal Access Token](https://cloud.digitalocean.com/account/api/tokens) so the plugin can access Digital Ocean's API.
 
 - Click `Generate New Token`
-- Name: **Posh-ACME**
-- Check the `Write (optional)` box
+- Token Name: **Posh-ACME**
+- Expiration: *(Personal preference, but note that regenerating a token changes the value and the new value will need to be re-added to the plugin)*
+- Scopes: **Custom Scopes**
+- Custom Scopes: Check the `domain` box which grants create, read, update, and delete for domains
 - Click `Generate Token`
 - Copy the resulting token string somewhere safe. There's no way to retrieve it once you leave this page. You would have to delete the old one and create a new one.
 
