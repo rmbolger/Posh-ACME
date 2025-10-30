@@ -56,10 +56,12 @@ Function Add-DnsTxt {
 
     if ($rec -And $rec.value -eq $TxtValue) {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
-    } elseif ($rec) {
-        Write-Debug "Record $RecordName exists with wrong $TxtValue. Removing old record."
-		Remove-DnsTxt $RecordName, $TxtValue, $HetznerToken, $HetznerTokenInsecure, $ExtraParams
     } else {
+        if ($rec) {
+            Write-Debug "Record $RecordName exists with wrong $TxtValue. Removing old record."
+		    Remove-DnsTxt $RecordName, $TxtValue, $HetznerToken, $HetznerTokenInsecure, $ExtraParams
+        }
+        
         $queryParams = @{
             Uri = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets"
             Method = 'POST'
