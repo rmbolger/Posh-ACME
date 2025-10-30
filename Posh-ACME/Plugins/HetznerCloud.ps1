@@ -39,8 +39,7 @@ Function Add-DnsTxt {
     # Get a list of existing TXT records for this record name
     try {
         Write-Verbose "Searching for existing TXT record"
-        $query = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets/$recShort/TXT"
-        # $query = "$apiRoot/records?zone_id=$($zone.id)"
+        $query = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets?type=TXT&name=$recShort"
         Write-Debug "GET $query"
         $recs = Invoke-RestMethod $query @restParams @Script:UseBasic -EA Stop
     } catch {
@@ -50,14 +49,16 @@ Function Add-DnsTxt {
     }
 
     # check for a matching record
-    $rec = $recs.records | Where-Object {
+    $rec = $recs.rrsets | Where-Object {
         $_.type -eq 'TXT' -and
-        $_.name -eq $recShort -and
-        $_.value -eq $TxtValue
+        $_.name -eq $recShort
     }
 
-    if ($rec) {
+    if ($rec -And $rec.value -eq $TxtValue) {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
+    } elseif ($rec) {
+        Write-Debug "Record $RecordName exists with wrong $TxtValue. Removing old record."
+		Remove-DnsTxt $RecordName, $TxtValue, $HetznerToken, $HetznerTokenInsecure, $ExtraParams
     } else {
         $queryParams = @{
             Uri = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets"
@@ -119,8 +120,6 @@ Function Remove-DnsTxt {
         $ExtraParams
     )
 
-    $apiRoot = 'https://dns.hetzner.com/api/v1'
-
     # un-secure the password so we can add it to the auth header
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
         $HetznerTokenInsecure = [pscredential]::new('a',$HetznerToken).GetNetworkCredential().Password
@@ -145,16 +144,15 @@ Function Remove-DnsTxt {
     # Get a list of existing TXT records for this record name
     try {
         Write-Verbose "Searching for existing TXT record"
-        $query = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets/$recShort/TXT"
+        $query = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets?type=TXT&name=$recShort"
         Write-Debug "GET $query"
         $recs = Invoke-RestMethod $query @restParams @Script:UseBasic -EA Stop
     } catch { throw }
 
     # check for a matching record
-    $rec = $recs.records | Where-Object {
+    $rec = $recs.rrsets | Where-Object {
         $_.type -eq 'TXT' -and
-        $_.name -eq $recShort -and
-        $_.value -eq $TxtValue
+        $_.name -eq $recShort
     }
 
     if ($rec) {
