@@ -15,13 +15,15 @@ Function Add-DnsTxt {
         $ExtraParams
     )
 
+    $apiRoot = 'https://dns.hetzner.com/api/v1'
+
     # un-secure the password so we can add it to the auth header
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
         $HetznerTokenInsecure = [pscredential]::new('a',$HetznerToken).GetNetworkCredential().Password
     }
     $restParams = @{
         Headers = @{
-            Authorization = "Bearer $HetznerTokenInsecure"
+            'Auth-API-Token' = $HetznerTokenInsecure
             Accept = 'application/json'
         }
         ContentType = 'application/json'
@@ -39,40 +41,30 @@ Function Add-DnsTxt {
     # Get a list of existing TXT records for this record name
     try {
         Write-Verbose "Searching for existing TXT record"
-        $query = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets?type=TXT&name=$recShort"
+        $query = "$apiRoot/records?zone_id=$($zone.id)"
         Write-Debug "GET $query"
         $recs = Invoke-RestMethod $query @restParams @Script:UseBasic -EA Stop
-    } catch {
-        if (404 -ne $_.Exception.Response.StatusCode) {
-            throw 
-        }
-    }
+    } catch { throw }
 
     # check for a matching record
-    $rec = $recs.rrsets | Where-Object {
+    $rec = $recs.records | Where-Object {
         $_.type -eq 'TXT' -and
-        $_.name -eq $recShort
+        $_.name -eq $recShort -and
+        $_.value -eq $TxtValue
     }
 
-    if ($rec -And $rec.value -eq $TxtValue) {
+    if ($rec) {
         Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
     } else {
-        if ($rec) {
-            Write-Debug "Record $RecordName exists with wrong $TxtValue. Removing old record."
-		    Remove-DnsTxt $RecordName, $TxtValue, $HetznerToken, $HetznerTokenInsecure, $ExtraParams
-        }
-        
         $queryParams = @{
-            Uri = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets"
+            Uri = "$apiRoot/records"
             Method = 'POST'
             Body = @{
                 name = $recShort
-                type = 'TXT'
                 ttl = 600
-                records = @(@{
-                    value = """$TxtValue"""
-                    comment = "Lets encrypt"
-                })
+                type = 'TXT'
+                value = $TxtValue
+                zone_id = $zone.id
             } | ConvertTo-Json
             ErrorAction = 'Stop'
         }
@@ -122,13 +114,15 @@ Function Remove-DnsTxt {
         $ExtraParams
     )
 
+    $apiRoot = 'https://dns.hetzner.com/api/v1'
+
     # un-secure the password so we can add it to the auth header
     if ('Secure' -eq $PSCmdlet.ParameterSetName) {
         $HetznerTokenInsecure = [pscredential]::new('a',$HetznerToken).GetNetworkCredential().Password
     }
     $restParams = @{
         Headers = @{
-            Authorization = "Bearer $HetznerTokenInsecure"
+            'Auth-API-Token' = $HetznerTokenInsecure
             Accept = 'application/json'
         }
         ContentType = 'application/json'
@@ -146,21 +140,22 @@ Function Remove-DnsTxt {
     # Get a list of existing TXT records for this record name
     try {
         Write-Verbose "Searching for existing TXT record"
-        $query = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets?type=TXT&name=$recShort"
+        $query = "$apiRoot/records?zone_id=$($zone.id)"
         Write-Debug "GET $query"
         $recs = Invoke-RestMethod $query @restParams @Script:UseBasic -EA Stop
     } catch { throw }
 
     # check for a matching record
-    $rec = $recs.rrsets | Where-Object {
+    $rec = $recs.records | Where-Object {
         $_.type -eq 'TXT' -and
-        $_.name -eq $recShort
+        $_.name -eq $recShort -and
+        $_.value -eq $TxtValue
     }
 
     if ($rec) {
         try {
             Write-Verbose "Remove Record $RecordName ($($rec.Id)) with value $TxtValue."
-            $query = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets/$recShort/TXT"
+            $query = "$apiRoot/records/$($rec.Id)"
             Write-Debug "DELETE $query"
             Invoke-RestMethod $query -Method Delete @restParams @Script:UseBasic -EA Stop | Out-Null
         } catch { throw }
@@ -232,6 +227,12 @@ Function Find-HetznerZone {
         return $script:HetznerRecordZones.$RecordName
     }
 
+    # first, get all Zones, Zone to get is identified by 'ZoneID'.
+    try {
+        $response = Invoke-RestMethod -Uri "https://dns.hetzner.com/api/v1/zones" `
+            @RestParameters @Script:UseBasic -EA Stop
+    } catch { throw }
+
     # We need to find the closest/deepest
     # sub-zone that would hold the record rather than just adding it to the apex. So for something
     # like _acme-challenge.site1.sub1.sub2.example.com, we'd look for zone matches in the following
@@ -246,7 +247,7 @@ Function Find-HetznerZone {
         Write-Debug "Checking $zoneTest"
 
         try {
-            $query = "https://api.hetzner.cloud/v1/zones/$zoneTest"
+            $query = "https://dns.hetzner.com/api/v1/zones?name=$zoneTest"
             Write-Debug "GET $query"
             $response = Invoke-RestMethod $query @RestParameters @Script:UseBasic -EA Stop
         } catch {
@@ -257,17 +258,8 @@ Function Find-HetznerZone {
             else { throw }
         }
 
-        if(!$response.zone) {
-            return $null;
-        }
-
         Write-Debug "Zone $zoneTest found"
-
-        $zone = @{ 
-            id = ($response.zone.id)
-            name = ($response.zone.name)
-        }
-
+        $zone = $response.zones | Select-Object -First 1 id,name
         $script:HetznerRecordZones.$RecordName = $zone
         return $zone
     }
