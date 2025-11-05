@@ -342,7 +342,7 @@ function Find-CoreNetworksDnsZones {
 
         # if we get here, we found nothing
         $zones = $data.name -join ', '
-        Write-Debug "No match found. Available zones: $zones"
+        Write-Debug "No match found for $RecordName. Available zones: $zones"
 
     }
     catch {
