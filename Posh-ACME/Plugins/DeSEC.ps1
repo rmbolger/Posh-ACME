@@ -346,7 +346,7 @@ function Invoke-DeSEC {
         try {
             $resp = Invoke-WebRequest @queryParams @script:UseBasic
             Write-Debug "Response: $($resp.Content)"
-            return ($resp.Content | ConvertFrom-Json -Depth 10)
+            return ($resp.Content | ConvertFrom-Json)
         }
         catch {
             # re-throw anything other than HTTP 429

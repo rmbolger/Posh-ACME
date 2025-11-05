@@ -308,7 +308,7 @@ function Confirm-EuroDNSReseller {
         $URL = "https://rest-api.EuroDNS.com/dns-zones/$($domain)/check"
 
         try {
-            $(Invoke-WebRequest $url -headers $(Connect-EuroDNSReseller $EuroDNSReseller_Creds) -Body ($EuroDNSReseller_Data | ConvertTo-Json -Depth 10) -Method Post -erroraction Stop @script:UseBasic).content | ConvertFrom-Json -Depth 10
+            $(Invoke-WebRequest $url -headers $(Connect-EuroDNSReseller $EuroDNSReseller_Creds) -Body ($EuroDNSReseller_Data | ConvertTo-Json -Depth 10) -Method Post -erroraction Stop @script:UseBasic).content | ConvertFrom-Json
         }
         catch {
 
