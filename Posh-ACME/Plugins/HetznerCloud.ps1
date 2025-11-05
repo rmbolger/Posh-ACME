@@ -1,27 +1,23 @@
 function Get-CurrentPluginType { 'dns-01' }
 
 Function Add-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName='Secure')]
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position = 0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position = 1)]
         [string]$TxtValue,
-        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
-        [securestring]$HetznerToken,
-        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
-        [string]$HetznerTokenInsecure,
+        [Parameter(Mandatory,Position = 2)]
+        [securestring]$HCToken,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # un-secure the password so we can add it to the auth header
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $HetznerTokenInsecure = [pscredential]::new('a',$HetznerToken).GetNetworkCredential().Password
-    }
+    $HCTokenInsecure = [pscredential]::new('a',$HCToken).GetNetworkCredential().Password
     $restParams = @{
         Headers = @{
-            Authorization = "Bearer $HetznerTokenInsecure"
+            Authorization = "Bearer $HCTokenInsecure"
             Accept = 'application/json'
         }
         ContentType = 'application/json'
@@ -44,7 +40,7 @@ Function Add-DnsTxt {
         $recs = Invoke-RestMethod $query @restParams @Script:UseBasic -EA Stop
     } catch {
         if (404 -ne $_.Exception.Response.StatusCode) {
-            throw 
+            throw
         }
     }
 
@@ -59,9 +55,9 @@ Function Add-DnsTxt {
     } else {
         if ($rec) {
             Write-Debug "Record $RecordName exists with wrong $TxtValue. Removing old record."
-		    Remove-DnsTxt $RecordName, $TxtValue, $HetznerToken, $HetznerTokenInsecure, $ExtraParams
+		    Remove-DnsTxt $RecordName, $TxtValue, $HCToken, $HCTokenInsecure, $ExtraParams
         }
-        
+
         $queryParams = @{
             Uri = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets"
             Method = 'POST'
@@ -93,15 +89,13 @@ Function Add-DnsTxt {
         The fully qualified name of the TXT record.
     .PARAMETER TxtValue
         The value of the TXT record.
-    .PARAMETER HetznerToken
+    .PARAMETER HCToken
         The API token for your Hetzner account.
-    .PARAMETER HetznerTokenInsecure
-        (DEPRECATED) The API token for your Hetzner account.
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
         $token = Read-Host 'Token' -AsSecureString
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -HetznerToken $token
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -HCToken $token
 
         Adds or updates the specified TXT record with the specified value.
     #>
@@ -114,21 +108,17 @@ Function Remove-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory,Position = 1)]
         [string]$TxtValue,
-        [Parameter(ParameterSetName='Secure',Mandatory,Position=2)]
-        [securestring]$HetznerToken,
-        [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=2)]
-        [string]$HetznerTokenInsecure,
+        [Parameter(Mandatory,Position = 2)]
+        [securestring]$HCToken,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # un-secure the password so we can add it to the auth header
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $HetznerTokenInsecure = [pscredential]::new('a',$HetznerToken).GetNetworkCredential().Password
-    }
+    $HCTokenInsecure = [pscredential]::new('a',$HCToken).GetNetworkCredential().Password
     $restParams = @{
         Headers = @{
-            Authorization = "Bearer $HetznerTokenInsecure"
+            Authorization = "Bearer $HCTokenInsecure"
             Accept = 'application/json'
         }
         ContentType = 'application/json'
@@ -177,15 +167,13 @@ Function Remove-DnsTxt {
         The fully qualified name of the TXT record.
     .PARAMETER TxtValue
         The value of the TXT record.
-    .PARAMETER HetznerToken
+    .PARAMETER HCToken
         The API token for your Hetzner account.
-    .PARAMETER HetznerTokenInsecure
-        (DEPRECATED) The API token for your Hetzner account.
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
         $token = Read-Host 'Token' -AsSecureString
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -HetznerToken $token
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -HCToken $token
 
         Removes the specified TXT record with the specified value.
     #>
@@ -224,12 +212,12 @@ Function Find-HetznerZone {
 
     # setup a module variable to cache the record to zone mapping
     # so it's quicker to find later
-    if (!$script:HetznerRecordZones) { $script:HetznerRecordZones = @{} }
+    if (!$script:HCRecordZones) { $script:HCRecordZones = @{} }
 
     # check for the record in the cache
-    if ($script:HetznerRecordZones.ContainsKey($RecordName)) {
-        Write-Debug "Result from Cache $($script:HetznerRecordZones.$RecordName.Name)"
-        return $script:HetznerRecordZones.$RecordName
+    if ($script:HCRecordZones.ContainsKey($RecordName)) {
+        Write-Debug "Result from Cache $($script:HCRecordZones.$RecordName.Name)"
+        return $script:HCRecordZones.$RecordName
     }
 
     # We need to find the closest/deepest
@@ -263,12 +251,12 @@ Function Find-HetznerZone {
 
         Write-Debug "Zone $zoneTest found"
 
-        $zone = @{ 
+        $zone = @{
             id = ($response.zone.id)
             name = ($response.zone.name)
         }
 
-        $script:HetznerRecordZones.$RecordName = $zone
+        $script:HCRecordZones.$RecordName = $zone
         return $zone
     }
 
