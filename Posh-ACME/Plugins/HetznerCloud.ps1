@@ -31,6 +31,7 @@ Function Add-DnsTxt {
 
     # separate the portion of the name that doesn't contain the zone name
     $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.name.TrimEnd('.')))$",''
+    if ($recShort -eq '') { $recShort = '@' }
 
     # Get a list of existing TXT records for this record name
     try {
@@ -38,47 +39,81 @@ Function Add-DnsTxt {
         $query = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets?type=TXT&name=$recShort"
         Write-Debug "GET $query"
         $recs = Invoke-RestMethod $query @restParams @Script:UseBasic -EA Stop
+        Write-Debug ($recs | ConvertTo-Json -Depth 5)
     } catch {
         if (404 -ne $_.Exception.Response.StatusCode) {
             throw
         }
     }
 
-    # check for a matching record
-    $rec = $recs.rrsets | Where-Object {
-        $_.type -eq 'TXT' -and
-        $_.name -eq $recShort
-    }
+    # check for a matching record. Partially redacted example follows:
+    # {
+    #   "meta": { ... },
+    #   "rrsets": [
+    #     {
+    #       "id": "_acme-challenge/TXT",
+    #       "name": "_acme-challenge",
+    #       "type": "TXT",
+    #       "ttl": 600,
+    #       "records": [
+    #         {
+    #           "value": "\"3Sf2LzKsq12Av-nfduZjxebiOd2FhccQXeLVx5eDrGM\"",
+    #           "comment": "ACME cert validation"
+    #         }
+    #       ],
+    #       "zone": 69323
+    #     }
+    #   ]
+    # }
+    $rec = $recs.rrsets[0]
+    $valToFind = "`"$TxtValue`""
 
-    if ($rec -And $rec.value -eq $TxtValue) {
-        Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
-    } else {
-        if ($rec) {
-            Write-Debug "Record $RecordName exists with wrong $TxtValue. Removing old record."
-		    Remove-DnsTxt $RecordName, $TxtValue, $HCToken, $HCTokenInsecure, $ExtraParams
+    if ($rec) {
+        # check if the value already exists
+        if ($valToFind -in $rec.records.value) {
+            Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
+            return
+        }
+        # add the new value
+        $queryParams = @{
+            Uri = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets/$($rec.id)/actions/add_records"
+            Method = 'POST'
+            Body = @{
+                records = @(@{
+                    value = $valToFind
+                    comment = "ACME cert validation"
+                })
+            } | ConvertTo-Json
+            ErrorAction = 'Stop'
         }
 
+        Write-Verbose "Update Record $RecordName with new value $TxtValue."
+
+    } else {
+        # add a new record
         $queryParams = @{
             Uri = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets"
             Method = 'POST'
             Body = @{
                 name = $recShort
                 type = 'TXT'
-                ttl = 600
+                ttl = 300
                 records = @(@{
-                    value = """$TxtValue"""
-                    comment = "Lets encrypt"
+                    value = $valToFind
+                    comment = "ACME cert validation"
                 })
             } | ConvertTo-Json
             ErrorAction = 'Stop'
         }
 
-        try {
-            Write-Verbose "Add Record $RecordName with value $TxtValue."
-            Write-Debug "POST $($queryParams.Uri)`n$($queryParams.Body)"
-            Invoke-RestMethod @queryParams @restParams @Script:UseBasic | Out-Null
-        } catch { throw }
+        Write-Verbose "Add Record $RecordName with value $TxtValue."
     }
+
+    try {
+        Write-Debug "$($queryParams.Method) $($queryParams.Uri)`n$($queryParams.Body)"
+        Invoke-RestMethod @queryParams @restParams @Script:UseBasic | Out-Null
+    } catch { throw }
+
 
     <#
     .SYNOPSIS
@@ -132,6 +167,7 @@ Function Remove-DnsTxt {
 
     # separate the portion of the name that doesn't contain the zone name
     $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.name.TrimEnd('.')))$",''
+    if ($recShort -eq '') { $recShort = '@' }
 
     # Get a list of existing TXT records for this record name
     try {
@@ -139,21 +175,52 @@ Function Remove-DnsTxt {
         $query = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets?type=TXT&name=$recShort"
         Write-Debug "GET $query"
         $recs = Invoke-RestMethod $query @restParams @Script:UseBasic -EA Stop
-    } catch { throw }
-
-    # check for a matching record
-    $rec = $recs.rrsets | Where-Object {
-        $_.type -eq 'TXT' -and
-        $_.name -eq $recShort
+        Write-Debug ($recs | ConvertTo-Json -Depth 5)
+    } catch {
+        if (404 -ne $_.Exception.Response.StatusCode) {
+            throw
+        }
     }
 
+    # check for a matching record
+    $rec = $recs.rrsets[0]
+    $valToFind = "`"$TxtValue`""
+
     if ($rec) {
+        if (-not ($valToFind -in $rec.records.value)) {
+            Write-Debug "Record $RecordName does not contain $TxtValue. Nothing to do."
+            return
+        }
+
+        if ($rec.records.Count -gt 1) {
+            # remove just the one value
+            $queryParams = @{
+                Uri = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets/$($rec.id)/actions/remove_records"
+                Method = 'POST'
+                Body = @{
+                    records = @(@{
+                        value = $valToFind
+                    })
+                } | ConvertTo-Json
+                ErrorAction = 'Stop'
+            }
+            Write-Verbose "Remove value $TxtValue from Record $RecordName."
+            Write-Debug "POST $($queryParams.Uri)`n$($queryParams.Body)"
+        } else {
+            # remove the entire record set
+            $queryParams = @{
+                Uri = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets/$($rec.id)"
+                Method = 'DELETE'
+                ErrorAction = 'Stop'
+            }
+            Write-Verbose "Remove Record $RecordName with value $TxtValue."
+            Write-Debug "DELETE $($queryParams.Uri)"
+        }
+
         try {
-            Write-Verbose "Remove Record $RecordName ($($rec.Id)) with value $TxtValue."
-            $query = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets/$recShort/TXT"
-            Write-Debug "DELETE $query"
-            Invoke-RestMethod $query -Method Delete @restParams @Script:UseBasic -EA Stop | Out-Null
+            Invoke-RestMethod @queryParams @restParams @Script:UseBasic -EA Stop | Out-Null
         } catch { throw }
+
     } else {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     }
@@ -199,7 +266,7 @@ function Save-DnsTxt {
 # Helper Functions
 ############################
 
-# API Docs: https://dns.hetzner.com/api-docs/
+# API Docs: https://docs.hetzner.cloud/reference/cloud#dns
 
 Function Find-HetznerZone {
     [CmdletBinding()]
