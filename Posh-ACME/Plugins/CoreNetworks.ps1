@@ -25,6 +25,9 @@ function Add-DnsTxt {
 
     ### Search und find the dns zone of the (sub)domain  (for example: example.com).
     $zoneName = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
+    if (-not $zoneName) {
+        throw "Could not find DNS zone for record name $RecordName"
+    }
     Write-Debug $zoneName
 
     ### Grab the relative portion of the Fully Qualified Domain Name (FQDN)
@@ -117,6 +120,9 @@ function Remove-DnsTxt {
 
     ### Search und find the dns zone of the (sub)domain  (for example: example.com).
     $zoneName = $(Find-CoreNetworksDnsZones $CoreNetworksApiRoot $headers $RecordName)
+    if (-not $zoneName) {
+        throw "Could not find DNS zone for record name $RecordName"
+    }
     Write-Debug $zoneName
 
     ### Grab the relative portion of the Fully Qualified Domain Name (FQDN)
@@ -333,6 +339,11 @@ function Find-CoreNetworksDnsZones {
                 return $e
             }
         }
+
+        # if we get here, we found nothing
+        $zones = $data.name -join ', '
+        Write-Debug "No match found. Available zones: $zones"
+
     }
     catch {
         Write-Debug $_
