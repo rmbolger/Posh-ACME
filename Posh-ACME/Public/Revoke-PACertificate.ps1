@@ -102,8 +102,8 @@ function Revoke-PACertificate {
         # the cert.
         #     https://datatracker.ietf.org/doc/html/rfc5280#section-5.3.1
         #
-        # BuyPass currently only implements Account key based revocation and throws
-        # an Internal Server Error if you try to revoke via the cert key.
+        # Actalis currently only implements Account key based revocation and throws
+        # an account not found error if you try to revoke via the cert key.
 
         # check the private key
         if ($KeyFile) {

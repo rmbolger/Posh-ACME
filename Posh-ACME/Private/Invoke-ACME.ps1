@@ -166,15 +166,6 @@ function Invoke-ACME {
             return (Invoke-ACME $Header $PayloadJson -Key $acctKey -NoRetry)
         }
 
-        # Work around BuyPass bug that sends some errors with a "details" (plural) property
-        # instead of "detail" (singular) and no "type" property.
-        if (-not $acmeError.detail -and $acmeError.details) {
-            $acmeError | Add-Member 'detail' $acmeError.details -Force
-        }
-        if (-not $acmeError.type) {
-            $acmeError | Add-Member 'type' 'urn:ietf:params:acme:error:malformed' -Force
-        }
-
         # throw the converted AcmeException
         throw [AcmeException]::new($acmeError.detail,$acmeError,$ex)
     }
