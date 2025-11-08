@@ -42,8 +42,6 @@ Foreach($import in @($Public + $Private))
 $script:WellKnownDirs = @{
     LE_PROD = 'https://acme-v02.api.letsencrypt.org/directory'
     LE_STAGE = 'https://acme-staging-v02.api.letsencrypt.org/directory'
-    BUYPASS_PROD = 'https://api.buypass.com/acme/directory'
-    BUYPASS_TEST = 'https://api.test4.buypass.no/acme/directory'
     ZEROSSL_PROD = 'https://acme.zerossl.com/v2/DV90'
     GOOGLE_PROD = 'https://dv.acme-v02.api.pki.goog/directory'
     GOOGLE_STAGE = 'https://dv.acme-v02.test-api.pki.goog/directory'

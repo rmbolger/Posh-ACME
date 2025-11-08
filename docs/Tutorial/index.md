@@ -14,7 +14,7 @@ Set-PAServer LE_STAGE
 ```
 
 !!! note
-    `LE_STAGE` is a shortcut for the Let's Encrypt Staging server's directory URL. You could do the same thing by specifying the actual URL which is `https://acme-staging-v02.api.letsencrypt.org/directory` and this module should work with any ACME compliant directory URL. Other currently supported shortcuts include `LE_PROD`, `BUYPASS_PROD`, `BUYPASS_TEST`, `ZEROSSL_PROD`, and `ACTALIS_PROD`.
+    `LE_STAGE` is a shortcut for the Let's Encrypt Staging server's directory URL. You could do the same thing by specifying the actual URL which is `https://acme-staging-v02.api.letsencrypt.org/directory` and this module should work with any ACME compliant directory URL. Other currently supported shortcuts include `LE_PROD`, `ZEROSSL_PROD`, `GOOGLE_PROD`, `GOOGLE_STAGE`, `SSLCOM_RSA`, `SSLCOM_ECC`, and `ACTALIS_PROD`.
 
 Once you set a server, the module will continue to perform future actions against that server until you change it with another call to `Set-PAServer`. The first time you connect to a server, a link to its Terms of Service will be displayed. You should review it before continuing.
 

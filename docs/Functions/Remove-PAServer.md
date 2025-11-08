@@ -44,7 +44,7 @@ Remove the current server and deactivates accounts without confirmation.
 ## Parameters
 
 ### -DirectoryUrl
-Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).
+Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD and LE_STAGE (LetsEncrypt), ZEROSSL_PROD (Zerossl.com), GOOGLE_PROD and GOOGLE_STAGE (pki.goog), SSLCOM_RSA and SSLCOM_ECC (ssl.com), and ACTALIS_PROD (Actalis.com).
 
 ```yaml
 Type: String

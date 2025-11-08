@@ -1580,7 +1580,7 @@ Get-PAAccount -List | %{
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="1" aliases="location">
           <maml:name>DirectoryUrl</maml:name>
           <maml:description>
-            <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).</maml:para>
+            <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD and LE_STAGE (LetsEncrypt), ZEROSSL_PROD (Zerossl.com), GOOGLE_PROD and GOOGLE_STAGE (pki.goog), SSLCOM_RSA and SSLCOM_ECC (ssl.com), and ACTALIS_PROD (Actalis.com).</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -1654,7 +1654,7 @@ Get-PAAccount -List | %{
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="1" aliases="location">
         <maml:name>DirectoryUrl</maml:name>
         <maml:description>
-          <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).</maml:para>
+          <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD and LE_STAGE (LetsEncrypt), ZEROSSL_PROD (Zerossl.com), GOOGLE_PROD and GOOGLE_STAGE (pki.goog), SSLCOM_RSA and SSLCOM_ECC (ssl.com), and ACTALIS_PROD (Actalis.com).</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -2959,7 +2959,7 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="location">
           <maml:name>DirectoryUrl</maml:name>
           <maml:description>
-            <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).</maml:para>
+            <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD and LE_STAGE (LetsEncrypt), ZEROSSL_PROD (Zerossl.com), GOOGLE_PROD and GOOGLE_STAGE (pki.goog), SSLCOM_RSA and SSLCOM_ECC (ssl.com), and ACTALIS_PROD (Actalis.com).</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -3232,7 +3232,7 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="location">
           <maml:name>DirectoryUrl</maml:name>
           <maml:description>
-            <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).</maml:para>
+            <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD and LE_STAGE (LetsEncrypt), ZEROSSL_PROD (Zerossl.com), GOOGLE_PROD and GOOGLE_STAGE (pki.goog), SSLCOM_RSA and SSLCOM_ECC (ssl.com), and ACTALIS_PROD (Actalis.com).</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -3461,7 +3461,7 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="location">
         <maml:name>DirectoryUrl</maml:name>
         <maml:description>
-          <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).</maml:para>
+          <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD and LE_STAGE (LetsEncrypt), ZEROSSL_PROD (Zerossl.com), GOOGLE_PROD and GOOGLE_STAGE (pki.goog), SSLCOM_RSA and SSLCOM_ECC (ssl.com), and ACTALIS_PROD (Actalis.com).</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -5543,7 +5543,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="1" aliases="location">
           <maml:name>DirectoryUrl</maml:name>
           <maml:description>
-            <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).</maml:para>
+            <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD and LE_STAGE (LetsEncrypt), ZEROSSL_PROD (Zerossl.com), GOOGLE_PROD and GOOGLE_STAGE (pki.goog), SSLCOM_RSA and SSLCOM_ECC (ssl.com), and ACTALIS_PROD (Actalis.com).</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -5614,7 +5614,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="1" aliases="location">
         <maml:name>DirectoryUrl</maml:name>
         <maml:description>
-          <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).</maml:para>
+          <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD and LE_STAGE (LetsEncrypt), ZEROSSL_PROD (Zerossl.com), GOOGLE_PROD and GOOGLE_STAGE (pki.goog), SSLCOM_RSA and SSLCOM_ECC (ssl.com), and ACTALIS_PROD (Actalis.com).</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -7701,7 +7701,7 @@ Set-PAOrder example.com -Plugin FakeDNS -PluginArgs $pArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="1" aliases="location">
           <maml:name>DirectoryUrl</maml:name>
           <maml:description>
-            <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).</maml:para>
+            <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD and LE_STAGE (LetsEncrypt), ZEROSSL_PROD (Zerossl.com), GOOGLE_PROD and GOOGLE_STAGE (pki.goog), SSLCOM_RSA and SSLCOM_ECC (ssl.com), and ACTALIS_PROD (Actalis.com).</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -7817,7 +7817,7 @@ Set-PAOrder example.com -Plugin FakeDNS -PluginArgs $pArgs</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="1" aliases="location">
         <maml:name>DirectoryUrl</maml:name>
         <maml:description>
-          <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD (LetsEncrypt Production), LE_STAGE (LetsEncrypt Staging), BUYPASS_PROD (BuyPass.com Production), BUYPASS_TEST (BuyPass.com Testing), and ZEROSSL_PROD (Zerossl.com Production).</maml:para>
+          <maml:para>Either the URL to an ACME server's "directory" endpoint or one of the supported short names. Currently supported short names include LE_PROD and LE_STAGE (LetsEncrypt), ZEROSSL_PROD (Zerossl.com), GOOGLE_PROD and GOOGLE_STAGE (pki.goog), SSLCOM_RSA and SSLCOM_ECC (ssl.com), and ACTALIS_PROD (Actalis.com).</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
