@@ -4,15 +4,15 @@ As more public certificate authorities hop on the [ACME][rfc00] bandwagon, it is
 
 ## ACME CA Info
 
-|                     | [Let's&nbsp;Encrypt][le01] | [BuyPass*][bp01]       | [ZeroSSL][z01]     | [SSL.com][ss01]    | [Google][gc01]     |
+|                     | [Let's&nbsp;Encrypt][le01] | [Google][gc01]         | [ZeroSSL][z01]     | [SSL.com][ss01]    | [Actalis][ac01]    |
 | -------             | :------------------------: | :-------------:        | :------------:     | :-------------:    | :------------:     |
-| Free SAN Limit      | 100 names                  | 5 names                | 100+ names         | 1 name + www       | 100+ names         |
-| Free Wildcards      | :white_check_mark:         | :x:                    | :white_check_mark: | :x:                | :white_check_mark: |
-| Free Lifetime       | 90 days                    | 180 days               | 90 days            | 90 days            | 1*-90 days         |
-| [IDN][wk02] Support | :white_check_mark:         | :white_check_mark:     | :white_check_mark: | :white_check_mark: | :x:                |
-| Chain Info          | [Chains][le06]             | [Roots][bp04] "Go SSL" | RSA [Iss1][z02]/[Iss2][z03]/[Root][z04]<br />ECC [Iss1][z05]/[Iss2][z06]/[Root][z07] | RSA [Iss][ss02]/[Root][ss03]<br />ECC [Iss][ss06]/[Root][ss07] | [Iss][gc02]/[Root][gc03] |
-| Rate Limits         | [Policy][le02]             | [Policy][bp02]         | ??                 | ??                 | [Policy][gc04]     |
-| Notes               | [Service Status][le09]<br />[Staging Environment][le03] | [Test Environment][bp03] | See Notes below | See Warning below | [Staging Endpoint][gc06]<br />[Quick Start][gc07] |
+| Free SAN Limit      | 100 names                  | 100+ names             | 100+ names         | 1 name + www       | 1 name + www       |
+| Free Wildcards      | :white_check_mark:         | :white_check_mark:     | :white_check_mark: | :x:                | :x:                |
+| Free Lifetime       | 90 days                    | 1*-90 days             | 90 days            | 90 days            | 90 days            |
+| [IDN][wk02] Support | :white_check_mark:         | :x:                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Chain Info          | [Chains][le06]             | [Iss][gc02]/[Root][gc03] | RSA [Iss1][z02]/[Iss2][z03]/[Root][z04]<br />ECC [Iss1][z05]/[Iss2][z06]/[Root][z07] | RSA [Iss][ss02]/[Root][ss03]<br />ECC [Iss][ss06]/[Root][ss07] | [Iss][ac02]/[Root][ac03] |
+| Rate Limits         | [Policy][le02]             | [Policy][gc04]         | ??                 | ??                 | ??                 |
+| Notes               | [Service Status][le09]<br />[Staging Environment][le03] | [Staging Endpoint][gc06]<br />[Quick Start][gc07] | See Notes below | See Warning below | [CPS and Audit Docs][ac04] |
 
 
 * Wildcard names (if supported) count towards Subject Alternative Name (SAN) limits.
@@ -20,7 +20,7 @@ As more public certificate authorities hop on the [ACME][rfc00] bandwagon, it is
 * ZeroSSL supports a custom REST API that some clients use instead of pure ACME.
 * **SSL.com Warning:** If your SSL.com account has funds available, you will be charged for a paid 1-year certificate instead of a free 90-day certificate. There is no known way to request only a free certificate.
 * Google certs have a 90 day lifetime by default but can be requested for shorter lifetimes down to 1 day if supported by your ACME client. The recommended minimum lifetime is 3 days.
-* BuyPass has [announced](https://community.buypass.com/t/y4y130p) it will cease offering free certs via ACME on October 15, 2025.
+* BuyPass has been removed from this page since they stopped offering free certs via ACME on [October 15, 2025](https://community.buypass.com/t/y4y130p).
 
 ## ACME Spec and Feature Support
 
@@ -30,21 +30,21 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
     Multi-perspective validation is not part of the ACME protocol but is an important security feature for the integrity of domain validation.
     SXG Support is also not part of the ACME protocol but is a notable feature among free ACME CAs.
 
-| Feature                                      | [Let's&nbsp;Encrypt][le01] | [BuyPass][bp01]                              | [ZeroSSL][z01]     | [SSL.com][ss01]                              | [Google][gc01]      |
-| -------                                      | :------------------------: | :-------------:                              | :------------:     | :-------------:                              | :------------:      |
-| [(EAB) External<br />Account Binding][rfc01] | n/a                        | n/a                                          | Required           | Required                                     | Required*           |
-| [Multi-perspective<br />Validation][le05]    | :white_check_mark:         | :x:                                          | :x:                | :x:                                          | :white_check_mark:  |
-| [Account<br />Key Rollover][rfc02]           | :white_check_mark:         | :white_check_mark:                           | :x:                | :x:*                                         | :white_check_mark:  |
-| [Account<br />Deactivation][rfc03]           | :white_check_mark:         | :white_check_mark:                           | :white_check_mark: | :white_check_mark:                           | :white_check_mark:  |
-| [Account<br />Orders][rfc04]                 | :x: *([Planned][le07])*    | :x:                                          | :x:                | :x:*                                         | :x:                 |
-| [IP Address<br />Identifiers][rfc05]         | :x: *([Planned][le08])*    | :x:                                          | :x:*               | :x:                                          | :x:                 |
-| [Pre-Authorization][rfc06]                   | :x:                        | :white_check_mark:                           | :x:                | :x:                                          | :x:                 |
-| [Authorization<br />Deactivation][rfc07]     | :white_check_mark:         | :white_check_mark:                           | :white_check_mark: | :white_check_mark:                           | :white_check_mark:  |
-| [Cert<br />Revocation][rfc08]                | :white_check_mark:         | :warning:<br />*(Only using account key)*    | :white_check_mark: | :white_check_mark:                           | :white_check_mark:  |
-| [Challenge<br />Retrying][rfc09]             | :x:                        | :warning:<br />*(Client must request retry)* | :white_check_mark: | :warning:<br />*(Client must request retry)* | :x:                 |
-| [Variable Cert Lifetime][rfc10]              | :x:                        | :x:                                          | :x:                | :x:                                          | :white_check_mark:  |
-| [SXG Support][gc09]                          | :x:                        | :x:                                          | :x:                | :x:                                          | :white_check_mark:* |
-| [ACME Renewal Information (ARI)][rfc11]      | draft-03                   | :x:                                          | :x:                | :x:                                          | draft-03            |
+| Feature                                      | [Let's&nbsp;Encrypt][le01] | [Google][gc01]      | [ZeroSSL][z01]     | [SSL.com][ss01]                        | [Actalis][ac01]     |
+| -------                                      | :------------------------: | :-------------:     | :------------:     | :-------------:                        | :------------:      |
+| [(EAB) External<br />Account Binding][rfc01] | Not Needed                 | Required*           | Required           | Required                               | Required            |
+| [Multi-perspective<br />Validation][le05]    | :white_check_mark:         | :white_check_mark:  | :x:                | :x:                                    | :white_check_mark:  |
+| [Account<br />Key Rollover][rfc02]           | :white_check_mark:         | :white_check_mark:  | :x:                | :x:*                                   | :x:*                |
+| [Account<br />Deactivation][rfc03]           | :white_check_mark:         | :white_check_mark:  | :white_check_mark: | :white_check_mark:                     | :white_check_mark:  |
+| [Account<br />Orders][rfc04]                 | :x: *([Planned][le07])*    | :x:                 | :x:                | :x:*                                   | :x:*                |
+| [IP Address<br />Identifiers][rfc05]         | :x: *([Planned][le08])*    | :white_check_mark:* | :x:*               | :x:                                    | :x:                 |
+| [Pre-Authorization][rfc06]                   | :x:                        | :x:                 | :x:                | :x:                                    | :x:                 |
+| [Authorization<br />Deactivation][rfc07]     | :white_check_mark:         | :white_check_mark:  | :white_check_mark: | :white_check_mark:                     | :white_check_mark:* |
+| [Cert<br />Revocation][rfc08]                | :white_check_mark:         | :white_check_mark:  | :white_check_mark: | :white_check_mark:                     | :warning:<br />*(Only via account key)* |
+| [Challenge<br />Retrying][rfc09]             | :x:                        | :x:                 | :white_check_mark: | :warning:<br />*(Client must request)* | :x:*                |
+| [Variable Cert Lifetime][rfc10]              | :x:                        | :white_check_mark:  | :x:                | :x:                                    | :x:                 |
+| [SXG Support][gc09]                          | :x:                        | :white_check_mark:* | :x:                | :x:                                    | :x:                 |
+| [ACME Renewal Information (ARI)][rfc11]      | :white_check_mark:         | :white_check_mark:  | :x:                | :x:                                    | :white_check_mark:  |
 
 
 * :white_check_mark: = Feature supported
@@ -55,7 +55,13 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 * SSL.com requires an email address in the ACME account contact field, but doesn't enforce it on creation time. Instead, it throws an "badCSR" error when you try to finalize an order from an account with an empty address.
 * ZeroSSL does support IP address based certificates, but not via the ACME protocol.
 * Google's EAB credentials can only be used once to establish a new ACME account and expire after 7 days if not used. Creating additional accounts requires generating new EAB credentials.
+* Google conditionally offers IP certificates [for customers who provide a valid business need][gc10].
 * For Google SXG Certificates, you must use a different ACME directory endpoint. [https://dv-sxg.acme-v02.api.pki.goog/directory][gc08]
+* Actalis advertises the key rollover endpoint, but it throws an error.
+* Actalis account objects have the `orders` field, but it does not currently return orders for the account.
+* Actalis does not cache authorizations. Attempting to deactivate one doesn't throw an error, but is not required.
+* Actalis puts failed challenges into the `processing` status implying they will retry, but they never do. Explicit retry requests also don't seem to work.
+
 
 
 [wk01]: https://en.wikipedia.org/wiki/Domain-validated_certificate
@@ -67,7 +73,7 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 [le05]: https://letsencrypt.org/2020/02/19/multi-perspective-validation.html
 [le06]: https://letsencrypt.org/certificates/
 [le07]: https://github.com/letsencrypt/boulder/issues/3335
-[le08]: https://github.com/letsencrypt/boulder/issues/2706
+[le08]: https://letsencrypt.org/2025/07/01/issuing-our-first-ip-address-certificate
 [le09]: https://letsencrypt.status.io/
 [le10]: https://acme-v02.api.letsencrypt.org/directory
 [rfc00]: https://datatracker.ietf.org/doc/html/rfc8555
@@ -82,11 +88,6 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 [rfc09]: https://datatracker.ietf.org/doc/html/rfc8555#section-8.2
 [rfc10]: https://datatracker.ietf.org/doc/html/rfc8555#section-7.1.3
 [rfc11]: https://datatracker.ietf.org/doc/draft-ietf-acme-ari/
-[bp01]: https://www.buypass.com/
-[bp02]: https://community.buypass.com/t/m2r5cj/rate-limits
-[bp03]: https://api.test4.buypass.no/acme/directory
-[bp04]: https://www.buypass.com/security/buypass-root-certificates
-[bp05]: https://api.buypass.com/acme/directory
 [z01]: https://zerossl.com/
 [z02]: https://crt.sh/?q=c81a8bd1f9cf6d84c525f378ca1d3f8c30770e34
 [z03]: https://crt.sh/?q=d89e3bd43d5d909b47a18977aa9d5ce36cee184c
@@ -111,3 +112,8 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 [gc07]: https://cloud.google.com/certificate-manager/docs/public-ca-tutorial
 [gc08]: https://dv-sxg.acme-v02.api.pki.goog/directory
 [gc09]: https://web.dev/signed-exchanges/
+[gc10]: https://pki.goog/faq/#faq-IPCerts
+[ac01]: https://www.actalis.com/
+[ac02]: https://www.actalis.com/actalisdvserveracmecag1-en
+[ac03]: https://www.actalis.com/actalis-authentication-rootca-en
+[ac04]: https://www.actalis.com/legal-repository
