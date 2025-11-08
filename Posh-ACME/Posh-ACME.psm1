@@ -49,6 +49,7 @@ $script:WellKnownDirs = @{
     GOOGLE_STAGE = 'https://dv.acme-v02.test-api.pki.goog/directory'
     SSLCOM_RSA = 'https://acme.ssl.com/sslcom-dv-rsa'
     SSLCOM_ECC = 'https://acme.ssl.com/sslcom-dv-ecc'
+    ACTALIS_PROD = 'https://acme-api.actalis.com/acme/directory'
 }
 $script:HEADER_NONCE = 'Replay-Nonce'
 $script:USER_AGENT = "Posh-ACME/4.29.3 PowerShell/$($PSVersionTable.PSVersion)"
