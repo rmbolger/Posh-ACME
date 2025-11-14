@@ -1,3 +1,16 @@
+## 4.30.0 (2025-11-13)
+
+* New [HetznerCloud](https://www.hetzner.com/) plugin (#642) (Thanks @humnose)
+  * This is for Hetzner users who have migrated their zones from the legacy "DNS Console" to the new "Hetzner Console". NOTE: New API tokens are needed.
+* Added `AZArcAgentAPIVersion` param for Azure IMDS parameter set (#636) (Thanks @semics-tech)
+  * This may be necessary systems running older versions of the Azure Managed Identity Agent that don't work with the default version identifier.
+* Added `ACTALIS_PROD` to the list of well-known directory shortcuts. They've also been added to the ACME CA Comparison guide.
+* Removed `BUYPASS_PROD` and `BUYPASS_TEST` from the list of well-known directory shortcuts since they are no longer in operation.
+* Removed a workaround for a BuyPass server bug which is no longer necessary.
+* Fixed Windows plugin breaks when not using WinUseSsl or WinSkipCACheck switches (#637) (Thanks @jmpederson1)
+* Fixed PS 5.1 compat with DeSEC and EuroDNSReseller by removing -Depth param from ConvertFrom-Json calls (#643)
+* Fixed null ref errors in CoreNetworks plugin when no matching zone found. Added additional debug logs. (#616)
+
 ## 4.29.3 (2025-07-24)
 
 * The current ACME server directory endpoint is now refreshed on module import to ensure server changes are reflected before actions are performed. If the previously used ACME server is unreachable, a warning is thrown and previously cached data is used.
