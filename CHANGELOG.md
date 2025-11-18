@@ -1,3 +1,7 @@
+## 4.30.1 (2025-11-18)
+
+* Fixed Simply and SimplyCom plugins which now require trailing slashes to API endpoints. (#646) (Thanks @tomsommer)
+
 ## 4.30.0 (2025-11-13)
 
 * New [HetznerCloud](https://www.hetzner.com/) plugin (#642) (Thanks @humnose)
