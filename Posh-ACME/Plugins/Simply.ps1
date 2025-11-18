@@ -43,7 +43,7 @@ function Add-DnsTxt {
         Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
         try {
             $postParams = @{
-                Uri = "{0}/my/products/{1}/dns/records" -f $SimplyAPIRoot,$zoneID
+                Uri = "{0}/my/products/{1}/dns/records/" -f $SimplyAPIRoot,$zoneID
                 Method = 'POST'
                 Headers = $authHeader
                 Body = $body
@@ -122,7 +122,7 @@ function Remove-DnsTxt {
         Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
         try {
             $delParams = @{
-                Uri = "{0}/my/products/{1}/dns/records/{2}" -f $SimplyAPIRoot,$zoneID,$rec.record_id
+                Uri = "{0}/my/products/{1}/dns/records/{2}/" -f $SimplyAPIRoot,$zoneID,$rec.record_id
                 Headers = $authHeader
                 Method = 'DELETE'
                 ErrorAction = 'Stop'
@@ -216,7 +216,7 @@ function Get-SimplyTXTRecord {
         # query all of the domains on the account
         try {
             $getParams = @{
-                Uri = '{0}/my/products' -f $ApiRoot
+                Uri = '{0}/my/products/' -f $ApiRoot
                 Headers = $AuthHeader
                 ErrorAction = 'Stop'
                 Verbose = $false
@@ -255,7 +255,7 @@ function Get-SimplyTXTRecord {
     # query the zone records and check for the one we care about
     try {
         $getParams = @{
-            Uri = '{0}/my/products/{1}/dns/records' -f $ApiRoot,$zoneID
+            Uri = '{0}/my/products/{1}/dns/records/' -f $ApiRoot,$zoneID
             Headers = $AuthHeader
             ErrorAction = 'Stop'
             Verbose = $false
