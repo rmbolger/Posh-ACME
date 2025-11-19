@@ -18,7 +18,7 @@
         <link rel="prev" href="../GoogleDomains/">
       
       
-        <link rel="next" href="../HostingDe/">
+        <link rel="next" href="../HetznerCloud/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -1458,6 +1458,8 @@
       
         
       
+        
+      
     
     
       
@@ -2334,6 +2336,27 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HetznerCloud/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HetznerCloud
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -3810,7 +3833,12 @@
 
 
 <h1 id="how-to-use-the-hetzner-dns-plugin">How To Use the Hetzner DNS Plugin<a class="headerlink" href="#how-to-use-the-hetzner-dns-plugin" title="Permanent link">&para;</a></h1>
-<p>This plugin works against the <a href="https://www.hetzner.de/">Hetzner</a> DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.</p>
+<p>This plugin works against the <a href="https://www.hetzner.de/">Hetzner</a> DNS provider. It is specifically for DNS zones in the legacy DNS Console. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The legacy DNS Console is scheduled to be shut down in May 2026. Please migrate your zones to the new Hetzner Console before then and re-configure your certificates to use the new <code>HetznerCloud</code> plugin.
+https://www.hetzner.com/news/dns-beta/</p>
+</div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>You will need to generate an API Token if you haven't already done so. Go to <a href="https://dns.hetzner.com/settings/api-token">Manage API tokens</a> after logging in to the <a href="https://dns.hetzner.comn">DNS Console</a>. Give the token a name and click <code>Create access token</code>. Make a note of the token value as you'll need it later and won't be able to retrieve it after this point.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
@@ -3873,13 +3901,13 @@
         
         
           
-          <a href="../HostingDe/" class="md-footer__link md-footer__link--next" aria-label="Next: HostingDe">
+          <a href="../HetznerCloud/" class="md-footer__link md-footer__link--next" aria-label="Next: HetznerCloud">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                HostingDe
+                HetznerCloud
               </div>
             </div>
             <div class="md-footer__button md-icon">
