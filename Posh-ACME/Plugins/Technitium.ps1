@@ -16,6 +16,7 @@ function Add-DnsTxt {
         [string]$TechnitiumProtocol = 'https',
         [Parameter(Position=5)]
         [int]$TechnitiumTTL = 3600,
+        [switch]$TechnitiumIgnoreCert,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -25,7 +26,7 @@ function Add-DnsTxt {
 
     # Build the API URL
     $baseUri = "$($TechnitiumProtocol)://$($TechnitiumServer)/api/zones/records/add"
-    
+
     $queryParams = @{
         token = $token
         domain = $RecordName
@@ -35,19 +36,25 @@ function Add-DnsTxt {
     }
 
     try {
+        # ignore cert validation for the duration of the call
+        if ($TechnitiumIgnoreCert) { Set-TechnitiumCertIgnoreOn }
+
         Write-Verbose "Adding TXT record $RecordName with value $TxtValue to Technitium DNS server $TechnitiumServer"
         Write-Debug "API URL: $baseUri"
-        
+
         $result = Invoke-RestMethod -Uri $baseUri -Method Get -Body $queryParams -ErrorAction Stop @script:UseBasic
-        
+
         if ($result.status -ne "ok") {
             throw "Technitium API returned status: $($result.status). Response: $($result | ConvertTo-Json -Compress)"
         }
-        
+
         Write-Verbose "Successfully added TXT record $RecordName"
     } catch {
         Write-Error "Failed to add TXT record to Technitium DNS: $_"
         throw
+    } finally {
+        # return cert validation back to normal
+        if ($TechnitiumIgnoreCert) { Set-TechnitiumCertIgnoreOff }
     }
 
     <#
@@ -74,6 +81,9 @@ function Add-DnsTxt {
 
     .PARAMETER TechnitiumTTL
         The TTL of the new TXT record in seconds (default 3600).
+
+    .PARAMETER TechnitiumIgnoreCert
+        If specified, SSL certificate errors will be ignored (not recommended for production use).
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -108,6 +118,7 @@ function Remove-DnsTxt {
         [string]$TechnitiumProtocol = 'https',
         [Parameter(Position=5)]
         [int]$TechnitiumTTL = 3600,
+        [switch]$TechnitiumIgnoreCert,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -117,7 +128,7 @@ function Remove-DnsTxt {
 
     # Build the API URL
     $baseUri = "$($TechnitiumProtocol)://$($TechnitiumServer)/api/zones/records/delete"
-    
+
     $queryParams = @{
         token = $token
         domain = $RecordName
@@ -126,19 +137,25 @@ function Remove-DnsTxt {
     }
 
     try {
+        # ignore cert validation for the duration of the call
+        if ($TechnitiumIgnoreCert) { Set-TechnitiumCertIgnoreOn }
+
         Write-Verbose "Removing TXT record $RecordName with value $TxtValue from Technitium DNS server $TechnitiumServer"
         Write-Debug "API URL: $baseUri"
-        
-        $result = Invoke-RestMethod -Uri $baseUri -Method Get -Body $queryParams -ErrorAction Stop
-        
+
+        $result = Invoke-RestMethod -Uri $baseUri -Method Get -Body $queryParams -ErrorAction Stop @script:UseBasic
+
         if ($result.status -ne "ok") {
             throw "Technitium API returned status: $($result.status). Response: $($result | ConvertTo-Json -Compress)"
         }
-        
+
         Write-Verbose "Successfully removed TXT record $RecordName"
     } catch {
         Write-Error "Failed to remove TXT record from Technitium DNS: $_"
         throw
+    } finally {
+        # return cert validation back to normal
+        if ($TechnitiumIgnoreCert) { Set-TechnitiumCertIgnoreOff }
     }
 
     <#
@@ -165,6 +182,9 @@ function Remove-DnsTxt {
 
     .PARAMETER TechnitiumTTL
         The TTL parameter (included for consistency but not used in delete operations).
+
+    .PARAMETER TechnitiumIgnoreCert
+        If specified, SSL certificate errors will be ignored (not recommended for production use).
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -208,3 +228,39 @@ function Save-DnsTxt {
 
 # API Docs:
 # https://github.com/TechnitiumSoftware/DnsServer/blob/master/APIDOCS.md
+
+function Set-TechnitiumCertIgnoreOn {
+    [CmdletBinding()]
+    param()
+
+    if ($script:SkipCertSupported) {
+        # Core edition
+        if (-not $script:UseBasic.SkipCertificateCheck) {
+            # temporarily set skip to true
+            $script:UseBasic.SkipCertificateCheck = $true
+            # remember that we did
+            $script:TechnitiumUnsetIgnoreAfter = $true
+        }
+
+    } else {
+        # Desktop edition
+        [CertValidation]::Ignore()
+    }
+}
+
+function Set-TechnitiumCertIgnoreOff {
+    [CmdletBinding()]
+    param()
+
+    if ($script:SkipCertSupported) {
+        # Core edition
+        if ($script:TechnitiumUnsetIgnoreAfter) {
+            $script:UseBasic.SkipCertificateCheck = $false
+            Remove-Variable TechnitiumUnsetIgnoreAfter -Scope Script
+        }
+
+    } else {
+        # Desktop edition
+        [CertValidation]::Restore()
+    }
+}

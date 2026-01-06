@@ -12,7 +12,7 @@ This plugin works against the [Technitium DNS Server](https://technitium.com/dns
 
 1. Login to your Technitium DNS Server web console as admin
 2. Navigate to **Administration** > **Users** and create a new user (e.g., "acme-user")
-3. Navigate to **Zones** and grant the new user **View** and **Modify** access to only the zones that need certificates
+3. Navigate to **Zones** and grant the new user **View**, **Modify**, and **Delete** access to only the zones that need certificates
 4. Logout and login as the new user
 5. Click the top right user menu and select **Create API Token**
 6. Enter the user's password, provide a token name (e.g., "posh-acme"), and click **Create**
@@ -38,6 +38,7 @@ Ensure that your system running Posh-ACME can reach the Technitium DNS Server's 
 | TechnitiumServer | String | Yes | The hostname/IP and port of your Technitium server (e.g., 'dns.example.com:5380' or '192.168.1.100:5380') |
 | TechnitiumProtocol | String | No | Protocol to use: 'https' (default) or 'http'. HTTPS is strongly recommended for production use |
 | TechnitiumTTL | Integer | No | The TTL in seconds for the TXT records (default: 3600) |
+| TechnitiumIgnoreCert | Switch | No | If set, disables certificate validation for HTTPS connections |
 
 ### Example: Basic Certificate Request
 
