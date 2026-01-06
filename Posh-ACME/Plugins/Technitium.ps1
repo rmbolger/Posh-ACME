@@ -28,11 +28,17 @@ function Add-DnsTxt {
     $baseUri = "$($TechnitiumProtocol)://$($TechnitiumServer)/api/zones/records/add"
 
     $queryParams = @{
-        token = $token
-        domain = $RecordName
-        type = "TXT"
-        ttl = $TechnitiumTTL
-        text = $TxtValue
+        Uri = $baseUri
+        Method = 'Get'
+        Body = @{
+            token = $token
+            domain = $RecordName
+            type = "TXT"
+            ttl = $TechnitiumTTL
+            text = $TxtValue
+        }
+        Verbose = $false
+        ErrorAction = 'Stop'
     }
 
     try {
@@ -40,9 +46,10 @@ function Add-DnsTxt {
         if ($TechnitiumIgnoreCert) { Set-TechnitiumCertIgnoreOn }
 
         Write-Verbose "Adding TXT record $RecordName with value $TxtValue to Technitium DNS server $TechnitiumServer"
-        Write-Debug "API URL: $baseUri"
+        $sanitizedBody = ($queryParams.Body | ConvertTo-Json).Replace($token,'********')
+        Write-Debug "GET $baseUri`n$sanitizedBody"
 
-        $result = Invoke-RestMethod -Uri $baseUri -Method Get -Body $queryParams -ErrorAction Stop @script:UseBasic
+        $result = Invoke-RestMethod @queryParams @script:UseBasic
 
         if ($result.status -ne "ok") {
             throw "Technitium API returned status: $($result.status). Response: $($result | ConvertTo-Json -Compress)"
@@ -130,10 +137,16 @@ function Remove-DnsTxt {
     $baseUri = "$($TechnitiumProtocol)://$($TechnitiumServer)/api/zones/records/delete"
 
     $queryParams = @{
-        token = $token
-        domain = $RecordName
-        type = "TXT"
-        text = $TxtValue
+        Uri = $baseUri
+        Method = 'Get'
+        Body = @{
+            token = $token
+            domain = $RecordName
+            type = "TXT"
+            text = $TxtValue
+        }
+        Verbose = $false
+        ErrorAction = 'Stop'
     }
 
     try {
@@ -141,9 +154,10 @@ function Remove-DnsTxt {
         if ($TechnitiumIgnoreCert) { Set-TechnitiumCertIgnoreOn }
 
         Write-Verbose "Removing TXT record $RecordName with value $TxtValue from Technitium DNS server $TechnitiumServer"
-        Write-Debug "API URL: $baseUri"
+        $sanitizedBody = ($queryParams.Body | ConvertTo-Json).Replace($token,'********')
+        Write-Debug "GET $baseUri`n$sanitizedBody"
 
-        $result = Invoke-RestMethod -Uri $baseUri -Method Get -Body $queryParams -ErrorAction Stop @script:UseBasic
+        $result = Invoke-RestMethod @queryParams @script:UseBasic
 
         if ($result.status -ne "ok") {
             throw "Technitium API returned status: $($result.status). Response: $($result | ConvertTo-Json -Compress)"
@@ -236,6 +250,7 @@ function Set-TechnitiumCertIgnoreOn {
     if ($script:SkipCertSupported) {
         # Core edition
         if (-not $script:UseBasic.SkipCertificateCheck) {
+            Write-Debug "Disabling certificate validation for PS Core"
             # temporarily set skip to true
             $script:UseBasic.SkipCertificateCheck = $true
             # remember that we did
@@ -243,6 +258,7 @@ function Set-TechnitiumCertIgnoreOn {
         }
 
     } else {
+        Write-Debug "Disabling certificate validation for PS Desktop"
         # Desktop edition
         [CertValidation]::Ignore()
     }
@@ -253,6 +269,7 @@ function Set-TechnitiumCertIgnoreOff {
     param()
 
     if ($script:SkipCertSupported) {
+        Write-Debug "Enabling certificate validation for PS Core"
         # Core edition
         if ($script:TechnitiumUnsetIgnoreAfter) {
             $script:UseBasic.SkipCertificateCheck = $false
@@ -261,6 +278,7 @@ function Set-TechnitiumCertIgnoreOff {
 
     } else {
         # Desktop edition
+        Write-Debug "Enabling certificate validation for PS Desktop"
         [CertValidation]::Restore()
     }
 }
