@@ -45,6 +45,17 @@ function Add-DnsTxt {
         # ignore cert validation for the duration of the call
         if ($TechnitiumIgnoreCert) { Set-TechnitiumCertIgnoreOn }
 
+        # Check if this exact value already exists
+        $existing = Get-TechnitiumRecord -RecordName $RecordName -Token $token `
+            -TechnitiumServer $TechnitiumServer -TechnitiumProtocol $TechnitiumProtocol `
+            -TechnitiumIgnoreCert:$TechnitiumIgnoreCert
+        
+        if ($existing -and $TxtValue -in $existing.rData.text) {
+            Write-Verbose "TXT record $RecordName already contains value $TxtValue (likely from previous run)"
+            Write-Debug "Skipping add operation - record already exists with correct value"
+            return
+        }
+
         Write-Verbose "Adding TXT record $RecordName with value $TxtValue to Technitium DNS server $TechnitiumServer"
         $sanitizedBody = ($queryParams.Body | ConvertTo-Json).Replace($token,'********')
         Write-Debug "GET $baseUri`n$sanitizedBody"
@@ -152,6 +163,17 @@ function Remove-DnsTxt {
     try {
         # ignore cert validation for the duration of the call
         if ($TechnitiumIgnoreCert) { Set-TechnitiumCertIgnoreOn }
+
+        # Check if record exists before trying to delete
+        $existing = Get-TechnitiumRecord -RecordName $RecordName -Token $token `
+            -TechnitiumServer $TechnitiumServer -TechnitiumProtocol $TechnitiumProtocol `
+            -TechnitiumIgnoreCert:$TechnitiumIgnoreCert
+        
+        if (!$existing -or $TxtValue -notin $existing.rData.text) {
+            Write-Verbose "TXT record $RecordName with value $TxtValue not found (may have been already cleaned up)"
+            Write-Debug "Skipping delete operation - record does not exist"
+            return
+        }
 
         Write-Verbose "Removing TXT record $RecordName with value $TxtValue from Technitium DNS server $TechnitiumServer"
         $sanitizedBody = ($queryParams.Body | ConvertTo-Json).Replace($token,'********')
@@ -261,6 +283,49 @@ function Set-TechnitiumCertIgnoreOn {
         Write-Debug "Disabling certificate validation for PS Desktop"
         # Desktop edition
         [CertValidation]::Ignore()
+    }
+}
+
+function Get-TechnitiumRecord {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$RecordName,
+        [Parameter(Mandatory)]
+        [string]$Token,
+        [Parameter(Mandatory)]
+        [string]$TechnitiumServer,
+        [Parameter(Mandatory)]
+        [string]$TechnitiumProtocol,
+        [switch]$TechnitiumIgnoreCert
+    )
+
+    $baseUri = "$($TechnitiumProtocol)://$($TechnitiumServer)/api/zones/records/get"
+    
+    $queryParams = @{
+        Uri = $baseUri
+        Method = 'Get'
+        Body = @{
+            token = $Token
+            domain = $RecordName
+        }
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
+
+    try {
+        if ($TechnitiumIgnoreCert) { Set-TechnitiumCertIgnoreOn }
+        
+        $result = Invoke-RestMethod @queryParams @script:UseBasic
+        
+        if ($result.status -eq "ok" -and $result.records) {
+            return $result.records | Where-Object { $_.type -eq "TXT" }
+        }
+        return $null
+    } catch {
+        return $null
+    } finally {
+        if ($TechnitiumIgnoreCert) { Set-TechnitiumCertIgnoreOff }
     }
 }
 
