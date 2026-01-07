@@ -21,54 +21,34 @@ function Add-DnsTxt {
         $ExtraParams
     )
 
-    # Convert the secure token to a normal string
-    $token = [pscredential]::new('a',$TechnitiumToken).GetNetworkCredential().Password
-
-    # Build the API URL
-    $baseUri = "$($TechnitiumProtocol)://$($TechnitiumServer)/api/zones/records/add"
-
-    $queryParams = @{
-        Uri = $baseUri
-        Method = 'Get'
-        Body = @{
-            token = $token
-            domain = $RecordName
-            type = "TXT"
-            ttl = $TechnitiumTTL
-            text = $TxtValue
-        }
-        Verbose = $false
-        ErrorAction = 'Stop'
+    $commonParams = @{
+        BaseUri = "$($TechnitiumProtocol)://$($TechnitiumServer)/api"
+        Token = [pscredential]::new('a',$TechnitiumToken).GetNetworkCredential().Password
     }
 
     try {
         # ignore cert validation for the duration of the call
         if ($TechnitiumIgnoreCert) { Set-TechnitiumCertIgnoreOn }
 
-        # Check if this exact value already exists
-        $existing = Get-TechnitiumRecord -RecordName $RecordName -Token $token `
-            -TechnitiumServer $TechnitiumServer -TechnitiumProtocol $TechnitiumProtocol `
-            -TechnitiumIgnoreCert:$TechnitiumIgnoreCert
-        
-        if ($existing -and $TxtValue -in $existing.rData.text) {
-            Write-Verbose "TXT record $RecordName already contains value $TxtValue (likely from previous run)"
-            Write-Debug "Skipping add operation - record already exists with correct value"
+        $resp = Invoke-Technitium 'zones/records/get' @{domain=$RecordName} @commonParams
+        $txtRecs = $resp.response.records | Where-Object { $_.type -eq "TXT" }
+
+        if ($txtRecs -and $TxtValue -in $txtRecs.rData.text) {
+            Write-Debug "Record $RecordName with value $TxtValue already exists. Nothing to do."
             return
         }
 
-        Write-Verbose "Adding TXT record $RecordName with value $TxtValue to Technitium DNS server $TechnitiumServer"
-        $sanitizedBody = ($queryParams.Body | ConvertTo-Json).Replace($token,'********')
-        Write-Debug "GET $baseUri`n$sanitizedBody"
-
-        $result = Invoke-RestMethod @queryParams @script:UseBasic
-
-        if ($result.status -ne "ok") {
-            throw "Technitium API returned status: $($result.status). Response: $($result | ConvertTo-Json -Compress)"
+        Write-Verbose "Adding TXT record $RecordName with value $TxtValue"
+        $body = @{
+            domain = $RecordName
+            type = "TXT"
+            ttl = $TechnitiumTTL
+            text = $TxtValue
         }
+        $null = Invoke-Technitium 'zones/records/add' $body @commonParams
 
         Write-Verbose "Successfully added TXT record $RecordName"
     } catch {
-        Write-Error "Failed to add TXT record to Technitium DNS: $_"
         throw
     } finally {
         # return cert validation back to normal
@@ -141,53 +121,33 @@ function Remove-DnsTxt {
         $ExtraParams
     )
 
-    # Convert the secure token to a normal string
-    $token = [pscredential]::new('a',$TechnitiumToken).GetNetworkCredential().Password
-
-    # Build the API URL
-    $baseUri = "$($TechnitiumProtocol)://$($TechnitiumServer)/api/zones/records/delete"
-
-    $queryParams = @{
-        Uri = $baseUri
-        Method = 'Get'
-        Body = @{
-            token = $token
-            domain = $RecordName
-            type = "TXT"
-            text = $TxtValue
-        }
-        Verbose = $false
-        ErrorAction = 'Stop'
+    $commonParams = @{
+        BaseUri = "$($TechnitiumProtocol)://$($TechnitiumServer)/api"
+        Token = [pscredential]::new('a',$TechnitiumToken).GetNetworkCredential().Password
     }
 
     try {
         # ignore cert validation for the duration of the call
         if ($TechnitiumIgnoreCert) { Set-TechnitiumCertIgnoreOn }
 
-        # Check if record exists before trying to delete
-        $existing = Get-TechnitiumRecord -RecordName $RecordName -Token $token `
-            -TechnitiumServer $TechnitiumServer -TechnitiumProtocol $TechnitiumProtocol `
-            -TechnitiumIgnoreCert:$TechnitiumIgnoreCert
-        
-        if (!$existing -or $TxtValue -notin $existing.rData.text) {
-            Write-Verbose "TXT record $RecordName with value $TxtValue not found (may have been already cleaned up)"
-            Write-Debug "Skipping delete operation - record does not exist"
+        $resp = Invoke-Technitium 'zones/records/get' @{domain=$RecordName} @commonParams
+        $txtRecs = $resp.response.records | Where-Object { $_.type -eq "TXT" }
+
+        if (-not $txtRecs -or $TxtValue -notin $txtRecs.rData.text) {
+            Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
             return
         }
 
-        Write-Verbose "Removing TXT record $RecordName with value $TxtValue from Technitium DNS server $TechnitiumServer"
-        $sanitizedBody = ($queryParams.Body | ConvertTo-Json).Replace($token,'********')
-        Write-Debug "GET $baseUri`n$sanitizedBody"
-
-        $result = Invoke-RestMethod @queryParams @script:UseBasic
-
-        if ($result.status -ne "ok") {
-            throw "Technitium API returned status: $($result.status). Response: $($result | ConvertTo-Json -Compress)"
+        Write-Verbose "Removing TXT record $RecordName with value $TxtValue"
+        $body = @{
+            domain = $RecordName
+            type = "TXT"
+            text = $TxtValue
         }
+        $null = Invoke-Technitium 'zones/records/delete' $body @commonParams
 
         Write-Verbose "Successfully removed TXT record $RecordName"
     } catch {
-        Write-Error "Failed to remove TXT record from Technitium DNS: $_"
         throw
     } finally {
         # return cert validation back to normal
@@ -286,49 +246,6 @@ function Set-TechnitiumCertIgnoreOn {
     }
 }
 
-function Get-TechnitiumRecord {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [string]$RecordName,
-        [Parameter(Mandatory)]
-        [string]$Token,
-        [Parameter(Mandatory)]
-        [string]$TechnitiumServer,
-        [Parameter(Mandatory)]
-        [string]$TechnitiumProtocol,
-        [switch]$TechnitiumIgnoreCert
-    )
-
-    $baseUri = "$($TechnitiumProtocol)://$($TechnitiumServer)/api/zones/records/get"
-    
-    $queryParams = @{
-        Uri = $baseUri
-        Method = 'Get'
-        Body = @{
-            token = $Token
-            domain = $RecordName
-        }
-        Verbose = $false
-        ErrorAction = 'Stop'
-    }
-
-    try {
-        if ($TechnitiumIgnoreCert) { Set-TechnitiumCertIgnoreOn }
-        
-        $result = Invoke-RestMethod @queryParams @script:UseBasic
-        
-        if ($result.status -eq "ok" -and $result.records) {
-            return $result.records | Where-Object { $_.type -eq "TXT" }
-        }
-        return $null
-    } catch {
-        return $null
-    } finally {
-        if ($TechnitiumIgnoreCert) { Set-TechnitiumCertIgnoreOff }
-    }
-}
-
 function Set-TechnitiumCertIgnoreOff {
     [CmdletBinding()]
     param()
@@ -345,5 +262,41 @@ function Set-TechnitiumCertIgnoreOff {
         # Desktop edition
         Write-Debug "Enabling certificate validation for PS Desktop"
         [CertValidation]::Restore()
+    }
+}
+
+function Invoke-Technitium {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, Position=0)]
+        [string]$Endpoint,
+        [Parameter(Mandatory, Position=1)]
+        [hashtable]$Body,
+        [Parameter(Mandatory, Position=2)]
+        [string]$BaseUri,
+        [Parameter(Mandatory, Position=3)]
+        [string]$Token
+    )
+
+    $queryParams = @{
+        Uri = "$BaseUri/$Endpoint"
+        Method = 'Get'
+        Body = $Body
+        Verbose = $false
+        ErrorAction = 'Stop'
+    }
+    # log the call without the token before we add it
+    Write-Debug "GET $($queryParams.Uri)`n$($queryParams.Body | ConvertTo-Json)"
+    # add the token
+    $queryParams.Body.token = $Token
+
+    try {
+        $result = Invoke-RestMethod @queryParams @script:UseBasic
+        if ($result.status -ne "ok") {
+            throw "Technitium API returned status: $($result.status). Message: $($result.errorMessage)"
+        }
+        return $result
+    } catch {
+        throw
     }
 }
