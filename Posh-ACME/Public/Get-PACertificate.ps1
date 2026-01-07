@@ -111,6 +111,7 @@ function Get-PACertificate {
                 FullChainFile = (Join-Path $order.Folder 'fullchain.cer').ToString()
                 PfxFile       = (Join-Path $order.Folder 'cert.pfx').ToString()
                 PfxFullChain  = (Join-Path $order.Folder 'fullchain.pfx').ToString()
+                CSR           = (Join-Path $order.Folder 'request.csr').ToString()
 
                 PfxPass = $secPfxPass
             }
