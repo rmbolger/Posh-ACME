@@ -85,6 +85,7 @@ Simply | [Simply.com](https://www.simply.com/) (deprecated) | [Usage Guide](Simp
 SimplyCom | [Simply.com](https://www.simply.com/) (formerly UnoEuro) | [Usage Guide](SimplyCom.md) | :white_check_mark:
 SOLIDServer | [efficient iP SOLIDserver DDI](https://efficientip.com/products/solidserver-ddi/) | [Usage Guide](SOLIDServer.md) | :white_check_mark:
 SSHProxy | Custom SSH Script | [Usage Guide](SSHProxy.md) | :white_check_mark:
+Technitium | [Technitium DNS](https://technitium.com/dns/) | [Usage Guide](Technitium.md) | :white_check_mark:
 TencentDNS | [TencentDNS](https://dnspod.com/) | [Usage Guide](TencentDNS.md) | :white_check_mark:
 TotalUptime | [TotalUptime](https://totaluptime.com/solutions/cloud-dns-service/) | [Usage Guide](TotalUptime.md) | :white_check_mark:
 TransIP | [TransIP](https://www.transip.nl/) | [Usage Guide](TransIP.md) | :white_check_mark:
