@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.30.1'
+ModuleVersion = '4.31.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -84,9 +84,11 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.30.1 (2025-11-18)
+## 4.31.0 (2026-01-21)
 
-* Fixed Simply and SimplyCom plugins which now require trailing slashes to API endpoints. (#646) (Thanks @tomsommer)
+* New [Technitium DNS](https://technitium.com/dns/) plugin. (#653) (Thanks @shalafi99)
+* Added `CSR` property to the output of `Get-PACertificate` which is the path to the CSR file used for the request. (#650) (Thanks @skyblaster)
+* Fixed bug in HetznerCloud plugin due to duplicate ErrorAction param use (#656)
 '@
 
     }

@@ -1,3 +1,9 @@
+## 4.31.0 (2026-01-21)
+
+* New [Technitium DNS](https://technitium.com/dns/) plugin. (#653) (Thanks @shalafi99)
+* Added `CSR` property to the output of `Get-PACertificate` which is the path to the CSR file used for the request. (#650) (Thanks @skyblaster)
+* Fixed bug in HetznerCloud plugin due to duplicate ErrorAction param use (#656)
+
 ## 4.30.1 (2025-11-18)
 
 * Fixed Simply and SimplyCom plugins which now require trailing slashes to API endpoints. (#646) (Thanks @tomsommer)
