@@ -22,6 +22,7 @@ Function Add-DnsTxt {
         }
         ContentType = 'application/json'
         Verbose = $false
+        ErrorAction = 'Stop'
     }
 
     # find matching ZoneID to check, if the records exists already
@@ -38,7 +39,7 @@ Function Add-DnsTxt {
         Write-Verbose "Searching for existing TXT record"
         $query = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets?type=TXT&name=$recShort"
         Write-Debug "GET $query"
-        $recs = Invoke-RestMethod $query @restParams @Script:UseBasic -EA Stop
+        $recs = Invoke-RestMethod $query @restParams @Script:UseBasic
         Write-Debug ($recs | ConvertTo-Json -Depth 5)
     } catch {
         if (404 -ne $_.Exception.Response.StatusCode) {
@@ -84,7 +85,6 @@ Function Add-DnsTxt {
                     comment = "ACME cert validation"
                 })
             } | ConvertTo-Json
-            ErrorAction = 'Stop'
         }
 
         Write-Verbose "Update Record $RecordName with new value $TxtValue."
@@ -103,7 +103,6 @@ Function Add-DnsTxt {
                     comment = "ACME cert validation"
                 })
             } | ConvertTo-Json
-            ErrorAction = 'Stop'
         }
 
         Write-Verbose "Add Record $RecordName with value $TxtValue."
@@ -111,7 +110,7 @@ Function Add-DnsTxt {
 
     try {
         Write-Debug "$($queryParams.Method) $($queryParams.Uri)`n$($queryParams.Body)"
-        Invoke-RestMethod @queryParams @restParams @Script:UseBasic | Out-Null
+        $null = Invoke-RestMethod @queryParams @restParams @Script:UseBasic
     } catch { throw }
 
 
@@ -158,6 +157,7 @@ Function Remove-DnsTxt {
         }
         ContentType = 'application/json'
         Verbose = $false
+        ErrorAction = 'Stop'
     }
 
     # find matching ZoneID to check, if the records exists already
@@ -174,7 +174,7 @@ Function Remove-DnsTxt {
         Write-Verbose "Searching for existing TXT record"
         $query = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets?type=TXT&name=$recShort"
         Write-Debug "GET $query"
-        $recs = Invoke-RestMethod $query @restParams @Script:UseBasic -EA Stop
+        $recs = Invoke-RestMethod $query @restParams @Script:UseBasic
         Write-Debug ($recs | ConvertTo-Json -Depth 5)
     } catch {
         if (404 -ne $_.Exception.Response.StatusCode) {
@@ -202,7 +202,6 @@ Function Remove-DnsTxt {
                         value = $valToFind
                     })
                 } | ConvertTo-Json
-                ErrorAction = 'Stop'
             }
             Write-Verbose "Remove value $TxtValue from Record $RecordName."
             Write-Debug "POST $($queryParams.Uri)`n$($queryParams.Body)"
@@ -211,14 +210,13 @@ Function Remove-DnsTxt {
             $queryParams = @{
                 Uri = "https://api.hetzner.cloud/v1/zones/$($zone.id)/rrsets/$($rec.id)"
                 Method = 'DELETE'
-                ErrorAction = 'Stop'
             }
             Write-Verbose "Remove Record $RecordName with value $TxtValue."
             Write-Debug "DELETE $($queryParams.Uri)"
         }
 
         try {
-            Invoke-RestMethod @queryParams @restParams @Script:UseBasic -EA Stop | Out-Null
+            $null = Invoke-RestMethod @queryParams @restParams @Script:UseBasic
         } catch { throw }
 
     } else {
@@ -303,7 +301,7 @@ Function Find-HetznerZone {
         try {
             $query = "https://api.hetzner.cloud/v1/zones/$zoneTest"
             Write-Debug "GET $query"
-            $response = Invoke-RestMethod $query @RestParameters @Script:UseBasic -EA Stop
+            $response = Invoke-RestMethod $query @RestParameters @Script:UseBasic
         } catch {
             if (404 -eq $_.Exception.Response.StatusCode) {
                 Write-Debug "Zone $zoneTest does not exist"
