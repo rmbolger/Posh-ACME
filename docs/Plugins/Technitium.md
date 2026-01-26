@@ -1,3 +1,5 @@
+title: Technitium
+
 # How To Use the Technitium DNS Plugin
 
 This plugin works against the [Technitium DNS Server](https://technitium.com/dns/). It is assumed that you have already installed Technitium DNS Server and created the DNS zone(s) you will be working against.
