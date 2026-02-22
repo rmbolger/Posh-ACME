@@ -28,7 +28,9 @@ function Add-DnsTxt {
         $IBCred = [pscredential]::new($IBUsername,$secpass)
     }
 
-    $recUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&view=$IBView"
+    $escapedTxtValue = [uri]::EscapeDataString($TxtValue)
+
+    $recUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$escapedTxtValue&view=$IBView"
 
     try {
         # ignore cert validation for the duration of the call
