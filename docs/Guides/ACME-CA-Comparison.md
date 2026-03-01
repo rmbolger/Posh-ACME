@@ -9,7 +9,7 @@ As more public certificate authorities hop on the [ACME][rfc00] bandwagon, it is
 | Free SAN Limit      | 100 names                  | 100+ names             | 100+ names         | 1 name + www       | 1 name + www       |
 | Free Wildcards      | :white_check_mark:         | :white_check_mark:     | :white_check_mark: | :x:                | :x:                |
 | Free Lifetime       | 90 days                    | 1*-90 days             | 90 days            | 90 days            | 90 days            |
-| [IDN][wk02] Support | :white_check_mark:         | :x:                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| [IDN][wk02] Support | :white_check_mark:         | :white_check_mark:     | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | Chain Info          | [Chains][le06]             | [Iss][gc02]/[Root][gc03] | RSA [Iss1][z02]/[Iss2][z03]/[Root][z04]<br />ECC [Iss1][z05]/[Iss2][z06]/[Root][z07] | RSA [Iss][ss02]/[Root][ss03]<br />ECC [Iss][ss06]/[Root][ss07] | [Iss][ac02]/[Root][ac03] |
 | Rate Limits         | [Policy][le02]             | [Policy][gc04]         | ??                 | ??                 | ??                 |
 | Notes               | [Service Status][le09]<br />[Staging Environment][le03] | [Staging Endpoint][gc06]<br />[Quick Start][gc07] | See Notes below | See Warning below | [CPS and Audit Docs][ac04] |
@@ -120,3 +120,4 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 [ac02]: https://www.actalis.com/actalisdvserveracmecag1-en
 [ac03]: https://www.actalis.com/actalis-authentication-rootca-en
 [ac04]: https://www.actalis.com/legal-repository
+
