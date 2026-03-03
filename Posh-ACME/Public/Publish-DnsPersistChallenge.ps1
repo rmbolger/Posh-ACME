@@ -34,6 +34,10 @@ function Publish-DnsPersistChallenge {
             catch { $PSCmdlet.ThrowTerminatingError($_) }
             $AccountUri = $Account.location
         }
+
+        # initialize a deferred collection object so we can build up the list of challenges
+        # to publish as we process the orders and then publish them all at once at the end.
+        $chalCollection = [Collections.Generic.List[pscustomobject]]::new()
     }
 
     Process {
@@ -45,7 +49,7 @@ function Publish-DnsPersistChallenge {
             $pArgs = $Order | Get-PAPluginArgs
 
             # loop through the auths by index so we can correlate them to the associated plugin on the order
-            $chals = for ($i=0; $i -lt $auths.Count; $i++) {
+            for ($i=0; $i -lt $auths.Count; $i++) {
                 $fqdn = $auths[$i].fqdn
 
                 if ($fqdn.StartsWith('*.')) {
@@ -88,72 +92,88 @@ function Publish-DnsPersistChallenge {
                     $plugin = $Order.Plugin[-1]
                 }
 
-                [pscustomobject]@{
+                $chalCollection.Add([pscustomobject]@{
                     fqdn = $fqdn
                     issuer = $issuers[0]
                     plugin = $plugin
                     pArgs = $pArgs
-                }
-            }
-
-            # Sort FQDNs by reverse label order so the most generic (example.com) comes first
-            # and filter duplicate fqdns due to wildcard trimming.
-            $chals = $chals | Sort-Object {$a=$_.fqdn.Split('.'); [array]::Reverse($a); $a -join '.'} -Unique
-
-            $lastFqdn = $null
-            foreach ($chal in $chals) {
-                # skip if a previous wildcard enabled record would cover this domain and -UseAllDomains was not specified
-                if ($chal.fqdn -like "*.$lastFqdn" -and $AllowWildcard -and -not $UseAllDomains) {
-                    Write-Verbose "Skipping $($chal.fqdn) because it's a wildcard match for $lastFqdn and should be covered by the same TXT record."
-                    continue
-                }
-
-                $publishArgs = @{
-                    Domain = $chal.fqdn
-                    IssuerDomainName = $chal.issuer
-                    AccountUri = $AccountUri
-                    Plugin = $chal.plugin
-                    PluginArgs = $chal.pArgs
-                    AllowWildcard = $AllowWildcard
-                }
-                if ($PersistUntil) {
-                    $publishArgs.PersistUntil = $PersistUntil
-                }
-                Publish-DnsPersistChallenge @publishArgs
-                $lastFqdn = $chal.fqdn
+                })
             }
 
         } else {
 
             # sanitize the $Domain if it was passed in as a wildcard on accident
             if ($Domain -and $Domain.StartsWith('*.')) {
-                Write-Warning "Stripping wildcard characters from domain name. Not required for publishing."
+                Write-Warning "Stripping wildcard characters from $Domain. Not required for publishing."
                 $Domain = $Domain.Substring(2)
             }
 
-            # build the TXT value based on the input parameters
-            $txtValue = '{0}; accounturi={1}' -f $IssuerDomainName, $AccountUri
-            if ($AllowWildcard) {
-                $txtValue += '; policy=wildcard'
+            $chalCollection.Add([pscustomobject]@{
+                fqdn = $Domain
+                issuer = $IssuerDomainName
+                plugin = $Plugin
+                pArgs = $PluginArgs
+            })
+
+        }
+
+    }
+
+    End {
+
+        # Sort FQDNs by reverse label order so the most generic (example.com) comes first
+        # and filter duplicate fqdns due to wildcard trimming.
+        $chals = $chalCollection.ToArray() | Sort-Object {$a=$_.fqdn.Split('.'); [array]::Reverse($a); $a -join '.'} -Unique
+
+        # filter out any challenges that would be covered by a previous record if wildcards are allowed
+        # and -UseAllDomains was not specified
+        $lastFqdn = $null
+        $chals = foreach ($chal in $chals) {
+            if ($chal.fqdn -like "*.$lastFqdn" -and $AllowWildcard -and -not $UseAllDomains) {
+                Write-Verbose "Skipping $($chal.fqdn) because it's a wildcard match for $lastFqdn and should be covered by the same TXT record."
+                continue
             }
-            if ($PersistUntil) {
-                $txtValue += '; persistUntil={0}' -f $PersistUntil.ToUnixTimeSeconds()
-            }
-            $txtValue = '"{0}"' -f $txtValue
+            Write-Output $chal
+            $lastFqdn = $chal.fqdn
+        }
+
+        # process what's left by plugin
+        $chals | Group-Object plugin | ForEach-Object {
 
             # dot source the plugin file
-            $pluginDetail = $script:Plugins.$Plugin
+            $pluginDetail = $script:Plugins.($_.Name)
+            Write-Verbose ($pluginDetail | convertto-json)
             . $pluginDetail.Path
 
-            # All plugins in $script:Plugins should have been validated during module
-            # load. So we're not going to do much plugin-specific validation here.
-            Write-Verbose "Publishing dns-persist-01 challenge for $Domain using Plugin $Plugin."
+            # process the group by unique pArgs
+            $_.Group | Group-Object pArgs | ForEach-Object {
+                $pArgs = $_.Group[0].pArgs
 
-            $recordName = "_validation-persist.$($Domain)".TrimEnd('.')
+                foreach ($chal in $_.Group) {
 
-            # call the function with the required parameters and splatting the rest
-            Write-Debug "Calling $Plugin plugin to add $recordName TXT with value $txtValue"
-            Add-DnsTxt -RecordName $recordName -TxtValue $txtValue @PluginArgs
+                    Write-Verbose "Publishing dns-persist-01 challenge for $($chal.fqdn) using Plugin $($chal.plugin)."
+
+                    $recordName = "_validation-persist.$($chal.fqdn)".TrimEnd('.')
+
+                    # build the TXT value based on the input parameters
+                    $txtValue = '{0}; accounturi={1}' -f $chal.issuer, $AccountUri
+                    if ($AllowWildcard) {
+                        $txtValue += '; policy=wildcard'
+                    }
+                    if ($PersistUntil) {
+                        $txtValue += '; persistUntil={0}' -f $PersistUntil.ToUnixTimeSeconds()
+                    }
+                    $txtValue = '"{0}"' -f $txtValue
+
+                    # call the function with the required parameters and splatting the rest
+                    Write-Debug "Calling $($chal.plugin) plugin to add $recordName TXT with value $txtValue"
+                    Add-DnsTxt -RecordName $recordName -TxtValue $txtValue @pArgs
+                }
+
+                # Save the changes for this plugin and pArgs combination
+                Write-Verbose "Finalizing record changes for plugin $($pluginDetail.Name)."
+                Save-DnsTxt @pArgs
+            }
 
         }
 
