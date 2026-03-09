@@ -2,7 +2,7 @@ title: GoDaddy Corporate Domains
 
 # How To Use the GoDaddy DNS Plugin
 
-This plugin works against the [GoDaddy Corporate Domains DNS](https://www.godaddy.com/corporate-domains) provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against. The warnings below apply to GoDaddy Retail accounts, which use the same API root, so it's likely they apply here too.
+This plugin works against the [GoDaddy Corporate Domains DNS](https://developer.brandsight.com/#tag/DNS-Management) (also known as Brandsight) provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against. The warnings below apply to GoDaddy Retail accounts, which use the same API root, so it's likely they apply here too.
 
 !!! warning
     From April 2024 GoDaddy have introduced API account limits which prevent DNS API access for customers with less than 10 domains on their account. Existing accounts that don't meet the new requirements will now receive an Access Denied error when communicating with the API.

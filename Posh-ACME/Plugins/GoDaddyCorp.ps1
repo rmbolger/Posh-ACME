@@ -290,7 +290,7 @@ function Save-DnsTxt {
 ############################
 
 # API Docs:
-# https://developer.godaddy.com/doc/endpoint/domains
+# https://developer.brandsight.com/#tag/DNS-Management
 
 function Find-GDZone {
     [CmdletBinding()]
