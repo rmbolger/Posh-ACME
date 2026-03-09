@@ -1,6 +1,6 @@
 title: GoDaddy Corporate Domains
 
-# How To Use the GoDaddy DNS Plugin
+# How To Use the GoDaddy Corporate DNS Plugin
 
 This plugin works against the [GoDaddy Corporate Domains DNS](https://developer.brandsight.com/#tag/DNS-Management) (also known as Brandsight) provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against. The warnings below apply to GoDaddy Retail accounts, which use the same API root, so it's likely they apply here too.
 
