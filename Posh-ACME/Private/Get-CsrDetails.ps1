@@ -12,6 +12,7 @@ function Get-CsrDetails {
     #   Domain    : The collection of FQDNs found in the CN and/or SAN attributes
     #   KeyLength : The key length value using our Posh-ACME nomeclature
     #   OCSPMustStaple : Boolean indicating whether the OCSP Must Staple flag is set
+    #   ClientAuthEKU : Boolean indicating whether the Client Authentication EKU is included
     #   Base64Url : The Base64Url encoded bytes of the raw request
     #   PemLines  : The original lines from the file/string PEM request content
 
@@ -141,6 +142,14 @@ function Get-CsrDetails {
         $details.OCSPMustStaple = $false
     }
     Write-Debug "OCSP Must-Staple = $($details.OCSPMustStaple)"
+
+    # Find the sequence for EKU (oid 2.5.29.37) and determine whether Client Authentication is included
+    if ($ekuSeq = $extensions | Where-Object { $_.Id -eq '2.5.29.37' }) {
+        $ekuExt = [Org.BouncyCastle.Asn1.X509.ExtendedKeyUsage]::GetInstance([Org.BouncyCastle.Asn1.Asn1Object]::FromByteArray($ekuSeq[1].GetOctets()))
+        $details.ClientAuthEKU = $ekuExt.HasKeyPurposeId([Org.BouncyCastle.Asn1.X509.KeyPurposeID]::IdKPClientAuth)
+    } else {
+        $details.ClientAuthEKU = $false
+    }
 
     return $details
 }

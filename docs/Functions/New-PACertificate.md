@@ -17,10 +17,10 @@ Request a new certificate
 ```powershell
 New-PACertificate [-Domain] <String[]> [-Name <String>] [-Contact <String[]>] [-CertKeyLength <String>]
  [-AlwaysNewKey] [-AcceptTOS] [-AccountKeyLength <String>] [-DirectoryUrl <String>] [-Plugin <String[]>]
- [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-Subject <String>]
- [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-UseModernPfxEncryption]
- [-Install] [-UseSerialValidation] [-Force] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
- [-PreferredChain <String>] [-Profile <String>] [<CommonParameters>]
+ [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-ClientAuthEKU]
+ [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>]
+ [-UseModernPfxEncryption] [-Install] [-UseSerialValidation] [-Force] [-DnsSleep <Int32>]
+ [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Profile <String>] [<CommonParameters>]
 ```
 
 ### FromCSR
@@ -525,6 +525,21 @@ The name of the desired ACME certificate profile. This is checked against the pr
 ```yaml
 Type: String
 Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ClientAuthEKU
+If specified, the Client Authentication (1.3.6.1.5.5.7.3.2) enhanced key usage field will be added to the generated certificate request. Otherwise, only the Server Authentication (1.3.6.1.5.5.7.3.1) field will be added. Note that the Client Authentication field is being removed by most public CAs and may be rejected if included. Some CAs also ignore submitted EKU values entirely.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: FromScratch
 Aliases:
 
 Required: False

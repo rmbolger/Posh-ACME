@@ -27,6 +27,9 @@ function New-PAOrder {
         [switch]$OCSPMustStaple,
         [Parameter(ParameterSetName='FromScratch')]
         [Parameter(ParameterSetName='ImportKey')]
+        [switch]$ClientAuthEKU,
+        [Parameter(ParameterSetName='FromScratch')]
+        [Parameter(ParameterSetName='ImportKey')]
         [switch]$AlwaysNewKey,
         [Parameter(ParameterSetName='FromScratch')]
         [Parameter(ParameterSetName='ImportKey')]
@@ -69,7 +72,8 @@ function New-PAOrder {
 
         $Domain = $csrDetails.Domain
         $KeyLength = $csrDetails.KeyLength
-        $OCSPMustStaple = New-Object Management.Automation.SwitchParameter($csrDetails.OCSPMustStaple)
+        $OCSPMustStaple = [Management.Automation.SwitchParameter]::new($csrDetails.OCSPMustStaple)
+        $ClientAuthEKU = [Management.Automation.SwitchParameter]::new($csrDetails.ClientAuthEKU)
     }
 
     # De-dupe the domain list if necessary
@@ -310,6 +314,7 @@ function New-PAOrder {
         CertExpires         = $null
         RenewAfter          = $null
         OCSPMustStaple      = $OCSPMustStaple.IsPresent
+        ClientAuthEKU       = $ClientAuthEKU.IsPresent
         Plugin              = @('Manual')
         DnsAlias            = $null
         DnsSleep            = $DnsSleep

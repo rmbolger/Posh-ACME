@@ -16,21 +16,21 @@ Create a new order on the current ACME account.
 ### FromScratch (Default)
 ```powershell
 New-PAOrder [-Domain] <String[]> [[-KeyLength] <String>] [-Name <String>] [-Plugin <String[]>]
- [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-AlwaysNewKey]
- [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>]
- [-UseModernPfxEncryption] [-Install] [-UseSerialValidation] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
- [-PreferredChain <String>] [-Force] [-ReplacesCert <String>] [-Profile <String>] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+ [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-ClientAuthEKU]
+ [-AlwaysNewKey] [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>]
+ [-PfxPassSecure <SecureString>] [-UseModernPfxEncryption] [-Install] [-UseSerialValidation]
+ [-DnsSleep <Int32>] [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Force] [-ReplacesCert <String>]
+ [-Profile <String>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### ImportKey
 ```powershell
 New-PAOrder [-Domain] <String[]> -KeyFile <String> [-Name <String>] [-Plugin <String[]>]
- [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-AlwaysNewKey]
- [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>]
- [-UseModernPfxEncryption] [-Install] [-UseSerialValidation] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
- [-PreferredChain <String>] [-Force] [-ReplacesCert <String>] [-Profile <String>] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+ [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-ClientAuthEKU]
+ [-AlwaysNewKey] [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>]
+ [-PfxPassSecure <SecureString>] [-UseModernPfxEncryption] [-Install] [-UseSerialValidation]
+ [-DnsSleep <Int32>] [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Force] [-ReplacesCert <String>]
+ [-Profile <String>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### FromCSR
@@ -506,6 +506,21 @@ The name of the desired ACME certificate profile. This is checked against the pr
 ```yaml
 Type: String
 Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ClientAuthEKU
+If specified, the Client Authentication (1.3.6.1.5.5.7.3.2) enhanced key usage field will be added to the generated certificate request. Otherwise, only the Server Authentication (1.3.6.1.5.5.7.3.1) field will be added. Note that the Client Authentication field is being removed by most public CAs and may be rejected if included. Some CAs also ignore submitted EKU values entirely.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: FromScratch, ImportKey
 Aliases:
 
 Required: False
