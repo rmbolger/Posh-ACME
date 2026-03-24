@@ -95,56 +95,107 @@ function New-Csr {
     }
 
     # create a .NET Dictionary to hold our extensions because that's what BouncyCastle needs
-    $extDict = New-Object 'Collections.Generic.Dictionary[Org.BouncyCastle.Asn1.DerObjectIdentifier,Org.BouncyCastle.Asn1.X509.X509Extension]'
+    $extDict = [Collections.Generic.Dictionary[
+        Org.BouncyCastle.Asn1.DerObjectIdentifier,
+        Org.BouncyCastle.Asn1.X509.X509Extension
+    ]]::new()
 
     # create the extensions we care about
-    $basicConstraints = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.BasicConstraints($false))))
+    $basicConstraints = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
+        $false, # not critical
+        [Org.BouncyCastle.Asn1.DerOctetString]::new(
+            [Org.BouncyCastle.Asn1.X509.BasicConstraints]::new($false) # not a CA
+        )
+    )
     if ($Order.KeyLength -like 'ec-*') {
         # Only DigitalSignature on ECC certs because KeyEncipherment not supported
-        $keyUsage = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($true, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.KeyUsage([Org.BouncyCastle.Asn1.X509.KeyUsage]::DigitalSignature))))
+        $keyUsage = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
+            $true, # critical
+            [Org.BouncyCastle.Asn1.DerOctetString]::new(
+                [Org.BouncyCastle.Asn1.X509.KeyUsage]::new(
+                    [Org.BouncyCastle.Asn1.X509.KeyUsage]::DigitalSignature
+                )
+            )
+        )
     } else {
         # DigitalSignature and KeyEncipherment on RSA certs
-        $keyUsage = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($true, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.KeyUsage([Org.BouncyCastle.Asn1.X509.KeyUsage]::DigitalSignature -bor [Org.BouncyCastle.Asn1.X509.KeyUsage]::KeyEncipherment))))
+        $keyUsage = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
+            $true, # critical
+            [Org.BouncyCastle.Asn1.DerOctetString]::new(
+                [Org.BouncyCastle.Asn1.X509.KeyUsage]::new(
+                    [Org.BouncyCastle.Asn1.X509.KeyUsage]::DigitalSignature -bor
+                    [Org.BouncyCastle.Asn1.X509.KeyUsage]::KeyEncipherment
+                )
+            )
+        )
     }
-    # Client + Server Authentication
-    $extKeyUsage = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.ExtendedKeyUsage([Org.BouncyCastle.Asn1.X509.KeyPurposeID]::IdKPServerAuth, [Org.BouncyCastle.Asn1.X509.KeyPurposeID]::IdKPClientAuth))))
-    $ski = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.X509.Extension.SubjectKeyIdentifierStructure($keyPair.Public))))
+    $ski = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
+        $false, # not critical
+        [Org.BouncyCastle.Asn1.DerOctetString]::new(
+            [Org.BouncyCastle.X509.Extension.SubjectKeyIdentifierStructure]::new($keyPair.Public)
+        )
+    )
 
     # create SANs based on the identifier types
-    $genNames = @()
-    $Order.identifiers | ForEach-Object {
+    $genNames = $Order.identifiers | ForEach-Object {
         if ($_.type -eq 'dns') {
-            $genNames += New-Object Org.BouncyCastle.Asn1.X509.GeneralName([Org.BouncyCastle.Asn1.X509.GeneralName]::DnsName, $_.value)
+            [Org.BouncyCastle.Asn1.X509.GeneralName]::new(
+                [Org.BouncyCastle.Asn1.X509.GeneralName]::DnsName,
+                $_.value
+            )
         }
         elseif ($_.type -eq 'ip') {
-            $genNames += New-Object Org.BouncyCastle.Asn1.X509.GeneralName([Org.BouncyCastle.Asn1.X509.GeneralName]::IPAddress, $_.value)
+            [Org.BouncyCastle.Asn1.X509.GeneralName]::new(
+                [Org.BouncyCastle.Asn1.X509.GeneralName]::IPAddress,
+                $_.value
+            )
         }
         else {
             Write-Warning "Skipping unexpected identifier type '$($_.type)' with value '$($_.value)'."
         }
     }
-    $sans = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(New-Object Org.BouncyCastle.Asn1.X509.GeneralNames(@(,$genNames)))))
+    $sans = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
+        $false, # not critical
+        [Org.BouncyCastle.Asn1.DerOctetString]::new(
+            [Org.BouncyCastle.Asn1.X509.GeneralNames]::new($genNames)
+        )
+    )
 
     # add them to a DerSet object
     $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::BasicConstraints, $basicConstraints)
     $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::KeyUsage, $keyUsage)
-    $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::ExtendedKeyUsage, $extKeyUsage)
     $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::SubjectAlternativeName, $sans)
     $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::SubjectKeyIdentifier, $ski)
 
     # add OCSP Must Staple if requested
     if ($Order.OCSPMustStaple) {
         Write-Debug "Adding OCSP Must-Staple"
-        $mustStaple = New-Object Org.BouncyCastle.Asn1.X509.X509Extension($false, (New-Object Org.BouncyCastle.Asn1.DerOctetString(@(,[byte[]](0x30,0x03,0x02,0x01,0x05)))))
-        $extDict.Add((New-Object Org.BouncyCastle.Asn1.DerObjectIdentifier('1.3.6.1.5.5.7.1.24')), $mustStaple)
+        $mustStaple = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
+            $false, # not critical
+            [Org.BouncyCastle.Asn1.DerOctetString]::new(
+                @(,[byte[]](0x30,0x03,0x02,0x01,0x05)) # OCSP NoCheck extension ASN.1 structure (SEQUENCE { BOOLEAN FALSE }
+            )
+        )
+        $extDict.Add([Org.BouncyCastle.Asn1.DerObjectIdentifier]::new('1.3.6.1.5.5.7.1.24'), $mustStaple)
     }
 
     # build the extensions DerSet
-    $extensions = New-Object Org.BouncyCastle.Asn1.X509.X509Extensions($extDict)
-    $extDerSet = New-Object Org.BouncyCastle.Asn1.DerSet(New-Object Org.BouncyCastle.Asn1.Pkcs.AttributePkcs([Org.BouncyCastle.Asn1.Pkcs.PkcsObjectIdentifiers]::Pkcs9AtExtensionRequest,(New-Object Org.BouncyCastle.Asn1.DerSet($extensions))))
+    $extensions = [Org.BouncyCastle.Asn1.X509.X509Extensions]::new($extDict)
+    $extDerSet = [Org.BouncyCastle.Asn1.DerSet]::new(
+        [Org.BouncyCastle.Asn1.Pkcs.AttributePkcs]::new(
+            [Org.BouncyCastle.Asn1.Pkcs.PkcsObjectIdentifiers]::Pkcs9AtExtensionRequest,
+            [Org.BouncyCastle.Asn1.DerSet]::new($extensions)
+        )
+    )
 
     # create the request object
-    $req = New-Object Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest($sigAlgo,$subject,$keyPair.Public,$extDerSet,$keyPair.Private)
+    $req = [Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest]::new(
+        $sigAlgo,
+        $subject,
+        $keyPair.Public,
+        $extDerSet,
+        $keyPair.Private
+    )
 
     # export the csr to a file
     Export-Pem $req $reqFile

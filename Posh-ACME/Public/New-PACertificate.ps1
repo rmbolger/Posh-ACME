@@ -115,7 +115,7 @@ function New-PACertificate {
 
         $Domain = $csrDetails.Domain
         $CertKeyLength = $csrDetails.KeyLength
-        $OCSPMustStaple = New-Object Management.Automation.SwitchParameter($csrDetails.OCSPMustStaple)
+        $OCSPMustStaple = [Management.Automation.SwitchParameter]::new($csrDetails.OCSPMustStaple)
     }
 
     # Generate an appropriate name if one wasn't specified

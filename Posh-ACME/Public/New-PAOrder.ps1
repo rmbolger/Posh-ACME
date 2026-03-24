@@ -69,7 +69,7 @@ function New-PAOrder {
 
         $Domain = $csrDetails.Domain
         $KeyLength = $csrDetails.KeyLength
-        $OCSPMustStaple = New-Object Management.Automation.SwitchParameter($csrDetails.OCSPMustStaple)
+        $OCSPMustStaple = [Management.Automation.SwitchParameter]::new($csrDetails.OCSPMustStaple)
     }
 
     # De-dupe the domain list if necessary
