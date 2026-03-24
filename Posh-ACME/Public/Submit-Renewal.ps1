@@ -82,7 +82,6 @@ function Submit-Renewal {
                     $certParams.CertKeyLength  = $order.KeyLength
                     $certParams.AlwaysNewKey   = $order.AlwaysNewKey
                     $certParams.OCSPMustStaple = $order.OCSPMustStaple
-                    $certParams.ClientAuthEKU  = $order.ClientAuthEKU
                     $certParams.FriendlyName   = $order.FriendlyName
                     $certParams.PfxPass        = $order.PfxPass
                     if (Test-WinOnly) { $certParams.Install = $order.Install }

@@ -18,9 +18,9 @@ Switch to or modify an order.
 Set-PAOrder [[-MainDomain] <String>] [-Name <String>] [-NoSwitch] [-Plugin <String[]>]
  [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-NewName <String>]
  [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>]
- [-UseModernPfxEncryption] [-Install] [-OCSPMustStaple] [-ClientAuthEKU] [-DnsSleep <Int32>]
- [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-AlwaysNewKey] [-UseSerialValidation]
- [-Profile <String>] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-UseModernPfxEncryption] [-Install] [-OCSPMustStaple] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
+ [-PreferredChain <String>] [-AlwaysNewKey] [-UseSerialValidation] [-Profile <String>] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ### Revoke
@@ -456,21 +456,6 @@ The name of the desired ACME certificate profile. This is checked against the pr
 
 ```yaml
 Type: String
-Parameter Sets: Edit
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ClientAuthEKU
-If specified, the Client Authentication (1.3.6.1.5.5.7.3.2) enhanced key usage field will be added to the generated certificate request. Otherwise, only the Server Authentication (1.3.6.1.5.5.7.3.1) field will be added. Note that the Client Authentication field is being removed by most public CAs and may be rejected if included. Some CAs also ignore all submitted EKU values entirely.
-
-```yaml
-Type: SwitchParameter
 Parameter Sets: Edit
 Aliases:
 

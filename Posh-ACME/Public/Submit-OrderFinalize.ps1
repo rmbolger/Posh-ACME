@@ -48,7 +48,6 @@ function Submit-OrderFinalize {
         if ([String]::IsNullOrWhiteSpace($order.CSRBase64Url)) {
             $msg = "Creating new certificate request with key length $($Order.KeyLength)"
             if ($Order.OCSPMustStaple) { $msg += " and OCSP Must-Staple" }
-            if ($Order.ClientAuthEKU) { $msg += " and Client Authentication EKU" }
             Write-Verbose "$msg."
             $csr = New-Csr $Order
         } else {

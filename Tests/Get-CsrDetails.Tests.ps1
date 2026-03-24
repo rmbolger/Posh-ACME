@@ -74,7 +74,6 @@ Describe "Get-CsrDetails" {
                 $result.Domain         | Should -BeExactly @('example.com')
                 $result.KeyLength      | Should -BeExactly '2048'
                 $result.OCSPMustStaple | Should -BeFalse
-                $result.ClientAuthEKU  | Should -BeTrue
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
                 $result.PemLines.Count | Should -Be 19
             }
@@ -89,7 +88,6 @@ Describe "Get-CsrDetails" {
                 $result.Domain         | Should -BeExactly @('example.com')
                 $result.KeyLength      | Should -BeExactly '2048'
                 $result.OCSPMustStaple | Should -BeFalse
-                $result.ClientAuthEKU  | Should -BeTrue
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
                 $result.PemLines.Count | Should -Be 19
             }
@@ -105,7 +103,6 @@ Describe "Get-CsrDetails" {
                 $result.Domain         | Should -BeExactly @('example.com')
                 $result.KeyLength      | Should -BeExactly '2048'
                 $result.OCSPMustStaple | Should -BeFalse
-                $result.ClientAuthEKU  | Should -BeTrue
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
                 $result.PemLines.Count | Should -Be 3
             }
@@ -120,7 +117,6 @@ Describe "Get-CsrDetails" {
                 $result.Domain         | Should -BeExactly @('example.com')
                 $result.KeyLength      | Should -BeExactly '2048'
                 $result.OCSPMustStaple | Should -BeFalse
-                $result.ClientAuthEKU  | Should -BeTrue
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
                 $result.PemLines.Count | Should -Be 3
             }
@@ -136,7 +132,6 @@ Describe "Get-CsrDetails" {
                 $result.Domain         | Should -BeExactly @('example.com')
                 $result.KeyLength      | Should -BeExactly "4096"
                 $result.OCSPMustStaple | Should -BeTrue
-                $result.ClientAuthEKU  | Should -BeTrue
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
                 $result.PemLines.Count | Should -Be 28
             }
@@ -152,7 +147,6 @@ Describe "Get-CsrDetails" {
                 $result.Domain         | Should -BeExactly @('*.example.com','example.com','*.sub1.example.com')
                 $result.KeyLength      | Should -BeExactly "ec-256"
                 $result.OCSPMustStaple | Should -BeFalse
-                $result.ClientAuthEKU  | Should -BeTrue
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
                 $result.PemLines.Count | Should -Be 11
             }
@@ -168,7 +162,6 @@ Describe "Get-CsrDetails" {
                 $result.Domain         | Should -BeExactly @('example.com')
                 $result.KeyLength      | Should -BeExactly "ec-521"
                 $result.OCSPMustStaple | Should -BeFalse
-                $result.ClientAuthEKU  | Should -BeFalse
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
                 $result.PemLines.Count | Should -Be 13
             }

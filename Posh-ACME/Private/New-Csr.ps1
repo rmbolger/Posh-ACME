@@ -129,18 +129,6 @@ function New-Csr {
             )
         )
     }
-    # Server and optionally Client Authentication EKU
-    $ekuIDs = @([Org.BouncyCastle.Asn1.X509.KeyPurposeID]::IdKPServerAuth)
-    if ($Order.ClientAuthEKU) {
-        Write-Debug "Adding Client Authentication EKU to CSR."
-        $ekuIDs += [Org.BouncyCastle.Asn1.X509.KeyPurposeID]::IdKPClientAuth
-    }
-    $extKeyUsage = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
-        $false, # not critical
-        [Org.BouncyCastle.Asn1.DerOctetString]::new(
-            [Org.BouncyCastle.Asn1.X509.ExtendedKeyUsage]::new($ekuIDs)
-        )
-    )
     $ski = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
         $false, # not critical
         [Org.BouncyCastle.Asn1.DerOctetString]::new(
@@ -176,7 +164,6 @@ function New-Csr {
     # add them to a DerSet object
     $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::BasicConstraints, $basicConstraints)
     $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::KeyUsage, $keyUsage)
-    $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::ExtendedKeyUsage, $extKeyUsage)
     $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::SubjectAlternativeName, $sans)
     $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::SubjectKeyIdentifier, $ski)
 

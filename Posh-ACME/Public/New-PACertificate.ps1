@@ -32,8 +32,6 @@ function New-PACertificate {
         [Parameter(ParameterSetName='FromScratch')]
         [switch]$OCSPMustStaple,
         [Parameter(ParameterSetName='FromScratch')]
-        [switch]$ClientAuthEKU,
-        [Parameter(ParameterSetName='FromScratch')]
         [string]$Subject,
         [Parameter(ParameterSetName='FromScratch')]
         [string]$FriendlyName,
@@ -118,7 +116,6 @@ function New-PACertificate {
         $Domain = $csrDetails.Domain
         $CertKeyLength = $csrDetails.KeyLength
         $OCSPMustStaple = [Management.Automation.SwitchParameter]::new($csrDetails.OCSPMustStaple)
-        $ClientAuthEKU = [Management.Automation.SwitchParameter]::new($csrDetails.ClientAuthEKU)
     }
 
     # Generate an appropriate name if one wasn't specified
@@ -170,7 +167,6 @@ function New-PACertificate {
                 Name                   = $Name
                 KeyLength              = $CertKeyLength
                 OCSPMustStaple         = $OCSPMustStaple
-                ClientAuthEKU          = $ClientAuthEKU
                 AlwaysNewKey           = $AlwaysNewKey
                 Subject                = $Subject
                 FriendlyName           = $FriendlyName
@@ -183,7 +179,6 @@ function New-PACertificate {
             # by explicit parameters
             if ($oldOrder) {
                 @(  'OCSPMustStaple'
-                    'ClientAuthEKU'
                     'AlwaysNewKey'
                     'Subject'
                     'FriendlyName'

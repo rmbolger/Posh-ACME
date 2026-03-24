@@ -47,8 +47,6 @@ function Set-PAOrder {
         [Parameter(ParameterSetName='Edit')]
         [switch]$OCSPMustStaple,
         [Parameter(ParameterSetName='Edit')]
-        [switch]$ClientAuthEKU,
-        [Parameter(ParameterSetName='Edit')]
         [int]$DnsSleep,
         [Parameter(ParameterSetName='Edit')]
         [int]$ValidationTimeout,
@@ -191,13 +189,6 @@ function Set-PAOrder {
                 Write-Verbose "Setting OCSPMustStaple to $($OCSPMustStaple.IsPresent)"
                 Write-Warning "Changing the value of OCSPMustStaple only affects future certificates generated with this order. It can not change the state of an existing certificate."
                 $order.OCSPMustStaple = $OCSPMustStaple.IsPresent
-                $saveChanges = $true
-            }
-
-            if ('ClientAuthEKU' -in $psbKeys -and $ClientAuthEKU.IsPresent -ne $order.ClientAuthEKU) {
-                Write-Verbose "Setting ClientAuthEKU to $($ClientAuthEKU.IsPresent)"
-                Write-Warning "Changing the value of ClientAuthEKU only affects future certificates generated with this order. It can not change the state of an existing certificate."
-                $order | Add-Member 'ClientAuthEKU' $ClientAuthEKU.IsPresent -Force
                 $saveChanges = $true
             }
 
