@@ -16,7 +16,7 @@ function Register-ArgCompleters {
             [Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
         }
     }
-    $PluginCommands = 'New-PACertificate','New-PAOrder','Set-PAOrder','Get-PAPlugin','Publish-Challenge','Save-Challenge','Unpublish-Challenge','Publish-DnsPersistChallenge'
+    $PluginCommands = 'New-PACertificate','New-PAOrder','Set-PAOrder','Get-PAPlugin','Publish-Challenge','Save-Challenge','Unpublish-Challenge','Publish-DnsPersistChallenge','Unpublish-DnsPersistChallenge'
     Register-ArgumentCompleter -CommandName $PluginCommands -ParameterName 'Plugin' -ScriptBlock $PluginNameCompleter
 
     # Account ID
