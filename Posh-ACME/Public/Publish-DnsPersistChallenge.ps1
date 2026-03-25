@@ -3,14 +3,12 @@ function Publish-DnsPersistChallenge {
     param(
         [Parameter(Mandatory,ParameterSetName='FromOrder',Position=0,ValueFromPipeline)]
         [PSTypeName('PoshACME.PAOrder')]$Order,
-        [Parameter(ParameterSetName='FromOrder',Position=1)]
-        [PSTypeName('PoshACME.PAAccount')]$Account,
         [Parameter(Mandatory,ParameterSetName='Standalone',Position=0,ValueFromPipeline)]
-        [string]$Domain,
+        [string[]]$Domain,
         [Parameter(Mandatory,ParameterSetName='Standalone',Position=1)]
-        [string]$IssuerDomainName,
-        [Parameter(Mandatory,ParameterSetName='Standalone',Position=2)]
         [string]$AccountUri,
+        [Parameter(Mandatory,ParameterSetName='Standalone',Position=2)]
+        [string]$IssuerDomainName,
         [Parameter(Mandatory,ParameterSetName='Standalone')]
         [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
         [string]$Plugin,
@@ -25,14 +23,11 @@ function Publish-DnsPersistChallenge {
         # Make sure we have an account if we're running in the FromOrder parameter set.
         if ('FromOrder' -eq $PSCmdlet.ParameterSetName) {
              try {
-                if (-not $Account) {
-                    if (-not ($Account = Get-PAAccount)) {
-                        throw "No Account parameter specified and no current account selected. Try running Set-PAAccount first."
-                    }
+                if (-not ($Account = Get-PAAccount)) {
+                    throw "No current account selected. Try running Set-PAAccount first."
                 }
             }
             catch { $PSCmdlet.ThrowTerminatingError($_) }
-            $AccountUri = $Account.location
         }
 
         # initialize a deferred collection object so we can build up the list of challenges
@@ -70,7 +65,9 @@ function Publish-DnsPersistChallenge {
                 $issuers = $challenge.'issuer-domain-names'
 
                 # Sanity check issuer-domain-names.
-                # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-00.html#section-3.1
+                # "Clients MUST consider a challenge malformed if the issuer-domain-names array is empty or if it contains
+                # more than 10 entries, and MUST reject such challenges."
+                # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-01.html#section-3.1
                 if (-not $issuers -or $issuers.Length -eq 0) {
                     Write-Warning "dns-persist-01 challenge for $fqdn has no issuer domain names. Skipping."
                     continue
@@ -81,7 +78,7 @@ function Publish-DnsPersistChallenge {
                 }
 
                 # "The order of names in the array has no significance."
-                # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-00.html#section-7.6
+                # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-01.html#section-7.6
                 # So sort them to make it more likely that we get the same value for each challenge on each run.
                 $issuers = @($issuers | Sort-Object)
 
@@ -92,8 +89,15 @@ function Publish-DnsPersistChallenge {
                     $plugin = $Order.Plugin[-1]
                 }
 
+                # Sanitize the account URI for draft-00 challenges until Pebble supports the newer draft and includes it.
+                if (-not $challenge.accounturi) {
+                    Write-Warning "dns-persist-01 challenge for $fqdn is missing accounturi. Might be based on draft-00. Using account URI from account object instead."
+                    $challenge | Add-Member accounturi $Account.location -Force
+                }
+
                 $chalCollection.Add([pscustomobject]@{
                     fqdn = $fqdn
+                    accounturi = $challenge.accounturi
                     issuer = $issuers[0]
                     plugin = $plugin
                     pArgs = $pArgs
@@ -102,18 +106,22 @@ function Publish-DnsPersistChallenge {
 
         } else {
 
-            # sanitize the $Domain if it was passed in as a wildcard on accident
-            if ($Domain -and $Domain.StartsWith('*.')) {
-                Write-Warning "Stripping wildcard characters from $Domain. Not required for publishing."
-                $Domain = $Domain.Substring(2)
-            }
+            foreach ($d in $Domain) {
+                # sanitize the domain if it was passed in as a wildcard on accident
+                if ($d -and $d.StartsWith('*.')) {
+                    Write-Warning "Stripping wildcard characters from $d. Not required for publishing."
+                    $d = $d.Substring(2)
+                }
 
-            $chalCollection.Add([pscustomobject]@{
-                fqdn = $Domain
-                issuer = $IssuerDomainName
-                plugin = $Plugin
-                pArgs = $PluginArgs
-            })
+                $chalCollection.Add([pscustomobject]@{
+                    fqdn = $d
+                    accounturi = $AccountUri
+                    issuer = $IssuerDomainName
+                    plugin = $Plugin
+                    pArgs = $PluginArgs
+                })
+
+            }
 
         }
 
@@ -142,7 +150,7 @@ function Publish-DnsPersistChallenge {
 
             # dot source the plugin file
             $pluginDetail = $script:Plugins.($_.Name)
-            Write-Verbose ($pluginDetail | convertto-json)
+            Write-Verbose "Loading plugin $($pluginDetail.Name)"
             . $pluginDetail.Path
 
             # process the group by unique pArgs
@@ -156,7 +164,7 @@ function Publish-DnsPersistChallenge {
                     $recordName = "_validation-persist.$($chal.fqdn)".TrimEnd('.')
 
                     # build the TXT value based on the input parameters
-                    $txtValue = '{0}; accounturi={1}' -f $chal.issuer, $AccountUri
+                    $txtValue = '{0}; accounturi={1}' -f $chal.issuer, $chal.accounturi
                     if ($AllowWildcard) {
                         $txtValue += '; policy=wildcard'
                     }
