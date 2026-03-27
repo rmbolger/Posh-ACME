@@ -28,7 +28,9 @@ function Add-DnsTxt {
         $IBCred = [pscredential]::new($IBUsername,$secpass)
     }
 
-    $recUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&view=$IBView"
+    $escapedTxtValue = [uri]::EscapeDataString($TxtValue)
+
+    $recUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$escapedTxtValue&view=$IBView"
 
     try {
         # ignore cert validation for the duration of the call
@@ -124,12 +126,15 @@ function Remove-DnsTxt {
         $IBCred = [pscredential]::new($IBUsername,$secpass)
     }
 
+    $escapedTxtValue = [uri]::EscapeDataString($TxtValue)
+
+    $recUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$escapedTxtValue&view=$IBView"
+
     try {
         # ignore cert validation for the duration of the call
         if ($IBIgnoreCert) { Set-IBCertIgnoreOn }
 
         # query the _ref for the txt record object we want to delete
-        $recUrl = "https://$IBServer/wapi/v1.0/record:txt?name=$RecordName&text=$TxtValue&view=$IBView"
         Write-Debug "GET $recUrl"
         $response = Invoke-RestMethod -Uri $recUrl -Method Get -Credential $IBCred -Verbose:$false @script:UseBasic
 
