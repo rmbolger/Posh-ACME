@@ -39,6 +39,7 @@ FunctionsToExport = @(
     'New-PAOrder'
     'New-PAAuthorization'
     'Publish-Challenge'
+    'Publish-DnsPersistChallenge'
     'Remove-PAAccount'
     'Remove-PAOrder'
     'Remove-PAServer'
@@ -53,6 +54,7 @@ FunctionsToExport = @(
     'Submit-OrderFinalize'
     'Submit-Renewal'
     'Unpublish-Challenge'
+    'Unpublish-DnsPersistChallenge'
 )
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.

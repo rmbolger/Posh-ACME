@@ -29,6 +29,7 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - PowerShell [SecretManagement](https://devblogs.microsoft.com/powershell/secretmanagement-and-secretstore-are-generally-available/) support [(Guide)](Guides/Using-SecretManagement.md)
 - [ARI (ACME Renewal Information)](https://datatracker.ietf.org/doc/draft-ietf-acme-ari/) support based on draft 07.
 - [ACME Profiles](https://datatracker.ietf.org/doc/draft-ietf-acme-profiles/) support based on draft 00.
+- [dns-persist-01](https://datatracker.ietf.org/doc/draft-ietf-acme-dns-persist/) experimental support based on draft 01.
 
 
 ## Installation (Stable)
