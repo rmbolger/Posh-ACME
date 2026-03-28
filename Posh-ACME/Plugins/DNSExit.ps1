@@ -9,32 +9,62 @@ function Add-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [securestring]$DNSExitApiKey,
-        [Parameter(Mandatory,Position=3)]
-        [string[]]$DNSExitDomain,
-        [Parameter(Position=4)]
+        [Parameter(Position=3)]
         [int]$DNSExitTTL = 0,
-        [Parameter(Position=5)]
+        [Parameter(Position=4)]
         [string]$DNSExitApiUri = 'https://api.dnsexit.com/dns/',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     $apiKey = [pscredential]::new('a',$DNSExitApiKey).GetNetworkCredential().Password
-    $zoneName = Find-DNSExitZone $RecordName $DNSExitDomain
-    $recShort = Get-DNSExitRelativeName $RecordName $zoneName
 
-    $payload = @{
-        domain = $zoneName
-        add = @{
-            type = 'TXT'
-            name = $recShort
-            content = $TxtValue
-            ttl = $DNSExitTTL
+    $queryParams = @{
+        Uri = $DNSExitApiUri
+        Method = 'POST'
+        Headers = @{apikey=$apiKey}
+        ContentType = 'application/json'
+        ErrorAction = 'Stop'
+        Verbose = $false
+        Debug = $false
+    }
+
+    # The API has no GET endpoints to query available zones or existing records,
+    # but adding a record requires knowing the zone name. So we're just going to
+    # split the record name at various levels until one works or we run out
+    # of combinations to try.
+    $pieces = $RecordName.Split('.')
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $shortName = ''
+        if ($i -gt 0) { $shortName = $pieces[0..($i-1)] -join '.' }
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
+        Write-Debug "Trying name='$shortName' and domain='$zoneTest'"
+
+        $queryParams.Body = @{
+            domain = $zoneTest
+            add = @{
+                type = 'TXT'
+                name = $shortName
+                content = $TxtValue
+                ttl = $DNSExitTTL
+            }
+        } | ConvertTo-Json -Depth 5 -Compress
+
+        Write-Debug "POST $DNSExitApiUri`n$($queryParams.Body)"
+        $resp = Invoke-RestMethod @queryParams @script:UseBasic
+        if ($resp.code -eq 0) {
+            Write-Debug "Successfully added record in zone '$zoneTest'"
+            return
+        } elseif ($resp.code -eq 6 -and $resp.message -like '*duplicate key value*') {
+            Write-Debug "Record already exists in zone '$zoneTest'. Treating as success."
+            return
+        } else {
+            Write-Debug "Failed to add record in zone '$zoneTest': $($resp.code) $($resp.message)"
         }
     }
 
-    Write-Verbose "Adding TXT record $RecordName in zone $zoneName"
-    Invoke-DNSExitApi $DNSExitApiUri $apiKey $payload | Out-Null
+    Write-Verbose "Failed to add TXT record $RecordName. Unable to find matching zone for API key."
+
 
     <#
     .SYNOPSIS
@@ -52,9 +82,6 @@ function Add-DnsTxt {
     .PARAMETER DNSExitApiKey
         The DNSExit DNS API key associated with your account.
 
-    .PARAMETER DNSExitDomain
-        One or more DNS zones hosted in DNSExit. The deepest matching zone is used for a record.
-
     .PARAMETER DNSExitTTL
         The TTL for new TXT records in minutes. Defaults to 0.
 
@@ -66,7 +93,7 @@ function Add-DnsTxt {
 
     .EXAMPLE
         $apiKey = Read-Host 'DNSExit API Key' -AsSecureString
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $apiKey 'example.com'
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' $apiKey
 
         Adds the specified TXT record using the DNSExit API.
     #>
@@ -81,35 +108,56 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [securestring]$DNSExitApiKey,
-        [Parameter(Mandatory,Position=3)]
-        [string[]]$DNSExitDomain,
-        [Parameter(Position=4)]
+        [Parameter(Position=3)]
         [int]$DNSExitTTL = 0,
-        [Parameter(Position=5)]
+        [Parameter(Position=4)]
         [string]$DNSExitApiUri = 'https://api.dnsexit.com/dns/',
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     $apiKey = [pscredential]::new('a',$DNSExitApiKey).GetNetworkCredential().Password
-    $zoneName = Find-DNSExitZone $RecordName $DNSExitDomain
-    $recShort = Get-DNSExitRelativeName $RecordName $zoneName
 
-    # DNSExit's public docs only demonstrate delete operations by name rather
-    # than by TXT content. We include content because it may be accepted by the
-    # API, but callers should treat name-scoped deletion as the documented
-    # provider behavior.
-    $payload = @{
-        domain = $zoneName
-        delete = @{
-            type = 'TXT'
-            name = $recShort
-            content = $TxtValue
+    $queryParams = @{
+        Uri = $DNSExitApiUri
+        Method = 'POST'
+        Headers = @{apikey=$apiKey}
+        ContentType = 'application/json'
+        ErrorAction = 'Stop'
+        Verbose = $false
+        Debug = $false
+    }
+
+    # The API has no GET endpoints to query available zones or existing records,
+    # but adding a record requires knowing the zone name. So we're just going to
+    # split the record name at various levels until one works or we run out
+    # of combinations to try.
+    $pieces = $RecordName.Split('.')
+    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+        $shortName = ''
+        if ($i -gt 0) { $shortName = $pieces[0..($i-1)] -join '.' }
+        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
+        Write-Debug "Trying name='$shortName' and domain='$zoneTest'"
+
+        $queryParams.Body = @{
+            domain = $zoneTest
+            delete = @{
+                type = 'TXT'
+                name = $shortName
+            }
+        } | ConvertTo-Json -Depth 5 -Compress
+
+        Write-Debug "POST $DNSExitApiUri`n$($queryParams.Body)"
+        $resp = Invoke-RestMethod @queryParams @script:UseBasic
+        if ($resp.code -eq 0) {
+            Write-Debug "Successfully removed record in zone '$zoneTest'"
+            return
+        } else {
+            Write-Debug "Failed to remove record in zone '$zoneTest': $($resp.code) $($resp.message)"
         }
     }
 
-    Write-Verbose "Removing TXT record $RecordName from zone $zoneName"
-    Invoke-DNSExitApi $DNSExitApiUri $apiKey $payload | Out-Null
+    Write-Verbose "Failed to remove TXT record $RecordName. Unable to find matching zone for API key."
 
     <#
     .SYNOPSIS
@@ -127,9 +175,6 @@ function Remove-DnsTxt {
     .PARAMETER DNSExitApiKey
         The DNSExit DNS API key associated with your account.
 
-    .PARAMETER DNSExitDomain
-        One or more DNS zones hosted in DNSExit. The deepest matching zone is used for a record.
-
     .PARAMETER DNSExitTTL
         Included for parameter parity with Add-DnsTxt. Not used during removal.
 
@@ -141,7 +186,7 @@ function Remove-DnsTxt {
 
     .EXAMPLE
         $apiKey = Read-Host 'DNSExit API Key' -AsSecureString
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $apiKey 'example.com'
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' $apiKey
 
         Removes the specified TXT record using the DNSExit API.
     #>
@@ -172,82 +217,3 @@ function Save-DnsTxt {
 
 # API Docs:
 # https://dnsexit.com/dns/dns-api/
-
-function Find-DNSExitZone {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory,Position=0)]
-        [string]$RecordName,
-        [Parameter(Mandatory,Position=1)]
-        [string[]]$DNSExitDomain
-    )
-
-    $zones = @($DNSExitDomain | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object {
-        $_.Trim().TrimEnd('.')
-    } | Sort-Object -Unique)
-
-    $pieces = $RecordName.TrimEnd('.').Split('.')
-    for ($i = 0; $i -lt ($pieces.Count - 1); $i++) {
-        $zoneTest = $pieces[$i..($pieces.Count - 1)] -join '.'
-        if ($zoneTest -in $zones) {
-            Write-Debug "Matched DNSExit zone $zoneTest for record $RecordName"
-            return $zoneTest
-        }
-    }
-
-    throw "Unable to find a matching DNSExit zone for $RecordName. Supply the hosted zone using DNSExitDomain."
-}
-
-function Get-DNSExitRelativeName {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory,Position=0)]
-        [string]$RecordName,
-        [Parameter(Mandatory,Position=1)]
-        [string]$ZoneName
-    )
-
-    $recShort = $RecordName.TrimEnd('.') -ireplace "\.?$([regex]::Escape($ZoneName.TrimEnd('.')))$",''
-    Write-Debug "Using relative record name '$recShort' in zone '$ZoneName'"
-    return $recShort
-}
-
-function Invoke-DNSExitApi {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory,Position=0)]
-        [string]$ApiUri,
-        [Parameter(Mandatory,Position=1)]
-        [string]$ApiKey,
-        [Parameter(Mandatory,Position=2)]
-        [hashtable]$Payload
-    )
-
-    $body = $Payload | ConvertTo-Json -Depth 5 -Compress
-    $headers = @{
-        'Content-Type' = 'application/json'
-        'apikey' = $ApiKey
-    }
-    $safeHeaders = @{
-        'Content-Type' = 'application/json'
-        'apikey' = 'REDACTED'
-    }
-
-    Write-Debug "POST $ApiUri`nHeaders: $($safeHeaders | ConvertTo-Json -Compress)`nBody: $body"
-
-    try {
-        $result = Invoke-RestMethod -Uri $ApiUri -Method Post -Headers $headers -Body $body -ErrorAction Stop @script:UseBasic
-    } catch {
-        throw
-    }
-
-    if ($null -eq $result) {
-        throw 'DNSExit API returned an empty response.'
-    }
-
-    if ($result.code -ne 0) {
-        throw "DNSExit API returned code $($result.code): $($result.message)"
-    }
-
-    return $result
-}

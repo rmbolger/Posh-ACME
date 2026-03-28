@@ -23,7 +23,6 @@ The plugin also requires you to specify the hosted zone or zones using `DNSExitD
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | DNSExitApiKey | SecureString | Yes | The DNSExit DNS API key |
-| DNSExitDomain | String[] | Yes | One or more hosted DNS zones in DNSExit. The deepest matching zone is used for each record |
 | DNSExitTTL | Integer | No | TXT record TTL in minutes. Defaults to `0` |
 | DNSExitApiUri | String | No | DNSExit API endpoint. Defaults to `https://api.dnsexit.com/dns/` |
 
@@ -32,7 +31,6 @@ The plugin also requires you to specify the hosted zone or zones using `DNSExitD
 ```powershell
 $pArgs = @{
     DNSExitApiKey = (Read-Host 'DNSExit API Key' -AsSecureString)
-    DNSExitDomain = 'example.com'
 }
 
 New-PACertificate example.com -Plugin DNSExit -PluginArgs $pArgs
@@ -40,12 +38,9 @@ New-PACertificate example.com -Plugin DNSExit -PluginArgs $pArgs
 
 ### Example Wildcard
 
-The DNSExit API only allows a single TXT record to exist for a given FQDN at a time. This means that if you request a wildcard cert that is valid for the domain apex and the wildcard domain name, each name must be validated separately instead of just creating both TXT records at once and validating them together. In order for Posh-ACME to process the validations in serial rather than parallel, you must specify the `-UseSerialValidation` switch in your call to New-PACertificate.
-
 ```powershell
 $pArgs = @{
     DNSExitApiKey = (Read-Host 'DNSExit API Key' -AsSecureString)
-    DNSExitDomain = 'example.com'
     DNSExitTTL = 5
 }
 
@@ -54,5 +49,7 @@ New-PACertificate 'example.com','*.example.com' -UseSerialValidation -Plugin DNS
 
 ## Known Limitations
 
-- DNSExit's public API docs show delete examples by record `name`. They do not clearly document TXT delete-by-value semantics. This means providers may delete all TXT values at a given record name rather than a single specific value.
+- The DNSExit API does not allow for selective record deletion by value. So when the plugin tries to delete the TXT record it created, it will delete all values for that FQDN, not just the one it created. For typical `_acme-challenge.example.com` records, this is probably fine, but be wary if you're using it with the `-DnsAlias` parameter
+and referencing an FQDN that might have other TXT records that could be deleted such
+as the domain apex.
 - TTL values in DNSExit are documented in minutes, not seconds.
