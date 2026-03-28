@@ -11,7 +11,8 @@ Before using the plugin, create a DNS API key in DNSExit:
 1. Sign in to your DNSExit account.
 2. Open `Settings`.
 3. Open `DNS API Key`.
-4. Create and copy the API key.
+4. Click `Generate API Key` if you hadn't previously done that.
+5. Copy the API key.
 
 The plugin also requires you to specify the hosted zone or zones using `DNSExitDomain`. This plugin intentionally does not try to auto-discover zones from the provider because DNSExit's public API docs do not clearly document that capability.
 
@@ -37,36 +38,21 @@ $pArgs = @{
 New-PACertificate example.com -Plugin DNSExit -PluginArgs $pArgs
 ```
 
-### Example With Multiple Zones
+### Example Wildcard
 
-```powershell
-$pArgs = @{
-    DNSExitApiKey = (Read-Host 'DNSExit API Key' -AsSecureString)
-    DNSExitDomain = 'example.com','sub.example.com'
-    DNSExitTTL = 5
-}
-
-New-PACertificate '*.sub.example.com','sub.example.com' -Plugin DNSExit -PluginArgs $pArgs
-```
-
-## Known Limitations
-
-- DNSExit's public API docs clearly document JSON `add`, `delete`, and `update` commands, but they do not clearly document a record lookup API.
-- DNSExit's public API docs show delete examples by record `name`. They do not clearly document TXT delete-by-value semantics. This means providers may delete all TXT values at a given record name rather than a single specific value.
-- TTL values in DNSExit are documented in minutes, not seconds.
-
-## Testing The Plugin
-
-Before requesting a real certificate, test the plugin against a throwaway name in one of your DNSExit zones:
+The DNSExit API only allows a single TXT record to exist for a given FQDN at a time. This means that if you request a wildcard cert that is valid for the domain apex and the wildcard domain name, each name must be validated separately instead of just creating both TXT records at once and validating them together. In order for Posh-ACME to process the validations in serial rather than parallel, you must specify the `-UseSerialValidation` switch in your call to New-PACertificate.
 
 ```powershell
 $pArgs = @{
     DNSExitApiKey = (Read-Host 'DNSExit API Key' -AsSecureString)
     DNSExitDomain = 'example.com'
+    DNSExitTTL = 5
 }
 
-$acct = Get-PAAccount
-
-Publish-Challenge example.com -Account $acct -Token 'fake-token' -Plugin DNSExit -PluginArgs $pArgs -Verbose
-Unpublish-Challenge example.com -Account $acct -Token 'fake-token' -Plugin DNSExit -PluginArgs $pArgs -Verbose
+New-PACertificate 'example.com','*.example.com' -UseSerialValidation -Plugin DNSExit -PluginArgs $pArgs
 ```
+
+## Known Limitations
+
+- DNSExit's public API docs show delete examples by record `name`. They do not clearly document TXT delete-by-value semantics. This means providers may delete all TXT values at a given record name rather than a single specific value.
+- TTL values in DNSExit are documented in minutes, not seconds.
