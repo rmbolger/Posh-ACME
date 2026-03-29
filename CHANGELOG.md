@@ -1,3 +1,21 @@
+## 4.32.0 (2026-03-29)
+
+* New [DNSExit](https://dnsexit.com/) plugin (#668) (Thanks @joxdev13)
+* Preliminary support for [dns-persist-01](https://datatracker.ietf.org/doc/draft-ietf-acme-dns-persist/)
+  * Adds functions `Publish-DnsPersistChallenge` and `Unpublish-DnsPersistChallenge`. These are subject to change while the spec is still in a draft state.
+  * I wanted to get these released early so folks can start testing the DNS plugins with them. No other core module changes have been added to support the cert workflow for this challenge type yet.
+  * It is **highly** recommended to test these functions using your preferred DNS plugin. I suspect there are some bugs in some of the plugins that might surface because they have only been tested creating ACME challenge TXT records until now. Please submit issues for plugins that have problems.
+* Fixed bug in Infoblox plugin that caused errors when TxtValue required URL escaping
+* Added better error handling in `Get-PAPluginArgs` when decrypting encrypted args fails (#654)
+
+### Potentially Breaking Change
+
+* Generated CSRs no longer include the Enhanced Key Usage (EKU) extension.
+  * This is a fix for CAs that have started rejecting CSRs containing the Client Authentication EKU such as [Google](https://pki.goog/updates/may2025-clientauth.html) due to its deprecation across all public CAs.
+  * This change has been tested successfully against all known free public ACME CAs. The resulting certs still contain the EKU extension, but which EKUs get added is dependent on the CA as it has always been.
+  * However, there are many commercial and private CAs I was unable to test against which is why this *might* be a breaking change for them. PLEASE test if you're not using one of the free public ACME CAs.
+  * If for some reason your preferred CA rejects the new CSRs, you may always fall back to supplying your own CSR using the `-CSRPath` param in many of the functions.
+
 ## 4.31.1 (2026-02-07)
 
 * Fixed bug in CSR generation for IP address certs. IPs will no longer be added to CSR Common Name. If an IP address is the "MainDomain" of the order, the CSR CN will be empty. (#658)
