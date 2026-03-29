@@ -28,12 +28,22 @@ function Get-PAPluginArgs {
             if ($SafeVal -is [pscustomobject]) {
                 if ($SafeVal.origType) {
                     if ('pscredential' -eq $SafeVal.origType) {
-                        return [pscredential]::new(
-                            $SafeVal.user,($SafeVal.pass | ConvertTo-SecureString @EncParam)
-                        )
+                        try {
+                            return [pscredential]::new(
+                                $SafeVal.user,($SafeVal.pass | ConvertTo-SecureString @EncParam -EA Stop)
+                            )
+                        } catch {
+                            Write-Debug ($_.ScriptStackTrace)
+                            throw
+                        }
                     }
                     elseif ('securestring' -eq $SafeVal.origType) {
-                        return $SafeVal.value | ConvertTo-SecureString @EncParam
+                        try {
+                            return $SafeVal.value | ConvertTo-SecureString @EncParam -EA Stop
+                        } catch {
+                            Write-Debug ($_.ScriptStackTrace)
+                            throw
+                        }
                     }
                 } else {
                     Write-Debug "PluginArg deserialized as custom object we don't recognize. Treating as hashtable."
@@ -87,7 +97,12 @@ function Get-PAPluginArgs {
             # Convert it to a hashtable and do our custom deserialization on SecureString
             # and PSCredential objects.
             foreach ($prop in $pDataSafe.PSObject.Properties) {
-                $pData[$prop.Name] = SecureDeserialize $prop.Value $encParam
+                try {
+                    $pData[$prop.Name] = SecureDeserialize $prop.Value $encParam
+                } catch {
+                    Write-Debug ($_.Exception.Message)
+                    Write-Warning "Failed to deserialize plugin argument '$($prop.Name)'. You may need to reset the PluginArgs for this order."
+                }
             }
         }
 
