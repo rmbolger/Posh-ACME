@@ -13,15 +13,26 @@ function Add-DnsTxt {
         [securestring]$GDSecretSecure,
         [Parameter(ParameterSetName='DeprecatedInsecure', Mandatory, Position = 3)]
         [string]$GDSecret,
+        [Parameter(Position = 4)]
+        [string]$GDCustomerId,
         [Parameter(Mandatory = $false)]
         [switch]$GDUseOTE,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
+    # GoDaddy has a consumer facing v1 API that doesn't require a customer ID and a newer v2 API that does.
+    # The v1 API doesn't appear to be deprecated, so we'll default to that if a customer ID isn't provided.
+    # The v2 API has the same endpoints for managing records and we'll use that if a customer ID is provided.
     $apiRoot = "https://api.godaddy.com/v1/domains"
-    if ($GDUseOTE) {
+    if (-not $GDCustomerId -and $GDUseOTE) {
         $apiRoot = "https://api.ote-godaddy.com/v1/domains"
+    }
+    elseif ($GDCustomerId -and -not $GDUseOTE) {
+        $apiRoot = "https://api.godaddy.com/v2/customers/$GDCustomerId/domains"
+    }
+    elseif ($GDCustomerId -and $GDUseOTE) {
+        $apiRoot = "https://api.ote-godaddy.com/v2/customers/$GDCustomerId/domains"
     }
 
     # grab the plain text secret if necessary
@@ -29,9 +40,17 @@ function Add-DnsTxt {
         $GDSecret = [pscredential]::new('a',$GDSecretSecure).GetNetworkCredential().Password
     }
 
-    $headers = @{Authorization = "sso-key $($GDKey):$($GDSecret)"}
+    # build the common parameters for all API calls
+    $commonParams = @{
+        Headers = @{
+            Authorization = "sso-key $($GDKey):$($GDSecret)"
+        }
+        ErrorAction = 'Stop'
+        Verbose = $false
+        Debug = $false
+    } + $script:UseBasic
 
-    if (-not ($zone = Find-GDZone $RecordName $headers $apiRoot)) {
+    if (-not ($zone = Find-GDZone $RecordName $commonParams $apiRoot)) {
         throw "Unable to find matching zone for $RecordName."
     }
     $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.TrimEnd('.')))$",''
@@ -41,12 +60,9 @@ function Add-DnsTxt {
     try {
         $queryParams = @{
             Uri = "$apiRoot/$zone/records/TXT/$recShort"
-            Headers = $headers
-            ErrorAction = 'Stop'
-            Verbose = $false
-        }
+        } + $commonParams
         Write-Debug "GET $($queryParams.Uri)"
-        $recs = Invoke-RestMethod @queryParams @script:UseBasic
+        $recs = Invoke-RestMethod @queryParams
     } catch { throw }
 
     if (-not $recs -or $TxtValue -notin $recs.data) {
@@ -60,7 +76,7 @@ function Add-DnsTxt {
 
         if (!$recs -or $recs.Count -eq 0) {
             # Build the new record set from scratch
-            $bodyJson = "[{`"data`":`"$TxtValue`",`"ttl`":600}]"
+            $bodyJson = ConvertTo-Json @(@{data=$TxtValue;ttl=600}) -Compress
         } else {
             # add the new record and build the body
             $recsNew = $recs + ([pscustomobject]@{data=$TxtValue;ttl=600})
@@ -73,13 +89,10 @@ function Add-DnsTxt {
                 Uri = "$apiRoot/$zone/records/TXT/$recShort"
                 Method = 'Put'
                 Body = $bodyJson
-                Headers = $headers
                 ContentType = 'application/json'
-                ErrorAction = 'Stop'
-                Verbose = $false
-            }
+            } + $commonParams
             Write-Debug "PUT $($queryParams.Uri)`n$bodyJson"
-            Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
+            Invoke-RestMethod @queryParams | Out-Null
         } catch { throw }
 
     } else {
@@ -109,6 +122,9 @@ function Add-DnsTxt {
     .PARAMETER GDSecret
         (DEPRECATED) The GoDaddy API Secret.
 
+    .PARAMETER GDCustomerId
+        The GoDaddy Customer ID. This is only required for the v2 API which is used for some reseller accounts. If not specified, the plugin will attempt to use the v1 API which doesn't require a customer ID.
+
     .PARAMETER GDUseOTE
         If specified, use the GoDaddy OTE test environment rather than the production environment.
 
@@ -136,15 +152,26 @@ function Remove-DnsTxt {
         [securestring]$GDSecretSecure,
         [Parameter(ParameterSetName='DeprecatedInsecure', Mandatory, Position = 3)]
         [string]$GDSecret,
+        [Parameter(Position = 4)]
+        [string]$GDCustomerId,
         [Parameter(Mandatory = $false)]
         [switch]$GDUseOTE,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
+    # GoDaddy has a consumer facing v1 API that doesn't require a customer ID and a newer v2 API that does.
+    # The v1 API doesn't appear to be deprecated, so we'll default to that if a customer ID isn't provided.
+    # The v2 API has the same endpoints for managing records and we'll use that if a customer ID is provided.
     $apiRoot = "https://api.godaddy.com/v1/domains"
-    if ($GDUseOTE) {
+    if (-not $GDCustomerId -and $GDUseOTE) {
         $apiRoot = "https://api.ote-godaddy.com/v1/domains"
+    }
+    elseif ($GDCustomerId -and -not $GDUseOTE) {
+        $apiRoot = "https://api.godaddy.com/v2/customers/$GDCustomerId/domains"
+    }
+    elseif ($GDCustomerId -and $GDUseOTE) {
+        $apiRoot = "https://api.ote-godaddy.com/v2/customers/$GDCustomerId/domains"
     }
 
     # grab the plain text secret if necessary
@@ -152,9 +179,17 @@ function Remove-DnsTxt {
         $GDSecret = [pscredential]::new('a',$GDSecretSecure).GetNetworkCredential().Password
     }
 
-    $headers = @{Authorization = "sso-key $($GDKey):$($GDSecret)"}
+    # build the common parameters for all API calls
+    $commonParams = @{
+        Headers = @{
+            Authorization = "sso-key $($GDKey):$($GDSecret)"
+        }
+        ErrorAction = 'Stop'
+        Verbose = $false
+        Debug = $false
+    } + $script:UseBasic
 
-    if (-not ($zone = Find-GDZone $RecordName $headers $apiRoot)) {
+    if (-not ($zone = Find-GDZone $RecordName $commonParams $apiRoot)) {
         throw "Unable to find matching zone for $RecordName."
     }
     $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.TrimEnd('.')))$",''
@@ -164,47 +199,44 @@ function Remove-DnsTxt {
     try {
         $queryParams = @{
             Uri = "$apiRoot/$zone/records/TXT/$recShort"
-            Headers = $headers
-            ErrorAction = 'Stop'
-            Verbose = $false
-        }
+        } + $commonParams
         Write-Debug "GET $($queryParams.Uri)"
-        $recs = Invoke-RestMethod @queryParams @script:UseBasic
+        $recs = Invoke-RestMethod @queryParams
     } catch { throw }
 
     if (-not $recs -or $TxtValue -notin $recs.data) {
         Write-Debug "Record $RecordName with value $TxtValue doesn't exist. Nothing to do."
     } else {
-        # For some odd reason, the GoDaddy API doesn't have a method to delete a
-        # particular record. The closest we can get is re-setting the set of records that
-        # match a particular Type and Name. So we need to remove the record from our
-        # set of results (which it may be the only one) and then send whatever's left.
 
         if ($recs.Count -le 1) {
-            # It's the last one, but there's no way to remove it without re-writing the
-            # entire contents of the zone. So just clear the value from the record instead.
-            $bodyJson = '[{"data":"","ttl":600}]'
+            # It's the last one, so delete the whole record.
+            try {
+                Write-Verbose "Removing a TXT record for $recShort"
+                $queryParams = @{
+                    Uri = "$apiRoot/$zone/records/TXT/$recShort"
+                    Method = 'Delete'
+                } + $commonParams
+                Write-Debug "DELETE $($queryParams.Uri)"
+                Invoke-RestMethod @queryParams | Out-Null
+            } catch { throw }
+
         } else {
             # filter the record we want to delete and build the body
             $recsNew = $recs | Where-Object { $_.data -ne $TxtValue }
             $bodyJson = ConvertTo-Json @($recsNew) -Compress
+
+            try {
+                Write-Verbose "Removing a TXT record for $recShort with value $TxtValue"
+                $queryParams = @{
+                    Uri = "$apiRoot/$zone/records/TXT/$recShort"
+                    Method = 'Put'
+                    Body = $bodyJson
+                    ContentType = 'application/json'
+                } + $commonParams
+                Write-Debug "PUT $($queryParams.Uri)`n$bodyJson"
+                Invoke-RestMethod @queryParams | Out-Null
+            } catch { throw }
         }
-
-        try {
-            Write-Verbose "Removing a TXT record for $recShort with value $TxtValue"
-            $queryParams = @{
-                Uri = "$apiRoot/$zone/records/TXT/$recShort"
-                Method = 'Put'
-                Body = $bodyJson
-                Headers = $headers
-                ContentType = 'application/json'
-                ErrorAction = 'Stop'
-                Verbose = $false
-            }
-            Write-Debug "PUT $($queryParams.Uri)`n$bodyJson"
-            Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
-        } catch { throw }
-
     }
 
 
@@ -229,6 +261,9 @@ function Remove-DnsTxt {
 
     .PARAMETER GDSecret
         (DEPRECATED) The GoDaddy API Secret.
+
+    .PARAMETER GDCustomerId
+        The GoDaddy Customer ID. This is only required for the v2 API which is used for some reseller accounts. If not specified, the plugin will attempt to use the v1 API which doesn't require a customer ID.
 
     .PARAMETER GDUseOTE
         If specified, use the GoDaddy OTE test environment rather than the production environment.
@@ -268,6 +303,8 @@ function Save-DnsTxt {
 
 # API Docs:
 # https://developer.godaddy.com/doc/endpoint/domains
+# Alternate URL for v2-only Brandsight docs
+# https://developer.brandsight.com/#tag/DNS-Management
 
 function Find-GDZone {
     [CmdletBinding()]
@@ -275,7 +312,7 @@ function Find-GDZone {
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
-        [hashtable]$AuthHeader,
+        [hashtable]$CommonParams,
         [Parameter(Mandatory, Position = 2)]
         [string]$ApiRoot
     )
@@ -305,13 +342,10 @@ function Find-GDZone {
         try {
             $queryParams = @{
                 Uri = "$ApiRoot/$zoneTest/records/NS"
-                Headers = $AuthHeader
-                ErrorAction = 'Stop'
-                Verbose = $false
-            }
+            } + $CommonParams
             Write-Debug "GET $($queryParams.Uri)"
             # no error means we found the zone
-            Invoke-RestMethod @queryParams @script:UseBasic | Out-Null
+            Invoke-RestMethod @queryParams | Out-Null
         } catch {
             # The NS check may throw either a 404 (Not Found) or a 422 (Unprocessable Entity) when
             # the zone is not found. Ignore those and re-throw anything else
