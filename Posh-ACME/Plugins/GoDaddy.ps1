@@ -60,7 +60,7 @@ function Add-DnsTxt {
 
         if (!$recs -or $recs.Count -eq 0) {
             # Build the new record set from scratch
-            $bodyJson = "[{`"data`":`"$TxtValue`",`"ttl`":600}]"
+            $bodyJson = ConvertTo-Json @(@{data=$TxtValue;ttl=600}) -Compress
         } else {
             # add the new record and build the body
             $recsNew = $recs + ([pscustomobject]@{data=$TxtValue;ttl=600})
