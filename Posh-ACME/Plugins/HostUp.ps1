@@ -7,17 +7,18 @@ function Add-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 2)]
+        [Parameter(Mandatory, Position = 2)]
         [securestring]$HUToken,
-        [Parameter(ParameterSetName = 'DeprecatedInsecure', Mandatory, Position = 2)]
-        [string]$HUTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
     # Gets the plaintext version of the token
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $HUTokenInsecure = [pscredential]::new('a', $HUToken).GetNetworkCredential().Password
+    $HUTokenInsecure = [pscredential]::new('a', $HUToken).GetNetworkCredential().Password
+
+    # Normalize the TxtValue to ensure it is wrapped in quotes
+    if ($TxtValue -notmatch '^".*"$') {
+        $TxtValue = "`"$TxtValue`""
     }
 
     $apiRoot = 'https://cloud.hostup.se/api'
@@ -27,7 +28,8 @@ function Add-DnsTxt {
         ContentType = 'application/json'
         ErrorAction = 'Stop'
         Verbose     = $false
-    }
+        Debug       = $false
+    } + $script:UseBasic
 
     $zone = Find-HostUpZone -RecordName $RecordName -CommonRestParams $commonParams
 
@@ -43,7 +45,7 @@ function Add-DnsTxt {
         $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.domain.TrimEnd('.')))$", ''
         Write-Debug "GET $zoneRoot/records"
 
-        $resp = Invoke-RestMethod -Uri "$zoneRoot/records" @commonParams @script:UseBasic
+        $resp = Invoke-RestMethod -Uri "$zoneRoot/records" @commonParams
 
         Write-Debug "Response:`n$($resp | ConvertTo-Json -Depth 10)"
     }
@@ -51,9 +53,9 @@ function Add-DnsTxt {
 
     $record = $resp.data.zone.records |
     Where-Object {
-        $_.type -eq 'TXT'
-        -and $_.name -eq $RecordName
-        -and $_.value -eq "`"$TxtValue`""
+        $_.type -eq 'TXT' -and
+        $_.name -eq $RecordName -and
+        $_.value -eq $TxtValue
     }
 
     if (-not $record) {
@@ -68,7 +70,7 @@ function Add-DnsTxt {
             } | ConvertTo-Json -Compress
 
             Write-Debug "POST $zoneRoot/records`n$bodyJson"
-            Invoke-RestMethod -Uri "$zoneRoot/records" -Method Post -Body $bodyJson @commonParams @script:UseBasic | Out-Null
+            Invoke-RestMethod -Uri "$zoneRoot/records" -Method Post -Body $bodyJson @commonParams | Out-Null
         }
         catch { throw }
     }
@@ -92,9 +94,6 @@ function Add-DnsTxt {
     .PARAMETER HUToken
         The Account API token for HostUp.
 
-    .PARAMETER HUTokenInsecure
-        (DEPRECATED) The Account API token for HostUp.
-
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
 
@@ -113,16 +112,17 @@ function Remove-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
-        [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 2)]
+        [Parameter(Mandatory, Position = 2)]
         [securestring]$HUToken,
-        [Parameter(ParameterSetName = 'DeprecatedInsecure', Mandatory, Position = 2)]
-        [string]$HUTokenInsecure,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $HUTokenInsecure = [pscredential]::new('a', $HUToken).GetNetworkCredential().Password
+    $HUTokenInsecure = [pscredential]::new('a', $HUToken).GetNetworkCredential().Password
+
+    # Normalize the TxtValue to ensure it is wrapped in quotes
+    if ($TxtValue -notmatch '^".*"$') {
+        $TxtValue = "`"$TxtValue`""
     }
 
     $apiRoot = 'https://cloud.hostup.se/api'
@@ -132,7 +132,8 @@ function Remove-DnsTxt {
         ContentType = 'application/json'
         ErrorAction = 'Stop'
         Verbose     = $false
-    }
+        Debug       = $false
+    } + $script:UseBasic
 
     $zone = Find-HostUpZone -RecordName $RecordName -CommonRestParams $commonParams
 
@@ -145,19 +146,18 @@ function Remove-DnsTxt {
     $zoneRoot = "$apiRoot/dns/zones/$($zone.domain_id)"
 
     try {
-        $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zone.domain.TrimEnd('.')))$", ''
         Write-Debug "GET $zoneRoot/records"
 
-        $resp = Invoke-RestMethod -Uri "$zoneRoot/records" @commonParams @script:UseBasic
+        $resp = Invoke-RestMethod -Uri "$zoneRoot/records" @commonParams
         Write-Debug "Response:`n$($resp | ConvertTo-Json -Depth 10)"
     }
     catch { throw }
 
     $record = $resp.data.zone.records |
     Where-Object {
-        $_.type -eq 'TXT'
-        -and $_.name -eq $RecordName
-        -and $_.value -eq "`"$TxtValue`""
+        $_.type -eq 'TXT' -and
+        $_.name -eq $RecordName -and
+        $_.value -eq $TxtValue
     }
 
     if ($record) {
@@ -167,7 +167,7 @@ function Remove-DnsTxt {
             Write-Debug "DELETE $recordUri"
             Write-Verbose "Deleting $RecordName with value $TxtValue"
 
-            Invoke-RestMethod -Uri $recordUri -Method Delete @commonParams @script:UseBasic | Out-Null
+            Invoke-RestMethod -Uri $recordUri -Method Delete @commonParams | Out-Null
         }
         catch { throw }
     }
@@ -190,9 +190,6 @@ function Remove-DnsTxt {
 
     .PARAMETER HUToken
         The Account API token for HostUp.
-
-    .PARAMETER HUTokenInsecure
-        (DEPRECATED) The Account API token for HostUp.
 
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
@@ -258,7 +255,7 @@ function Find-HostUpZone {
         $uri = "$apiRoot/dns/zones"
         Write-Debug "GET $uri"
 
-        $resp = Invoke-RestMethod $uri @CommonRestParams @script:UseBasic
+        $resp = Invoke-RestMethod $uri @CommonRestParams
 
         Write-Debug "Response`n$($resp | ConvertTo-Json -Depth 10)"
         $zones = @($resp.data.zones)
