@@ -21,9 +21,6 @@ After giving the token a name, it will show you the token string. Be sure to sav
 
 With your token value, you'll need to set the `HUToken` SecureString parameter.
 
-!!! warning
-    The `HUTokenInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
-
 ```powershell
 $pArgs = @{
     HUToken = (Read-Host "HostUp Token" -AsSecureString)
