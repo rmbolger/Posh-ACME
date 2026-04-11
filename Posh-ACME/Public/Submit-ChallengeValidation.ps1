@@ -104,7 +104,9 @@ function Submit-ChallengeValidation {
                 }
                 $challenge = $auth.challenges | Where-Object { $_.type -eq $chalType }
                 if (-not $challenge) {
-                    throw "$($auth.fqdn) authorization contains no challenges that match $chalType"
+                    try {
+                        throw "$($auth.fqdn) authorization contains no challenges that match $chalType"
+                    } catch { $PSCmdlet.ThrowTerminatingError($_) }
                 }
 
                 if ($Order.UseSerialValidation) {
@@ -181,7 +183,9 @@ function Submit-ChallengeValidation {
                 continue
             } else {
                 #status invalid, revoked, deactivated, or expired
-                throw "$($auth.fqdn) authorization status is '$($auth.status)'. Create a new order and try again."
+                try {
+                    throw "$($auth.fqdn) authorization status is '$($auth.status)'. Create a new order and try again."
+                } catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
         }
 
