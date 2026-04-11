@@ -18,9 +18,9 @@ Create a new order on the current ACME account.
 New-PAOrder [-Domain] <String[]> [[-KeyLength] <String>] [-Name <String>] [-Plugin <String[]>]
  [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-AlwaysNewKey]
  [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>]
- [-UseModernPfxEncryption] [-Install] [-UseSerialValidation] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
- [-PreferredChain <String>] [-Force] [-ReplacesCert <String>] [-Profile <String>] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+ [-UseModernPfxEncryption] [-Install] [-UseSerialValidation] [-DnsSleep <Int32>] [-DnsVariant <String>]
+ [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Force] [-ReplacesCert <String>] [-Profile <String>]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### ImportKey
@@ -28,17 +28,17 @@ New-PAOrder [-Domain] <String[]> [[-KeyLength] <String>] [-Name <String>] [-Plug
 New-PAOrder [-Domain] <String[]> -KeyFile <String> [-Name <String>] [-Plugin <String[]>]
  [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-AlwaysNewKey]
  [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>]
- [-UseModernPfxEncryption] [-Install] [-UseSerialValidation] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
- [-PreferredChain <String>] [-Force] [-ReplacesCert <String>] [-Profile <String>] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+ [-UseModernPfxEncryption] [-Install] [-UseSerialValidation] [-DnsSleep <Int32>] [-DnsVariant <String>]
+ [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Force] [-ReplacesCert <String>] [-Profile <String>]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### FromCSR
 ```powershell
 New-PAOrder [-CSRPath] <String> [-Name <String>] [-Plugin <String[]>] [-PluginArgs <Hashtable>]
  [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-UseSerialValidation] [-DnsSleep <Int32>]
- [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Force] [-ReplacesCert <String>] [-Profile <String>]
- [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-DnsVariant <String>] [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Force]
+ [-ReplacesCert <String>] [-Profile <String>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## Description
@@ -502,6 +502,21 @@ Accept wildcard characters: False
 
 ### -Profile
 The name of the desired ACME certificate profile. This is checked against the profiles supported by the CA and ignored if it doesn't exist.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DnsVariant
+The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.
 
 ```yaml
 Type: String

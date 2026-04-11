@@ -12,7 +12,8 @@ function Unpublish-Challenge {
         [string]$Plugin,
         [Parameter(Position=4)]
         [hashtable]$PluginArgs,
-        [string]$DnsAlias
+        [string]$DnsAlias,
+        [string]$DnsVariant
     )
 
     # dot source the plugin file
@@ -21,7 +22,7 @@ function Unpublish-Challenge {
 
     # All plugins in $script:Plugins should have been validated during module
     # load. So we're not going to do much plugin-specific validation here.
-    Write-Verbose "Unpublishing challenge for Domain $Domain with Token $Token using Plugin $Plugin and DnsAlias '$DnsAlias'."
+    Write-Verbose "Unpublishing challenge for Domain $Domain with Token $Token using Plugin $Plugin, DnsAlias '$DnsAlias', and DnsVariant '$DnsVariant'."
 
     # sanitize the $Domain if it was passed in as a wildcard on accident
     if ($Domain -and $Domain.StartsWith('*.')) {
@@ -36,8 +37,11 @@ function Unpublish-Challenge {
         if (-not [String]::IsNullOrWhiteSpace($DnsAlias)) {
             # always use the alias if it was specified
             $recordName = $DnsAlias
+        } elseif ($DnsVariant -eq 'dns-account-01') {
+            $label = ConvertTo-AcctDnsLabel -AccountUri $Account.Location
+            $recordName = "$label.$Domain"
         } else {
-            # use Domain
+            # use standard dns-01 fqdn
             $recordName = "_acme-challenge.$($Domain)"
         }
 

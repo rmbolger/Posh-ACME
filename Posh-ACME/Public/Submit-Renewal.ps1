@@ -99,6 +99,7 @@ function Submit-Renewal {
                 $certParams.UseSerialValidation = $order.UseSerialValidation
                 $certParams.Force               = $Force.IsPresent
                 $certParams.DnsSleep            = $order.DnsSleep
+                $certParams.DnsVariant          = $order.DnsVariant
                 $certParams.ValidationTimeout   = $order.ValidationTimeout
                 $certParams.PreferredChain      = $order.PreferredChain
                 $certParams.Profile             = $order.Profile

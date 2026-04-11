@@ -3167,6 +3167,18 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>DnsVariant</maml:name>
+          <maml:description>
+            <maml:para>The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
       <command:syntaxItem>
         <maml:name>New-PACertificate</maml:name>
@@ -3351,6 +3363,18 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
           <maml:name>Profile</maml:name>
           <maml:description>
             <maml:para>The name of the desired ACME certificate profile. This is checked against the profiles supported by the CA and ignored if it doesn't exist.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>DnsVariant</maml:name>
+          <maml:description>
+            <maml:para>The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -3666,6 +3690,18 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
         <maml:name>Profile</maml:name>
         <maml:description>
           <maml:para>The name of the desired ACME certificate profile. This is checked against the profiles supported by the CA and ignored if it doesn't exist.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>DnsVariant</maml:name>
+        <maml:description>
+          <maml:para>The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -4053,6 +4089,18 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>DnsVariant</maml:name>
+          <maml:description>
+            <maml:para>The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
       <command:syntaxItem>
         <maml:name>New-PAOrder</maml:name>
@@ -4336,6 +4384,18 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>DnsVariant</maml:name>
+          <maml:description>
+            <maml:para>The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
       <command:syntaxItem>
         <maml:name>New-PAOrder</maml:name>
@@ -4507,6 +4567,18 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
           <maml:name>Profile</maml:name>
           <maml:description>
             <maml:para>The name of the desired ACME certificate profile. This is checked against the profiles supported by the CA and ignored if it doesn't exist.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>DnsVariant</maml:name>
+          <maml:description>
+            <maml:para>The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -4830,6 +4902,18 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>DnsVariant</maml:name>
+        <maml:description>
+          <maml:para>The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
     </command:parameters>
     <command:inputTypes />
     <command:returnValues>
@@ -4994,6 +5078,18 @@ New-PAOrder -Domain $domains -Plugin FakeDNS -PluginArgs $pArgs</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>DnsVariant</maml:name>
+          <maml:description>
+            <maml:para>The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
@@ -5061,6 +5157,18 @@ New-PAOrder -Domain $domains -Plugin FakeDNS -PluginArgs $pArgs</dev:code>
         <maml:name>DnsAlias</maml:name>
         <maml:description>
           <maml:para>When using DNS Alias support with DNS validation plugins, the alias domain that the TXT record will be written to. This should be the complete FQDN including the `_acme-challenge.` prefix if necessary. This field is ignored for non-DNS validation plugins.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>DnsVariant</maml:name>
+        <maml:description>
+          <maml:para>The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -7695,6 +7803,18 @@ Set-PAAccount -UseAltPluginEncryption:$false</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>DnsVariant</maml:name>
+          <maml:description>
+            <maml:para>The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
@@ -7990,6 +8110,18 @@ Set-PAAccount -UseAltPluginEncryption:$false</dev:code>
         <maml:name>Profile</maml:name>
         <maml:description>
           <maml:para>The name of the desired ACME certificate profile. This is checked against the profiles supported by the CA and ignored if it doesn't exist.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>DnsVariant</maml:name>
+        <maml:description>
+          <maml:para>The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -8950,6 +9082,18 @@ Submit-Renewal -PluginArgs $pArgs</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>DnsVariant</maml:name>
+          <maml:description>
+            <maml:para>The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
@@ -9017,6 +9161,18 @@ Submit-Renewal -PluginArgs $pArgs</dev:code>
         <maml:name>DnsAlias</maml:name>
         <maml:description>
           <maml:para>When using DNS Alias support with DNS validation plugins, the alias domain that the TXT record will be removed from. This should be the complete FQDN including the `_acme-challenge.` prefix if necessary. This field is ignored for non-DNS validation plugins.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>DnsVariant</maml:name>
+        <maml:description>
+          <maml:para>The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>

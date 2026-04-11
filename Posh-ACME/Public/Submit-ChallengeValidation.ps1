@@ -95,21 +95,37 @@ function Submit-ChallengeValidation {
             $auth = $allAuths[$i]
             if ($auth.status -eq 'pending') {
 
-                # Determine which challenge to publish based on the plugin type
+                # Determine which challenge to publish based on the plugin type and check
+                # for any alternate DNS challenge preference specified in the order
                 $chalType = $script:Plugins.($Order.Plugin[$i]).ChallengeType
+                if ($chalType -eq 'dns-01' -and $Order.DnsVariant -and $Order.DnsVariant -ne 'dns-01') {
+                    $chalType = $Order.DnsVariant
+                    Write-Verbose "Using alternate DNS challenge type '$chalType' for $($auth.fqdn) based on order preference."
+                }
                 $challenge = $auth.challenges | Where-Object { $_.type -eq $chalType }
                 if (-not $challenge) {
-                    throw "$($auth.fqdn) authorization contains no challenges that match $($Order.Plugin[$i]) plugin type, $chalType"
+                    try {
+                        throw "$($auth.fqdn) authorization contains no challenges that match $chalType"
+                    } catch { $PSCmdlet.ThrowTerminatingError($_) }
                 }
 
                 if ($Order.UseSerialValidation) {
                     # Publish and validate each challenge separately
+                    $pubParams = @{
+                        Domain = $auth.DNSId
+                        Account = $acct
+                        Token = $challenge.token
+                        Plugin = $Order.Plugin[$i]
+                        PluginArgs = $PluginArgs
+                        DnsAlias = $Order.DnsAlias[$i]
+                        DnsVariant = $Order.DnsVariant
+                    }
                     try {
-                        Publish-Challenge $auth.DNSId $acct $challenge.token $Order.Plugin[$i] $PluginArgs -DnsAlias $Order.DnsAlias[$i]
-                        Save-Challenge $Order.Plugin[$i] $PluginArgs
+                        Publish-Challenge @pubParams
+                        Save-Challenge -Plugin $Order.Plugin[$i] -PluginArgs $PluginArgs
 
                         # sleep while DNS changes propagate if it was a DNS challenge that was published
-                        if ($Order.DnsSleep -gt 0 -and 'dns-01' -eq $chalType) {
+                        if ($Order.DnsSleep -gt 0 -and $chalType -like 'dns-*') {
                             Write-Verbose "Sleeping for $($Order.DnsSleep) seconds while DNS change(s) propagate"
                             Start-SleepProgress $Order.DnsSleep -Activity "Waiting for DNS to propagate"
                         }
@@ -125,14 +141,23 @@ function Submit-ChallengeValidation {
                         $PSCmdlet.ThrowTerminatingError($_)
                     }
                     finally {
-                        Unpublish-Challenge $auth.DNSId $acct $challenge.token $Order.Plugin[$i] $PluginArgs -DnsAlias $Order.DnsAlias[$i]
-                        Save-Challenge $Order.Plugin[$i] $PluginArgs
+                        Unpublish-Challenge @pubParams
+                        Save-Challenge -Plugin $Order.Plugin[$i] -PluginArgs $PluginArgs
                     }
                 }
                 else {
                     try {
                         # Publish each challenge
-                        Publish-Challenge $auth.DNSId $acct $challenge.token $Order.Plugin[$i] $PluginArgs -DnsAlias $Order.DnsAlias[$i]
+                        $pubParams = @{
+                            Domain = $auth.DNSId
+                            Account = $acct
+                            Token = $challenge.token
+                            Plugin = $Order.Plugin[$i]
+                            PluginArgs = $PluginArgs
+                            DnsAlias = $Order.DnsAlias[$i]
+                            DnsVariant = $Order.DnsVariant
+                        }
+                        Publish-Challenge @pubParams
 
                         # save the details of what we published for validation and cleanup later
                         $published += @{
@@ -143,7 +168,8 @@ function Submit-ChallengeValidation {
                             chalType = $chalType
                             chalToken = $challenge.token
                             chalUrl = $challenge.url
-                            DNSAlias = $Order.DnsAlias[$i]
+                            DnsAlias = $Order.DnsAlias[$i]
+                            DnsVariant = $Order.DnsVariant
                         }
                     }
                     catch {
@@ -157,7 +183,9 @@ function Submit-ChallengeValidation {
                 continue
             } else {
                 #status invalid, revoked, deactivated, or expired
-                throw "$($auth.fqdn) authorization status is '$($auth.status)'. Create a new order and try again."
+                try {
+                    throw "$($auth.fqdn) authorization status is '$($auth.status)'. Create a new order and try again."
+                } catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
         }
 
@@ -172,7 +200,7 @@ function Submit-ChallengeValidation {
 
                     # call the Save function for each plugin used
                     $uniquePluginsUsed | ForEach-Object {
-                        Save-Challenge $_ $PluginArgs
+                        Save-Challenge -Plugin $_ -PluginArgs $PluginArgs
                     }
 
                     # sleep while DNS changes propagate if there were DNS challenges published
@@ -196,12 +224,21 @@ function Submit-ChallengeValidation {
             finally {
                 # always cleanup the challenges that were published
                 $published | ForEach-Object {
-                    Unpublish-Challenge $_.identifier $acct $_.chalToken $_.plugin $PluginArgs -DnsAlias $_.DNSAlias
+                    $pubParams = @{
+                        Domain = $_.identifier
+                        Account = $acct
+                        Token = $_.chalToken
+                        Plugin = $_.plugin
+                        PluginArgs = $PluginArgs
+                        DnsAlias = $_.DnsAlias
+                        DnsVariant = $_.DnsVariant
+                    }
+                    Unpublish-Challenge @pubParams
                 }
 
                 # save the cleanup changes
                 $published.plugin | Sort-Object -Unique | ForEach-Object {
-                    Save-Challenge $_ $PluginArgs
+                    Save-Challenge -Plugin $_ -PluginArgs $PluginArgs
                 }
             }
         }

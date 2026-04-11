@@ -47,6 +47,8 @@ function New-PACertificate {
         [switch]$UseSerialValidation,
         [switch]$Force,
         [int]$DnsSleep=120,
+        [ValidateSet('dns-01','dns-account-01')]
+        [string]$DnsVariant,
         [int]$ValidationTimeout=60,
         [string]$PreferredChain,
         [string]$Profile
@@ -216,6 +218,7 @@ function New-PACertificate {
             'LifetimeDays'
             'DnsAlias'
             'DnsSleep'
+            'DnsVariant'
             'ValidationTimeout'
             'PreferredChain'
             'Profile'
@@ -255,6 +258,7 @@ function New-PACertificate {
             'UseModernPfxEncryption'
             'Install'
             'DnsSleep'
+            'DnsVariant'
             'ValidationTimeout'
             'PreferredChain'
             'Profile'
