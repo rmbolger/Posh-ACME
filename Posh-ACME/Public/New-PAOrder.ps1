@@ -48,6 +48,8 @@ function New-PAOrder {
         [switch]$Install,
         [switch]$UseSerialValidation,
         [int]$DnsSleep=120,
+        [ValidateSet('dns-01','dns-account-01')]
+        [string]$DnsVariant,
         [int]$ValidationTimeout=60,
         [string]$PreferredChain,
         [switch]$Force,
@@ -313,6 +315,7 @@ function New-PAOrder {
         Plugin              = @('Manual')
         DnsAlias            = $null
         DnsSleep            = $DnsSleep
+        DnsVariant          = $DnsVariant
         ValidationTimeout   = $ValidationTimeout
         Subject             = $Subject
         FriendlyName        = $FriendlyName

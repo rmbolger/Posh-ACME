@@ -49,6 +49,9 @@ function Set-PAOrder {
         [Parameter(ParameterSetName='Edit')]
         [int]$DnsSleep,
         [Parameter(ParameterSetName='Edit')]
+        [ValidateSet('dns-01','dns-account-01')]
+        [string]$DnsVariant,
+        [Parameter(ParameterSetName='Edit')]
         [int]$ValidationTimeout,
         [Parameter(ParameterSetName='Edit')]
         [string]$PreferredChain,
@@ -195,6 +198,12 @@ function Set-PAOrder {
             if ('DnsSleep' -in $psbKeys -and $DnsSleep -ne $order.DnsSleep) {
                 Write-Verbose "Setting DnsSleep to $DnsSleep"
                 $order.DnsSleep = $DnsSleep
+                $saveChanges = $true
+            }
+
+            if ('DnsVariant' -in $psbKeys -and $DnsVariant -ne $order.DnsVariant) {
+                Write-Verbose "Setting DnsVariant to $DnsVariant"
+                $order | Add-Member 'DnsVariant' $DnsVariant -Force
                 $saveChanges = $true
             }
 

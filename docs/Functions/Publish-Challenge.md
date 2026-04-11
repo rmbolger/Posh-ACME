@@ -15,7 +15,7 @@ Publish a challenge using the specified plugin.
 
 ```powershell
 Publish-Challenge [-Domain] <String> [-Account] <Object> [-Token] <String> [-Plugin] <String>
- [[-PluginArgs] <Hashtable>] [-DnsAlias <String>] [<CommonParameters>]
+ [[-PluginArgs] <Hashtable>] [-DnsAlias <String>] [-DnsVariant <String>] [<CommonParameters>]
 ```
 
 ## Description
@@ -170,6 +170,21 @@ Accept wildcard characters: False
 When using DNS Alias support with DNS validation plugins, the alias domain that the TXT record will be written to.
 This should be the complete FQDN including the `_acme-challenge.` prefix if necessary.
 This field is ignored for non-DNS validation plugins.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DnsVariant
+The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.
 
 ```yaml
 Type: String

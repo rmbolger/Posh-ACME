@@ -18,9 +18,9 @@ Switch to or modify an order.
 Set-PAOrder [[-MainDomain] <String>] [-Name <String>] [-NoSwitch] [-Plugin <String[]>]
  [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-NewName <String>]
  [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>]
- [-UseModernPfxEncryption] [-Install] [-OCSPMustStaple] [-DnsSleep <Int32>] [-ValidationTimeout <Int32>]
- [-PreferredChain <String>] [-AlwaysNewKey] [-UseSerialValidation] [-Profile <String>] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+ [-UseModernPfxEncryption] [-Install] [-OCSPMustStaple] [-DnsSleep <Int32>] [-DnsVariant <String>]
+ [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-AlwaysNewKey] [-UseSerialValidation]
+ [-Profile <String>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### Revoke
@@ -453,6 +453,21 @@ Accept wildcard characters: False
 
 ### -Profile
 The name of the desired ACME certificate profile. This is checked against the profiles supported by the CA and ignored if it doesn't exist.
+
+```yaml
+Type: String
+Parameter Sets: Edit
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DnsVariant
+The DNS challenge variant to use for identifiers in this order. Defaults to `dns-01`. Some variants may require advance DNS preparation. This setting is ignored if only HTTP plugins are specified.
 
 ```yaml
 Type: String
