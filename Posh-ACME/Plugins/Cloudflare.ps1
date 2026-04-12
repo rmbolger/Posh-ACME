@@ -24,42 +24,54 @@ function Add-DnsTxt {
 
     $apiRoot = 'https://api.cloudflare.com/client/v4/zones'
     $authHeader = Get-CFAuthHeader @PSBoundParameters
+    $commonParams = @{
+        Headers = $authHeader
+        Verbose = $false
+        Debug = $false
+        ErrorAction = 'Stop'
+    } + $script:UseBasic
 
-    if (-not ($zoneID = Find-CFZone $RecordName $authHeader)) {
+    # Normalize the TxtValue to ensure it is wrapped in quotes
+    if ($TxtValue -notmatch '^".*"$') {
+        $TxtValue = "`"$TxtValue`""
+    }
+
+    if (-not ($zoneID = Find-CFZone $RecordName $apiRoot $commonParams)) {
         throw "Unable to find Cloudflare hosted zone for $RecordName"
     }
 
     # check for an existing record
     Write-Debug "Checking for existing record"
     try {
-        $getParams = @{
-            Uri = "$apiRoot/$zoneID/dns_records?type=TXT&name=$RecordName&content=$TxtValue"
-            Headers = $authHeader
-            Verbose = $false
-            ErrorAction = 'Stop'
+        $getParams = $commonParams + @{
+            Uri = "$apiRoot/$zoneID/dns_records"
+            Body = @{
+                type = "TXT"
+                name = $RecordName
+                content = $TxtValue
+            }
         }
-        Write-Debug "GET $($getParams.Uri)"
-        $response = Invoke-RestMethod @getParams @script:UseBasic
+        Write-Debug "GET $($getParams.Uri)`n$($getParams.Body | ConvertTo-Json)"
+        $response = Invoke-RestMethod @getParams
     } catch { throw }
 
     # add the new TXT record if necessary
     if ($response.result.Count -eq 0) {
 
-        $bodyJson = @{ type="TXT"; name=$RecordName; content=$TxtValue } | ConvertTo-Json
         Write-Verbose "Adding $RecordName with value $TxtValue"
         try {
-            $postParams = @{
+            $postParams = $commonParams + @{
                 Uri = "$apiRoot/$zoneID/dns_records"
                 Method = 'Post'
-                Body = $bodyJson
+                Body = @{
+                    type = "TXT"
+                    name = $RecordName
+                    content = $TxtValue
+                } | ConvertTo-Json
                 ContentType = 'application/json'
-                Headers = $authHeader
-                Verbose = $false
-                ErrorAction = 'Stop'
             }
-            Write-Debug "POST $($postParams.Uri)"
-            Write-Debug "Body`n$($postParams.Body)"
-            Invoke-RestMethod @postParams @script:UseBasic | Out-Null
+            Write-Debug "POST $($postParams.Uri)`n$($postParams.Body)"
+            Invoke-RestMethod @postParams | Out-Null
         } catch { throw }
 
     } else {
@@ -130,22 +142,35 @@ function Remove-DnsTxt {
 
     $apiRoot = 'https://api.cloudflare.com/client/v4/zones'
     $authHeader = Get-CFAuthHeader @PSBoundParameters
+    $commonParams = @{
+        Headers = $authHeader
+        Verbose = $false
+        Debug = $false
+        ErrorAction = 'Stop'
+    } + $script:UseBasic
 
-    if (-not ($zoneID = Find-CFZone $RecordName $authHeader)) {
+    # Normalize the TxtValue to ensure it is wrapped in quotes
+    if ($TxtValue -notmatch '^".*"$') {
+        $TxtValue = "`"$TxtValue`""
+    }
+
+    if (-not ($zoneID = Find-CFZone $RecordName $apiRoot $commonParams)) {
         throw "Unable to find Cloudflare hosted zone for $RecordName"
     }
 
     # check for an existing record
     Write-Debug "Checking for existing record"
     try {
-        $getParams = @{
-            Uri = "$apiRoot/$zoneID/dns_records?type=TXT&name=$RecordName&content=$TxtValue"
-            Headers = $authHeader
-            Verbose = $false
-            ErrorAction = 'Stop'
+        $getParams = $commonParams + @{
+            Uri = "$apiRoot/$zoneID/dns_records"
+            Body = @{
+                type = "TXT"
+                name = $RecordName
+                content = $TxtValue
+            }
         }
-        Write-Debug "GET $($getParams.Uri)"
-        $response = Invoke-RestMethod @getParams @script:UseBasic
+        Write-Debug "GET $($getParams.Uri)`n$($getParams.Body | ConvertTo-Json)"
+        $response = Invoke-RestMethod @getParams
     } catch { throw }
 
     # remove the txt record if it exists
@@ -154,15 +179,12 @@ function Remove-DnsTxt {
         $recID = $response.result[0].id
         Write-Verbose "Removing $RecordName with value $TxtValue"
         try {
-            $delParams = @{
+            $delParams = $commonParams + @{
                 Uri = "$apiRoot/$zoneID/dns_records/$recID"
                 Method = 'Delete'
-                Headers = $authHeader
-                Verbose = $false
-                ErrorAction = 'Stop'
             }
             Write-Debug "DELETE $($delParams.Uri)"
-            Invoke-RestMethod @delParams @script:UseBasic | Out-Null
+            Invoke-RestMethod @delParams | Out-Null
         } catch { throw }
 
     } else {
@@ -283,7 +305,9 @@ function Find-CFZone {
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [hashtable]$AuthHeader
+        [string]$ApiRoot,
+        [Parameter(Mandatory,Position=2)]
+        [hashtable]$CommonParams
     )
 
     # setup a module variable to cache the record to zone mapping
@@ -297,8 +321,6 @@ function Find-CFZone {
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
 
-    $apiRoot = 'https://api.cloudflare.com/client/v4/zones'
-
     # We need to find the zone ID for the closest/deepest sub-zone that would
     # contain the record.
     $pieces = $RecordName.Split('.')
@@ -309,14 +331,12 @@ function Find-CFZone {
         $response = $null
 
         try {
-            $getParams = @{
-                Uri = "$apiRoot/?name=$zoneTest"
-                Headers = $AuthHeader
-                Verbose = $false
-                ErrorAction = 'Stop'
+            $getParams = $commonParams + @{
+                Uri = $ApiRoot
+                Body = @{name = $zoneTest}
             }
-            Write-Debug "GET $($getParams.Uri)"
-            $response = Invoke-RestMethod @getParams @script:UseBasic
+            Write-Debug "GET $($getParams.Uri)`n$($getParams.Body | ConvertTo-Json)"
+            $response = Invoke-RestMethod @getParams
         } catch {
             # UPDATE: As of Feb 2021, Cloudflare seems to have fixed the bug where
             # querying a zone that doesn't exist with a limited scope API token
