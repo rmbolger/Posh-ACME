@@ -40,7 +40,7 @@ function Publish-DnsPersistChallenge {
         if ('FromOrder' -eq $PSCmdlet.ParameterSetName) {
 
             # extract the required parameters from the order object
-            $auths = $Order | Get-PAAuthorization
+            $auths = @($Order | Get-PAAuthorization)
             $pArgs = $Order | Get-PAPluginArgs
 
             # loop through the auths by index so we can correlate them to the associated plugin on the order
