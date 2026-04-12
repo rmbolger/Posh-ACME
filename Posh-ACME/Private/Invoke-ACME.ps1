@@ -54,6 +54,7 @@ function Invoke-ACME {
             Headers = $script:COMMON_HEADERS
             ErrorAction = 'Stop'
             Verbose = $false
+            Debug = $false
         }
 
         Write-Debug "POST $($iwrSplat.Uri)`n$Jws"
