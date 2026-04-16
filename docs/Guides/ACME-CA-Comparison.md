@@ -8,32 +8,29 @@ As more public certificate authorities hop on the [ACME][rfc00] bandwagon, it is
 | -------             | :------------------------: | :-------------:        | :------------:     | :-------------:    | :------------:     |
 | Free SAN Limit      | 100 names                  | 100+ names             | 100+ names         | 1 name + www       | 1 name + www       |
 | Free Wildcards      | :white_check_mark:         | :white_check_mark:     | :white_check_mark: | :x:                | :x:                |
-| Free Lifetime       | 90 days                    | 1*-90 days             | 90 days            | 90 days            | 90 days            |
+| Free Lifetime       | ~6*-90 days                | 1*-90 days             | 90 days            | 90 days            | 90 days            |
 | [IDN][wk02] Support | :white_check_mark:         | :white_check_mark:     | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | Chain Info          | [Chains][le06]             | [Iss][gc02]/[Root][gc03] | RSA [Iss1][z02]/[Iss2][z03]/[Root][z04]<br />ECC [Iss1][z05]/[Iss2][z06]/[Root][z07] | RSA [Iss][ss02]/[Root][ss03]<br />ECC [Iss][ss06]/[Root][ss07] | [Iss][ac02]/[Root][ac03] |
-| Rate Limits         | [Policy][le02]             | [Policy][gc04]         | ??                 | ??                 | ??                 |
+| Rate Limits         | [Policy][le02]             | [Policy][gc04]         | :question:         | :question:         | :question:         |
 | Notes               | [Service Status][le09]<br />[Staging Environment][le03] | [Staging Endpoint][gc06]<br />[Quick Start][gc07] | See Notes below | See Warning below | [CPS and Audit Docs][ac04] |
 
 
 * Wildcard names (if supported) count towards Subject Alternative Name (SAN) limits.
 * `1 name + www` means one domain name plus its www name variant such as `example.com` and `www.example.com`
+* Let's Encrypt certs have a 90 day lifetime by default, but roughly 6 days (160 hours) if using the `shortlived` [ACME profile][le12].
+* Google certs have a 90 day lifetime by default but can be requested for shorter lifetimes down to 1 day if supported by your ACME client. The recommended minimum lifetime is 3 days.
+* All public CAs will be [forced to reduce certificate lifetimes][cab01] down to a maximum of 47 days as of March 2029.
 * ZeroSSL supports a custom REST API that some clients use instead of pure ACME.
 * **SSL.com Warning:** If your SSL.com account has funds available, you will be charged for a paid 1-year certificate instead of a free 90-day certificate. There is no known way to request only a free certificate.
-* Google certs have a 90 day lifetime by default but can be requested for shorter lifetimes down to 1 day if supported by your ACME client. The recommended minimum lifetime is 3 days.
 * BuyPass has been removed from this page since they stopped offering free certs via ACME on [October 15, 2025](https://community.buypass.com/t/y4y130p).
 
-## ACME Spec and Feature Support
+## ACME Spec and Extensions Support
 
-Some of the features in the ACME protocol are optional. Others are mandatory but not yet supported by some implementations. Here is the status of those various features in each CA.
-
-!!! note
-    Multi-perspective validation is not part of the ACME protocol but is an important security feature for the integrity of domain validation.
-    SXG Support is also not part of the ACME protocol but is a notable feature among free ACME CAs.
+Some of the features in the ACME protocol are optional. Others are mandatory but not yet supported by some implementations. There are also a number of optional extensions to the original protocol. Here is the status of those various features in each CA.
 
 | Feature                                      | [Let's&nbsp;Encrypt][le01] | [Google][gc01]      | [ZeroSSL][z01]     | [SSL.com][ss01]                        | [Actalis][ac01]     |
 | -------                                      | :------------------------: | :-------------:     | :------------:     | :-------------:                        | :------------:      |
 | [(EAB) External<br />Account Binding][rfc01] | Not Needed                 | Required*           | Required           | Required                               | Required            |
-| [Multi-perspective<br />Validation][le05]    | :white_check_mark:         | :white_check_mark:  | :x:                | :x:                                    | :white_check_mark:  |
 | [Account<br />Key Rollover][rfc02]           | :white_check_mark:         | :white_check_mark:  | :x:                | :x:*                                   | :white_check_mark:  |
 | [Account<br />Deactivation][rfc03]           | :white_check_mark:         | :white_check_mark:  | :white_check_mark: | :white_check_mark:                     | :white_check_mark:  |
 | [Account<br />Orders][rfc04]                 | :x: *([Planned][le07])*    | :x:                 | :x:                | :x:*                                   | :white_check_mark:  |
@@ -42,16 +39,18 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 | [Authorization<br />Deactivation][rfc07]     | :white_check_mark:         | :white_check_mark:  | :white_check_mark: | :white_check_mark:                     | :white_check_mark:  |
 | [Cert<br />Revocation][rfc08]                | :white_check_mark:         | :white_check_mark:  | :white_check_mark: | :white_check_mark:                     | :white_check_mark:  |
 | [Challenge<br />Retrying][rfc09]             | :x:                        | :x:                 | :white_check_mark: | :warning:<br />*(Client must request)* | :x:*                |
-| [Variable Cert Lifetime][rfc10]              | :x:                        | :white_check_mark:  | :x:                | :x:                                    | :x:                 |
+| [Variable Cert Lifetime][rfc10]              | :x:*                       | :white_check_mark:  | :x:                | :x:                                    | :x:                 |
 | [SXG Support][gc09]                          | :x:                        | :white_check_mark:* | :x:                | :x:                                    | :x:                 |
 | [ACME Renewal Information (ARI)][rfc11]      | :white_check_mark:         | :white_check_mark:  | :x:                | :x:                                    | :white_check_mark:  |
 | [ACME Profiles][rfc12]                       | :white_check_mark:         | :x:                 | :x:                | :x:                                    | :x:                 |
-
+| [dns-account-01][rfc13]                      | :x:                        | :x:                 | :x:                | :x:                                    | :x:                 |
+| [dns-persist-01][rfc14]                      | :x: *([Pending][le13])     | :x: *(Pending)      | :x:                | :x:                                    | :x:                 |
 
 * :white_check_mark: = Feature supported
 * :x: = Feature unsupported
 * :warning: = Feature partially supported.
 * :question: = Support unknown or untested
+* Let's Encrypt doesn't support variable cert lifetimes via RFC9555's `notBefore`/`notAfter` order fields. But it does support alternative lifetimes via ACME Profiles.
 * Let's Encrypt IP Address certs require using the `shortlived` profile with a client that supports ACME Profiles. [More Info][le11]
 * SSL.com throws "Missing Authentication Token" errors when making some calls against Account endpoints which is why those features are labeled Unsupported.
 * SSL.com requires an email address in the ACME account contact field, but doesn't enforce it on creation time. Instead, it throws an "badCSR" error when you try to finalize an order from an account with an empty address.
@@ -78,6 +77,8 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 [le09]: https://letsencrypt.status.io/
 [le10]: https://acme-v02.api.letsencrypt.org/directory
 [le11]: https://letsencrypt.org/2026/01/15/6day-and-ip-general-availability
+[le12]: https://letsencrypt.org/docs/profiles/#shortlived
+[le13]: https://letsencrypt.org/2026/02/18/dns-persist-01
 [rfc00]: https://datatracker.ietf.org/doc/html/rfc8555
 [rfc01]: https://datatracker.ietf.org/doc/html/rfc8555#section-7.3.4
 [rfc02]: https://datatracker.ietf.org/doc/html/rfc8555#section-7.3.5
@@ -89,8 +90,10 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 [rfc08]: https://datatracker.ietf.org/doc/html/rfc8555#section-7.6
 [rfc09]: https://datatracker.ietf.org/doc/html/rfc8555#section-8.2
 [rfc10]: https://datatracker.ietf.org/doc/html/rfc8555#section-7.1.3
-[rfc11]: https://datatracker.ietf.org/doc/draft-ietf-acme-ari/
+[rfc11]: https://datatracker.ietf.org/doc/rfc9773/
 [rfc12]: https://datatracker.ietf.org/doc/draft-ietf-acme-profiles/
+[rfc13]: https://datatracker.ietf.org/doc/draft-ietf-acme-dns-account-label/
+[rfc14]: https://datatracker.ietf.org/doc/draft-ietf-acme-dns-persist/
 [z01]: https://zerossl.com/
 [z02]: https://crt.sh/?q=c81a8bd1f9cf6d84c525f378ca1d3f8c30770e34
 [z03]: https://crt.sh/?q=d89e3bd43d5d909b47a18977aa9d5ce36cee184c
@@ -120,4 +123,4 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 [ac02]: https://www.actalis.com/actalisdvserveracmecag1-en
 [ac03]: https://www.actalis.com/actalis-authentication-rootca-en
 [ac04]: https://www.actalis.com/legal-repository
-
+[cab01]: https://cabforum.org/working-groups/server/baseline-requirements/requirements/#632-certificate-operational-periods-and-key-pair-usage-periods
