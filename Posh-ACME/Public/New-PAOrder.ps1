@@ -51,7 +51,7 @@ function New-PAOrder {
         [switch]$Install,
         [switch]$UseSerialValidation,
         [int]$DnsSleep=120,
-        [ValidateSet('dns-01','dns-account-01')]
+        [ValidateSet('dns-01','dns-persist-01','dns-account-01')]
         [string]$DnsVariant,
         [int]$ValidationTimeout=60,
         [string]$PreferredChain,
