@@ -62,7 +62,6 @@ function Submit-ChallengeValidation {
         # records for any that are still pending.
 
         $allAuths = @($Order | Get-PAAuthorization)
-        $published = @()
 
         # fill out the order's Plugin attribute so there's a value for each authorization
         if (-not $Order.Plugin) {
@@ -89,9 +88,13 @@ function Submit-ChallengeValidation {
         # import existing args
         $PluginArgs = Get-PAPluginArgs -Name $Order.Name
 
-        # loop through the authorizations looking for challenges to validate
+        # loop through the authorizations looking for challenges to publish and validate
+        $published = @()
+        $toValidate = @()
+        $sleepForPersist = $false
         for ($i=0; $i -lt $allAuths.Count; $i++) {
 
+            $pubParams = $null
             $auth = $allAuths[$i]
             if ($auth.status -eq 'pending') {
 
@@ -109,8 +112,34 @@ function Submit-ChallengeValidation {
                     } catch { $PSCmdlet.ThrowTerminatingError($_) }
                 }
 
-                if ($Order.UseSerialValidation) {
-                    # Publish and validate each challenge separately
+                if ($chalType -eq 'dns-persist-01') {
+                    # publish the persist record if requested
+                    if ($PluginArgs.PublishPersist) {
+                        # Sanitize the account URI for draft-00 challenges until implementations support the newer draft and include it.
+                        if (-not $challenge.accounturi) {
+                            Write-Warning "dns-persist-01 challenge for $($auth.DNSId) is missing accounturi. Using account URI from account object instead."
+                            $challenge | Add-Member accounturi $acct.location -Force
+                        }
+                        $issuer = Get-IssuerFromChallenge $challenge
+                        if (-not $issuer) {
+                            try {
+                                throw "Unable to determine issuer domain name from dns-persist-01 challenge."
+                            } catch { $PSCmdlet.ThrowTerminatingError($_) }
+                        }
+                        $pubParams = @{
+                            Domain = $auth.DNSId
+                            AccountUri = $challenge.accounturi
+                            IssuerDomainName = $issuer
+                            Plugin = $Order.Plugin[$i]
+                            PluginArgs = $PluginArgs
+                        }
+                        try {
+                            Publish-DnsPersistChallenge @pubParams
+                            $sleepForPersist = $true
+                        } catch { throw }
+                    }
+                } else {
+                    # publish standard challenge
                     $pubParams = @{
                         Domain = $auth.DNSId
                         Account = $acct
@@ -122,10 +151,20 @@ function Submit-ChallengeValidation {
                     }
                     try {
                         Publish-Challenge @pubParams
-                        Save-Challenge -Plugin $Order.Plugin[$i] -PluginArgs $PluginArgs
+                        # save the params to unpublish later
+                        $published += $pubParams
+                    } catch { throw }
+                }
 
-                        # sleep while DNS changes propagate if it was a DNS challenge that was published
-                        if ($Order.DnsSleep -gt 0 -and $chalType -like 'dns-*') {
+                if ($Order.UseSerialValidation) {
+                    # save and validate the challenge before moving on to the next
+                    try {
+                        if ($chalType -ne 'dns-persist-01') {
+                            Save-Challenge -Plugin $pubParams.Plugin -PluginArgs $PluginArgs
+                        }
+
+                        # sleep while DNS changes propagate if a DNS challenge was published
+                        if ($chalType -like 'dns-*' -and $Order.DnsSleep -gt 0 -and $pubParams) {
                             Write-Verbose "Sleeping for $($Order.DnsSleep) seconds while DNS change(s) propagate"
                             Start-SleepProgress $Order.DnsSleep -Activity "Waiting for DNS to propagate"
                         }
@@ -141,39 +180,18 @@ function Submit-ChallengeValidation {
                         $PSCmdlet.ThrowTerminatingError($_)
                     }
                     finally {
-                        Unpublish-Challenge @pubParams
-                        Save-Challenge -Plugin $Order.Plugin[$i] -PluginArgs $PluginArgs
-                    }
-                }
-                else {
-                    try {
-                        # Publish each challenge
-                        $pubParams = @{
-                            Domain = $auth.DNSId
-                            Account = $acct
-                            Token = $challenge.token
-                            Plugin = $Order.Plugin[$i]
-                            PluginArgs = $PluginArgs
-                            DnsAlias = $Order.DnsAlias[$i]
-                            DnsVariant = $Order.DnsVariant
-                        }
-                        Publish-Challenge @pubParams
-
-                        # save the details of what we published for validation and cleanup later
-                        $published += @{
-                            identifier = $auth.DNSId
-                            fqdn = $auth.fqdn
-                            authUrl = $auth.location
-                            plugin = $Order.Plugin[$i]
-                            chalType = $chalType
-                            chalToken = $challenge.token
-                            chalUrl = $challenge.url
-                            DnsAlias = $Order.DnsAlias[$i]
-                            DnsVariant = $Order.DnsVariant
+                        # always try to cleanup non-persistent challenges
+                        if ($chalType -ne 'dns-persist-01') {
+                            Unpublish-Challenge @pubParams
+                            Save-Challenge -Plugin $pubParams.Plugin -PluginArgs $PluginArgs
                         }
                     }
-                    catch {
-                        $PSCmdlet.ThrowTerminatingError($_)
+                } else {
+                    # save the details we'll need later for batch validation
+                    $toValidate += @{
+                        chalType = $chalType
+                        chalUrl = $challenge.url
+                        authUrl = $auth.location
                     }
                 }
 
@@ -189,57 +207,46 @@ function Submit-ChallengeValidation {
             }
         }
 
-        if (-not $Order.UseSerialValidation) {
-            try {
-                # if we published any records, now we need to save them, wait for DNS
-                # to propagate, and notify the server it can perform the validation
-                if ($published.Count -gt 0) {
+        if ($Order.UseSerialValidation) {
+            # nothing left to do
+            return
+        }
 
-                    # grab the set of unique plugins that were used to publish challenges
-                    $uniquePluginsUsed = $published.plugin | Sort-Object -Unique
-
-                    # call the Save function for each plugin used
-                    $uniquePluginsUsed | ForEach-Object {
-                        Save-Challenge -Plugin $_ -PluginArgs $PluginArgs
-                    }
-
-                    # sleep while DNS changes propagate if there were DNS challenges published
-                    $uniqueChalTypes = $script:Plugins[$uniquePluginsUsed].ChallengeType
-                    if ($Order.DnsSleep -gt 0 -and 'dns-01' -in $uniqueChalTypes) {
-                        Write-Verbose "Sleeping for $($Order.DnsSleep) seconds while DNS change(s) propagate"
-                        Start-SleepProgress $Order.DnsSleep -Activity "Waiting for DNS to propagate"
-                    }
-
-                    # ask the server to validate the challenges
-                    Write-Verbose "Requesting challenge validations"
-                    $published.chalUrl | Send-ChallengeAck -Account $acct
-
-                    # and wait for them to succeed or fail
-                    Wait-AuthValidation @($published.authUrl) $Order.ValidationTimeout
-                }
-            }
-            catch {
-                $PSCmdlet.ThrowTerminatingError($_)
-            }
-            finally {
-                # always cleanup the challenges that were published
-                $published | ForEach-Object {
-                    $pubParams = @{
-                        Domain = $_.identifier
-                        Account = $acct
-                        Token = $_.chalToken
-                        Plugin = $_.plugin
-                        PluginArgs = $PluginArgs
-                        DnsAlias = $_.DnsAlias
-                        DnsVariant = $_.DnsVariant
-                    }
-                    Unpublish-Challenge @pubParams
-                }
-
-                # save the cleanup changes
+        try {
+            # save the non-persistent challenges we published
+            if ($published.Count -gt 0) {
                 $published.plugin | Sort-Object -Unique | ForEach-Object {
                     Save-Challenge -Plugin $_ -PluginArgs $PluginArgs
                 }
+            }
+
+            # sleep while DNS changes propagate if there were DNS challenges published
+            if ($Order.DnsSleep -gt 0 -and $toValidate.chalType -match '^dns-' -and
+                ($published.Count -gt 0 -or $sleepForPersist)
+            ) {
+                Write-Verbose "Sleeping for $($Order.DnsSleep) seconds while DNS change(s) propagate"
+                Start-SleepProgress $Order.DnsSleep -Activity "Waiting for DNS to propagate"
+            }
+
+            # ask the server to validate the challenges
+            Write-Verbose "Requesting challenge validations"
+            $toValidate.chalUrl | Send-ChallengeAck -Account $acct
+
+            # and wait for them to succeed or fail
+            Wait-AuthValidation @($toValidate.authUrl) $Order.ValidationTimeout
+        }
+        catch {
+            $PSCmdlet.ThrowTerminatingError($_)
+        }
+        finally {
+            # always try to cleanup non-persistent challenges
+            $published | ForEach-Object {
+                Unpublish-Challenge @_
+            }
+
+            # save the cleanup changes
+            $published.plugin | Sort-Object -Unique | ForEach-Object {
+                Save-Challenge -Plugin $_ -PluginArgs $PluginArgs
             }
         }
 

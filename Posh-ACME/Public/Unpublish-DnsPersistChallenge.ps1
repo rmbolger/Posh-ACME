@@ -62,25 +62,11 @@ function Unpublish-DnsPersistChallenge {
                     Write-Warning "Authz contains no dns-persist-01 challenge for $fqdn. Skipping."
                     continue
                 }
-                $issuers = $challenge.'issuer-domain-names'
-
-                # Sanity check issuer-domain-names.
-                # "Clients MUST consider a challenge malformed if the issuer-domain-names array is empty or if it contains
-                # more than 10 entries, and MUST reject such challenges."
-                # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-01.html#section-3.1
-                if (-not $issuers -or $issuers.Length -eq 0) {
-                    Write-Warning "dns-persist-01 challenge for $fqdn has no issuer domain names. Skipping."
+                $issuer = Get-IssuerFromChallenge $challenge
+                if (-not $issuer) {
+                    Write-Warning "Unable to determine issuer domain name from dns-persist-01 challenge."
                     continue
                 }
-                if ($issuers.Length -gt 10) {
-                    Write-Warning "dns-persist-01 challenge for $fqdn has more than 10 issuer domain names. Clients must reject this. Skipping."
-                    continue
-                }
-
-                # "The order of names in the array has no significance."
-                # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-01.html#section-7.6
-                # So sort them to make it more likely that we get the same value for each challenge on each run.
-                $issuers = @($issuers | Sort-Object)
 
                 # correlate the plugin args to the auth by index or use the last one available.
                 if ($Order.Plugin.Count -gt $i) {
@@ -89,7 +75,7 @@ function Unpublish-DnsPersistChallenge {
                     $plugin = $Order.Plugin[-1]
                 }
 
-                # Sanitize the account URI for draft-00 challenges until Pebble supports the newer draft and includes it.
+                # Sanitize the account URI for draft-00 challenges until implementations support the newer draft and include it.
                 if (-not $challenge.accounturi) {
                     Write-Warning "dns-persist-01 challenge for $fqdn is missing accounturi. Might be based on draft-00. Using account URI from account object instead."
                     $challenge | Add-Member accounturi $Account.location -Force
@@ -98,7 +84,7 @@ function Unpublish-DnsPersistChallenge {
                 $chalCollection.Add([pscustomobject]@{
                     fqdn = $fqdn
                     accounturi = $challenge.accounturi
-                    issuer = $issuers[0]
+                    issuer = $issuer
                     plugin = $plugin
                     pArgs = $pArgs
                 })
