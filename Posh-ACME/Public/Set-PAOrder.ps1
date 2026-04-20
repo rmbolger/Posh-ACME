@@ -49,7 +49,7 @@ function Set-PAOrder {
         [Parameter(ParameterSetName='Edit')]
         [int]$DnsSleep,
         [Parameter(ParameterSetName='Edit')]
-        [ValidateSet('dns-01','dns-account-01')]
+        [ValidateSet('dns-01','dns-persist-01','dns-account-01')]
         [string]$DnsVariant,
         [Parameter(ParameterSetName='Edit')]
         [int]$ValidationTimeout,
