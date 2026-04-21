@@ -1,4 +1,4 @@
-function ConvertTo-AcctDnsLabel {
+function Get-DnsAcctLabel {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0,ValueFromPipelineByPropertyName)]

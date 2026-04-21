@@ -38,7 +38,7 @@ function Unpublish-Challenge {
             # always use the alias if it was specified
             $recordName = $DnsAlias
         } elseif ($DnsVariant -eq 'dns-account-01') {
-            $label = ConvertTo-AcctDnsLabel -AccountUri $Account.Location
+            $label = Get-DnsAcctLabel -AccountUri $Account.Location
             $recordName = "$label.$Domain"
         } else {
             # use standard dns-01 fqdn
