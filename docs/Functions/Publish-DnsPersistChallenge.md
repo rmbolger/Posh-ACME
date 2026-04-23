@@ -15,15 +15,15 @@ Publish dns-persist-01 challenge records.
 
 ### FromOrder (Default)
 ```powershell
-Publish-DnsPersistChallenge [-Order] <Object> [-AllowWildcard] [-UseAllDomains]
- [-PersistUntil <DateTimeOffset>] [<CommonParameters>]
+Publish-DnsPersistChallenge [-Order] <Object> [-Plugin <String[]>] [-PluginArgs <Hashtable>] [-AllowWildcard]
+ [-UseAllDomains] [-PersistUntil <DateTimeOffset>] [<CommonParameters>]
 ```
 
 ### Standalone
 ```powershell
 Publish-DnsPersistChallenge [-Domain] <String[]> [-AccountUri] <String> [-IssuerDomainName] <String>
- -Plugin <String> [-PluginArgs <Hashtable>] [-AllowWildcard] [-UseAllDomains] [-PersistUntil <DateTimeOffset>]
- [<CommonParameters>]
+ -Plugin <String[]> [-PluginArgs <Hashtable>] [-AllowWildcard] [-UseAllDomains]
+ [-PersistUntil <DateTimeOffset>] [<CommonParameters>]
 ```
 
 ## Description
@@ -202,7 +202,19 @@ The name of the validation plugin to use.
 Use Get-PAPlugin to display a list of available plugins.
 
 ```yaml
-Type: String
+Type: String[]
+Parameter Sets: FromOrder
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+```yaml
+Type: String[]
 Parameter Sets: Standalone
 Aliases:
 
@@ -219,7 +231,7 @@ So if a plugin has a -MyText string and -MyNumber integer parameter, you could s
 
 ```yaml
 Type: Hashtable
-Parameter Sets: Standalone
+Parameter Sets: (All)
 Aliases:
 
 Required: False

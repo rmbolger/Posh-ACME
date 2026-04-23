@@ -5429,9 +5429,9 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           <maml:description>
             <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>String[]</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
@@ -5494,6 +5494,30 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
           <dev:type>
             <maml:name>DateTimeOffset</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Plugin</maml:name>
+          <maml:description>
+            <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PluginArgs</maml:name>
+          <maml:description>
+            <maml:para>A hashtable containing the plugin arguments to use with the specified plugin. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Hashtable</command:parameterValue>
+          <dev:type>
+            <maml:name>Hashtable</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
@@ -5585,14 +5609,14 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Plugin</maml:name>
         <maml:description>
           <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>String[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
@@ -9433,9 +9457,9 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           <maml:description>
             <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>String[]</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
@@ -9498,6 +9522,30 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
           <dev:type>
             <maml:name>DateTimeOffset</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Plugin</maml:name>
+          <maml:description>
+            <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PluginArgs</maml:name>
+          <maml:description>
+            <maml:para>A hashtable containing the plugin arguments to use with the specified plugin. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Hashtable</command:parameterValue>
+          <dev:type>
+            <maml:name>Hashtable</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
@@ -9589,14 +9637,14 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Plugin</maml:name>
         <maml:description>
           <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>String[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
