@@ -10,9 +10,11 @@ function Unpublish-DnsPersistChallenge {
         [Parameter(Mandatory,ParameterSetName='Standalone',Position=2)]
         [string]$IssuerDomainName,
         [Parameter(Mandatory,ParameterSetName='Standalone')]
+        [Parameter(ParameterSetName='FromOrder')]
         [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
-        [string]$Plugin,
+        [string[]]$Plugin,
         [Parameter(ParameterSetName='Standalone')]
+        [Parameter(ParameterSetName='FromOrder')]
         [hashtable]$PluginArgs,
         [switch]$AllowWildcard,
         [switch]$UseAllDomains,
@@ -41,7 +43,16 @@ function Unpublish-DnsPersistChallenge {
 
             # extract the required parameters from the order object
             $auths = @($Order | Get-PAAuthorization)
-            $pArgs = $Order | Get-PAPluginArgs
+            if ('Plugin' -notin $PSBoundParameters.Keys) {
+                $Plugin = $Order.Plugin
+            } else {
+                Write-Verbose "Overriding order Plugin with explicit parameter."
+            }
+            if ('PluginArgs' -notin $PSBoundParameters.Keys) {
+                $PluginArgs = $Order | Get-PAPluginArgs
+            } else {
+                Write-Verbose "Overriding order PluginArgs with explicit parameter."
+            }
 
             # loop through the auths by index so we can correlate them to the associated plugin on the order
             for ($i=0; $i -lt $auths.Count; $i++) {
@@ -69,10 +80,10 @@ function Unpublish-DnsPersistChallenge {
                 }
 
                 # correlate the plugin args to the auth by index or use the last one available.
-                if ($Order.Plugin.Count -gt $i) {
-                    $plugin = $Order.Plugin[$i]
+                if ($Plugin.Count -gt $i) {
+                    $p = $Plugin[$i]
                 } else {
-                    $plugin = $Order.Plugin[-1]
+                    $p = $Plugin[-1]
                 }
 
                 # Sanitize the account URI for draft-00 challenges until implementations support the newer draft and include it.
@@ -85,32 +96,38 @@ function Unpublish-DnsPersistChallenge {
                     fqdn = $fqdn
                     accounturi = $challenge.accounturi
                     issuer = $issuer
-                    plugin = $plugin
-                    pArgs = $pArgs
+                    plugin = $p
+                    pArgs = $PluginArgs
                 })
             }
 
         } else {
 
-            foreach ($d in $Domain) {
+            for ($i=0; $i -lt $Domain.Count; $i++) {
+                $d = $Domain[$i]
                 # sanitize the domain if it was passed in as a wildcard on accident
                 if ($d -and $d.StartsWith('*.')) {
                     Write-Warning "Stripping wildcard characters from $d. Not required for publishing."
                     $d = $d.Substring(2)
                 }
 
+                # correlate the plugin args to the domain by index or use the last one available.
+                if ($Plugin.Count -gt $i) {
+                    $p = $Plugin[$i]
+                } else {
+                    $p = $Plugin[-1]
+                }
+
                 $chalCollection.Add([pscustomobject]@{
                     fqdn = $d
                     accounturi = $AccountUri
                     issuer = $IssuerDomainName
-                    plugin = $Plugin
+                    plugin = $p
                     pArgs = $PluginArgs
                 })
-
             }
 
         }
-
     }
 
     End {
