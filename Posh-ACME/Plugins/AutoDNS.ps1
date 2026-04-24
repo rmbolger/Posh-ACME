@@ -220,7 +220,7 @@ function Find-AutoDNSZone {
         return $script:AutoDNSRecordZones.$RecordName
     }
 
-    $zoneInquireTemplate = "<?xml version=`"1.0`" encoding=`"UTF-8`"?><request>$AuthBlock<task><code>0205</code><view><children>1</children><limit>1</limit></view><where><key>name</key><operator>eq</operator><value>{0}</value></where></task></request>"
+    $zoneInquireTemplate = "<?xml version=`"1.0`" encoding=`"UTF-8`"?><request>{0}<task><code>0205</code><view><children>1</children><limit>1</limit></view><where><key>name</key><operator>eq</operator><value>{1}</value></where></task></request>"
 
     # Search for the zone from longest to shortest set of FQDN pieces.
     $pieces = $RecordName.Split('.')
@@ -228,7 +228,7 @@ function Find-AutoDNSZone {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         try {
-            $zoneInquire = $zoneInquireTemplate -f $zoneTest
+            $zoneInquire = $zoneInquireTemplate -f $AuthBlock,$zoneTest
             $result = (Invoke-RestMethod $Gateway -Method Post -Body $zoneInquire @script:UseBasic).response.result
 
             # check for results
