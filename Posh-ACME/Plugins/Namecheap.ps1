@@ -13,6 +13,7 @@ function Add-DnsTxt {
         [securestring]$NCApiKey,
         [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$NCApiKeyInsecure,
+        [switch]$NCUseSandbox,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -21,15 +22,19 @@ function Add-DnsTxt {
     try { $body = Get-NCCommonBody @PSBoundParameters } catch { throw }
 
     # get the SLD/TLD for this record
-    try { $sld,$tld = Find-NCDomain $RecordName $body } catch { throw }
+    try { $sld,$tld = Find-NCDomain $RecordName $body -UseSandbox:$NCUseSandbox } catch { throw }
     Write-Debug "Found domain $sld{dot}$tld"
 
     # get the current set of records for this domain
-    try { $recs = Get-NCRecords $sld $tld $body } catch { throw }
+    try { $recs = Get-NCRecords $sld $tld $body -UseSandbox:$NCUseSandbox } catch { throw }
+
+    # strip quotes from the TXT value if they exist since namecheap strips them on the server side
+    $TxtValue = $TxtValue.Trim('"')
 
     # get the short version of the record name to match against
     $zoneName = "$sld.$tld"
     $recMatch = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
+    if ($recMatch -eq '') { $recMatch = '@' }
 
     # check for an existing record
     if ($recs | Where-Object { $_.Name -eq $recMatch -and $_.Type -eq 'TXT' -and $_.Address -eq $TxtValue }) {
@@ -57,7 +62,7 @@ function Add-DnsTxt {
         # send it all over
         try {
             Write-Verbose "Adding a TXT record for $RecordName with value $TxtValue"
-            Invoke-NCAPI $addBody -Method Post | Out-Null
+            Invoke-NCAPI $addBody -Method Post -UseSandbox:$NCUseSandbox | Out-Null
         } catch { throw }
 
     }
@@ -111,6 +116,7 @@ function Remove-DnsTxt {
         [securestring]$NCApiKey,
         [Parameter(ParameterSetName='DeprecatedInsecure',Mandatory,Position=3)]
         [string]$NCApiKeyInsecure,
+        [switch]$NCUseSandbox,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -119,15 +125,19 @@ function Remove-DnsTxt {
     try { $body = Get-NCCommonBody @PSBoundParameters } catch { throw }
 
     # get the SLD/TLD for this record
-    try { $sld,$tld = Find-NCDomain $RecordName $body } catch { throw }
+    try { $sld,$tld = Find-NCDomain $RecordName $body -UseSandbox:$NCUseSandbox } catch { throw }
     Write-Debug "Found domain $sld{dot}$tld"
 
     # get the current set of records for this domain
-    try { $recs = Get-NCRecords $sld $tld $body } catch { throw }
+    try { $recs = Get-NCRecords $sld $tld $body -UseSandbox:$NCUseSandbox } catch { throw }
+
+    # strip quotes from the TXT value if they exist since namecheap strips them on the server side
+    $TxtValue = $TxtValue.Trim('"')
 
     # get the short version of the record name to match against
     $zoneName = "$sld.$tld"
     $recMatch = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
+    if ($recMatch -eq '') { $recMatch = '@' }
 
     # check for an existing record
     if ($delRec = $recs | Where-Object { $_.Name -eq $recMatch -and $_.Type -eq 'TXT' -and $_.Address -eq $TxtValue }) {
@@ -148,7 +158,7 @@ function Remove-DnsTxt {
         # send it all over
         try {
             Write-Verbose "Removing TXT record for $RecordName with value $TxtValue"
-            Invoke-NCAPI $addBody -Method Post | Out-Null
+            Invoke-NCAPI $addBody -Method Post -UseSandbox:$NCUseSandbox | Out-Null
         } catch { throw }
 
     } else {
@@ -247,7 +257,7 @@ function Get-NCCommonBody {
     # In testing, it seems like they don't check the value for ClientIp at all and only check
     # the actual IP you're coming from. But we'll try to play by the rules anyway.
     try {
-        $ip = Invoke-RestMethod https://api.ipify.org -EA Stop
+        $ip = Invoke-RestMethod https://api.ipify.org -Verbose:$false -Debug:$false -EA Stop
         $body.ClientIp = $ip
         Write-Debug "Retrieved public IP as $ip"
     } catch { throw }
@@ -261,7 +271,9 @@ function Find-NCDomain {
         [Parameter(Mandatory,Position=0)]
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
-        [hashtable]$CommonBody
+        [hashtable]$CommonBody,
+        [Parameter(Mandatory,Position=2)]
+        [switch]$UseSandbox
     )
 
     $CommonBody.Command = 'namecheap.domains.getList'
@@ -284,7 +296,7 @@ function Find-NCDomain {
         $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
         Write-Debug "Checking $zoneTest"
         try {
-            $response = Invoke-NCAPI $CommonBody -QueryAdditions "SearchTerm=$zoneTest"
+            $response = Invoke-NCAPI ($CommonBody + @{SearchTerm=$zoneTest}) -UseSandbox:$UseSandbox
 
             # check for results
             if ($response.ApiResponse.CommandResponse.Paging.TotalItems -gt 0) {
@@ -313,13 +325,15 @@ function Get-NCRecords {
         [Parameter(Mandatory,Position=1)]
         [string]$TLD,
         [Parameter(Mandatory,Position=2)]
-        [hashtable]$CommonBody
+        [hashtable]$CommonBody,
+        [Parameter(Mandatory,Position=3)]
+        [switch]$UseSandbox
     )
 
     try {
         Write-Debug "Fetching records for $SLD{dot}$TLD"
         $CommonBody.Command = 'namecheap.domains.dns.getHosts'
-        $response = Invoke-NCAPI $CommonBody -QueryAdditions "SLD=$SLD&TLD=$TLD"
+        $response = Invoke-NCAPI ($CommonBody + @{SLD=$SLD; TLD=$TLD}) -UseSandbox:$UseSandbox
 
         $recs = @($response.ApiResponse.CommandResponse.DomainDNSGetHostsResult.host)
         Write-Debug "Found $($recs.Count) records"
@@ -363,8 +377,8 @@ function Invoke-NCAPI {
     param(
         [Parameter(Mandatory,Position=0)]
         [hashtable]$body,
-        [Microsoft.PowerShell.Commands.WebRequestMethod]$Method=([Microsoft.PowerShell.Commands.WebRequestMethod]::Get),
-        [string]$QueryAdditions
+        [string]$Method='GET',
+        [switch]$UseSandbox
     )
 
     # Namecheap's API seems to sporadically return error 3050750 with the message
@@ -375,16 +389,37 @@ function Invoke-NCAPI {
     # that will do that.
 
     $apiBase = 'https://api.namecheap.com/xml.response'
-    if ($QueryAdditions) { $apiBase += "?$QueryAdditions" }
+    if ($UseSandbox) { $apiBase = 'https://api.sandbox.namecheap.com/xml.response' }
 
     try {
+        $queryParams = @{
+            Uri = $apiBase
+            Body = $body
+            Method = $Method.ToUpper()
+            Verbose = $false
+            Debug = $false
+            ErrorAction = 'Stop'
+        } + $script:UseBasic
+
+        # create a redacted version of the body for logging
+        $redactedBody = $body.Clone()
+        'ApiUser','ApiKey','UserName','ClientIp' | ForEach-Object {
+            if ($redactedBody.ContainsKey($_)) {
+                $redactedBody.Remove($_)
+            }
+        }
 
         for ($i=1; $i -le 5; $i++) {
 
-            $response = Invoke-RestMethod $apiBase -Body $body -Method $Method @script:UseBasic -EA Stop
+            Write-Debug "$($Method.ToUpper()) $apiBase`nBODY (JSON for display purposes):$($redactedBody | ConvertTo-Json -Depth 5)"
+            $response = Invoke-RestMethod @queryParams
 
             # return the response if no errors
-            if ($response.ApiResponse.Status -eq 'OK') { return $response }
+            if ($response.ApiResponse.Status -eq 'OK') {
+                # convert the xml object to a string for easier debugging if needed
+                Write-Debug "Response:`n$($response.OuterXml)"
+                return $response
+            }
 
             # loop/retry on the 3050750 error
             if (3050750 -eq $response.ApiResponse.Errors.Error.Number) {
