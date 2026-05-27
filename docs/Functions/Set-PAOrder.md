@@ -18,9 +18,9 @@ Switch to or modify an order.
 Set-PAOrder [[-MainDomain] <String>] [-Name <String>] [-NoSwitch] [-Plugin <String[]>]
  [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-NewName <String>]
  [-Subject <String>] [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>]
- [-UseModernPfxEncryption] [-Install] [-OCSPMustStaple] [-DnsSleep <Int32>] [-DnsVariant <String>]
- [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-AlwaysNewKey] [-UseSerialValidation]
- [-Profile <String>] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-UseModernPfxEncryption] [-UsePfxDerEncoding] [-Install] [-OCSPMustStaple] [-DnsSleep <Int32>]
+ [-DnsVariant <String>] [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-AlwaysNewKey]
+ [-UseSerialValidation] [-Profile <String>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### Revoke
@@ -471,6 +471,21 @@ The DNS challenge variant to use for identifiers in this order. Defaults to `dns
 
 ```yaml
 Type: String
+Parameter Sets: Edit
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UsePfxDerEncoding
+If specified, the data in PFX files will be DER encoded rather than the default which is BER encoding. This may be required for dependent systems that use libraries that are deprecating BER support.
+
+```yaml
+Type: SwitchParameter
 Parameter Sets: Edit
 Aliases:
 

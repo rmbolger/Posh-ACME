@@ -3266,6 +3266,17 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>UsePfxDerEncoding</maml:name>
+          <maml:description>
+            <maml:para>If specified, the data in PFX files will be DER encoded rather than the default which is BER encoding. This may be required for dependent systems that use libraries that are deprecating BER support.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
       <command:syntaxItem>
         <maml:name>New-PACertificate</maml:name>
@@ -3797,6 +3808,18 @@ New-PAAccount -ExtAcctKID $eabKID -ExtAcctHMACKey $eabHMAC -Contact 'me@example.
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>UsePfxDerEncoding</maml:name>
+        <maml:description>
+          <maml:para>If specified, the data in PFX files will be DER encoded rather than the default which is BER encoding. This may be required for dependent systems that use libraries that are deprecating BER support.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
     </command:parameters>
     <command:inputTypes />
     <command:returnValues>
@@ -4188,6 +4211,17 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>UsePfxDerEncoding</maml:name>
+          <maml:description>
+            <maml:para>If specified, the data in PFX files will be DER encoded rather than the default which is BER encoding. This may be required for dependent systems that use libraries that are deprecating BER support.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
       <command:syntaxItem>
         <maml:name>New-PAOrder</maml:name>
@@ -4482,6 +4516,17 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>UsePfxDerEncoding</maml:name>
+          <maml:description>
+            <maml:para>If specified, the data in PFX files will be DER encoded rather than the default which is BER encoding. This may be required for dependent systems that use libraries that are deprecating BER support.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
       </command:syntaxItem>
       <command:syntaxItem>
@@ -5000,6 +5045,18 @@ New-PACertificate 'example.com' -Plugin FakeDNS -PluginArgs $pArgs -DnsAlias 'ac
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>UsePfxDerEncoding</maml:name>
+        <maml:description>
+          <maml:para>If specified, the data in PFX files will be DER encoded rather than the default which is BER encoding. This may be required for dependent systems that use libraries that are deprecating BER support.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes />
@@ -7902,6 +7959,17 @@ Set-PAAccount -UseAltPluginEncryption:$false</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>UsePfxDerEncoding</maml:name>
+          <maml:description>
+            <maml:para>If specified, the data in PFX files will be DER encoded rather than the default which is BER encoding. This may be required for dependent systems that use libraries that are deprecating BER support.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
@@ -8216,6 +8284,18 @@ Set-PAAccount -UseAltPluginEncryption:$false</dev:code>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>UsePfxDerEncoding</maml:name>
+        <maml:description>
+          <maml:para>If specified, the data in PFX files will be DER encoded rather than the default which is BER encoding. This may be required for dependent systems that use libraries that are deprecating BER support.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes />

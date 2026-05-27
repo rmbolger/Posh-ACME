@@ -43,6 +43,8 @@ function Set-PAOrder {
         [Parameter(ParameterSetName='Edit')]
         [switch]$UseModernPfxEncryption,
         [Parameter(ParameterSetName='Edit')]
+        [switch]$UsePfxDerEncoding,
+        [Parameter(ParameterSetName='Edit')]
         [switch]$Install,
         [Parameter(ParameterSetName='Edit')]
         [switch]$OCSPMustStaple,
@@ -260,6 +262,15 @@ function Set-PAOrder {
             ) {
                 Write-Verbose "Setting UseModernPfxEncryption to $($UseModernPfxEncryption.IsPresent)"
                 $order | Add-Member 'UseModernPfxEncryption' $UseModernPfxEncryption.IsPresent -Force
+                $saveChanges = $true
+                $rewritePfx = $true
+            }
+
+            if ('UsePfxDerEncoding' -in $psbKeys -and
+                (-not $order.UsePfxDerEncoding -or $UsePfxDerEncoding.IsPresent -ne $order.UsePfxDerEncoding)
+            ) {
+                Write-Verbose "Setting UsePfxDerEncoding to $($UsePfxDerEncoding.IsPresent)"
+                $order | Add-Member 'UsePfxDerEncoding' $UsePfxDerEncoding.IsPresent -Force
                 $saveChanges = $true
                 $rewritePfx = $true
             }

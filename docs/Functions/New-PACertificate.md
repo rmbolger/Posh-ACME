@@ -19,7 +19,7 @@ New-PACertificate [-Domain] <String[]> [-Name <String>] [-Contact <String[]>] [-
  [-AlwaysNewKey] [-AcceptTOS] [-AccountKeyLength <String>] [-DirectoryUrl <String>] [-Plugin <String[]>]
  [-PluginArgs <Hashtable>] [-LifetimeDays <Int32>] [-DnsAlias <String[]>] [-OCSPMustStaple] [-Subject <String>]
  [-FriendlyName <String>] [-PfxPass <String>] [-PfxPassSecure <SecureString>] [-UseModernPfxEncryption]
- [-Install] [-UseSerialValidation] [-Force] [-DnsSleep <Int32>] [-DnsVariant <String>]
+ [-UsePfxDerEncoding] [-Install] [-UseSerialValidation] [-Force] [-DnsSleep <Int32>] [-DnsVariant <String>]
  [-ValidationTimeout <Int32>] [-PreferredChain <String>] [-Profile <String>] [<CommonParameters>]
 ```
 
@@ -541,6 +541,21 @@ The DNS challenge variant to use for identifiers in this order. Defaults to `dns
 ```yaml
 Type: String
 Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UsePfxDerEncoding
+If specified, the data in PFX files will be DER encoded rather than the default which is BER encoding. This may be required for dependent systems that use libraries that are deprecating BER support.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: FromScratch
 Aliases:
 
 Required: False

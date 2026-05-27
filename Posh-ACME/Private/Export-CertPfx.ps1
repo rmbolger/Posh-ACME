@@ -10,7 +10,8 @@ function Export-CertPfx {
         [string]$ChainFile,
         [string]$FriendlyName,
         [string]$PfxPass='',
-        [switch]$UseModernPfxEncryption
+        [switch]$UseModernPfxEncryption,
+        [switch]$UsePfxDerEncoding
     )
 
     $CertFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($CertFile)
@@ -34,6 +35,11 @@ function Export-CertPfx {
     $storebuilder.SetCertAlgorithm(
         [Org.BouncyCastle.Asn1.Pkcs.PkcsObjectIdentifiers]::PbeWithShaAnd3KeyTripleDesCbc.Id
     ) | Out-Null
+
+    # set optional DER encoding
+    if ($UsePfxDerEncoding) {
+        $storebuilder.SetUseDerEncoding($true) | Out-Null
+    }
 
     # The private key algorithm option affects compatibility with various versions
     # of OpenSSL. The default, "RC2-40-CBC", works with 1.0.x and 1.1.x, but not

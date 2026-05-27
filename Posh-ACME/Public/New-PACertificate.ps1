@@ -42,6 +42,8 @@ function New-PACertificate {
         [Parameter(ParameterSetName='FromScratch')]
         [switch]$UseModernPfxEncryption,
         [Parameter(ParameterSetName='FromScratch')]
+        [switch]$UsePfxDerEncoding,
+        [Parameter(ParameterSetName='FromScratch')]
         [ValidateScript({Test-WinOnly -ThrowOnFail})]
         [switch]$Install,
         [switch]$UseSerialValidation,
@@ -174,6 +176,7 @@ function New-PACertificate {
                 FriendlyName           = $FriendlyName
                 PfxPassSecure          = $PfxPassSecure
                 UseModernPfxEncryption = $UseModernPfxEncryption
+                UsePfxDerEncoding      = $UsePfxDerEncoding
                 Install                = $Install
             }
 
@@ -185,6 +188,7 @@ function New-PACertificate {
                     'Subject'
                     'FriendlyName'
                     'UseModernPfxEncryption'
+                    'UsePfxDerEncoding'
                     'Install' ) | ForEach-Object {
 
                     if ($oldOrder.$_ -and $_ -notin $psbKeys) {
@@ -256,6 +260,7 @@ function New-PACertificate {
             'FriendlyName'
             'PfxPassSecure'
             'UseModernPfxEncryption'
+            'UsePfxDerEncoding'
             'Install'
             'DnsSleep'
             'DnsVariant'

@@ -155,6 +155,9 @@ function Export-PACertFiles {
         if ($Order.UseModernPfxEncryption) {
             $pfxParams.UseModernPfxEncryption = $true
         }
+        if ($Order.UsePfxDerEncoding) {
+            $pfxParams.UsePfxDerEncoding = $true
+        }
         Export-CertPfx @pfxParams
         $pfxParams.OutputFile = $pfxFullFile
         Export-CertPfx @pfxParams -ChainFile $chainFile

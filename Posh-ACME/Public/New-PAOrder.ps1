@@ -45,6 +45,9 @@ function New-PAOrder {
         [switch]$UseModernPfxEncryption,
         [Parameter(ParameterSetName='FromScratch')]
         [Parameter(ParameterSetName='ImportKey')]
+        [switch]$UsePfxDerEncoding,
+        [Parameter(ParameterSetName='FromScratch')]
+        [Parameter(ParameterSetName='ImportKey')]
         [switch]$Install,
         [switch]$UseSerialValidation,
         [int]$DnsSleep=120,
@@ -355,6 +358,9 @@ function New-PAOrder {
     }
     if ('UseModernPfxEncryption' -in $PSBoundParameters.Keys) {
         $order | Add-Member UseModernPfxEncryption $UseModernPfxEncryption.IsPresent -Force
+    }
+    if ('UsePfxDerEncoding' -in $PSBoundParameters.Keys) {
+        $order | Add-Member UsePfxDerEncoding $UsePfxDerEncoding.IsPresent -Force
     }
 
     # add the Name and Folder properties
