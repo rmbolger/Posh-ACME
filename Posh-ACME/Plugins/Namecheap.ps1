@@ -23,6 +23,9 @@ function Add-DnsTxt {
 
     # get the SLD/TLD for this record
     try { $sld,$tld = Find-NCDomain $RecordName $body -UseSandbox:$NCUseSandbox } catch { throw }
+    if (!$sld -or !$tld) {
+        throw "Unable to find a registered domain for $RecordName. Make sure the domain is registered and that your API user has access to it."
+    }
     Write-Debug "Found domain $sld{dot}$tld"
 
     # get the current set of records for this domain
@@ -126,6 +129,9 @@ function Remove-DnsTxt {
 
     # get the SLD/TLD for this record
     try { $sld,$tld = Find-NCDomain $RecordName $body -UseSandbox:$NCUseSandbox } catch { throw }
+    if (!$sld -or !$tld) {
+        throw "Unable to find a registered domain for $RecordName. Make sure the domain is registered and that your API user has access to it."
+    }
     Write-Debug "Found domain $sld{dot}$tld"
 
     # get the current set of records for this domain
@@ -300,7 +306,15 @@ function Find-NCDomain {
 
             # check for results
             if ($response.ApiResponse.CommandResponse.Paging.TotalItems -gt 0) {
-                # we found the domain, but subsequent queries in the namecheap API
+                # We found at least one match, but the query will return partial matches. So
+                # we need to double check the results for an exact match.
+                $results = @($response.ApiResponse.CommandResponse.DomainGetListResult.Domain)
+                if (!($results | Where-Object { $_.Name -eq $zoneTest })) {
+                    Write-Debug "No exact match for $zoneTest. Continuing search."
+                    continue
+                }
+
+                # We found the domain, but subsequent queries in the namecheap API
                 # require us to distinguish between "SLD" and "TLD" and it's unclear
                 # from their docs what to do with third level domains like example.co.uk.
                 # So for now, we're going to assume the SLD is the first piece (example)
