@@ -21,15 +21,8 @@ function Add-DnsTxt {
     # get our auth body parameters
     try { $body = Get-NCCommonBody @PSBoundParameters } catch { throw }
 
-    # get the SLD/TLD for this record
-    try { $sld,$tld = Find-NCDomain $RecordName $body -UseSandbox:$NCUseSandbox } catch { throw }
-    if (!$sld -or !$tld) {
-        throw "Unable to find a registered domain for $RecordName. Make sure the domain is registered and that your API user has access to it."
-    }
-    Write-Debug "Found domain $sld{dot}$tld"
-
     # get the current set of records for this domain
-    try { $recs = Get-NCRecords $sld $tld $body -UseSandbox:$NCUseSandbox } catch { throw }
+    try { $sld,$tld,$recs = Get-NCRecords $RecordName $body -UseSandbox:$NCUseSandbox } catch { throw }
 
     # strip quotes from the TXT value if they exist since namecheap strips them on the server side
     $TxtValue = $TxtValue.Trim('"')
@@ -127,15 +120,8 @@ function Remove-DnsTxt {
     # get our auth body parameters
     try { $body = Get-NCCommonBody @PSBoundParameters } catch { throw }
 
-    # get the SLD/TLD for this record
-    try { $sld,$tld = Find-NCDomain $RecordName $body -UseSandbox:$NCUseSandbox } catch { throw }
-    if (!$sld -or !$tld) {
-        throw "Unable to find a registered domain for $RecordName. Make sure the domain is registered and that your API user has access to it."
-    }
-    Write-Debug "Found domain $sld{dot}$tld"
-
     # get the current set of records for this domain
-    try { $recs = Get-NCRecords $sld $tld $body -UseSandbox:$NCUseSandbox } catch { throw }
+    try { $sld,$tld,$recs = Get-NCRecords $RecordName $body -UseSandbox:$NCUseSandbox } catch { throw }
 
     # strip quotes from the TXT value if they exist since namecheap strips them on the server side
     $TxtValue = $TxtValue.Trim('"')
@@ -271,7 +257,7 @@ function Get-NCCommonBody {
     return $body
 }
 
-function Find-NCDomain {
+function Get-NCRecords {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory,Position=0)]
@@ -282,79 +268,56 @@ function Find-NCDomain {
         [switch]$UseSandbox
     )
 
-    $CommonBody.Command = 'namecheap.domains.getList'
-
     # setup a module variable to cache the record to zone ID mapping
     # so it's quicker to find later
     if (!$script:NCRecordZones) { $script:NCRecordZones = @{} }
 
     # check for the record in the cache
     if ($script:NCRecordZones.ContainsKey($RecordName)) {
-        return $script:NCRecordZones.$RecordName
+        $sld,$tld = $script:NCRecordZones.$RecordName
     }
 
-    # Namecheap doesn't appear to support hosting sub-zones explicitly, but we also can't assume
-    # the registered domain is only two pieces (example.com). There are plenty of valid third level
-    # domains like (example.co.uk). So we're going to search for the zone from longest to shortest
-    # set of pieces.
-    $pieces = $RecordName.Split('.')
-    for ($i=0; $i -lt ($pieces.Count-1); $i++) {
-        $zoneTest = $pieces[$i..($pieces.Count-1)] -join '.'
-        Write-Debug "Checking $zoneTest"
-        try {
-            $response = Invoke-NCAPI ($CommonBody + @{SearchTerm=$zoneTest}) -UseSandbox:$UseSandbox
+    $CommonBody.Command = 'namecheap.domains.dns.getHosts'
 
-            # check for results
-            if ($response.ApiResponse.CommandResponse.Paging.TotalItems -gt 0) {
-                # We found at least one match, but the query will return partial matches. So
-                # we need to double check the results for an exact match.
-                $results = @($response.ApiResponse.CommandResponse.DomainGetListResult.Domain)
-                if (!($results | Where-Object { $_.Name -eq $zoneTest })) {
-                    Write-Debug "No exact match for $zoneTest. Continuing search."
+    if (!$sld -or !$tld) {
+        # try to find the zone from the record name by checking each possible SLD/TLD combo until we find a match
+        $pieces = $RecordName.Split('.')
+        for ($i=0; $i -lt ($pieces.Count-1); $i++) {
+            $sld = $pieces[$i]
+            $tld = $pieces[($i+1)..($pieces.Count-1)] -join '.'
+            Write-Debug "Checking $sld{dot}$tld"
+
+            try {
+                $response = Invoke-NCAPI ($CommonBody + @{SLD=$sld; TLD=$tld}) -UseSandbox:$UseSandbox
+
+                Write-Debug "Found domain $sld{dot}$tld with $($response.ApiResponse.CommandResponse.DomainDNSGetHostsResult.host.Count) records"
+                $recs = @($response.ApiResponse.CommandResponse.DomainDNSGetHostsResult.host)
+                $script:NCRecordZones.$RecordName = $sld,$tld
+                return $sld,$tld,$recs
+
+            } catch {
+                if ($_.Exception.Message -like 'Namecheap API Error 2019166*') {
+                    Write-Debug "No match for $sld{dot}$tld. Continuing search."
                     continue
                 }
-
-                # We found the domain, but subsequent queries in the namecheap API
-                # require us to distinguish between "SLD" and "TLD" and it's unclear
-                # from their docs what to do with third level domains like example.co.uk.
-                # So for now, we're going to assume the SLD is the first piece (example)
-                # and the TLD is everything after (co.uk).
-                $sld = $zoneTest.Substring(0,$zoneTest.IndexOf('.'))
-                $tld = $zoneTest.Substring($zoneTest.IndexOf('.')+1)
-
-                $script:NCRecordZones.$RecordName = $sld,$tld
-                return $sld,$tld
+                throw
             }
-        } catch { throw }
+        }
+        return
+    } else {
+        # use saved SLD/TLD from cache if we have it
+        Write-Debug "Checking $sld{dot}$tld"
+        try {
+            $response = Invoke-NCAPI ($CommonBody + @{SLD=$sld; TLD=$tld}) -UseSandbox:$UseSandbox
+
+            Write-Debug "Found domain $sld{dot}$tld with $($response.ApiResponse.CommandResponse.DomainDNSGetHostsResult.host.Count) records"
+            $recs = @($response.ApiResponse.CommandResponse.DomainDNSGetHostsResult.host)
+            $script:NCRecordZones.$RecordName = $sld,$tld
+            return $sld,$tld,$recs
+        } catch {
+            throw
+        }
     }
-
-    return $null
-}
-
-function Get-NCRecords {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory,Position=0)]
-        [string]$SLD,
-        [Parameter(Mandatory,Position=1)]
-        [string]$TLD,
-        [Parameter(Mandatory,Position=2)]
-        [hashtable]$CommonBody,
-        [Parameter(Mandatory,Position=3)]
-        [switch]$UseSandbox
-    )
-
-    try {
-        Write-Debug "Fetching records for $SLD{dot}$TLD"
-        $CommonBody.Command = 'namecheap.domains.dns.getHosts'
-        $response = Invoke-NCAPI ($CommonBody + @{SLD=$SLD; TLD=$TLD}) -UseSandbox:$UseSandbox
-
-        $recs = @($response.ApiResponse.CommandResponse.DomainDNSGetHostsResult.host)
-        Write-Debug "Found $($recs.Count) records"
-
-        return $recs
-
-    } catch { throw }
 }
 
 function Add-NCRecordParams {
