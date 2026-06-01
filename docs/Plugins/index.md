@@ -66,6 +66,7 @@ Linode | [Linode DNS](https://www.linode.com/?r=4dfd67cf6f1e384ce626f29436201863
 Loopia | [LoopiaDNS](https://www.loopia.com/loopiadns/) | [Usage Guide](Loopia.md) | :white_check_mark:
 LuaDns | [LuaDns](https://www.luadns.com) | [Usage Guide](LuaDns.md) | :white_check_mark:
 Manual | Manual Record Creation | | :white_check_mark:
+MijnHost | [mijn.host](https://mijn.host) | [Usage Guide](MijnHost.md) | :white_check_mark:
 Namecheap | [Namecheap FreeDNS](https://www.namecheap.com/domains/freedns/) | [Usage Guide](Namecheap.md) | :white_check_mark:
 NameCom | [Name.com](https://www.name.com/) | [Usage Guide](NameCom.md) | :white_check_mark:
 NameSilo | [NameSilo](https://www.namesilo.com) | [Usage Guide](NameSilo.md) | :white_check_mark:
