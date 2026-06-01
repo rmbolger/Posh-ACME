@@ -296,7 +296,9 @@ function Get-NCRecords {
                 return $sld,$tld,$recs
 
             } catch {
-                if ($_.Exception.Message -like 'Namecheap API Error 2019166*') {
+                if ($_.Exception.Message -like 'Namecheap API Error 2019166*' -or   # Domain name not found
+                    $_.Exception.Message -like 'Namecheap API Error 2013280*'       # TLD too long
+                ) {
                     Write-Debug "No match for $sld{dot}$tld. Continuing search."
                     continue
                 }
