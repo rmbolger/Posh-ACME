@@ -1,7 +1,7 @@
 function Get-CurrentPluginType { 'dns-01' }
 
 function Add-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName = 'Secure')]
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
@@ -9,21 +9,15 @@ function Add-DnsTxt {
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
 
-        [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 2)]
+        [Parameter(Mandatory, Position = 2)]
         [securestring]$MijnHostApiKey,
-
-        [Parameter(ParameterSetName = 'DeprecatedInsecure', Mandatory, Position = 2)]
-        [string]$MijnHostApiKeyInsecure,
 
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $MijnHostApiKeyInsecure = [PSCredential]::new('a', $MijnHostApiKey).GetNetworkCredential().Password
-    }
-
-    $restParams = Get-MijnHostRestParams -ApiKey $MijnHostApiKeyInsecure
+    $apiKey = [PSCredential]::new('a', $MijnHostApiKey).GetNetworkCredential().Password
+    $restParams = Get-MijnHostRestParams -ApiKey $apiKey
 
     $zone = Find-MijnHostZone -RecordName $RecordName -RestParams $restParams
     if (-not $zone) { throw "Unable to find mijn.host zone for $RecordName" }
@@ -31,17 +25,21 @@ function Add-DnsTxt {
     # API requires a trailing dot on record names
     $fqdn = "$RecordName."
 
+    # The mijn.host API (PowerDNS) expects TXT values without surrounding quotes.
+    # Posh-ACME passes dns-persist-01 TxtValues wrapped in double quotes, so strip them.
+    $normalizedValue = $TxtValue -replace '^"(.*)"$', '$1'
+
     # Fetch current records and check for an existing match (idempotent)
     $current = Invoke-MijnHostDnsGet -Zone $zone -RestParams $restParams
-    $exists = $current | Where-Object { $_.type -eq 'TXT' -and $_.name -eq $fqdn -and $_.value -eq $TxtValue }
+    $exists = $current | Where-Object { $_.type -eq 'TXT' -and $_.name -eq $fqdn -and $_.value -eq $normalizedValue }
 
     if ($exists) {
-        Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
+        Write-Debug "Record $RecordName already contains $normalizedValue. Nothing to do."
         return
     }
 
     Write-Verbose "Adding TXT record $fqdn on zone $zone"
-    $newRecords = [array]$current + [PSCustomObject]@{ type = 'TXT'; name = $fqdn; value = $TxtValue; ttl = 900 }
+    $newRecords = [array]$current + [PSCustomObject]@{ type = 'TXT'; name = $fqdn; value = $normalizedValue; ttl = 900 }
     Invoke-MijnHostDnsPut -Zone $zone -Records $newRecords -RestParams $restParams
 
     <#
@@ -55,8 +53,6 @@ function Add-DnsTxt {
         The value of the TXT record.
     .PARAMETER MijnHostApiKey
         The API key for your mijn.host account as a SecureString.
-    .PARAMETER MijnHostApiKeyInsecure
-        (DEPRECATED) The API key for your mijn.host account as plain text.
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
@@ -66,7 +62,7 @@ function Add-DnsTxt {
 }
 
 function Remove-DnsTxt {
-    [CmdletBinding(DefaultParameterSetName = 'Secure')]
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory, Position = 0)]
         [string]$RecordName,
@@ -74,31 +70,27 @@ function Remove-DnsTxt {
         [Parameter(Mandatory, Position = 1)]
         [string]$TxtValue,
 
-        [Parameter(ParameterSetName = 'Secure', Mandatory, Position = 2)]
+        [Parameter(Mandatory, Position = 2)]
         [securestring]$MijnHostApiKey,
-
-        [Parameter(ParameterSetName = 'DeprecatedInsecure', Mandatory, Position = 2)]
-        [string]$MijnHostApiKeyInsecure,
 
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
 
-    if ('Secure' -eq $PSCmdlet.ParameterSetName) {
-        $MijnHostApiKeyInsecure = [PSCredential]::new('a', $MijnHostApiKey).GetNetworkCredential().Password
-    }
-
-    $restParams = Get-MijnHostRestParams -ApiKey $MijnHostApiKeyInsecure
+    $apiKey = [PSCredential]::new('a', $MijnHostApiKey).GetNetworkCredential().Password
+    $restParams = Get-MijnHostRestParams -ApiKey $apiKey
 
     $zone = Find-MijnHostZone -RecordName $RecordName -RestParams $restParams
     if (-not $zone) { throw "Unable to find mijn.host zone for $RecordName" }
 
     $fqdn = "$RecordName."
+    $normalizedValue = $TxtValue -replace '^"(.*)"$', '$1'
+
     $current = Invoke-MijnHostDnsGet -Zone $zone -RestParams $restParams
-    $remaining = $current | Where-Object { -not ($_.type -eq 'TXT' -and $_.name -eq $fqdn -and $_.value -eq $TxtValue) }
+    $remaining = $current | Where-Object { -not ($_.type -eq 'TXT' -and $_.name -eq $fqdn -and $_.value -eq $normalizedValue) }
 
     if ($current.Count -eq @($remaining).Count) {
-        Write-Debug "Record $RecordName with value $TxtValue does not exist. Nothing to do."
+        Write-Debug "Record $RecordName with value $normalizedValue does not exist. Nothing to do."
         return
     }
 
@@ -116,8 +108,6 @@ function Remove-DnsTxt {
         The value of the TXT record.
     .PARAMETER MijnHostApiKey
         The API key for your mijn.host account as a SecureString.
-    .PARAMETER MijnHostApiKeyInsecure
-        (DEPRECATED) The API key for your mijn.host account as plain text.
     .PARAMETER ExtraParams
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
@@ -204,24 +194,22 @@ function Find-MijnHostZone {
         return $script:MijnHostZoneCache.$RecordName
     }
 
-    # Walk from longest to shortest label set, try each as a zone name.
-    # Matches the strategy used by the official mijn.host certbot plugin.
+    # Fetch the list of zones the API key can manage, then find the longest
+    # suffix of RecordName that matches a known zone. Using the domains list
+    # avoids per-zone probe requests and correctly handles the domain apex case
+    # (where the record name itself is the zone, e.g. when using -DnsAlias).
+    $url = "https://mijn.host/api/v2/domains"
+    Write-Debug "GET $url"
+    $response = Invoke-RestMethod $url @RestParams -Method Get @script:UseBasic
+    $zones = $response.data.domains | Select-Object -ExpandProperty domain
+
     $pieces = $RecordName.Split('.')
-    for ($i = 1; $i -lt $pieces.Count; $i++) {
-        $zoneTest = ($pieces[$i..($pieces.Count - 1)]) -join '.'
-        $url = "https://mijn.host/api/v2/domains/$zoneTest/dns"
-        Write-Debug "Trying zone: $zoneTest"
-        try {
-            Invoke-RestMethod $url @RestParams -Method Get @script:UseBasic | Out-Null
-            Write-Debug "Matched zone: $zoneTest"
-            $script:MijnHostZoneCache.$RecordName = $zoneTest
-            return $zoneTest
-        } catch {
-            $statusCode = try { $_.Exception.Response.StatusCode.value__ } catch { $null }
-            if ($statusCode -eq 400 -or $statusCode -eq 404) {
-                continue
-            }
-            throw
+    for ($i = 0; $i -lt $pieces.Count; $i++) {
+        $zone = ($pieces[$i..($pieces.Count - 1)]) -join '.'
+        if ($zone -in $zones) {
+            Write-Debug "Matched zone: $zone"
+            $script:MijnHostZoneCache.$RecordName = $zone
+            return $zone
         }
     }
 

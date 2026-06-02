@@ -12,12 +12,9 @@ You will need to generate an API key if you haven't already done so. Log in to t
 
 You will need to provide the API key as a SecureString value to `MijnHostApiKey`.
 
-!!! warning
-    The `MijnHostApiKeyInsecure` parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.
-
 ```powershell
 $pArgs = @{
-    MijnHostApiKey = (Read-Host 'mijn.host API Key' -AsSecureString)
+    MijnHostApiKey = (Read-Host -Prompt 'mijn.host API Key' -AsSecureString)
 }
 New-PACertificate example.com -Plugin MijnHost -PluginArgs $pArgs
 ```
