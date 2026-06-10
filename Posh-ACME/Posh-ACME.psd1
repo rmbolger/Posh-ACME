@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.32.0'
+ModuleVersion = '4.33.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -87,23 +87,22 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.32.0 (2026-03-29)
+## 4.33.0 (2026-06-09)
 
-* New [DNSExit](https://dnsexit.com/) plugin (#668) (Thanks @joxdev13)
-* Preliminary support for [dns-persist-01](https://datatracker.ietf.org/doc/draft-ietf-acme-dns-persist/)
-  * Adds functions `Publish-DnsPersistChallenge` and `Unpublish-DnsPersistChallenge`. These are subject to change while the spec is still in a draft state.
-  * I wanted to get these released early so folks can start testing the DNS plugins with them. No other core module changes have been added to support the cert workflow for this challenge type yet.
-  * It is **highly** recommended to test these functions using your preferred DNS plugin. I suspect there are some bugs in some of the plugins that might surface because they have only been tested creating ACME challenge TXT records until now. Please submit issues for plugins that have problems.
-* Fixed bug in Infoblox plugin that caused errors when TxtValue required URL escaping
-* Added better error handling in `Get-PAPluginArgs` when decrypting encrypted args fails (#654)
-
-### Potentially Breaking Change
-
-* Generated CSRs no longer include the Enhanced Key Usage (EKU) extension.
-  * This is a fix for CAs that have started rejecting CSRs containing the Client Authentication EKU such as [Google](https://pki.goog/updates/may2025-clientauth.html) due to its deprecation across all public CAs.
-  * This change has been tested successfully against all known free public ACME CAs. The resulting certs still contain the EKU extension, but which EKUs get added is dependent on the CA as it has always been.
-  * However, there are many commercial and private CAs I was unable to test against which is why this *might* be a breaking change for them. PLEASE test if you're not using one of the free public ACME CAs.
-  * If for some reason your preferred CA rejects the new CSRs, you may always fall back to supplying your own CSR using the `-CSRPath` param in many of the functions.
+* Added preliminary support for `dns-account-01` challenge type based on [draft-ietf-acme-dns-account-label-03](https://datatracker.ietf.org/doc/draft-ietf-acme-dns-account-label/03/).
+  * New `-DnsVariant` parameter in various Order and Challenge related functions.
+  * New `Get-DnsAcctLabel` utility function
+* New `-UsePfxDerEncoding` to `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder` which changes the encoding within generated PFX files from BER to DER. This may be necessary for compatibility with some applications, libraries, or services that have deprecated BER support. (#674)
+* New [HostUp](https://cloud.hostup.se/) plugin (#663) (Thanks @itssimple)
+* Cloudflare: Fixed a bug with TXT records containing quotes and did some light refactoring
+* GoDaddy: Added support for corporate (Brandsight) API access which requires a Customer ID value. (#660) (Thanks @vertras)
+* GoDaddy: Fixed support for TXT records containing quotes
+* Namecheap: Reduced required API permissions for delegated corporate accounts to just `domains.dns.*` (#672)
+* Namecheap: Added Sandbox support and better debug logging
+* Namecheap: Fixed TXT records containing quotes and apex record support
+* AutoDNS: Fixed string formatting error when using a password containing curly braces (#671)
+* Fixed a PowerShell 5.1 specific bug in `Publish-DnsPersistChallenge` and `Unpublish-DnsPersistChallenge`
+* Disabled PowerShell native debug logging on low level ACME calls which is now way more verbose in 7.6 and was duplicating the module specific logging.
 '@
 
     }
