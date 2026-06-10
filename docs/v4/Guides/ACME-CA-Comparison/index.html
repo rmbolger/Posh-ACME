@@ -565,6 +565,8 @@
       
         
       
+        
+      
     
     
       
@@ -633,6 +635,27 @@
   
   <span class="md-ellipsis">
     Export-PAAccountKey
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-DnsAcctLabel/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-DnsAcctLabel
   </span>
   
 
@@ -1332,6 +1355,8 @@
       
         
           
+        
+      
         
       
         
@@ -2363,6 +2388,27 @@
   
   <span class="md-ellipsis">
     HetznerCloud
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/HostUp/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HostUp
   </span>
   
 
@@ -3426,6 +3472,8 @@
       
         
       
+        
+      
     
     
       
@@ -3534,9 +3582,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#acme-spec-and-feature-support" class="md-nav__link">
+  <a href="#acme-spec-and-extensions-support" class="md-nav__link">
     <span class="md-ellipsis">
-      ACME Spec and Feature Support
+      ACME Spec and Extensions Support
     </span>
   </a>
   
@@ -3563,6 +3611,27 @@
   
   <span class="md-ellipsis">
     (Advanced) Custom Challenge Validation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DNS-Challenge-Variants/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DNS Challenge Variants
   </span>
   
 
@@ -3885,9 +3954,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#acme-spec-and-feature-support" class="md-nav__link">
+  <a href="#acme-spec-and-extensions-support" class="md-nav__link">
     <span class="md-ellipsis">
-      ACME Spec and Feature Support
+      ACME Spec and Extensions Support
     </span>
   </a>
   
@@ -3957,7 +4026,7 @@
 </tr>
 <tr>
 <td>Free Lifetime</td>
-<td style="text-align: center;">90 days</td>
+<td style="text-align: center;">~6*-90 days</td>
 <td style="text-align: center;">1*-90 days</td>
 <td style="text-align: center;">90 days</td>
 <td style="text-align: center;">90 days</td>
@@ -3983,9 +4052,9 @@
 <td>Rate Limits</td>
 <td style="text-align: center;"><a href="https://letsencrypt.org/docs/rate-limits/">Policy</a></td>
 <td style="text-align: center;"><a href="https://cloud.google.com/certificate-manager/docs/quotas">Policy</a></td>
-<td style="text-align: center;">??</td>
-<td style="text-align: center;">??</td>
-<td style="text-align: center;">??</td>
+<td style="text-align: center;"><img alt="❓" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2753.svg" title=":question:" /></td>
+<td style="text-align: center;"><img alt="❓" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2753.svg" title=":question:" /></td>
+<td style="text-align: center;"><img alt="❓" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2753.svg" title=":question:" /></td>
 </tr>
 <tr>
 <td>Notes</td>
@@ -4000,18 +4069,15 @@
 <ul>
 <li>Wildcard names (if supported) count towards Subject Alternative Name (SAN) limits.</li>
 <li><code>1 name + www</code> means one domain name plus its www name variant such as <code>example.com</code> and <code>www.example.com</code></li>
+<li>Let's Encrypt certs have a 90 day lifetime by default, but roughly 6 days (160 hours) if using the <code>shortlived</code> <a href="https://letsencrypt.org/docs/profiles/#shortlived">ACME profile</a>.</li>
+<li>Google certs have a 90 day lifetime by default but can be requested for shorter lifetimes down to 1 day if supported by your ACME client. The recommended minimum lifetime is 3 days.</li>
+<li>All public CAs will be <a href="https://cabforum.org/working-groups/server/baseline-requirements/requirements/#632-certificate-operational-periods-and-key-pair-usage-periods">forced to reduce certificate lifetimes</a> down to a maximum of 47 days as of March 2029.</li>
 <li>ZeroSSL supports a custom REST API that some clients use instead of pure ACME.</li>
 <li><strong>SSL.com Warning:</strong> If your SSL.com account has funds available, you will be charged for a paid 1-year certificate instead of a free 90-day certificate. There is no known way to request only a free certificate.</li>
-<li>Google certs have a 90 day lifetime by default but can be requested for shorter lifetimes down to 1 day if supported by your ACME client. The recommended minimum lifetime is 3 days.</li>
 <li>BuyPass has been removed from this page since they stopped offering free certs via ACME on <a href="https://community.buypass.com/t/y4y130p">October 15, 2025</a>.</li>
 </ul>
-<h2 id="acme-spec-and-feature-support">ACME Spec and Feature Support<a class="headerlink" href="#acme-spec-and-feature-support" title="Permanent link">&para;</a></h2>
-<p>Some of the features in the ACME protocol are optional. Others are mandatory but not yet supported by some implementations. Here is the status of those various features in each CA.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Multi-perspective validation is not part of the ACME protocol but is an important security feature for the integrity of domain validation.
-SXG Support is also not part of the ACME protocol but is a notable feature among free ACME CAs.</p>
-</div>
+<h2 id="acme-spec-and-extensions-support">ACME Spec and Extensions Support<a class="headerlink" href="#acme-spec-and-extensions-support" title="Permanent link">&para;</a></h2>
+<p>Some of the features in the ACME protocol are optional. Others are mandatory but not yet supported by some implementations. There are also a number of optional extensions to the original protocol. Here is the status of those various features in each CA.</p>
 <table>
 <thead>
 <tr>
@@ -4031,14 +4097,6 @@ SXG Support is also not part of the ACME protocol but is a notable feature among
 <td style="text-align: center;">Required</td>
 <td style="text-align: center;">Required</td>
 <td style="text-align: center;">Required</td>
-</tr>
-<tr>
-<td><a href="https://letsencrypt.org/2020/02/19/multi-perspective-validation.html">Multi-perspective<br />Validation</a></td>
-<td style="text-align: center;"><img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2705.svg" title=":white_check_mark:" /></td>
-<td style="text-align: center;"><img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2705.svg" title=":white_check_mark:" /></td>
-<td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
-<td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
-<td style="text-align: center;"><img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2705.svg" title=":white_check_mark:" /></td>
 </tr>
 <tr>
 <td><a href="https://datatracker.ietf.org/doc/html/rfc8555#section-7.3.5">Account<br />Key Rollover</a></td>
@@ -4106,7 +4164,7 @@ SXG Support is also not part of the ACME protocol but is a notable feature among
 </tr>
 <tr>
 <td><a href="https://datatracker.ietf.org/doc/html/rfc8555#section-7.1.3">Variable Cert Lifetime</a></td>
-<td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
+<td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" />*</td>
 <td style="text-align: center;"><img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2705.svg" title=":white_check_mark:" /></td>
 <td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
 <td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
@@ -4121,7 +4179,7 @@ SXG Support is also not part of the ACME protocol but is a notable feature among
 <td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
 </tr>
 <tr>
-<td><a href="https://datatracker.ietf.org/doc/draft-ietf-acme-ari/">ACME Renewal Information (ARI)</a></td>
+<td><a href="https://datatracker.ietf.org/doc/rfc9773/">ACME Renewal Information (ARI)</a></td>
 <td style="text-align: center;"><img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2705.svg" title=":white_check_mark:" /></td>
 <td style="text-align: center;"><img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2705.svg" title=":white_check_mark:" /></td>
 <td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
@@ -4136,6 +4194,22 @@ SXG Support is also not part of the ACME protocol but is a notable feature among
 <td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
 <td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
 </tr>
+<tr>
+<td><a href="https://datatracker.ietf.org/doc/draft-ietf-acme-dns-account-label/">dns-account-01</a></td>
+<td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
+<td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
+<td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
+<td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
+<td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
+</tr>
+<tr>
+<td><a href="https://datatracker.ietf.org/doc/draft-ietf-acme-dns-persist/">dns-persist-01</a></td>
+<td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /> *(<a href="https://letsencrypt.org/2026/02/18/dns-persist-01">Pending</a>)</td>
+<td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /> *(Pending)</td>
+<td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
+<td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
+<td style="text-align: center;"><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /></td>
+</tr>
 </tbody>
 </table>
 <ul>
@@ -4143,6 +4217,7 @@ SXG Support is also not part of the ACME protocol but is a notable feature among
 <li><img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/274c.svg" title=":x:" /> = Feature unsupported</li>
 <li><img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/26a0.svg" title=":warning:" /> = Feature partially supported.</li>
 <li><img alt="❓" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/2753.svg" title=":question:" /> = Support unknown or untested</li>
+<li>Let's Encrypt doesn't support variable cert lifetimes via RFC9555's <code>notBefore</code>/<code>notAfter</code> order fields. But it does support alternative lifetimes via ACME Profiles.</li>
 <li>Let's Encrypt IP Address certs require using the <code>shortlived</code> profile with a client that supports ACME Profiles. <a href="https://letsencrypt.org/2026/01/15/6day-and-ip-general-availability">More Info</a></li>
 <li>SSL.com throws "Missing Authentication Token" errors when making some calls against Account endpoints which is why those features are labeled Unsupported.</li>
 <li>SSL.com requires an email address in the ACME account contact field, but doesn't enforce it on creation time. Instead, it throws an "badCSR" error when you try to finalize an order from an account with an empty address.</li>

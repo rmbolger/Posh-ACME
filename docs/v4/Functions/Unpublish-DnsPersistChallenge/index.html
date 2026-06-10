@@ -567,6 +567,8 @@
       
         
       
+        
+      
     
     
       
@@ -636,6 +638,27 @@
   
   <span class="md-ellipsis">
     Export-PAAccountKey
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Get-DnsAcctLabel/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-DnsAcctLabel
   </span>
   
 
@@ -1767,6 +1790,8 @@
       
         
       
+        
+      
     
     
       
@@ -2622,6 +2647,27 @@
   
   <span class="md-ellipsis">
     HetznerCloud
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Plugins/HostUp/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HostUp
   </span>
   
 
@@ -3683,6 +3729,8 @@
       
         
       
+        
+      
     
     
       
@@ -3761,6 +3809,27 @@
   
   <span class="md-ellipsis">
     (Advanced) Custom Challenge Validation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/DNS-Challenge-Variants/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DNS Challenge Variants
   </span>
   
 
@@ -4325,13 +4394,13 @@
 <p>Remove dns-persist-01 challenge records.</p>
 <h2 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">&para;</a></h2>
 <h3 id="fromorder-default">FromOrder (Default)<a class="headerlink" href="#fromorder-default" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nb">Unpublish-DnsPersistChallenge</span> <span class="p">[</span><span class="n">-Order</span><span class="p">]</span> <span class="p">&lt;</span><span class="n">Object</span><span class="p">&gt;</span> <span class="p">[</span><span class="n">-AllowWildcard</span><span class="p">]</span> <span class="p">[</span><span class="n">-UseAllDomains</span><span class="p">]</span>
- <span class="p">[</span><span class="n">-PersistUntil</span> <span class="p">&lt;</span><span class="n">DateTimeOffset</span><span class="p">&gt;]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
+<div class="highlight"><pre><span></span><code><span class="nb">Unpublish-DnsPersistChallenge</span> <span class="p">[</span><span class="n">-Order</span><span class="p">]</span> <span class="p">&lt;</span><span class="n">Object</span><span class="p">&gt;</span> <span class="p">[</span><span class="n">-Plugin</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">[]&gt;]</span> <span class="p">[</span><span class="n">-PluginArgs</span> <span class="p">&lt;</span><span class="n">Hashtable</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-AllowWildcard</span><span class="p">]</span>
+ <span class="p">[</span><span class="n">-UseAllDomains</span><span class="p">]</span> <span class="p">[</span><span class="n">-PersistUntil</span> <span class="p">&lt;</span><span class="n">DateTimeOffset</span><span class="p">&gt;]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h3 id="standalone">Standalone<a class="headerlink" href="#standalone" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nb">Unpublish-DnsPersistChallenge</span> <span class="p">[</span><span class="n">-Domain</span><span class="p">]</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">[]&gt;</span> <span class="p">[</span><span class="n">-AccountUri</span><span class="p">]</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;</span> <span class="p">[</span><span class="n">-IssuerDomainName</span><span class="p">]</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;</span>
- <span class="n">-Plugin</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;</span> <span class="p">[</span><span class="n">-PluginArgs</span> <span class="p">&lt;</span><span class="n">Hashtable</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-AllowWildcard</span><span class="p">]</span> <span class="p">[</span><span class="n">-UseAllDomains</span><span class="p">]</span> <span class="p">[</span><span class="n">-PersistUntil</span> <span class="p">&lt;</span><span class="n">DateTimeOffset</span><span class="p">&gt;]</span>
- <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
+ <span class="n">-Plugin</span> <span class="p">&lt;</span><span class="n">String</span><span class="p">[]&gt;</span> <span class="p">[</span><span class="n">-PluginArgs</span> <span class="p">&lt;</span><span class="n">Hashtable</span><span class="p">&gt;]</span> <span class="p">[</span><span class="n">-AllowWildcard</span><span class="p">]</span> <span class="p">[</span><span class="n">-UseAllDomains</span><span class="p">]</span>
+ <span class="p">[</span><span class="n">-PersistUntil</span> <span class="p">&lt;</span><span class="n">DateTimeOffset</span><span class="p">&gt;]</span> <span class="p">[&lt;</span><span class="n">CommonParameters</span><span class="p">&gt;]</span>
 </code></pre></div>
 <h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h2>
 <p>Removes long-lived dns-persist-01 challenge TXT record(s) for the specified order or provided set of domains. For CAs that support it, these can be used instead of more traditional dns-01 challenge records to make cert renewals easier by not requiring updated records during each renewal. Generally, they are set up in advance of a cert order so that you don't have to store your DNS API credentials on the server responsible for getting the certificate.</p>
@@ -4466,7 +4535,17 @@
 <h3 id="-plugin">-Plugin<a class="headerlink" href="#-plugin" title="Permanent link">&para;</a></h3>
 <p>The name of the validation plugin to use.
 Use Get-PAPlugin to display a list of available plugins.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">String</span>
+<div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">String[]</span>
+<span class="nt">Parameter Sets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FromOrder</span>
+<span class="nt">Aliases</span><span class="p">:</span>
+
+<span class="nt">Required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="nt">Position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Named</span>
+<span class="nt">Default value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="nt">Accept pipeline input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="nt">Accept wildcard characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">String[]</span>
 <span class="nt">Parameter Sets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Standalone</span>
 <span class="nt">Aliases</span><span class="p">:</span>
 
@@ -4480,7 +4559,7 @@ Use Get-PAPlugin to display a list of available plugins.</p>
 <p>A hashtable containing the plugin arguments to use with the specified plugin.
 So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as <code>@{MyText='text';MyNumber=1234}</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Hashtable</span>
-<span class="nt">Parameter Sets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Standalone</span>
+<span class="nt">Parameter Sets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(All)</span>
 <span class="nt">Aliases</span><span class="p">:</span>
 
 <span class="nt">Required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>

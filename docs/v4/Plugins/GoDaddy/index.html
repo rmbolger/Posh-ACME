@@ -565,6 +565,8 @@
       
         
       
+        
+      
     
     
       
@@ -633,6 +635,27 @@
   
   <span class="md-ellipsis">
     Export-PAAccountKey
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Functions/Get-DnsAcctLabel/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-DnsAcctLabel
   </span>
   
 
@@ -1334,6 +1357,8 @@
       
         
           
+        
+      
         
       
         
@@ -2359,6 +2384,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Using the Plugin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#consumer-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Consumer example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#corporate-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Corporate example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -2424,6 +2473,27 @@
   
   <span class="md-ellipsis">
     HetznerCloud
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HostUp/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HostUp
   </span>
   
 
@@ -3485,6 +3555,8 @@
       
         
       
+        
+      
     
     
       
@@ -3563,6 +3635,27 @@
   
   <span class="md-ellipsis">
     (Advanced) Custom Challenge Validation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Guides/DNS-Challenge-Variants/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DNS Challenge Variants
   </span>
   
 
@@ -3891,6 +3984,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Using the Plugin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#consumer-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Consumer example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#corporate-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Corporate example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -3925,11 +4042,7 @@
 
 
 <h1 id="how-to-use-the-godaddy-dns-plugin">How To Use the GoDaddy DNS Plugin<a class="headerlink" href="#how-to-use-the-godaddy-dns-plugin" title="Permanent link">&para;</a></h1>
-<p>This plugin works against the <a href="https://www.godaddy.com">GoDaddy DNS</a> provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against. </p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>From April 2024 GoDaddy have introduced API account limits which prevent DNS API access for customers with less than 10 domains on their account. Existing accounts that don't meet the new requirements will now receive an Access Denied error when communicating with the API.</p>
-</div>
+<p>This plugin works against the <a href="https://www.godaddy.com">GoDaddy</a> domain registrar hosted DNS provider including their Corporate Brandsight provider. It is assumed that you have already setup an account and registered a domain that is using the default Nameservers.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>It has been reported that enabling GoDaddy's Domain Protection feature on a domain silently prevents API modification of TXT records to the domain. The API calls will appear to succeed, but only empty records get created. If you are having trouble with this plugin, please ensure Domain Protection is disabled.</p>
@@ -3943,15 +4056,25 @@
 <li>Click <code>Next</code></li>
 <li>Copy the resulting key and secret strings somewhere safe. There's no way to retrieve the secret once you leave this page. You would have to delete the old one and create a new one.</li>
 </ul>
+<p>Corporate/Brandsight customers will need to contact their account manager or a Super Admin on their account to generate the API key/secret and provide a Customer ID value.</p>
 <h2 id="using-the-plugin">Using the Plugin<a class="headerlink" href="#using-the-plugin" title="Permanent link">&para;</a></h2>
-<p>The Key is used with the <code>GDKey</code> string parameter and the Secret is used with the <code>GDSecretSecure</code> SecureString parameter.</p>
+<p>The Key is used with the <code>GDKey</code> string parameter and the Secret is used with the <code>GDSecretSecure</code> SecureString parameter. Corporate/Brandsight customers will use the Customer ID value with the <code>GDCustomerId</code> string parameter.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>The <code>GDSecret</code> parameter is deprecated and will be removed in the next major module version. If you are using it, please migrate to the Secure parameter set.</p>
 </div>
+<h3 id="consumer-example">Consumer example<a class="headerlink" href="#consumer-example" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
     <span class="n">GDKey</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxxxxxxxxxx&#39;</span>
     <span class="n">GDSecret</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;Secret&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">GoDaddy</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
+</code></pre></div>
+<h3 id="corporate-example">Corporate example<a class="headerlink" href="#corporate-example" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nv">$pArgs</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">GDKey</span> <span class="p">=</span> <span class="s1">&#39;xxxxxxxxxxxxxxxx&#39;</span>
+    <span class="n">GDSecret</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Read-Host</span> <span class="s1">&#39;Secret&#39;</span> <span class="n">-AsSecureString</span><span class="p">)</span>
+    <span class="n">GDCustomerId</span> <span class="p">=</span> <span class="s1">&#39;yyyyyyyyyyyyyyyy&#39;</span>
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span> <span class="n">-Plugin</span> <span class="n">GoDaddy</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
