@@ -201,11 +201,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://poshac.me/docs/v4/Guides/DNS-Challenge-Variants/</loc>
-         <lastmod>2026-06-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://poshac.me/docs/v4/Guides/Environment-Variable-Reference/</loc>
          <lastmod>2026-06-10</lastmod>
          <changefreq>daily</changefreq>
