@@ -99,12 +99,14 @@ function Submit-Renewal {
                 $certParams.UseSerialValidation = $order.UseSerialValidation
                 $certParams.Force               = $Force.IsPresent
                 $certParams.DnsSleep            = $order.DnsSleep
-                $certParams.DnsVariant          = $order.DnsVariant
                 $certParams.ValidationTimeout   = $order.ValidationTimeout
                 $certParams.PreferredChain      = $order.PreferredChain
                 $certParams.Profile             = $order.Profile
 
+                # conditional params
                 if ($order.LifetimeDays -gt 0) { $certParams.LifetimeDays = $order.LifetimeDays }
+                if ($order.DnsVariant) { $certParams.DnsVariant = $order.DnsVariant }
+
 
                 # now we just have to request a new cert using all of the old parameters
                 New-PACertificate @certParams

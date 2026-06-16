@@ -118,8 +118,8 @@ function Submit-ChallengeValidation {
                         Plugin = $Order.Plugin[$i]
                         PluginArgs = $PluginArgs
                         DnsAlias = $Order.DnsAlias[$i]
-                        DnsVariant = $Order.DnsVariant
                     }
+                    if ($Order.DnsVariant) { $pubParams.DnsVariant = $Order.DnsVariant }
                     try {
                         Publish-Challenge @pubParams
                         Save-Challenge -Plugin $Order.Plugin[$i] -PluginArgs $PluginArgs
@@ -155,8 +155,8 @@ function Submit-ChallengeValidation {
                             Plugin = $Order.Plugin[$i]
                             PluginArgs = $PluginArgs
                             DnsAlias = $Order.DnsAlias[$i]
-                            DnsVariant = $Order.DnsVariant
                         }
+                        if ($Order.DnsVariant) { $pubParams.DnsVariant = $Order.DnsVariant }
                         Publish-Challenge @pubParams
 
                         # save the details of what we published for validation and cleanup later
@@ -231,8 +231,8 @@ function Submit-ChallengeValidation {
                         Plugin = $_.plugin
                         PluginArgs = $PluginArgs
                         DnsAlias = $_.DnsAlias
-                        DnsVariant = $_.DnsVariant
                     }
+                    if ($_.DnsVariant) { $pubParams.DnsVariant = $_.DnsVariant }
                     Unpublish-Challenge @pubParams
                 }
 
