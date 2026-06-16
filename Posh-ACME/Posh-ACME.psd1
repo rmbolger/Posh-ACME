@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.33.0'
+ModuleVersion = '4.33.1'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -87,22 +87,9 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.33.0 (2026-06-09)
+## 4.33.1 (2026-06-16)
 
-* Added preliminary support for `dns-account-01` challenge type based on [draft-ietf-acme-dns-account-label-03](https://datatracker.ietf.org/doc/draft-ietf-acme-dns-account-label/03/).
-  * New `-DnsVariant` parameter in various Order and Challenge related functions.
-  * New `Get-DnsAcctLabel` utility function
-* New `-UsePfxDerEncoding` to `New-PACertificate`, `New-PAOrder`, and `Set-PAOrder` which changes the encoding within generated PFX files from BER to DER. This may be necessary for compatibility with some applications, libraries, or services that have deprecated BER support. (#674)
-* New [HostUp](https://cloud.hostup.se/) plugin (#663) (Thanks @itssimple)
-* Cloudflare: Fixed a bug with TXT records containing quotes and did some light refactoring
-* GoDaddy: Added support for corporate (Brandsight) API access which requires a Customer ID value. (#660) (Thanks @vertras)
-* GoDaddy: Fixed support for TXT records containing quotes
-* Namecheap: Reduced required API permissions for delegated corporate accounts to just `domains.dns.*` (#672)
-* Namecheap: Added Sandbox support and better debug logging
-* Namecheap: Fixed TXT records containing quotes and apex record support
-* AutoDNS: Fixed string formatting error when using a password containing curly braces (#671)
-* Fixed a PowerShell 5.1 specific bug in `Publish-DnsPersistChallenge` and `Unpublish-DnsPersistChallenge`
-* Disabled PowerShell native debug logging on low level ACME calls which is now way more verbose in 7.6 and was duplicating the module specific logging.
+* Fixed parameter validation errors on renewal due to DnsVariant parameter being empty (#679)
 '@
 
     }

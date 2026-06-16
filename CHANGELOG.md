@@ -1,3 +1,7 @@
+## 4.33.1 (2026-06-16)
+
+* Fixed parameter validation errors on renewal due to DnsVariant parameter being empty (#679)
+
 ## 4.33.0 (2026-06-09)
 
 * Added preliminary support for `dns-account-01` challenge type based on [draft-ietf-acme-dns-account-label-03](https://datatracker.ietf.org/doc/draft-ietf-acme-dns-account-label/03/).
