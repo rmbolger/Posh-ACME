@@ -86,6 +86,7 @@ SimpleDNSPlus | [Simple DNS Plus](https://simpledns.com/) | [Usage Guide](Simple
 Simply | [Simply.com](https://www.simply.com/) (deprecated) | [Usage Guide](Simply.md) | :white_check_mark:
 SimplyCom | [Simply.com](https://www.simply.com/) (formerly UnoEuro) | [Usage Guide](SimplyCom.md) | :white_check_mark:
 SOLIDServer | [efficient iP SOLIDserver DDI](https://efficientip.com/products/solidserver-ddi/) | [Usage Guide](SOLIDServer.md) | :white_check_mark:
+Spaceship | [Spaceship](https://www.spaceship.com/) | [Usage Guide](Spaceship.md) | :white_check_mark:
 SSHProxy | Custom SSH Script | [Usage Guide](SSHProxy.md) | :white_check_mark:
 Technitium | [Technitium DNS](https://technitium.com/dns/) | [Usage Guide](Technitium.md) | :white_check_mark:
 TencentDNS | [TencentDNS](https://dnspod.com/) | [Usage Guide](TencentDNS.md) | :white_check_mark:
