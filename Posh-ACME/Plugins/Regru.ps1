@@ -44,13 +44,20 @@ function Add-DnsTxt {
             text                = $TxtValue
             output_content_type = 'plain'
         }
-        $queryUri = '{0}add_txt?input_format=json&input_data={1}' -f $apiBase,(ConvertTo-RrBody $bodyParams)
+        $queryUri = '{0}add_txt' -f $apiBase
+        $formBody = @{
+            input_format = 'json'
+            input_data   = ($bodyParams | ConvertTo-Json -Compress -Depth 10)
+        }
         $bodyParams.password = 'XXXXXXXX'
-        $querySanitized = '{0}add_txt?input_format=json&input_data={1}' -f $apiBase,(ConvertTo-RrBody $bodyParams)
+        $sanitizedBody = @{
+            input_format = 'json'
+            input_data   = ($bodyParams | ConvertTo-Json -Compress -Depth 10)
+        }
 
         try {
-            Write-Debug "GET $querySanitized"
-            $response = Invoke-RestMethod $queryUri -EA Stop -Verbose:$false @script:UseBasic
+            Write-Debug "POST $queryUri body=$(($sanitizedBody | ConvertTo-Json -Compress))"
+            $response = Invoke-RestMethod $queryUri -Method Post -Body $formBody -EA Stop -Verbose:$false @script:UseBasic
             if ($response) { Write-Debug "Response:`n$(($response | ConvertTo-Json -Depth 10))" }
         }
         catch { throw }
@@ -67,10 +74,10 @@ function Add-DnsTxt {
 
     <#
      .SYNOPSIS
-        Remove a DNS TXT record from Reg.Ru.
+        Add a DNS TXT record to Reg.Ru.
 
     .DESCRIPTION
-        Uses the Reg.Ru API to remove a DNS TXT record.
+        Uses the Reg.Ru API to add a DNS TXT record.
 
     .PARAMETER RecordName
         The fully qualified name of the TXT record.
@@ -141,13 +148,20 @@ function Remove-DnsTxt {
             record_type         = 'TXT'
             output_content_type = 'plain'
         }
-        $queryUri = '{0}remove_record?input_format=json&input_data={1}' -f $apiBase,(ConvertTo-RrBody $bodyParams)
+        $queryUri = '{0}remove_record' -f $apiBase
+        $formBody = @{
+            input_format = 'json'
+            input_data   = ($bodyParams | ConvertTo-Json -Compress -Depth 10)
+        }
         $bodyParams.password = 'XXXXXXXX'
-        $querySanitized = '{0}remove_record?input_format=json&input_data={1}' -f $apiBase,(ConvertTo-RrBody $bodyParams)
+        $sanitizedBody = @{
+            input_format = 'json'
+            input_data   = ($bodyParams | ConvertTo-Json -Compress -Depth 10)
+        }
 
         try {
-            Write-Debug "GET $querySanitized"
-            $response = Invoke-RestMethod $queryUri -EA Stop -Verbose:$false @script:UseBasic
+            Write-Debug "POST $queryUri body=$(($sanitizedBody | ConvertTo-Json -Compress))"
+            $response = Invoke-RestMethod $queryUri -Method Post -Body $formBody -EA Stop -Verbose:$false @script:UseBasic
             if ($response) { Write-Debug "Response:`n$(($response | ConvertTo-Json -Depth 10))" }
         }
         catch { throw }
@@ -265,13 +279,20 @@ function Get-RrTxtRecord {
         domains             = $zoneTests
         output_content_type = 'plain'
     }
-    $queryUri = '{0}get_resource_records?input_format=json&input_data={1}' -f $apiBase,(ConvertTo-RrBody $bodyParams)
+    $queryUri = '{0}get_resource_records' -f $apiBase
+    $formBody = @{
+        input_format = 'json'
+        input_data   = ($bodyParams | ConvertTo-Json -Compress -Depth 10)
+    }
     $bodyParams.password = 'XXXXXXXX'
-    $querySanitized = '{0}get_resource_records?input_format=json&input_data={1}' -f $apiBase,(ConvertTo-RrBody $bodyParams)
+    $sanitizedBody = @{
+        input_format = 'json'
+        input_data   = ($bodyParams | ConvertTo-Json -Compress -Depth 10)
+    }
 
     try {
-        Write-Debug "GET $querySanitized"
-        $response = Invoke-RestMethod $queryUri -EA Stop -Verbose:$false @script:UseBasic
+        Write-Debug "POST $queryUri body=$(($sanitizedBody | ConvertTo-Json -Compress))"
+        $response = Invoke-RestMethod $queryUri -Method Post -Body $formBody -EA Stop -Verbose:$false @script:UseBasic
         if ($response) { Write-Debug "Response:`n$(($response | ConvertTo-Json -Depth 10))" }
     }
     catch { throw }
