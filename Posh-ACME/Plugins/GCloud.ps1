@@ -27,11 +27,17 @@ function Add-DnsTxt {
 
     $recRoot = "https://www.googleapis.com/dns/v1beta2/projects/$projID/managedZones/$zoneID"
 
+    # Normalize the TxtValue to ensure it is wrapped in quotes
+    if ($TxtValue -notmatch '^".*"$') {
+        $TxtValue = "`"$TxtValue`""
+    }
+
     # query the current txt record set
     $queryParams = @{
         Uri = '{0}/rrsets?type=TXT&name={1}.' -f $recRoot,$RecordName
         Headers = $script:GCToken.AuthHeader
         Verbose = $false
+        Debug = $false
         ErrorAction = 'Stop'
     }
     try {
@@ -50,12 +56,12 @@ function Add-DnsTxt {
                     name    = "$RecordName."
                     type    = 'TXT'
                     ttl     = 10
-                    rrdatas = @("`"$TxtValue`"")
+                    rrdatas = @($TxtValue)
                 }
             )
         }
     } else {
-        if ("`"$TxtValue`"" -in $rrsets[0].rrdatas) {
+        if ($TxtValue -in $rrsets[0].rrdatas) {
             Write-Debug "Record $RecordName already contains $TxtValue. Nothing to do."
             return
         }
@@ -65,7 +71,7 @@ function Add-DnsTxt {
         # operation
         Write-Debug "Appending to $RecordName with $($rrsets[0].Count) existing value(s)"
         $toDelete = $rrsets[0] | ConvertTo-Json | ConvertFrom-Json
-        $rrsets[0].rrdatas += "`"$TxtValue`""
+        $rrsets[0].rrdatas += $TxtValue
         $changeBody = @{
             deletions = @($toDelete)
             additions = @($rrsets[0])
@@ -80,6 +86,7 @@ function Add-DnsTxt {
         Headers     = $script:GCToken.AuthHeader
         ContentType = 'application/json'
         Verbose     = $false
+        Debug       = $false
         ErrorAction = 'Stop'
     }
     try {
@@ -143,11 +150,17 @@ function Remove-DnsTxt {
 
     $recRoot = "https://www.googleapis.com/dns/v1beta2/projects/$projID/managedZones/$zoneID"
 
+    # Normalize the TxtValue to ensure it is wrapped in quotes
+    if ($TxtValue -notmatch '^".*"$') {
+        $TxtValue = "`"$TxtValue`""
+    }
+
     # query the current txt record set
     $queryParams = @{
         Uri = '{0}/rrsets?type=TXT&name={1}.' -f $recRoot,$RecordName
         Headers = $script:GCToken.AuthHeader
         Verbose = $false
+        Debug = $false
         ErrorAction = 'Stop'
     }
     try {
@@ -161,7 +174,7 @@ function Remove-DnsTxt {
         Write-Debug "Record $RecordName already deleted."
         return
     } else {
-        if ("`"$TxtValue`"" -notin $rrsets[0].rrdatas) {
+        if ($TxtValue -notin $rrsets[0].rrdatas) {
             Write-Debug "Record $RecordName doesn't contain $TxtValue. Nothing to do."
             return
         }
@@ -177,7 +190,7 @@ function Remove-DnsTxt {
         }
         if ($rrsets[0].rrdatas.Count -gt 1) {
             $rrsets[0].rrdatas = @(
-                $rrsets[0].rrdatas | Where-Object { $_ -ne "`"$TxtValue`"" }
+                $rrsets[0].rrdatas | Where-Object { $_ -ne $TxtValue }
             )
             $changeBody.additions = @($rrsets[0])
         }
@@ -191,6 +204,7 @@ function Remove-DnsTxt {
         Headers     = $script:GCToken.AuthHeader
         ContentType = 'application/json'
         Verbose     = $false
+        Debug       = $false
         ErrorAction = 'Stop'
     }
     try {
@@ -327,7 +341,7 @@ function Connect-GCloudDns {
     # attempt to sign in
     try {
         Write-Debug "Sending OAuth2 login"
-        $response = Invoke-RestMethod $GCKeyObj.token_uri -Method Post -Body $authBody @script:UseBasic
+        $response = Invoke-RestMethod $GCKeyObj.token_uri -Method Post -Body $authBody @script:UseBasic -Verbose:$false -Debug:$false
         Write-Debug ($response | ConvertTo-Json)
     } catch { throw }
 
@@ -360,28 +374,6 @@ function Find-GCZone {
         return $script:GCRecordZones.$RecordName
     }
 
-    # get the list of available zones across the projects we have IDs for
-    $zones = @($GCProjectId | ForEach-Object {
-        $projID = $_
-        $queryParams = @{
-            Uri = "https://www.googleapis.com/dns/v1beta2/projects/$projID/managedZones"
-            Headers = $script:GCToken.AuthHeader
-            Verbose = $false
-            ErrorAction = 'Stop'
-        }
-        Write-Debug "GET $($queryParams.Uri)"
-        try {
-            Invoke-RestMethod @queryParams @script:UseBasic |
-                Select-Object -ExpandProperty managedZones |
-                Where-Object { $_.visibility -eq 'public' } |
-                Select-Object id,dnsName,@{L='projID';E={$projID}}
-        } catch { throw }
-    })
-
-    if ($zones.Count -eq 0) {
-        throw "No managed zones found"
-    }
-
     # Since Google could be hosting both apex and sub-zones, we need to find the closest/deepest
     # sub-zone that would hold the record rather than just adding it to the apex. So for something
     # like _acme-challenge.site1.sub1.sub2.example.com, we'd look for zone matches in the following
@@ -394,13 +386,27 @@ function Find-GCZone {
     $pieces = $RecordName.Split('.')
     for ($i=0; $i -lt ($pieces.Count-1); $i++) {
         $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )."
-        Write-Debug "Checking $zoneTest"
-
-        if ($zoneMatch = $zones | Where-Object { $_.dnsName -eq $zoneTest }) {
-            $zoneID = $zoneMatch.id
-            $projID = $zoneMatch.projID
-            $script:GCRecordZones.$RecordName = @($zoneID,$projID)
-            return @($zoneID,$projID)
+        foreach ($projID in $GCProjectId) {
+            Write-Debug "Checking '$zoneTest' in project '$projID'"
+            $queryParams = @{
+                Uri = "https://www.googleapis.com/dns/v1beta2/projects/$projID/managedZones?dnsName=$zoneTest"
+                Headers = $script:GCToken.AuthHeader
+                Verbose = $false
+                Debug = $false
+                ErrorAction = 'Stop'
+            }
+            Write-Debug "GET $($queryParams.Uri)"
+            try {
+                $zone = Invoke-RestMethod @queryParams @script:UseBasic |
+                    Select-Object -ExpandProperty managedZones |
+                    Where-Object { $_.visibility -eq 'public' } |
+                    Select-Object -First 1
+                if ($zone) {
+                    $zoneID = $zone.id
+                    $script:GCRecordZones.$RecordName = @($zoneID,$projID)
+                    return @($zoneID,$projID)
+                }
+            } catch { throw }
         }
     }
 
