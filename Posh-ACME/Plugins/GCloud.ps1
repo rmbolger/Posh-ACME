@@ -18,10 +18,11 @@ function Add-DnsTxt {
     # https://cloud.google.com/dns/api/v1beta2/
 
     Connect-GCloudDns $GCKeyFile
-    if (-not $GCProjectId) { $GCProjectId = @($script:GCToken.DefaultProject) }
+    $GCProjectId = Split-GCProjectId $GCProjectId
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (-not ($zoneID,$projID = Find-GCZone $RecordName $GCProjectId)) {
+    $zoneID,$projID = Find-GCZone $RecordName $GCProjectId
+    if (-not $zoneID -or -not $projID) {
         throw "Unable to find Google hosted zone for $RecordName in project(s) $($GCProjectId -join ',')"
     }
 
@@ -133,6 +134,7 @@ function Remove-DnsTxt {
         [string]$TxtValue,
         [Parameter(Mandatory,Position=2)]
         [string]$GCKeyFile,
+        [string[]]$GCProjectId,
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
@@ -141,10 +143,11 @@ function Remove-DnsTxt {
     # https://cloud.google.com/dns/api/v1beta2/
 
     Connect-GCloudDns $GCKeyFile
-    if (-not $GCProjectId) { $GCProjectId = @($script:GCToken.DefaultProject) }
+    $GCProjectId = Split-GCProjectId $GCProjectId
 
     Write-Verbose "Attempting to find hosted zone for $RecordName"
-    if (-not ($zoneID,$projID = Find-GCZone $RecordName $GCProjectId)) {
+    $zoneID,$projID = Find-GCZone $RecordName $GCProjectId
+    if (-not $zoneID -or -not $projID) {
         throw "Unable to find Google hosted zone for $RecordName in project(s) $($GCProjectId -join ',')"
     }
 
@@ -356,6 +359,33 @@ function Connect-GCloudDns {
 
 }
 
+function Split-GCProjectId {
+    [CmdletBinding()]
+    param(
+        [Parameter(Position=0)]
+        [string[]]$GCProjectId
+    )
+
+    # Callers may supply the project list as a real array or as a single comma-
+    # delimited string. Normalize both and fall back to the key file's project.
+    $projIDs = @(
+        $GCProjectId |
+            ForEach-Object { $_.Split(',').Trim() } |
+            Where-Object { $_ } |
+            Select-Object -Unique
+    )
+
+    if ($projIDs.Count -eq 0) {
+        $projIDs = @($script:GCToken.DefaultProject)
+    }
+    if ($projIDs.Count -eq 0 -or ($projIDs | Where-Object { [string]::IsNullOrWhiteSpace($_) })) {
+        throw "No Google Cloud project ID available. Specify -GCProjectId or use a key file that contains a project_id."
+    }
+
+    Write-Debug "Using project(s): $($projIDs -join ',')"
+    return $projIDs
+}
+
 function Find-GCZone {
     [CmdletBinding()]
     param(
@@ -383,31 +413,61 @@ function Find-GCZone {
     # - sub2.example.com
     # - example.com
 
+    # remember projects we couldn't query at all so we only complain about each once
+    # and can report them if the zone ends up not being found anywhere
+    $projErrors = [ordered]@{}
+
     $pieces = $RecordName.Split('.')
     for ($i=0; $i -lt ($pieces.Count-1); $i++) {
         $zoneTest = "$( $pieces[$i..($pieces.Count-1)] -join '.' )."
         foreach ($projID in $GCProjectId) {
+
+            # a project query that failed once will keep failing, so skip the rest
+            if ($projErrors.Contains($projID)) { continue }
+
             Write-Debug "Checking '$zoneTest' in project '$projID'"
+
+            # Query matching zones for this exact dnsName and choose a public match.
+            $zone = $null
+            $queryFailed = $false
+            $uri = "https://www.googleapis.com/dns/v1beta2/projects/$projID/managedZones?dnsName=$([uri]::EscapeDataString($zoneTest))"
             $queryParams = @{
-                Uri = "https://www.googleapis.com/dns/v1beta2/projects/$projID/managedZones?dnsName=$zoneTest"
+                Uri = $uri
                 Headers = $script:GCToken.AuthHeader
                 Verbose = $false
                 Debug = $false
                 ErrorAction = 'Stop'
             }
-            Write-Debug "GET $($queryParams.Uri)"
+            Write-Debug "GET $uri"
             try {
-                $zone = Invoke-RestMethod @queryParams @script:UseBasic |
-                    Select-Object -ExpandProperty managedZones |
-                    Where-Object { $_.visibility -eq 'public' } |
-                    Select-Object -First 1
-                if ($zone) {
-                    $zoneID = $zone.id
-                    $script:GCRecordZones.$RecordName = @($zoneID,$projID)
-                    return @($zoneID,$projID)
-                }
-            } catch { throw }
+                $response = Invoke-RestMethod @queryParams @script:UseBasic
+                Write-Debug "$(Convertto-Json $response -Depth 5)"
+            } catch {
+                # One inaccessible project (no permission, Cloud DNS API not enabled,
+                # wrong ID) shouldn't abort the search across the others.
+                Write-Warning "Unable to query Google project '$projID': $($_.Exception.Message)"
+                $projErrors[$projID] = $_.Exception.Message
+                $queryFailed = $true
+            }
+
+            $zones = @($response.managedZones | Where-Object { $_ })
+            $zone = $zones | Where-Object { $_.visibility -eq 'public' } | Select-Object -First 1
+
+            if ($queryFailed) { continue }
+
+            if ($zone) {
+                Write-Debug "Found zone '$($zone.name)' ($($zone.id)) in project '$projID'"
+                $script:GCRecordZones.$RecordName = @($zone.id,$projID)
+                return $script:GCRecordZones.$RecordName
+            }
+            elseif ($zones.Count -gt 0) {
+                Write-Warning "Found $($zones.Count) zone(s) matching '$zoneTest' in project '$projID' but none are public. Private zones are not supported for ACME validation."
+            }
         }
+    }
+
+    if ($projErrors.Count -eq @($GCProjectId).Count) {
+        throw "Unable to query any of the specified Google project(s). $(($projErrors.GetEnumerator() | ForEach-Object { "$($_.Key): $($_.Value)" }) -join ' | ')"
     }
 
     return $null
