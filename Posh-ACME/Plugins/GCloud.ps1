@@ -370,7 +370,8 @@ function Split-GCProjectId {
     # delimited string. Normalize both and fall back to the key file's project.
     $projIDs = @(
         $GCProjectId |
-            ForEach-Object { $_.Split(',').Trim() } |
+            # null GCProjectId is allowed, so the string cast is necessary to avoid errors when calling Split()
+            ForEach-Object { ([string]$_).Split(',').Trim() } |
             Where-Object { $_ } |
             Select-Object -Unique
     )
