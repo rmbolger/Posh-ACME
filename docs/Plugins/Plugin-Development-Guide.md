@@ -70,9 +70,6 @@ $plainText = [pscredential]::new('a',$secString).GetNetworkCredential().Password
 
 In addition to the native function help, it can be very helpful to new users to have a plugin specific readme. It should be a [Markdown](https://www.markdowntutorial.com/) formatted file in the [docs/Plugins](https://github.com/rmbolger/Posh-ACME/tree/main/docs/Plugins) folder called `<PluginName>.md`. It's usually easiest to copy an existing guide and modify it. The `title:` field at the top of the file should match the name of the plugin including capitalization.
 
-!!!note
-    You may notice there are some Markdown files for other plugins in the main Plugins folder called `<PluginName>-Readme.md`. These exist for legacy reasons before the docs website was around and are not necessary for new plugins.
-
 For people who may be setting up automation against their provider for the first time, it can be helpful to add guidance on creating service accounts, limited access roles, or any prerequisite setup that the plugin requires to work properly. It should also have a section with an example on how to use the plugin with `New-PACertificate`.
 
 
@@ -191,6 +188,37 @@ $publishParams = @{
 }
 Publish-Challenge @publishParams
 Unpublish-Challenge @publishParams
+```
+
+### Future-Proof for dns-persist-01
+
+The new `dns-persist-01` challenge standard is still in development, but it's a good idea to ensure your plugin will support it once it becomes generally available. The main difference between it and `dns-01` is that the `$TxtValue` input string will be surrounded by double-quotes for the persist record but not for the standard record which can affect string matching with API calls and results. The input differences between persist and standard may change in the next major version, but for now, the plugin will need to deal with both possible value types.
+
+Here is an example of how to test persist support.
+
+```powershell
+# The actual values for AccountUri and IssuerDomainName don't matter
+# as long as they're not empty
+$pubParams = @{
+    Domain = 'example.com'
+    AccountUri = 'fakeaccount'
+    IssuerDomainName 'fakeissuer'
+    AllowWildcard = $true
+    Plugin = 'InfomaniakV2'
+    PluginArgs = $pArgs
+    Verbose = $true
+}
+Publish-DnsPersistChallenge @pubParams
+Unpublish-DnsPersistChallenge @pubParams
+```
+
+Some APIs will handle quoted and unquoted values the same and add or remove quotes on the server-side as necessary. For the others, you may want to normalize the quotes on the incoming `$TxtValue` parameter like this:
+
+```powershell
+# Normalize the TxtValue to ensure it is wrapped in quotes
+if ($TxtValue -notmatch '^".*"$') {
+    $TxtValue = "`"$TxtValue`""
+}
 ```
 
 ### Deriving Object IDs
