@@ -13,6 +13,14 @@ function Add-DnsTxt {
         $ExtraParams
     )
 
+    # dns-01 values arrive bare, but dns-persist-01 values arrive already wrapped in
+    # double quotes because they contain spaces. The API stores exactly one pair of
+    # quotes either way, so normalize the incoming value to the quoted form and compare
+    # against the stored target as-is.
+    if ($TxtValue -notmatch '^".*"$') {
+        $TxtValue = '"{0}"' -f $TxtValue
+    }
+
     $apiRoot = 'https://api.infomaniak.com/2/zones'
 
     # grab the plain text token
@@ -99,6 +107,14 @@ function Remove-DnsTxt {
         [Parameter(ValueFromRemainingArguments)]
         $ExtraParams
     )
+
+    # dns-01 values arrive bare, but dns-persist-01 values arrive already wrapped in
+    # double quotes because they contain spaces. The API stores exactly one pair of
+    # quotes either way, so normalize the incoming value to the quoted form and compare
+    # against the stored target as-is.
+    if ($TxtValue -notmatch '^".*"$') {
+        $TxtValue = '"{0}"' -f $TxtValue
+    }
 
     $apiRoot = 'https://api.infomaniak.com/2/zones'
 
@@ -263,9 +279,10 @@ function Find-IKV2TxtRecord {
         [string]$ApiRoot
     )
 
-    # 'with=idn' adds the source_idn field which holds the fully qualified record
-    # name. There is no equivalent target_idn field in v2, so the value comparison
-    # below has to be done against the raw target.
+    # 'with=idn' adds the source_idn field, which holds the fully qualified record name,
+    # so the name comparison below can match either the relative or the fully qualified
+    # form. Separately, the API always returns TXT targets wrapped in a single pair of
+    # double quotes, which is why callers normalize TxtValue to the quoted form first.
     try {
         $queryParams = @{
             Uri = "$ApiRoot/$Zone/records?with=idn"
@@ -277,27 +294,6 @@ function Find-IKV2TxtRecord {
     $recs | Where-Object {
         $_.type -eq 'TXT' -and
         ($_.source -eq $RecShort -or $_.source_idn -eq $RecordName) -and
-        (ConvertFrom-IKV2TxtTarget $_.target) -eq $TxtValue
+        $_.target -eq $TxtValue
     } | Select-Object -First 1
-}
-
-function ConvertFrom-IKV2TxtTarget {
-    [CmdletBinding()]
-    param(
-        [Parameter(Position = 0)]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [string]$Target
-    )
-
-    # The v2 API returns TXT targets wrapped in literal double quotes even when they
-    # were submitted without them. For example, submitting 'abc123' comes back as
-    # '"abc123"'. Strip a single matched pair so comparisons against the raw ACME
-    # TxtValue succeed. Without this, existing challenge records are never matched,
-    # which would leave stale TXT records behind on cleanup.
-    if ($Target.Length -ge 2 -and $Target.StartsWith('"') -and $Target.EndsWith('"')) {
-        return $Target.Substring(1, $Target.Length - 2)
-    }
-
-    return $Target
 }
