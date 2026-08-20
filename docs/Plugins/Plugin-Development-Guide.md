@@ -2,60 +2,121 @@
 
 ## Introduction
 
-A validation plugin for Posh-ACME is a standard PowerShell PS1 script file located in the module's `Plugins` folder. It can also be in a folder outside the module and referenced using the `POSHACME_PLUGINS` environment variable. The file name is what users will use to reference it when specifying a plugin, so it should be related to the provider it is publishing against.
+A plugin is a PowerShell `.ps1` script file. Put the file in the module `Plugins` folder, or store it in another folder and reference that folder with the `POSHACME_PLUGINS` environment variable.
 
-All plugins must contain a function called `Get-CurrentPluginType` which returns a string indicating the type of ACME challenge they support. Posh-ACME currently supports the `dns-01` and `http-01` challenge types.
+Users select a plugin by file name without the extension. Choose a file name that clearly matches the provider.
 
-DNS plugins must contain the following additional functions:
+All plugins must define `Get-CurrentPluginType`. This function returns the ACME challenge type supported by the plugin. Posh-ACME currently supports `dns-01` and `http-01`. Since version v4.33.0, the `dns-01` challenge type also implies support for `dns-account-01` and `dns-persist-01` DNS challenge variants. Those don't need to be explicitly supported.
+
+DNS plugins must also define:
 
 - `Add-DnsTxt`
 - `Remove-DnsTxt`
 - `Save-DnsTxt`
 
-HTTP plugins must contain the following additional functions:
+HTTP plugins must also define:
 
 - `Add-HttpChallenge`
 - `Remove-HttpChallenge`
 - `Save-HttpChallenge`
 
-The easiest way to get started is to make a copy of `_Example-DNS.ps1` or `_Example-HTTP.ps1` depending on the type of plugin you are making and rename it for your purposes.
+To start quickly, copy `_Example-DNS.ps1` or `_Example-HTTP.ps1` and rename the copy.
 
-**Pull Requests for new plugins are quite welcome.**
+!!! note
+    Pull Requests for new plugins are quite welcome.
 
 
 ## Function Details
 
 ### `Add-DnsTxt` and `Remove-DnsTxt`
 
-These are responsible for adding/removing TXT records to/from a DNS server/provider. There are two mandatory and positional string parameters, `$RecordName` and `$TxtValue`. RecordName is the fully qualified domain name (FQDN) of the record we will be adding a TXT value for. TxtValue is the actual value that will be set in the TXT record. Do not modify or remove these first
-two parameters.
+These functions add and remove TXT records in a DNS provider.
 
-Additional parameters should be added as necessary for the specific DNS provider such as credentials or API keys. In addition to standard PowerShell naming standards, their names must also not conflict with any other plugin's parameters. A good way to do that is to use a unique prefix on all of the parameters. It doesn't have to match the plugin name exactly as long as it's unique and reasonably related to the plugin. Common parameters that can be shared between this plugin's functions should be named the same as each other.
+Both functions must include these first two parameters exactly as shown:
 
-The last parameter should always be `$ExtraParams` with the `ValueFromRemainingArguments` parameter attribute. This allows callers to [splat](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting?view=powershell-5.1) the combined collection of plugin parameters to each plugin without errors for parameters that don't exist.
+```
+[Parameter(Mandatory,Position=0)]
+[string]$RecordName,
+[Parameter(Mandatory,Position=1)]
+[string]$TxtValue,
+```
 
-Many DNS providers will only need the Add and Remove functions. In those cases, remember to remove all but the `$ExtraParams` parameter in the Save function and just leave the function body empty. For other providers, it is may be more efficient to stage changes in bulk and then perform what is effectively a Save or Commit operation on those changes. In those cases, implement the Save function as described below.
+Do not rename, reorder, remove, or change the type of these two parameters.
+
+Add provider-specific parameters as needed, for example credentials or API keys. Follow normal PowerShell naming conventions. Also ensure parameter names do not conflict with parameter names used by other plugins.
+
+Use a unique provider prefix for provider-specific parameters. The prefix does not need to match the plugin name exactly, but it should be unique and clearly related.
+
+If two or more functions in the same plugin use the same meaning for a parameter, use the same parameter name in each function.
+
+The last parameter must be `$ExtraParams` with the `ValueFromRemainingArguments` attribute as shown below. This allows callers to [splat](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting) a combined parameter set without failing on extra keys.
+
+```
+[Parameter(ValueFromRemainingArguments)]
+$ExtraParams
+```
+
+Many DNS providers only need `Add-DnsTxt` and `Remove-DnsTxt`.
+
+- If no explicit commit step is required, keep `Save-DnsTxt` with only `$ExtraParams` and an empty function body.
+- If the provider supports staged updates, implement `Save-DnsTxt` to commit those staged changes.
 
 ### `Add-HttpChallenge` and `Remove-HttpChallenge`
 
-These are responsible for publishing/unpublishing the ACME challenge body text at a specific HTTP URL. There are three mandatory and positional string parameters, `$Domain`, `$Token`, and `$Body`. Domain and Token are what the validation server will use to build the URL it will check against (`http://<Domain>/.well-known/acme-challenge/<Token>`). Body is the text value it expects to get in response to that query. Do not modify or remove these first three parameters.
+These functions publish and remove ACME challenge content at an HTTP endpoint.
 
-Additional parameters should be added as necessary for the specific HTTP provider such as filesystem paths, credentials, or API keys. In addition to standard PowerShell naming standards, their names must also not conflict with any other plugin's parameters. A good way to do that is to use a unique prefix on all of the parameters. It doesn't have to match the plugin name exactly as long as it's unique and reasonably related to the plugin. Common parameters that can be shared between this plugin's functions should be named the same as each other.
+Both functions must include these first three parameters exactly as shown:
 
-The last parameter should always be `$ExtraParams` with the `ValueFromRemainingArguments` parameter attribute. This allows callers to [splat](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting?view=powershell-5.1) the combined collection of plugin parameters to each plugin without errors for parameters that
-don't exist.
+```
+[Parameter(Mandatory,Position=0)]
+[string]$Domain,
+[Parameter(Mandatory,Position=1)]
+[string]$Token,
+[Parameter(Mandatory,Position=2)]
+[string]$Body,
+```
 
-Many HTTP providers will only need the Add and Remove functions. In those cases, remember to remove all but the `$ExtraParams` parameter in the Save function and just leave the function body empty. For other providers, it is may be more efficient to stage changes in bulk and then perform what is effectively a Save or Commit operation on those changes. In those cases, implement the Save function as described below.
+The validation server checks this URL pattern:
+
+`http://<Domain>/.well-known/acme-challenge/<Token>`
+
+The response body at that URL must match `$Body`.
+
+Do not rename, reorder, remove, or change the type of these three parameters.
+
+Add provider-specific parameters as needed, for example file paths, credentials, or API keys. Use PowerShell naming conventions and avoid conflicts with parameter names from other plugins.
+
+As with DNS plugins, use a unique provider prefix where practical, and keep shared parameter names consistent across functions in the same plugin.
+
+The last parameter must be `$ExtraParams` with the `ValueFromRemainingArguments` attribute as shown below. This allows callers to [splat](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting) a combined parameter set without failing on extra keys.
+
+```
+[Parameter(ValueFromRemainingArguments)]
+$ExtraParams
+```
+
+Many HTTP providers only need `Add-HttpChallenge` and `Remove-HttpChallenge`.
+
+- If no explicit commit step is required, keep `Save-HttpChallenge` with only `$ExtraParams` and an empty function body.
+- If the provider supports staged updates, implement `Save-HttpChallenge` to commit those staged changes.
 
 ### `Save-DnsTxt` and `Save-HttpChallenge`
 
-These functions are optional for DNS/HTTP plugins where it is more efficient to stage changes in bulk before Saving or Committing the changes. There are no required parameters except `$ExtraParams` which should always be last and have the `ValueFromRemainingArguments` parameter attribute.
+These save functions are optional. Use them when the provider workflow is stage first, then commit.
+
+Copy the provider specific parameters to this function and include the `$ExtraParams` parameter last with the `ValueFromRemainingArguments` attribute.
 
 ### Parameter Types
 
-Try to limit parameters to simple data types like `[string]`, `[int]`, and `[switch]`. Arrays and Hashtables are fine as long as the contents are also simple types. Hashtables in particular should not be nested. The parameters should be able to convert nicely back and forth using `Convert-ToJson` and `Convert-FromJson`.
+Prefer simple parameter types such as `[string]`, `[int]`, and `[switch]`.
 
-Secrets such as passwords and API keys/tokens should use `[SecureString]` or `[PSCredential]` parameters even if you ultimately need them in plain text within the plugin. This ensures the values are encrypted when saved to disk for later renewals. Here are some examples for how to convert them back to plain text in the plugin code.
+Arrays and hashtables are supported if their contents are also simple types. Do not nest hashtables.
+
+Parameter values should serialize and deserialize cleanly with `ConvertTo-Json` and `ConvertFrom-Json`.
+
+For secrets such as passwords and API keys or tokens, use `[SecureString]` or `[PSCredential]`, even if the plugin later needs plain text. This keeps saved renewal data encrypted at rest.
+
+Here are examples for converting secret values back to plain text:
 
 ```powershell
 # get the username and password from a PSCredential called $cred
@@ -68,42 +129,50 @@ $plainText = [pscredential]::new('a',$secString).GetNetworkCredential().Password
 
 ## Usage Guides
 
-In addition to the native function help, it can be very helpful to new users to have a plugin specific readme. It should be a [Markdown](https://www.markdowntutorial.com/) formatted file in the [docs/Plugins](https://github.com/rmbolger/Posh-ACME/tree/main/docs/Plugins) folder called `<PluginName>.md`. It's usually easiest to copy an existing guide and modify it. The `title:` field at the top of the file should match the name of the plugin including capitalization.
+Please include a plugin-specific usage guide by creating a [Markdown](https://www.markdowntutorial.com/) file named `<PluginName>.md` in [docs/Plugins](https://github.com/rmbolger/Posh-ACME/tree/main/docs/Plugins). To save time, copy an existing plugin guide and edit it.
 
-For people who may be setting up automation against their provider for the first time, it can be helpful to add guidance on creating service accounts, limited access roles, or any prerequisite setup that the plugin requires to work properly. It should also have a section with an example on how to use the plugin with `New-PACertificate`.
+Set the `title:` value at the top of the guide to match the plugin name exactly, including capitalization.
+
+For users who are automating against a provider for the first time, include prerequisite setup steps. Typical examples are service account creation, least-privilege role assignment, and required API enablement.
+
+Include at least one usage example that shows how to use the plugin with `New-PACertificate`.
 
 
 ## General Development Tips and Tricks
 
 ### No Write-Host
 
-Unless your plugin requires interactive user input which should be rare, do not use `Write-Host` to display informational messages or debug output. Use `Write-Verbose` for messages you would want a potential user to see. Use `Write-Debug` for things only the plugin developer would likely care about or a user trying to troubleshoot a plugin that is not working.
+Do not use `Write-Host` for informational or debug output. Use `Write-Verbose` for messages intended for plugin users. Use `Write-Debug` for developer-focused troubleshooting details. Interactive prompts should be rare. If your plugin does not require user input, avoid interactive output patterns.
 
-When testing your module, use `-Verbose` to see your verbose messages. And run `$DebugPreference = 'Continue'` to make the debug messages show up without prompting for confirmation *(which happens if you use `-Debug`)*.
+When testing, use `-Verbose` to display verbose output. To display debug output without confirmation prompts, run `$DebugPreference = 'Continue'`.
 
 ### No Pipeline Output
 
-Do not output any objects to the pipeline from your plugin. This will interfere with scripts and workflows that use the normal output of public functions. You can use `Out-Null` on internal calls that would normally output to the pipeline when you don't care about that data.
+Do not write plugin objects to the pipeline. Pipeline output from plugin internals can interfere with scripts that rely on normal output from public module functions. If an internal call returns objects that you do not need, pipe that call to `Out-Null`.
 
 ### UseBasicParsing
 
-Any time you call `Invoke-WebRequest` or `Invoke-RestMethod`, you should always add `@script:UseBasic` to the end.
+When calling `Invoke-WebRequest` or `Invoke-RestMethod`, always append `@script:UseBasic`.
 
-By default in PowerShell 5.1, those two functions use Internet Explorer's DOM parser to process the response body which can cause errors in cases where IE is not installed or hasn't gone through its first-run sequence yet. Both functions have a `-UseBasicParsing` parameter that switches the parser to a PowerShell native parser and is the new default functionality in PowerShell 6+. The parameter is also deprecated because they don't plan on bringing back IE DOM parsing in future PowerShell versions. So the module creates a variable when it is first loaded that checks whether `-UseBasicParsing` is still available or not and adds it to the `$script:UseBasic` hashtable. That way, you can just [splat](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting) it on all your calls to those two functions which will future proof your plugin.
+In Windows PowerShell 5.1, these cmdlets may use the Internet Explorer DOM parser by default. This can fail if Internet Explorer is unavailable or not initialized. The `-UseBasicParsing` switch uses a PowerShell-native parser. In PowerShell 6+, that behavior is already the default and the switch is deprecated.
+
+Posh-ACME initializes `$script:UseBasic` when the module loads. The variable contains `-UseBasicParsing` only when that switch is supported. Splatting `@script:UseBasic` keeps plugin web calls compatible across supported PowerShell versions.
 
 ### Testing Plugins
 
-If the module is already loaded in the session, you will need to re-import it using `Import-Module -Force`. There is a helper script called `instdev.ps1` in the root of the git repository that can make this process a lot easier as you are developing the plugin.
+If the module is already loaded in the current session, re-import it with `Import-Module -Force`. When editing from a clone of the git repo, you can use `instdev.ps1` in the repository root instead.
 
-First make sure any existing copies of the module are uninstalled (or at least don't reside in your `$env:PSModulePath`). Clone the git repository (or your fork) to a folder on your local system and add your plugin file to the `Posh-Acme\Plugins` folder if it's not already there. Open a new PowerShell session to the repository root folder and run `.\instdev.ps1` which will do the following:
+Before running it, ensure existing installed copies of the module are removed or not present in `$env:PSModulePath`. Clone the repository (or your fork), place your plugin file in `Posh-Acme\Plugins` if needed, open a new PowerShell session in the repository root, and run `.\instdev.ps1`.
+
+The script performs these actions:
 
 - Copy the module files to the current user's default PowerShell modules folder.
 - Run `Import-Module Posh-ACME -Force`
 - Display the available module commands
 
-If there are no problems, your plugin should now be listed in the output of `Get-PAPlugin`.
+If the import succeeds, `Get-PAPlugin` should list your plugin.
 
-Testing a plugin can be done without requesting a new certificate. All you need is an existing ACME account created with `New-PAAccount` and the `Publish-Challenge`, `Unpublish-Challenge`, and `Save-Challenge` functions. They call the Add, Remove, and Save functions from the plugin. Here are some examples of how I generally call them while testing.
+You can test plugin behavior without requesting a new certificate. Ensure you have an existing ACME account created with `New-PAAccount` first. Then, use these commands to test a standard multi-SAN cert validation.
 
 ```powershell
 $DebugPreference = 'Continue'
@@ -125,23 +194,36 @@ Unpublish-Challenge example.com (Get-PAAccount) test3 MyPlugin $pArgs -Verbose
 Save-Challenge MyPlugin $pArgs -Verbose
 ```
 
-Alternatively, you can [dot source](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_scripts?view=powershell-5.1#script-scope-and-dot-sourcing) the plugin file and call the functions directly. But this can be difficult if the functions depend on module-scoped variables like `$script:UseBasic` or internal module functions. Also, remember to dot source again each time you make a change to the plugin.
+You can also [dot source](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_scripts?view=powershell-5.1#script-scope-and-dot-sourcing) the plugin file and call plugin functions directly.
+
+!!! note
+    Direct dot-sourcing can be difficult when the plugin depends on module-scoped variables such as `$script:UseBasic` or private module functions. If you choose dot-sourcing, load the file again after each plugin edit.
 
 ## DNS Specific Tips and Tricks
 
 ### Multiple TXT Values Per Record
 
-It is both supported and expected that a given TXT record may have multiple values. It's most common with wildcard certificates that contain both the wildcard name (`*.example.com`) and the root domain (`example.com`). Both names require TXT records be added for the same FQDN (`_acme-challenge.example.com`). This can also happen if the user is using CNAME challenge aliases.
+TXT records can contain multiple values. Plugins must support this. This is common for wildcard certificates that include both `*.example.com` and `example.com`. Both names require distinct validation data at `_acme-challenge.example.com`. This can also happen when users use CNAME challenge aliases.
 
-The Add/Remove functions need to support all potential states of the particular TXT record. But how the record is represented by a given provider seems to vary. Some represent it as a single record with multiple values that you need to add to or remove from. Others have distinct records for each value that can be created/deleted individually. So make sure you can both create a new record that doesn't exist *and* add a value to a record that already does.
+Provider APIs represent multi-value TXT records differently:
+
+- Some APIs use one record object with multiple values.
+- Some APIs use separate record objects, one per value.
+
+Your Add and Remove functions must handle all relevant states, including:
+
+- Creating a TXT record that does not exist.
+- Adding a value to an existing TXT record.
 
 ### Remove Only Specific TxtValue
 
-Related to having multiple TXT values per record, the remove function must not blindly delete any record that matches `$RecordName`. It should be able to remove only the `$TxtValue` on a record that may have multiple values. But if the record only contains a single value, the record should be deleted entirely.
+When multiple values exist on the same TXT record, do not delete by `$RecordName` alone. The remove function must remove only the requested `$TxtValue`. If the TXT record contains only that one value, delete the record.
 
 ### Zone Matching
 
-A particular DNS provider may be hosting both domain apex zones (`example.com`) and sub-zones (`sub1.example.com`). One of the first things a plugin usually has to do is figure out which zone `$RecordName` needs to be added to. This should be the deepest sub-zone that would still contain `$RecordName`. Here are some examples assuming only the two previously mentioned zones exist.
+A DNS provider can host both apex zones (for example, `example.com`) and sub-zones (for example, `sub1.example.com`). The plugin must identify which zone contains `$RecordName`. Use the deepest matching zone that still contains the record.
+
+The table below assumes only `example.com` and `sub1.example.com` exist:
 
 `$RecordName`                                    | Matching Zone
 -------------                                    | -------------
@@ -151,18 +233,18 @@ _acme-challenge.sub1.example.com                 | sub1.example.com
 _acme-challenge.site1.sub1.example.com           | sub1.example.com
 _acme-challenge.site1.sub3.sub2.sub1.example.com | sub1.example.com
 
-Many of the existing plugins have a helper function to handle this. Copy and modify their code where it makes sense.
+Many existing plugins include helper functions for zone matching. Reuse and adapt them where appropriate.
 
 ### Relative Record Names
 
-Many providers will end up needing you to provide a record's relative/short name such as `_acme-challenge` or `_acme-challenge.www` rather than the fully-qualified domain provided by `$RecordName`. To do this properly, you must first know the zone name that would contain the record. Once you have it, use the following method to separate the relative name from the zone name.
+Some provider APIs require a relative (short) record name such as `_acme-challenge` or `_acme-challenge.www`, not a full FQDN. To calculate the relative name, first determine the containing zone name. Then separate the record from the zone with this pattern:
 
 ```powershell
 # assumes $zoneName contains the zone name containing the record
 $recShort = $RecordName -ireplace "\.?$([regex]::Escape($zoneName.TrimEnd('.')))$",''
 ```
 
-Keep in mind that there are cases where `$RecordName` and `$zoneName` can be identical. The code above will set `$recShort` to an empty string. Depending on the provider, this may not be the proper way to reference zone apex records. Some providers expect you to use `@`, others may want the full zone name like `example.com`. So if your provider expects something other than an empty string, make sure you account for it. Here's an example:
+`$RecordName` and `$zoneName` can be identical. In that case, the code above sets `$recShort` to an empty string. This works for some providers, but others use a specific character to represent an apex record such as `@` or the full zone name. If your provider does not accept an empty apex name, map the empty value to the required format. Example:
 
 ```powershell
 if ($recShort -eq [string]::Empty) {
@@ -172,7 +254,7 @@ if ($recShort -eq [string]::Empty) {
 
 ### DNS Aliases and Domain Apex
 
-Don't forget to test your functions against the domain apex which can happen when users are using DNS challenge aliases.
+Test domain apex behavior, by simulating using DNS challenge aliases.
 
 ```powershell
 # The my.cname.tld record doesn't actually need to exist for the test to work.
@@ -192,9 +274,16 @@ Unpublish-Challenge @publishParams
 
 ### Future-Proof for dns-persist-01
 
-The new `dns-persist-01` challenge standard is still in development, but it's a good idea to ensure your plugin will support it once it becomes generally available. The main difference between it and `dns-01` is that the `$TxtValue` input string will be surrounded by double-quotes for the persist record but not for the standard record which can affect string matching with API calls and results. The input differences between persist and standard may change in the next major version, but for now, the plugin will need to deal with both possible value types.
+The `dns-persist-01` challenge standard is still in development. It is recommended to make new DNS plugins compatible with it.
 
-Here is an example of how to test persist support.
+The key difference from `dns-01` is `$TxtValue` input quoting:
+
+- `dns-persist-01` values will arrive already wrapped in double quotes.
+- `dns-01` values will arrive unquoted.
+
+This difference can affect string matching against provider API results, so plugin logic should handle both forms.
+
+Example test for persist support:
 
 ```powershell
 # The actual values for AccountUri and IssuerDomainName don't matter
@@ -212,7 +301,7 @@ Publish-DnsPersistChallenge @pubParams
 Unpublish-DnsPersistChallenge @pubParams
 ```
 
-Some APIs will handle quoted and unquoted values the same and add or remove quotes on the server-side as necessary. For the others, you may want to normalize the quotes on the incoming `$TxtValue` parameter like this:
+Some APIs normalize quotes automatically. Others do not. If needed, normalize the incoming `$TxtValue` to ensure it is quoted:
 
 ```powershell
 # Normalize the TxtValue to ensure it is wrapped in quotes
@@ -223,19 +312,19 @@ if ($TxtValue -notmatch '^".*"$') {
 
 ### Deriving Object IDs
 
-Many providers assign ID values to object types like zones and records that you need to use to manipulate those objects. A user should ideally not have to know or provide any zone, record, or object IDs in order to use the plugin. All of that should be discovered by the plugin code and the only thing the user should need to provide is whatever credentials or tokens the API requires for authentication.
+Many providers assign object IDs (such as zone IDs and record IDs) that are required for API operations. Prefer automatic discovery of these IDs in plugin code. Users should only need to provide only authentication material, such as credentials or tokens.
 
-In the rare cases that you do need the user to provide something like a zone ID, make sure you allow for multiple values. A single certificate can contain names from many different zones and the plugin parameters that get passed to the plugin are the same for each TXT record that needs to be created.
+If user-supplied IDs are required, support multiple values. A single certificate can include names from multiple zones, and the same plugin argument set is reused for each challenge record.
 
 ### Trailing Dots
 
-Be aware how your particular DNS provider represents zone and record names. Some include the trailing dot (`example.com.`). Others don't. This can affect string matching when finding zones and existing records.
+Check how your provider represents zone and record names. Some APIs include trailing dots (for example, `example.com.`). Others do not. Account for this in all matching logic for zones and existing records.
 
 ### Internationalized Domain Name (IDN)
 
-Many DNS providers and registrars support [IDN domains](https://en.wikipedia.org/wiki/Internationalized_domain_name) which contain non-ascii unicode characters (or even emojis). When using IDN domains with ACME, the IDN names must be specified as [Punycode](https://en.wikipedia.org/wiki/Punycode). But the DNS providers may still send or receive the unicode version of the name. Particularly if your provider is not US-based, be aware of and try to account for how the provider handles IDN names.
+Many DNS providers and registrars support [IDN domains](https://en.wikipedia.org/wiki/Internationalized_domain_name), which contain non-ASCII Unicode characters. For ACME operations, IDN names must be provided as [Punycode](https://en.wikipedia.org/wiki/Punycode). Provider APIs may still return or accept Unicode labels.
 
-The .NET [System.Globalization.IdnMapping](https://docs.microsoft.com/en-us/dotnet/api/system.globalization.idnmapping) class can help convert back and for between IDN and punycode names like this:
+Make sure plugin logic handles the provider's IDN behavior correctly. Use .NET `System.Globalization.IdnMapping` to convert between Unicode and Punycode as necessary:
 
 ```powershell
 # create an instance of the class
@@ -252,16 +341,16 @@ $idn.GetUnicode('xn--bcher-kva.example')
 
 ### Validation Timing
 
-When DNS plugins are used, there's a user customizable sleep timer between when the TXT records are published and the module asks the ACME server to validate those records because records are not typically available instantaneously worldwide. However, that sleep timer does not exist when an order is only using HTTP plugins because HTTP resources are typically available instantly.
+For DNS plugins, Posh-ACME includes a user-configurable wait period before validation. This helps account for DNS propagation time. For HTTP-only orders, that DNS wait period is not used because HTTP content is usually available immediately.
 
-If your particular HTTP provider requires a delay between when the challenges are published and when they are validated, you should add that delay in the `Save-HttpChallenge` function of your plugin.
+If your HTTP provider still requires a delay before validation succeeds, add that delay in `Save-HttpChallenge`.
 
 ## Migrating DNS Plugins from 3.x to 4.x
 
-In case you have been using your own private DNS plugin in 3.x, here's how to migrate it to the 4.x format.
+Use this checklist to migrate a private DNS plugin from 3.x to 4.x.
 
-* Add `function Get-CurrentPluginType { 'dns-01' }` to the top of the file.
-* Replace instances of `Add-DnsTxt<Name>` with `Add-DnsTxt`
-* Replace instances of `Remove-DnsTxt<Name>` with `Remove-DnsTxt`
-* Replace instances of `Save-DnsTxt<Name>` with `Save-DnsTxt`
-* Replace instances of `-DnsPlugin` with `-Plugin` in usage guides.
+- Add `function Get-CurrentPluginType { 'dns-01' }` at the top of the file.
+- Replace `Add-DnsTxt<Name>` with `Add-DnsTxt`.
+- Replace `Remove-DnsTxt<Name>` with `Remove-DnsTxt`.
+- Replace `Save-DnsTxt<Name>` with `Save-DnsTxt`.
+- Replace `-DnsPlugin` with `-Plugin` in usage guides.
