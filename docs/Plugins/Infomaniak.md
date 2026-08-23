@@ -2,7 +2,10 @@ title: Infomaniak
 
 # How To Use the Infomaniak DNS Plugin
 
-This plugin works against the [Infomaniak](https://www.infomaniak.com) DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
+This plugin works against the [Infomaniak](https://www.infomaniak.com) DNS provider using version 1 of their API. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.
+
+!!! note
+    Infomaniak now documents version 2 of their API, which is served by the [InfomaniakV2](InfomaniakV2.md) plugin. This plugin continues to work, but new deployments should prefer InfomaniakV2. Switching requires a new API token with the `dns:read` and `dns:write` scopes, because the v2 endpoints reject tokens that only carry the `Domain` scope this guide asks for.
 
 ## Setup
 
