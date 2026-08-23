@@ -191,20 +191,6 @@ function Invoke-HNLRest {
         if ($Body) { Write-Debug $Body }
         return Invoke-RestMethod @params @script:UseBasic
     } catch {
-        # $apiMessage = $null
-        # $errResp = $_.ErrorDetails.Message
-        # if ($errResp) {
-        #     try {
-        #         $parsed = $errResp | ConvertFrom-Json
-        #         if ($parsed.error) { $apiMessage = $parsed.error }
-        #         elseif ($parsed.errors.message) { $apiMessage = $parsed.errors.message }
-        #     } catch {
-        #         Write-Debug "HostingNL: error response body was not JSON: $errResp"
-        #     }
-        # }
-        # if ($apiMessage) {
-        #     throw "HostingNL error: $apiMessage"
-        # }
         throw
     }
 
