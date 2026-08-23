@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.33.1'
+ModuleVersion = '4.34.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -87,9 +87,21 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.33.1 (2026-06-16)
+## 4.34.0 (2026-08-23)
 
-* Fixed parameter validation errors on renewal due to DnsVariant parameter being empty (#679)
+* New DNS Plugins
+  * [Spaceship](https://www.spaceship.com/) (#678)
+  * [GoDaddyV3](https://www.godaddy.com) for use with new V3 API (#686)
+  * [MijnHost](https://mijn.host) (#675) (Thanks @j81blog)
+  * [InfomaniakV2](https://www.infomaniak.com) (#689) (Thanks @Sundypha)
+  * [HostingNL](https://www.hosting.nl/) (684) (Thanks @Tim81)
+* Fixed Gandi API endpoint URL which recently changed. It is now a configurable parameter as well. (#682)
+* Fixed Regru compatibility with API 2 (#687) (Thanks @kropachev)
+* Fixed a number of GCloud issues:
+  * Now works against accounts with many zones (#688)
+  * Fixed future dns-persist-01 support
+  * GCProjectId may now be a comma-delimited string instead of a string array
+  * Better error handling
 '@
 
     }
