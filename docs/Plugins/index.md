@@ -53,6 +53,7 @@ GoDaddyV3 | [GoDaddy](https://www.godaddy.com) | [Usage Guide](GoDaddyV3.md) | :
 Hetzner | [Hetzner](https://hetzner.de/) (Deprecated) | [Usage Guide](Hetzner.md) | :white_check_mark:
 HetznerCloud | [Hetzner](https://hetzner.de/) | [Usage Guide](Hetzner.md) | :white_check_mark:
 HostingDe | [Hosting.de](https://hosting.de) | [Usage Guide](HostingDe.md) | :white_check_mark:
+HostingNL | [Hosting.nl](https://hosting.nl) | [Usage Guide](HostingNL.md) | :white_check_mark:
 HostUp | [HostUp](https://hostup.se) | [Usage Guide](HostUp.md) | :white_check_mark:
 HurricaneElectric | [Hurricane Electric DNS](https://dns.he.net/) | [Usage Guide](HurricaneElectric.md) | :white_check_mark:
 HurricaneElectricDyn | [Hurricane Electric DNS](https://dns.he.net/) | [Usage Guide](HurricaneElectricDyn.md) | :white_check_mark:
