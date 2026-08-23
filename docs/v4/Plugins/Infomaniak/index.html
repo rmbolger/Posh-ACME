@@ -18,7 +18,7 @@
         <link rel="prev" href="../Infoblox/">
       
       
-        <link rel="next" href="../LeaseWeb/">
+        <link rel="next" href="../InfomaniakV2/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -1535,6 +1535,16 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
     
     
       
@@ -2344,6 +2354,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../GoDaddyV3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GoDaddyV3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../GoogleDomains/" class="md-nav__link">
         
   
@@ -2433,6 +2464,27 @@
   
   <span class="md-ellipsis">
     HostingDe
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HostingNL/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HostingNL
   </span>
   
 
@@ -2675,6 +2727,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../InfomaniakV2/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    InfomaniakV2
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../LeaseWeb/" class="md-nav__link">
         
   
@@ -2743,6 +2816,27 @@
   
   <span class="md-ellipsis">
     LuaDns
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MijnHost/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    MijnHost
   </span>
   
 
@@ -3184,6 +3278,27 @@
   
   <span class="md-ellipsis">
     SimplyCom
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Spaceship/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Spaceship
   </span>
   
 
@@ -3971,7 +4086,11 @@
 
 
 <h1 id="how-to-use-the-infomaniak-dns-plugin">How To Use the Infomaniak DNS Plugin<a class="headerlink" href="#how-to-use-the-infomaniak-dns-plugin" title="Permanent link">&para;</a></h1>
-<p>This plugin works against the <a href="https://www.infomaniak.com">Infomaniak</a> DNS provider. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.</p>
+<p>This plugin works against the <a href="https://www.infomaniak.com">Infomaniak</a> DNS provider using version 1 of their API. It is assumed that you have already setup an account and created the DNS zone(s) you will be working against.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Infomaniak now documents version 2 of their API, which is served by the <a href="../InfomaniakV2/">InfomaniakV2</a> plugin. This plugin continues to work, but new deployments should prefer InfomaniakV2. Switching requires a new API token with the <code>dns:read</code> and <code>dns:write</code> scopes, because the v2 endpoints reject tokens that only carry the <code>Domain</code> scope this guide asks for.</p>
+</div>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <p>You will need to generate an API Token if you haven't already done so. Go to <a href="https://manager.infomaniak.com/v3/0/api/dashboard">Manage API tokens</a> after logging in to the <a href="https://manager.infomaniak.com">Management Console</a>. Create a new token with the scope <code>Domain</code>. Set the expiration time to your preference. Make a note of the token value as you'll need it later and won't be able to retrieve it after this point.</p>
 <div class="admonition note">
@@ -4038,13 +4157,13 @@
         
         
           
-          <a href="../LeaseWeb/" class="md-footer__link md-footer__link--next" aria-label="Next: LeaseWeb">
+          <a href="../InfomaniakV2/" class="md-footer__link md-footer__link--next" aria-label="Next: InfomaniakV2">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                LeaseWeb
+                InfomaniakV2
               </div>
             </div>
             <div class="md-footer__button md-icon">
