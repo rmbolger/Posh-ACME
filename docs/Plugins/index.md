@@ -34,6 +34,7 @@ DeSEC | [DeSEC DNS](https://desec.io/#!/en/product/dnshosting) | [Usage Guide](D
 DMEasy | [DNS Made Easy](https://dnsmadeeasy.com/) | [Usage Guide](DMEasy.md) | :white_check_mark:
 DNSExit | [DNSExit](https://dnsexit.com/) | [Usage Guide](DNSExit.md) | :white_check_mark:
 DNSimple | [DNSimple DNS](https://dnsimple.com/r/c9b80a2f227e49) | [Usage Guide](DNSimple.md) | :white_check_mark:
+DNSMint | [DNSMint](https://dnsmint.com/) | [Usage Guide](DNSMint.md) | :white_check_mark:
 DNSPod | [DNSPod](https://www.dnspod.com/) | [Usage Guide](DNSPod.md) | :white_check_mark:
 DOcean | [Digital Ocean](https://m.do.co/c/d515942ef761) | [Usage Guide](DOcean.md) | :white_check_mark:
 DomainOffensive | [Domain Offensive](https://do.de) | [Usage Guide](DomainOffensive.md) | :white_check_mark:
