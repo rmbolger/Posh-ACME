@@ -28,3 +28,19 @@ New-PACertificate 'q7k4m2.dnsmint-a3f9c1.dev','*.q7k4m2.dnsmint-a3f9c1.dev' -Plu
 ```
 
 A hostname that resolves to a public address and does not need a wildcard can use `http-01` instead and needs no plugin at all.
+
+## What a key may write
+
+A DNSMint key may write the two validation names under a hostname the account holds, `_acme-challenge.<hostname>` and `_validation-persist.<hostname>`, and nothing else. Any other name is refused by the API:
+
+```
+fqdn must be a validation name, "_acme-challenge.<hostname>." or "_validation-persist.<hostname>."
+```
+
+Two things follow.
+
+**`-DnsAlias` names the record, not the hostname.** `_acme-challenge.<dnsmint-host>` works. A bare `<dnsmint-host>` is refused by the rule above.
+
+**A domain of your own is covered by CNAME, as with acme-dns.** Point `_acme-challenge.your-domain.com` at `_acme-challenge.<dnsmint-host>` and DNSMint answers that challenge and nothing else. That is also the answer for the apex of a domain you own: the plugin cannot write there and does not try.
+
+The plugin does no zone matching and calculates no relative record names, so the empty short name at an apex never arises.
