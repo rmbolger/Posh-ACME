@@ -144,9 +144,16 @@ function Invoke-DNSMintChallenge {
     $uri = '{0}/{1}' -f $DNSMintApiRoot.TrimEnd('/'), $Action
     Write-Verbose "Sending $Action for $RecordName"
 
+    # -Verbose:$false -Debug:$false, because the automatic output includes the
+    # request headers and the token is one of them. The Write-Debug pair says
+    # the same thing without the Authorization header, and says it on 5.1 too.
+    Write-Debug "POST $uri"
+    Write-Debug $body
+
     try {
         Invoke-RestMethod $uri -Method Post -Body $body -Headers $headers `
-            -ContentType 'application/json' @script:UseBasic -EA Stop | Out-Null
+            -ContentType 'application/json' @script:UseBasic `
+            -Verbose:$false -Debug:$false -EA Stop | Out-Null
     } catch {
         # DNSMint explains refusals in the body - a key narrowed to another
         # hostname, a name that is not live - and that is more use than the
