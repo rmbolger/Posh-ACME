@@ -123,6 +123,21 @@ Describe "Get-CsrDetails" {
         }
     }
 
+    Context "RSA 2048 CSR with critical extensions" {
+        It "Reads properly" {
+            Copy-Item "$PSScriptRoot\TestFiles\rsa-2048-noCN-criticalSAN.csr" 'TestDrive:\test.csr'
+            InModuleScope Posh-ACME {
+                { Get-CsrDetails -CSRPath 'TestDrive:\test.csr' } | Should -Not -Throw
+                $result = Get-CsrDetails -CSRPath 'TestDrive:\test.csr'
+                $result.Domain         | Should -BeExactly @('example.com')
+                $result.KeyLength      | Should -BeExactly '2048'
+                $result.OCSPMustStaple | Should -BeTrue
+                { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
+                $result.PemLines.Count | Should -Be 16
+            }
+        }
+    }
+
     Context "RSA 4096 CSR" {
         It "Reads properly" {
             Copy-Item "$PSScriptRoot\TestFiles\rsa-4096-soloCN-noSANs-ocsp.csr" 'TestDrive:\test.csr'
