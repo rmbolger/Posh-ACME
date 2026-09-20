@@ -118,10 +118,16 @@ function Get-CsrDetails {
     }
 
     # Now find the sequence for "Subject Alternative Name" (oid 2.5.29.17)
-    # [0] is the OID, [1] is the DerOctetString
+    # [0] is the OID and the DerOctetString value is normally [1]. But per RFC 5280,
+    # an extension flagged critical also encodes a DerBoolean between the two which
+    # shifts the value to [2]. Either way, the value is the last element.
     if ($sanSeq = $extensions | Where-Object { $_.Id -eq '2.5.29.17' }) {
+        $sanValue = $sanSeq[$sanSeq.Count-1]
+        if ($sanValue -isnot [Org.BouncyCastle.Asn1.Asn1OctetString]) {
+            throw "Unable to parse the Subject Alternative Name extension in the certificate request."
+        }
         # convert to [Org.BouncyCastle.Asn1.X509.GeneralNames]
-        $genNames = [Org.BouncyCastle.Asn1.X509.GeneralNames]::GetInstance([Org.BouncyCastle.Asn1.Asn1Object]::FromByteArray($sanSeq[1].GetOctets()))
+        $genNames = [Org.BouncyCastle.Asn1.X509.GeneralNames]::GetInstance([Org.BouncyCastle.Asn1.Asn1Object]::FromByteArray($sanValue.GetOctets()))
         # and grab just the DNS names
         $SANs = ($genNames.GetNames() | Where-Object { $_.TagNo -eq 2 }).Name
     }
@@ -134,9 +140,10 @@ function Get-CsrDetails {
     if ($details.Domain.Count -eq 0) { throw "No Common Name (CN) or Subject Alternative Name (SAN) extensions found in certificate request." }
 
     # Find the sequence for OCSP Must-Staple (oid 1.3.6.1.5.5.7.1.24)
-    # and determine whether it's set
+    # and determine whether it's set. As with the SAN extension above, the value is
+    # the last element because a critical flag shifts it off of [1].
     if ($ocspSeq = $extensions | Where-Object { $_.Id -eq '1.3.6.1.5.5.7.1.24'}) {
-        $details.OCSPMustStaple = ($ocspSeq[1].ToString() -eq '#3003020105')
+        $details.OCSPMustStaple = ($ocspSeq[$ocspSeq.Count-1].ToString() -eq '#3003020105')
     } else {
         $details.OCSPMustStaple = $false
     }
