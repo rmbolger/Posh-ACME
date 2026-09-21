@@ -53,15 +53,12 @@ function ConvertFrom-BCKey {
 
         $pKey = $BCKeyPair.Private
 
-        $keyParams = New-Object Security.Cryptography.RSAParameters
-        $keyParams.Exponent = $pKey.PublicExponent.ToByteArrayUnsigned()
-        $keyParams.Modulus  = $pKey.Modulus.ToByteArrayUnsigned()
-        $keyParams.D        = $pKey.Exponent.ToByteArrayUnsigned()
-        $keyParams.P        = $pKey.P.ToByteArrayUnsigned()
-        $keyParams.Q        = $pKey.Q.ToByteArrayUnsigned()
-        $keyParams.DP       = $pKey.DP.ToByteArrayUnsigned()
-        $keyParams.DQ       = $pKey.DQ.ToByteArrayUnsigned()
-        $keyParams.InverseQ = $pKey.QInv.ToByteArrayUnsigned()
+        # RSAParameters requires D to be the same length as Modulus and the rest of the
+        # private params to be half that length. But like the EC D value above, calling
+        # ToByteArrayUnsigned() on the BouncyCastle values drops any leading zero bytes
+        # which makes ImportParameters throw "Bad Data". BouncyCastle's own converter
+        # takes care of the padding for us.
+        $keyParams = [Org.BouncyCastle.Security.DotNetUtilities]::ToRSAParameters($pKey)
 
         # create the key
         $key = New-Object Security.Cryptography.RSACryptoServiceProvider
