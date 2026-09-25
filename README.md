@@ -18,9 +18,9 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - [OCSP Must-Staple](https://scotthelme.co.uk/ocsp-must-staple/) support
 - DNS challenge [CNAME support](https://poshac.me/docs/latest/Guides/Using-DNS-Challenge-Aliases/)
 - Multiple ACME accounts supported per ACME CA.
-- External Account Binding support for ACME CAs that require it [(Guide)](https://poshac.me/docs/Guides/External-Account-Binding/)
-- Preferred Chain support to use alternative CA trust chains [(Guide)](https://poshac.me/docs/Guides/Using-Alternate-Trust-Chains/)
-- PowerShell [SecretManagement](https://devblogs.microsoft.com/powershell/secretmanagement-and-secretstore-are-generally-available/) support [(Guide)](https://poshac.me/docs/v4/Guides/Using-SecretManagement/)
+- External Account Binding support for ACME CAs that require it [(Guide)](https://poshac.me/docs/latest/Guides/External-Account-Binding/)
+- Preferred Chain support to use alternative CA trust chains [(Guide)](https://poshac.me/docs/latest/Guides/Using-Alternate-Trust-Chains/)
+- PowerShell [SecretManagement](https://devblogs.microsoft.com/powershell/secretmanagement-and-secretstore-are-generally-available/) support [(Guide)](https://poshac.me/docs/latest/Guides/Using-SecretManagement/)
 - [ARI (ACME Renewal Information)](https://datatracker.ietf.org/doc/draft-ietf-acme-ari/) support based on draft 07.
 - [ACME Profiles](https://datatracker.ietf.org/doc/draft-ietf-acme-profiles/) support based on draft 00.
 - [dns-account-01](https://datatracker.ietf.org/doc/draft-ietf-acme-dns-account-label/03/) experimental support based on draft 03.
@@ -45,7 +45,7 @@ Install-Module -Name Posh-ACME -Scope CurrentUser
 
 [![Pester Tests badge](https://github.com/rmbolger/Posh-ACME/workflows/Pester%20Tests/badge.svg)](https://github.com/rmbolger/Posh-ACME/actions)
 
-Use the following PowerShell command to install the latest *development* version from the git `main` branch. This method assumes a default [`PSModulePath`](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath) environment variable and installs to the CurrentUser scope.
+Use the following PowerShell command to install the latest *development* version from the git `main` branch. This method assumes a default [`PSModulePath`](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath) environment variable and installs to the CurrentUser scope.
 
 ```powershell
 iex (irm https://raw.githubusercontent.com/rmbolger/Posh-ACME/main/instdev.ps1)
@@ -87,8 +87,8 @@ The output of `New-PACertificate` is an object that contains various properties 
 ## Requirements and Platform Support
 
 * Supports Windows PowerShell 5.1 (Desktop edition) **with .NET Framework 4.7.1** or later
-* Supports PowerShell 6.2 or later ([Core edition](https://docs.microsoft.com/en-us/powershell/scripting/whats-new/differences-from-windows-powershell)) on all supported OS platforms.
-* Requires `FullLanguage` [language mode](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_language_modes)
+* Supports PowerShell 6.2 or later ([Core edition](https://learn.microsoft.com/en-us/powershell/scripting/whats-new/differences-from-windows-powershell)) on all supported OS platforms.
+* Requires `FullLanguage` [language mode](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_language_modes)
 
 *NOTE: PowerShell 6.0-6.1 should also work, but there are known issues when using `SecureString` or `PSCredential` plugin args on non-Windows platforms.*
 
