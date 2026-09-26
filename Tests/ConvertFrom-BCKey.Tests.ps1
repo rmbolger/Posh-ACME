@@ -39,6 +39,20 @@ Describe "ConvertFrom-BCKey.Tests.ps1" {
         dq = 'wFZFRyl3nYXMMcdjvUpsxC-werrpG5-LwdDU1_Q4wenV7-ojMZgLIG7MW4wpL2TgshffmG2PvyQqifTryVrVbKuEy5Ri4mnczheLzTRvw0u5QJ42wEE2i1OK-fi28gWdE2uRJ4JDT14rjqORVtTSiUEgXzDEpXqZ_cNBFjLW64IyvX4VxhSCpBmb4tOV5bA7Lx0NVwZv2q2joujYGh6gWJ3XuT5OxDWMqjOgLWAySg7-4Y7lSkdOVN6MGCLLCLYkOppxPGkcRRn4cPsvittN_aQ_AaGdVPSNfaiilI_0yA5eNqBWxfhWa6ksuiP3t1Hdh28mPWnh6T-Y1ZC37IO_Dw'
         qi = 'IlO6vs-8_HiAY0keF5Q7Jb6Yp9C1WSo4Px2usVpjfADL_jKh8lLrJhpmqBnZTUVvGo9RrPoxkruw8kkW2QIFpPQq-CmN2szIH5QzE3-_4oiWalLX0qmg2CGHgUSEp3wu4BAAf30bxEL6l3bbo3oWYWAKymD5ZGdf3QccxIbpdtT8BdUeuEfZ-C2v8CeTq7aC2SsW9UkVvZPA9raHr1ojbhTT9VoQ0gdfSA6wdc3Yw8uRK4TZCpKWfukk0b_-KaFihZKXXBUgqzDfu6swfr_-Kbp7VwbjP73WRPCXG3zFPirh3AFC0ZjvE58G-GF-P_YhuHE5ca1syW7Wx4hcIsE9lQ'
     }
+    # RSA 2048 key where both d and qi have a leading zero byte. BouncyCastle drops
+    # leading zeros when converting to a byte array, so this makes sure the values
+    # get padded back to the lengths RSAParameters requires.
+    $rsa2048padjwk = @{
+        kty = 'RSA'
+        n = 'yvkCemVGnAiPo91OQFD9aHidDiAsUha741aumDvZif6vwxaPL1hHs7MOGlCFy5uRILU54pjWti2oGyIVTykSMkxdyty_uO3XJHLwrirkZvvZE5WY9qAKkA-NWX18RIR6luU7BuQ4CEqMUjqd7yAA5CfWBJeToVjgzxBGPc7GYKmiDZyC719fiDacaBdX1kGSC4YMaBGkfQDD7uWeyznn5zKg2utHFSOz6z3j3B3PMmMDo-NLdE3I55MkHctHC1gPJyKAN55UEFxrhuI2LlRREkt-7NcbbvWCK6C2GK-4fYYaI4H5zp4NXxe3ZqPOZh4d7KpZxyVr9vILGGG2_6xDFQ'
+        e = 'AQAB'
+        d = 'AIVBY98b55r231bsdDx8XVACcfV4vDKWTJ-9pHUEjN_VQ2q_CWbVDociq3sI9M431CJJtBKQadQxJWOGWFKN_7-80PuVOyVAbqNtG9-F27cuoUNxKnublsFrdHOnuABoZzfzIpa_GcEzMDXws5rvDIIrpR_MY-kugvu3oUFgkd0Hw5iOfmUOouIEatcQPnbd200koVSCQONrZSSJmztHXPjOR4hAB1eVO-enyvw6ZceZ4xcRHTgUCMeOPkZLyBs8EzjMiGZIZ2TuxkAhEaZznWKijIChra4H6Tx4plZT-zEuYiCNcWK2srL5fQ12DfFKxFAxk27xvNX41i3Qhy-FAQ'
+        p = '7UiIugjJxMdP0JAeDlmH4CZj1b5w41y9lOqX38j_x5ZEQF01JttG-Jp_2qgfwxJ0JrqZX068jWJyyxC2swdVM7HjF6zOHhWhjgjZOyasp2tKYJnqL63gE1GJoKWWS6tiAPSFaIWHGLRTiIgVriKs9ZbL6l1RNViLXXejBzJ6EZU'
+        q = '2vuj6dThtyHS3UA7FxJe535t7pIiNGPjcgzIok_Bws3KatsfkQRhrMFMXi1S3r6PvNno4_yVhl8gv5RBbP9O2QWYj4QFtk7cjZLaeQbcrbVrn12jpHP0OF9v7WCjOK0ewt9x2mH7vODLE_SACXQzCrDiMb_bWeCqafGRjAHIC4E'
+        dp = 'CxnLm7hxiA0zBLTZUx6JJslk_kjsixZ5oA_hjwyeOr4i70ftBqZXiaXguWAILF4epPkx162dUJf8eteLVJDRQZve3eqtseadKkHrt8K1bRet4RsSQ6zEwOKdp7BXea7I5PaLjzo_-b3l8os7SGxC3zJw08QN2osL6hGAxQNthok'
+        dq = 'SbvfdlWi5tnxuWPuQZeC8ymj9GeqMr_LjtR1HgoC8Qf_9zjvCRJTnSq8_xz9wVii53DsNRAQfN09FqTh3sSclQCIXRKUJc2p_9WJ0KSZ27exlEigWDhe7DheZKxcaTIJoI5CNMk3TWLXnlF-ZzCEGz5x-1RhlILMfr3DR0Q2SoE'
+        qi = 'AF0lYose1p0qa8NMnbP2TZwyJwiyYMXXWNhSEDw2mqBaEnBHm82n5FdeaJZ80iclW7O7jWYh3_5m_av4_Ainm5tNUCQsCvnPl1_-OJz9B28BIlqBUW-o86g1gqNduuTNfb637b4G5b0GD4TSr24zYegvZs2WNZ_SAHPYCkItVdM'
+    }
     $ec256jwk = @{
         kty = 'EC'
         crv = 'P-256'
@@ -65,6 +79,7 @@ Describe "ConvertFrom-BCKey.Tests.ps1" {
         @{ jwk = $rsa2048jwk }
         @{ jwk = $rsa3072jwk }
         @{ jwk = $rsa4096jwk }
+        @{ jwk = $rsa2048padjwk }
     ) {
         InModuleScope Posh-ACME -Parameters @{JWK = $jwk} {
             param($JWK)
