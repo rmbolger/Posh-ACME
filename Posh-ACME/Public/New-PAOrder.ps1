@@ -88,10 +88,9 @@ function New-PAOrder {
     if ('ImportKey' -eq $PSCmdlet.ParameterSetName) {
         $KeyFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($KeyFile)
         try {
-            $kLength = [string]::Empty
             # we don't actually care about the key object, just the parsed length
-            $null = New-PAKey -KeyFile $KeyFile -ParsedLength ([ref]$kLength)
-            $KeyLength = $kLength
+            $keyObj = New-PAKey -KeyFile $KeyFile
+            $KeyLength = $keyObj.KeyLength
         }
         catch { $PSCmdlet.ThrowTerminatingError($_) }
     }

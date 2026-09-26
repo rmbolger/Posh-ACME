@@ -51,7 +51,7 @@ function Update-PAAccount {
             Write-Debug "Refreshing account $($acct.id) using newAccount endpoint"
             $header = @{
                 alg   = $acct.alg
-                jwk   = ($acct.key | ConvertFrom-Jwk | ConvertTo-Jwk -PublicOnly)
+                jwk   = $acct.pubkey
                 nonce = $script:Dir.nonce
                 url   = $script:Dir.newAccount
             }
