@@ -37,14 +37,8 @@ function Get-DnsPersistAccountUri {
                 throw "Account status is $($Account.status)."
             }
 
-            # Calculate the public account key thumbprint to use in the hash value for the accountUri value
-            # This is the same thumbprint value used to generate Key Authorization values for ACME challenges.
-            $acctKey = $Account.key | ConvertFrom-Jwk
-            $pubJwk = $acctKey | ConvertTo-Jwk -PublicOnly -AsJson
-            $jwkBytes = [Text.Encoding]::ASCII.GetBytes($pubJwk)
-            $jwkHash = $sha256.ComputeHash($jwkBytes)
-            $thumb = ConvertTo-Base64Url $jwkHash
-
+            # Use the account thumbprint and location values
+            $thumb = $Account.thumbprint
             $accountLocation = $Account.location
         }
         else {

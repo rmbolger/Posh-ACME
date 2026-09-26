@@ -34,18 +34,20 @@
                 <TableHeaders>
                     <TableColumnHeader><Width>20</Width></TableColumnHeader>
                     <TableColumnHeader><Width>15</Width></TableColumnHeader>
+                    <TableColumnHeader><Width>10</Width></TableColumnHeader>
+                    <TableColumnHeader><Width>10</Width></TableColumnHeader>
+                    <TableColumnHeader><Width>45</Width></TableColumnHeader>
                     <TableColumnHeader/>
-                    <TableColumnHeader><Width>10</Width></TableColumnHeader>
-                    <TableColumnHeader><Width>10</Width></TableColumnHeader>
                 </TableHeaders>
                 <TableRowEntries>
                     <TableRowEntry>
                         <TableColumnItems>
                             <TableColumnItem><PropertyName>id</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>status</PropertyName></TableColumnItem>
-                            <TableColumnItem><PropertyName>contact</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>alg</PropertyName></TableColumnItem>
                             <TableColumnItem><PropertyName>KeyLength</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>thumbprint</PropertyName></TableColumnItem>
+                            <TableColumnItem><PropertyName>contact</PropertyName></TableColumnItem>
                         </TableColumnItems>
                     </TableRowEntry>
                 </TableRowEntries>

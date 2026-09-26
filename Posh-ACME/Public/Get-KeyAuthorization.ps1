@@ -45,15 +45,9 @@ function Get-KeyAuthorization {
             throw "Account status is $($Account.status)."
         }
 
-        # hydrate the account key
-        $acctKey = $Account.key | ConvertFrom-Jwk
-
-        # create the key thumbprint
-        $pubJwk = $acctKey | ConvertTo-Jwk -PublicOnly -AsJson
-        $jwkBytes = [Text.Encoding]::UTF8.GetBytes($pubJwk)
+        # use the precomputed public JWK thumbprint
+        $thumb = $Account.thumbprint
         $sha256 = [Security.Cryptography.SHA256]::Create()
-        $jwkHash = $sha256.ComputeHash($jwkBytes)
-        $thumb = ConvertTo-Base64Url $jwkHash
     }
 
     Process {

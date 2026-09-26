@@ -25,7 +25,7 @@ function Unpublish-DnsPersistChallenge {
         # Make sure we have an account if we're running in the FromOrder parameter set.
         if ('FromOrder' -eq $PSCmdlet.ParameterSetName) {
              try {
-                if (-not ($Account = Get-PAAccount)) {
+                if (-not (Get-PAAccount)) {
                     throw "No current account selected. Try running Set-PAAccount first."
                 }
             }
