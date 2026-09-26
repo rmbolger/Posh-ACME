@@ -86,15 +86,9 @@ function Unpublish-DnsPersistChallenge {
                     $p = $Plugin[-1]
                 }
 
-                # Sanitize the account URI for draft-00 challenges until implementations support the newer draft and include it.
-                if (-not $challenge.accounturi) {
-                    Write-Warning "dns-persist-01 challenge for $fqdn is missing accounturi. Might be based on draft-00. Using account URI from account object instead."
-                    $challenge | Add-Member accounturi $Account.location -Force
-                }
-
                 $chalCollection.Add([pscustomobject]@{
                     fqdn = $fqdn
-                    accounturi = $challenge.accounturi
+                    accounturi = Get-DnsPersistAccountUri -Domain $fqdn
                     issuer = $issuer
                     plugin = $p
                     pArgs = $PluginArgs
