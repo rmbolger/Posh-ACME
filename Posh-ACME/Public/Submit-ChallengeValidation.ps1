@@ -115,11 +115,6 @@ function Submit-ChallengeValidation {
                 if ($chalType -eq 'dns-persist-01') {
                     # publish the persist record if requested
                     if ($PluginArgs.PublishPersist) {
-                        # Sanitize the account URI for draft-00 challenges until implementations support the newer draft and include it.
-                        if (-not $challenge.accounturi) {
-                            Write-Warning "dns-persist-01 challenge for $($auth.DNSId) is missing accounturi. Using account URI from account object instead."
-                            $challenge | Add-Member accounturi $acct.location -Force
-                        }
                         $issuer = Get-IssuerFromChallenge $challenge
                         if (-not $issuer) {
                             try {
@@ -128,7 +123,7 @@ function Submit-ChallengeValidation {
                         }
                         $pubParams = @{
                             Domain = $auth.DNSId
-                            AccountUri = $challenge.accounturi
+                            AccountUri = $acct.location
                             IssuerDomainName = $issuer
                             Plugin = $Order.Plugin[$i]
                             PluginArgs = $PluginArgs

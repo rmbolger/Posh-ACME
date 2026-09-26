@@ -370,6 +370,269 @@ Get-PAAccount -List | %{
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
+      <command:name>Get-DnsPersistAccountUri</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>DnsPersistAccountUri</command:noun>
+      <maml:description>
+        <maml:para>Calculate the hashed URI required for the accountUri field in a dns-persist-01 validation record.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>The _validation-persist TXT record required to satisfy dns-persist-01 challenges requires an accountUri parameter whose value is a hashed URI identifying the ACME account requesting validation. The hashed URI cryptographically binds the account to the domain being validated without publishing the account URL in cleartext.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-DnsPersistAccountUri</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
+          <maml:name>Domain</maml:name>
+          <maml:description>
+            <maml:para>The domain FQDN that the record will be published for. Wildcard `*.` and `_validation-persist` prefixes are not required and will be stripped.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+          <maml:name>Account</maml:name>
+          <maml:description>
+            <maml:para>The ACME account associated with the challenge.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Object</command:parameterValue>
+          <dev:type>
+            <maml:name>Object</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AccountHashPrefix</maml:name>
+          <maml:description>
+            <maml:para>The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>HashAlgorithm</maml:name>
+          <maml:description>
+            <maml:para>The RFC6920 hash algorithm used to hash the necessary data. The only currently supported algorithm is 'sha-256' which is the default. Additional algorithms may be supported in the future but will also require explicit CA support.</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">sha-256</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Get-DnsPersistAccountUri</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
+          <maml:name>Domain</maml:name>
+          <maml:description>
+            <maml:para>The domain FQDN that the record will be published for. Wildcard `*.` and `_validation-persist` prefixes are not required and will be stripped.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+          <maml:name>AccountUri</maml:name>
+          <maml:description>
+            <maml:para>The account URI for the ACME account the persist record is being published for. This should be retrievable using `(Get-PAAccount).location`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+          <maml:name>KeyThumbprint</maml:name>
+          <maml:description>
+            <maml:para>The ACME account key JWK thumbprint as calculated by RFC7638.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AccountHashPrefix</maml:name>
+          <maml:description>
+            <maml:para>The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>HashAlgorithm</maml:name>
+          <maml:description>
+            <maml:para>The RFC6920 hash algorithm used to hash the necessary data. The only currently supported algorithm is 'sha-256' which is the default. Additional algorithms may be supported in the future but will also require explicit CA support.</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">sha-256</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+        <maml:name>Account</maml:name>
+        <maml:description>
+          <maml:para>The ACME account associated with the challenge.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Object</command:parameterValue>
+        <dev:type>
+          <maml:name>Object</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>AccountHashPrefix</maml:name>
+        <maml:description>
+          <maml:para>The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+        <maml:name>AccountUri</maml:name>
+        <maml:description>
+          <maml:para>The account URI for the ACME account the persist record is being published for. This should be retrievable using `(Get-PAAccount).location`.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
+        <maml:name>Domain</maml:name>
+        <maml:description>
+          <maml:para>The domain FQDN that the record will be published for. Wildcard `*.` and `_validation-persist` prefixes are not required and will be stripped.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>HashAlgorithm</maml:name>
+        <maml:description>
+          <maml:para>The RFC6920 hash algorithm used to hash the necessary data. The only currently supported algorithm is 'sha-256' which is the default. Additional algorithms may be supported in the future but will also require explicit CA support.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+        <maml:name>KeyThumbprint</maml:name>
+        <maml:description>
+          <maml:para>The ACME account key JWK thumbprint as calculated by RFC7638.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes />
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>The accountUri value for the _validation-persist TXT record.</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert />
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title> Example 1: Current account and CA published accountHashPrefix </maml:title>
+        <dev:code>Get-DnsPersistAccountUri 'example.com'</dev:code>
+        <dev:remarks>
+          <maml:para>Get the accountUri value using the current ACME account and the accountHashPrefix value that must be published by the CA.</maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>- Example 2: Current account and overridden accountHashPrefix -</maml:title>
+        <dev:code>Get-DnsPersistAccountUri 'example.com' -AccountHashPrefix 'https://ca.example/account-hash/'</dev:code>
+        <dev:remarks>
+          <maml:para>Get the accountUri value using the current ACME account and the specified accountHashPrefix.</maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------- Example 3: Explicit account Uri and thumbprint --------</maml:title>
+        <dev:code>Get-DnsPersistAccountUri 'example.com' -AccountUri 'https://ca.example/acct/123' -KeyThumbprint 'NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs'</dev:code>
+        <dev:remarks>
+          <maml:para>Get the accountUri value using explicit AccountUri and Thumbprint values. This is mostly useful for testing or if you don't have local access to the account private key.</maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Get-DnsPersistAccountUri/</maml:uri>
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Publish-DnsPersistChallenge</maml:linkText>
+        <maml:uri></maml:uri>
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Unpublish-DnsPersistChallenge</maml:linkText>
+        <maml:uri></maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
       <command:name>Get-KeyAuthorization</command:name>
       <command:verb>Get</command:verb>
       <command:noun>KeyAuthorization</command:noun>

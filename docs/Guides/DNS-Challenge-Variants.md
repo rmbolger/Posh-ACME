@@ -49,7 +49,7 @@ There are two main methods to utilize `dns-persist-01` with Posh-ACME. The recom
 
 ### Pre-provisioning
 
-Pre-provisioning is a bit more work up front, but you only have to do it once. Creating the persistent TXT records can be done either on the same system where the cert will be deployed or an entirely different system. From the same system is a bit easier, but we'll go through both.
+Pre-provisioning is a bit more work up front, but you only have to do it once or if you ever perform a key rollover on your ACME account. Creating the persistent TXT records can be done either on the same system where the cert will be deployed or an entirely different system. From the same system is a bit easier, but we'll go through both.
 
 #### Publish from Deployment System
 

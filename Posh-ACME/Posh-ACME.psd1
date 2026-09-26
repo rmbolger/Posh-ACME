@@ -23,6 +23,7 @@ FormatsToProcess = 'Posh-ACME.Format.ps1xml'
 FunctionsToExport = @(
     'Complete-PAOrder'
     'Export-PAAccountKey'
+    'Get-DnsPersistAccountUri'
     'Get-DnsAcctLabel'
     'Get-KeyAuthorization'
     'Get-PAAccount'
