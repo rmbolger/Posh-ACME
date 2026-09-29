@@ -88,7 +88,7 @@ Accept wildcard characters: False
 ```
 
 ### -AccountUri
-The account URI for the ACME account the persist record is being published for. This should be retrievable using `(Get-PAAccount).location`.
+The account URI for the ACME account the persist record is being published for. This should be retrievable using `(Get-PAAccount).location` or provided by the account owner.
 
 ```yaml
 Type: String
@@ -103,7 +103,7 @@ Accept wildcard characters: False
 ```
 
 ### -Domain
-The domain FQDN that the record will be published for. Wildcard `*.` and `_validation-persist` prefixes are not required and will be stripped.
+The domain FQDN name that the challenge record will be published for. Do not include wildcard "*." or "_validation-persist." prefixes.
 
 ```yaml
 Type: String

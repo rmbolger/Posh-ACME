@@ -13,17 +13,32 @@ Publish dns-persist-01 challenge records.
 
 ## Syntax
 
-### FromOrder (Default)
+### PreProvision (Default)
 ```powershell
-Publish-DnsPersistChallenge [-Order] <Object> [-Plugin <String[]>] [-PluginArgs <Hashtable>] [-AllowWildcard]
- [-UseAllDomains] [-PersistUntil <DateTimeOffset>] [<CommonParameters>]
+Publish-DnsPersistChallenge [-Domain] <String[]> -Account <Object> [-AccountHashPrefix <String>]
+ [-IssuerDomainName <String>] [-Plugin <String[]>] [-PluginArgs <Hashtable>] [-AllowWildcard]
+ [-PersistUntil <DateTimeOffset>] [-NoAutoWildcard] [<CommonParameters>]
 ```
 
-### Standalone
+### FromOrder
 ```powershell
-Publish-DnsPersistChallenge [-Domain] <String[]> [-AccountUri] <String> [-IssuerDomainName] <String>
- -Plugin <String[]> [-PluginArgs <Hashtable>] [-AllowWildcard] [-UseAllDomains]
- [-PersistUntil <DateTimeOffset>] [<CommonParameters>]
+Publish-DnsPersistChallenge [-Order] <Object> [-AccountHashPrefix <String>] [-IssuerDomainName <String>]
+ [-Plugin <String[]>] [-PluginArgs <Hashtable>] [-AllowWildcard] [-PersistUntil <DateTimeOffset>]
+ [-NoAutoWildcard] [<CommonParameters>]
+```
+
+### Advanced
+```powershell
+Publish-DnsPersistChallenge [-Domain] <String[]> -HashedAccountUri <String> [-IssuerDomainName <String>]
+ [-Plugin <String[]>] [-PluginArgs <Hashtable>] [-AllowWildcard] [-PersistUntil <DateTimeOffset>]
+ [-NoAutoWildcard] [<CommonParameters>]
+```
+
+### PreProvisionExplicit
+```powershell
+Publish-DnsPersistChallenge [-Domain] <String[]> -AccountUri <String> -KeyThumbprint <String>
+ [-AccountHashPrefix <String>] [-IssuerDomainName <String>] [-Plugin <String[]>] [-PluginArgs <Hashtable>]
+ [-AllowWildcard] [-PersistUntil <DateTimeOffset>] [-NoAutoWildcard] [<CommonParameters>]
 ```
 
 ## Description
@@ -105,16 +120,31 @@ Publishes a challenge for each domain in the current order. If you haven't confi
 
 ## Parameters
 
-### -AccountUri
-The ACME account URI the record will be valid for. This can be found by running `(Get-PAAccount).location`
+### -Account
+The ACME account associated with the challenge.
 
 ```yaml
-Type: String
-Parameter Sets: Standalone
+Type: Object
+Parameter Sets: PreProvision
 Aliases:
 
 Required: True
-Position: 1
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AccountUri
+The account URI for the ACME account the persist record is being published for. This should be retrievable using `(Get-PAAccount).location` or provided by the account owner.
+
+```yaml
+Type: String
+Parameter Sets: PreProvisionExplicit
+Aliases:
+
+Required: True
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -136,11 +166,11 @@ Accept wildcard characters: False
 ```
 
 ### -Domain
-The domain name that the challenge will be published for. Wildcard domains should have the "*." prefix removed.
+The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.
 
 ```yaml
 Type: String[]
-Parameter Sets: Standalone
+Parameter Sets: PreProvision, Advanced, PreProvisionExplicit
 Aliases:
 
 Required: True
@@ -150,16 +180,46 @@ Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 
-### -IssuerDomainName
-This should generally match the CA identity value you'd normally put in a CAA record. If the CA publishes the caaIdentities field in their directory object, you can also get it using `(Get-PAServer).meta.caaIdentities[0]`. Lastly, it can be found within the actual dns-persist-01 challenge object in the `issuerDomainNames` field. 
+### -HashedAccountUri
+The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the value normally returned by `Get-DnsPersistAccountUri`.
 
 ```yaml
 Type: String
-Parameter Sets: Standalone
+Parameter Sets: Advanced
 Aliases:
 
 Required: True
-Position: 2
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -IssuerDomainName
+Any of the values published by the CA in the `issuerDomainNames` array in the meta object of its directory. You should be able to query one using `(Get-PAServer).meta.issuerDomainNames[0]`. Challenge objects for `dns-persist-01` must also have this list in a `issuerDomainNames` field. They generally also correspond to the CA identity value you'd normally put in a CAA record.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -KeyThumbprint
+The ACME account key JWK thumbprint as calculated by RFC7638.
+
+```yaml
+Type: String
+Parameter Sets: PreProvisionExplicit
+Aliases:
+
+Required: True
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -203,22 +263,10 @@ Use Get-PAPlugin to display a list of available plugins.
 
 ```yaml
 Type: String[]
-Parameter Sets: FromOrder
+Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-```yaml
-Type: String[]
-Parameter Sets: Standalone
-Aliases:
-
-Required: True
 Position: Named
 Default value: None
 Accept pipeline input: False
@@ -241,10 +289,23 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -UseAllDomains
-When used with `-AllowWildcard`, this switch ensures a record will be created for all domains in the list or order. Otherwise, a record will only be created for the most generic set of domains that will match all domains in the list.
+### -AccountHashPrefix
+The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.
 
-For example, if the list contains `example.com`, `sub1.example.com`, and `example.net`, `-AllowWildcard` will skip creating the record for `sub1.example.com` because it is already covered by the record created for `example.com`. But with `-UseAllDomains`, the `sub1.example.com` record will be created as well.
+```yaml
+Type: String
+Parameter Sets: PreProvision, FromOrder, PreProvisionExplicit
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoAutoWildcard
+When specified, stops the function from automatically adding the `policy=wildcard` parameter to TXT records associated with wildcard domains such as `*.example.com`. If your order or list of domains has a wildcard and this switch is used, the domain will be skipped and an associated warning will be thrown. This switch is ignored when also using `-AllowWildcard`.
 
 ```yaml
 Type: SwitchParameter
@@ -265,4 +326,4 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 [Unpublish-DnsPersistChallenge](Unpublish-DnsPersistChallenge.md)
 
-[Get-PAPlugin](Get-PAPlugin.md)
+[Get-DnsPersistAccountUri](Get-DnsPersistAccountUri.md)
