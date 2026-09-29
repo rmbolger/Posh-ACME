@@ -67,36 +67,23 @@ function Get-DnsPersistAccountUri {
         # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-02.html#section-9.2
         $origDomain = $Domain
         $Domain = $Domain.Trim().ToLowerInvariant().Normalize([Text.NormalizationForm]::FormC)
-        # Remove any common ACME DNS persist prefixes from the domain name.
-        do {
-            $checkNext = $false
-            foreach ($prefix in @('_validation-persist.','*.')) {
-                if ($Domain.StartsWith($prefix, [StringComparison]::Ordinal)) {
-                    $Domain = $Domain.Substring($prefix.Length)
-                    $checkNext = $true
-                    break
-                }
-            }
-        } while ($checkNext)
 
-        # double check the domain isn't empty after removing prefixes
+        # Remove accidentally included wildcard prefix and any trailing dots
+        if ($Domain.StartsWith('*.', [StringComparison]::Ordinal)) {
+            $Domain = $Domain.Substring(2).TrimEnd('.')
+        }
+
+        # double check the domain isn't empty now
         if (-not $Domain) {
-            throw 'Domain is empty after removing whitespace and dns-persist prefixes.'
+            throw 'Domain is empty after removing whitespace and wildcard prefixes.'
         }
 
         # convert the domain to its ASCII-compatible encoding (A-label) form
         $idn = [Globalization.IdnMapping]::new()
         $Domain = $idn.GetAscii($Domain).ToLowerInvariant()
-        # remove any trailing dot from the domain name
-        if ($Domain.EndsWith('.')) {
-            $Domain = $Domain.Substring(0, $Domain.Length - 1)
-        }
         Write-Debug "Domain '$origDomain' normalized to '$Domain'"
 
         # validate the resulting domain is still valid
-        if (-not $Domain -or $Domain.EndsWith('.')) {
-            throw 'Domain must contain at least one label and no more than one trailing dot.'
-        }
         if ($Domain.Length -gt 253) {
             throw 'Domain exceeds the maximum length of 253 octets.'
         }
