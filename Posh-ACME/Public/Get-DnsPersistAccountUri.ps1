@@ -100,7 +100,9 @@ function Get-DnsPersistAccountUri {
         $hashInputBytes.AddRange([Text.Encoding]::ASCII.GetBytes($thumb))
         $hashInputBytes.AddRange([Text.Encoding]::ASCII.GetBytes($accountLocation))
         $hashInputBytes = $hashInputBytes.ToArray()
-        Write-Debug "Hashing combined value: $([Text.Encoding]::ASCII.GetString($hashInputBytes))"
+        Write-Debug ("Hash input: length=0x{0:X2}, data={1}" -f
+            $hashInputBytes[0],
+            [Text.Encoding]::ASCII.GetString($hashInputBytes, 1, $hashInputBytes.Length - 1))
         $hashB64 = ConvertTo-Base64Url $sha256.ComputeHash($hashInputBytes)
         $accountUri = '{0}{1}/{2}' -f $AccountHashPrefix, $HashAlgorithm, $hashB64
 

@@ -59,6 +59,11 @@ function Unpublish-DnsPersistChallenge {
             }
         }
 
+        # Set the Manual plugin if no plugin was specified and we are not in the FromOrder param set
+        if (-not $Plugin -and 'FromOrder' -ne $PSCmdlet.ParameterSetName) {
+            $Plugin = 'Manual'
+        }
+
         # initialize a deferred collection object so we can build up the list of challenges
         # to publish as we process the pipeline inputs and publish them all at the end
         $chalCollection = [Collections.Generic.List[pscustomobject]]::new()
