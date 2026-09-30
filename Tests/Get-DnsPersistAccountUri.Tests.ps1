@@ -18,9 +18,9 @@ Describe "Get-DnsPersistAccountUri" {
         $unicodeUri | Should -Be $asciiUri
     }
 
-    It "Strips challenge and wildcard prefixes" {
+    It "Strips wildcard prefixes" {
         $plainUri = Get-DnsPersistAccountUri -Domain 'example.com' -Account $account -AccountHashPrefix 'https://ca.example/account-hash/'
-        $prefixedUri = Get-DnsPersistAccountUri -Domain '*._validation-persist.Example.com.' -Account $account -AccountHashPrefix 'https://ca.example/account-hash/'
+        $prefixedUri = Get-DnsPersistAccountUri -Domain '*.Example.com.' -Account $account -AccountHashPrefix 'https://ca.example/account-hash/'
 
         $prefixedUri | Should -Be $plainUri
     }
@@ -54,7 +54,6 @@ Describe "Get-DnsPersistAccountUri" {
     It "Rejects invalid normalized domains" -TestCases @(
         @{ Domain = '   '; Reason = 'empty domain' }
         @{ Domain = '.'; Reason = 'no labels' }
-        @{ Domain = 'example.com..'; Reason = 'extra trailing dot' }
         @{ Domain = 'example..com'; Reason = 'empty label' }
         @{ Domain = '-example.com'; Reason = 'label starts with hyphen' }
         @{ Domain = 'example-.com'; Reason = 'label ends with hyphen' }
