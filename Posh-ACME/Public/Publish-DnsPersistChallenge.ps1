@@ -64,6 +64,8 @@ function Publish-DnsPersistChallenge {
             $Plugin = 'Manual'
         }
 
+        $idn = [Globalization.IdnMapping]::new()
+
         # initialize a deferred collection object so we can build up the list of challenges
         # to publish as we process the pipeline inputs and publish them all at the end
         $chalCollection = [Collections.Generic.List[pscustomobject]]::new()
@@ -124,6 +126,8 @@ function Publish-DnsPersistChallenge {
                     $addWildcard = $true
                 }
 
+                $fqdn = $idn.GetAscii($fqdn.Trim().TrimEnd('.').ToLowerInvariant().Normalize([Text.NormalizationForm]::FormC)).ToLowerInvariant()
+
                 # correlate the plugin args to the auth by index or use the last one available.
                 if ($Plugin.Count -gt $i) {
                     $p = $Plugin[$i]
@@ -167,6 +171,8 @@ function Publish-DnsPersistChallenge {
             if ($AllowWildcard) {
                 $addWildcard = $true
             }
+
+            $fqdn = $idn.GetAscii($fqdn.ToLowerInvariant().Normalize([Text.NormalizationForm]::FormC)).ToLowerInvariant()
 
             # correlate the plugin args to the auth by index or use the last one available.
             if ($Plugin.Count -gt $i) {
@@ -214,15 +220,24 @@ function Publish-DnsPersistChallenge {
 
     End {
 
-        # Sort by issuer, then domains in reverse label order, finally by wildcard policy
-        # and remove duplicates
-        $sortedChals = $chalCollection.ToArray() |
-            Sort-Object -Unique -Property issuer,{
+        # sort wildcard records first within each issuer and domain
+        $orderedChals = $chalCollection.ToArray() |
+            Sort-Object -Property issuer,{
                 $a=$_.fqdn.Split('.'); [array]::Reverse($a); $a -join '.'
             },{-not $_.addWildcard}
 
+        # remove duplicates that only differ by addWildcard or other non-essential properties
+        $lastChal = $null
+        $dedupeChals = foreach ($chal in $orderedChals) {
+            if ($lastChal -and $lastChal.fqdn -eq $chal.fqdn -and $lastChal.issuer -eq $chal.issuer) {
+                continue
+            }
+            $lastChal = $chal
+            $chal
+        }
+
         # process what's left by plugin
-        $sortedChals | Group-Object plugin | ForEach-Object {
+        $dedupeChals | Group-Object plugin | ForEach-Object {
 
             # dot source the plugin file
             $pluginDetail = $script:Plugins.($_.Name)
