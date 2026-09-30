@@ -70,8 +70,9 @@ function Get-DnsPersistAccountUri {
 
         # Remove accidentally included wildcard prefix and any trailing dots
         if ($Domain.StartsWith('*.', [StringComparison]::Ordinal)) {
-            $Domain = $Domain.Substring(2).TrimEnd('.')
+            $Domain = $Domain.Substring(2)
         }
+        $Domain = $Domain.TrimEnd('.')
 
         # double check the domain isn't empty now
         if (-not $Domain) {
