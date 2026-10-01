@@ -9,7 +9,7 @@ function Submit-ChallengeValidation {
     # - publish challenges for any pending authorizations in the Order
     # - notify ACME server to validate those challenges
     # - wait until the validations are complete (good or bad)
-    # - unpublish the challenges that were published
+    # - unpublish the non-persistent challenges that were published
     # - return the updated order if successful, otherwise throw
 
     Begin {
@@ -122,11 +122,11 @@ function Submit-ChallengeValidation {
                             } catch { $PSCmdlet.ThrowTerminatingError($_) }
                         }
                         $pubParams = @{
-                            Domain = $auth.DNSId
-                            AccountUri = $acct.location
+                            Domain           = $auth.fqdn # this includes wildcard prefixes which will get automatically handled
+                            Account          = $acct
                             IssuerDomainName = $issuer
-                            Plugin = $Order.Plugin[$i]
-                            PluginArgs = $PluginArgs
+                            Plugin           = $Order.Plugin[$i]
+                            PluginArgs       = $PluginArgs
                         }
                         try {
                             Publish-DnsPersistChallenge @pubParams
