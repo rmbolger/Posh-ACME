@@ -51,6 +51,16 @@ Describe "Get-DnsPersistAccountUri" {
         $actualUri | Should -Be 'https://ca.example/account-hash/sha-256/5SQm7n6tPh2-PlLbCKGnViTXX5z19SCN4cPGQHSk-kw'
     }
 
+    It "Matches the draft 02 domain-correlation opt-out example" {
+        $actualUri = Get-DnsPersistAccountUri `
+            -Domain '*' `
+            -AccountUri 'https://ca.example/acct/123' `
+            -KeyThumbprint 'NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs' `
+            -AccountHashPrefix 'https://ca.example/account-hash/'
+
+        $actualUri | Should -Be 'https://ca.example/account-hash/sha-256/NpDnSwUthQK8zCgFdefYxAdAVPnygMLbs9US6oO-5ug'
+    }
+
     It "Rejects invalid normalized domains" -TestCases @(
         @{ Domain = '   '; Reason = 'empty domain' }
         @{ Domain = '.'; Reason = 'no labels' }

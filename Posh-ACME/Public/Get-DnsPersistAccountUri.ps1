@@ -47,7 +47,6 @@ function Get-DnsPersistAccountUri {
             $accountLocation = $AccountUri
         }
 
-
         # If AccountHashPrefix wasn't provided, grab it from the ACME server's directory object
         if (-not $AccountHashPrefix) {
             if (-not ($server = Get-PAServer)) {
@@ -58,6 +57,9 @@ function Get-DnsPersistAccountUri {
             }
             $AccountHashPrefix = $server.meta.accountHashPrefix
         }
+
+        # Prepare the IDN mapping object for later use in domain normalization
+        $idn = [Globalization.IdnMapping]::new()
     }
 
     Process {
@@ -80,17 +82,18 @@ function Get-DnsPersistAccountUri {
         }
 
         # convert the domain to its ASCII-compatible encoding (A-label) form
-        $idn = [Globalization.IdnMapping]::new()
         $Domain = $idn.GetAscii($Domain).ToLowerInvariant()
         Write-Debug "Domain '$origDomain' normalized to '$Domain'"
 
-        # validate the resulting domain is still valid
-        if ($Domain.Length -gt 253) {
-            throw 'Domain exceeds the maximum length of 253 octets.'
-        }
-        foreach ($label in $Domain.Split('.')) {
-            if ($label.Length -gt 63 -or $label -cnotmatch '^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$') {
-                throw "Domain contains an invalid DNS label: $label"
+        # validate the resulting domain is still valid unless it is using the domain-correlation opt-out ('*')
+        if ($Domain -ne '*') {
+            if ($Domain.Length -gt 253) {
+                throw 'Domain exceeds the maximum length of 253 octets.'
+            }
+            foreach ($label in $Domain.Split('.')) {
+                if ($label.Length -gt 63 -or $label -cnotmatch '^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$') {
+                    throw "Domain contains an invalid DNS label: $label"
+                }
             }
         }
 

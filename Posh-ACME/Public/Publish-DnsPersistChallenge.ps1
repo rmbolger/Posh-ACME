@@ -25,7 +25,11 @@ function Publish-DnsPersistChallenge {
         [hashtable]$PluginArgs,
         [switch]$AllowWildcard,
         [DateTimeOffset]$PersistUntil,
-        [switch]$NoAutoWildcard
+        [switch]$NoAutoWildcard,
+        [Parameter(ParameterSetName='PreProvision')]
+        [Parameter(ParameterSetName='PreProvisionExplicit')]
+        [Parameter(ParameterSetName='FromOrder')]
+        [switch]$NoDomainCorrelationMitigation
     )
 
     Begin {
@@ -135,7 +139,12 @@ function Publish-DnsPersistChallenge {
                     $p = $Plugin[-1]
                 }
 
-                $hashAcctUri = Get-DnsPersistAccountUri -Domain $fqdn -AccountHashPrefix $AccountHashPrefix
+                if ($NoDomainCorrelationMitigation) {
+                    Write-Verbose "Generating hashed accountUri with no domain correlation mitigation."
+                    $hashAcctUri = Get-DnsPersistAccountUri -Domain '*' -AccountHashPrefix $AccountHashPrefix
+                } else {
+                    $hashAcctUri = Get-DnsPersistAccountUri -Domain $fqdn -AccountHashPrefix $AccountHashPrefix
+                }
 
                 $chalCollection.Add([pscustomobject]@{
                     fqdn             = $fqdn
@@ -193,6 +202,10 @@ function Publish-DnsPersistChallenge {
                 $getUriParams = @{
                     Domain = $fqdn
                     AccountHashPrefix = $AccountHashPrefix
+                }
+                if ($NoDomainCorrelationMitigation) {
+                    Write-Verbose "Generating hashed accountUri with no domain correlation mitigation."
+                    $getUriParams.Domain = '*'
                 }
                 if ('PreProvision' -eq $PSCmdlet.ParameterSetName) {
                     # pass through the account object
