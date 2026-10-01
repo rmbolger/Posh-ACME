@@ -17,14 +17,14 @@ Publish dns-persist-01 challenge records.
 ```powershell
 Publish-DnsPersistChallenge [-Domain] <String[]> -Account <Object> [-AccountHashPrefix <String>]
  [-IssuerDomainName <String>] [-Plugin <String[]>] [-PluginArgs <Hashtable>] [-AllowWildcard]
- [-PersistUntil <DateTimeOffset>] [-NoAutoWildcard] [<CommonParameters>]
+ [-PersistUntil <DateTimeOffset>] [-NoAutoWildcard] [-NoDomainCorrelationMitigation] [<CommonParameters>]
 ```
 
 ### FromOrder
 ```powershell
 Publish-DnsPersistChallenge [-Order] <Object> [-AccountHashPrefix <String>] [-IssuerDomainName <String>]
  [-Plugin <String[]>] [-PluginArgs <Hashtable>] [-AllowWildcard] [-PersistUntil <DateTimeOffset>]
- [-NoAutoWildcard] [<CommonParameters>]
+ [-NoAutoWildcard] [-NoDomainCorrelationMitigation] [<CommonParameters>]
 ```
 
 ### Advanced
@@ -38,7 +38,8 @@ Publish-DnsPersistChallenge [-Domain] <String[]> -HashedAccountUri <String> [-Is
 ```powershell
 Publish-DnsPersistChallenge [-Domain] <String[]> -AccountUri <String> -KeyThumbprint <String>
  [-AccountHashPrefix <String>] [-IssuerDomainName <String>] [-Plugin <String[]>] [-PluginArgs <Hashtable>]
- [-AllowWildcard] [-PersistUntil <DateTimeOffset>] [-NoAutoWildcard] [<CommonParameters>]
+ [-AllowWildcard] [-PersistUntil <DateTimeOffset>] [-NoAutoWildcard] [-NoDomainCorrelationMitigation]
+ [<CommonParameters>]
 ```
 
 ## Description
@@ -310,6 +311,21 @@ When specified, stops the function from automatically adding the `policy=wildcar
 ```yaml
 Type: SwitchParameter
 Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoDomainCorrelationMitigation
+By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This ensures that observers of the record data won't be correlate that two or more domains are associated with the same ACME account. When specified, this switch opts out of that domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: PreProvision, FromOrder, PreProvisionExplicit
 Aliases:
 
 Required: False

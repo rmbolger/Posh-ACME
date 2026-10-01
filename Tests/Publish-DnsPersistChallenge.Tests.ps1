@@ -221,4 +221,48 @@ Describe "Publish-DnsPersistChallenge" {
         $records | Should -Match ([regex]::Escape("_validation-persist.www.example.com->`"authority.example;accounturi=$hashedUri;policy=wildcard;persistUntil=1806537600`""))
         ([regex]::Matches($output, 'Please create the following TXT records:')).Count | Should -Be 1
     }
+
+    It "Uses the domain-correlation opt-out when pre-provisioning from an account" {
+        Mock -ModuleName Posh-ACME Get-DnsPersistAccountUri { 'https://ca.example/hash/shared' }
+        $output = Publish-DnsPersistChallenge -Domain 'example.com' -Account $account `
+            -AccountHashPrefix $prefix -IssuerDomainName 'authority.example' `
+            -NoDomainCorrelationMitigation -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
+
+        Should -Invoke Get-DnsPersistAccountUri -Exactly 1 -ModuleName Posh-ACME -ParameterFilter { $Domain -eq '*' }
+        ($output -replace '\s+', '') | Should -Match '_validation-persist\.example\.com->"authority\.example;accounturi=https://ca\.example/hash/shared"'
+    }
+
+    It "Uses the domain-correlation opt-out with explicit account details" {
+        Mock -ModuleName Posh-ACME Get-DnsPersistAccountUri { 'https://ca.example/hash/shared' }
+        $output = Publish-DnsPersistChallenge -Domain 'www.example.com' `
+            -AccountUri 'https://ca.example/acct/123' -KeyThumbprint 'thumbprint' `
+            -AccountHashPrefix $prefix -IssuerDomainName 'authority.example' `
+            -NoDomainCorrelationMitigation -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
+
+        Should -Invoke Get-DnsPersistAccountUri -Exactly 1 -ModuleName Posh-ACME -ParameterFilter { $Domain -eq '*' }
+        ($output -replace '\s+', '') | Should -Match '_validation-persist\.www\.example\.com->"authority\.example;accounturi=https://ca\.example/hash/shared"'
+    }
+
+    It "Uses the domain-correlation opt-out for order challenges" {
+        Mock -ModuleName Posh-ACME Get-PAAuthorization {
+            [pscustomobject]@{
+                fqdn = 'order.example.com'
+                challenges = @([pscustomobject]@{ type = 'dns-persist-01'; issuerDomainNames = @('authority.example') })
+            }
+        }
+        Mock -ModuleName Posh-ACME Get-DnsPersistAccountUri { 'https://ca.example/hash/shared' }
+        $order = [pscustomobject]@{ PSTypeName = 'PoshACME.PAOrder'; Plugin = @('Manual'); authorizations = @('https://ca.example/authz/1') }
+        $output = Publish-DnsPersistChallenge -Order $order -AccountHashPrefix $prefix `
+            -Plugin Manual -PluginArgs $pluginArgs -NoDomainCorrelationMitigation 6>&1 | Out-String
+
+        Should -Invoke Get-DnsPersistAccountUri -Exactly 1 -ModuleName Posh-ACME -ParameterFilter { $Domain -eq '*' }
+        ($output -replace '\s+', '') | Should -Match '_validation-persist\.order\.example\.com->"authority\.example;accounturi=https://ca\.example/hash/shared"'
+    }
+
+    It "Rejects the domain-correlation switch with a caller-supplied hashed URI" {
+        {
+            Publish-DnsPersistChallenge -Domain 'example.com' -HashedAccountUri 'https://ca.example/hash/external' `
+                -IssuerDomainName 'authority.example' -NoDomainCorrelationMitigation -Plugin Manual
+        } | Should -Throw
+    }
 }

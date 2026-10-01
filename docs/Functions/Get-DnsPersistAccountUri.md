@@ -103,7 +103,7 @@ Accept wildcard characters: False
 ```
 
 ### -Domain
-The domain FQDN name that the challenge record will be published for. Do not include wildcard "*." or "_validation-persist." prefixes.
+The domain FQDN name that the challenge record will be published for. Do not include wildcard `*.` or `_validation-persist.` prefixes. But you may set the domain to `*` to opt-out of the default domain correlation privacy protections in the resulting value. See the `-NoDomainCorrelationMitigation` switch in [Publish-DnsPersistChallenge](Publish-DnsPersistChallenge.md) for more details.
 
 ```yaml
 Type: String
