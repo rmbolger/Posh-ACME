@@ -168,18 +168,34 @@ Describe "Get-CsrDetails" {
         }
     }
 
+    Context "EC 256 CSR with IP SAN" {
+        It "Includes IP address SAN entries in Domain" {
+            Copy-Item "$PSScriptRoot\TestFiles\ec-256-san-with-ip.csr" 'TestDrive:\test.csr'
+            InModuleScope Posh-ACME {
+                $result = Get-CsrDetails -CSRPath 'TestDrive:\test.csr'
+
+                $result.Domain.Count | Should -Be 2
+                $result.Domain[0] | Should -BeExactly 'example.com'
+                $result.Domain[1] | Should -BeExactly '192.0.2.1'
+                $result.KeyLength | Should -BeExactly 'ec-256'
+                $result.OCSPMustStaple | Should -BeFalse
+            }
+        }
+    }
+
     Context "EC 521 CSR" {
         It "Reads properly" {
+            Mock -ModuleName Posh-ACME Write-Warning {}
             Copy-Item "$PSScriptRoot\TestFiles\ec-521-complexCN-SANsNoDns.csr" 'TestDrive:\test.csr'
             InModuleScope Posh-ACME {
-                { Get-CsrDetails -CSRPath 'TestDrive:\test.csr' } | Should -Not -Throw
                 $result = Get-CsrDetails -CSRPath 'TestDrive:\test.csr'
-                $result.Domain         | Should -BeExactly @('example.com')
+                $result.Domain | Should -BeExactly @('example.com','127.0.0.1','192.168.0.1')
                 $result.KeyLength      | Should -BeExactly "ec-521"
                 $result.OCSPMustStaple | Should -BeFalse
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
                 $result.PemLines.Count | Should -Be 13
             }
+            Should -Invoke Write-Warning -Exactly 2 -ModuleName Posh-ACME
         }
     }
 

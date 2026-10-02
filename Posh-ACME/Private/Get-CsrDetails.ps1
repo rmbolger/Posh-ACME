@@ -127,9 +127,20 @@ function Get-CsrDetails {
             throw "Unable to parse the Subject Alternative Name extension in the certificate request."
         }
         # convert to [Org.BouncyCastle.Asn1.X509.GeneralNames]
-        $genNames = [Org.BouncyCastle.Asn1.X509.GeneralNames]::GetInstance([Org.BouncyCastle.Asn1.Asn1Object]::FromByteArray($sanValue.GetOctets()))
-        # and grab just the DNS names
-        $SANs = ($genNames.GetNames() | Where-Object { $_.TagNo -eq 2 }).Name
+        $genNames = [Org.BouncyCastle.Asn1.X509.GeneralNames]::GetInstance(
+            [Org.BouncyCastle.Asn1.Asn1Object]::FromByteArray($sanValue.GetOctets())
+        )
+        # grab DNS names and IP addresses
+        $SANs = foreach ($genName in $genNames.GetNames()) {
+            if ($genName.TagNo -eq [Org.BouncyCastle.Asn1.X509.GeneralName]::DnsName) {
+                $genName.Name
+            } elseif ($genName.TagNo -eq [Org.BouncyCastle.Asn1.X509.GeneralName]::IPAddress) {
+                $ipBytes = [Org.BouncyCastle.Asn1.Asn1OctetString]::GetInstance($genName.Name).GetOctets()
+                ([Net.IPAddress]::new($ipBytes)).ToString()
+            } else {
+                Write-Warning "Unsupported SAN type with TagNo $($genName.TagNo) found in certificate request."
+            }
+        }
     }
     if ($SANs) {
         Write-Debug "SANs = $(($SANs -join ','))"
