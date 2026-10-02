@@ -2,7 +2,7 @@ Describe "Get-CsrDetails" {
 
     BeforeAll {
         $env:POSHACME_HOME = 'TestDrive:\'
-        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1') -Force
     }
 
     Context "Missing CSR file" {
@@ -174,9 +174,10 @@ Describe "Get-CsrDetails" {
             InModuleScope Posh-ACME {
                 $result = Get-CsrDetails -CSRPath 'TestDrive:\test.csr'
 
-                $result.Domain.Count | Should -Be 2
+                $result.Domain.Count | Should -Be 3
                 $result.Domain[0] | Should -BeExactly 'example.com'
                 $result.Domain[1] | Should -BeExactly '192.0.2.1'
+                $result.Domain[2] | Should -BeExactly '2001:db8::1'
                 $result.KeyLength | Should -BeExactly 'ec-256'
                 $result.OCSPMustStaple | Should -BeFalse
             }
@@ -185,17 +186,18 @@ Describe "Get-CsrDetails" {
 
     Context "EC 521 CSR" {
         It "Reads properly" {
-            Mock -ModuleName Posh-ACME Write-Warning {}
             Copy-Item "$PSScriptRoot\TestFiles\ec-521-complexCN-SANsNoDns.csr" 'TestDrive:\test.csr'
             InModuleScope Posh-ACME {
-                $result = Get-CsrDetails -CSRPath 'TestDrive:\test.csr'
+                $result = Get-CsrDetails -CSRPath 'TestDrive:\test.csr' -WarningVariable sanWarnings -WarningAction SilentlyContinue
                 $result.Domain | Should -BeExactly @('example.com','127.0.0.1','192.168.0.1')
                 $result.KeyLength      | Should -BeExactly "ec-521"
                 $result.OCSPMustStaple | Should -BeFalse
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
                 $result.PemLines.Count | Should -Be 13
+                $sanWarnings.Count | Should -Be 2
+                $sanWarnings.Message -join ' ' | Should -Match 'TagNo 1'
+                $sanWarnings.Message -join ' ' | Should -Match 'TagNo 6'
             }
-            Should -Invoke Write-Warning -Exactly 2 -ModuleName Posh-ACME
         }
     }
 
