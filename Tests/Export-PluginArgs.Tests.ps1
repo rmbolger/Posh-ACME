@@ -6,7 +6,7 @@ Describe "Export-PluginArgs" {
 
     BeforeAll {
         $env:POSHACME_HOME = 'TestDrive:\'
-        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1') -Force
     }
 
     Context "No account" {

@@ -8,7 +8,7 @@ Describe "Get-PAPluginArgs" {
         # copy a fake config root to the test drive
         Get-ChildItem "$PSScriptRoot\TestFiles\ConfigRoot\" | Copy-Item -Dest 'TestDrive:\' -Recurse
         $env:POSHACME_HOME = 'TestDrive:\'
-        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1') -Force
     }
 
     Context "No account" {

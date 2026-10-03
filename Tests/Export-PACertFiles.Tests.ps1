@@ -4,7 +4,7 @@ Describe "Export-PACertFiles" {
         # copy a fake config root to the test drive
         Get-ChildItem "$PSScriptRoot\TestFiles\ConfigRoot\" | Copy-Item -Dest 'TestDrive:\' -Recurse
         $env:POSHACME_HOME = 'TestDrive:\'
-        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1') -Force
     }
 
     Context "No account" {
@@ -59,7 +59,9 @@ Describe "Export-PACertFiles" {
                 $script:Order | Add-Member PreferredChain $null -Force
                 { Export-PACertFiles } | Should -Not -Throw
             }
-            Should -Invoke Write-Warning -ModuleName Posh-ACME
+            Should -Invoke Write-Warning -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
+                $Message -like 'Order has expired. Unable to re-download cert/chain files. Using cached copies.'
+            }
             Should -Invoke Copy-Item -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
                 $Path -like '*chain0.cer' -and $Destination -like '*chain.cer'
             }
@@ -74,7 +76,9 @@ Describe "Export-PACertFiles" {
                 $script:Order | Add-Member PreferredChain "(STAGING) Doctored Durian Root CA X3" -Force
                 { Export-PACertFiles } | Should -Not -Throw
             }
-            Should -Invoke Write-Warning -ModuleName Posh-ACME
+            Should -Invoke Write-Warning -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
+                $Message -like 'Order has expired. Unable to re-download cert/chain files. Using cached copies.'
+            }
             Should -Invoke Copy-Item -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
                 $Path -like '*chain0.cer' -and $Destination -like '*chain.cer'
             }
@@ -89,7 +93,9 @@ Describe "Export-PACertFiles" {
                 $script:Order | Add-Member PreferredChain "(STAGING) Pretend Pear X1" -Force
                 { Export-PACertFiles } | Should -Not -Throw
             }
-            Should -Invoke Write-Warning -ModuleName Posh-ACME
+            Should -Invoke Write-Warning -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
+                $Message -like 'Order has expired. Unable to re-download cert/chain files. Using cached copies.'
+            }
             Should -Invoke Copy-Item -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
                 $Path -like '*chain1.cer' -and $Destination -like '*chain.cer'
             }

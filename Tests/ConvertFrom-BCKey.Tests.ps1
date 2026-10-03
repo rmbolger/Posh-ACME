@@ -2,7 +2,7 @@ Describe "ConvertFrom-BCKey.Tests.ps1" {
 
     BeforeAll {
         $env:POSHACME_HOME = 'TestDrive:\'
-        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1') -Force
     }
 
     # build some known good sample JWKs

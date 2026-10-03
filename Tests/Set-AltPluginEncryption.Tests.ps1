@@ -1,8 +1,20 @@
 Describe "Set-AltPluginEncryption" {
 
     BeforeAll {
+        $savedVaultName = $env:POSHACME_VAULT_NAME
+        $savedVaultPass = $env:POSHACME_VAULT_PASS
+        $savedVaultSecretTemplate = $env:POSHACME_VAULT_SECRET_TEMPLATE
+        $env:POSHACME_VAULT_NAME = $null
+        $env:POSHACME_VAULT_PASS = $null
+        $env:POSHACME_VAULT_SECRET_TEMPLATE = $null
         $env:POSHACME_HOME = 'TestDrive:\'
-        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1') -Force
+    }
+
+    AfterAll {
+        $env:POSHACME_VAULT_NAME = $savedVaultName
+        $env:POSHACME_VAULT_PASS = $savedVaultPass
+        $env:POSHACME_VAULT_SECRET_TEMPLATE = $savedVaultSecretTemplate
     }
 
     Context "Local Secret - 3 Orders" {
@@ -14,6 +26,10 @@ Describe "Set-AltPluginEncryption" {
         }
 
         BeforeEach {
+            $env:POSHACME_VAULT_NAME = $null
+            $env:POSHACME_VAULT_PASS = $null
+            $env:POSHACME_VAULT_SECRET_TEMPLATE = $null
+
             Get-ChildItem "$PSScriptRoot\TestFiles\ConfigRoot\" | Copy-Item -Dest 'TestDrive:\' -Recurse -Force
 
             InModuleScope -ModuleName Posh-ACME {
@@ -130,6 +146,10 @@ Describe "Set-AltPluginEncryption" {
         }
 
         BeforeEach {
+            $env:POSHACME_VAULT_NAME = 'fake-vault'
+            $env:POSHACME_VAULT_PASS = $null
+            $env:POSHACME_VAULT_SECRET_TEMPLATE = $null
+
             Get-ChildItem "$PSScriptRoot\TestFiles\ConfigRoot\" | Copy-Item -Dest 'TestDrive:\' -Recurse -Force
 
             InModuleScope -ModuleName Posh-ACME {

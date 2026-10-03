@@ -2,7 +2,7 @@ Describe "ConvertFrom-Base64Url" {
 
     BeforeAll {
         $env:POSHACME_HOME = 'TestDrive:\'
-        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1') -Force
     }
 
     It "Decodes string values properly" {

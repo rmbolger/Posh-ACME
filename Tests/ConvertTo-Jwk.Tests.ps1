@@ -2,7 +2,7 @@ Describe "ConvertTo-Jwk" {
 
     BeforeAll {
         $env:POSHACME_HOME = 'TestDrive:\'
-        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1')
+        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1') -Force
 
         # create sample keys
         $rsa2048 = [Security.Cryptography.RSACryptoServiceProvider]::new(2048)
