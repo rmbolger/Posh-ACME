@@ -40,11 +40,10 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 | [Cert<br />Revocation][rfc08]                | :white_check_mark:         | :white_check_mark:  | :white_check_mark: | :white_check_mark:                     | :white_check_mark:  |
 | [Challenge<br />Retrying][rfc09]             | :x:                        | :x:                 | :white_check_mark: | :warning:<br />*(Client must request)* | :x:*                |
 | [Variable Cert Lifetime][rfc10]              | :x:*                       | :white_check_mark:  | :x:                | :x:                                    | :x:                 |
-| [SXG Support][gc09]                          | :x:                        | :white_check_mark:* | :x:                | :x:                                    | :x:                 |
 | [ACME Renewal Information (ARI)][rfc11]      | :white_check_mark:         | :white_check_mark:  | :x:                | :x:                                    | :white_check_mark:  |
-| [ACME Profiles][rfc12]                       | :white_check_mark:         | :x:                 | :x:                | :x:                                    | :x:                 |
-| [dns-account-01][rfc13]                      | :x:                        | :x:                 | :x:                | :x:                                    | :x:                 |
-| [dns-persist-01][rfc14]                      | :x: *([Pending][le13])     | :x: *(Pending)      | :x:                | :x:                                    | :x:                 |
+| [ACME Profiles][rfc12]                       | :white_check_mark:         | :white_check_mark:  | :x:                | :x:                                    | :x:                 |
+| [dns-account-01][rfc13]                      | :x:                        | :white_check_mark:  | :x:                | :x:                                    | :x:                 |
+| [dns-persist-01][rfc14]                      | :x: *([Pending][le13])     | :white_check_mark:* | :x:                | :x:                                    | :x:                 |
 
 * :white_check_mark: = Feature supported
 * :x: = Feature unsupported
@@ -52,12 +51,13 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 * :question: = Support unknown or untested
 * Let's Encrypt doesn't support variable cert lifetimes via RFC9555's `notBefore`/`notAfter` order fields. But it does support alternative lifetimes via ACME Profiles.
 * Let's Encrypt IP Address certs require using the `shortlived` profile with a client that supports ACME Profiles. [More Info][le11]
-* SSL.com throws "Missing Authentication Token" errors when making some calls against Account endpoints which is why those features are labeled Unsupported.
-* SSL.com requires an email address in the ACME account contact field, but doesn't enforce it on creation time. Instead, it throws an "badCSR" error when you try to finalize an order from an account with an empty address.
-* ZeroSSL does support IP address based certificates, but not via the ACME protocol.
 * Google's EAB credentials can only be used once to establish a new ACME account and expire after 7 days if not used. Creating additional accounts requires generating new EAB credentials.
 * Google conditionally offers IP certificates [for customers who provide a valid business need][gc10].
-* For Google SXG Certificates, you must use a different ACME directory endpoint. [https://dv-sxg.acme-v02.api.pki.goog/directory][gc08]
+* Google's [SXG][gc08] Certificate support has been disabled as of October 2026 ([announcement][gc09]).
+* Google's production dns-persist-01 support is [based on draft 01][gc11] and the associated TXT records are incompatible with draft 02 which was published in September 2026.
+* ZeroSSL does support IP address based certificates, but not via the ACME protocol.
+* SSL.com throws "Missing Authentication Token" errors when making some calls against Account endpoints which is why those features are labeled Unsupported.
+* SSL.com requires an email address in the ACME account contact field, but doesn't enforce it on creation time. Instead, it throws an "badCSR" error when you try to finalize an order from an account with an empty address.
 * Actalis supports IP Address certs only on OV certs which require a paid plan.
 * Actalis does not cache authorizations. Deactivating them works but only changes their cosmetic status.
 * Actalis puts failed challenges into the `processing` status implying they will retry, but they never do. Explicit retry requests also don't seem to work.
@@ -116,9 +116,10 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 [gc05]: https://dv.acme-v02.api.pki.goog/directory
 [gc06]: https://dv.acme-v02.test-api.pki.goog/directory
 [gc07]: https://cloud.google.com/certificate-manager/docs/public-ca-tutorial
-[gc08]: https://dv-sxg.acme-v02.api.pki.goog/directory
-[gc09]: https://web.dev/signed-exchanges/
+[gc08]: https://web.dev/signed-exchanges/
+[gc09]: https://developers.google.com/public-key-infrastructure/updates/july2026-sxg-deprecation
 [gc10]: https://pki.goog/faq/#faq-IPCerts
+[gc11]: https://developers.google.com/public-key-infrastructure/updates/september2026-dns-persist-01
 [ac01]: https://www.actalis.com/
 [ac02]: https://www.actalis.com/actalisdvserveracmecag1-en
 [ac03]: https://www.actalis.com/actalis-authentication-rootca-en
