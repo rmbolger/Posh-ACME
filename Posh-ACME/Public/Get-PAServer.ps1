@@ -83,7 +83,12 @@ function Get-PAServer {
                 try {
                     Set-PAServer -DirectoryUrl $dir.location -NoSwitch
                 } catch {
-                    Write-Warning "Failed to query ACME directory: $_"
+                    # Silence real warnings for our test harness directory URL
+                    if ($dir.location -eq 'https://acme.test/directory') {
+                        Write-Debug "Failed to query test ACME directory: $_"
+                    } else {
+                        Write-Warning "Failed to query ACME directory: $_"
+                    }
                 }
                 Get-PAServer -DirectoryUrl $dir.location
 
