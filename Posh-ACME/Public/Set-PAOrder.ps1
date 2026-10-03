@@ -228,8 +228,6 @@ function Set-PAOrder {
                     Write-Verbose "Setting Profile to $Profile"
                     $order | Add-Member 'Profile' $Profile -Force
                     $saveChanges = $true
-                    $rewritePfx = $false
-                    $rewriteCer = $false
                 } else {
                     Write-Warning "Profile '$Profile' is not currently supported on this ACME server. Ignoring profile selection."
                 }
