@@ -87,6 +87,8 @@ function Update-PAOrder {
                     ErrorAction = 'Stop'
                     Verbose = $false
                 }
+                # clear any response left over from a previous order in the pipeline
+                $resp = $null
                 try {
                     Write-Debug "GET $($queryParams.Uri)"
                     $resp = Invoke-RestMethod @queryParams @script:UseBasic
