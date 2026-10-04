@@ -173,7 +173,7 @@ function New-Csr {
         $mustStaple = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
             $false, # not critical
             [Org.BouncyCastle.Asn1.DerOctetString]::new(
-                @(,[byte[]](0x30,0x03,0x02,0x01,0x05)) # OCSP NoCheck extension ASN.1 structure (SEQUENCE { BOOLEAN FALSE }
+                [byte[]](0x30,0x03,0x02,0x01,0x05) # TLS Feature extension ASN.1 structure (SEQUENCE { INTEGER 5 })
             )
         )
         $extDict.Add([Org.BouncyCastle.Asn1.DerObjectIdentifier]::new('1.3.6.1.5.5.7.1.24'), $mustStaple)
