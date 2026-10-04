@@ -71,7 +71,7 @@ function Complete-PAOrder {
 
         Write-Verbose "Successfully created certificate."
 
-        $cert = Get-PACertificate
+        $cert = $Order | Get-PACertificate
 
         # install to local computer store if asked
         if ($Order.Install) {
