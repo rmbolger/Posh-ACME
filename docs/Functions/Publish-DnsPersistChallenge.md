@@ -50,66 +50,56 @@ Unlike `Publish-Challenge`, this function does not require running `Save-Challen
 
 ## Examples
 
-### Example 1: Publish a standalone challenge
+### Example 1: Pre-Provision a standalone challenge
 
 ```powershell
-# Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
 }
-Publish-DnsPersistChallenge @splat
+Publish-DnsPersistChallenge @pubParams
 ```
 
 Publish a standalone non-wildcard challenge for the current server and account.
 
-### Example 2: Publish a wildcard challenge
+### Example 2: Pre-Provision a wildcard challenge
 
 ```powershell
-# Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
-    Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+$pubParams = @{
+    Domain = '*.example.com'
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
-    AllowWildcard = $true
 }
-Publish-DnsPersistChallenge @splat
+Publish-DnsPersistChallenge @pubParams
 ```
 
-Publish a standalone wildcard challenge for the current server and account. This record will be good for the specified domain and any subdomains including nested subdomains.
+Publish a standalone wildcard challenge for the current server and account. The `policy=wildcard` flag is automatically added to the record due to the "*." prefix and will work for the specified domain and any subdomains including nested subdomains.
 
-### Example 3: Publish an expiring challenge
+### Example 3: Pre-Provision an expiring challenge
 
 ```powershell
-# Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
-    PersistUntil = (Get-Date '2027-04-01')
+    PersistUntil = '2027-04-01'
 }
-Publish-DnsPersistChallenge @splat
+Publish-DnsPersistChallenge @pubParams
 ```
 
-Publish a standalone expiring challenge for the current server and account. 
+Publish a standalone expiring challenge for the current server and account.
 
-**WARNING**: In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the *exact* same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and *not* something like `(Get-Date).AddYears(1)`.
+**WARNING**: In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the *exact* same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and *not* something like `(Get-Date).AddYears(1)`.
 
 ### Example 4: Publish challenges for an order
 
@@ -242,9 +232,9 @@ Accept wildcard characters: False
 ```
 
 ### -PersistUntil
-The DateTimeOffset object for when this records validation will expire.
+A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string.
 
-**WARNING**: In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the *exact* same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and *not* something like `(Get-Date).AddYears(1)`.
+**WARNING**: In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the *exact* same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and *not* something like `(Get-Date).AddYears(1)`.
 
 ```yaml
 Type: DateTimeOffset

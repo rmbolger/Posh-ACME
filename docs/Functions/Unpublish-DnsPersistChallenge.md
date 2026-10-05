@@ -53,18 +53,15 @@ Unlike `Unpublish-Challenge`, this function does not require running `Save-Chall
 ### Example 1: Remove a standalone challenge
 
 ```powershell
-# Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
 }
-Unpublish-DnsPersistChallenge @splat
+Unpublish-DnsPersistChallenge @pubParams
 ```
 
 Remove a standalone non-wildcard challenge for the current server and account.
@@ -72,19 +69,16 @@ Remove a standalone non-wildcard challenge for the current server and account.
 ### Example 2: Remove a wildcard challenge
 
 ```powershell
-# Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
     AllowWildcard = $true
 }
-Unpublish-DnsPersistChallenge @splat
+Unpublish-DnsPersistChallenge @pubParams
 ```
 
 Remove a standalone wildcard challenge for the current server and account.
@@ -92,24 +86,21 @@ Remove a standalone wildcard challenge for the current server and account.
 ### Example 3: Remove an expiring challenge
 
 ```powershell
-# Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
-    PersistUntil = (Get-Date '2027-04-01')
+    PersistUntil = '2027-04-01'
 }
-Unpublish-DnsPersistChallenge @splat
+Unpublish-DnsPersistChallenge @pubParams
 ```
 
 Remove a standalone expiring challenge for the current server and account. 
 
-**WARNING**: In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the *exact* same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and *not* something like `(Get-Date).AddYears(1)`.
+**WARNING**: In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the *exact* same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and *not* something like `(Get-Date).AddYears(1)`.
 
 ### Example 4: Remove challenges for an order
 
@@ -242,9 +233,9 @@ Accept wildcard characters: False
 ```
 
 ### -PersistUntil
-The DateTimeOffset object for when this records validation will expire.
+A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string.
 
-**WARNING**: In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the *exact* same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and *not* something like `(Get-Date).AddYears(1)`.
+**WARNING**: In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the *exact* same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and *not* something like `(Get-Date).AddYears(1)`.
 
 ```yaml
 Type: DateTimeOffset
