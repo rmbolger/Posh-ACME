@@ -265,4 +265,66 @@ Describe "Publish-DnsPersistChallenge" {
                 -IssuerDomainName 'authority.example' -NoDomainCorrelationMitigation -Plugin Manual
         } | Should -Throw
     }
+
+    It "Serializes published challenges and appends them to the cache" {
+        $cachePath = 'TestDrive:\PersistedChallenges.json'
+        $existing = [pscustomobject]@{
+            fqdn = 'keep.example.com'
+            issuer = 'other-authority.example'
+            hashAcctUri = 'https://ca.example/hash/existing'
+            addWildcard = $false
+            persistUntil = $null
+            fromAcctUri = ''
+            fromAcctThumb = ''
+        }
+        ConvertTo-Json -InputObject @($existing) -Depth 5 | Set-Content $cachePath
+
+        $accountUri = 'https://ca.example/acct/persist'
+        $thumbprint = 'NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs'
+        $expiration = [DateTimeOffset]::Parse('2027-04-01T00:00:00Z')
+        $expectedUri = Get-DnsPersistAccountUri -Domain 'persist.example.com' -AccountUri $accountUri `
+            -KeyThumbprint $thumbprint -AccountHashPrefix $prefix
+
+        Publish-DnsPersistChallenge -Domain '*.persist.example.com' -AccountUri $accountUri `
+            -KeyThumbprint $thumbprint -AccountHashPrefix $prefix -IssuerDomainName 'authority.example' `
+            -Plugin Manual -PluginArgs $pluginArgs -AllowWildcard -PersistUntil $expiration 6>&1 | Out-Null
+
+        $records = Get-Content $cachePath -Raw | ConvertFrom-Json
+        $records = @($records)
+        $records | Should -HaveCount 2
+        ($records | Where-Object fqdn -eq 'keep.example.com').issuer | Should -Be 'other-authority.example'
+
+        $record = $records | Where-Object fqdn -eq 'persist.example.com'
+        $record | Should -Not -BeNullOrEmpty
+        $record.issuer | Should -Be 'authority.example'
+        $record.hashAcctUri | Should -Be $expectedUri
+        $record.addWildcard | Should -BeTrue
+        $record.persistUntil | Should -Be '1806537600'
+        $record.fromAcctUri | Should -Be $accountUri
+        $record.fromAcctThumb | Should -Be $thumbprint
+    }
+
+    It "Does not append an already cached challenge" {
+        $cachePath = 'TestDrive:\PersistedChallenges.json'
+        $record = [pscustomobject]@{
+            fqdn = 'persist.example.com'
+            issuer = 'authority.example'
+            hashAcctUri = 'https://ca.example/hash/existing'
+            addWildcard = $false
+            persistUntil = $null
+            fromAcctUri = ''
+            fromAcctThumb = ''
+        }
+        ConvertTo-Json -InputObject @($record) -Depth 5 | Set-Content $cachePath
+
+        Publish-DnsPersistChallenge -Domain 'persist.example.com' `
+            -HashedAccountUri 'https://ca.example/hash/existing' -IssuerDomainName 'authority.example' `
+            -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-Null
+
+        $records = Get-Content $cachePath -Raw | ConvertFrom-Json
+        $records = @($records)
+        $records | Should -HaveCount 1
+        $records[0].fqdn | Should -Be 'persist.example.com'
+        $records[0].hashAcctUri | Should -Be 'https://ca.example/hash/existing'
+    }
 }

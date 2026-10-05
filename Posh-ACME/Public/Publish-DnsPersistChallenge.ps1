@@ -70,6 +70,11 @@ function Publish-DnsPersistChallenge {
 
         $idn = [Globalization.IdnMapping]::new()
 
+        # get the current account for later if it wasn't passed in
+        if (-not $Account) {
+            $Account = Get-PAAccount
+        }
+
         # initialize a deferred collection object so we can build up the list of challenges
         # to publish as we process the pipeline inputs and publish them all at the end
         $chalCollection = [Collections.Generic.List[pscustomobject]]::new()
@@ -139,20 +144,29 @@ function Publish-DnsPersistChallenge {
                     $p = $Plugin[-1]
                 }
 
+                # generate the hashed account URI for the challenge
+                $getUriParams = @{
+                    Domain            = $fqdn
+                    AccountHashPrefix = $AccountHashPrefix
+                    AccountUri        = $Account.location
+                    KeyThumbprint     = $Account.thumbprint
+                }
                 if ($NoDomainCorrelationMitigation) {
                     Write-Verbose "Generating hashed accountUri with no domain correlation mitigation."
-                    $hashAcctUri = Get-DnsPersistAccountUri -Domain '*' -AccountHashPrefix $AccountHashPrefix
-                } else {
-                    $hashAcctUri = Get-DnsPersistAccountUri -Domain $fqdn -AccountHashPrefix $AccountHashPrefix
+                    $getUriParams.Domain = '*'
                 }
+                $hashAcctUri = Get-DnsPersistAccountUri @getUriParams
 
+                # add the challenge information to the collection
                 $chalCollection.Add([pscustomobject]@{
-                    fqdn             = $fqdn
-                    hashedAccountUri = $hashAcctUri
-                    issuer           = $issuer
-                    plugin           = $p
-                    pArgs            = $PluginArgs
-                    addWildcard      = $addWildcard
+                    fqdn          = $fqdn
+                    hashAcctUri   = $hashAcctUri
+                    issuer        = $issuer
+                    plugin        = $p
+                    pArgs         = $PluginArgs
+                    addWildcard   = $addWildcard
+                    fromAcctUri   = $Account.location
+                    fromAcctThumb = $Account.thumbprint
                 })
             }
 
@@ -191,8 +205,11 @@ function Publish-DnsPersistChallenge {
             }
 
             # The $HashedAccountUri is only available in the Advanced parameter set and mandatory.
-            # Its existence means we should use it as-is.
+            # Its existence means we should use it as-is, but also means we don't know the account
+            # location or thumbprint of the account used to generate it.
             $hashAcctUri = $HashedAccountUri
+            $fromAcctUri = ''
+            $fromAcctThumb = ''
 
             # But if it doesn't exist, all we're left with are the PreProvision* parameter sets where
             # we need to generate it using Get-DnsPersistAccountUri.
@@ -200,7 +217,7 @@ function Publish-DnsPersistChallenge {
 
                 # Build the call to Get-DnsPersistAccountUri based the parameter set.
                 $getUriParams = @{
-                    Domain = $fqdn
+                    Domain            = $fqdn
                     AccountHashPrefix = $AccountHashPrefix
                 }
                 if ($NoDomainCorrelationMitigation) {
@@ -208,24 +225,28 @@ function Publish-DnsPersistChallenge {
                     $getUriParams.Domain = '*'
                 }
                 if ('PreProvision' -eq $PSCmdlet.ParameterSetName) {
+                    $fromAcctUri = $Account.location
+                    $fromAcctThumb = $Account.thumbprint
                     # pass through the account object
                     $getUriParams.Account = $Account
                 } else { # PreProvisionExplicit
                     # pass through the explicit account URI and key thumbprint
-                    $getUriParams.AccountUri    = $AccountUri
-                    $getUriParams.KeyThumbprint = $KeyThumbprint
+                    $getUriParams.AccountUri    = $fromAcctUri   = $AccountUri
+                    $getUriParams.KeyThumbprint = $fromAcctThumb = $KeyThumbprint
                 }
-
                 $hashAcctUri = Get-DnsPersistAccountUri @getUriParams
             }
 
+            # add the challenge information to the collection
             $chalCollection.Add([pscustomobject]@{
-                fqdn             = $fqdn
-                hashedAccountUri = $hashAcctUri
-                issuer           = $IssuerDomainName
-                plugin           = $p
-                pArgs            = $PluginArgs
-                addWildcard      = $addWildcard
+                fqdn          = $fqdn
+                hashAcctUri   = $hashAcctUri
+                issuer        = $IssuerDomainName
+                plugin        = $p
+                pArgs         = $PluginArgs
+                addWildcard   = $addWildcard
+                fromAcctUri   = $fromAcctUri
+                fromAcctThumb = $fromAcctThumb
             })
         }
 
@@ -250,7 +271,7 @@ function Publish-DnsPersistChallenge {
         }
 
         # process what's left by plugin
-        $dedupeChals | Group-Object plugin | ForEach-Object {
+        $published = $dedupeChals | Group-Object plugin | ForEach-Object {
 
             # dot source the plugin file
             $pluginDetail = $script:Plugins.($_.Name)
@@ -268,7 +289,7 @@ function Publish-DnsPersistChallenge {
                     $recordName = "_validation-persist.$($chal.fqdn)"
 
                     # build the TXT value based on the input parameters
-                    $txtValue = '{0}; accounturi={1}' -f $chal.issuer, $chal.hashedAccountUri
+                    $txtValue = '{0}; accounturi={1}' -f $chal.issuer, $chal.hashAcctUri
                     if ($chal.addWildcard) {
                         $txtValue += '; policy=wildcard'
                     }
@@ -280,6 +301,16 @@ function Publish-DnsPersistChallenge {
                     # call the function with the required parameters and splatting the rest
                     Write-Debug "Calling $($chal.plugin) plugin to add $recordName TXT with value $txtValue"
                     Add-DnsTxt -RecordName $recordName -TxtValue $txtValue @pArgs
+
+                    [pscustomobject]@{
+                        fqdn        = $chal.fqdn
+                        issuer      = $chal.issuer
+                        hashAcctUri = $chal.hashAcctUri
+                        addWildcard = $chal.addWildcard
+                        persistUntil = if ($PersistUntil) { $PersistUntil.ToUnixTimeSeconds().ToString() } else { $null }
+                        fromAcctUri  = $chal.fromAcctUri
+                        fromAcctThumb = $chal.fromAcctThumb
+                    }
                 }
 
                 # Save the changes for this plugin and pArgs combination
@@ -289,6 +320,32 @@ function Publish-DnsPersistChallenge {
 
         }
 
+        # Append the published challenges to the local cache without duplicating entries that
+        # already exist with the same fqdn, issuer, hashAcctUri, addWildcard, and persistUntil values
+        $pubCachePath = Join-Path (Get-ConfigRoot) 'PersistedChallenges.json'
+        if (Test-Path $pubCachePath) {
+            $existing = Get-Content $pubCachePath -Raw | ConvertFrom-Json
+            $existing = @($existing)
+        } else {
+            $existing = @()
+        }
+        $toSave = $published | Where-Object {
+            $fqdn        = $_.fqdn
+            $issuer      = $_.issuer
+            $hashAcctUri = $_.hashAcctUri
+            $addWildcard = $_.addWildcard
+            $expires = $_.persistUntil
+
+            -not ($existing | Where-Object {
+                $_.fqdn -eq $fqdn -and
+                $_.issuer -eq $issuer -and
+                $_.hashAcctUri -eq $hashAcctUri -and
+                $_.addWildcard -eq $addWildcard -and
+                $_.persistUntil -eq $expires
+            })
+        }
+        $existing += $toSave
+        ConvertTo-Json @($existing) -Depth 5 | Set-Content $pubCachePath
     }
 
 }
