@@ -6,12 +6,12 @@ function Test-ValidPlugin {
         [switch]$ThrowOnFail
     )
 
-    $PluginName | ForEach-Object {
+    foreach ($name in $PluginName) {
 
-        if (-not ($script:Plugins.$_)) {
+        if (-not ($script:Plugins.$name)) {
 
             if ($ThrowOnFail) {
-                throw "$PluginName plugin not found or was invalid."
+                throw "$name plugin not found or was invalid."
             } else {
                 return $false
             }

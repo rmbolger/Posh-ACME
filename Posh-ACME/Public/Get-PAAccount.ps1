@@ -84,7 +84,7 @@ function Get-PAAccount {
 
             # filter by KeyLength if specified
             if ('KeyLength' -in $PSBoundParameters.Keys) {
-                $accts = $accts | Where-Object { $_.KeyLength -eq $KeyLength }
+                $accts = $accts | Where-Object { $_.KeyLength -in $KeyLength }
             }
 
             # filter by Contact if specified
