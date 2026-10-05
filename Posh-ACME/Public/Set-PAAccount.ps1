@@ -246,6 +246,9 @@ function Set-PAAccount {
             if (Test-Path $newFolder) {
                 Write-Error "Failed to rename PAAccount $($acct.id). The path '$newFolder' already exists."
             } else {
+                # remember the old ID so we can tell whether this was the current account
+                $oldID = $acct.id
+
                 # rename the dir folder
                 Write-Debug "Renaming $($acct.id) account folder to $newFolder"
                 try {
@@ -255,9 +258,9 @@ function Set-PAAccount {
                     $acct.id = $NewName
                     $acct.Folder = $newFolder
 
-                    # update the current account ref if necessary
+                    # update the current account ref only if we renamed the current account
                     $curAcctFile = (Join-Path $server.Folder 'current-account.txt')
-                    if ($acct.id -ne (Get-Content $curAcctFile -EA Ignore)) {
+                    if ($oldID -eq (Get-Content $curAcctFile -EA Ignore)) {
                         Write-Debug "Updating current-account.txt"
                         $NewName | Out-File $curAcctFile -Force -EA Stop
                     }
