@@ -140,6 +140,7 @@ Describe "Get-PAAccount" {
             @{ splat = @{ List=$true;                      KeyLength='2048'                          }; ResultCount=0 }
             @{ splat = @{ List=$true;                      KeyLength='ec-256'                        }; ResultCount=1 }
             @{ splat = @{ List=$true;                      KeyLength='ec-384'                        }; ResultCount=1 }
+            @{ splat = @{ List=$true;                      KeyLength='ec-256','ec-384'               }; ResultCount=2 }
             @{ splat = @{ List=$true;                                          Contact='me@ex.test'  }; ResultCount=1 }
             @{ splat = @{ List=$true;                                          Contact='me2@ex.test' }; ResultCount=0 }
             @{ splat = @{ List=$true;                                          Contact='me@ex.test','me2@ex.test' }; ResultCount=1 }
