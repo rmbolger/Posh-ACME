@@ -55,11 +55,21 @@ Describe "Unpublish-DnsPersistChallenge" {
         } | Should -Throw
     }
 
-    It "Unpublishes cached challenges piped from Get-PublishedPersistChallenge" {
+    It "Unpublishes every cached challenge piped from Get-PublishedPersistChallenge" {
         @(
             [pscustomobject]@{
                 fqdn = 'first.example.com'; issuer = 'authority.example'
                 hashAcctUri = 'https://ca.example/hash/first'; addWildcard = $true
+                persistUntil = '1806537600'; fromAcctUri = ''; fromAcctThumb = ''
+            }
+            [pscustomobject]@{
+                fqdn = 'first.example.com'; issuer = 'authority.example'
+                hashAcctUri = 'https://ca.example/hash/first'; addWildcard = $true
+                persistUntil = '1806537600'; fromAcctUri = ''; fromAcctThumb = ''
+            }
+            [pscustomobject]@{
+                fqdn = 'first.example.com'; issuer = 'authority.example'
+                hashAcctUri = 'https://ca.example/hash/first'; addWildcard = $false
                 persistUntil = '1806537600'; fromAcctUri = ''; fromAcctThumb = ''
             }
             [pscustomobject]@{
@@ -72,7 +82,11 @@ Describe "Unpublish-DnsPersistChallenge" {
         $output = Get-PublishedPersistChallenge | Unpublish-DnsPersistChallenge `
             -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
 
+        ([regex]::Matches($output, '_validation-persist\.first\.example\.com ->')).Count | Should -Be 3
+        ([regex]::Matches($output, '_validation-persist\.second\.example\.com ->')).Count | Should -Be 1
+        ([regex]::Matches($output, 'policy=wildcard')).Count | Should -Be 2
         ($output -replace '\s+', '') | Should -Match ([regex]::Escape('_validation-persist.first.example.com->"authority.example;accounturi=https://ca.example/hash/first;policy=wildcard;persistUntil=1806537600"'))
+        ($output -replace '\s+', '') | Should -Match ([regex]::Escape('_validation-persist.first.example.com->"authority.example;accounturi=https://ca.example/hash/first;persistUntil=1806537600"'))
         ($output -replace '\s+', '') | Should -Match ([regex]::Escape('_validation-persist.second.example.com->"other.example;accounturi=https://ca.example/hash/second"'))
     }
 }

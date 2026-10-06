@@ -268,24 +268,14 @@ function Unpublish-DnsPersistChallenge {
 
     End {
 
-        # sort wildcard records first within each issuer and domain
+        # sort challenges by issuer and domain
         $orderedChals = $chalCollection.ToArray() |
             Sort-Object -Property issuer,{
                 $a=$_.fqdn.Split('.'); [array]::Reverse($a); $a -join '.'
-            },{-not $_.addWildcard}
+            },hashAcctUri
 
-        # remove duplicates that only differ by addWildcard or other non-essential properties
-        $lastChal = $null
-        $dedupeChals = foreach ($chal in $orderedChals) {
-            if ($lastChal -and $lastChal.fqdn -eq $chal.fqdn -and $lastChal.issuer -eq $chal.issuer) {
-                continue
-            }
-            $lastChal = $chal
-            $chal
-        }
-
-        # process what's left by plugin
-        $modified = $dedupeChals | Group-Object plugin | ForEach-Object {
+        # process challenges by plugin
+        $modified = $orderedChals | Group-Object plugin | ForEach-Object {
 
             # dot source the plugin file
             $pluginDetail = $script:Plugins.($_.Name)

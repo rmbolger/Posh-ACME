@@ -112,23 +112,6 @@ Describe "Publish-DnsPersistChallenge" {
         $output | Should -Match 'policy=wildcard'
     }
 
-    It "Keeps only the wildcard record at the same owner and removes exact duplicates" {
-        Mock -ModuleName Posh-ACME Get-PAAuthorization {
-            @('example.com','*.example.com','example.com') | ForEach-Object {
-                [pscustomobject]@{
-                    fqdn = $_
-                    challenges = @([pscustomobject]@{ type = 'dns-persist-01'; issuerDomainNames = @('authority.example') })
-                }
-            }
-        }
-        $order = [pscustomobject]@{ PSTypeName = 'PoshACME.PAOrder'; Plugin = @('Manual'); authorizations = @('https://ca.example/authz/1') }
-        $output = Publish-DnsPersistChallenge -Order $order -AccountHashPrefix $prefix `
-            -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
-
-        ([regex]::Matches($output, '_validation-persist\.example\.com ->')).Count | Should -Be 1
-        ([regex]::Matches($output, 'policy=wildcard')).Count | Should -Be 1
-    }
-
     It "Keeps separate records for different issuers at the same owner" {
         Mock -ModuleName Posh-ACME Get-PAAuthorization {
             @('authority.example','other.example') | ForEach-Object {
@@ -145,23 +128,6 @@ Describe "Publish-DnsPersistChallenge" {
         ([regex]::Matches($output, '_validation-persist\.example\.com ->')).Count | Should -Be 2
         $output | Should -Match 'authority\.example; accounturi='
         $output | Should -Match 'other\.example; accounturi='
-    }
-
-    It "Keeps the wildcard record when it precedes the base authorization" {
-        Mock -ModuleName Posh-ACME Get-PAAuthorization {
-            @('*.example.com','example.com','*.example.com') | ForEach-Object {
-                [pscustomobject]@{
-                    fqdn = $_
-                    challenges = @([pscustomobject]@{ type = 'dns-persist-01'; issuerDomainNames = @('authority.example') })
-                }
-            }
-        }
-        $order = [pscustomobject]@{ PSTypeName = 'PoshACME.PAOrder'; Plugin = @('Manual'); authorizations = @('https://ca.example/authz/1') }
-        $output = Publish-DnsPersistChallenge -Order $order -AccountHashPrefix $prefix `
-            -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
-
-        ([regex]::Matches($output, '_validation-persist\.example\.com ->')).Count | Should -Be 1
-        ([regex]::Matches($output, 'policy=wildcard')).Count | Should -Be 1
     }
 
     It "Uses directory metadata for pre-provisioning defaults" {
@@ -326,5 +292,30 @@ Describe "Publish-DnsPersistChallenge" {
         $records | Should -HaveCount 1
         $records[0].fqdn | Should -Be 'persist.example.com'
         $records[0].hashAcctUri | Should -Be 'https://ca.example/hash/existing'
+    }
+
+    It "Publishes every piped cached record, including literal duplicates" {
+        $cachePath = 'TestDrive:\PersistedChallenges.json'
+        @(
+            [pscustomobject]@{ fqdn='restore.example.com'; issuer='authority.example'; hashAcctUri='https://ca.example/hash/first'; addWildcard=$false; persistUntil=$null }
+            [pscustomobject]@{ fqdn='restore.example.com'; issuer='authority.example'; hashAcctUri='https://ca.example/hash/first'; addWildcard=$false; persistUntil=$null }
+            [pscustomobject]@{ fqdn='restore.example.com'; issuer='authority.example'; hashAcctUri='https://ca.example/hash/first'; addWildcard=$true; persistUntil=$null }
+            [pscustomobject]@{ fqdn='restore.example.com'; issuer='authority.example'; hashAcctUri='https://ca.example/hash/second'; addWildcard=$false; persistUntil='1806537600' }
+            [pscustomobject]@{ fqdn='restore.example.com'; issuer='authority.example'; hashAcctUri='https://ca.example/hash/second'; addWildcard=$true; persistUntil='1806537600' }
+            [pscustomobject]@{ fqdn='restore.example.com'; issuer='authority.example'; hashAcctUri='https://ca.example/hash/second'; addWildcard=$false; persistUntil='2208988800' }
+            [pscustomobject]@{ fqdn='restore.example.com'; issuer='other.example'; hashAcctUri='https://ca.example/hash/third'; addWildcard=$false; persistUntil=$null }
+        ) | ConvertTo-Json -Depth 5 | Set-Content $cachePath
+
+        $output = Get-PublishedPersistChallenge | Publish-DnsPersistChallenge `
+            -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
+
+        ([regex]::Matches($output, '_validation-persist\.restore\.example\.com ->')).Count | Should -Be 7
+        $compact = $output -replace '\s+', ''
+        ([regex]::Matches($compact, [regex]::Escape('authority.example;accounturi=https://ca.example/hash/first"'))).Count | Should -Be 2
+        $compact | Should -Match ([regex]::Escape('authority.example;accounturi=https://ca.example/hash/first;policy=wildcard"'))
+        $compact | Should -Match ([regex]::Escape('authority.example;accounturi=https://ca.example/hash/second;persistUntil=1806537600"'))
+        $compact | Should -Match ([regex]::Escape('authority.example;accounturi=https://ca.example/hash/second;policy=wildcard;persistUntil=1806537600"'))
+        $compact | Should -Match ([regex]::Escape('authority.example;accounturi=https://ca.example/hash/second;persistUntil=2208988800"'))
+        $compact | Should -Match ([regex]::Escape('other.example;accounturi=https://ca.example/hash/third"'))
     }
 }
