@@ -88,5 +88,47 @@ Describe "Unpublish-DnsPersistChallenge" {
         ($output -replace '\s+', '') | Should -Match ([regex]::Escape('_validation-persist.first.example.com->"authority.example;accounturi=https://ca.example/hash/first;policy=wildcard;persistUntil=1806537600"'))
         ($output -replace '\s+', '') | Should -Match ([regex]::Escape('_validation-persist.first.example.com->"authority.example;accounturi=https://ca.example/hash/first;persistUntil=1806537600"'))
         ($output -replace '\s+', '') | Should -Match ([regex]::Escape('_validation-persist.second.example.com->"other.example;accounturi=https://ca.example/hash/second"'))
+
+        $remaining = Get-Content 'TestDrive:\PersistedChallenges.json' -Raw | ConvertFrom-Json
+        @($remaining) | Should -HaveCount 0
+    }
+
+    It "Removes matching cached entries without removing other challenge variants" {
+        $cachePath = 'TestDrive:\PersistedChallenges.json'
+        $record = [pscustomobject]@{
+            fqdn = 'example.com'; issuer = 'authority.example'
+            hashAcctUri = 'https://ca.example/hash/first'; addWildcard = $false
+            persistUntil = $null; fromAcctUri = ''; fromAcctThumb = ''
+        }
+        @(
+            $record
+            $record
+            [pscustomobject]@{ fqdn='example.com'; issuer='authority.example'; hashAcctUri='https://ca.example/hash/first'; addWildcard=$true; persistUntil=$null }
+            [pscustomobject]@{ fqdn='example.com'; issuer='authority.example'; hashAcctUri='https://ca.example/hash/second'; addWildcard=$false; persistUntil=$null }
+            [pscustomobject]@{ fqdn='example.com'; issuer='authority.example'; hashAcctUri='https://ca.example/hash/first'; addWildcard=$false; persistUntil='1806537600' }
+            [pscustomobject]@{ fqdn='example.com'; issuer='other.example'; hashAcctUri='https://ca.example/hash/first'; addWildcard=$false; persistUntil=$null }
+            [pscustomobject]@{ fqdn='other.example.com'; issuer='authority.example'; hashAcctUri='https://ca.example/hash/first'; addWildcard=$false; persistUntil=$null }
+        ) | ConvertTo-Json -Depth 5 | Set-Content $cachePath
+
+        Unpublish-DnsPersistChallenge -Domain 'example.com' -HashedAccountUri 'https://ca.example/hash/first' `
+            -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-Null
+
+        $remaining = Get-Content $cachePath -Raw | ConvertFrom-Json
+        @($remaining) | Should -HaveCount 5
+        @($remaining | Where-Object addWildcard -eq $true) | Should -HaveCount 1
+        @($remaining | Where-Object hashAcctUri -eq 'https://ca.example/hash/second') | Should -HaveCount 1
+        @($remaining | Where-Object persistUntil -eq '1806537600') | Should -HaveCount 1
+        @($remaining | Where-Object issuer -eq 'other.example') | Should -HaveCount 1
+        @($remaining | Where-Object fqdn -eq 'other.example.com') | Should -HaveCount 1
+    }
+
+    It "Does not create a cache when no published challenges were cached" {
+        $cachePath = 'TestDrive:\PersistedChallenges.json'
+        Remove-Item $cachePath -ErrorAction Ignore
+
+        Unpublish-DnsPersistChallenge -Domain 'example.com' -HashedAccountUri 'https://ca.example/hash/first' `
+            -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-Null
+
+        $cachePath | Should -Not -Exist
     }
 }

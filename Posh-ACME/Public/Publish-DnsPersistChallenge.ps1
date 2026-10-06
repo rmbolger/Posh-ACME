@@ -324,8 +324,7 @@ function Publish-DnsPersistChallenge {
 
         }
 
-        # Append the published challenges to the local cache without duplicating entries that
-        # already exist with the same fqdn, issuer, hashAcctUri, addWildcard, and persistUntil values
+        # Append the published challenges to the local cache if they don't already exist
         $pubCachePath = Join-Path (Get-ConfigRoot) 'PersistedChallenges.json'
         if (Test-Path $pubCachePath) {
             $existing = Get-Content $pubCachePath -Raw | ConvertFrom-Json

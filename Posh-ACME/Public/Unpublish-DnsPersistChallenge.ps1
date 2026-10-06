@@ -324,6 +324,23 @@ function Unpublish-DnsPersistChallenge {
 
         }
 
+        # Remove the unpublished challenges from the local cache if they exist
+        $pubCachePath = Join-Path (Get-ConfigRoot) 'PersistedChallenges.json'
+        if (Test-Path $pubCachePath) {
+            $existing = Get-Content $pubCachePath -Raw | ConvertFrom-Json
+            $remaining = $existing | Where-Object {
+                $entry = $_
+                -not ($modified | Where-Object {
+                    $_.fqdn -eq $entry.fqdn -and
+                    $_.issuer -eq $entry.issuer -and
+                    $_.hashAcctUri -eq $entry.hashAcctUri -and
+                    $_.addWildcard -eq $entry.addWildcard -and
+                    $_.persistUntil -eq $entry.persistUntil
+                })
+            }
+            ConvertTo-Json @($remaining) -Depth 5 | Set-Content $pubCachePath
+        }
+
     }
 
 }
