@@ -5735,7 +5735,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>PersistUntil</maml:name>
           <maml:description>
-            <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and not something like `(Get-Date).AddYears(1)`.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
           <dev:type>
@@ -5867,7 +5867,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>PersistUntil</maml:name>
           <maml:description>
-            <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and not something like `(Get-Date).AddYears(1)`.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
           <dev:type>
@@ -5987,7 +5987,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>PersistUntil</maml:name>
           <maml:description>
-            <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and not something like `(Get-Date).AddYears(1)`.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
           <dev:type>
@@ -6072,7 +6072,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>PersistUntil</maml:name>
           <maml:description>
-            <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and not something like `(Get-Date).AddYears(1)`.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
           <dev:type>
@@ -6241,7 +6241,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>PersistUntil</maml:name>
         <maml:description>
-          <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+          <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and not something like `(Get-Date).AddYears(1)`.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
         <dev:type>
@@ -6318,61 +6318,51 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>---------- Example 1: Publish a standalone challenge ----------</maml:title>
-        <dev:code># Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+        <maml:title>------- Example 1: Pre-Provision a standalone challenge -------</maml:title>
+        <dev:code>$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
 }
-Publish-DnsPersistChallenge @splat</dev:code>
+Publish-DnsPersistChallenge @pubParams</dev:code>
         <dev:remarks>
           <maml:para>Publish a standalone non-wildcard challenge for the current server and account.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>----------- Example 2: Publish a wildcard challenge -----------</maml:title>
-        <dev:code># Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
-    Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+        <maml:title>-------- Example 2: Pre-Provision a wildcard challenge --------</maml:title>
+        <dev:code>$pubParams = @{
+    Domain = '*.example.com'
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
-    AllowWildcard = $true
 }
-Publish-DnsPersistChallenge @splat</dev:code>
+Publish-DnsPersistChallenge @pubParams</dev:code>
         <dev:remarks>
-          <maml:para>Publish a standalone wildcard challenge for the current server and account. This record will be good for the specified domain and any subdomains including nested subdomains.</maml:para>
+          <maml:para>Publish a standalone wildcard challenge for the current server and account. The `policy=wildcard` flag is automatically added to the record due to the "*." prefix and will work for the specified domain and any subdomains including nested subdomains.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>----------- Example 3: Publish an expiring challenge -----------</maml:title>
-        <dev:code># Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+        <maml:title>-------- Example 3: Pre-Provision an expiring challenge --------</maml:title>
+        <dev:code>$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
-    PersistUntil = (Get-Date '2027-04-01')
+    PersistUntil = '2027-04-01'
 }
-Publish-DnsPersistChallenge @splat</dev:code>
+Publish-DnsPersistChallenge @pubParams</dev:code>
         <dev:remarks>
-          <maml:para>Publish a standalone expiring challenge for the current server and account. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+          <maml:para>Publish a standalone expiring challenge for the current server and account. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and not something like `(Get-Date).AddYears(1)`.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
@@ -10130,7 +10120,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>PersistUntil</maml:name>
           <maml:description>
-            <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and not something like `(Get-Date).AddYears(1)`.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
           <dev:type>
@@ -10262,7 +10252,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>PersistUntil</maml:name>
           <maml:description>
-            <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and not something like `(Get-Date).AddYears(1)`.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
           <dev:type>
@@ -10382,7 +10372,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>PersistUntil</maml:name>
           <maml:description>
-            <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and not something like `(Get-Date).AddYears(1)`.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
           <dev:type>
@@ -10467,7 +10457,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>PersistUntil</maml:name>
           <maml:description>
-            <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and not something like `(Get-Date).AddYears(1)`.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
           <dev:type>
@@ -10636,7 +10626,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>PersistUntil</maml:name>
         <maml:description>
-          <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+          <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and not something like `(Get-Date).AddYears(1)`.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
         <dev:type>
@@ -10714,18 +10704,15 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
     <command:examples>
       <command:example>
         <maml:title>----------- Example 1: Remove a standalone challenge -----------</maml:title>
-        <dev:code># Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+        <dev:code>$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
 }
-Unpublish-DnsPersistChallenge @splat</dev:code>
+Unpublish-DnsPersistChallenge @pubParams</dev:code>
         <dev:remarks>
           <maml:para>Remove a standalone non-wildcard challenge for the current server and account.</maml:para>
           <maml:para></maml:para>
@@ -10733,19 +10720,16 @@ Unpublish-DnsPersistChallenge @splat</dev:code>
       </command:example>
       <command:example>
         <maml:title>------------ Example 2: Remove a wildcard challenge ------------</maml:title>
-        <dev:code># Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+        <dev:code>$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
     AllowWildcard = $true
 }
-Unpublish-DnsPersistChallenge @splat</dev:code>
+Unpublish-DnsPersistChallenge @pubParams</dev:code>
         <dev:remarks>
           <maml:para>Remove a standalone wildcard challenge for the current server and account.</maml:para>
           <maml:para></maml:para>
@@ -10753,21 +10737,18 @@ Unpublish-DnsPersistChallenge @splat</dev:code>
       </command:example>
       <command:example>
         <maml:title>----------- Example 3: Remove an expiring challenge -----------</maml:title>
-        <dev:code># Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+        <dev:code>$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
-    PersistUntil = (Get-Date '2027-04-01')
+    PersistUntil = '2027-04-01'
 }
-Unpublish-DnsPersistChallenge @splat</dev:code>
+Unpublish-DnsPersistChallenge @pubParams</dev:code>
         <dev:remarks>
-          <maml:para>Remove a standalone expiring challenge for the current server and account. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+          <maml:para>Remove a standalone expiring challenge for the current server and account. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `'2027-04-01'` and not something like `(Get-Date).AddYears(1)`.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
