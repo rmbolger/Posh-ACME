@@ -5,7 +5,7 @@ function Unpublish-DnsPersistChallenge {
         [PSTypeName('PoshACME.PAOrder')]$Order,
         [Parameter(Mandatory,ParameterSetName='PreProvision',Position=0,ValueFromPipeline)]
         [Parameter(Mandatory,ParameterSetName='PreProvisionExplicit',Position=0,ValueFromPipeline)]
-        [Parameter(Mandatory,ParameterSetName='Advanced',Position=0,ValueFromPipeline)]
+        [Parameter(Mandatory,ParameterSetName='Advanced',Position=0,ValueFromPipeline,ValueFromPipelineByPropertyName)]
         [string[]]$Domain,
         [Parameter(Mandatory,ParameterSetName='PreProvision')]
         [PSTypeName('PoshACME.PAAccount')]$Account,
@@ -13,18 +13,30 @@ function Unpublish-DnsPersistChallenge {
         [string]$AccountUri,
         [Parameter(Mandatory,ParameterSetName='PreProvisionExplicit')]
         [string]$KeyThumbprint,
-        [Parameter(Mandatory,ParameterSetName='Advanced')]
+        [Parameter(Mandatory,ParameterSetName='Advanced',ValueFromPipelineByPropertyName)]
         [string]$HashedAccountUri,
         [Parameter(ParameterSetName='PreProvision')]
         [Parameter(ParameterSetName='PreProvisionExplicit')]
         [Parameter(ParameterSetName='FromOrder')]
         [string]$AccountHashPrefix,
+        [Parameter(ParameterSetName='PreProvision')]
+        [Parameter(ParameterSetName='PreProvisionExplicit')]
+        [Parameter(ParameterSetName='FromOrder')]
+        [Parameter(ParameterSetName='Advanced',ValueFromPipelineByPropertyName)]
         [string]$IssuerDomainName,
         [ValidateScript({Test-ValidPlugin $_ -ThrowOnFail})]
         [string[]]$Plugin,
         [hashtable]$PluginArgs,
+        [Parameter(ParameterSetName='PreProvision')]
+        [Parameter(ParameterSetName='PreProvisionExplicit')]
+        [Parameter(ParameterSetName='FromOrder')]
+        [Parameter(ParameterSetName='Advanced',ValueFromPipelineByPropertyName)]
         [switch]$AllowWildcard,
-        [DateTimeOffset]$PersistUntil,
+        [Parameter(ParameterSetName='PreProvision')]
+        [Parameter(ParameterSetName='PreProvisionExplicit')]
+        [Parameter(ParameterSetName='FromOrder')]
+        [Parameter(ParameterSetName='Advanced',ValueFromPipelineByPropertyName)]
+        [Nullable[DateTimeOffset]]$PersistUntil,
         [switch]$NoAutoWildcard,
         [Parameter(ParameterSetName='PreProvision')]
         [Parameter(ParameterSetName='PreProvisionExplicit')]
@@ -36,6 +48,25 @@ function Unpublish-DnsPersistChallenge {
         trap { $PSCmdlet.ThrowTerminatingError($_) }
 
         $server = Get-PAServer
+
+        # Set the Manual plugin if no plugin was specified and we are not in the FromOrder param set
+        if (-not $Plugin -and 'FromOrder' -ne $PSCmdlet.ParameterSetName) {
+            $Plugin = 'Manual'
+        }
+
+        $idn = [Globalization.IdnMapping]::new()
+
+        # get the current account for later if it wasn't passed in
+        if (-not $Account) {
+            $Account = Get-PAAccount
+        }
+
+        # initialize a deferred collection object so we can build up the list of challenges
+        # to publish as we process the pipeline inputs and publish them all at the end
+        $chalCollection = [Collections.Generic.List[pscustomobject]]::new()
+    }
+
+    Process {
 
         # Try to grab server published things we may need if they weren't explicitly provided
         if (-not $IssuerDomainName -and 'FromOrder' -ne $PSCmdlet.ParameterSetName) {
@@ -62,20 +93,6 @@ function Unpublish-DnsPersistChallenge {
                 throw "AccountHashPrefix not specified and the current ACME server does not publish the required value in the directory metadata."
             }
         }
-
-        # Set the Manual plugin if no plugin was specified and we are not in the FromOrder param set
-        if (-not $Plugin -and 'FromOrder' -ne $PSCmdlet.ParameterSetName) {
-            $Plugin = 'Manual'
-        }
-
-        $idn = [Globalization.IdnMapping]::new()
-
-        # initialize a deferred collection object so we can build up the list of challenges
-        # to publish as we process the pipeline inputs and publish them all at the end
-        $chalCollection = [Collections.Generic.List[pscustomobject]]::new()
-    }
-
-    Process {
 
         # Build the list of challenges to publish from the Domains and other properties of the order.
         if ('FromOrder' -eq $PSCmdlet.ParameterSetName) {
@@ -139,20 +156,30 @@ function Unpublish-DnsPersistChallenge {
                     $p = $Plugin[-1]
                 }
 
+                # generate the hashed account URI for the challenge
+                $getUriParams = @{
+                    Domain            = $fqdn
+                    AccountHashPrefix = $AccountHashPrefix
+                    AccountUri        = $Account.location
+                    KeyThumbprint     = $Account.thumbprint
+                }
                 if ($NoDomainCorrelationMitigation) {
                     Write-Verbose "Generating hashed accountUri with no domain correlation mitigation."
-                    $hashAcctUri = Get-DnsPersistAccountUri -Domain '*' -AccountHashPrefix $AccountHashPrefix
-                } else {
-                    $hashAcctUri = Get-DnsPersistAccountUri -Domain $fqdn -AccountHashPrefix $AccountHashPrefix
+                    $getUriParams.Domain = '*'
                 }
+                $hashAcctUri = Get-DnsPersistAccountUri @getUriParams
 
+                # add the challenge information to the collection
                 $chalCollection.Add([pscustomobject]@{
-                    fqdn             = $fqdn
-                    hashedAccountUri = $hashAcctUri
-                    issuer           = $issuer
-                    plugin           = $p
-                    pArgs            = $PluginArgs
-                    addWildcard      = $addWildcard
+                    fqdn          = $fqdn
+                    hashAcctUri   = $hashAcctUri
+                    issuer        = $issuer
+                    plugin        = $p
+                    pArgs         = $PluginArgs
+                    addWildcard   = $addWildcard
+                    persistUntil  = $PersistUntil
+                    fromAcctUri   = $Account.location
+                    fromAcctThumb = $Account.thumbprint
                 })
             }
 
@@ -191,8 +218,11 @@ function Unpublish-DnsPersistChallenge {
             }
 
             # The $HashedAccountUri is only available in the Advanced parameter set and mandatory.
-            # Its existence means we should use it as-is.
+            # Its existence means we should use it as-is, but also means we don't know the account
+            # location or thumbprint of the account used to generate it.
             $hashAcctUri = $HashedAccountUri
+            $fromAcctUri = ''
+            $fromAcctThumb = ''
 
             # But if it doesn't exist, all we're left with are the PreProvision* parameter sets where
             # we need to generate it using Get-DnsPersistAccountUri.
@@ -200,7 +230,7 @@ function Unpublish-DnsPersistChallenge {
 
                 # Build the call to Get-DnsPersistAccountUri based the parameter set.
                 $getUriParams = @{
-                    Domain = $fqdn
+                    Domain            = $fqdn
                     AccountHashPrefix = $AccountHashPrefix
                 }
                 if ($NoDomainCorrelationMitigation) {
@@ -208,24 +238,29 @@ function Unpublish-DnsPersistChallenge {
                     $getUriParams.Domain = '*'
                 }
                 if ('PreProvision' -eq $PSCmdlet.ParameterSetName) {
+                    $fromAcctUri = $Account.location
+                    $fromAcctThumb = $Account.thumbprint
                     # pass through the account object
                     $getUriParams.Account = $Account
                 } else { # PreProvisionExplicit
                     # pass through the explicit account URI and key thumbprint
-                    $getUriParams.AccountUri    = $AccountUri
-                    $getUriParams.KeyThumbprint = $KeyThumbprint
+                    $getUriParams.AccountUri    = $fromAcctUri   = $AccountUri
+                    $getUriParams.KeyThumbprint = $fromAcctThumb = $KeyThumbprint
                 }
-
                 $hashAcctUri = Get-DnsPersistAccountUri @getUriParams
             }
 
+            # add the challenge information to the collection
             $chalCollection.Add([pscustomobject]@{
-                fqdn             = $fqdn
-                hashedAccountUri = $hashAcctUri
-                issuer           = $IssuerDomainName
-                plugin           = $p
-                pArgs            = $PluginArgs
-                addWildcard      = $addWildcard
+                fqdn          = $fqdn
+                hashAcctUri   = $hashAcctUri
+                issuer        = $IssuerDomainName
+                plugin        = $p
+                pArgs         = $PluginArgs
+                addWildcard   = $addWildcard
+                persistUntil  = $PersistUntil
+                fromAcctUri   = $fromAcctUri
+                fromAcctThumb = $fromAcctThumb
             })
         }
 
@@ -250,7 +285,7 @@ function Unpublish-DnsPersistChallenge {
         }
 
         # process what's left by plugin
-        $dedupeChals | Group-Object plugin | ForEach-Object {
+        $modified = $dedupeChals | Group-Object plugin | ForEach-Object {
 
             # dot source the plugin file
             $pluginDetail = $script:Plugins.($_.Name)
@@ -268,18 +303,28 @@ function Unpublish-DnsPersistChallenge {
                     $recordName = "_validation-persist.$($chal.fqdn)"
 
                     # build the TXT value based on the input parameters
-                    $txtValue = '{0}; accounturi={1}' -f $chal.issuer, $chal.hashedAccountUri
+                    $txtValue = '{0}; accounturi={1}' -f $chal.issuer, $chal.hashAcctUri
                     if ($chal.addWildcard) {
                         $txtValue += '; policy=wildcard'
                     }
-                    if ($PersistUntil) {
-                        $txtValue += '; persistUntil={0}' -f $PersistUntil.ToUnixTimeSeconds()
+                    if ($chal.persistUntil) {
+                        $txtValue += '; persistUntil={0}' -f $chal.persistUntil.ToUnixTimeSeconds()
                     }
                     $txtValue = '"{0}"' -f $txtValue
 
                     # call the function with the required parameters and splatting the rest
                     Write-Debug "Calling $($chal.plugin) plugin to remove $recordName TXT with value $txtValue"
                     Remove-DnsTxt -RecordName $recordName -TxtValue $txtValue @pArgs
+
+                    [pscustomobject]@{
+                        fqdn        = $chal.fqdn
+                        issuer      = $chal.issuer
+                        hashAcctUri = $chal.hashAcctUri
+                        addWildcard = $chal.addWildcard
+                        persistUntil = if ($chal.persistUntil) { $chal.persistUntil.ToUnixTimeSeconds().ToString() } else { $null }
+                        fromAcctUri  = $chal.fromAcctUri
+                        fromAcctThumb = $chal.fromAcctThumb
+                    }
                 }
 
                 # Save the changes for this plugin and pArgs combination

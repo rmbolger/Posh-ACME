@@ -54,4 +54,25 @@ Describe "Unpublish-DnsPersistChallenge" {
                 -IssuerDomainName 'authority.example' -NoDomainCorrelationMitigation -Plugin Manual
         } | Should -Throw
     }
+
+    It "Unpublishes cached challenges piped from Get-PublishedPersistChallenge" {
+        @(
+            [pscustomobject]@{
+                fqdn = 'first.example.com'; issuer = 'authority.example'
+                hashAcctUri = 'https://ca.example/hash/first'; addWildcard = $true
+                persistUntil = '1806537600'; fromAcctUri = ''; fromAcctThumb = ''
+            }
+            [pscustomobject]@{
+                fqdn = 'second.example.com'; issuer = 'other.example'
+                hashAcctUri = 'https://ca.example/hash/second'; addWildcard = $false
+                persistUntil = $null; fromAcctUri = ''; fromAcctThumb = ''
+            }
+        ) | ConvertTo-Json -Depth 5 | Set-Content 'TestDrive:\PersistedChallenges.json'
+
+        $output = Get-PublishedPersistChallenge | Unpublish-DnsPersistChallenge `
+            -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
+
+        ($output -replace '\s+', '') | Should -Match ([regex]::Escape('_validation-persist.first.example.com->"authority.example;accounturi=https://ca.example/hash/first;policy=wildcard;persistUntil=1806537600"'))
+        ($output -replace '\s+', '') | Should -Match ([regex]::Escape('_validation-persist.second.example.com->"other.example;accounturi=https://ca.example/hash/second"'))
+    }
 }

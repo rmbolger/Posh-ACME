@@ -34,6 +34,7 @@ FunctionsToExport = @(
     'Get-PAPluginArgs'
     'Get-PAProfile'
     'Get-PAServer'
+    'Get-PublishedPersistChallenge'
     'Install-PACertificate'
     'Invoke-HttpChallengeListener'
     'New-PAAccount'

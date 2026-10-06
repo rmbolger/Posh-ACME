@@ -147,7 +147,19 @@ If specified, the record will have the `policy=wildcard` option added which allo
 
 ```yaml
 Type: SwitchParameter
-Parameter Sets: (All)
+Parameter Sets: PreProvision, FromOrder, PreProvisionExplicit
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: Advanced
 Aliases:
 
 Required: False
@@ -162,7 +174,19 @@ The domain name(s) that the challenge record will be published for. Wildcard pre
 
 ```yaml
 Type: String[]
-Parameter Sets: PreProvision, Advanced, PreProvisionExplicit
+Parameter Sets: PreProvision, PreProvisionExplicit
+Aliases:
+
+Required: True
+Position: 0
+Default value: None
+Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+```yaml
+Type: String[]
+Parameter Sets: Advanced
 Aliases:
 
 Required: True
@@ -183,7 +207,7 @@ Aliases:
 Required: True
 Position: Named
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
@@ -192,7 +216,19 @@ Any of the values published by the CA in the `issuerDomainNames` array in the me
 
 ```yaml
 Type: String
-Parameter Sets: (All)
+Parameter Sets: PreProvision, FromOrder, PreProvisionExplicit
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+```yaml
+Type: String
+Parameter Sets: Advanced
 Aliases:
 
 Required: False
@@ -239,7 +275,19 @@ A DateTimeOffset object for when this record's validation will expire. Can be pa
 
 ```yaml
 Type: DateTimeOffset
-Parameter Sets: (All)
+Parameter Sets: PreProvision, FromOrder, PreProvisionExplicit
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+```yaml
+Type: DateTimeOffset
+Parameter Sets: Advanced
 Aliases:
 
 Required: False
