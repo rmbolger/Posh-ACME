@@ -2123,6 +2123,63 @@ Get-PAAccount -List | %{
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
+      <command:name>Get-PublishedPersistChallenge</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>PublishedPersistChallenge</command:noun>
+      <maml:description>
+        <maml:para>Get the list of previously published dns-persist-01 records.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Use this to review what dns-persist-01 records have been published from this Posh-ACME configuration. This is a local only cache, not a live check of your infrastructure, and could be out of date if changes were made outside the context of Posh-ACME or this system.</maml:para>
+      <maml:para>The results can be piped to `Unpublish-DnsPersistChallenge` or `Publish-DnsPersistChallenge`.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-PublishedPersistChallenge</maml:name>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters />
+    <command:inputTypes />
+    <command:returnValues />
+    <maml:alertSet>
+      <maml:alert />
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>------------------- Example 1: Get the list -------------------</maml:title>
+        <dev:code>Get-PublishedPersistChallenge</dev:code>
+        <dev:remarks>
+          <maml:para>Get all previously published records.</maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>---------------- Example 2: Unpublish a subset ----------------</maml:title>
+        <dev:code>Get-PublishedPersistChallenge | ?{ $_.Domain -like '*example.com' } | Unpublish-DnsPersistChallenge</dev:code>
+        <dev:remarks>
+          <maml:para>Unpublish all records associated with `example.com`</maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Get-PublishedPersistChallenge/</maml:uri>
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Publish-DnsPersistChallenge</maml:linkText>
+        <maml:uri></maml:uri>
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Unpublish-DnsPersistChallenge</maml:linkText>
+        <maml:uri></maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
       <command:name>Install-PACertificate</command:name>
       <command:verb>Install</command:verb>
       <command:noun>PACertificate</command:noun>
