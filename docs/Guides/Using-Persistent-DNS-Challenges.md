@@ -213,6 +213,39 @@ Set-PAOrder -Plugin Manual -DnsVariant dns-persist-01
 
 Then continue renewing the order as you normally would. If you're calls to `New-PACertificate` instead of `Submit-Renewal`, make sure you update your script parameters to exclude the `-Plugin` and `-PluginArgs` parameters and include the `-DnsVariant dns-persist-01` parameter.
 
-### Updating or Removing Persistent Records
+## Updating or Removing Persistent Records
 
-TBD
+There are a few reasons you may update or replace your persistent validation records.
+
+- Your ACME account key changes due to a rollover.
+  - Because the record data is partially computed from the account key, changing that key changes what gets computed. The draft 02 spec technically requires CAs to continue allowing validation against records computed from former account keys, but it also strongly suggests clients re-publish new records after a rollover for "operational hygiene and auditing".
+- Your ACME account is deactivated or otherwise lost.
+  - Account deactivation is non-reversible. If it happens on purpose or due to compromise, all of your existing records immediately become invalid and require re-publishing from a new account.
+- You used a PersistUntil value that has expired or will expire soon.
+  - An expired record won't validate. You'll want to unpublish the old record and republish a new record with an updated PersistUntil value before the old record expires.
+
+There are two variations on how to unpublish a persistent record using Posh-ACME.
+
+### Use the same Publish parameters with Unpublish
+
+Whatever parameters you originally used to publish the record with `Publish-DnsPersistChallenge` can be used with `Unpublish-DnsPersistChallenge` with the following caveats.
+
+- The `FromOrder` parameter set may not work if the order is expired.
+- The `FromOrder` parameter set may not work if the CA does not return the same set of authorization data for a previously valid order.
+- The `PreProvision` parameter set where you pass the ACME account object will not find the correct record to unpublish if the account key has been rotated. Use the `PreProvisionExplicit` parameter set instead with `-KeyThumbprint` set to the previous value.
+- If you created the record with a `-PersistUntil` value that was based on a date/time relative to "now", you can't use that same calculation because the new "now" is different than the old "now". This is why it is highly recommended to use simple date values only.
+
+### Pipe Get-PublishedPersistChallenge to Unpublish
+
+The `Get-PublishedPersistChallenge` command returns the record data for all records published from the entire local config. You can filter the results to the records you want to unpublish, and pipe them to `Unpublish-DnsPersistChallenge` along with the necessary plugin parameters.
+
+```powershell
+$pArgs = {
+    FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
+}
+Get-PublishedPersistChallenge |
+Where-Object { $_.Domain -eq 'example.com' } |
+Unpublish-DnsPersistChallenge -Plugin FakeDNS -PluginArgs $pArgs -Verbose
+```
+
+The data returned by `Get-PublishedPersistChallenge` may include `Domain`, `HashedAccountUri`, `IssuerDomainName`, `AllowWildcard`, `PersistUntil`, `FromAccountUri`, and `FromAccountThumbprint` which can all be filtered against. However, `FromAccountUri` and `FromAccountThumbprint` will be empty for any records published using the Advanced parameter set and they weren't known during publishing.
