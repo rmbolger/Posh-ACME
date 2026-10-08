@@ -99,10 +99,11 @@ Here is an example of using advanced publishing with a draft 02 compatible CA.
 
 ```powershell
 # AccountUri and KeyThumbprint params can be used instead of an actual account object as well
-$hashedAcctUri = Get-DnsPersistAccountUri $certNames -Account (Get-PAAccount)
+$domain = 'example.com'
+$hashedAcctUri = Get-DnsPersistAccountUri $domain -Account (Get-PAAccount)
 
 $pubParams = @{
-    Domain = $certNames
+    Domain = $domain
     HashedAccountUri = $hashedAcctUri
     # IssuerDomainName = 'ca.example'  # Uncomment to override the auto-selected issuer
     Plugin = 'FakeDNS'
@@ -233,14 +234,14 @@ Whatever parameters you originally used to publish the record with `Publish-DnsP
 - The `FromOrder` parameter set may not work if the order is expired.
 - The `FromOrder` parameter set may not work if the CA does not return the same set of authorization data for a previously valid order.
 - The `PreProvision` parameter set where you pass the ACME account object will not find the correct record to unpublish if the account key has been rotated. Use the `PreProvisionExplicit` parameter set instead with `-KeyThumbprint` set to the previous value.
-- If you created the record with a `-PersistUntil` value that was based on a date/time relative to "now", you can't use that same calculation because the new "now" is different than the old "now". This is why it is highly recommended to use simple date values only.
+- If you created the record with a `-PersistUntil` value that was based on a date/time relative to "now", you can't use that same calculation because the new "now" is different than the old "now". This is why it is highly recommended to use UTC date-only values such as `'2027-04-01Z'`.
 
 ### Pipe Get-PublishedPersistChallenge to Unpublish
 
 The `Get-PublishedPersistChallenge` command returns the record data for all records published from the entire local config. You can filter the results to the records you want to unpublish, and pipe them to `Unpublish-DnsPersistChallenge` along with the necessary plugin parameters.
 
 ```powershell
-$pArgs = {
+$pArgs = @{
     FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
 }
 Get-PublishedPersistChallenge |
