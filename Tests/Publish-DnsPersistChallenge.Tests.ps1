@@ -294,6 +294,27 @@ Describe "Publish-DnsPersistChallenge" {
         $records[0].hashAcctUri | Should -Be 'https://ca.example/hash/existing'
     }
 
+    It "Retains each piped record's expiration" {
+        Remove-Item 'TestDrive:\PersistedChallenges.json' -ErrorAction Ignore
+        $inputRecords = @(
+            [pscustomobject]@{ Domain='one.example.com'; HashedAccountUri='https://ca.example/hash/one'; IssuerDomainName='authority.example'; PersistUntil=[DateTimeOffset]::Parse('2026-12-25Z') }
+            [pscustomobject]@{ Domain='two.example.com'; HashedAccountUri='https://ca.example/hash/two'; IssuerDomainName='authority.example'; PersistUntil=[DateTimeOffset]::Parse('2026-04-01Z') }
+            [pscustomobject]@{ Domain='three.example.com'; HashedAccountUri='https://ca.example/hash/three'; IssuerDomainName='authority.example'; PersistUntil=$null }
+        )
+
+        $output = $inputRecords | Publish-DnsPersistChallenge -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
+
+        $compact = $output -replace '\s+', ''
+        $compact | Should -Match ([regex]::Escape('_validation-persist.one.example.com->"authority.example;accounturi=https://ca.example/hash/one;persistUntil=1798156800"'))
+        $compact | Should -Match ([regex]::Escape('_validation-persist.two.example.com->"authority.example;accounturi=https://ca.example/hash/two;persistUntil=1775001600"'))
+        $compact | Should -Match ([regex]::Escape('_validation-persist.three.example.com->"authority.example;accounturi=https://ca.example/hash/three"'))
+        $records = Get-Content 'TestDrive:\PersistedChallenges.json' -Raw | ConvertFrom-Json
+        @($records) | Should -HaveCount 3
+        ($records | Where-Object fqdn -eq 'one.example.com').persistUntil | Should -Be '1798156800'
+        ($records | Where-Object fqdn -eq 'two.example.com').persistUntil | Should -Be '1775001600'
+        ($records | Where-Object fqdn -eq 'three.example.com').persistUntil | Should -BeNullOrEmpty
+    }
+
     It "Publishes every piped cached record, including literal duplicates" {
         $cachePath = 'TestDrive:\PersistedChallenges.json'
         @(
