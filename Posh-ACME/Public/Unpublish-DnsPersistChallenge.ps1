@@ -165,9 +165,9 @@ function Unpublish-DnsPersistChallenge {
                 }
                 if ($NoDomainCorrelationMitigation) {
                     Write-Verbose "Generating hashed accountUri with no domain correlation mitigation."
-                    $getUriParams.Domain = '*'
+                    $getUriParams.NoDomainCorrelationMitigation = $true
                 }
-                $hashAcctUri = Get-DnsPersistAccountUri @getUriParams
+                $hashAcctUri = (Get-DnsPersistAccountUri @getUriParams).HashedAccountUri
 
                 # add the challenge information to the collection
                 $chalCollection.Add([pscustomobject]@{
@@ -235,7 +235,7 @@ function Unpublish-DnsPersistChallenge {
                 }
                 if ($NoDomainCorrelationMitigation) {
                     Write-Verbose "Generating hashed accountUri with no domain correlation mitigation."
-                    $getUriParams.Domain = '*'
+                    $getUriParams.NoDomainCorrelationMitigation = $true
                 }
                 if ('PreProvision' -eq $PSCmdlet.ParameterSetName) {
                     $fromAcctUri = $Account.location
@@ -247,7 +247,7 @@ function Unpublish-DnsPersistChallenge {
                     $getUriParams.AccountUri    = $fromAcctUri   = $AccountUri
                     $getUriParams.KeyThumbprint = $fromAcctThumb = $KeyThumbprint
                 }
-                $hashAcctUri = Get-DnsPersistAccountUri @getUriParams
+                $hashAcctUri = (Get-DnsPersistAccountUri @getUriParams).HashedAccountUri
             }
 
             # add the challenge information to the collection

@@ -11,7 +11,8 @@ function Get-DnsPersistAccountUri {
         [string]$KeyThumbprint,
         [string]$AccountHashPrefix,
         [ValidateSet('sha-256')]
-        [string]$HashAlgorithm='sha-256'
+        [string]$HashAlgorithm='sha-256',
+        [switch]$NoDomainCorrelationMitigation
     )
 
     # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-02.html#section-4.1
@@ -71,7 +72,8 @@ function Get-DnsPersistAccountUri {
         $Domain = $Domain.Trim().ToLowerInvariant().Normalize([Text.NormalizationForm]::FormC)
 
         # Remove accidentally included wildcard prefix and any trailing dots
-        if ($Domain.StartsWith('*.', [StringComparison]::Ordinal)) {
+        $isWildcard = $Domain.StartsWith('*.', [StringComparison]::Ordinal)
+        if ($isWildcard) {
             $Domain = $Domain.Substring(2)
         }
         $Domain = $Domain.TrimEnd('.')
@@ -85,22 +87,22 @@ function Get-DnsPersistAccountUri {
         $Domain = $idn.GetAscii($Domain).ToLowerInvariant()
         Write-Debug "Domain '$origDomain' normalized to '$Domain'"
 
-        # validate the resulting domain is still valid unless it is using the domain-correlation opt-out ('*')
-        if ($Domain -ne '*') {
-            if ($Domain.Length -gt 253) {
-                throw 'Domain exceeds the maximum length of 253 octets.'
-            }
-            foreach ($label in $Domain.Split('.')) {
-                if ($label.Length -gt 63 -or $label -cnotmatch '^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$') {
-                    throw "Domain contains an invalid DNS label: $label"
-                }
+        if ($Domain.Length -gt 253) {
+            throw 'Domain exceeds the maximum length of 253 octets.'
+        }
+        foreach ($label in $Domain.Split('.')) {
+            if ($label.Length -gt 63 -or $label -cnotmatch '^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$') {
+                throw "Domain contains an invalid DNS label: $label"
             }
         }
 
+        $recordDomain = if ($isWildcard) { "*.$Domain" } else { $Domain }
+        $hashDomain = if ($NoDomainCorrelationMitigation) { '*' } else { $Domain }
+
         # Build the octet sequence: length_of_domain || domain_name || key || account_URL
         $hashInputBytes = [Collections.Generic.List[byte]]::new()
-        $hashInputBytes.Add([byte]$Domain.Length)
-        $hashInputBytes.AddRange([Text.Encoding]::ASCII.GetBytes($Domain))
+        $hashInputBytes.Add([byte]$hashDomain.Length)
+        $hashInputBytes.AddRange([Text.Encoding]::ASCII.GetBytes($hashDomain))
         $hashInputBytes.AddRange([Text.Encoding]::ASCII.GetBytes($thumb))
         $hashInputBytes.AddRange([Text.Encoding]::ASCII.GetBytes($accountLocation))
         $hashInputBytes = $hashInputBytes.ToArray()
@@ -110,6 +112,9 @@ function Get-DnsPersistAccountUri {
         $hashB64 = ConvertTo-Base64Url $sha256.ComputeHash($hashInputBytes)
         $accountUri = '{0}{1}/{2}' -f $AccountHashPrefix, $HashAlgorithm, $hashB64
 
-        return $accountUri
+        [pscustomobject]@{
+            Domain = $recordDomain
+            HashedAccountUri = $accountUri
+        }
     }
 }

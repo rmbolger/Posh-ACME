@@ -374,11 +374,11 @@ Get-PAAccount -List | %{
       <command:verb>Get</command:verb>
       <command:noun>DnsPersistAccountUri</command:noun>
       <maml:description>
-        <maml:para>Calculate the hashed URI required for the accountUri field in a dns-persist-01 validation record.</maml:para>
+        <maml:para>Calculate the domain and hashed account URI for a dns-persist-01 validation record.</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>The _validation-persist TXT record required to satisfy dns-persist-01 challenges requires an accountUri parameter whose value is a hashed URI identifying the ACME account requesting validation. The hashed URI cryptographically binds the account to the domain being validated without publishing the account URL in cleartext.</maml:para>
+      <maml:para>The _validation-persist TXT record required to satisfy dns-persist-01 challenges requires an accountUri parameter whose value is a hashed URI identifying the ACME account requesting validation. The hashed URI cryptographically binds the account to the domain being validated without publishing the account URL in cleartext. Returns a Domain/HashedAccountUri pair for each input, suitable for piping to Publish-DnsPersistChallenge or Unpublish-DnsPersistChallenge.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -386,7 +386,7 @@ Get-PAAccount -List | %{
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
           <maml:name>Domain</maml:name>
           <maml:description>
-            <maml:para>The domain FQDN name that the challenge record will be published for. Do not include wildcard ` .` or `_validation-persist.` prefixes. But you may set the domain to ` ` to opt-out of the default domain correlation privacy protections in the resulting value. See the `-NoDomainCorrelationMitigation` switch in Publish-DnsPersistChallenge (Publish-DnsPersistChallenge.md)for more details.</maml:para>
+            <maml:para>The domain FQDN name that the challenge record will be published for. A leading wildcard prefix is preserved in the output Domain and excluded from the hash input. Do not include `_validation-persist.` or pass a single asterisk as the domain. Use `-NoDomainCorrelationMitigation` to hash an asterisk internally while keeping the real DNS owner name.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -434,13 +434,24 @@ Get-PAAccount -List | %{
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoDomainCorrelationMitigation</maml:name>
+          <maml:description>
+            <maml:para>Hash `*` instead of the domain to produce the same hashed account URI for different domains. The returned Domain remains the normalized DNS owner name, including a wildcard prefix if one was supplied.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
       <command:syntaxItem>
         <maml:name>Get-DnsPersistAccountUri</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
           <maml:name>Domain</maml:name>
           <maml:description>
-            <maml:para>The domain FQDN name that the challenge record will be published for. Do not include wildcard ` .` or `_validation-persist.` prefixes. But you may set the domain to ` ` to opt-out of the default domain correlation privacy protections in the resulting value. See the `-NoDomainCorrelationMitigation` switch in Publish-DnsPersistChallenge (Publish-DnsPersistChallenge.md)for more details.</maml:para>
+            <maml:para>The domain FQDN name that the challenge record will be published for. A leading wildcard prefix is preserved in the output Domain and excluded from the hash input. Do not include `_validation-persist.` or pass a single asterisk as the domain. Use `-NoDomainCorrelationMitigation` to hash an asterisk internally while keeping the real DNS owner name.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -500,6 +511,17 @@ Get-PAAccount -List | %{
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoDomainCorrelationMitigation</maml:name>
+          <maml:description>
+            <maml:para>Hash `*` instead of the domain to produce the same hashed account URI for different domains. The returned Domain remains the normalized DNS owner name, including a wildcard prefix if one was supplied.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
@@ -542,7 +564,7 @@ Get-PAAccount -List | %{
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
         <maml:name>Domain</maml:name>
         <maml:description>
-          <maml:para>The domain FQDN name that the challenge record will be published for. Do not include wildcard ` .` or `_validation-persist.` prefixes. But you may set the domain to ` ` to opt-out of the default domain correlation privacy protections in the resulting value. See the `-NoDomainCorrelationMitigation` switch in Publish-DnsPersistChallenge (Publish-DnsPersistChallenge.md)for more details.</maml:para>
+          <maml:para>The domain FQDN name that the challenge record will be published for. A leading wildcard prefix is preserved in the output Domain and excluded from the hash input. Do not include `_validation-persist.` or pass a single asterisk as the domain. Use `-NoDomainCorrelationMitigation` to hash an asterisk internally while keeping the real DNS owner name.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -575,15 +597,27 @@ Get-PAAccount -List | %{
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>NoDomainCorrelationMitigation</maml:name>
+        <maml:description>
+          <maml:para>Hash `*` instead of the domain to produce the same hashed account URI for different domains. The returned Domain remains the normalized DNS owner name, including a wildcard prefix if one was supplied.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
     </command:parameters>
     <command:inputTypes />
     <command:returnValues>
       <command:returnValue>
         <dev:type>
-          <maml:name>System.String</maml:name>
+          <maml:name>System.Management.Automation.PSCustomObject</maml:name>
         </dev:type>
         <maml:description>
-          <maml:para>The accountUri value for the _validation-persist TXT record.</maml:para>
+          <maml:para>A Domain and HashedAccountUri pair for the _validation-persist TXT record.</maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
@@ -595,7 +629,7 @@ Get-PAAccount -List | %{
         <maml:title> Example 1: Current account and CA published accountHashPrefix </maml:title>
         <dev:code>Get-DnsPersistAccountUri 'example.com'</dev:code>
         <dev:remarks>
-          <maml:para>Get the accountUri value using the current ACME account and the accountHashPrefix value that must be published by the CA.</maml:para>
+          <maml:para>Get the domain and accountUri value using the current ACME account and the accountHashPrefix value that must be published by the CA.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
@@ -603,7 +637,7 @@ Get-PAAccount -List | %{
         <maml:title>- Example 2: Current account and overridden accountHashPrefix -</maml:title>
         <dev:code>Get-DnsPersistAccountUri 'example.com' -AccountHashPrefix 'https://ca.example/account-hash/'</dev:code>
         <dev:remarks>
-          <maml:para>Get the accountUri value using the current ACME account and the specified accountHashPrefix.</maml:para>
+          <maml:para>Get the domain and accountUri value using the current ACME account and the specified accountHashPrefix.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
@@ -611,7 +645,16 @@ Get-PAAccount -List | %{
         <maml:title>-------- Example 3: Explicit account Uri and thumbprint --------</maml:title>
         <dev:code>Get-DnsPersistAccountUri 'example.com' -AccountUri 'https://ca.example/acct/123' -KeyThumbprint 'NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs'</dev:code>
         <dev:remarks>
-          <maml:para>Get the accountUri value using explicit AccountUri and Thumbprint values. This is mostly useful for testing or if you don't have local access to the account private key.</maml:para>
+          <maml:para>Get the domain and accountUri value using explicit AccountUri and Thumbprint values. This is mostly useful for testing or if you don't have local access to the account private key.</maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title> Example 4: Publish several records without domain correlation </maml:title>
+        <dev:code>'example.com','*.example.org' | Get-DnsPersistAccountUri -NoDomainCorrelationMitigation |
+	Publish-DnsPersistChallenge -Plugin FakeDNS -PluginArgs $pArgs</dev:code>
+        <dev:remarks>
+          <maml:para>Both records use the same hashed account URI, but retain their own DNS owner names and wildcard policy.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
@@ -6128,7 +6171,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
           <maml:name>HashedAccountUri</maml:name>
           <maml:description>
-            <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the value normally returned by `Get-DnsPersistAccountUri`.</maml:para>
+            <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by `Get-DnsPersistAccountUri`, which can be piped in with its matching `Domain` property.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -6250,7 +6293,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
         <maml:name>HashedAccountUri</maml:name>
         <maml:description>
-          <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the value normally returned by `Get-DnsPersistAccountUri`.</maml:para>
+          <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by `Get-DnsPersistAccountUri`, which can be piped in with its matching `Domain` property.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -10513,7 +10556,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
           <maml:name>HashedAccountUri</maml:name>
           <maml:description>
-            <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the value normally returned by `Get-DnsPersistAccountUri`.</maml:para>
+            <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by `Get-DnsPersistAccountUri`, which can be piped in with its matching `Domain` property.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -10635,7 +10678,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
         <maml:name>HashedAccountUri</maml:name>
         <maml:description>
-          <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the value normally returned by `Get-DnsPersistAccountUri`.</maml:para>
+          <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by `Get-DnsPersistAccountUri`, which can be piped in with its matching `Domain` property.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>

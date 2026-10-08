@@ -12,23 +12,23 @@ Describe "Unpublish-DnsPersistChallenge" {
     }
 
     It "Uses the domain-correlation opt-out when removing an account object's record" {
-        Mock -ModuleName Posh-ACME Get-DnsPersistAccountUri { 'https://ca.example/hash/shared' }
+        Mock -ModuleName Posh-ACME Get-DnsPersistAccountUri { [pscustomobject]@{ HashedAccountUri = 'https://ca.example/hash/shared' } }
         $output = Unpublish-DnsPersistChallenge -Domain 'example.com' -Account $account `
             -AccountHashPrefix $prefix -IssuerDomainName 'authority.example' `
             -NoDomainCorrelationMitigation -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
 
-        Should -Invoke Get-DnsPersistAccountUri -Exactly 1 -ModuleName Posh-ACME -ParameterFilter { $Domain -eq '*' }
+        Should -Invoke Get-DnsPersistAccountUri -Exactly 1 -ModuleName Posh-ACME -ParameterFilter { $Domain -eq 'example.com' -and $NoDomainCorrelationMitigation }
         ($output -replace '\s+', '') | Should -Match '_validation-persist\.example\.com->"authority\.example;accounturi=https://ca\.example/hash/shared"'
     }
 
     It "Uses the domain-correlation opt-out with explicit account details when removing" {
-        Mock -ModuleName Posh-ACME Get-DnsPersistAccountUri { 'https://ca.example/hash/shared' }
+        Mock -ModuleName Posh-ACME Get-DnsPersistAccountUri { [pscustomobject]@{ HashedAccountUri = 'https://ca.example/hash/shared' } }
         $output = Unpublish-DnsPersistChallenge -Domain 'www.example.com' `
             -AccountUri 'https://ca.example/acct/123' -KeyThumbprint 'thumbprint' `
             -AccountHashPrefix $prefix -IssuerDomainName 'authority.example' `
             -NoDomainCorrelationMitigation -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
 
-        Should -Invoke Get-DnsPersistAccountUri -Exactly 1 -ModuleName Posh-ACME -ParameterFilter { $Domain -eq '*' }
+        Should -Invoke Get-DnsPersistAccountUri -Exactly 1 -ModuleName Posh-ACME -ParameterFilter { $Domain -eq 'www.example.com' -and $NoDomainCorrelationMitigation }
         ($output -replace '\s+', '') | Should -Match '_validation-persist\.www\.example\.com->"authority\.example;accounturi=https://ca\.example/hash/shared"'
     }
 
@@ -39,12 +39,12 @@ Describe "Unpublish-DnsPersistChallenge" {
                 challenges = @([pscustomobject]@{ type = 'dns-persist-01'; issuerDomainNames = @('authority.example') })
             }
         }
-        Mock -ModuleName Posh-ACME Get-DnsPersistAccountUri { 'https://ca.example/hash/shared' }
+        Mock -ModuleName Posh-ACME Get-DnsPersistAccountUri { [pscustomobject]@{ HashedAccountUri = 'https://ca.example/hash/shared' } }
         $order = [pscustomobject]@{ PSTypeName = 'PoshACME.PAOrder'; Plugin = @('Manual'); authorizations = @('https://ca.example/authz/1') }
         $output = Unpublish-DnsPersistChallenge -Order $order -AccountHashPrefix $prefix `
             -Plugin Manual -PluginArgs $pluginArgs -NoDomainCorrelationMitigation 6>&1 | Out-String
 
-        Should -Invoke Get-DnsPersistAccountUri -Exactly 1 -ModuleName Posh-ACME -ParameterFilter { $Domain -eq '*' }
+        Should -Invoke Get-DnsPersistAccountUri -Exactly 1 -ModuleName Posh-ACME -ParameterFilter { $Domain -eq 'order.example.com' -and $NoDomainCorrelationMitigation }
         ($output -replace '\s+', '') | Should -Match '_validation-persist\.order\.example\.com->"authority\.example;accounturi=https://ca\.example/hash/shared"'
     }
 
@@ -53,6 +53,18 @@ Describe "Unpublish-DnsPersistChallenge" {
             Unpublish-DnsPersistChallenge -Domain 'example.com' -HashedAccountUri 'https://ca.example/hash/external' `
                 -IssuerDomainName 'authority.example' -NoDomainCorrelationMitigation -Plugin Manual
         } | Should -Throw
+    }
+
+    It "Unpublishes normalized owners with a shared opt-out hash from the helper" {
+        $records = @('example.com','*.other.example.com') | Get-DnsPersistAccountUri `
+            -Account $account -AccountHashPrefix $prefix -NoDomainCorrelationMitigation
+        $output = $records | Unpublish-DnsPersistChallenge -IssuerDomainName 'authority.example' `
+            -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
+
+        $compact = $output -replace '\s+', ''
+        $uri = $records[0].HashedAccountUri
+        $compact | Should -Match ([regex]::Escape("_validation-persist.example.com->`"authority.example;accounturi=$uri`""))
+        $compact | Should -Match ([regex]::Escape("_validation-persist.other.example.com->`"authority.example;accounturi=$uri;policy=wildcard`""))
     }
 
     It "Unpublishes every cached challenge piped from Get-PublishedPersistChallenge" {

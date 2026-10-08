@@ -196,7 +196,7 @@ Accept wildcard characters: False
 ```
 
 ### -HashedAccountUri
-The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the value normally returned by `Get-DnsPersistAccountUri`.
+The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by `Get-DnsPersistAccountUri`, which can be piped in with its matching `Domain` property.
 
 ```yaml
 Type: String

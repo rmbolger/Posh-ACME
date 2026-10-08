@@ -93,26 +93,17 @@ Publish-DnsPersistChallenge @pubParams
 
 Users running against draft 02 or newer CAs shouldn't generally need to use this method. But it can be useful if the spec changes and you need more granular control over the TXT record values. This method can also be used to publish draft 01 compatible records for use with older implementations like the one Google uses.
 
-The Advanced parameter set for [Publish-DnsPersistChallenge](../Functions/Publish-DnsPersistChallenge) has only one required parameter besides the standard domain list which is `-HashedAccountUri`. It is the string that ends up in the TXT record as `accountUri=<value>`. For draft 02+, it must be populated with the output of [Get-DnsPersistAccountUri](../Functions/Get-DnsPersistAccountUri). The other semi-required parameter is `-IssuerDomainName`. On a draft 02+ CA, it will be auto-populated from the `issuerDomainNames` field of the directory meta object if not explicitly set. If you're working against a draft 01 CA or don't have a server selected, it is required and will throw an error if not included. The rest of the optional parameters are similar to the other parameter sets for things like plugin details, wildcard handling, and optional expiration.
+The Advanced parameter set for [Publish-DnsPersistChallenge](../Functions/Publish-DnsPersistChallenge) has only one required parameter besides the standard domain list which is `-HashedAccountUri`. It is the string that ends up in the TXT record as `accountUri=<value>`. For draft 02+, use the `HashedAccountUri` property from [Get-DnsPersistAccountUri](../Functions/Get-DnsPersistAccountUri), which also returns a matching `Domain` property for direct pipeline binding. The other semi-required parameter is `-IssuerDomainName`. On a draft 02+ CA, it will be auto-populated from the `issuerDomainNames` field of the directory meta object if not explicitly set. If you're working against a draft 01 CA or don't have a server selected, it is required and will throw an error if not included. The rest of the optional parameters are similar to the other parameter sets for things like plugin details, wildcard handling, and optional expiration.
 
 Here is an example of using advanced publishing with a draft 02 compatible CA.
 
 ```powershell
-# AccountUri and KeyThumbprint params can be used instead of an actual account object as well
-$domain = 'example.com'
-$hashedAcctUri = Get-DnsPersistAccountUri $domain -Account (Get-PAAccount)
-
-$pubParams = @{
-    Domain = $domain
-    HashedAccountUri = $hashedAcctUri
-    # IssuerDomainName = 'ca.example'  # Uncomment to override the auto-selected issuer
-    Plugin = 'FakeDNS'
-    PluginArgs = @{
-        FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
-    }
-    Verbose = $true
+$pArgs = @{
+    FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
 }
-Publish-DnsPersistChallenge @pubParams
+# AccountUri and KeyThumbprint can be used instead of a local account.
+'example.com','*.example.org' | Get-DnsPersistAccountUri -Account (Get-PAAccount) |
+    Publish-DnsPersistChallenge -Plugin FakeDNS -PluginArgs $pArgs -Verbose
 ```
 
 For a draft 01 CA, the HashedAccountUri must be set to the actual account URI value. You'll also need to either query an issuer from the `caaIdentities` list or just specify one manually. It will generally match the domain name value used in a CAA record.

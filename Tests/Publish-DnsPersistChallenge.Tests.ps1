@@ -13,7 +13,7 @@ Describe "Publish-DnsPersistChallenge" {
     }
 
     It "Uses the A-label for an account object's record owner and hash" {
-        $expectedUri = Get-DnsPersistAccountUri -Domain 'xn--bcher-kva.de' -Account $account -AccountHashPrefix $prefix
+        $expectedUri = (Get-DnsPersistAccountUri -Domain 'xn--bcher-kva.de' -Account $account -AccountHashPrefix $prefix).HashedAccountUri
         $output = Publish-DnsPersistChallenge -Domain $unicodeDomain -Account $account -AccountHashPrefix $prefix `
             -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
 
@@ -25,6 +25,7 @@ Describe "Publish-DnsPersistChallenge" {
         $thumbprint = 'NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs'
         $expectedUri = Get-DnsPersistAccountUri -Domain 'xn--bcher-kva.de' -AccountUri $accountUri `
             -KeyThumbprint $thumbprint -AccountHashPrefix $prefix
+        $expectedUri = $expectedUri.HashedAccountUri
         $output = Publish-DnsPersistChallenge -Domain "*.$unicodeDomain" -AccountUri $accountUri `
             -KeyThumbprint $thumbprint -AccountHashPrefix $prefix -IssuerDomainName 'authority.example' `
             -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
@@ -48,7 +49,7 @@ Describe "Publish-DnsPersistChallenge" {
             }
         }
         $order = [pscustomobject]@{ PSTypeName = 'PoshACME.PAOrder'; Plugin = @('Manual'); authorizations = @('https://ca.example/authz/1') }
-        $expectedUri = Get-DnsPersistAccountUri -Domain 'xn--bcher-kva.de' -AccountHashPrefix $prefix
+        $expectedUri = (Get-DnsPersistAccountUri -Domain 'xn--bcher-kva.de' -AccountHashPrefix $prefix).HashedAccountUri
         $output = Publish-DnsPersistChallenge -Order $order -AccountHashPrefix $prefix `
             -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
 
@@ -63,6 +64,18 @@ Describe "Publish-DnsPersistChallenge" {
 
         $output | Should -Match '_validation-persist\.xn--bcher-kva\.de ->'
         $output | Should -Match '_validation-persist\.xn--mnchen-3ya\.de ->'
+    }
+
+    It "Publishes normalized owners with a shared opt-out hash from the helper" {
+        $records = @('example.com','*.other.example.com') | Get-DnsPersistAccountUri `
+            -Account $account -AccountHashPrefix $prefix -NoDomainCorrelationMitigation
+        $output = $records | Publish-DnsPersistChallenge -IssuerDomainName 'authority.example' `
+            -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
+
+        $compact = $output -replace '\s+', ''
+        $uri = $records[0].HashedAccountUri
+        $compact | Should -Match ([regex]::Escape("_validation-persist.example.com->`"authority.example;accounturi=$uri`""))
+        $compact | Should -Match ([regex]::Escape("_validation-persist.other.example.com->`"authority.example;accounturi=$uri;policy=wildcard`""))
     }
 
     It "Skips wildcard order auths with NoAutoWildcard while publishing other auths" {
@@ -189,23 +202,23 @@ Describe "Publish-DnsPersistChallenge" {
     }
 
     It "Uses the domain-correlation opt-out when pre-provisioning from an account" {
-        Mock -ModuleName Posh-ACME Get-DnsPersistAccountUri { 'https://ca.example/hash/shared' }
+        Mock -ModuleName Posh-ACME Get-DnsPersistAccountUri { [pscustomobject]@{ HashedAccountUri = 'https://ca.example/hash/shared' } }
         $output = Publish-DnsPersistChallenge -Domain 'example.com' -Account $account `
             -AccountHashPrefix $prefix -IssuerDomainName 'authority.example' `
             -NoDomainCorrelationMitigation -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
 
-        Should -Invoke Get-DnsPersistAccountUri -Exactly 1 -ModuleName Posh-ACME -ParameterFilter { $Domain -eq '*' }
+        Should -Invoke Get-DnsPersistAccountUri -Exactly 1 -ModuleName Posh-ACME -ParameterFilter { $Domain -eq 'example.com' -and $NoDomainCorrelationMitigation }
         ($output -replace '\s+', '') | Should -Match '_validation-persist\.example\.com->"authority\.example;accounturi=https://ca\.example/hash/shared"'
     }
 
     It "Uses the domain-correlation opt-out with explicit account details" {
-        Mock -ModuleName Posh-ACME Get-DnsPersistAccountUri { 'https://ca.example/hash/shared' }
+        Mock -ModuleName Posh-ACME Get-DnsPersistAccountUri { [pscustomobject]@{ HashedAccountUri = 'https://ca.example/hash/shared' } }
         $output = Publish-DnsPersistChallenge -Domain 'www.example.com' `
             -AccountUri 'https://ca.example/acct/123' -KeyThumbprint 'thumbprint' `
             -AccountHashPrefix $prefix -IssuerDomainName 'authority.example' `
             -NoDomainCorrelationMitigation -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
 
-        Should -Invoke Get-DnsPersistAccountUri -Exactly 1 -ModuleName Posh-ACME -ParameterFilter { $Domain -eq '*' }
+        Should -Invoke Get-DnsPersistAccountUri -Exactly 1 -ModuleName Posh-ACME -ParameterFilter { $Domain -eq 'www.example.com' -and $NoDomainCorrelationMitigation }
         ($output -replace '\s+', '') | Should -Match '_validation-persist\.www\.example\.com->"authority\.example;accounturi=https://ca\.example/hash/shared"'
     }
 
@@ -216,12 +229,12 @@ Describe "Publish-DnsPersistChallenge" {
                 challenges = @([pscustomobject]@{ type = 'dns-persist-01'; issuerDomainNames = @('authority.example') })
             }
         }
-        Mock -ModuleName Posh-ACME Get-DnsPersistAccountUri { 'https://ca.example/hash/shared' }
+        Mock -ModuleName Posh-ACME Get-DnsPersistAccountUri { [pscustomobject]@{ HashedAccountUri = 'https://ca.example/hash/shared' } }
         $order = [pscustomobject]@{ PSTypeName = 'PoshACME.PAOrder'; Plugin = @('Manual'); authorizations = @('https://ca.example/authz/1') }
         $output = Publish-DnsPersistChallenge -Order $order -AccountHashPrefix $prefix `
             -Plugin Manual -PluginArgs $pluginArgs -NoDomainCorrelationMitigation 6>&1 | Out-String
 
-        Should -Invoke Get-DnsPersistAccountUri -Exactly 1 -ModuleName Posh-ACME -ParameterFilter { $Domain -eq '*' }
+        Should -Invoke Get-DnsPersistAccountUri -Exactly 1 -ModuleName Posh-ACME -ParameterFilter { $Domain -eq 'order.example.com' -and $NoDomainCorrelationMitigation }
         ($output -replace '\s+', '') | Should -Match '_validation-persist\.order\.example\.com->"authority\.example;accounturi=https://ca\.example/hash/shared"'
     }
 
@@ -250,6 +263,7 @@ Describe "Publish-DnsPersistChallenge" {
         $expiration = [DateTimeOffset]::Parse('2027-04-01T00:00:00Z')
         $expectedUri = Get-DnsPersistAccountUri -Domain 'persist.example.com' -AccountUri $accountUri `
             -KeyThumbprint $thumbprint -AccountHashPrefix $prefix
+        $expectedUri = $expectedUri.HashedAccountUri
 
         Publish-DnsPersistChallenge -Domain '*.persist.example.com' -AccountUri $accountUri `
             -KeyThumbprint $thumbprint -AccountHashPrefix $prefix -IssuerDomainName 'authority.example' `

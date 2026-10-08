@@ -9,25 +9,25 @@ schema: 2.0.0
 
 ## Synopsis
 
-Calculate the hashed URI required for the accountUri field in a dns-persist-01 validation record.
+Calculate the domain and hashed account URI for a dns-persist-01 validation record.
 
 ## Syntax
 
 ### NativeAccount (Default)
 ```powershell
 Get-DnsPersistAccountUri [-Domain] <String> [[-Account] <Object>] [-AccountHashPrefix <String>]
- [-HashAlgorithm <String>] [<CommonParameters>]
+ [-HashAlgorithm <String>] [-NoDomainCorrelationMitigation] [<CommonParameters>]
 ```
 
 ### ExplicitAccountDetails
 ```powershell
 Get-DnsPersistAccountUri [-Domain] <String> [-AccountUri] <String> [-KeyThumbprint] <String>
- [-AccountHashPrefix <String>] [-HashAlgorithm <String>] [<CommonParameters>]
+ [-AccountHashPrefix <String>] [-HashAlgorithm <String>] [-NoDomainCorrelationMitigation] [<CommonParameters>]
 ```
 
 ## Description
 
-The _validation-persist TXT record required to satisfy dns-persist-01 challenges requires an accountUri parameter whose value is a hashed URI identifying the ACME account requesting validation. The hashed URI cryptographically binds the account to the domain being validated without publishing the account URL in cleartext.
+The _validation-persist TXT record required to satisfy dns-persist-01 challenges requires an accountUri parameter whose value is a hashed URI identifying the ACME account requesting validation. The hashed URI cryptographically binds the account to the domain being validated without publishing the account URL in cleartext. Returns a Domain/HashedAccountUri pair for each input, suitable for piping to Publish-DnsPersistChallenge or Unpublish-DnsPersistChallenge.
 
 ## Examples
 
@@ -37,7 +37,7 @@ The _validation-persist TXT record required to satisfy dns-persist-01 challenges
 Get-DnsPersistAccountUri 'example.com'
 ```
 
-Get the accountUri value using the current ACME account and the accountHashPrefix value that must be published by the CA.
+Get the domain and accountUri value using the current ACME account and the accountHashPrefix value that must be published by the CA.
 
 ### Example 2: Current account and overridden accountHashPrefix
 
@@ -45,7 +45,7 @@ Get the accountUri value using the current ACME account and the accountHashPrefi
 Get-DnsPersistAccountUri 'example.com' -AccountHashPrefix 'https://ca.example/account-hash/'
 ```
 
-Get the accountUri value using the current ACME account and the specified accountHashPrefix.
+Get the domain and accountUri value using the current ACME account and the specified accountHashPrefix.
 
 ### Example 3: Explicit account Uri and thumbprint
 
@@ -53,7 +53,16 @@ Get the accountUri value using the current ACME account and the specified accoun
 Get-DnsPersistAccountUri 'example.com' -AccountUri 'https://ca.example/acct/123' -KeyThumbprint 'NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs'
 ```
 
-Get the accountUri value using explicit AccountUri and Thumbprint values. This is mostly useful for testing or if you don't have local access to the account private key.
+Get the domain and accountUri value using explicit AccountUri and Thumbprint values. This is mostly useful for testing or if you don't have local access to the account private key.
+
+### Example 4: Publish several records without domain correlation
+
+```powershell
+'example.com','*.example.org' | Get-DnsPersistAccountUri -NoDomainCorrelationMitigation |
+	Publish-DnsPersistChallenge -Plugin FakeDNS -PluginArgs $pArgs
+```
+
+Both records use the same hashed account URI, but retain their own DNS owner names and wildcard policy.
 
 ## Parameters
 
@@ -103,7 +112,7 @@ Accept wildcard characters: False
 ```
 
 ### -Domain
-The domain FQDN name that the challenge record will be published for. Do not include wildcard `*.` or `_validation-persist.` prefixes. But you may set the domain to `*` to opt-out of the default domain correlation privacy protections in the resulting value. See the `-NoDomainCorrelationMitigation` switch in [Publish-DnsPersistChallenge](Publish-DnsPersistChallenge.md) for more details.
+The domain FQDN name that the challenge record will be published for. A leading wildcard prefix is preserved in the output Domain and excluded from the hash input. Do not include `_validation-persist.` or pass a single asterisk as the domain. Use `-NoDomainCorrelationMitigation` to hash an asterisk internally while keeping the real DNS owner name.
 
 ```yaml
 Type: String
@@ -149,13 +158,28 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -NoDomainCorrelationMitigation
+Hash `*` instead of the domain to produce the same hashed account URI for different domains. The returned Domain remains the normalized DNS owner name, including a wildcard prefix if one was supplied.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## Outputs
 
-### System.String
-The accountUri value for the _validation-persist TXT record.
+### System.Management.Automation.PSCustomObject
+A Domain and HashedAccountUri pair for the _validation-persist TXT record.
 
 ## Related Links
 
