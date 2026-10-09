@@ -41,7 +41,7 @@ Get-PAAccount | Get-DnsAcctLabel
 ```
 
 !!! note
-    At the time of this writing, Google is the only free public CAs supporting this challenge type in production. The self-hosted ACME test server, [Pebble](https://github.com/letsencrypt/pebble), also has support.
+    As of October 2026, Google is the only free public CA supporting this challenge type in production. The self-hosted ACME test server, [Pebble](https://github.com/letsencrypt/pebble), also has support.
 
 ## Using dns-persist-01
 

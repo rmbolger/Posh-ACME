@@ -1,14 +1,17 @@
 # Using Persistent DNS Challenges
 
-There are two main methods to utilize `dns-persist-01` with Posh-ACME. The recommended method is a 2 step process where you pre-provision the TXT records and then create your order with the `-DnsVariant dns-persist-01` parameter and no Plugin or PluginArgs parameters. There are a couple variations of this method depending on who is responsible for publishing the DNS records and where they are publishing from. Alternatively, you can use a method very similarl to the standard `dns-01` challenge where you specify `-Plugin`, `-PluginArgs`, in addition to the new `-DnsVariant dns-persist-01` parameter and let the module provision the persisten records for you. But that sort of defeats the purpose of having a persistent record because you still end up storing the Plugin and PluginArg details with the order.
+There are two main methods to utilize `dns-persist-01` with Posh-ACME. The recommended method is a 2 step process where you pre-provision the TXT records and then create your order with the `-DnsVariant dns-persist-01` parameter and no Plugin or PluginArgs parameters. There are a few variations of this method depending on who is responsible for publishing the DNS records and where they are publishing from. Alternatively, you can use a method very similarl to the standard `dns-01` challenge where you specify `-Plugin`, `-PluginArgs`, in addition to the new `-DnsVariant dns-persist-01` parameter and let the module provision the persisten records for you. But that somewhat defeats the purpose of having a persistent record because you still end up storing the Plugin and PluginArg details with the order.
 
 !!! warning
     This guide assumes you are generally familiar with using Posh-ACME and DNS plugins and have already at least configured an ACME server and setup an ACME account. If not, start with the [Tutorial](../Tutorial) and then come back.
 
 !!! note
-    At the time of this writing, Google is the only free public CA supporting this challenge type in production, but the implementation is currently based on draft 01 of the spec. Posh-ACME supports draft 02 which uses an incompatible TXT record format. However, the Advanced parameter set of [Publish-DnsPersistChallenge](../Functions/Publish-DnsPersistChallenge) can still be used to publish draft 01 compatible TXT records and the rest of the cert request workflows work against draft 01 servers.
+    As of October 2026, Google is the only free public CA supporting this challenge type in production, but the implementation is currently based on draft 01 of the spec. Posh-ACME supports draft 02 which uses an incompatible TXT record format. However, the Advanced parameter set of [Publish-DnsPersistChallenge](../Functions/Publish-DnsPersistChallenge) can still be used to publish draft 01 compatible TXT records and the rest of the cert request workflows work against draft 01 servers.
     
     Let's Encrypt has a `dns-persist-01` implementation on their staging endpoint based on an earlier draft which is largely compatible with draft 01. They have [stated](https://letsencrypt.org/2026/02/18/dns-persist-01) their goal for production rollout is some time in 2026. But that will realistically depend on how quickly the spec approaches finalization and the finalized implementation will likely be based on draft 02 or later. The self-hosted ACME test server, [Pebble](https://github.com/letsencrypt/pebble), also currently has support for draft 01.
+
+!!! warning
+    The spec for this challenge type is still in active development and may still change in such a way that forces breaking changes in the current functionality. I will not be doing major version upgrades for breaking changes specifically surrounding dns-persist-01 support. Please be mindful of the changelog if you attempt to use the new functionality for your own production certs. I will attempt to remain as compatible as possible with the implementations of the free ACME CAs whenever they go into production.
 
 ## Pre-Provisioning
 
@@ -37,14 +40,14 @@ Get-PAOrder | Publish-DnsPersistChallenge -Plugin FakeDNS -PluginArgs $pArgs -Ve
 ```
 
 !!! warning
-    If you are running against a CA like Google that is using draft 01 of the spec, the publish step using the pending order won't work because it requires fields in the server and challenge objects that may not exist on a draft 01 implementation. See the Advanced Publishing section for a workaround.
+    If you are running against a CA like Google that is using draft 01 or earlier of the spec, the publish step using the pending order won't work because it requires fields in the server and challenge objects that may not exist. See the Advanced Publishing section for a workaround.
 
 ### Publish using Account Details
 
 This method still requires a Posh-ACME installation, but doesn't need to be the same system you request certs from as long as you're referencing the same ACME account from both systems. There are two variations and both require an ACME server configured with `Set-PAServer`. The first also requires a local Posh-ACME account created with `New-PAAccount`. The second only requires output from the system with the ACME account.
 
 !!! warning
-    If you are running against a CA like Google that is using draft 01 of the spec, neither of these methods will work because draft 02 TXT records that get published are incompatible with draft 01 implementations. See the Advanced publishing section for a workaround.
+    If you are running against a CA like Google that is using draft 01 or earlier of the spec, neither of these methods will work because draft 02 TXT records that get published are incompatible with draft 01 implementations. See the Advanced publishing section for a workaround.
 
 #### Local Account
 
@@ -109,11 +112,11 @@ $pArgs = @{
 For a draft 01 CA, the HashedAccountUri must be set to the actual account URI value. You'll also need to either query an issuer from the `caaIdentities` list or just specify one manually. It will generally match the domain name value used in a CAA record.
 
 ```powershell
-# from the deployment system
+# use when publishing from the same system the cert is requested from
 $issuer = (Get-PAServer).meta.caaIdentities[0]  # or any value from the list
 $accountUri = (Get-PAAccount).location
 
-# or copy/pasted from the deployment system
+# use when publishing from a different system (copy/paste from the cert system)
 $issuer = 'ca.example'
 $accountUri = 'https://ca.example/acct/123'
 
@@ -240,4 +243,4 @@ Where-Object { $_.Domain -eq 'example.com' } |
 Unpublish-DnsPersistChallenge -Plugin FakeDNS -PluginArgs $pArgs -Verbose
 ```
 
-The data returned by `Get-PublishedPersistChallenge` may include `Domain`, `HashedAccountUri`, `IssuerDomainName`, `AllowWildcard`, `PersistUntil`, `FromAccountUri`, and `FromAccountThumbprint` which can all be filtered against. However, `FromAccountUri` and `FromAccountThumbprint` will be empty for any records published using the Advanced parameter set and they weren't known during publishing.
+The data returned by `Get-PublishedPersistChallenge` may include `Domain`, `HashedAccountUri`, `IssuerDomainName`, `AllowWildcard`, `PersistUntil`, `FromAccountUri`, and `FromAccountThumbprint` which can all be filtered against. However, `FromAccountUri` and `FromAccountThumbprint` will be empty for any records published using the Advanced parameter set because they aren't known when using that parameter set.
