@@ -9,7 +9,7 @@ schema: 2.0.0
 
 ## Synopsis
 
-Get the list of previously published dns-persist-01 records.
+Get the list of dns-persist-01 records previously published from this system.
 
 ## Syntax
 
@@ -21,7 +21,7 @@ Get-PublishedPersistChallenge [<CommonParameters>]
 
 Use this to review what dns-persist-01 records have been published from this Posh-ACME configuration. This is a local only cache, not a live check of your infrastructure, and could be out of date if changes were made outside the context of Posh-ACME or this system.
 
-The results can be piped to `Unpublish-DnsPersistChallenge` or `Publish-DnsPersistChallenge`.
+The results can be piped to [Unpublish-DnsPersistChallenge](Unpublish-DnsPersistChallenge.md) or [Publish-DnsPersistChallenge](Publish-DnsPersistChallenge.md).
 
 ## Examples
 

@@ -46,7 +46,7 @@ Unpublish-DnsPersistChallenge [-Domain] <String[]> -AccountUri <String> -KeyThum
 
 Removes long-lived dns-persist-01 challenge TXT record(s) for the specified order or provided set of domains. For CAs that support it, these can be used instead of more traditional dns-01 challenge records to make cert renewals easier by not requiring updated records during each renewal. Generally, they are set up in advance of a cert order so that you don't have to store your DNS API credentials on the server responsible for getting the certificate.
 
-Unlike `Unpublish-Challenge`, this function does not require running `Save-Challenge` after use for plugins that normally require that step. The save action is run automatically at the end of this function.
+Unlike [Unpublish-Challenge](Unpublish-Challenge.md), this function does not require running [Save-Challenge](Save-Challenge.md) after use for plugins that normally require that step. The save action is run automatically at the end of this function.
 
 ## Examples
 
@@ -197,7 +197,7 @@ Accept wildcard characters: False
 ```
 
 ### -HashedAccountUri
-The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by `Get-DnsPersistAccountUri`, which can be piped in with its matching `Domain` property.
+The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by [Get-DnsPersistAccountUri](Get-DnsPersistAccountUri.md), which can be piped in with its matching `Domain` property.
 
 ```yaml
 Type: String
@@ -360,7 +360,7 @@ Accept wildcard characters: False
 ```
 
 ### -NoDomainCorrelationMitigation
-By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This ensures that observers of the record data won't be correlate that two or more domains are associated with the same ACME account. When specified, this switch opts out of that domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.
+By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.
 
 ```yaml
 Type: SwitchParameter

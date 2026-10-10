@@ -12,7 +12,7 @@ The first, `dns-account-01`, is intended to solve the `dns-01` problem where mul
 The second, `dns-persist-01`, is a bit more exciting and may end up becoming the new most popular challenge type because of the operational hassles it removes. It allows an ACME user to provision a persistent TXT record that no longer needs to updated at every renewal. The record theoretically remains valid forever unless the user chooses to limit its validity with an expiration date or the account key is rotated which both require updating the record value. It's a huge operational win because it removes the need to store API credentials for your DNS server with your ACME client.
 
 !!! warning
-    This guide assumes you are generally familiar with using Posh-ACME and DNS plugins and have already at least configured an ACME server and setup an ACME account. If not, start with the [Tutorial](../Tutorial) and then come back.
+    This guide assumes you are generally familiar with using Posh-ACME and DNS plugins and have already at least configured an ACME server and setup an ACME account. If not, start with the [Tutorial](../Tutorial/index.md) and then come back.
 
 ## Using dns-account-01
 
@@ -45,4 +45,4 @@ Get-PAAccount | Get-DnsAcctLabel
 
 ## Using dns-persist-01
 
-Please see the dedicated [Using Persistent DNS Challenges](Using-Persistent-DNS-Challenges) guide.
+Please see the dedicated [Using Persistent DNS Challenges](Using-Persistent-DNS-Challenges.md) guide.

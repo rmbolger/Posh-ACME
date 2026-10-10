@@ -27,7 +27,7 @@ Get-DnsPersistAccountUri [-Domain] <String> [-AccountUri] <String> [-KeyThumbpri
 
 ## Description
 
-The _validation-persist TXT record required to satisfy dns-persist-01 challenges requires an accountUri parameter whose value is a hashed URI identifying the ACME account requesting validation. The hashed URI cryptographically binds the account to the domain being validated without publishing the account URL in cleartext. Returns a Domain/HashedAccountUri pair for each input, suitable for piping to Publish-DnsPersistChallenge or Unpublish-DnsPersistChallenge.
+The `_validation-persist` TXT record required to satisfy dns-persist-01 challenges requires an `accountUri` parameter whose value is a hashed URI identifying the ACME account requesting validation. The hashed URI cryptographically binds the account to the domain being validated without publishing the account URL in cleartext. Returns a Domain/HashedAccountUri pair for each input, suitable for piping to [Publish-DnsPersistChallenge](Publish-DnsPersistChallenge.md) or [Unpublish-DnsPersistChallenge](Unpublish-DnsPersistChallenge.md).
 
 ## Examples
 

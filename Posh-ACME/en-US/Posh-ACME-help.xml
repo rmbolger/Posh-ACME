@@ -378,7 +378,7 @@ Get-PAAccount -List | %{
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>The _validation-persist TXT record required to satisfy dns-persist-01 challenges requires an accountUri parameter whose value is a hashed URI identifying the ACME account requesting validation. The hashed URI cryptographically binds the account to the domain being validated without publishing the account URL in cleartext. Returns a Domain/HashedAccountUri pair for each input, suitable for piping to Publish-DnsPersistChallenge or Unpublish-DnsPersistChallenge.</maml:para>
+      <maml:para>The `_validation-persist` TXT record required to satisfy dns-persist-01 challenges requires an `accountUri` parameter whose value is a hashed URI identifying the ACME account requesting validation. The hashed URI cryptographically binds the account to the domain being validated without publishing the account URL in cleartext. Returns a Domain/HashedAccountUri pair for each input, suitable for piping to Publish-DnsPersistChallenge (Publish-DnsPersistChallenge.md) or [Unpublish-DnsPersistChallenge](Unpublish-DnsPersistChallenge.md).</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -2170,12 +2170,12 @@ Get-PAAccount -List | %{
       <command:verb>Get</command:verb>
       <command:noun>PublishedPersistChallenge</command:noun>
       <maml:description>
-        <maml:para>Get the list of previously published dns-persist-01 records.</maml:para>
+        <maml:para>Get the list of dns-persist-01 records previously published from this system.</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
       <maml:para>Use this to review what dns-persist-01 records have been published from this Posh-ACME configuration. This is a local only cache, not a live check of your infrastructure, and could be out of date if changes were made outside the context of Posh-ACME or this system.</maml:para>
-      <maml:para>The results can be piped to `Unpublish-DnsPersistChallenge` or `Publish-DnsPersistChallenge`.</maml:para>
+      <maml:para>The results can be piped to Unpublish-DnsPersistChallenge (Unpublish-DnsPersistChallenge.md) or [Publish-DnsPersistChallenge](Publish-DnsPersistChallenge.md).</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -5780,7 +5780,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
     </command:details>
     <maml:description>
       <maml:para>Publishes long-lived dns-persist-01 challenge TXT record(s) for the specified order or provided set of domains. For CAs that support it, these can be used instead of more traditional dns-01 challenge records to make cert renewals easier by not requiring updated records during each renewal. Generally, they are set up in advance of a cert order so that you don't have to store your DNS API credentials on the server responsible for getting the certificate.</maml:para>
-      <maml:para>Unlike `Publish-Challenge`, this function does not require running `Save-Challenge` after use for plugins that normally require that step. The save action is run automatically at the end of this function.</maml:para>
+      <maml:para>Unlike Publish-Challenge (Publish-Challenge.md), this function does not require running [Save-Challenge](Save-Challenge.md)after use for plugins that normally require that step. The save action is run automatically at the end of this function.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -5894,7 +5894,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>NoDomainCorrelationMitigation</maml:name>
           <maml:description>
-            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This ensures that observers of the record data won't be correlate that two or more domains are associated with the same ACME account. When specified, this switch opts out of that domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
+            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -6026,7 +6026,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>NoDomainCorrelationMitigation</maml:name>
           <maml:description>
-            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This ensures that observers of the record data won't be correlate that two or more domains are associated with the same ACME account. When specified, this switch opts out of that domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
+            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -6134,7 +6134,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>NoDomainCorrelationMitigation</maml:name>
           <maml:description>
-            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This ensures that observers of the record data won't be correlate that two or more domains are associated with the same ACME account. When specified, this switch opts out of that domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
+            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -6171,7 +6171,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
           <maml:name>HashedAccountUri</maml:name>
           <maml:description>
-            <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by `Get-DnsPersistAccountUri`, which can be piped in with its matching `Domain` property.</maml:para>
+            <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by Get-DnsPersistAccountUri (Get-DnsPersistAccountUri.md), which can be piped in with its matching `Domain` property.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -6293,7 +6293,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
         <maml:name>HashedAccountUri</maml:name>
         <maml:description>
-          <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by `Get-DnsPersistAccountUri`, which can be piped in with its matching `Domain` property.</maml:para>
+          <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by Get-DnsPersistAccountUri (Get-DnsPersistAccountUri.md), which can be piped in with its matching `Domain` property.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -6401,7 +6401,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>NoDomainCorrelationMitigation</maml:name>
         <maml:description>
-          <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This ensures that observers of the record data won't be correlate that two or more domains are associated with the same ACME account. When specified, this switch opts out of that domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
+          <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
@@ -10165,7 +10165,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
     </command:details>
     <maml:description>
       <maml:para>Removes long-lived dns-persist-01 challenge TXT record(s) for the specified order or provided set of domains. For CAs that support it, these can be used instead of more traditional dns-01 challenge records to make cert renewals easier by not requiring updated records during each renewal. Generally, they are set up in advance of a cert order so that you don't have to store your DNS API credentials on the server responsible for getting the certificate.</maml:para>
-      <maml:para>Unlike `Unpublish-Challenge`, this function does not require running `Save-Challenge` after use for plugins that normally require that step. The save action is run automatically at the end of this function.</maml:para>
+      <maml:para>Unlike Unpublish-Challenge (Unpublish-Challenge.md), this function does not require running [Save-Challenge](Save-Challenge.md)after use for plugins that normally require that step. The save action is run automatically at the end of this function.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -10279,7 +10279,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>NoDomainCorrelationMitigation</maml:name>
           <maml:description>
-            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This ensures that observers of the record data won't be correlate that two or more domains are associated with the same ACME account. When specified, this switch opts out of that domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
+            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -10411,7 +10411,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>NoDomainCorrelationMitigation</maml:name>
           <maml:description>
-            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This ensures that observers of the record data won't be correlate that two or more domains are associated with the same ACME account. When specified, this switch opts out of that domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
+            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -10519,7 +10519,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>NoDomainCorrelationMitigation</maml:name>
           <maml:description>
-            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This ensures that observers of the record data won't be correlate that two or more domains are associated with the same ACME account. When specified, this switch opts out of that domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
+            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -10556,7 +10556,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
           <maml:name>HashedAccountUri</maml:name>
           <maml:description>
-            <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by `Get-DnsPersistAccountUri`, which can be piped in with its matching `Domain` property.</maml:para>
+            <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by Get-DnsPersistAccountUri (Get-DnsPersistAccountUri.md), which can be piped in with its matching `Domain` property.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -10678,7 +10678,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
         <maml:name>HashedAccountUri</maml:name>
         <maml:description>
-          <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by `Get-DnsPersistAccountUri`, which can be piped in with its matching `Domain` property.</maml:para>
+          <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by Get-DnsPersistAccountUri (Get-DnsPersistAccountUri.md), which can be piped in with its matching `Domain` property.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -10786,7 +10786,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>NoDomainCorrelationMitigation</maml:name>
         <maml:description>
-          <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This ensures that observers of the record data won't be correlate that two or more domains are associated with the same ACME account. When specified, this switch opts out of that domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
+          <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
