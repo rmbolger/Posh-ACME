@@ -1,9 +1,9 @@
 # Using Persistent DNS Challenges
 
-There are two main methods to utilize `dns-persist-01` with Posh-ACME. The recommended method is a 2 step process where you pre-provision the TXT records and then create your order with the `-DnsVariant dns-persist-01` parameter and no Plugin or PluginArgs parameters. There are a few variations of this method depending on who is responsible for publishing the DNS records and where they are publishing from. Alternatively, you can use a method very similarl to the standard `dns-01` challenge where you specify `-Plugin`, `-PluginArgs`, in addition to the new `-DnsVariant dns-persist-01` parameter and let the module provision the persisten records for you. But that somewhat defeats the purpose of having a persistent record because you still end up storing the Plugin and PluginArg details with the order.
+There are two main methods to utilize `dns-persist-01` with Posh-ACME. The recommended method is a 2 step process where you pre-provision the TXT records and then create your order with the `-DnsVariant dns-persist-01` parameter and no Plugin or PluginArgs parameters. There are a few variations of this method depending on who is responsible for publishing the DNS records and where they are publishing from. Alternatively, you can use a method very similar to the standard `dns-01` challenge where you specify the new `-DnsVariant dns-persist-01` parameter in addition to the standard `-Plugin`, `-PluginArgs`, and let the module provision the persistent records for you. But that somewhat defeats the purpose of having a persistent record because you still end up storing the plugin credentials with the order.
 
 !!! warning
-    This guide assumes you are generally familiar with using Posh-ACME and DNS plugins and have already at least configured an ACME server and setup an ACME account. If not, start with the [Tutorial](../Tutorial/index.md) and then come back.
+    This guide assumes you are generally familiar with using Posh-ACME and DNS plugins and have already at least configured an ACME server and set up an ACME account. If not, start with the [Tutorial](../Tutorial/index.md) and then come back.
 
 !!! note
     As of October 2026, Google is the only free public CA supporting this challenge type in production, but the implementation is currently based on draft 01 of the spec. Posh-ACME supports draft 02 which uses an incompatible TXT record format. However, the Advanced parameter set of [Publish-DnsPersistChallenge](../Functions/Publish-DnsPersistChallenge.md) can still be used to publish draft 01 compatible TXT records and the rest of the cert request workflows work against draft 01 servers.
@@ -15,9 +15,9 @@ There are two main methods to utilize `dns-persist-01` with Posh-ACME. The recom
 
 ## Pre-Provisioning
 
-Pre-provisioning is a bit more work up front, but you should only have to do it once unless you set an expiration with `-PersistUntil` or your ACME account key is rotated. Both require updating the record value with new data to continue using them. Creating the persistent TXT records can be done either from the same system where Posh-ACME is running from or an entirely different system. It's a bit easier if the secondary system has a copy of Posh-ACME, but not required.
+Pre-provisioning is a bit more work up front, but you should only have to do it once unless you set an expiration with `-PersistUntil` or your ACME account key is rotated. Both require updating the record value with new data to continue using them. Creating persistent TXT records can be done either from the same system where Posh-ACME is running from or an entirely different system. It's a bit easier if the secondary system has a copy of Posh-ACME but not required.
 
-Each unique name published using the variations below will have a persistent record published for it. If there are wildcard names, the `policy=wildcard` flag will be added to that record automatically. This is necessary for the wildcard validations to succeed. You can prevent the automatic addition with the `-NoAutoWildcard` switch, but it will then skip creating the record for that name since it wouldn't work for validation. Alternatively, you may use the `-AllowWildcard` switch to add the wildcard flag to all of the records even if they're not technically needed. Just be aware that the `policy=wildcard` flag authorizes all nested sub-domains for that FQDN and ACME account.
+Each unique name published using the variations below will have a persistent record published for it. If there are wildcard names, the `policy=wildcard` flag will be added to that record automatically. This is necessary for the wildcard validations to succeed. You can prevent the automatic addition with the `-NoAutoWildcard` switch, but it will then skip creating the record for that name since it wouldn't work for validation. Alternatively, you may use the `-AllowWildcard` switch to add the wildcard flag to all records even if not technically needed. Just be aware that the `policy=wildcard` flag authorizes all nested sub-domains for that FQDN and ACME account.
 
 ### Publish from Pending Order
 
@@ -44,7 +44,7 @@ Get-PAOrder | Publish-DnsPersistChallenge -Plugin FakeDNS -PluginArgs $pArgs -Ve
 
 ### Publish using Account Details
 
-This method still requires a Posh-ACME installation, but doesn't need to be the same system you request certs from as long as you're referencing the same ACME account from both systems. There are two variations and both require an ACME server configured with `Set-PAServer`. The first also requires a local Posh-ACME account created with `New-PAAccount`. The second only requires output from the system with the ACME account.
+This method still requires a Posh-ACME installation but doesn't need to be the same system you request certs from as long as you're referencing the same ACME account from both systems. There are two variations and both require an ACME server configured with `Set-PAServer`. The first also requires a local Posh-ACME account created with `New-PAAccount`. The second only requires output from the system with the ACME account.
 
 !!! warning
     If you are running against a CA like Google that is using draft 01 or earlier of the spec, neither of these methods will work because draft 02 TXT records that get published are incompatible with draft 01 implementations. See the Advanced publishing section for a workaround.
@@ -135,7 +135,7 @@ Publish-DnsPersistChallenge @pubParams
 
 ### Obtain Cert Using Pre-Provisioned Records
 
-Ensure all of your authoritative DNS servers are serving the necessary persistent records and then run `New-PACertificate` with any subset of domains you published records for.
+Ensure all your authoritative DNS servers are serving the necessary persistent records and then run `New-PACertificate` with any subset of domains you published records for.
 
 ```powershell
 New-PACertificate 'example.com','www.example.com' -DnsVariant dns-persist-01 -Verbose
@@ -160,7 +160,7 @@ This will auto-create the necessary persistent records if they don't exist. But 
 
 ### Check if dns-persist-01 is supported
 
-Before changing any existing orders and publishing persistent records, double check whether your ACME CA actually supports the spec first.
+Before changing any existing orders and publishing persistent records, double check whether your ACME CA supports the spec first.
 
 Create temporary throw-away order and check the challenge object.
 
@@ -191,7 +191,7 @@ Get-PAServer -Refresh | Select -Expand meta
 
 ### Publish Necessary Records
 
-For draft 02+ servers, use any of the methods above to publish compatible records. For draft 01 servers, use the Advanced Publishing instructions specifically for draft 01. Don't forget to ensure all of your authoritative DNS servers are now serving the necessary persistent records for the order you will be migrating.
+For draft 02+ servers, use any of the methods above to publish compatible records. For draft 01 servers, use the Advanced Publishing instructions specifically for draft 01. Don't forget to ensure all your authoritative DNS servers are now serving the necessary persistent records for the order you will be migrating.
 
 ### Migrate the Order
 
@@ -215,7 +215,7 @@ There are a few reasons you may update or replace your persistent validation rec
 - Your ACME account key changes due to a rollover.
   - Because the record data is partially computed from the account key, changing that key changes what gets computed. The draft 02 spec technically requires CAs to continue allowing validation against records computed from former account keys, but it also strongly suggests clients re-publish new records after a rollover for "operational hygiene and auditing".
 - Your ACME account is deactivated or otherwise lost.
-  - Account deactivation is non-reversible. If it happens on purpose or due to compromise, all of your existing records immediately become invalid and require re-publishing from a new account.
+  - Account deactivation is non-reversible. If it happens on purpose or due to compromise, all your existing records immediately become invalid and require re-publishing from a new account.
 - You used a PersistUntil value that has expired or will expire soon.
   - An expired record won't validate. You'll want to unpublish the old record and republish a new record with an updated PersistUntil value before the old record expires.
 
@@ -232,7 +232,7 @@ Whatever parameters you originally used to publish the record with `Publish-DnsP
 
 ### Pipe Get-PublishedPersistChallenge to Unpublish
 
-The `Get-PublishedPersistChallenge` command returns the record data for all records published from the entire local config. You can filter the results to the records you want to unpublish, and pipe them to `Unpublish-DnsPersistChallenge` along with the necessary plugin parameters.
+The `Get-PublishedPersistChallenge` command returns the record data for all records published from the entire local config. You can filter the results to the records you want to unpublish and pipe them to `Unpublish-DnsPersistChallenge` along with the necessary plugin parameters.
 
 ```powershell
 $pArgs = @{
