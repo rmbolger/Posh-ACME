@@ -82,6 +82,31 @@ function Import-PAConfig {
 
     if ($ImportAccount -or $Level -eq 'Account') {
 
+        # Migrate legacy account files before loading the current account.
+        Get-ChildItem (Join-Path $script:Dir.Folder '\*\acct.json') | ForEach-Object {
+            $acct = Get-Content $_.FullName -Raw | ConvertFrom-Json
+            $needsPubKey = 'pubkey' -notin $acct.PSObject.Properties.Name -or -not $acct.pubkey
+            $needsThumbprint = 'thumbprint' -notin $acct.PSObject.Properties.Name -or -not $acct.thumbprint
+
+            if ($needsPubKey -or $needsThumbprint) {
+                $key = $acct.key | ConvertFrom-Jwk
+                if ($needsPubKey) {
+                    $acct | Add-Member 'pubkey' ($key | ConvertTo-Jwk -PublicOnly) -Force
+                }
+
+                if ($needsThumbprint) {
+                    $publicJwkJson = $key | ConvertTo-Jwk -PublicOnly -AsJson
+                    $publicJwkBytes = [Text.Encoding]::UTF8.GetBytes($publicJwkJson)
+                    $sha256 = [Security.Cryptography.SHA256]::Create()
+                    $thumbprint = ConvertTo-Base64Url ($sha256.ComputeHash($publicJwkBytes))
+                    $acct | Add-Member 'thumbprint' $thumbprint -Force
+                }
+
+                $acct | ConvertTo-Json -Depth 5 |
+                    Out-File $_.FullName -Force -EA Stop
+            }
+        }
+
         # load the current account into memory if it exists on disk
         $acctID = [string](Get-Content (Join-Path $script:Dir.Folder 'current-account.txt') -EA Ignore)
         if (![string]::IsNullOrWhiteSpace($acctID)) {

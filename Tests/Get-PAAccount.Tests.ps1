@@ -113,6 +113,35 @@ Describe "Get-PAAccount" {
             $acct.location  | Should -Be $location
         }
 
+        It "Migrates all legacy accounts before loading the current account" {
+            $acctFiles = Get-ChildItem (Join-Path $TestDrive 'srvr1\*\acct.json')
+            foreach ($acctFile in $acctFiles) {
+                $legacyAcct = Get-Content $acctFile.FullName -Raw | ConvertFrom-Json
+                $legacyAcct.PSObject.Properties.Remove('pubkey')
+                $legacyAcct.PSObject.Properties.Remove('thumbprint')
+                $legacyAcct | ConvertTo-Json -Depth 5 | Set-Content $acctFile.FullName
+            }
+
+            InModuleScope Posh-ACME { Import-PAConfig -Level Account }
+
+            $currentAccount = Get-PAAccount
+            $currentAccount.id | Should -BeExactly 'acct1'
+            $currentAccount.pubkey | Should -Not -BeNullOrEmpty
+            $currentAccount.thumbprint | Should -Not -BeNullOrEmpty
+
+            $accounts = @(Get-PAAccount -List)
+            $accounts.Count | Should -Be 3
+            foreach ($account in $accounts) {
+                $account.pubkey | Should -Not -BeNullOrEmpty
+                $account.thumbprint | Should -Not -BeNullOrEmpty
+
+                $accountFile = Join-Path $account.Folder 'acct.json'
+                $savedAccount = Get-Content $accountFile -Raw | ConvertFrom-Json
+                $savedAccount.pubkey | Should -Not -BeNullOrEmpty
+                $savedAccount.thumbprint | Should -BeExactly $account.thumbprint
+            }
+        }
+
         It "Returns List Results" -TestCases @(
             @{ splat = @{ List=$true                } }
             @{ splat = @{ List=$true; Refresh=$true } }
@@ -124,6 +153,10 @@ Describe "Get-PAAccount" {
             $accts[0].PSObject.TypeNames[0] | Should -Be 'PoshACME.PAAccount'
             $accts[1].PSObject.TypeNames[0] | Should -Be 'PoshACME.PAAccount'
             $accts[2].PSObject.TypeNames[0] | Should -Be 'PoshACME.PAAccount'
+            $accts | ForEach-Object {
+                $_.pubkey | Should -Not -BeNullOrEmpty
+                $_.thumbprint | Should -Not -BeNullOrEmpty
+            }
 
             if ($splat.Refresh) {
                 # only expecting 2 calls because one account is deactivated
