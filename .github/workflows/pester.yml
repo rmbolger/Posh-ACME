@@ -11,7 +11,7 @@ jobs:
       run: |
         Set-PSRepository PSGallery -InstallationPolicy Trusted
         Install-Module Microsoft.PowerShell.SecretManagement
-        Import-Module Pester -MinimumVersion 5.2
+        Import-Module Pester -MaximumVersion 5.99 # highest under 6.x
         Get-Module Pester # show what version in use
         $cfg = [PesterConfiguration]@{Run=@{Exit=$true}}
         Invoke-Pester -Configuration $cfg
@@ -27,7 +27,7 @@ jobs:
       run: |
         Set-PSRepository PSGallery -InstallationPolicy Trusted
         Install-Module Microsoft.PowerShell.SecretManagement
-        Import-Module Pester -MinimumVersion 5.2
+        Import-Module Pester -MaximumVersion 5.99 # highest under 6.x
         Get-Module Pester # show what version in use
         $cfg = [PesterConfiguration]@{Run=@{Exit=$true}}
         Invoke-Pester -Configuration $cfg
