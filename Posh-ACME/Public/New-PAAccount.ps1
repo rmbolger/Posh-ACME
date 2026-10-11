@@ -87,11 +87,7 @@ function New-PAAccount {
 
     } else { # ImportKey parameter set
 
-        try {
-            $kLength = [string]::Empty
-            $acctKey = New-PAKey -KeyFile $KeyFile -ParsedLength ([ref]$kLength)
-            $KeyLength = $kLength
-        }
+        try { $acctKey = New-PAKey -KeyFile $KeyFile }
         catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 
@@ -101,14 +97,14 @@ function New-PAAccount {
     # RS256 for all RSA keys
     # ES256 for P-256 keys, ES384 for P-384 keys, ES512 for P-521 keys
     $alg = 'RS256'
-    if     ($KeyLength -eq 'ec-256') { $alg = 'ES256' }
-    elseif ($KeyLength -eq 'ec-384') { $alg = 'ES384' }
-    elseif ($KeyLength -eq 'ec-521') { $alg = 'ES512' }
+    if     ($acctKey.KeyLength -eq 'ec-256') { $alg = 'ES256' }
+    elseif ($acctKey.KeyLength -eq 'ec-384') { $alg = 'ES384' }
+    elseif ($acctKey.KeyLength -eq 'ec-521') { $alg = 'ES512' }
 
     # build the protected header for the request
     $header = @{
         alg   = $alg
-        jwk   = ($acctKey | ConvertTo-Jwk -PublicOnly)
+        jwk   = $acctKey.JwkPubKey
         nonce = $script:Dir.nonce
         url   = $script:Dir.newAccount
     }
@@ -145,7 +141,7 @@ function New-PAAccount {
 
     # send the request
     try {
-        $response = Invoke-ACME $header $payloadJson -Key $acctKey -EA Stop
+        $response = Invoke-ACME $header $payloadJson -Key $acctKey.Key -EA Stop
     } catch { $PSCmdlet.ThrowTerminatingError($_) }
 
     # grab the Location header
@@ -192,9 +188,11 @@ function New-PAAccount {
         status = $respObj.status
         contact = $respObj.contact
         location = $location
-        key = ($acctKey | ConvertTo-Jwk)
+        key = $acctKey.JwkKey
+        pubkey = $acctKey.JwkPubKey
+        thumbprint = $acctKey.JwkThumbprint
         alg = $alg
-        KeyLength = $KeyLength
+        KeyLength = $acctKey.KeyLength
         # The orders field is supposed to exist according to
         # https://tools.ietf.org/html/rfc8555#section-7.1.2
         # But it's not currently implemented in Boulder. Tracking issue is here:

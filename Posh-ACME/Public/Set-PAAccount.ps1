@@ -181,9 +181,8 @@ function Set-PAAccount {
             if ($KeyFile) {
                 # attempt to use the specified key as the new account key
                 try {
-                    $kLength = [string]::Empty
-                    $newKey = New-PAKey -KeyFile $KeyFile -ParsedLength ([ref]$kLength)
-                    $KeyLength = $kLength
+                    $newKey = New-PAKey -KeyFile $KeyFile
+                    $KeyLength = $newKey.KeyLength
                 }
                 catch { $PSCmdlet.ThrowTerminatingError($_) }
 
@@ -204,20 +203,20 @@ function Set-PAAccount {
 
             # build the inner header
             $innerHead = @{
-                alg  = $alg;
-                jwk  = ($newKey | ConvertTo-Jwk -PublicOnly);
-                url  = $script:Dir.keyChange;
+                alg  = $alg
+                jwk  = $newKey.JwkPubKey
+                url  = $script:Dir.keyChange
             }
 
             # build the inner payload
             $innerPayloadJson = @{
                 account = $acct.location;
-                oldKey  = $acct.Key | ConvertFrom-Jwk | ConvertTo-Jwk -PublicOnly
+                oldKey  = $acct.pubkey
             } | ConvertTo-Json -Depth 5 -Compress
 
             # build the outer payload by creating a signed JWS from
             # the inner header/payload and new key
-            $payloadJson = New-Jws $newKey $innerHead $innerPayloadJson -NoHeaderValidation
+            $payloadJson = New-Jws $newKey.Key $innerHead $innerPayloadJson -NoHeaderValidation
 
             # send the request
             try {
@@ -229,7 +228,9 @@ function Set-PAAccount {
 
                 # So if we haven't caught an error, update the account with the
                 # new key
-                $acct.key = $newKey | ConvertTo-Jwk
+                $acct.key = $newKey.JwkKey
+                $acct.pubkey = $newKey.JwkPubKey
+                $acct.thumbprint = $newKey.JwkThumbprint
                 $acct.alg = $alg
                 $acct.KeyLength = $KeyLength
 

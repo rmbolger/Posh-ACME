@@ -76,7 +76,7 @@ function Export-PluginArgs {
         $uniquePlugins = @($Order.Plugin | Sort-Object -Unique)
 
         # Get all of the plugin specific parameter names for the current plugin list
-        $paramNames = foreach ($p in $uniquePlugins) {
+        $paramNames = @(foreach ($p in $uniquePlugins) {
 
             Write-Debug "Attempting to load plugin $p"
 
@@ -101,7 +101,10 @@ function Export-PluginArgs {
                 ($_ -notin $ignoreParams) -and
                 ($true -notin $cmd.Parameters[$_].Attributes.ValueFromRemainingArguments)
             }
-        }
+        })
+
+        # Add the set of plugin-agnostic parameter names
+        $paramNames += 'PublishPersist'
 
         # Remove any old args that may conflict with the new ones
         foreach ($key in @($pData.Keys)) {

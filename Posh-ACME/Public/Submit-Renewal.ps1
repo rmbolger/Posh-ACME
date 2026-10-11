@@ -59,18 +59,25 @@ function Submit-Renewal {
                     return
                 }
 
-                # skip orders with a Manual DNS plugin by default because they require interactivity
-                if (-not $NoSkipManualDns -and 'Manual' -in @($order.Plugin)) {
-                    Write-Warning "Skipping renewal for order '$($order.Name)' due to Manual DNS plugin. Use -NoSkipManualDns to avoid this."
-                    return
-                }
-
-                Write-Verbose "Renewing certificate for order '$($order.Name)'"
-
                 # If new PluginArgs were specified, store these now.
                 if ($PluginArgs) {
                     Export-PluginArgs -Order $order -PluginArgs $PluginArgs
                 }
+                $pArgs = $order | Get-PAPluginArgs
+
+                # skip orders with a Manual DNS plugin by default because they require interactivity unless
+                # the user specifies -NoSkipManualDns or the order is configured to use dns-persist-01
+                # and not configured to publish the persistent record.
+                if ('Manual' -in @($order.Plugin) -and
+                    -not ($NoSkipManualDns -or
+                        ('dns-persist-01' -eq $order.DnsVariant -and -not $pArgs.PublishPersist)
+                    )
+                ) {
+                    Write-Warning "Skipping renewal for order '$($order.Name)' due to Manual DNS plugin. Use -NoSkipManualDns or disable the PublishPersist saved plugin arg to avoid this."
+                    return
+                }
+
+                Write-Verbose "Renewing certificate for order '$($order.Name)'"
 
                 # Build the parameter list we're going to send to New-PACertificate
                 $certParams = @{}
@@ -94,7 +101,7 @@ function Submit-Renewal {
                 # common params
                 $certParams.Name                = $order.Name
                 $certParams.Plugin              = $order.Plugin
-                $certParams.PluginArgs          = $order | Get-PAPluginArgs
+                $certParams.PluginArgs          = $pArgs
                 $certParams.DnsAlias            = $order.DnsAlias
                 $certParams.UseSerialValidation = $order.UseSerialValidation
                 $certParams.Force               = $Force.IsPresent

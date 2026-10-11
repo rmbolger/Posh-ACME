@@ -13,16 +13,32 @@ Publish dns-persist-01 challenge records.
 
 ## Syntax
 
-### FromOrder (Default)
+### PreProvision (Default)
 ```powershell
-Publish-DnsPersistChallenge [-Order] <Object> [-AllowWildcard] [-UseAllDomains]
- [-PersistUntil <DateTimeOffset>] [<CommonParameters>]
+Publish-DnsPersistChallenge [-Domain] <String[]> -Account <Object> [-AccountHashPrefix <String>]
+ [-IssuerDomainName <String>] [-Plugin <String[]>] [-PluginArgs <Hashtable>] [-AllowWildcard]
+ [-PersistUntil <DateTimeOffset>] [-NoAutoWildcard] [-NoDomainCorrelationMitigation] [<CommonParameters>]
 ```
 
-### Standalone
+### FromOrder
 ```powershell
-Publish-DnsPersistChallenge [-Domain] <String[]> [-AccountUri] <String> [-IssuerDomainName] <String>
- -Plugin <String> [-PluginArgs <Hashtable>] [-AllowWildcard] [-UseAllDomains] [-PersistUntil <DateTimeOffset>]
+Publish-DnsPersistChallenge [-Order] <Object> [-AccountHashPrefix <String>] [-IssuerDomainName <String>]
+ [-Plugin <String[]>] [-PluginArgs <Hashtable>] [-AllowWildcard] [-PersistUntil <DateTimeOffset>]
+ [-NoAutoWildcard] [-NoDomainCorrelationMitigation] [<CommonParameters>]
+```
+
+### Advanced
+```powershell
+Publish-DnsPersistChallenge [-Domain] <String[]> -HashedAccountUri <String> [-IssuerDomainName <String>]
+ [-Plugin <String[]>] [-PluginArgs <Hashtable>] [-AllowWildcard] [-PersistUntil <DateTimeOffset>]
+ [-NoAutoWildcard] [<CommonParameters>]
+```
+
+### PreProvisionExplicit
+```powershell
+Publish-DnsPersistChallenge [-Domain] <String[]> -AccountUri <String> -KeyThumbprint <String>
+ [-AccountHashPrefix <String>] [-IssuerDomainName <String>] [-Plugin <String[]>] [-PluginArgs <Hashtable>]
+ [-AllowWildcard] [-PersistUntil <DateTimeOffset>] [-NoAutoWildcard] [-NoDomainCorrelationMitigation]
  [<CommonParameters>]
 ```
 
@@ -30,70 +46,60 @@ Publish-DnsPersistChallenge [-Domain] <String[]> [-AccountUri] <String> [-Issuer
 
 Publishes long-lived dns-persist-01 challenge TXT record(s) for the specified order or provided set of domains. For CAs that support it, these can be used instead of more traditional dns-01 challenge records to make cert renewals easier by not requiring updated records during each renewal. Generally, they are set up in advance of a cert order so that you don't have to store your DNS API credentials on the server responsible for getting the certificate.
 
-Unlike `Publish-Challenge`, this function does not require running `Save-Challenge` after use for plugins that normally require that step. The save action is run automatically at the end of this function.
+Unlike [Publish-Challenge](Publish-Challenge.md), this function does not require running [Save-Challenge](Save-Challenge.md) after use for plugins that normally require that step. The save action is run automatically at the end of this function.
 
 ## Examples
 
-### Example 1: Publish a standalone challenge
+### Example 1: Pre-Provision a standalone challenge
 
 ```powershell
-# Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
 }
-Publish-DnsPersistChallenge @splat
+Publish-DnsPersistChallenge @pubParams
 ```
 
 Publish a standalone non-wildcard challenge for the current server and account.
 
-### Example 2: Publish a wildcard challenge
+### Example 2: Pre-Provision a wildcard challenge
 
 ```powershell
-# Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
-    Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+$pubParams = @{
+    Domain = '*.example.com'
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
-    AllowWildcard = $true
 }
-Publish-DnsPersistChallenge @splat
+Publish-DnsPersistChallenge @pubParams
 ```
 
-Publish a standalone wildcard challenge for the current server and account. This record will be good for the specified domain and any subdomains including nested subdomains.
+Publish a standalone wildcard challenge for the current server and account. The `policy=wildcard` flag is automatically added to the record due to the "*." prefix and will work for the specified domain and any subdomains including nested subdomains.
 
-### Example 3: Publish an expiring challenge
+### Example 3: Pre-Provision an expiring challenge
 
 ```powershell
-# Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
-    PersistUntil = (Get-Date '2027-04-01')
+    PersistUntil = '2027-04-01Z'
 }
-Publish-DnsPersistChallenge @splat
+Publish-DnsPersistChallenge @pubParams
 ```
 
-Publish a standalone expiring challenge for the current server and account. 
+Publish a standalone expiring challenge for the current server and account.
 
-**WARNING**: In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the *exact* same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and *not* something like `(Get-Date).AddYears(1)`.
+**WARNING**: In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the *exact* same DateTimeOffset value and timezone used with the Publish command. It is highly recommended to use a UTC date-only value you can remember such as `'2027-04-01Z'` and *not* something relative to "now" like `[DateTimeOffset]::Now.AddYears(1)`.
 
 ### Example 4: Publish challenges for an order
 
@@ -105,16 +111,31 @@ Publishes a challenge for each domain in the current order. If you haven't confi
 
 ## Parameters
 
-### -AccountUri
-The ACME account URI the record will be valid for. This can be found by running `(Get-PAAccount).location`
+### -Account
+The ACME account associated with the challenge.
 
 ```yaml
-Type: String
-Parameter Sets: Standalone
+Type: Object
+Parameter Sets: PreProvision
 Aliases:
 
 Required: True
-Position: 1
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AccountUri
+The account URI for the ACME account the persist record is being published for. This should be retrievable using `(Get-PAAccount).location` or provided by the account owner.
+
+```yaml
+Type: String
+Parameter Sets: PreProvisionExplicit
+Aliases:
+
+Required: True
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -125,7 +146,19 @@ If specified, the record will have the `policy=wildcard` option added which allo
 
 ```yaml
 Type: SwitchParameter
-Parameter Sets: (All)
+Parameter Sets: PreProvision, FromOrder, PreProvisionExplicit
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: Advanced
 Aliases:
 
 Required: False
@@ -136,11 +169,11 @@ Accept wildcard characters: False
 ```
 
 ### -Domain
-The domain name that the challenge will be published for. Wildcard domains should have the "*." prefix removed.
+The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.
 
 ```yaml
 Type: String[]
-Parameter Sets: Standalone
+Parameter Sets: PreProvision, PreProvisionExplicit
 Aliases:
 
 Required: True
@@ -150,16 +183,70 @@ Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 
-### -IssuerDomainName
-This should generally match the CA identity value you'd normally put in a CAA record. If the CA publishes the caaIdentities field in their directory object, you can also get it using `(Get-PAServer).meta.caaIdentities[0]`. Lastly, it can be found within the actual dns-persist-01 challenge object in the `issuer-domain-names` field. 
-
 ```yaml
-Type: String
-Parameter Sets: Standalone
+Type: String[]
+Parameter Sets: Advanced
 Aliases:
 
 Required: True
-Position: 2
+Position: 0
+Default value: None
+Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -HashedAccountUri
+The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by [Get-DnsPersistAccountUri](Get-DnsPersistAccountUri.md), which can be piped in with its matching `Domain` property.
+
+```yaml
+Type: String
+Parameter Sets: Advanced
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -IssuerDomainName
+Any of the values published by the CA in the `issuerDomainNames` array in the meta object of its directory. You should be able to query one using `(Get-PAServer).meta.issuerDomainNames[0]`. Challenge objects for `dns-persist-01` must also have this list in a `issuerDomainNames` field. They generally also correspond to the CA identity value you'd normally put in a CAA record.
+
+```yaml
+Type: String
+Parameter Sets: PreProvision, FromOrder, PreProvisionExplicit
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+```yaml
+Type: String
+Parameter Sets: Advanced
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -KeyThumbprint
+The ACME account key JWK thumbprint as calculated by RFC7638.
+
+```yaml
+Type: String
+Parameter Sets: PreProvisionExplicit
+Aliases:
+
+Required: True
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -181,13 +268,25 @@ Accept wildcard characters: False
 ```
 
 ### -PersistUntil
-The DateTimeOffset object for when this records validation will expire.
+A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string.
 
-**WARNING**: In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the *exact* same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and *not* something like `(Get-Date).AddYears(1)`.
+**WARNING**: In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the *exact* same DateTimeOffset value and timezone used with the Publish command. It is highly recommended to use a UTC date-only value you can remember such as `'2027-04-01Z'` and *not* something relative to "now" like `[DateTimeOffset]::Now.AddYears(1)`.
 
 ```yaml
 Type: DateTimeOffset
-Parameter Sets: (All)
+Parameter Sets: PreProvision, FromOrder, PreProvisionExplicit
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+```yaml
+Type: DateTimeOffset
+Parameter Sets: Advanced
 Aliases:
 
 Required: False
@@ -202,11 +301,11 @@ The name of the validation plugin to use.
 Use Get-PAPlugin to display a list of available plugins.
 
 ```yaml
-Type: String
-Parameter Sets: Standalone
+Type: String[]
+Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False
@@ -219,7 +318,7 @@ So if a plugin has a -MyText string and -MyNumber integer parameter, you could s
 
 ```yaml
 Type: Hashtable
-Parameter Sets: Standalone
+Parameter Sets: (All)
 Aliases:
 
 Required: False
@@ -229,14 +328,42 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -UseAllDomains
-When used with `-AllowWildcard`, this switch ensures a record will be created for all domains in the list or order. Otherwise, a record will only be created for the most generic set of domains that will match all domains in the list.
+### -AccountHashPrefix
+The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.
 
-For example, if the list contains `example.com`, `sub1.example.com`, and `example.net`, `-AllowWildcard` will skip creating the record for `sub1.example.com` because it is already covered by the record created for `example.com`. But with `-UseAllDomains`, the `sub1.example.com` record will be created as well.
+```yaml
+Type: String
+Parameter Sets: PreProvision, FromOrder, PreProvisionExplicit
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoAutoWildcard
+When specified, stops the function from automatically adding the `policy=wildcard` parameter to TXT records associated with wildcard domains such as `*.example.com`. If your order or list of domains has a wildcard and this switch is used, the domain will be skipped and an associated warning will be thrown. This switch is ignored when also using `-AllowWildcard`.
 
 ```yaml
 Type: SwitchParameter
 Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoDomainCorrelationMitigation
+By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: PreProvision, FromOrder, PreProvisionExplicit
 Aliases:
 
 Required: False
@@ -253,4 +380,4 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 [Unpublish-DnsPersistChallenge](Unpublish-DnsPersistChallenge.md)
 
-[Get-PAPlugin](Get-PAPlugin.md)
+[Get-DnsPersistAccountUri](Get-DnsPersistAccountUri.md)

@@ -1,14 +1,12 @@
 function New-PAKey {
     [CmdletBinding(DefaultParameterSetName='Generate')]
-    [OutputType('System.Security.Cryptography.AsymmetricAlgorithm')]
+    [OutputType([PSObject])]
     param(
         [Parameter(ParameterSetName='Generate',Position=0)]
         [ValidateScript({Test-ValidKeyLength $_ -ThrowOnFail})]
         [string]$KeyLength='2048',
         [Parameter(ParameterSetName='FromPem',Mandatory)]
-        [string]$KeyFile,
-        [Parameter(ParameterSetName='FromPem',Mandatory)]
-        [ref]$ParsedLength
+        [string]$KeyFile
     )
 
     if ('Generate' -eq $PSCmdlet.ParameterSetName) {
@@ -29,17 +27,17 @@ function New-PAKey {
                 default { throw "Unsupported EC KeySize. Try 256, 384, or 521." }
             }
 
-            # return the new key
-            return [Security.Cryptography.ECDsa]::Create($Curve)
+            $newKey = [Security.Cryptography.ECDsa]::Create($Curve)
 
         } else {
             $KeyType = 'RSA'
             $KeySize = [int]::Parse($KeyLength)
             Write-Debug "Creating new $KeyType $KeySize key"
 
-            # return the new key
-            return [Security.Cryptography.RSACryptoServiceProvider]::new($KeySize)
+            $newKey = [Security.Cryptography.RSACryptoServiceProvider]::new($KeySize)
         }
+
+        $outputKeyLength = $KeyLength
 
     } else {
 
@@ -55,23 +53,32 @@ function New-PAKey {
             throw "Error importing private key. $($_.Exception.Message)"
         }
 
-        # determine the appropriate KeyLength value based on the imported
-        # key's properties
-        $kl = $newKey.KeySize.ToString()
+        # Determine the KeyLength value based on the imported key's properties.
+        $outputKeyLength = $newKey.KeySize.ToString()
         if ($newKey -is [Security.Cryptography.ECDsa]) {
-            $kl = "ec-$kl"
+            $outputKeyLength = "ec-$outputKeyLength"
         }
-        Write-Debug "KeyLength parsed as $kl"
+        Write-Debug "KeyLength parsed as $outputKeyLength"
 
         try {
-            Test-ValidKeyLength $kl -ThrowOnFail | Out-Null
-            # set the [ref] value to pass back
-            $ParsedLength.Value = $kl
+            Test-ValidKeyLength $outputKeyLength -ThrowOnFail | Out-Null
         } catch {
-            throw "Imported key length ($kl) is invalid. $($_.Exception.Message)"
+            throw "Imported key length ($outputKeyLength) is invalid. $($_.Exception.Message)"
         }
+    }
 
-        # return the new key
-        return $newKey
+    $keyJwk = $newKey | ConvertTo-Jwk
+    $pubKeyJwk = $newKey | ConvertTo-Jwk -PublicOnly
+    $pubKeyJwkJson = $pubKeyJwk | ConvertTo-Json -Depth 5 -Compress
+    $pubKeyJwkBytes = [Text.Encoding]::UTF8.GetBytes($pubKeyJwkJson)
+    $sha256 = [Security.Cryptography.SHA256]::Create()
+    $thumbprint = ConvertTo-Base64Url ($sha256.ComputeHash($pubKeyJwkBytes))
+
+    return [pscustomobject]@{
+        Key = $newKey
+        KeyLength = $outputKeyLength
+        JwkKey = $keyJwk
+        JwkPubKey = $pubKeyJwk
+        JwkThumbprint = $thumbprint
     }
 }

@@ -30,7 +30,7 @@ A [PowerShell](#requirements-and-platform-support) module and [ACME](https://too
 - [ARI (ACME Renewal Information)](https://datatracker.ietf.org/doc/draft-ietf-acme-ari/) support based on draft 07.
 - [ACME Profiles](https://datatracker.ietf.org/doc/draft-ietf-acme-profiles/) support based on draft 00.
 - [dns-account-01](https://datatracker.ietf.org/doc/draft-ietf-acme-dns-account-label/03/) experimental support based on draft 03.
-- [dns-persist-01](https://datatracker.ietf.org/doc/draft-ietf-acme-dns-persist/) experimental support based on draft 01.
+- [dns-persist-01](https://datatracker.ietf.org/doc/draft-ietf-acme-dns-persist/) experimental support based on draft 02.
 
 
 ## Installation (Stable)
@@ -87,7 +87,7 @@ $pArgs = @{
 New-PACertificate $certNames -AcceptTOS -Contact $email -Plugin FakeDNS -PluginArgs $pArgs
 ```
 
-To learn how to use a specific plugins, check out `Get-PAPlugin <PluginName> -Guide`. There's also a [tutorial](Tutorial) for a more in-depth guide to using the module.
+To learn how to use a specific plugins, check out `Get-PAPlugin <PluginName> -Guide`. There's also a [tutorial](Tutorial/index.md) for a more in-depth guide to using the module.
 
 The output of `New-PACertificate` is an object that contains various properties about the certificate you generated. Only a subset of the properties are displayed by default. To see the full list including the filesystem paths to any certificate files that were generated, pipe the original output to `Format-List` or use `Get-PACertificate | Format-List`. You can also get the path to the server's config using `(Get-PAServer).Folder`.
 

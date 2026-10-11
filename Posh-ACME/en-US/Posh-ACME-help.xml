@@ -370,6 +370,312 @@ Get-PAAccount -List | %{
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
+      <command:name>Get-DnsPersistAccountUri</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>DnsPersistAccountUri</command:noun>
+      <maml:description>
+        <maml:para>Calculate the domain and hashed account URI for a dns-persist-01 validation record.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>The `_validation-persist` TXT record required to satisfy dns-persist-01 challenges requires an `accountUri` parameter whose value is a hashed URI identifying the ACME account requesting validation. The hashed URI cryptographically binds the account to the domain being validated without publishing the account URL in cleartext. Returns a Domain/HashedAccountUri pair for each input, suitable for piping to Publish-DnsPersistChallenge (Publish-DnsPersistChallenge.md) or [Unpublish-DnsPersistChallenge](Unpublish-DnsPersistChallenge.md).</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-DnsPersistAccountUri</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
+          <maml:name>Domain</maml:name>
+          <maml:description>
+            <maml:para>The domain FQDN name that the challenge record will be published for. A leading wildcard prefix is preserved in the output Domain and excluded from the hash input. Do not include `_validation-persist.` or pass a single asterisk as the domain. Use `-NoDomainCorrelationMitigation` to hash an asterisk internally while keeping the real DNS owner name.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+          <maml:name>Account</maml:name>
+          <maml:description>
+            <maml:para>The ACME account associated with the challenge.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Object</command:parameterValue>
+          <dev:type>
+            <maml:name>Object</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AccountHashPrefix</maml:name>
+          <maml:description>
+            <maml:para>The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>HashAlgorithm</maml:name>
+          <maml:description>
+            <maml:para>The RFC6920 hash algorithm used to hash the necessary data. The only currently supported algorithm is 'sha-256' which is the default. Additional algorithms may be supported in the future but will also require explicit CA support.</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">sha-256</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoDomainCorrelationMitigation</maml:name>
+          <maml:description>
+            <maml:para>Hash `*` instead of the domain to produce the same hashed account URI for different domains. The returned Domain remains the normalized DNS owner name, including a wildcard prefix if one was supplied.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Get-DnsPersistAccountUri</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
+          <maml:name>Domain</maml:name>
+          <maml:description>
+            <maml:para>The domain FQDN name that the challenge record will be published for. A leading wildcard prefix is preserved in the output Domain and excluded from the hash input. Do not include `_validation-persist.` or pass a single asterisk as the domain. Use `-NoDomainCorrelationMitigation` to hash an asterisk internally while keeping the real DNS owner name.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+          <maml:name>AccountUri</maml:name>
+          <maml:description>
+            <maml:para>The account URI for the ACME account the persist record is being published for. This should be retrievable using `(Get-PAAccount).location` or provided by the account owner.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+          <maml:name>KeyThumbprint</maml:name>
+          <maml:description>
+            <maml:para>The ACME account key JWK thumbprint as calculated by RFC7638.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AccountHashPrefix</maml:name>
+          <maml:description>
+            <maml:para>The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>HashAlgorithm</maml:name>
+          <maml:description>
+            <maml:para>The RFC6920 hash algorithm used to hash the necessary data. The only currently supported algorithm is 'sha-256' which is the default. Additional algorithms may be supported in the future but will also require explicit CA support.</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">sha-256</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoDomainCorrelationMitigation</maml:name>
+          <maml:description>
+            <maml:para>Hash `*` instead of the domain to produce the same hashed account URI for different domains. The returned Domain remains the normalized DNS owner name, including a wildcard prefix if one was supplied.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+        <maml:name>Account</maml:name>
+        <maml:description>
+          <maml:para>The ACME account associated with the challenge.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Object</command:parameterValue>
+        <dev:type>
+          <maml:name>Object</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>AccountHashPrefix</maml:name>
+        <maml:description>
+          <maml:para>The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+        <maml:name>AccountUri</maml:name>
+        <maml:description>
+          <maml:para>The account URI for the ACME account the persist record is being published for. This should be retrievable using `(Get-PAAccount).location` or provided by the account owner.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
+        <maml:name>Domain</maml:name>
+        <maml:description>
+          <maml:para>The domain FQDN name that the challenge record will be published for. A leading wildcard prefix is preserved in the output Domain and excluded from the hash input. Do not include `_validation-persist.` or pass a single asterisk as the domain. Use `-NoDomainCorrelationMitigation` to hash an asterisk internally while keeping the real DNS owner name.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>HashAlgorithm</maml:name>
+        <maml:description>
+          <maml:para>The RFC6920 hash algorithm used to hash the necessary data. The only currently supported algorithm is 'sha-256' which is the default. Additional algorithms may be supported in the future but will also require explicit CA support.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+        <maml:name>KeyThumbprint</maml:name>
+        <maml:description>
+          <maml:para>The ACME account key JWK thumbprint as calculated by RFC7638.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>NoDomainCorrelationMitigation</maml:name>
+        <maml:description>
+          <maml:para>Hash `*` instead of the domain to produce the same hashed account URI for different domains. The returned Domain remains the normalized DNS owner name, including a wildcard prefix if one was supplied.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes />
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Management.Automation.PSCustomObject</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>A Domain and HashedAccountUri pair for the _validation-persist TXT record.</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert />
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title> Example 1: Current account and CA published accountHashPrefix </maml:title>
+        <dev:code>Get-DnsPersistAccountUri 'example.com'</dev:code>
+        <dev:remarks>
+          <maml:para>Get the domain and accountUri value using the current ACME account and the accountHashPrefix value that must be published by the CA.</maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>- Example 2: Current account and overridden accountHashPrefix -</maml:title>
+        <dev:code>Get-DnsPersistAccountUri 'example.com' -AccountHashPrefix 'https://ca.example/account-hash/'</dev:code>
+        <dev:remarks>
+          <maml:para>Get the domain and accountUri value using the current ACME account and the specified accountHashPrefix.</maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------- Example 3: Explicit account Uri and thumbprint --------</maml:title>
+        <dev:code>Get-DnsPersistAccountUri 'example.com' -AccountUri 'https://ca.example/acct/123' -KeyThumbprint 'NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs'</dev:code>
+        <dev:remarks>
+          <maml:para>Get the domain and accountUri value using explicit AccountUri and Thumbprint values. This is mostly useful for testing or if you don't have local access to the account private key.</maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title> Example 4: Publish several records without domain correlation </maml:title>
+        <dev:code>'example.com','*.example.org' | Get-DnsPersistAccountUri -NoDomainCorrelationMitigation |
+	Publish-DnsPersistChallenge -Plugin FakeDNS -PluginArgs $pArgs</dev:code>
+        <dev:remarks>
+          <maml:para>Both records use the same hashed account URI, but retain their own DNS owner names and wildcard policy.</maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Get-DnsPersistAccountUri/</maml:uri>
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Publish-DnsPersistChallenge</maml:linkText>
+        <maml:uri></maml:uri>
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Unpublish-DnsPersistChallenge</maml:linkText>
+        <maml:uri></maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
       <command:name>Get-KeyAuthorization</command:name>
       <command:verb>Get</command:verb>
       <command:noun>KeyAuthorization</command:noun>
@@ -1854,6 +2160,63 @@ Get-PAAccount -List | %{
       </maml:navigationLink>
       <maml:navigationLink>
         <maml:linkText>Set-PAServer</maml:linkText>
+        <maml:uri></maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Get-PublishedPersistChallenge</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>PublishedPersistChallenge</command:noun>
+      <maml:description>
+        <maml:para>Get the list of dns-persist-01 records previously published from this system.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Use this to review what dns-persist-01 records have been published from this Posh-ACME configuration. This is a local only cache, not a live check of your infrastructure, and could be out of date if changes were made outside the context of Posh-ACME or this system.</maml:para>
+      <maml:para>The results can be piped to Unpublish-DnsPersistChallenge (Unpublish-DnsPersistChallenge.md) or [Publish-DnsPersistChallenge](Publish-DnsPersistChallenge.md).</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-PublishedPersistChallenge</maml:name>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters />
+    <command:inputTypes />
+    <command:returnValues />
+    <maml:alertSet>
+      <maml:alert />
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>------------------- Example 1: Get the list -------------------</maml:title>
+        <dev:code>Get-PublishedPersistChallenge</dev:code>
+        <dev:remarks>
+          <maml:para>Get all previously published records.</maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>---------------- Example 2: Unpublish a subset ----------------</maml:title>
+        <dev:code>Get-PublishedPersistChallenge | ?{ $_.Domain -like '*example.com' } | Unpublish-DnsPersistChallenge</dev:code>
+        <dev:remarks>
+          <maml:para>Unpublish all records associated with `example.com`</maml:para>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://poshac.me/docs/v4/Functions/Get-PublishedPersistChallenge/</maml:uri>
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Publish-DnsPersistChallenge</maml:linkText>
+        <maml:uri></maml:uri>
+      </maml:navigationLink>
+      <maml:navigationLink>
+        <maml:linkText>Unpublish-DnsPersistChallenge</maml:linkText>
         <maml:uri></maml:uri>
       </maml:navigationLink>
     </command:relatedLinks>
@@ -5417,7 +5780,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
     </command:details>
     <maml:description>
       <maml:para>Publishes long-lived dns-persist-01 challenge TXT record(s) for the specified order or provided set of domains. For CAs that support it, these can be used instead of more traditional dns-01 challenge records to make cert renewals easier by not requiring updated records during each renewal. Generally, they are set up in advance of a cert order so that you don't have to store your DNS API credentials on the server responsible for getting the certificate.</maml:para>
-      <maml:para>Unlike `Publish-Challenge`, this function does not require running `Save-Challenge` after use for plugins that normally require that step. The save action is run automatically at the end of this function.</maml:para>
+      <maml:para>Unlike Publish-Challenge (Publish-Challenge.md), this function does not require running [Save-Challenge](Save-Challenge.md)after use for plugins that normally require that step. The save action is run automatically at the end of this function.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -5425,7 +5788,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
           <maml:name>Domain</maml:name>
           <maml:description>
-            <maml:para>The domain name that the challenge will be published for. Wildcard domains should have the "*." prefix removed.</maml:para>
+            <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
@@ -5434,10 +5797,33 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
-          <maml:name>AccountUri</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Account</maml:name>
           <maml:description>
-            <maml:para>The ACME account URI the record will be valid for. This can be found by running `(Get-PAAccount).location`</maml:para>
+            <maml:para>The ACME account associated with the challenge.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Object</command:parameterValue>
+          <dev:type>
+            <maml:name>Object</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AllowWildcard</maml:name>
+          <maml:description>
+            <maml:para>If specified, the record will have the `policy=wildcard` option added which allows validation of the domain and all nested sub-domains.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IssuerDomainName</maml:name>
+          <maml:description>
+            <maml:para>Any of the values published by the CA in the `issuerDomainNames` array in the meta object of its directory. You should be able to query one using `(Get-PAServer).meta.issuerDomainNames[0]`. Challenge objects for `dns-persist-01` must also have this list in a `issuerDomainNames` field. They generally also correspond to the CA identity value you'd normally put in a CAA record.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -5446,10 +5832,95 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
-          <maml:name>IssuerDomainName</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PersistUntil</maml:name>
           <maml:description>
-            <maml:para>This should generally match the CA identity value you'd normally put in a CAA record. If the CA publishes the caaIdentities field in their directory object, you can also get it using `(Get-PAServer).meta.caaIdentities[0]`. Lastly, it can be found within the actual dns-persist-01 challenge object in the `issuer-domain-names` field.</maml:para>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value and timezone used with the Publish command. It is highly recommended to use a UTC date-only value you can remember such as `'2027-04-01Z'` and not something relative to "now" like `[DateTimeOffset]::Now.AddYears(1)`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
+          <dev:type>
+            <maml:name>DateTimeOffset</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Plugin</maml:name>
+          <maml:description>
+            <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PluginArgs</maml:name>
+          <maml:description>
+            <maml:para>A hashtable containing the plugin arguments to use with the specified plugin. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Hashtable</command:parameterValue>
+          <dev:type>
+            <maml:name>Hashtable</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AccountHashPrefix</maml:name>
+          <maml:description>
+            <maml:para>The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoAutoWildcard</maml:name>
+          <maml:description>
+            <maml:para>When specified, stops the function from automatically adding the `policy=wildcard` parameter to TXT records associated with wildcard domains such as `*.example.com`. If your order or list of domains has a wildcard and this switch is used, the domain will be skipped and an associated warning will be thrown. This switch is ignored when also using `-AllowWildcard`.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoDomainCorrelationMitigation</maml:name>
+          <maml:description>
+            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Publish-DnsPersistChallenge</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
+          <maml:name>Domain</maml:name>
+          <maml:description>
+            <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AccountUri</maml:name>
+          <maml:description>
+            <maml:para>The account URI for the ACME account the persist record is being published for. This should be retrievable using `(Get-PAAccount).location` or provided by the account owner.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -5470,9 +5941,33 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IssuerDomainName</maml:name>
+          <maml:description>
+            <maml:para>Any of the values published by the CA in the `issuerDomainNames` array in the meta object of its directory. You should be able to query one using `(Get-PAServer).meta.issuerDomainNames[0]`. Challenge objects for `dns-persist-01` must also have this list in a `issuerDomainNames` field. They generally also correspond to the CA identity value you'd normally put in a CAA record.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>KeyThumbprint</maml:name>
+          <maml:description>
+            <maml:para>The ACME account key JWK thumbprint as calculated by RFC7638.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>PersistUntil</maml:name>
           <maml:description>
-            <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value and timezone used with the Publish command. It is highly recommended to use a UTC date-only value you can remember such as `'2027-04-01Z'` and not something relative to "now" like `[DateTimeOffset]::Now.AddYears(1)`.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
           <dev:type>
@@ -5481,14 +5976,14 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Plugin</maml:name>
           <maml:description>
             <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>String[]</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
@@ -5506,10 +6001,32 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>UseAllDomains</maml:name>
+          <maml:name>AccountHashPrefix</maml:name>
           <maml:description>
-            <maml:para>When used with `-AllowWildcard`, this switch ensures a record will be created for all domains in the list or order. Otherwise, a record will only be created for the most generic set of domains that will match all domains in the list.</maml:para>
-            <maml:para>For example, if the list contains `example.com`, `sub1.example.com`, and `example.net`, `-AllowWildcard` will skip creating the record for `sub1.example.com` because it is already covered by the record created for `example.com`. But with `-UseAllDomains`, the `sub1.example.com` record will be created as well.</maml:para>
+            <maml:para>The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoAutoWildcard</maml:name>
+          <maml:description>
+            <maml:para>When specified, stops the function from automatically adding the `policy=wildcard` parameter to TXT records associated with wildcard domains such as `*.example.com`. If your order or list of domains has a wildcard and this switch is used, the domain will be skipped and an associated warning will be thrown. This switch is ignored when also using `-AllowWildcard`.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoDomainCorrelationMitigation</maml:name>
+          <maml:description>
+            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -5544,9 +6061,21 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IssuerDomainName</maml:name>
+          <maml:description>
+            <maml:para>Any of the values published by the CA in the `issuerDomainNames` array in the meta object of its directory. You should be able to query one using `(Get-PAServer).meta.issuerDomainNames[0]`. Challenge objects for `dns-persist-01` must also have this list in a `issuerDomainNames` field. They generally also correspond to the CA identity value you'd normally put in a CAA record.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>PersistUntil</maml:name>
           <maml:description>
-            <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value and timezone used with the Publish command. It is highly recommended to use a UTC date-only value you can remember such as `'2027-04-01Z'` and not something relative to "now" like `[DateTimeOffset]::Now.AddYears(1)`.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
           <dev:type>
@@ -5556,10 +6085,153 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>UseAllDomains</maml:name>
+          <maml:name>Plugin</maml:name>
           <maml:description>
-            <maml:para>When used with `-AllowWildcard`, this switch ensures a record will be created for all domains in the list or order. Otherwise, a record will only be created for the most generic set of domains that will match all domains in the list.</maml:para>
-            <maml:para>For example, if the list contains `example.com`, `sub1.example.com`, and `example.net`, `-AllowWildcard` will skip creating the record for `sub1.example.com` because it is already covered by the record created for `example.com`. But with `-UseAllDomains`, the `sub1.example.com` record will be created as well.</maml:para>
+            <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PluginArgs</maml:name>
+          <maml:description>
+            <maml:para>A hashtable containing the plugin arguments to use with the specified plugin. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Hashtable</command:parameterValue>
+          <dev:type>
+            <maml:name>Hashtable</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AccountHashPrefix</maml:name>
+          <maml:description>
+            <maml:para>The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoAutoWildcard</maml:name>
+          <maml:description>
+            <maml:para>When specified, stops the function from automatically adding the `policy=wildcard` parameter to TXT records associated with wildcard domains such as `*.example.com`. If your order or list of domains has a wildcard and this switch is used, the domain will be skipped and an associated warning will be thrown. This switch is ignored when also using `-AllowWildcard`.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoDomainCorrelationMitigation</maml:name>
+          <maml:description>
+            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Publish-DnsPersistChallenge</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
+          <maml:name>Domain</maml:name>
+          <maml:description>
+            <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AllowWildcard</maml:name>
+          <maml:description>
+            <maml:para>If specified, the record will have the `policy=wildcard` option added which allows validation of the domain and all nested sub-domains.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+          <maml:name>HashedAccountUri</maml:name>
+          <maml:description>
+            <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by Get-DnsPersistAccountUri (Get-DnsPersistAccountUri.md), which can be piped in with its matching `Domain` property.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IssuerDomainName</maml:name>
+          <maml:description>
+            <maml:para>Any of the values published by the CA in the `issuerDomainNames` array in the meta object of its directory. You should be able to query one using `(Get-PAServer).meta.issuerDomainNames[0]`. Challenge objects for `dns-persist-01` must also have this list in a `issuerDomainNames` field. They generally also correspond to the CA identity value you'd normally put in a CAA record.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PersistUntil</maml:name>
+          <maml:description>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value and timezone used with the Publish command. It is highly recommended to use a UTC date-only value you can remember such as `'2027-04-01Z'` and not something relative to "now" like `[DateTimeOffset]::Now.AddYears(1)`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
+          <dev:type>
+            <maml:name>DateTimeOffset</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Plugin</maml:name>
+          <maml:description>
+            <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PluginArgs</maml:name>
+          <maml:description>
+            <maml:para>A hashtable containing the plugin arguments to use with the specified plugin. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Hashtable</command:parameterValue>
+          <dev:type>
+            <maml:name>Hashtable</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoAutoWildcard</maml:name>
+          <maml:description>
+            <maml:para>When specified, stops the function from automatically adding the `policy=wildcard` parameter to TXT records associated with wildcard domains such as `*.example.com`. If your order or list of domains has a wildcard and this switch is used, the domain will be skipped and an associated warning will be thrown. This switch is ignored when also using `-AllowWildcard`.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -5570,10 +6242,22 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Account</maml:name>
+        <maml:description>
+          <maml:para>The ACME account associated with the challenge.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Object</command:parameterValue>
+        <dev:type>
+          <maml:name>Object</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>AccountUri</maml:name>
         <maml:description>
-          <maml:para>The ACME account URI the record will be valid for. This can be found by running `(Get-PAAccount).location`</maml:para>
+          <maml:para>The account URI for the ACME account the persist record is being published for. This should be retrievable using `(Get-PAAccount).location` or provided by the account owner.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -5597,7 +6281,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
         <maml:name>Domain</maml:name>
         <maml:description>
-          <maml:para>The domain name that the challenge will be published for. Wildcard domains should have the "*." prefix removed.</maml:para>
+          <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
@@ -5606,10 +6290,34 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+        <maml:name>HashedAccountUri</maml:name>
+        <maml:description>
+          <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by Get-DnsPersistAccountUri (Get-DnsPersistAccountUri.md), which can be piped in with its matching `Domain` property.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>IssuerDomainName</maml:name>
         <maml:description>
-          <maml:para>This should generally match the CA identity value you'd normally put in a CAA record. If the CA publishes the caaIdentities field in their directory object, you can also get it using `(Get-PAServer).meta.caaIdentities[0]`. Lastly, it can be found within the actual dns-persist-01 challenge object in the `issuer-domain-names` field.</maml:para>
+          <maml:para>Any of the values published by the CA in the `issuerDomainNames` array in the meta object of its directory. You should be able to query one using `(Get-PAServer).meta.issuerDomainNames[0]`. Challenge objects for `dns-persist-01` must also have this list in a `issuerDomainNames` field. They generally also correspond to the CA identity value you'd normally put in a CAA record.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>KeyThumbprint</maml:name>
+        <maml:description>
+          <maml:para>The ACME account key JWK thumbprint as calculated by RFC7638.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -5633,7 +6341,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>PersistUntil</maml:name>
         <maml:description>
-          <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+          <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value and timezone used with the Publish command. It is highly recommended to use a UTC date-only value you can remember such as `'2027-04-01Z'` and not something relative to "now" like `[DateTimeOffset]::Now.AddYears(1)`.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
         <dev:type>
@@ -5642,14 +6350,14 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Plugin</maml:name>
         <maml:description>
           <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>String[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
@@ -5667,10 +6375,33 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>UseAllDomains</maml:name>
+        <maml:name>AccountHashPrefix</maml:name>
         <maml:description>
-          <maml:para>When used with `-AllowWildcard`, this switch ensures a record will be created for all domains in the list or order. Otherwise, a record will only be created for the most generic set of domains that will match all domains in the list.</maml:para>
-          <maml:para>For example, if the list contains `example.com`, `sub1.example.com`, and `example.net`, `-AllowWildcard` will skip creating the record for `sub1.example.com` because it is already covered by the record created for `example.com`. But with `-UseAllDomains`, the `sub1.example.com` record will be created as well.</maml:para>
+          <maml:para>The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>NoAutoWildcard</maml:name>
+        <maml:description>
+          <maml:para>When specified, stops the function from automatically adding the `policy=wildcard` parameter to TXT records associated with wildcard domains such as `*.example.com`. If your order or list of domains has a wildcard and this switch is used, the domain will be skipped and an associated warning will be thrown. This switch is ignored when also using `-AllowWildcard`.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>NoDomainCorrelationMitigation</maml:name>
+        <maml:description>
+          <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
@@ -5687,61 +6418,51 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>---------- Example 1: Publish a standalone challenge ----------</maml:title>
-        <dev:code># Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+        <maml:title>------- Example 1: Pre-Provision a standalone challenge -------</maml:title>
+        <dev:code>$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
 }
-Publish-DnsPersistChallenge @splat</dev:code>
+Publish-DnsPersistChallenge @pubParams</dev:code>
         <dev:remarks>
           <maml:para>Publish a standalone non-wildcard challenge for the current server and account.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>----------- Example 2: Publish a wildcard challenge -----------</maml:title>
-        <dev:code># Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
-    Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+        <maml:title>-------- Example 2: Pre-Provision a wildcard challenge --------</maml:title>
+        <dev:code>$pubParams = @{
+    Domain = '*.example.com'
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
-    AllowWildcard = $true
 }
-Publish-DnsPersistChallenge @splat</dev:code>
+Publish-DnsPersistChallenge @pubParams</dev:code>
         <dev:remarks>
-          <maml:para>Publish a standalone wildcard challenge for the current server and account. This record will be good for the specified domain and any subdomains including nested subdomains.</maml:para>
+          <maml:para>Publish a standalone wildcard challenge for the current server and account. The `policy=wildcard` flag is automatically added to the record due to the "*." prefix and will work for the specified domain and any subdomains including nested subdomains.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>----------- Example 3: Publish an expiring challenge -----------</maml:title>
-        <dev:code># Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+        <maml:title>-------- Example 3: Pre-Provision an expiring challenge --------</maml:title>
+        <dev:code>$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
-    PersistUntil = (Get-Date '2027-04-01')
+    PersistUntil = '2027-04-01Z'
 }
-Publish-DnsPersistChallenge @splat</dev:code>
+Publish-DnsPersistChallenge @pubParams</dev:code>
         <dev:remarks>
-          <maml:para>Publish a standalone expiring challenge for the current server and account. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+          <maml:para>Publish a standalone expiring challenge for the current server and account. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value and timezone used with the Publish command. It is highly recommended to use a UTC date-only value you can remember such as `'2027-04-01Z'` and not something relative to "now" like `[DateTimeOffset]::Now.AddYears(1)`.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
@@ -5764,7 +6485,7 @@ Publish-DnsPersistChallenge @splat</dev:code>
         <maml:uri></maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
-        <maml:linkText>Get-PAPlugin</maml:linkText>
+        <maml:linkText>Get-DnsPersistAccountUri</maml:linkText>
         <maml:uri></maml:uri>
       </maml:navigationLink>
     </command:relatedLinks>
@@ -9444,7 +10165,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
     </command:details>
     <maml:description>
       <maml:para>Removes long-lived dns-persist-01 challenge TXT record(s) for the specified order or provided set of domains. For CAs that support it, these can be used instead of more traditional dns-01 challenge records to make cert renewals easier by not requiring updated records during each renewal. Generally, they are set up in advance of a cert order so that you don't have to store your DNS API credentials on the server responsible for getting the certificate.</maml:para>
-      <maml:para>Unlike `Unpublish-Challenge`, this function does not require running `Save-Challenge` after use for plugins that normally require that step. The save action is run automatically at the end of this function.</maml:para>
+      <maml:para>Unlike Unpublish-Challenge (Unpublish-Challenge.md), this function does not require running [Save-Challenge](Save-Challenge.md)after use for plugins that normally require that step. The save action is run automatically at the end of this function.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -9452,7 +10173,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
           <maml:name>Domain</maml:name>
           <maml:description>
-            <maml:para>The domain name that the challenge will be removed for. Wildcard domains should have the "*." prefix removed.</maml:para>
+            <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
@@ -9461,10 +10182,33 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
-          <maml:name>AccountUri</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Account</maml:name>
           <maml:description>
-            <maml:para>The ACME account URI the record will be valid for. This can be found by running `(Get-PAAccount).location`</maml:para>
+            <maml:para>The ACME account associated with the challenge.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Object</command:parameterValue>
+          <dev:type>
+            <maml:name>Object</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AllowWildcard</maml:name>
+          <maml:description>
+            <maml:para>If specified, the record will have the `policy=wildcard` option added which allows validation of the domain and all nested sub-domains.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IssuerDomainName</maml:name>
+          <maml:description>
+            <maml:para>Any of the values published by the CA in the `issuerDomainNames` array in the meta object of its directory. You should be able to query one using `(Get-PAServer).meta.issuerDomainNames[0]`. Challenge objects for `dns-persist-01` must also have this list in a `issuerDomainNames` field. They generally also correspond to the CA identity value you'd normally put in a CAA record.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -9473,10 +10217,95 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
-          <maml:name>IssuerDomainName</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PersistUntil</maml:name>
           <maml:description>
-            <maml:para>This should generally match the CA identity value you'd normally put in a CAA record. If the CA publishes the caaIdentities field in their directory object, you can also get it using `(Get-PAServer).meta.caaIdentities[0]`. Lastly, it can be found within the actual dns-persist-01 challenge object in the `issuer-domain-names` field.</maml:para>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value and timezone used with the Publish command. It is highly recommended to use a UTC date-only value you can remember such as `'2027-04-01Z'` and not something relative to "now" like `[DateTimeOffset]::Now.AddYears(1)`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
+          <dev:type>
+            <maml:name>DateTimeOffset</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Plugin</maml:name>
+          <maml:description>
+            <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PluginArgs</maml:name>
+          <maml:description>
+            <maml:para>A hashtable containing the plugin arguments to use with the specified plugin. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Hashtable</command:parameterValue>
+          <dev:type>
+            <maml:name>Hashtable</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AccountHashPrefix</maml:name>
+          <maml:description>
+            <maml:para>The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoAutoWildcard</maml:name>
+          <maml:description>
+            <maml:para>When specified, stops the function from automatically adding the `policy=wildcard` parameter to TXT records associated with wildcard domains such as `*.example.com`. If your order or list of domains has a wildcard and this switch is used, the domain will be skipped and an associated warning will be thrown. This switch is ignored when also using `-AllowWildcard`.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoDomainCorrelationMitigation</maml:name>
+          <maml:description>
+            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Unpublish-DnsPersistChallenge</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
+          <maml:name>Domain</maml:name>
+          <maml:description>
+            <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AccountUri</maml:name>
+          <maml:description>
+            <maml:para>The account URI for the ACME account the persist record is being published for. This should be retrievable using `(Get-PAAccount).location` or provided by the account owner.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -9497,9 +10326,33 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IssuerDomainName</maml:name>
+          <maml:description>
+            <maml:para>Any of the values published by the CA in the `issuerDomainNames` array in the meta object of its directory. You should be able to query one using `(Get-PAServer).meta.issuerDomainNames[0]`. Challenge objects for `dns-persist-01` must also have this list in a `issuerDomainNames` field. They generally also correspond to the CA identity value you'd normally put in a CAA record.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>KeyThumbprint</maml:name>
+          <maml:description>
+            <maml:para>The ACME account key JWK thumbprint as calculated by RFC7638.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>PersistUntil</maml:name>
           <maml:description>
-            <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value and timezone used with the Publish command. It is highly recommended to use a UTC date-only value you can remember such as `'2027-04-01Z'` and not something relative to "now" like `[DateTimeOffset]::Now.AddYears(1)`.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
           <dev:type>
@@ -9508,14 +10361,14 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Plugin</maml:name>
           <maml:description>
             <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>String[]</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
@@ -9533,10 +10386,32 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>UseAllDomains</maml:name>
+          <maml:name>AccountHashPrefix</maml:name>
           <maml:description>
-            <maml:para>When used with `-AllowWildcard`, this switch ensures a record will be created for all domains in the list or order. Otherwise, a record will only be created for the most generic set of domains that will match all domains in the list.</maml:para>
-            <maml:para>For example, if the list contains `example.com`, `sub1.example.com`, and `example.net`, `-AllowWildcard` will skip creating the record for `sub1.example.com` because it is already covered by the record created for `example.com`. But with `-UseAllDomains`, the `sub1.example.com` record will be created as well.</maml:para>
+            <maml:para>The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoAutoWildcard</maml:name>
+          <maml:description>
+            <maml:para>When specified, stops the function from automatically adding the `policy=wildcard` parameter to TXT records associated with wildcard domains such as `*.example.com`. If your order or list of domains has a wildcard and this switch is used, the domain will be skipped and an associated warning will be thrown. This switch is ignored when also using `-AllowWildcard`.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoDomainCorrelationMitigation</maml:name>
+          <maml:description>
+            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -9571,9 +10446,21 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IssuerDomainName</maml:name>
+          <maml:description>
+            <maml:para>Any of the values published by the CA in the `issuerDomainNames` array in the meta object of its directory. You should be able to query one using `(Get-PAServer).meta.issuerDomainNames[0]`. Challenge objects for `dns-persist-01` must also have this list in a `issuerDomainNames` field. They generally also correspond to the CA identity value you'd normally put in a CAA record.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>PersistUntil</maml:name>
           <maml:description>
-            <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value and timezone used with the Publish command. It is highly recommended to use a UTC date-only value you can remember such as `'2027-04-01Z'` and not something relative to "now" like `[DateTimeOffset]::Now.AddYears(1)`.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
           <dev:type>
@@ -9583,10 +10470,153 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>UseAllDomains</maml:name>
+          <maml:name>Plugin</maml:name>
           <maml:description>
-            <maml:para>When used with `-AllowWildcard`, this switch ensures a record will be created for all domains in the list or order. Otherwise, a record will only be created for the most generic set of domains that will match all domains in the list.</maml:para>
-            <maml:para>For example, if the list contains `example.com`, `sub1.example.com`, and `example.net`, `-AllowWildcard` will skip creating the record for `sub1.example.com` because it is already covered by the record created for `example.com`. But with `-UseAllDomains`, the `sub1.example.com` record will be created as well.</maml:para>
+            <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PluginArgs</maml:name>
+          <maml:description>
+            <maml:para>A hashtable containing the plugin arguments to use with the specified plugin. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Hashtable</command:parameterValue>
+          <dev:type>
+            <maml:name>Hashtable</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AccountHashPrefix</maml:name>
+          <maml:description>
+            <maml:para>The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoAutoWildcard</maml:name>
+          <maml:description>
+            <maml:para>When specified, stops the function from automatically adding the `policy=wildcard` parameter to TXT records associated with wildcard domains such as `*.example.com`. If your order or list of domains has a wildcard and this switch is used, the domain will be skipped and an associated warning will be thrown. This switch is ignored when also using `-AllowWildcard`.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoDomainCorrelationMitigation</maml:name>
+          <maml:description>
+            <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>Unpublish-DnsPersistChallenge</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
+          <maml:name>Domain</maml:name>
+          <maml:description>
+            <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AllowWildcard</maml:name>
+          <maml:description>
+            <maml:para>If specified, the record will have the `policy=wildcard` option added which allows validation of the domain and all nested sub-domains.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+          <maml:name>HashedAccountUri</maml:name>
+          <maml:description>
+            <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by Get-DnsPersistAccountUri (Get-DnsPersistAccountUri.md), which can be piped in with its matching `Domain` property.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IssuerDomainName</maml:name>
+          <maml:description>
+            <maml:para>Any of the values published by the CA in the `issuerDomainNames` array in the meta object of its directory. You should be able to query one using `(Get-PAServer).meta.issuerDomainNames[0]`. Challenge objects for `dns-persist-01` must also have this list in a `issuerDomainNames` field. They generally also correspond to the CA identity value you'd normally put in a CAA record.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PersistUntil</maml:name>
+          <maml:description>
+            <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value and timezone used with the Publish command. It is highly recommended to use a UTC date-only value you can remember such as `'2027-04-01Z'` and not something relative to "now" like `[DateTimeOffset]::Now.AddYears(1)`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
+          <dev:type>
+            <maml:name>DateTimeOffset</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Plugin</maml:name>
+          <maml:description>
+            <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PluginArgs</maml:name>
+          <maml:description>
+            <maml:para>A hashtable containing the plugin arguments to use with the specified plugin. So if a plugin has a -MyText string and -MyNumber integer parameter, you could specify them as `@{MyText='text';MyNumber=1234}`.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Hashtable</command:parameterValue>
+          <dev:type>
+            <maml:name>Hashtable</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>NoAutoWildcard</maml:name>
+          <maml:description>
+            <maml:para>When specified, stops the function from automatically adding the `policy=wildcard` parameter to TXT records associated with wildcard domains such as `*.example.com`. If your order or list of domains has a wildcard and this switch is used, the domain will be skipped and an associated warning will be thrown. This switch is ignored when also using `-AllowWildcard`.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -9597,10 +10627,22 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Account</maml:name>
+        <maml:description>
+          <maml:para>The ACME account associated with the challenge.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Object</command:parameterValue>
+        <dev:type>
+          <maml:name>Object</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>AccountUri</maml:name>
         <maml:description>
-          <maml:para>The ACME account URI the record will be valid for. This can be found by running `(Get-PAAccount).location`</maml:para>
+          <maml:para>The account URI for the ACME account the persist record is being published for. This should be retrievable using `(Get-PAAccount).location` or provided by the account owner.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -9624,7 +10666,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
         <maml:name>Domain</maml:name>
         <maml:description>
-          <maml:para>The domain name that the challenge will be removed for. Wildcard domains should have the "*." prefix removed.</maml:para>
+          <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
@@ -9633,10 +10675,34 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+        <maml:name>HashedAccountUri</maml:name>
+        <maml:description>
+          <maml:para>The hashed account URI identifying the ACME account requesting validation which cryptographically binds the account key to the validation domain. This is the `HashedAccountUri` property returned by Get-DnsPersistAccountUri (Get-DnsPersistAccountUri.md), which can be piped in with its matching `Domain` property.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>IssuerDomainName</maml:name>
         <maml:description>
-          <maml:para>This should generally match the CA identity value you'd normally put in a CAA record. If the CA publishes the caaIdentities field in their directory object, you can also get it using `(Get-PAServer).meta.caaIdentities[0]`. Lastly, it can be found within the actual dns-persist-01 challenge object in the `issuer-domain-names` field.</maml:para>
+          <maml:para>Any of the values published by the CA in the `issuerDomainNames` array in the meta object of its directory. You should be able to query one using `(Get-PAServer).meta.issuerDomainNames[0]`. Challenge objects for `dns-persist-01` must also have this list in a `issuerDomainNames` field. They generally also correspond to the CA identity value you'd normally put in a CAA record.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>KeyThumbprint</maml:name>
+        <maml:description>
+          <maml:para>The ACME account key JWK thumbprint as calculated by RFC7638.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -9660,7 +10726,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>PersistUntil</maml:name>
         <maml:description>
-          <maml:para>The DateTimeOffset object for when this records validation will expire. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+          <maml:para>A DateTimeOffset object for when this record's validation will expire. Can be passed as a locale-dependent parseable string. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value and timezone used with the Publish command. It is highly recommended to use a UTC date-only value you can remember such as `'2027-04-01Z'` and not something relative to "now" like `[DateTimeOffset]::Now.AddYears(1)`.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">DateTimeOffset</command:parameterValue>
         <dev:type>
@@ -9669,14 +10735,14 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Plugin</maml:name>
         <maml:description>
           <maml:para>The name of the validation plugin to use. Use Get-PAPlugin to display a list of available plugins.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>String[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
@@ -9694,10 +10760,33 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>UseAllDomains</maml:name>
+        <maml:name>AccountHashPrefix</maml:name>
         <maml:description>
-          <maml:para>When used with `-AllowWildcard`, this switch ensures a record will be created for all domains in the list or order. Otherwise, a record will only be created for the most generic set of domains that will match all domains in the list.</maml:para>
-          <maml:para>For example, if the list contains `example.com`, `sub1.example.com`, and `example.net`, `-AllowWildcard` will skip creating the record for `sub1.example.com` because it is already covered by the record created for `example.com`. But with `-UseAllDomains`, the `sub1.example.com` record will be created as well.</maml:para>
+          <maml:para>The accountHashPrefix value that the CA must publish in the meta object of its directory. This should be retrievable using `(Get-PAServer).meta.accountHashPrefix`.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>NoAutoWildcard</maml:name>
+        <maml:description>
+          <maml:para>When specified, stops the function from automatically adding the `policy=wildcard` parameter to TXT records associated with wildcard domains such as `*.example.com`. If your order or list of domains has a wildcard and this switch is used, the domain will be skipped and an associated warning will be thrown. This switch is ignored when also using `-AllowWildcard`.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>NoDomainCorrelationMitigation</maml:name>
+        <maml:description>
+          <maml:para>By default, the `accountUri` field in the TXT record value for `_validation-persist` records is partially based on the domain name the record is authorizing. This is to prevent observers of the record data from correlating that a set of domains are associated with the same ACME account. When specified, this switch opts out of the domain correlation mitigation by using `*` as the domain name in the hashed value instead of the actual domain name. This effectively makes the `accountUri` field the same for all records being authorized from the same ACME account. Some users may prefer this operational simplicity in favor of the privacy benefits of the default.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
@@ -9715,18 +10804,15 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
     <command:examples>
       <command:example>
         <maml:title>----------- Example 1: Remove a standalone challenge -----------</maml:title>
-        <dev:code># Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+        <dev:code>$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
 }
-Unpublish-DnsPersistChallenge @splat</dev:code>
+Unpublish-DnsPersistChallenge @pubParams</dev:code>
         <dev:remarks>
           <maml:para>Remove a standalone non-wildcard challenge for the current server and account.</maml:para>
           <maml:para></maml:para>
@@ -9734,19 +10820,16 @@ Unpublish-DnsPersistChallenge @splat</dev:code>
       </command:example>
       <command:example>
         <maml:title>------------ Example 2: Remove a wildcard challenge ------------</maml:title>
-        <dev:code># Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+        <dev:code>$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
     AllowWildcard = $true
 }
-Unpublish-DnsPersistChallenge @splat</dev:code>
+Unpublish-DnsPersistChallenge @pubParams</dev:code>
         <dev:remarks>
           <maml:para>Remove a standalone wildcard challenge for the current server and account.</maml:para>
           <maml:para></maml:para>
@@ -9754,21 +10837,18 @@ Unpublish-DnsPersistChallenge @splat</dev:code>
       </command:example>
       <command:example>
         <maml:title>----------- Example 3: Remove an expiring challenge -----------</maml:title>
-        <dev:code># Assumes the CA you're using publishes the caaIdentities field in their directory
-# endpoint. If not, use the same value as the CA identifier in a CAA record.
-$splat = @{
+        <dev:code>$pubParams = @{
     Domain = 'example.com'
-    AccountUri = (Get-PAAccount).location
-    IssuerDomainName = (Get-PAServer).meta.caaIdentities[0]
+    Account = (Get-PAAccount)
     Plugin = 'FakeDNS'
     PluginArgs = @{
         FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
     }
-    PersistUntil = (Get-Date '2027-04-01')
+    PersistUntil = '2027-04-01Z'
 }
-Unpublish-DnsPersistChallenge @splat</dev:code>
+Unpublish-DnsPersistChallenge @pubParams</dev:code>
         <dev:remarks>
-          <maml:para>Remove a standalone expiring challenge for the current server and account. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value used with the Publish command. It is highly recommended to use specific date value you can remember such as `(Get-Date '2027-04-01')` and not something like `(Get-Date).AddYears(1)`.</maml:para>
+          <maml:para>Remove a standalone expiring challenge for the current server and account. WARNING : In order for `Unpublish-DnsPersistChallenge` to properly find and delete previously created expiring records, you must use the exact same DateTimeOffset value and timezone used with the Publish command. It is highly recommended to use a UTC date-only value you can remember such as `'2027-04-01Z'` and not something relative to "now" like `[DateTimeOffset]::Now.AddYears(1)`.</maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
@@ -9791,7 +10871,7 @@ Unpublish-DnsPersistChallenge @splat</dev:code>
         <maml:uri></maml:uri>
       </maml:navigationLink>
       <maml:navigationLink>
-        <maml:linkText>Get-PAPlugin</maml:linkText>
+        <maml:linkText>Get-DnsPersistAccountUri</maml:linkText>
         <maml:uri></maml:uri>
       </maml:navigationLink>
     </command:relatedLinks>

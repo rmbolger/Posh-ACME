@@ -13,6 +13,7 @@ function Publish-Challenge {
         [Parameter(Position=4)]
         [hashtable]$PluginArgs,
         [string]$DnsAlias,
+        [ValidateSet('dns-01','dns-account-01')]
         [string]$DnsVariant
     )
 
