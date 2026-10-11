@@ -12,6 +12,7 @@ jobs:
         Set-PSRepository PSGallery -InstallationPolicy Trusted
         Install-Module Microsoft.PowerShell.SecretManagement
         Import-Module Pester -MinimumVersion 5.2
+        Get-Module Pester # show what version in use
         $cfg = [PesterConfiguration]@{Run=@{Exit=$true}}
         Invoke-Pester -Configuration $cfg
       shell: powershell
@@ -27,6 +28,7 @@ jobs:
         Set-PSRepository PSGallery -InstallationPolicy Trusted
         Install-Module Microsoft.PowerShell.SecretManagement
         Import-Module Pester -MinimumVersion 5.2
+        Get-Module Pester # show what version in use
         $cfg = [PesterConfiguration]@{Run=@{Exit=$true}}
         Invoke-Pester -Configuration $cfg
       shell: pwsh
