@@ -139,8 +139,9 @@ Describe "Publish-DnsPersistChallenge" {
             -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
 
         ([regex]::Matches($output, '_validation-persist\.example\.com ->')).Count | Should -Be 2
-        $output | Should -Match 'authority\.example; accounturi='
-        $output | Should -Match 'other\.example; accounturi='
+        $compact = $output -replace '\s+', ''
+        $compact | Should -Match 'authority\.example;accounturi='
+        $compact | Should -Match 'other\.example;accounturi='
     }
 
     It "Uses directory metadata for pre-provisioning defaults" {
