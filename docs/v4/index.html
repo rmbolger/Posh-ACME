@@ -661,6 +661,10 @@
       
         
       
+        
+      
+        
+      
     
     
       
@@ -750,6 +754,27 @@
   
   <span class="md-ellipsis">
     Get-DnsAcctLabel
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="Functions/Get-DnsPersistAccountUri/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-DnsPersistAccountUri
   </span>
   
 
@@ -939,6 +964,27 @@
   
   <span class="md-ellipsis">
     Get-PAServer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="Functions/Get-PublishedPersistChallenge/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-PublishedPersistChallenge
   </span>
   
 
@@ -1637,6 +1683,8 @@
       
         
       
+        
+      
     
     
       
@@ -2093,6 +2141,27 @@
   
   <span class="md-ellipsis">
     DNSExit
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="Plugins/DNSMint/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DNSMint
   </span>
   
 
@@ -3679,6 +3748,10 @@
       
         
       
+        
+      
+        
+      
     
     
       
@@ -3757,6 +3830,27 @@
   
   <span class="md-ellipsis">
     (Advanced) Custom Challenge Validation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="Guides/DNS-Challenge-Variants/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DNS Challenge Variants
   </span>
   
 
@@ -3904,6 +3998,27 @@
   
   <span class="md-ellipsis">
     Using DNS Challenge Aliases
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="Guides/Using-Persistent-DNS-Challenges/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Using Persistent DNS Challenges
   </span>
   
 
@@ -4180,7 +4295,7 @@
 <li><a href="https://datatracker.ietf.org/doc/draft-ietf-acme-ari/">ARI (ACME Renewal Information)</a> support based on draft 07.</li>
 <li><a href="https://datatracker.ietf.org/doc/draft-ietf-acme-profiles/">ACME Profiles</a> support based on draft 00.</li>
 <li><a href="https://datatracker.ietf.org/doc/draft-ietf-acme-dns-account-label/03/">dns-account-01</a> experimental support based on draft 03.</li>
-<li><a href="https://datatracker.ietf.org/doc/draft-ietf-acme-dns-persist/">dns-persist-01</a> experimental support based on draft 01.</li>
+<li><a href="https://datatracker.ietf.org/doc/draft-ietf-acme-dns-persist/">dns-persist-01</a> experimental support based on draft 02.</li>
 </ul>
 <h2 id="installation-stable">Installation (Stable)<a class="headerlink" href="#installation-stable" title="Permanent link">&para;</a></h2>
 <p>The latest release can found in the <a href="https://www.powershellgallery.com/packages/Posh-ACME/">PowerShell Gallery</a> or the <a href="https://github.com/rmbolger/Posh-ACME/releases">GitHub releases page</a>. Installing is easiest from the gallery using <code>Install-Module</code>. <em>See <a href="https://docs.microsoft.com/en-us/powershell/scripting/gallery/installing-psget">Installing PowerShellGet</a> if you run into problems with it.</em></p>
@@ -4219,7 +4334,7 @@
 <span class="p">}</span>
 <span class="nb">New-PACertificate</span> <span class="nv">$certNames</span> <span class="n">-AcceptTOS</span> <span class="n">-Contact</span> <span class="nv">$email</span> <span class="n">-Plugin</span> <span class="n">FakeDNS</span> <span class="n">-PluginArgs</span> <span class="nv">$pArgs</span>
 </code></pre></div>
-<p>To learn how to use a specific plugins, check out <code>Get-PAPlugin &lt;PluginName&gt; -Guide</code>. There's also a <a href="Tutorial">tutorial</a> for a more in-depth guide to using the module.</p>
+<p>To learn how to use a specific plugins, check out <code>Get-PAPlugin &lt;PluginName&gt; -Guide</code>. There's also a <a href="Tutorial/">tutorial</a> for a more in-depth guide to using the module.</p>
 <p>The output of <code>New-PACertificate</code> is an object that contains various properties about the certificate you generated. Only a subset of the properties are displayed by default. To see the full list including the filesystem paths to any certificate files that were generated, pipe the original output to <code>Format-List</code> or use <code>Get-PACertificate | Format-List</code>. You can also get the path to the server's config using <code>(Get-PAServer).Folder</code>.</p>
 <h2 id="requirements-and-platform-support">Requirements and Platform Support<a class="headerlink" href="#requirements-and-platform-support" title="Permanent link">&para;</a></h2>
 <ul>
