@@ -1,7 +1,7 @@
 @{
 
 RootModule = 'Posh-ACME.psm1'
-ModuleVersion = '4.34.0'
+ModuleVersion = '4.35.0'
 GUID = '5f52d490-68dd-411c-8252-828c199a4e63'
 Author = 'Ryan Bolger'
 Copyright = '(c) 2018 Ryan Bolger. All rights reserved.'
@@ -89,21 +89,38 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @'
-## 4.34.0 (2026-08-23)
+## 4.35.0 (2026-10-11)
 
-* New DNS Plugins
-  * [Spaceship](https://www.spaceship.com/) (#678)
-  * [GoDaddyV3](https://www.godaddy.com) for use with new V3 API (#686)
-  * [MijnHost](https://mijn.host) (#675) (Thanks @j81blog)
-  * [InfomaniakV2](https://www.infomaniak.com) (#689) (Thanks @Sundypha)
-  * [HostingNL](https://www.hosting.nl/) (684) (Thanks @Tim81)
-* Fixed Gandi API endpoint URL which recently changed. It is now a configurable parameter as well. (#682)
-* Fixed Regru compatibility with API 2 (#687) (Thanks @kropachev)
-* Fixed a number of GCloud issues:
-  * Now works against accounts with many zones (#688)
-  * Fixed future dns-persist-01 support
-  * GCProjectId may now be a comma-delimited string instead of a string array
-  * Better error handling
+* Posh-ACME now fully supports the new `dns-persist-01` challenge type based on [draft-ietf-acme-dns-persist-02](https://datatracker.ietf.org/doc/draft-ietf-acme-dns-persist/). The module still works with draft 01 based ACME servers, but the `_validation-persist` records must already exist or you must use the Advanced parameter set from `Publish-DnsPersistChallenge` to publish draft 01 compatible records. There are no available draft 02 ACME CAs to test against yet, so testing has been largely theoretical and bugs may surface once there is something real to test against.
+  * *Breaking Change:* `-UseAllDomains` has been removed from (Un)Publish-DnsPersistChallenge and they no longer attempt to skip records that would be covered by another wildcard record.
+  * *Breaking Change:* The FromOrder parameter set on (Un)Publish-DnsPersistChallenge should still work the same way, but it will now only work against draft 02+ compatible ACME servers.
+  * *Breaking Change:* Wildcard FQDNs passed to (Un)Publish-DnsPersistChallenge will now automatically have `policy=wildcard` added to that specific record without needing to pass the `-AllowWildcard` switch. Using the switch still adds it to all records being processed.
+  * *Breaking Change:* The Standalone parameter set on (Un)Publish-DnsPersistChallenge has been replaced by 3 new parameter sets. See the function docs and persist guide for details.
+* 3 new parameter sets for (Un)Publish-DnsPersistChallenge that allow for more pre-provisioning use cases, some of which don't require publishing from the same system you request the certs from. See the function docs and persist guide for details.
+* New `Get-DnsPersistAccountUri` function which calculates the hashed accountUri field required in draft 02 compatible persistent records.
+* New `Get-PublishedPersistChallenge` function which returns the details of persistent records published from the current Posh-ACME config. The objects returned by this function can be piped to (Un)Publish-DnsPersistChallenge.
+* `Get-PAAccount` now returns two additional fields
+  * `pubkey` which is a public-only version of the existing ACME account `key` value
+  * `thumbprint` which is the JWK thumbprint value of the ACME account key
+  * The default display output for a PAAccount object now includes the thumbprint by default
+* `dns-persist-01` has been added to the allowed values for `-DnsVariant` on New-PACertificate, New-PAOrder, and Set-PAOrder.
+* The `-DnsVariant` parameter on the older (Un)Publish-Challenge functions only allows `dns-01` and `dns-account-01`.
+* No user-facing changes to `Submit-ChallengeValidation`, but lots of refactoring internally to support the various dns-persist-01 workflows.
+* New "shared" PluginArgs parameter, `PublishPersist`, which must be `$true` if you want a dns-persist-01 enabled order to automatically attempt to re-publish the necessary persistent records on each renewal. This shouldn't be necessary when using pre-provisioning.
+* Added "DNS Challenge Variants" guide
+* Added "Using Persistent DNS Challenges" guide
+* New [DNSMint](https://dnsmint.com/) plugin (#690) (Thanks @kxbnb)
+* Fixed orders using `-CSRPath` throwing an error with CSRs that have the SAN field marked as critical. (#692) (Thanks @nimbice)
+* Fixed parsing of RSA private keys that contained leading zeroes in some fields. (#694) (Thanks @nimbice)
+* Fixed an internal typo related to HurricaneElectricDyn plugin name affecting output of `Get-PAPlugin` and some verbose logging (#695) (Thanks @nimbice)
+* Fixed some dead or redirecting links in the readme (#696) (Thanks @mikeweinberg)
+* Fixed `-CSRPath` workflows ignoring IP SAN fields in the parsed CSR. (#699)
+* Fixed `Set-PAOrder` skipping the cert re-export when `-Profile` is also changed (#698) (Thanks @nimbice)
+* Fixed ARI check using previous order's window when a request fails (#697) (Thanks @nimbice)
+* Fixed `Complete-PAOrder` using the current order instead of a specified order for cert detail output and installation. (#700) (Thanks @nimbice)
+* Fixed orders using `-OCSPMustStaple` failing to generate a CSR. (#701) (Thanks @nimbice)
+* Fixed `Get-PAAccount` and `Test-ValidPlugin` edge case bugs. (#702) (Thanks @nimbice)
+* Fixed a bug when using `Set-PAAccount` with both `-NewName` and `-NoSwitch`. (#703) (Thanks @nimbice)
 '@
 
     }
