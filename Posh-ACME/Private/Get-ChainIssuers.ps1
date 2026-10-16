@@ -30,12 +30,7 @@ function Get-ChainIssuers {
             }
             if ($inCert -and '-----END CERTIFICATE-----' -eq $lines[$i].Trim()) {
                 $certString = $lines[$iBegin..$i] -join [Environment]::NewLine
-                if ($IsCoreCLR -and (Get-Module Posh-ACME.Crypto)) {
-                    $issuerCN = @(Posh-ACME.Crypto\Get-BCCertificateIssuer -Pem $certString)
-                } else {
-                    $cert = Import-Pem -InputString $certString
-                    $issuerCN = $cert.IssuerDN.GetValueList([Org.BouncyCastle.Asn1.X509.X509Name]::CN)
-                }
+                $issuerCN = @(Get-BCCertificateIssuer -Pem $certString)
                 Write-Debug "Found issuer, $issuerCN, in $filePath"
                 [pscustomobject]@{
                     issuer = $issuerCN

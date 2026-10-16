@@ -24,6 +24,8 @@ if (-not $PSEdition -or $PSEdition -eq 'Desktop') {
     }
 }
 
+Import-Module (Join-Path $PSScriptRoot 'CryptoHelper/CryptoHelper.psd1') -Scope Local -ErrorAction Stop
+
 # Get public and private function definition files.
 $Public  = @( Get-ChildItem -Path $PSScriptRoot\Public\*.ps1 -ErrorAction Ignore )
 $Private = @( Get-ChildItem -Path $PSScriptRoot\Private\*.ps1 -ErrorAction Ignore )

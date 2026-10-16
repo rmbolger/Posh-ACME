@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net471;net6.0</TargetFrameworks>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net471" Version="1.0.3" PrivateAssets="all" />
+    <PackageReference Include="PowerShellStandard.Library" Version="5.1.0" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="System.Management.Automation" Version="7.2.0" ExcludeAssets="runtime" PrivateAssets="all" />
+    <ProjectReference Include="..\CryptoHelper.Loader\CryptoHelper.Loader.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.7.0" />
+  </ItemGroup>
+</Project>

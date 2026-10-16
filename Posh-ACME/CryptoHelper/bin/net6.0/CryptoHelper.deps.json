@@ -1,0 +1,328 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "CryptoHelper/1.0.0": {
+        "dependencies": {
+          "BouncyCastle.Cryptography": "2.7.0",
+          "CryptoHelper.Loader": "1.0.0",
+          "System.Management.Automation": "7.2.0"
+        },
+        "runtime": {
+          "CryptoHelper.dll": {}
+        }
+      },
+      "BouncyCastle.Cryptography/2.7.0": {
+        "runtime": {
+          "lib/net6.0/BouncyCastle.Cryptography.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.7.0.16391"
+          }
+        }
+      },
+      "Microsoft.Management.Infrastructure/2.0.0": {
+        "dependencies": {
+          "Microsoft.Management.Infrastructure.Runtime.Win": "2.0.0"
+        }
+      },
+      "Microsoft.Management.Infrastructure.Runtime.Win/2.0.0": {
+        "runtimeTargets": {
+          "runtimes/win-arm/native/Microsoft.Management.Infrastructure.Native.Unmanaged.dll": {
+            "rid": "win-arm",
+            "assetType": "native",
+            "fileVersion": "10.0.18362.1"
+          },
+          "runtimes/win-arm/native/mi.dll": {
+            "rid": "win-arm",
+            "assetType": "native",
+            "fileVersion": "10.0.18362.1"
+          },
+          "runtimes/win-arm/native/miutils.dll": {
+            "rid": "win-arm",
+            "assetType": "native",
+            "fileVersion": "10.0.18362.1"
+          },
+          "runtimes/win-arm64/native/Microsoft.Management.Infrastructure.Native.Unmanaged.dll": {
+            "rid": "win-arm64",
+            "assetType": "native",
+            "fileVersion": "10.0.18362.1"
+          },
+          "runtimes/win-arm64/native/mi.dll": {
+            "rid": "win-arm64",
+            "assetType": "native",
+            "fileVersion": "10.0.18362.1"
+          },
+          "runtimes/win-arm64/native/miutils.dll": {
+            "rid": "win-arm64",
+            "assetType": "native",
+            "fileVersion": "10.0.18362.1"
+          },
+          "runtimes/win10-x64/native/Microsoft.Management.Infrastructure.Native.Unmanaged.dll": {
+            "rid": "win10-x64",
+            "assetType": "native",
+            "fileVersion": "10.0.18362.1"
+          },
+          "runtimes/win10-x64/native/mi.dll": {
+            "rid": "win10-x64",
+            "assetType": "native",
+            "fileVersion": "10.0.18362.1"
+          },
+          "runtimes/win10-x64/native/miutils.dll": {
+            "rid": "win10-x64",
+            "assetType": "native",
+            "fileVersion": "10.0.18362.1"
+          },
+          "runtimes/win10-x86/native/Microsoft.Management.Infrastructure.Native.Unmanaged.dll": {
+            "rid": "win10-x86",
+            "assetType": "native",
+            "fileVersion": "10.0.18362.1"
+          },
+          "runtimes/win10-x86/native/mi.dll": {
+            "rid": "win10-x86",
+            "assetType": "native",
+            "fileVersion": "10.0.18362.1"
+          },
+          "runtimes/win10-x86/native/miutils.dll": {
+            "rid": "win10-x86",
+            "assetType": "native",
+            "fileVersion": "10.0.18362.1"
+          },
+          "runtimes/win7-x64/native/Microsoft.Management.Infrastructure.Native.Unmanaged.dll": {
+            "rid": "win7-x64",
+            "assetType": "native",
+            "fileVersion": "10.0.14394.1000"
+          },
+          "runtimes/win7-x64/native/mi.dll": {
+            "rid": "win7-x64",
+            "assetType": "native",
+            "fileVersion": "10.0.14394.1000"
+          },
+          "runtimes/win7-x64/native/miutils.dll": {
+            "rid": "win7-x64",
+            "assetType": "native",
+            "fileVersion": "10.0.14394.1000"
+          },
+          "runtimes/win7-x86/native/Microsoft.Management.Infrastructure.Native.Unmanaged.dll": {
+            "rid": "win7-x86",
+            "assetType": "native",
+            "fileVersion": "10.0.14394.1000"
+          },
+          "runtimes/win7-x86/native/mi.dll": {
+            "rid": "win7-x86",
+            "assetType": "native",
+            "fileVersion": "10.0.14394.1000"
+          },
+          "runtimes/win7-x86/native/miutils.dll": {
+            "rid": "win7-x86",
+            "assetType": "native",
+            "fileVersion": "10.0.14394.1000"
+          },
+          "runtimes/win8-x64/native/mi.dll": {
+            "rid": "win8-x64",
+            "assetType": "native",
+            "fileVersion": "6.2.9200.22812"
+          },
+          "runtimes/win8-x64/native/miutils.dll": {
+            "rid": "win8-x64",
+            "assetType": "native",
+            "fileVersion": "6.2.9200.22812"
+          },
+          "runtimes/win8-x86/native/mi.dll": {
+            "rid": "win8-x86",
+            "assetType": "native",
+            "fileVersion": "6.2.9200.22812"
+          },
+          "runtimes/win8-x86/native/miutils.dll": {
+            "rid": "win8-x86",
+            "assetType": "native",
+            "fileVersion": "6.2.9200.22812"
+          },
+          "runtimes/win81-x64/native/Microsoft.Management.Infrastructure.Native.Unmanaged.dll": {
+            "rid": "win81-x64",
+            "assetType": "native",
+            "fileVersion": "6.3.9600.16384"
+          },
+          "runtimes/win81-x64/native/mi.dll": {
+            "rid": "win81-x64",
+            "assetType": "native",
+            "fileVersion": "6.3.9600.16384"
+          },
+          "runtimes/win81-x64/native/miutils.dll": {
+            "rid": "win81-x64",
+            "assetType": "native",
+            "fileVersion": "6.3.9600.16384"
+          },
+          "runtimes/win81-x86/native/Microsoft.Management.Infrastructure.Native.Unmanaged.dll": {
+            "rid": "win81-x86",
+            "assetType": "native",
+            "fileVersion": "6.3.9600.16384"
+          },
+          "runtimes/win81-x86/native/mi.dll": {
+            "rid": "win81-x86",
+            "assetType": "native",
+            "fileVersion": "6.3.9600.16384"
+          },
+          "runtimes/win81-x86/native/miutils.dll": {
+            "rid": "win81-x86",
+            "assetType": "native",
+            "fileVersion": "6.3.9600.16384"
+          }
+        }
+      },
+      "Microsoft.PowerShell.Native/7.2.0": {
+        "runtimeTargets": {
+          "runtimes/linux-arm/native/libpsl-native.so": {
+            "rid": "linux-arm",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-arm64/native/libpsl-native.so": {
+            "rid": "linux-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-musl-x64/native/libpsl-native.so": {
+            "rid": "linux-musl-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-x64/native/libmi.so": {
+            "rid": "linux-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-x64/native/libpsl-native.so": {
+            "rid": "linux-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-x64/native/libpsrpclient.so": {
+            "rid": "linux-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/osx/native/libmi.dylib": {
+            "rid": "osx",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/osx/native/libpsl-native.dylib": {
+            "rid": "osx",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/osx/native/libpsrpclient.dylib": {
+            "rid": "osx",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-arm/native/PowerShell.Core.Instrumentation.dll": {
+            "rid": "win-arm",
+            "assetType": "native",
+            "fileVersion": "10.0.10011.16384"
+          },
+          "runtimes/win-arm/native/pwrshplugin.dll": {
+            "rid": "win-arm",
+            "assetType": "native",
+            "fileVersion": "10.0.10011.16384"
+          },
+          "runtimes/win-arm64/native/PowerShell.Core.Instrumentation.dll": {
+            "rid": "win-arm64",
+            "assetType": "native",
+            "fileVersion": "10.0.10011.16384"
+          },
+          "runtimes/win-arm64/native/pwrshplugin.dll": {
+            "rid": "win-arm64",
+            "assetType": "native",
+            "fileVersion": "10.0.10011.16384"
+          },
+          "runtimes/win-x64/native/PowerShell.Core.Instrumentation.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "10.0.10011.16384"
+          },
+          "runtimes/win-x64/native/pwrshplugin.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "10.0.10011.16384"
+          },
+          "runtimes/win-x86/native/PowerShell.Core.Instrumentation.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "10.0.10011.16384"
+          },
+          "runtimes/win-x86/native/pwrshplugin.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "10.0.10011.16384"
+          }
+        }
+      },
+      "System.Management.Automation/7.2.0": {
+        "dependencies": {
+          "Microsoft.Management.Infrastructure": "2.0.0",
+          "Microsoft.PowerShell.Native": "7.2.0"
+        }
+      },
+      "CryptoHelper.Loader/1.0.0": {
+        "runtime": {
+          "CryptoHelper.Loader.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "CryptoHelper/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BouncyCastle.Cryptography/2.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-U+12df8UEWHgBi04YVf/Lgi2dy3SItlIYvHjjEVa/BngCQIzDCDRBk50DDByCfDvSbe5pRNFr3b7UrVK2kMcLw==",
+      "path": "bouncycastle.cryptography/2.7.0",
+      "hashPath": "bouncycastle.cryptography.2.7.0.nupkg.sha512"
+    },
+    "Microsoft.Management.Infrastructure/2.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-IaKZRNBBv3sdrmBWd+aqwHq8cVHk/3WgWFAN/dt40MRY9rbtHiDfTTmaEN0tGTmQqGCGDo/ncntA8MvFMvcsRw==",
+      "path": "microsoft.management.infrastructure/2.0.0",
+      "hashPath": "microsoft.management.infrastructure.2.0.0.nupkg.sha512"
+    },
+    "Microsoft.Management.Infrastructure.Runtime.Win/2.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-vjBWQeDOjgernkrOdbEgn7M70SF7hof7ORdKPSlL06Uc15+oYdth5dZju9KsgUoti/cwnkZTiwtDx/lRtay0sA==",
+      "path": "microsoft.management.infrastructure.runtime.win/2.0.0",
+      "hashPath": "microsoft.management.infrastructure.runtime.win.2.0.0.nupkg.sha512"
+    },
+    "Microsoft.PowerShell.Native/7.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-TauOu3bYr4DRh9HpH3+fgaL+y2GY47KLsgU6qX1NDLqHshdEaCCjiF0N5sDEgCEhSb38FwWhpdFTIQvoOcYCXQ==",
+      "path": "microsoft.powershell.native/7.2.0",
+      "hashPath": "microsoft.powershell.native.7.2.0.nupkg.sha512"
+    },
+    "System.Management.Automation/7.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Ceu6q9/YkC8jhyIysqaJtOzPDJwc1UoK2KmG5Kn01dRd1HkKm2JBZeAMsZP8ka+Xw/Mn7X+2IWRicZWFah9tHQ==",
+      "path": "system.management.automation/7.2.0",
+      "hashPath": "system.management.automation.7.2.0.nupkg.sha512"
+    },
+    "CryptoHelper.Loader/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
