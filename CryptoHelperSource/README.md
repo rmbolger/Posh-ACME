@@ -5,8 +5,9 @@ UTF-8 string using BouncyCastle and outputs a lowercase hexadecimal digest,
 and `Get-BCCertificateIssuer`, which accepts a single PEM-encoded X.509
 certificate and outputs its issuer common name(s). Neither command exposes
 BouncyCastle types. Posh-ACME imports this module privately and uses its issuer
-command in `Get-ChainIssuers`; the other BouncyCastle call sites are unchanged.
-The SHA3 command remains an example and is not used by the SOLIDServer plugin.
+command in `Get-ChainIssuers` and its SHA3 command as the SOLIDServer plugin's
+fallback when native SHA3 is unavailable. Other BouncyCastle call sites are
+unchanged.
 
 Run `./build.ps1` from this directory with a .NET SDK that can target `net471`
 and `net6.0`. The build restores NuGet packages and publishes the versioned
@@ -32,8 +33,9 @@ The Pester tests preload Posh-ACME's older BouncyCastle assembly on PowerShell
 7 before importing this module, then check that the two copies coexist. They
 verify the SHA3-256 digest of `abc`, issuer CNs from Posh-ACME's chain fixture,
 that a forced re-import still exposes the cmdlets, and that Posh-ACME calls the
-embedded issuer parser. Posh-ACME's own tests cover matching any
-issuer CN and falling back to the default chain when there are none.
+embedded issuer parser. The SOLIDServer test exercises the SHA3 fallback on
+Windows PowerShell 5.1. Posh-ACME's own tests cover matching any issuer CN and
+falling back to the default chain when there are none.
 The `net6.0` target sets a minimum runtime API surface, not a requirement for
 users to install the .NET 6 SDK. Verify the published module on each PowerShell
 version you plan to support.

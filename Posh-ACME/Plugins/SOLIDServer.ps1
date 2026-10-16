@@ -379,8 +379,7 @@ function Get-SHA3_256 {
 
     # PowerShell 7.4+ (.NET 8+) have a native SHA3_256 class in System.Security.Cryptography.
     # However, it only works on Windows 11 23H2+ and Linux with OpenSSL 1.1.1+.
-    # So for everything else, we'll try to use the BouncyCastle equivalent in
-    # Org.BouncyCastle.Crypto.Digests.Sha3Digest that gets loaded by the module.
+    # CryptoHelper provides the fallback for other platforms.
 
     $inputBytes = [Text.Encoding]::UTF8.GetBytes($InputString)
 
@@ -391,11 +390,8 @@ function Get-SHA3_256 {
         $hashBytes = $sha3.ComputeHash($inputBytes)
     } catch {
         try {
-            $sha3 = [Org.BouncyCastle.Crypto.Digests.Sha3Digest]::new(256)
-            Write-Debug "Using BouncyCastle SHA3-256"
-            $hashBytes = [byte[]]::new($sha3.GetDigestSize())
-            $sha3.BlockUpdate($inputBytes, 0, $inputBytes.Length)
-            $null = $sha3.DoFinal($hashBytes, 0)
+            Write-Debug "Using CryptoHelper SHA3-256"
+            return Get-BCSha3Hash -InputString $InputString
         } catch {
             throw "Unable to load SHA3_256 hashing library. Make sure Posh-ACME is imported."
         }
