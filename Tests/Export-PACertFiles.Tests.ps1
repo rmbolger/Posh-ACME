@@ -105,6 +105,40 @@ Describe "Export-PACertFiles" {
             Should -Invoke Export-CertPfx -ModuleName Posh-ACME -Times 2 -Exactly
         }
 
+        It "Matches any issuer CN in a certificate" {
+            Mock -ModuleName Posh-ACME Get-ChainIssuers {
+                [pscustomobject]@{
+                    issuer = @('Another CA', 'Preferred CA')
+                    filePath = 'TestDrive:\srvr1\acct1\example.com\chain1.cer'
+                    index = 0
+                }
+            }
+            InModuleScope Posh-ACME {
+                $script:Order | Add-Member PreferredChain 'Preferred CA' -Force
+                Export-PACertFiles
+            }
+            Should -Invoke Copy-Item -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
+                $Path -like '*chain1.cer' -and $Destination -like '*chain.cer'
+            }
+        }
+
+        It "Uses the default chain when a certificate has no issuer CN" {
+            Mock -ModuleName Posh-ACME Get-ChainIssuers {
+                [pscustomobject]@{
+                    issuer = @()
+                    filePath = 'TestDrive:\srvr1\acct1\example.com\chain1.cer'
+                    index = 0
+                }
+            }
+            InModuleScope Posh-ACME {
+                $script:Order | Add-Member PreferredChain 'Preferred CA' -Force
+                Export-PACertFiles
+            }
+            Should -Invoke Copy-Item -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter {
+                $Path -like '*chain0.cer' -and $Destination -like '*chain.cer'
+            }
+        }
+
     }
 
 }

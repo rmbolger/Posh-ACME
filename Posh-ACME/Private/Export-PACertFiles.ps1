@@ -114,7 +114,7 @@ function Export-PACertFiles {
             $chainIssuers = Get-ChainIssuers $Order.Folder
             Write-Debug ($chainIssuers | ConvertTo-Json)
             $selectedChainFile = $chainIssuers |
-                Where-Object { $_.issuer -eq $order.PreferredChain } |
+                Where-Object { $order.PreferredChain -in @($_.issuer) } |
                 Sort-Object index |
                 Select-Object -First 1 -Expand filePath
             Write-Debug "Preferred chain, $($order.PreferredChain), matched: $selectedChainFile"
