@@ -11,7 +11,13 @@ Most Posh-ACME development remains PowerShell-only. The built CryptoHelper modul
 
 ```powershell
 Import-Module ./Posh-ACME/Posh-ACME/Posh-ACME.psd1
-Invoke-Pester -Path ./Posh-ACME/Tests/Get-ChainIssuers.Tests.ps1, ./Posh-ACME/Tests/Export-PACertFiles.Tests.ps1, ./Posh-ACME/CryptoHelperSource/Tests
+Invoke-Pester -Path @(
+	'./Posh-ACME/Tests/Get-ChainIssuers.Tests.ps1'
+	'./Posh-ACME/Tests/Export-PACertFiles.Tests.ps1'
+	'./Posh-ACME/Tests/Get-PACertificate.Tests.ps1'
+	'./Posh-ACME/Tests/SOLIDServer.Tests.ps1'
+	'./Posh-ACME/CryptoHelperSource/Tests'
+)
 ```
 
 ## Changing CryptoHelper
