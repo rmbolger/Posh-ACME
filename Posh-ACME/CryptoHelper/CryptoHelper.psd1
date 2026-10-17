@@ -12,6 +12,8 @@
     CmdletsToExport = @(
         'Get-BCSha3Hash'
         'Get-BCCertificateIssuer'
+        'Get-BCCertificateDetails'
+        'Get-BCCertificateDetails'
     )
     VariablesToExport = @()
     AliasesToExport = @()

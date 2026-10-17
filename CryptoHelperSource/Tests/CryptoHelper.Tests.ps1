@@ -24,10 +24,23 @@ Describe 'CryptoHelper' {
         $certificates[1].Value | Get-BCCertificateIssuer | Should -BeExactly '(STAGING) Doctored Durian Root CA X3'
     }
 
+    It 'Returns certificate details as PowerShell-friendly values' {
+        $certPath = Join-Path $PSScriptRoot '../../Tests/TestFiles/ConfigRoot/srvr1/acct1/example.com/cert.cer'
+        $details = Get-Content $certPath -Raw | Get-BCCertificateDetails
+        $details.Subject | Should -BeExactly 'CN=example.com'
+        $details.NotBefore | Should -BeOfType [datetime]
+        $details.NotAfter | Should -BeOfType [datetime]
+        $details.Thumbprint | Should -BeExactly '47D51C8D00859491824D57F50BB35DEE07D2E029'
+        $details.ARIId | Should -BeExactly 'zLv6VMSCAzhtm2UPIvh5pkMrGZM.HLlxoKGfUSg'
+        $details.Serial | Should -BeExactly '2069810438473732392'
+        $details.AllSANs | Should -BeExactly @('example.com')
+    }
+
     It 'Exports both cmdlets after force re-import' {
         Import-Module $modulePath -Force -ErrorAction Stop
         (Get-Module CryptoHelper).ExportedCmdlets.Keys | Should -Contain 'Get-BCSha3Hash'
         (Get-Module CryptoHelper).ExportedCmdlets.Keys | Should -Contain 'Get-BCCertificateIssuer'
+        (Get-Module CryptoHelper).ExportedCmdlets.Keys | Should -Contain 'Get-BCCertificateDetails'
         'abc' | Get-BCSha3Hash | Should -BeExactly '3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532'
     }
 
@@ -52,18 +65,47 @@ Describe 'CryptoHelper' {
     It 'Uses the embedded issuer parser from Posh-ACME' {
         $previousHome = $env:POSHACME_HOME
         try {
+            $configRoot = 'TestDrive:\IssuerConfig'
+            New-Item -Path $configRoot -ItemType Directory | Out-Null
             Get-ChildItem (Join-Path $PSScriptRoot '../../Tests/TestFiles/ConfigRoot') |
-                Copy-Item -Destination 'TestDrive:\' -Recurse
-            $env:POSHACME_HOME = 'TestDrive:\'
+                Copy-Item -Destination $configRoot -Recurse
+            $env:POSHACME_HOME = $configRoot
             Import-Module (Join-Path $PSScriptRoot '../../Posh-ACME/Posh-ACME.psd1') -Force
             Mock -ModuleName Posh-ACME Import-Pem { throw 'Legacy PEM parser was called.' }
 
             $issuers = InModuleScope Posh-ACME {
-                Get-ChainIssuers -OrderFolder 'TestDrive:\srvr1\acct1\example.com'
+                Get-ChainIssuers -OrderFolder 'TestDrive:\IssuerConfig\srvr1\acct1\example.com'
             }
             $issuers | Should -HaveCount 3
             $issuers[0].issuer | Should -Be '(STAGING) Pretend Pear X1'
             $issuers[1].issuer | Should -Be '(STAGING) Doctored Durian Root CA X3'
+        }
+        finally {
+            Remove-Module Posh-ACME -ErrorAction Ignore
+            $env:POSHACME_HOME = $previousHome
+        }
+    }
+
+    It 'Uses CryptoHelper certificate details from Get-PACertificate' {
+        $previousHome = $env:POSHACME_HOME
+        try {
+            $configRoot = 'TestDrive:\PACertificateConfig'
+            New-Item -Path $configRoot -ItemType Directory | Out-Null
+            Get-ChildItem (Join-Path $PSScriptRoot '../../Tests/TestFiles/ConfigRoot') |
+                Copy-Item -Destination $configRoot -Recurse
+            $env:POSHACME_HOME = $configRoot
+            Import-Module (Join-Path $PSScriptRoot '../../Posh-ACME/Posh-ACME.psd1') -Force
+            Mock -ModuleName Posh-ACME Import-Pem { throw 'Legacy PEM parser was called.' }
+
+            $certificate = InModuleScope Posh-ACME {
+                Get-PACertificate -MainDomain 'example.com'
+            }
+            $certificate.Subject | Should -BeExactly 'CN=example.com'
+            $certificate.Thumbprint | Should -BeExactly '47D51C8D00859491824D57F50BB35DEE07D2E029'
+            $certificate.ARIId | Should -BeExactly 'zLv6VMSCAzhtm2UPIvh5pkMrGZM.HLlxoKGfUSg'
+            $certificate.Serial | Should -BeExactly '2069810438473732392'
+            $certificate.AllSANs | Should -BeExactly @('example.com')
+            Should -Invoke Import-Pem -ModuleName Posh-ACME -Times 0 -Exactly
         }
         finally {
             Remove-Module Posh-ACME -ErrorAction Ignore

@@ -21,8 +21,6 @@ function Get-PACertificate {
         }
         catch { $PSCmdlet.ThrowTerminatingError($_) }
 
-        # prep to calculate SHA1 thumbprints
-        $sha1 = [Security.Cryptography.SHA1CryptoServiceProvider]::new()
     }
 
     Process {
@@ -42,20 +40,7 @@ function Get-PACertificate {
                 return
             }
 
-            # import the cert
-            $cert = Import-Pem -InputFile $certFile
-
-            # build the list of SANs
-            $altNames = $cert.GetSubjectAlternativeNames() | ForEach-Object {
-                if ($_[0] -eq [Org.BouncyCastle.Asn1.X509.GeneralName]::DnsName) {
-                    # second index is the actual DNS name
-                    $_[1]
-                }
-                elseif ($_[0] -eq [Org.BouncyCastle.Asn1.X509.GeneralName]::IPAddress) {
-                    # second index is a IP hex string like "#01010101" that we need to parse
-                    ([ipaddress]([byte[]] -split ($_[1].Substring(1) -replace '..', '0x$& '))).ToString()
-                }
-            }
+            $certDetails = Get-BCCertificateDetails -Pem (Get-Content $certFile -Raw)
 
             # convert the PfxPass to a securestring
             if ($order.PfxPass) {
@@ -67,14 +52,8 @@ function Get-PACertificate {
             # derive the ARI ID value
             # https://letsencrypt.org/2024/04/25/guide-to-integrating-ari-into-existing-acme-clients#step-3-constructing-the-ari-certid
             # https://www.ietf.org/archive/id/draft-ietf-acme-ari-03.html#name-the-renewalinfo-resource
-            $akiExt = $cert.GetExtensionValue([Org.BouncyCastle.Asn1.X509.X509Extensions]::AuthorityKeyIdentifier)
-            if ($akiExt) {
-                $akiBytes = [Org.BouncyCastle.Asn1.X509.AuthorityKeyIdentifier]::GetInstance($akiExt.GetOctets()).GetKeyIdentifier()
-                $serialBytes = $cert.SerialNumber.ToByteArray()
-                $ariID = '{0}.{1}' -f (ConvertTo-Base64Url $akiBytes),(ConvertTo-Base64Url $serialBytes)
-            } else {
-                Write-Warning "Cert with subject $($cert.SubjectDN) and serial $($cert.SerialNumber) has no AKI extension. Unable to generate ARIId value."
-                $ariID = $null
+            if (-not $certDetails.ARIId) {
+                Write-Warning "Cert with subject $($certDetails.Subject) and serial $($certDetails.Serial) has no AKI extension. Unable to generate ARIId value."
             }
 
             # send the output object to the pipeline
@@ -82,27 +61,25 @@ function Get-PACertificate {
                 PSTypeName = 'PoshACME.PACertificate'
 
                 # add the literal subject rather than just the domain name
-                Subject = $cert.SubjectDN.ToString()
+                Subject = $certDetails.Subject
 
-                # PowerShell's cert:\ provider outputs these in local time, but BouncyCastle
-                # outputs in UTC. So we'll convert so they match
-                NotBefore = $cert.NotBefore.ToLocalTime()
-                NotAfter  = $cert.NotAfter.ToLocalTime()
+                NotBefore = $certDetails.NotBefore
+                NotAfter  = $certDetails.NotAfter
 
                 KeyLength = $order.KeyLength
 
                 # the thumbprint is a SHA1 hash of the DER encoded cert which is not actually
                 # stored in the cert itself
-                Thumbprint = [BitConverter]::ToString($sha1.ComputeHash($cert.GetEncoded())).Replace('-','')
+                Thumbprint = $certDetails.Thumbprint
 
                 # add the ARI ID value
-                ARIId = $ariID
+                ARIId = $certDetails.ARIId
 
                 # add the serial
-                Serial = $cert.SerialNumber.ToString()
+                Serial = $certDetails.Serial
 
                 # add the full list of SANs
-                AllSANs = [string[]]@($altNames)
+                AllSANs = [string[]]@($certDetails.AllSANs)
 
                 # add the associated file paths whether they exist or not
                 CertFile      = (Join-Path $order.Folder 'cert.cer').ToString()
