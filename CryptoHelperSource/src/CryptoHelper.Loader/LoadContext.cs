@@ -7,47 +7,51 @@ namespace CryptoHelper.Loader;
 
 public sealed class LoadContext : AssemblyLoadContext
 {
-    private static readonly object Sync = new();
-    private static LoadContext? instance;
-    private readonly Assembly loaderAssembly = typeof(LoadContext).Assembly;
-    private readonly AssemblyDependencyResolver resolver;
-    private readonly Assembly moduleAssembly;
+    private static LoadContext? s_instance;
+    private static readonly object s_sync = new();
+    private readonly Assembly _thisAssembly = typeof(LoadContext).Assembly;
+    private readonly Assembly _moduleAssembly;
+    private readonly AssemblyDependencyResolver _resolver;
 
     private LoadContext(string modulePath) : base("CryptoHelper", isCollectible: false)
     {
-        resolver = new AssemblyDependencyResolver(modulePath);
-        moduleAssembly = LoadFromAssemblyPath(modulePath);
+        _resolver = new AssemblyDependencyResolver(modulePath);
+        _moduleAssembly = LoadFromAssemblyPath(modulePath);
     }
 
     protected override Assembly? Load(AssemblyName assemblyName)
     {
-        if (AssemblyName.ReferenceMatchesDefinition(loaderAssembly.GetName(), assemblyName))
+        // Checks to see if we are trying to access our current assembly
+        // (CryptoHelper.Loader). If so return the already loaded assembly object
+        // so there is only one copy of it in the process.
+        if (AssemblyName.ReferenceMatchesDefinition(_thisAssembly.GetName(), assemblyName))
         {
-            return loaderAssembly;
+            return _thisAssembly;
         }
 
-        string? path = resolver.ResolveAssemblyToPath(assemblyName);
-        return path is null ? null : LoadFromAssemblyPath(path);
+        // Returning null will fallback to the default loading behaviour.
+        string? asmPath = _resolver.ResolveAssemblyToPath(assemblyName);
+        return asmPath is null ? null : LoadFromAssemblyPath(asmPath);
     }
 
     protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
     {
-        string? path = resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
-        return path is null ? IntPtr.Zero : LoadUnmanagedDllFromPath(path);
+        string? libPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+        return libPath is null ? IntPtr.Zero : LoadUnmanagedDllFromPath(libPath);
     }
 
     public static Assembly Initialize()
     {
-        lock (Sync)
+        lock (s_sync)
         {
-            if (instance is null)
+            if (s_instance is null)
             {
-                string loaderPath = typeof(LoadContext).Assembly.Location;
-                string modulePath = Path.Combine(Path.GetDirectoryName(loaderPath)!, "CryptoHelper.dll");
-                instance = new LoadContext(modulePath);
+                string assemblyPath = typeof(LoadContext).Assembly.Location;
+                string modulePath = Path.Combine(Path.GetDirectoryName(assemblyPath)!, "CryptoHelper.dll");
+                s_instance = new LoadContext(modulePath);
             }
 
-            return instance.moduleAssembly;
+            return s_instance._moduleAssembly;
         }
     }
 }

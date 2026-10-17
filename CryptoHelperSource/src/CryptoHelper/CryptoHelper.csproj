@@ -1,19 +1,43 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFrameworks>net471;net6.0</TargetFrameworks>
     <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <!--
+    For PowerShell 7 we can load S.M.A at the version desired. This allows us
+    to use newer features with preprocessor directives. The PrivateAssets must
+    be set to all as PowerShell provides these assets at runtime. The runtime
+    assets are also excluded so S.M.A is not listed in CryptoHelper.deps.json
+    and the ALC falls back to the copy PowerShell has already loaded.
+    -->
+    <PackageReference Include="System.Management.Automation" Version="7.2.0" ExcludeAssets="runtime" PrivateAssets="all" />
+    <!--
+    References the loader so it is published alongside our module. It is
+    only needed on PowerShell 7.
+    -->
+    <ProjectReference Include="..\CryptoHelper.Loader\CryptoHelper.Loader.csproj" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
+    <!--
+    For PowerShell 5.1 we reference the standard library which provides a
+    baseline API for WinPS 5.1 and PS 7+. The PrivateAssets must also be set
+    to all as PowerShell provides them at runtime.
+    -->
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net471" Version="1.0.3" PrivateAssets="all" />
     <PackageReference Include="PowerShellStandard.Library" Version="5.1.0" PrivateAssets="all" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <PackageReference Include="System.Management.Automation" Version="7.2.0" ExcludeAssets="runtime" PrivateAssets="all" />
-    <ProjectReference Include="..\CryptoHelper.Loader\CryptoHelper.Loader.csproj" />
-  </ItemGroup>
+
   <ItemGroup>
+    <!--
+    Any dep we reference here is listed in CryptoHelper.deps.json and will
+    be available to load in our ALC. Do not set PrivateAssets="all" on a dep
+    that should be bundled, the SDK will not publish it.
+    -->
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.7.0" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <!--
+    The loader is only used on PowerShell 7, WinPS loads CryptoHelper.dll
+    directly as it has no concept of an ALC.
+    -->
     <TargetFramework>net6.0</TargetFramework>
+    <!--Not needed but makes it nicer to write in C# at this version-->
+    <LangVersion>10.0</LangVersion>
+    <!--Not needed but using Nullable is highly recommended-->
     <Nullable>enable</Nullable>
   </PropertyGroup>
 </Project>
