@@ -51,16 +51,14 @@ Describe "Get-CsrDetails" {
 
     Context "RSA 2048 CSR no attributes" {
         It "Reads properly" {
-            Mock -ModuleName Posh-ACME Write-Warning {}
             Copy-Item "$PSScriptRoot\TestFiles\rsa-2048-onlyCN-no-attrs.csr" 'TestDrive:\test.csr'
             InModuleScope Posh-ACME {
-                { Get-CsrDetails -CSRPath 'TestDrive:\test.csr' } | Should -Not -Throw
-                Should -Invoke Write-Warning
-                $result = Get-CsrDetails -CSRPath 'TestDrive:\test.csr'
+                $result = Get-CsrDetails -CSRPath 'TestDrive:\test.csr' -WarningVariable warnings -WarningAction SilentlyContinue
                 $result.Domain         | Should -BeExactly @('example.com')
                 $result.KeyLength      | Should -BeExactly '2048'
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
                 $result.PemLines.Count | Should -Be 15
+                $warnings.Message -join ' ' | Should -Match 'No Certficate Attributes found in CR.'
             }
         }
     }

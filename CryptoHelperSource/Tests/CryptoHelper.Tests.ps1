@@ -10,6 +10,7 @@ Describe 'CryptoHelper module' {
         $commands = (Get-Module CryptoHelper).ExportedCmdlets.Keys
         $commands | Should -Contain 'Get-Sha3Hash'
         $commands | Should -Contain 'Get-CertDetail'
+        $commands | Should -Contain 'Get-CsrDetail'
         'abc' | Get-Sha3Hash | Should -BeExactly '3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532'
     }
 

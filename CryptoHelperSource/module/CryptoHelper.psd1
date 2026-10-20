@@ -12,6 +12,7 @@
     CmdletsToExport = @(
         'Get-Sha3Hash'
         'Get-CertDetail'
+        'Get-CsrDetail'
     )
     VariablesToExport = @()
     AliasesToExport = @()

@@ -15,12 +15,10 @@ function Get-CsrDetails {
     #   Base64Url : The Base64Url encoded bytes of the raw request
     #   PemLines  : The original lines from the file/string PEM request content
 
-    # We're going to try to allow for CSRs being passed directly as a string value
-    # in addition to a filesystem path. Since the BC PemReader currently requires
-    # explicit BEGIN/END header and footer, we're going to assume that anything
-    # missing them is a file path.
+    # Allow for CSRs being passed directly as a string value in addition to a
+    # filesystem path. Anything missing the correct header string will be treated
+    # as a file path.
     if ($CSRPath -cnotlike '*CERTIFICATE REQUEST*') {
-
         Write-Debug "CSRPath didn't match CERTIFICATE REQUEST"
 
         # normalize the CSR path and make sure it exists
@@ -29,136 +27,25 @@ function Get-CsrDetails {
             throw "CSR file not found at $CSRPath"
         }
 
-        $importParams = @{
-            InputFile = $CSRPath
-        }
-
-        $details = @{
-            PemLines = Get-Content $CSRPath
-        }
-
+        $csrPem = Get-Content $CSRPath -Raw
+        $pemLines = Get-Content $CSRPath
     } else {
-
-        $importParams = @{
-            InputString = $CSRPath
-        }
-
-        $details = @{
-            PemLines = $CSRPath.Trim() -split "(?:`r)?`n"
-        }
+        $csrPem = $CSRPath
+        $pemLines = $CSRPath.Trim() -split "(?:`r)?`n"
     }
 
-    # parse the CSR into a [Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest]
-    Write-Debug "Attempting to import CSR pem"
-    $csr = Import-Pem @importParams
-    if ($csr -isnot [Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest]) {
-        throw "Specified CSR was unable to be parsed as a certificate request."
-    }
-    $details.Base64Url = ConvertTo-Base64Url $csr.GetEncoded()
-
-    # determine the KeyLength
-    $pubKey = $csr.GetPublicKey()
-    if ($pubKey -is [Org.BouncyCastle.Crypto.Parameters.RsaKeyParameters]) {
-        # RSA key, so KeyLength is just the bit length of the Modulus
-        $details.KeyLength = $pubKey.Modulus.BitLength.ToString()
-        if (-not (Test-ValidKeyLength $details.KeyLength)) {
-            throw "RSA key length from CSR is out of the supported range. ($($details.KeyLength))"
-        }
-    } elseif ($pubKey -is [Org.BouncyCastle.Crypto.Parameters.ECPublicKeyParameters]) {
-        # EC key, make sure the curve is supported
-        $curve = $pubKey.Parameters.Curve
-        if ($curve -eq [Org.BouncyCastle.Asn1.Nist.NistNamedCurves]::GetByName('P-256').Curve) {
-            $details.KeyLength = 'ec-256'
-        } elseif ($curve -eq [Org.BouncyCastle.Asn1.Nist.NistNamedCurves]::GetByName('P-384').Curve) {
-            $details.KeyLength = 'ec-384'
-        } elseif ($curve -eq [Org.BouncyCastle.Asn1.Nist.NistNamedCurves]::GetByName('P-521').Curve) {
-            $details.KeyLength = 'ec-521'
-        } else {
-            throw "Unsupported ECC curve. $($pubKey.Parameters.Curve.ToString())"
-        }
-    } else {
-        throw "Unsupported key type."
-    }
-    Write-Debug "KeyLength = $($details.KeyLength)"
-
-    # [Org.BouncyCastle.Asn1.Pkcs.CertificationRequestInfo]
-    $csrInfo = $csr.GetCertificationRequestInfo()
-
-    # grab the CN value
-    $cn = ($csrInfo.Subject.GetValueList([Org.BouncyCastle.Asn1.X509.X509Name]::CN))[0]
-    Write-Debug "CN = $cn"
-    if ($cn) { $details.Domain = @($cn) }
-    else { $details.Domain = @() }
-
-    # grab the rest of the attributes [Org.BouncyCastle.Asn1.Asn1Set]
-    # The Asn1Set is basically a nested collection of DerSequence objects
-    $attr = $csrInfo.Attributes
-
-    # Check if we have any attributes at all
-    if ($attr.count -eq 0) {
-        # throw if we have no CN
-        if ($details.Domain.Count -eq 0) { throw "No Common Name (CN) or Subject Alternative Name (SAN) extensions found in certificate request." }
-
-        Write-Warning "No Certficate Attributes found in CR."
-        $details.OCSPMustStaple = $false
-        return $details
+    Write-Debug "Attempting to parse CSR pem"
+    $csrDetails = Get-CsrDetail -Pem $csrPem
+    # The helper won't throw on unsupported RSA KeyLengths, so we need to check manually.
+    if ($csrDetails.KeyLength -notlike 'ec-*' -and -not (Test-ValidKeyLength $csrDetails.KeyLength)) {
+        throw "RSA key length from CSR is out of the supported range. ($($csrDetails.KeyLength))"
     }
 
-    # Find the sequence for "Certificate Extensions" (oid 1.2.840.113549.1.9.14)
-    # [0] is the OID, [1] is the nested Asn1Set,
-    # [1][0] should be the only DerSequence within the Ans1Set that contains additional nested DerSequence objects
-    $extensions = ($attr | Where-Object { $_.Id -eq '1.2.840.113549.1.9.14'})[1][0]
-    if (-not $extensions) {
-        # throw if we have no names
-        if ($details.Domain.Count -eq 0) { throw "No Common Name (CN) or Subject Alternative Name (SAN) extensions found in certificate request." }
-
-        Write-Warning "No Certificate Extensions sequence found in CSR."
-        $details.OCSPMustStaple = $false
-        return $details
+    return @{
+        Domain = [string[]]@($csrDetails.Domain)
+        KeyLength = $csrDetails.KeyLength
+        OCSPMustStaple = $csrDetails.OCSPMustStaple
+        Base64Url = $csrDetails.Base64Url
+        PemLines = $pemLines
     }
-
-    # Now find the sequence for "Subject Alternative Name" (oid 2.5.29.17)
-    # [0] is the OID and the DerOctetString value is normally [1]. But per RFC 5280,
-    # an extension flagged critical also encodes a DerBoolean between the two which
-    # shifts the value to [2]. Either way, the value is the last element.
-    if ($sanSeq = $extensions | Where-Object { $_.Id -eq '2.5.29.17' }) {
-        $sanValue = $sanSeq[$sanSeq.Count-1]
-        if ($sanValue -isnot [Org.BouncyCastle.Asn1.Asn1OctetString]) {
-            throw "Unable to parse the Subject Alternative Name extension in the certificate request."
-        }
-        # convert to [Org.BouncyCastle.Asn1.X509.GeneralNames]
-        $genNames = [Org.BouncyCastle.Asn1.X509.GeneralNames]::GetInstance(
-            [Org.BouncyCastle.Asn1.Asn1Object]::FromByteArray($sanValue.GetOctets())
-        )
-        # grab DNS names and IP addresses
-        $SANs = foreach ($genName in $genNames.GetNames()) {
-            if ($genName.TagNo -eq [Org.BouncyCastle.Asn1.X509.GeneralName]::DnsName) {
-                $genName.Name
-            } elseif ($genName.TagNo -eq [Org.BouncyCastle.Asn1.X509.GeneralName]::IPAddress) {
-                $ipBytes = [Org.BouncyCastle.Asn1.Asn1OctetString]::GetInstance($genName.Name).GetOctets()
-                ([Net.IPAddress]::new($ipBytes)).ToString()
-            } else {
-                Write-Warning "Unsupported SAN type with TagNo $($genName.TagNo) found in certificate request."
-            }
-        }
-    }
-    if ($SANs) {
-        Write-Debug "SANs = $(($SANs -join ','))"
-        $details.Domain += $SANs | Where-Object { $_ -notin $details.Domain }
-    }
-
-    # throw if we have no names
-    if ($details.Domain.Count -eq 0) { throw "No Common Name (CN) or Subject Alternative Name (SAN) extensions found in certificate request." }
-
-    # Find the sequence for OCSP Must-Staple (oid 1.3.6.1.5.5.7.1.24)
-    # and determine whether it's set. As with the SAN extension above, the value is
-    # the last element because a critical flag shifts it off of [1].
-    if ($ocspSeq = $extensions | Where-Object { $_.Id -eq '1.3.6.1.5.5.7.1.24'}) {
-        $details.OCSPMustStaple = ($ocspSeq[$ocspSeq.Count-1].ToString() -eq '#3003020105')
-    } else {
-        $details.OCSPMustStaple = $false
-    }
-    Write-Debug "OCSP Must-Staple = $($details.OCSPMustStaple)"
-
-    return $details
 }
