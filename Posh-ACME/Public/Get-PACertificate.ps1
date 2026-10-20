@@ -40,7 +40,7 @@ function Get-PACertificate {
                 return
             }
 
-            $certDetails = Get-BCCertificateDetails -Pem (Get-Content $certFile -Raw)
+            $certDetails = Get-CertDetail -Pem (Get-Content $certFile -Raw)
 
             # convert the PfxPass to a securestring
             if ($order.PfxPass) {

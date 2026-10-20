@@ -8,10 +8,9 @@ Describe 'CryptoHelper module' {
     It 'Exports its cmdlets after force re-import' {
         Import-Module $modulePath -Force -ErrorAction Stop
         $commands = (Get-Module CryptoHelper).ExportedCmdlets.Keys
-        $commands | Should -Contain 'Get-BCSha3Hash'
-        $commands | Should -Contain 'Get-BCCertificateIssuer'
-        $commands | Should -Contain 'Get-BCCertificateDetails'
-        'abc' | Get-BCSha3Hash | Should -BeExactly '3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532'
+        $commands | Should -Contain 'Get-Sha3Hash'
+        $commands | Should -Contain 'Get-CertDetail'
+        'abc' | Get-Sha3Hash | Should -BeExactly '3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532'
     }
 
     It 'Loads its BouncyCastle dependency in the expected context' {

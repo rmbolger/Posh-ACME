@@ -30,7 +30,8 @@ function Get-ChainIssuers {
             }
             if ($inCert -and '-----END CERTIFICATE-----' -eq $lines[$i].Trim()) {
                 $certString = $lines[$iBegin..$i] -join [Environment]::NewLine
-                $issuerCN = @(Get-BCCertificateIssuer -Pem $certString)
+                $certDetails = Get-CertDetail -Pem $certString
+                $issuerCN = @($certDetails.IssuerCNs)
                 Write-Debug "Found issuer, $issuerCN, in $filePath"
                 [pscustomobject]@{
                     issuer = $issuerCN

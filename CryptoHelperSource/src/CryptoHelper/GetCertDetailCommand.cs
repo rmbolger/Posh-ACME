@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Management.Automation;
@@ -10,16 +11,15 @@ using Org.BouncyCastle.X509;
 
 namespace CryptoHelper;
 
-[Cmdlet(VerbsCommon.Get, "BCCertificateDetails")]
+[Cmdlet(VerbsCommon.Get, "CertDetail")]
 [OutputType(typeof(PSObject))]
-public sealed class GetBCCertificateDetailsCommand : PSCmdlet
+public sealed class GetCertDetailCommand : PSCmdlet
 {
     [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true)]
     public string Pem { get; set; } = string.Empty;
 
     protected override void ProcessRecord()
     {
-        // parse the cert with PemReader
         using var input = new System.IO.StringReader(Pem);
         var reader = new PemReader(input);
         if (reader.ReadObject() is not X509Certificate certificate)
@@ -27,7 +27,7 @@ public sealed class GetBCCertificateDetailsCommand : PSCmdlet
             throw new ArgumentException("The PEM input must contain an X.509 certificate.", nameof(Pem));
         }
 
-        // grab the SANs
+        string[] issuerCNs = certificate.IssuerDN.GetValueList(X509Name.CN).ToArray();
         var altNames = new List<string>();
         foreach (IList<object> name in certificate.GetSubjectAlternativeNames() ?? Array.Empty<IList<object>>())
         {
@@ -48,14 +48,9 @@ public sealed class GetBCCertificateDetailsCommand : PSCmdlet
             }
         }
 
-        // compute the thumbprint
-        byte[] encodedCertificate = certificate.GetEncoded();
         using var sha1 = SHA1.Create();
-        string thumbprint = BitConverter.ToString(sha1.ComputeHash(encodedCertificate)).Replace("-", "");
+        string thumbprint = BitConverter.ToString(sha1.ComputeHash(certificate.GetEncoded())).Replace("-", "");
 
-        // derive the ARI ID
-        // https://letsencrypt.org/2024/04/25/guide-to-integrating-ari-into-existing-acme-clients#step-3-constructing-the-ari-certid
-        // https://www.ietf.org/archive/id/draft-ietf-acme-ari-03.html#name-the-renewalinfo-resource
         string? ariId = null;
         Asn1OctetString? akiExtension = certificate.GetExtensionValue(X509Extensions.AuthorityKeyIdentifier);
         if (akiExtension is not null)
@@ -69,8 +64,8 @@ public sealed class GetBCCertificateDetailsCommand : PSCmdlet
             }
         }
 
-        // output the results
         var result = new PSObject();
+        result.Properties.Add(new PSNoteProperty("IssuerCNs", issuerCNs));
         result.Properties.Add(new PSNoteProperty("Subject", certificate.SubjectDN.ToString()));
         result.Properties.Add(new PSNoteProperty("NotBefore", certificate.NotBefore.ToLocalTime()));
         result.Properties.Add(new PSNoteProperty("NotAfter", certificate.NotAfter.ToLocalTime()));

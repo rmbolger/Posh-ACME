@@ -10,9 +10,8 @@
     DotNetFrameworkVersion = '4.7.1'
     FunctionsToExport = @()
     CmdletsToExport = @(
-        'Get-BCSha3Hash'
-        'Get-BCCertificateIssuer'
-        'Get-BCCertificateDetails'
+        'Get-Sha3Hash'
+        'Get-CertDetail'
     )
     VariablesToExport = @()
     AliasesToExport = @()

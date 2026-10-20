@@ -391,7 +391,7 @@ function Get-SHA3_256 {
     } catch {
         try {
             Write-Debug "Using CryptoHelper SHA3-256"
-            return Get-BCSha3Hash -InputString $InputString
+            return Get-Sha3Hash -InputString $InputString
         } catch {
             throw "Unable to load SHA3_256 hashing library. Make sure Posh-ACME is imported."
         }
