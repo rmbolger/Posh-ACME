@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Collections;
 using System.Management.Automation;
 using System.Text;
 using Org.BouncyCastle.Asn1;
@@ -31,7 +32,7 @@ public sealed class NewCsrHelperCommand : PSCmdlet
     public string Subject { get; set; } = string.Empty;
 
     [Parameter()]
-    public PSObject[] Identifiers { get; set; } = Array.Empty<PSObject>();
+    public IDictionary[] Identifiers { get; set; } = Array.Empty<IDictionary>();
 
     [Parameter()]
     public bool OCSPMustStaple { get; set; }
@@ -88,10 +89,10 @@ public sealed class NewCsrHelperCommand : PSCmdlet
 
         // build the SAN list
         var generalNames = new List<GeneralName>();
-        foreach (PSObject identifier in Identifiers)
+        foreach (IDictionary identifier in Identifiers)
         {
-            string type = identifier.Properties["type"]?.Value?.ToString() ?? string.Empty;
-            string value = identifier.Properties["value"]?.Value?.ToString() ?? string.Empty;
+            string type = identifier.Contains("type") ? identifier["type"]?.ToString() ?? string.Empty : string.Empty;
+            string value = identifier.Contains("value") ? identifier["value"]?.ToString() ?? string.Empty : string.Empty;
             if (type == "dns")
             {
                 generalNames.Add(new GeneralName(GeneralName.DnsName, value));

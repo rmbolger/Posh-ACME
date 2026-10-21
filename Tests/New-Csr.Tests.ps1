@@ -30,7 +30,7 @@ Describe "New-Csr" {
                     KeyLength      = 'ec-256'
                     Folder         = $orderFolder
                     OCSPMustStaple = $MustStaple
-                    identifiers    = @([pscustomobject]@{ type = 'dns'; value = 'example.com' })
+                    identifiers    = @(@{ type = 'dns'; value = 'example.com' })
                 }
 
                 { New-Csr $order } | Should -Not -Throw
@@ -56,10 +56,10 @@ Describe "New-Csr" {
                     Folder         = $orderFolder
                     OCSPMustStaple = $false
                     identifiers    = @(
-                        [pscustomobject]@{ type = 'dns'; value = 'example.com' }
-                        [pscustomobject]@{ type = 'ip'; value = '192.0.2.1' }
-                        [pscustomobject]@{ type = 'dns'; value = 'www.example.com' }
-                        [pscustomobject]@{ type = 'ip'; value = '2001:db8::1' }
+                        @{ type = 'dns'; value = 'example.com' }
+                        @{ type = 'ip'; value = '192.0.2.1' }
+                        @{ type = 'dns'; value = 'www.example.com' }
+                        @{ type = 'ip'; value = '2001:db8::1' }
                     )
                 }
 

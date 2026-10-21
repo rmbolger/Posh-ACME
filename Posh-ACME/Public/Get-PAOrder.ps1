@@ -40,6 +40,16 @@ function Get-PAOrder {
                 # parse the json
                 $order = $_ | Get-Content -Raw | ConvertFrom-Json
 
+                # Normalize identifiers to the same hashtable shape used by New-PAOrder.
+                $order.identifiers = @(
+                    foreach ($identifier in $order.identifiers) {
+                        @{
+                            type = $identifier.type
+                            value = $identifier.value
+                        }
+                    }
+                )
+
                 # fix any dates that may have been parsed by PSCore's JSON serializer
                 $order.expires     = Repair-ISODate $order.expires
                 $order.CertExpires = Repair-ISODate $order.CertExpires

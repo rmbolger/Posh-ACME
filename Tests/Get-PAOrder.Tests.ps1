@@ -242,6 +242,11 @@ Describe "Get-PAOrder" {
             $order.Plugin            | Should -Not -BeNullOrEmpty
             $order.PfxPassB64U       | Should -BeNullOrEmpty
             $order.PfxPass           | Should -Not -BeNullOrEmpty
+            foreach ($identifier in $order.identifiers) {
+                $identifier | Should -BeOfType [hashtable]
+                $identifier.Keys | Should -Contain 'type'
+                $identifier.Keys | Should -Contain 'value'
+            }
 
         }
 
