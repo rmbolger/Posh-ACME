@@ -58,7 +58,7 @@ Describe "Get-CsrDetails" {
                 $result.KeyLength      | Should -BeExactly '2048'
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
                 $result.PemLines.Count | Should -Be 15
-                $warnings.Message -join ' ' | Should -Match 'No Certficate Attributes found in CR.'
+                $warnings.Message -join ' ' | Should -Match 'No Certificate Attributes found in CSR.'
             }
         }
     }
