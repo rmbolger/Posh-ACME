@@ -43,5 +43,30 @@ Describe "New-Csr" {
                 $details.Domain | Should -Be @('example.com')
             }
         }
+
+        It "Preserves mixed DNS and IP SAN order" {
+            InModuleScope Posh-ACME {
+                $orderFolder = Join-Path 'TestDrive:\' 'csr-mixed-san-order'
+                New-Item -ItemType Directory -Path $orderFolder -Force | Out-Null
+                $order = [pscustomobject]@{
+                    PSTypeName     = 'PoshACME.PAOrder'
+                    MainDomain     = 'example.com'
+                    SANs           = @()
+                    KeyLength      = 'ec-256'
+                    Folder         = $orderFolder
+                    OCSPMustStaple = $false
+                    identifiers    = @(
+                        [pscustomobject]@{ type = 'dns'; value = 'example.com' }
+                        [pscustomobject]@{ type = 'ip'; value = '192.0.2.1' }
+                        [pscustomobject]@{ type = 'dns'; value = 'www.example.com' }
+                        [pscustomobject]@{ type = 'ip'; value = '2001:db8::1' }
+                    )
+                }
+
+                New-Csr $order | Should -Not -BeNullOrEmpty
+                $details = Get-CsrDetails (Join-Path $orderFolder 'request.csr')
+                $details.Domain | Should -BeExactly @('example.com', '192.0.2.1', 'www.example.com', '2001:db8::1')
+            }
+        }
     }
 }

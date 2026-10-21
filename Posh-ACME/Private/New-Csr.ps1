@@ -14,64 +14,8 @@ function New-Csr {
     # Order verification should have already been taken care of
     $keyFile = Join-Path $Order.Folder 'cert.key'
     $reqFile = Join-Path $Order.Folder 'request.csr'
-
-    # Check for an existing key
-    if (Test-Path $keyFile -PathType Leaf) {
-
-        $keyPair = Import-Pem -InputFile $keyFile
-
-        if ($Order.KeyLength -notlike 'ec-*') {
-            $sigAlgo = 'SHA256WITHRSA'
-        } else {
-            $keySize = [int]$Order.KeyLength.Substring(3)
-            if ($keySize -eq 256) { $sigAlgo = 'SHA256WITHECDSA' }
-            elseif ($keySize -eq 384) { $sigAlgo = 'SHA384WITHECDSA' }
-            elseif ($keySize -eq 521) { $sigAlgo = 'SHA512WITHECDSA' }
-        }
-
-    # Nope, new key needed
-    } else {
-
-        Write-Verbose "Creating new private key for the certificate request."
-
-        $sRandom = [Org.BouncyCastle.Security.SecureRandom]::new()
-
-        if ($Order.KeyLength -like 'ec-*') {
-
-            # EC key
-            Write-Debug "Creating BC EC keypair of type $($Order.KeyLength)"
-            $keySize = [int]$Order.KeyLength.Substring(3)
-            $curveOid = [Org.BouncyCastle.Asn1.Nist.NistNamedCurves]::GetOid("P-$keySize")
-
-            if ($keySize -eq 256) { $sigAlgo = 'SHA256WITHECDSA' }
-            elseif ($keySize -eq 384) { $sigAlgo = 'SHA384WITHECDSA' }
-            elseif ($keySize -eq 521) { $sigAlgo = 'SHA512WITHECDSA' }
-
-            $ecGen = [Org.BouncyCastle.Crypto.Generators.ECKeyPairGenerator]::new()
-            $genParam = [Org.BouncyCastle.Crypto.Parameters.ECKeyGenerationParameters]::new($curveOid,$sRandom)
-            $ecGen.Init($genParam)
-            $keyPair = $ecGen.GenerateKeyPair()
-
-        } else {
-
-            # RSA key
-            Write-Debug "Creating BC RSA keypair of type $($Order.KeyLength)"
-            $keySize = [int]$Order.KeyLength
-            $sigAlgo = 'SHA256WITHRSA'
-
-            $rsaGen = [Org.BouncyCastle.Crypto.Generators.RsaKeyPairGenerator]::new()
-            $genParam = [Org.BouncyCastle.Crypto.KeyGenerationParameters]::new($sRandom,$keySize)
-            $rsaGen.Init($genParam)
-            $keyPair = $rsaGen.GenerateKeyPair()
-
-        }
-
-        # export the key to a file
-        Export-Pem $keyPair $keyFile
-
-    }
-
-    # start building the cert request
+    $keyExists = Test-Path $keyFile -PathType Leaf
+    $keyPem = if ($keyExists) { Get-Content $keyFile -Raw } else { $null }
 
     # super lazy IPv4 address regex, but we just need to be able to
     # distinguish from an FQDN
@@ -79,113 +23,40 @@ function New-Csr {
 
     # create the subject
     if ($Order.Subject) {
-        $subject = [Org.BouncyCastle.Asn1.X509.X509Name]::new($Order.Subject)
+        # use the specified subject
+        $subject = $Order.Subject
     } elseif ($Order.MainDomain.Length -le 64 -and
               $Order.MainDomain -notmatch $reIPv4 -and
               $Order.MainDomain -notlike '*:*'
     ) {
-        $subject = [Org.BouncyCastle.Asn1.X509.X509Name]::new("CN=$($Order.MainDomain)")
+        # use the main domain as the subject as long as it's
+        # not an IP address or IPv6 address and within the length limit
+        $subject = "CN=$($Order.MainDomain)"
     } else {
-        # CN's longer than 64 characters are invalid in a CSR
-        # IP Addresses cannot be in the CN either
-        # So just leave it empty because the CN value is deprecated anyway
-        $subject = [Org.BouncyCastle.Asn1.X509.X509Name]::GetInstance(
-            [Org.BouncyCastle.Asn1.DerSequence]::new()
-        )
+        # fallback to an empty subject if no suitable subject can be determined
+        $subject = [string]::Empty
     }
 
-    # create a .NET Dictionary to hold our extensions because that's what BouncyCastle needs
-    $extDict = [Collections.Generic.Dictionary[
-        Org.BouncyCastle.Asn1.DerObjectIdentifier,
-        Org.BouncyCastle.Asn1.X509.X509Extension
-    ]]::new()
-
-    # create the extensions we care about
-    if ($Order.KeyLength -like 'ec-*') {
-        # Only DigitalSignature on ECC certs because KeyEncipherment not supported
-        $keyUsage = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
-            $true, # critical
-            [Org.BouncyCastle.Asn1.DerOctetString]::new(
-                [Org.BouncyCastle.Asn1.X509.KeyUsage]::new(
-                    [Org.BouncyCastle.Asn1.X509.KeyUsage]::DigitalSignature
-                )
-            )
-        )
-    } else {
-        # DigitalSignature and KeyEncipherment on RSA certs
-        $keyUsage = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
-            $true, # critical
-            [Org.BouncyCastle.Asn1.DerOctetString]::new(
-                [Org.BouncyCastle.Asn1.X509.KeyUsage]::new(
-                    [Org.BouncyCastle.Asn1.X509.KeyUsage]::DigitalSignature -bor
-                    [Org.BouncyCastle.Asn1.X509.KeyUsage]::KeyEncipherment
-                )
-            )
-        )
+    # pass the request to the crypto helper to generate the CSR
+    $csrParams = @{
+        KeyLength = $Order.KeyLength
+        Subject = $subject
+        Identifiers = @($Order.identifiers)
+        OCSPMustStaple = [bool]$Order.OCSPMustStaple
+        PrivateKeyPem = $keyPem
     }
+    $csrResult = New-CsrHelper @csrParams
 
-    # create SANs based on the identifier types
-    $genNames = $Order.identifiers | ForEach-Object {
-        if ($_.type -eq 'dns') {
-            [Org.BouncyCastle.Asn1.X509.GeneralName]::new(
-                [Org.BouncyCastle.Asn1.X509.GeneralName]::DnsName,
-                $_.value
-            )
-        }
-        elseif ($_.type -eq 'ip') {
-            [Org.BouncyCastle.Asn1.X509.GeneralName]::new(
-                [Org.BouncyCastle.Asn1.X509.GeneralName]::IPAddress,
-                $_.value
-            )
-        }
-        else {
-            Write-Warning "Skipping unexpected identifier type '$($_.type)' with value '$($_.value)'."
-        }
+    # write the private key to a file if it was newly created
+    if (-not $keyExists -and $csrResult.PrivateKeyPem) {
+        $keyPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($keyFile)
+        [IO.File]::WriteAllText($keyPath, $csrResult.PrivateKeyPem, [Text.Encoding]::ASCII)
     }
-    $sans = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
-        $false, # not critical
-        [Org.BouncyCastle.Asn1.DerOctetString]::new(
-            [Org.BouncyCastle.Asn1.X509.GeneralNames]::new($genNames)
-        )
-    )
-
-    # add them to a DerSet object
-    $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::KeyUsage, $keyUsage)
-    $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::SubjectAlternativeName, $sans)
-
-    # add OCSP Must Staple if requested
-    if ($Order.OCSPMustStaple) {
-        Write-Debug "Adding OCSP Must-Staple"
-        $mustStaple = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
-            $false, # not critical
-            [Org.BouncyCastle.Asn1.DerOctetString]::new(
-                [byte[]](0x30,0x03,0x02,0x01,0x05) # TLS Feature extension ASN.1 structure (SEQUENCE { INTEGER 5 })
-            )
-        )
-        $extDict.Add([Org.BouncyCastle.Asn1.DerObjectIdentifier]::new('1.3.6.1.5.5.7.1.24'), $mustStaple)
-    }
-
-    # build the extensions DerSet
-    $extensions = [Org.BouncyCastle.Asn1.X509.X509Extensions]::new($extDict)
-    $extDerSet = [Org.BouncyCastle.Asn1.DerSet]::new(
-        [Org.BouncyCastle.Asn1.Pkcs.AttributePkcs]::new(
-            [Org.BouncyCastle.Asn1.Pkcs.PkcsObjectIdentifiers]::Pkcs9AtExtensionRequest,
-            [Org.BouncyCastle.Asn1.DerSet]::new($extensions)
-        )
-    )
-
-    # create the request object
-    $req = [Org.BouncyCastle.Pkcs.Pkcs10CertificationRequest]::new(
-        $sigAlgo,
-        $subject,
-        $keyPair.Public,
-        $extDerSet,
-        $keyPair.Private
-    )
 
     # export the csr to a file
-    Export-Pem $req $reqFile
+    $requestPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($reqFile)
+    [IO.File]::WriteAllText($requestPath, $csrResult.RequestPem, [Text.Encoding]::ASCII)
 
-    # return the raw Base64 encoded version
-    return (ConvertTo-Base64Url $req.GetEncoded())
+    # return the CSR as Base64Url
+    return $csrResult.Base64Url
 }

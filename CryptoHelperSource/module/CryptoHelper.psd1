@@ -13,6 +13,7 @@
         'Get-Sha3Hash'
         'Get-CertDetail'
         'Get-CsrDetail'
+        'New-CsrHelper'
     )
     VariablesToExport = @()
     AliasesToExport = @()
