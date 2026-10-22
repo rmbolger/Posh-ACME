@@ -112,7 +112,7 @@ function Revoke-PACertificate {
         if ($KeyFile) {
             if (Test-Path $KeyFile -PathType Leaf) {
                 try {
-                    $certKey = Import-Pem -InputFile $KeyFile | ConvertFrom-BCKey
+                    $certKey = ConvertFrom-PemPrivateKey -Pem (Get-Content $KeyFile -Raw)
                 }
                 catch {
                     Write-Warning "Unable to import private key file $($KeyFile): $($_.Exception.Message). Will attempt revocation with account key."

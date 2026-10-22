@@ -14,6 +14,7 @@
         'Get-CertDetail'
         'Get-CsrDetail'
         'New-CsrHelper'
+        'ConvertFrom-PemPrivateKey'
     )
     VariablesToExport = @()
     AliasesToExport = @()

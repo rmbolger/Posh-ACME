@@ -48,7 +48,7 @@ function New-PAKey {
 
         Write-Verbose "Attempting to import private key $KeyFile"
         try {
-            $newKey = Import-Pem -InputFile $KeyFile | ConvertFrom-BCKey
+            $newKey = ConvertFrom-PemPrivateKey -Pem (Get-Content $KeyFile -Raw)
         } catch {
             throw "Error importing private key. $($_.Exception.Message)"
         }

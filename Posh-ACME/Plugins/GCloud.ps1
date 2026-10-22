@@ -320,7 +320,7 @@ function Connect-GCloudDns {
     }
 
     Write-Debug "Loading private key for $($GCKeyObj.client_email)"
-    $key = Import-Pem -InputString $GCKeyObj.private_key | ConvertFrom-BCKey
+    $key = ConvertFrom-PemPrivateKey -Pem $GCKeyObj.private_key
 
     $unixNow = (Get-DateTimeOffsetNow).ToUnixTimeSeconds()
 

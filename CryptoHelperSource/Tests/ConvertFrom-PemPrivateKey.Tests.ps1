@@ -1,8 +1,8 @@
-Describe "ConvertFrom-BCKey.Tests.ps1" {
+Describe "ConvertFrom-PemPrivateKey" {
 
     BeforeAll {
         $env:POSHACME_HOME = 'TestDrive:\'
-        Import-Module (Join-Path $PSScriptRoot '..\Posh-ACME\Posh-ACME.psd1') -Force
+        Import-Module (Join-Path $PSScriptRoot '../../Posh-ACME/Posh-ACME.psd1') -Force
     }
 
     # build some known good sample JWKs
@@ -84,11 +84,14 @@ Describe "ConvertFrom-BCKey.Tests.ps1" {
         InModuleScope Posh-ACME -Parameters @{JWK = $jwk} {
             param($JWK)
 
-            # create a bouncy castle key from the jwk
+            # serialize a known key to PEM, then import it through CryptoHelper
             $bckey = $JWK | ConvertFrom-Jwk -AsBC
+            $keyFile = Join-Path 'TestDrive:\' ([guid]::NewGuid().ToString() + '.pem')
+            Export-Pem $bckey $keyFile
+            $pem = Get-Content $keyFile -Raw
 
-            { $bcKey | ConvertFrom-BCKey } | Should -Not -Throw
-            $netkey = $bcKey | ConvertFrom-BCKey
+            { $pem | ConvertFrom-PemPrivateKey } | Should -Not -Throw
+            $netkey = $pem | ConvertFrom-PemPrivateKey
 
             $netkey | Should -BeOfType 'System.Security.Cryptography.AsymmetricAlgorithm'
             { $netKey.ExportParameters($true) } | Should -Not -Throw
@@ -96,12 +99,22 @@ Describe "ConvertFrom-BCKey.Tests.ps1" {
 
             $netParam.Modulus  | Should -Be (ConvertFrom-Base64Url $JWK.n -AsByteArray)
             $netParam.Exponent | Should -Be (ConvertFrom-Base64Url $JWK.e -AsByteArray)
-            $netParam.D        | Should -Be (ConvertFrom-Base64Url $JWK.d -AsByteArray)
-            $netParam.P        | Should -Be (ConvertFrom-Base64Url $JWK.p -AsByteArray)
-            $netParam.Q        | Should -Be (ConvertFrom-Base64Url $JWK.q -AsByteArray)
-            $netParam.DP       | Should -Be (ConvertFrom-Base64Url $JWK.dp -AsByteArray)
-            $netParam.DQ       | Should -Be (ConvertFrom-Base64Url $JWK.dq -AsByteArray)
-            $netParam.InverseQ | Should -Be (ConvertFrom-Base64Url $JWK.qi -AsByteArray)
+
+            $publicKey = [Security.Cryptography.RSA]::Create()
+            $publicKey.ImportParameters([Security.Cryptography.RSAParameters]@{
+                Modulus = ConvertFrom-Base64Url $JWK.n -AsByteArray
+                Exponent = ConvertFrom-Base64Url $JWK.e -AsByteArray
+            })
+            $data = [Text.Encoding]::UTF8.GetBytes('key conversion test')
+            $signature = $netKey.SignData(
+                $data,
+                [Security.Cryptography.HashAlgorithmName]::SHA256,
+                [Security.Cryptography.RSASignaturePadding]::Pkcs1)
+            $publicKey.VerifyData(
+                $data,
+                $signature,
+                [Security.Cryptography.HashAlgorithmName]::SHA256,
+                [Security.Cryptography.RSASignaturePadding]::Pkcs1) | Should -BeTrue
         }
     }
 
@@ -113,11 +126,14 @@ Describe "ConvertFrom-BCKey.Tests.ps1" {
         InModuleScope Posh-ACME -Parameters @{JWK = $jwk} {
             param($JWK)
 
-            # create a bouncy castle key from the jwk
+            # serialize a known key to PEM, then import it through CryptoHelper
             $bckey = $JWK | ConvertFrom-Jwk -AsBC
+            $keyFile = Join-Path 'TestDrive:\' ([guid]::NewGuid().ToString() + '.pem')
+            Export-Pem $bckey $keyFile
+            $pem = Get-Content $keyFile -Raw
 
-            { $bcKey | ConvertFrom-BCKey } | Should -Not -Throw
-            $netkey = $bcKey | ConvertFrom-BCKey
+            { $pem | ConvertFrom-PemPrivateKey } | Should -Not -Throw
+            $netkey = $pem | ConvertFrom-PemPrivateKey
 
             $netkey | Should -BeOfType 'System.Security.Cryptography.AsymmetricAlgorithm'
             { $netKey.ExportParameters($true) } | Should -Not -Throw
