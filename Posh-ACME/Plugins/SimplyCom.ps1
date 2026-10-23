@@ -7,7 +7,7 @@ function Add-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(Position=2)]
         [string]$SimplyAccount,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$SimplyAPIKey,
@@ -22,9 +22,7 @@ function Add-DnsTxt {
         $SimplyAPIKeyInsecure = [pscredential]::new('a',$SimplyAPIKey).GetNetworkCredential().Password
     }
 
-    # Setup Basic Auth creds
-    $encodedCreds = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($SimplyAccount):$($SimplyAPIKeyInsecure)"))
-    $authHeader = @{Authorization = "Basic $encodedCreds"}
+    $authHeader = @{Authorization = "Bearer $SimplyAPIKeyInsecure"}
 
     $zoneID,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $authHeader $SimplyAPIRoot
 
@@ -72,7 +70,7 @@ function Add-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
     .PARAMETER SimplyAccount
-        The account name of the account used to connect to Simply API (e.g. S123456)
+        (DEPRECATED) No longer used. The API key alone identifies the account.
     .PARAMETER SimplyAPIKey
         The API Key associated with the account as a SecureString value.
     .PARAMETER SimplyAPIKeyInsecure
@@ -83,7 +81,7 @@ function Add-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
         $key = Read-Host 'API Key' -AsSecureString
-        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' 'S123456' $key
+        Add-DnsTxt '_acme-challenge.example.com' 'txt-value' -SimplyAPIKey $key
 
         Adds a TXT record for the specified site with the specified value.
     #>
@@ -96,7 +94,7 @@ function Remove-DnsTxt {
         [string]$RecordName,
         [Parameter(Mandatory,Position=1)]
         [string]$TxtValue,
-        [Parameter(Mandatory,Position=2)]
+        [Parameter(Position=2)]
         [string]$SimplyAccount,
         [Parameter(ParameterSetName='Secure',Mandatory,Position=3)]
         [securestring]$SimplyAPIKey,
@@ -111,9 +109,7 @@ function Remove-DnsTxt {
         $SimplyAPIKeyInsecure = [pscredential]::new('a',$SimplyAPIKey).GetNetworkCredential().Password
     }
 
-    # Setup Basic Auth creds
-    $encodedCreds = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($SimplyAccount):$($SimplyAPIKeyInsecure)"))
-    $authHeader = @{Authorization = "Basic $encodedCreds"}
+    $authHeader = @{Authorization = "Bearer $SimplyAPIKeyInsecure"}
 
     $zoneID,$rec = Get-SimplyTXTRecord $RecordName $TxtValue $authHeader $SimplyAPIRoot
 
@@ -150,7 +146,7 @@ function Remove-DnsTxt {
     .PARAMETER TxtValue
         The value of the TXT record.
     .PARAMETER SimplyAccount
-        The account name of the account used to connect to Simply API (e.g. S123456)
+        (DEPRECATED) No longer used. The API key alone identifies the account.
     .PARAMETER SimplyAPIKey
         The API Key associated with the account as a SecureString value.
     .PARAMETER SimplyAPIKeyInsecure
@@ -161,7 +157,7 @@ function Remove-DnsTxt {
         This parameter can be ignored and is only used to prevent errors when splatting with more parameters than this function supports.
     .EXAMPLE
         $key = Read-Host 'API Key' -AsSecureString
-        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' 'S123456' $key
+        Remove-DnsTxt '_acme-challenge.example.com' 'txt-value' -SimplyAPIKey $key
 
         Removes a TXT record from the specified site with the specified value.
     #>
