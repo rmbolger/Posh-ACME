@@ -10,11 +10,12 @@
     DotNetFrameworkVersion = '4.7.1'
     FunctionsToExport = @()
     CmdletsToExport = @(
-        'Get-Sha3Hash'
+        'ConvertFrom-PemPrivateKey'
         'Get-CertDetail'
         'Get-CsrDetail'
+        'Get-Sha3Hash'
         'New-CsrHelper'
-        'ConvertFrom-PemPrivateKey'
+        'New-Pfx'
     )
     VariablesToExport = @()
     AliasesToExport = @()
