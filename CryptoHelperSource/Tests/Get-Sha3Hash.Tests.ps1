@@ -1,7 +1,7 @@
 Describe 'Get-Sha3Hash' {
     BeforeAll {
-        . (Join-Path $PSScriptRoot 'TestHelpers.ps1')
-        Import-CryptoHelperForTest -TestRoot $PSScriptRoot
+        $modulePath = Join-Path $PSScriptRoot '../../Posh-ACME/CryptoHelper/CryptoHelper.psd1'
+        Import-Module $modulePath -Force -ErrorAction Stop
     }
 
     It 'Hashes UTF-8 input with SHA3-256' {

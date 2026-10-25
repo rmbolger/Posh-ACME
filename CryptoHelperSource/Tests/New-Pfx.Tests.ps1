@@ -1,7 +1,7 @@
 Describe 'New-Pfx' {
     BeforeAll {
-        . (Join-Path $PSScriptRoot 'TestHelpers.ps1')
-        Import-CryptoHelperForTest -TestRoot $PSScriptRoot
+        $modulePath = Join-Path $PSScriptRoot '../../Posh-ACME/CryptoHelper/CryptoHelper.psd1'
+        Import-Module $modulePath -Force -ErrorAction Stop
 
         $fixtureRoot = Join-Path $PSScriptRoot '../../Tests/TestFiles/ConfigRoot/srvr1/acct1/example.com'
         $certificatePem = Get-Content (Join-Path $fixtureRoot 'cert.cer') -Raw
