@@ -37,9 +37,34 @@ Describe 'New-Pfx' {
         )
     }
 
-    It 'Supports modern encryption and DER encoding options' {
+    It 'Uses legacy RC2 encryption and BER encoding by default' {
         $pfx = New-Pfx -CertificatePem $certificatePem -PrivateKeyPem $privateKeyPem `
-            -Password 'test-password' -UseModernPfxEncryption -UsePfxDerEncoding
-        $pfx.Length | Should -BeGreaterThan 0
+            -Password 'test-password'
+        $details = Get-PfxEncodingDetail -Pfx $pfx
+
+        $details.KeyEncryptionAlgorithm | Should -BeExactly '1.2.840.113549.1.12.1.6'
+        $details.KeyEncryptionScheme | Should -BeNullOrEmpty
+        $details.KeyEncryptionPrf | Should -BeNullOrEmpty
+        $details.IsDerEncoded | Should -BeFalse
+    }
+
+    It 'Uses AES-256-CBC with HMAC-SHA256 when modern encryption is requested' {
+        $pfx = New-Pfx -CertificatePem $certificatePem -PrivateKeyPem $privateKeyPem `
+            -Password 'test-password' -UseModernPfxEncryption
+        $details = Get-PfxEncodingDetail -Pfx $pfx
+
+        $details.KeyEncryptionAlgorithm | Should -BeExactly '1.2.840.113549.1.5.13'
+        $details.KeyEncryptionScheme | Should -BeExactly '2.16.840.1.101.3.4.1.42'
+        $details.KeyEncryptionPrf | Should -BeExactly '1.2.840.113549.2.9'
+        $details.IsDerEncoded | Should -BeFalse
+    }
+
+    It 'Uses DER encoding when requested' {
+        $pfx = New-Pfx -CertificatePem $certificatePem -PrivateKeyPem $privateKeyPem `
+            -Password 'test-password' -UsePfxDerEncoding
+        $details = Get-PfxEncodingDetail -Pfx $pfx
+
+        $details.KeyEncryptionAlgorithm | Should -BeExactly '1.2.840.113549.1.12.1.6'
+        $details.IsDerEncoded | Should -BeTrue
     }
 }

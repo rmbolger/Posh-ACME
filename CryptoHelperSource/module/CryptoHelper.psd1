@@ -13,6 +13,7 @@
         'ConvertFrom-PemPrivateKey'
         'ConvertTo-PemPrivateKey'
         'Get-CertDetail'
+        'Get-PfxEncodingDetail'
         'Get-CsrDetail'
         'Get-Sha3Hash'
         'New-CsrHelper'
