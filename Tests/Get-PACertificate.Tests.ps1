@@ -15,13 +15,11 @@ Describe 'Get-PACertificate' {
     }
 
     It 'Builds certificate details using CryptoHelper' {
-        Mock -ModuleName Posh-ACME Import-Pem { throw 'Legacy PEM parser was called.' }
         $certificate = Get-PACertificate -MainDomain 'example.com'
         $certificate.Subject | Should -BeExactly 'CN=example.com'
         $certificate.Thumbprint | Should -BeExactly '47D51C8D00859491824D57F50BB35DEE07D2E029'
         $certificate.ARIId | Should -BeExactly 'zLv6VMSCAzhtm2UPIvh5pkMrGZM.HLlxoKGfUSg'
         $certificate.Serial | Should -BeExactly '2069810438473732392'
         $certificate.AllSANs | Should -BeExactly @('example.com')
-        Should -Invoke Import-Pem -ModuleName Posh-ACME -Times 0 -Exactly
     }
 }

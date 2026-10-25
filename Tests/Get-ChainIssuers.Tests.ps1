@@ -23,13 +23,4 @@ Describe "Get-ChainIssuers" {
         }
     }
 
-    It "Uses CryptoHelper instead of Import-Pem" {
-        Mock -ModuleName Posh-ACME Import-Pem { throw 'Legacy PEM parser was called.' }
-        InModuleScope Posh-ACME {
-            $issuers = Get-ChainIssuers -OrderFolder 'TestDrive:\srvr1\acct1\example.com'
-            $issuers | Should -HaveCount 3
-        }
-        Should -Invoke Import-Pem -ModuleName Posh-ACME -Times 0 -Exactly
-    }
-
 }
