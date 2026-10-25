@@ -84,11 +84,8 @@ Describe "ConvertFrom-PemPrivateKey" {
         InModuleScope Posh-ACME -Parameters @{JWK = $jwk} {
             param($JWK)
 
-            # serialize a known key to PEM, then import it through CryptoHelper
-            $bckey = $JWK | ConvertFrom-Jwk -AsBC
-            $keyFile = Join-Path 'TestDrive:\' ([guid]::NewGuid().ToString() + '.pem')
-            Export-Pem $bckey $keyFile
-            $pem = Get-Content $keyFile -Raw
+            # serialize a known JWK to PEM, then import it through CryptoHelper
+            $pem = [string]::Join([Environment]::NewLine, (ConvertTo-PemPrivateKey -Jwk $JWK))
 
             { $pem | ConvertFrom-PemPrivateKey } | Should -Not -Throw
             $netkey = $pem | ConvertFrom-PemPrivateKey
@@ -126,11 +123,8 @@ Describe "ConvertFrom-PemPrivateKey" {
         InModuleScope Posh-ACME -Parameters @{JWK = $jwk} {
             param($JWK)
 
-            # serialize a known key to PEM, then import it through CryptoHelper
-            $bckey = $JWK | ConvertFrom-Jwk -AsBC
-            $keyFile = Join-Path 'TestDrive:\' ([guid]::NewGuid().ToString() + '.pem')
-            Export-Pem $bckey $keyFile
-            $pem = Get-Content $keyFile -Raw
+            # serialize a known JWK to PEM, then import it through CryptoHelper
+            $pem = [string]::Join([Environment]::NewLine, (ConvertTo-PemPrivateKey -Jwk $JWK))
 
             { $pem | ConvertFrom-PemPrivateKey } | Should -Not -Throw
             $netkey = $pem | ConvertFrom-PemPrivateKey

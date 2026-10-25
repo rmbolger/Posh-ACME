@@ -48,11 +48,19 @@ function Export-PAAccountKey {
 
         Write-Verbose "Exporting account $($acct.id) ($($acct.KeyLength)) to $OutputFile"
 
-        # convert the JWK to a BC keypair
-        $keypair = $acct.key | ConvertFrom-Jwk -AsBC
+        $jwk = @{}
+        if ($acct.key -is [System.Collections.IDictionary]) {
+            foreach ($name in $acct.key.Keys) {
+                $jwk[$name] = $acct.key[$name]
+            }
+        } else {
+            foreach ($property in $acct.key.PSObject.Properties) {
+                $jwk[$property.Name] = $property.Value
+            }
+        }
 
-        # export it
-        Export-Pem $keypair $OutputFile
+        $keyPem = ConvertTo-PemPrivateKey -Jwk $jwk
+        Export-Pem $keyPem $OutputFile
 
     }
 }

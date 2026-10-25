@@ -11,6 +11,7 @@
     FunctionsToExport = @()
     CmdletsToExport = @(
         'ConvertFrom-PemPrivateKey'
+        'ConvertTo-PemPrivateKey'
         'Get-CertDetail'
         'Get-CsrDetail'
         'Get-Sha3Hash'
