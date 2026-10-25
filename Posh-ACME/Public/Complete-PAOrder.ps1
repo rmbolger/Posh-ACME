@@ -60,13 +60,18 @@ function Complete-PAOrder {
         # is 1/3 the total lifetime of the cert earlier than its expiration. For
         # example, 90 day certs renew 30 days before expiration. For longer lived
         # certs we're going to cap to renewal window at 30 days before renewal.
-        $cert = Import-Pem (Join-Path $Order.Folder 'cert.cer')
-        $lifetime = $cert.NotAfter - $cert.NotBefore
+        # This value will eventually be overridden by an ARI value on servers that
+        # support it.
+        $certFile = Join-Path $Order.Folder 'cert.cer'
+        $certDetail = Get-CertDetail -Pem (Get-Content $certFile -Raw)
+        $notBeforeUTC = $certDetail.NotBefore.ToUniversalTime()
+        $notAfterUTC = $certDetail.NotAfter.ToUniversalTime()
+        $lifetime = $notAfterUTC - $notBeforeUTC
         $renewHours = [Math]::Min(720, ($lifetime.TotalHours / 3))
 
         # Set the CertExpires and RenewAfter fields
-        $Order | Add-Member 'CertExpires' $cert.NotAfter.ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture) -Force
-        $Order | Add-Member 'RenewAfter' $cert.NotAfter.AddHours(-$renewHours).ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture) -Force
+        $Order | Add-Member 'CertExpires' $notAfterUTC.ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture) -Force
+        $Order | Add-Member 'RenewAfter' $notAfterUTC.AddHours(-$renewHours).ToString('yyyy-MM-ddTHH:mm:ssZ', [Globalization.CultureInfo]::InvariantCulture) -Force
         Update-PAOrder $Order -SaveOnly
 
         Write-Verbose "Successfully created certificate."

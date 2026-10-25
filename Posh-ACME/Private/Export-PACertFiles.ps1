@@ -48,17 +48,8 @@ function Export-PACertFiles {
             $pems = @(Split-PemChain -ChainBytes $response.Content)
 
             # Do some basic validation to make sure we got what we were expecting.
-            $cert = Import-Pem -InputString ($pems[0] -join "`n")
-            $altNames = $cert.GetSubjectAlternativeNames() | ForEach-Object {
-                if ($_[0] -eq [Org.BouncyCastle.Asn1.X509.GeneralName]::DnsName) {
-                    # second index is the actual DNS name
-                    $_[1]
-                }
-                elseif ($_[0] -eq [Org.BouncyCastle.Asn1.X509.GeneralName]::IPAddress) {
-                    # second index is a IP hex string like "#01010101" that we need to parse
-                    ([ipaddress]([byte[]] -split ($_[1].Substring(1) -replace '..', '0x$& '))).ToString()
-                }
-            }
+            $certDetail = Get-CertDetail -Pem ($pems[0] -join "`n")
+            $altNames = $certDetail.AllSANs
             Write-Debug "SANs in downloaded cert: $(($altNames -join ', '))"
             $orderNames = @($Order.MainDomain) + @($Order.SANs)
             $orderNames | ForEach-Object {
