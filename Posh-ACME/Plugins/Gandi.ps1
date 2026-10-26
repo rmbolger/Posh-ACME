@@ -28,7 +28,7 @@ function Add-DnsTxt {
         if ('Secure' -eq $PSCmdlet.ParameterSetName) {
             $GandiTokenInsecure = [pscredential]::new('a',$GandiToken).GetNetworkCredential().Password
         }
-        $RestHeaders.'X-Api-Key' = $GandiTokenInsecure
+        $RestHeaders.Authorization = "Apikey $GandiTokenInsecure"
     }
 
     # get the zone name for our record
