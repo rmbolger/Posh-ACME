@@ -9,5 +9,13 @@
     <LangVersion>10.0</LangVersion>
     <!--Not needed but using Nullable is highly recommended-->
     <Nullable>enable</Nullable>
+
+    <Deterministic>true</Deterministic>
+    <EnableSourceLink>false</EnableSourceLink>
+    <PathMap>$(MSBuildThisFileDirectory)=/_/</PathMap>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <EmbedAllSources>true</EmbedAllSources>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 </Project>

@@ -4,6 +4,14 @@
     <TargetFrameworks>net471;net6.0</TargetFrameworks>
     <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
+
+    <Deterministic>true</Deterministic>
+    <EnableSourceLink>false</EnableSourceLink>
+    <PathMap>$(MSBuildThisFileDirectory)=/_/</PathMap>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <EmbedAllSources>true</EmbedAllSources>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
