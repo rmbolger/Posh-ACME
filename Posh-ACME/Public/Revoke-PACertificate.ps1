@@ -105,6 +105,9 @@ function Revoke-PACertificate {
         # Actalis currently only implements Account key based revocation and throws
         # an account not found error if you try to revoke via the cert key.
 
+        # clear any key left over from a previous item in the pipeline
+        $certKey = $null
+
         # check the private key
         if ($KeyFile) {
             if (Test-Path $KeyFile -PathType Leaf) {

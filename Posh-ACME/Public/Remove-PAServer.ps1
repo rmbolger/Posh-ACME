@@ -61,6 +61,9 @@ function Remove-PAServer {
         # save the current server because we need to switch away temporarily
         $oldServer = Get-PAServer
 
+        # clear any flag left over from a previous item in the pipeline
+        $SwitchBack = $false
+
         # switch servers if necessary
         if ($oldServer -and $server.location -ne $oldServer.location) {
             Set-PAServer -DirectoryUrl $server.location -NoRefresh
