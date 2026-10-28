@@ -7,12 +7,7 @@ function Export-Pem {
         [string]$OutputFile
     )
 
-    if ($InputObject -is [array]) {
-        # this should be a string array output from Split-PemChain that we just
-        # need to write to disk with proper line endings.
-        $pem = $InputObject
-
-    } else {
+    if ($InputObject -isnot [array] -and $InputObject -isnot [string]) {
         throw "Unsuppored InputObject type"
     }
 
@@ -25,8 +20,12 @@ function Export-Pem {
     try {
         $sw = [IO.StreamWriter]::new($OutputFile, $false, [Text.Encoding]::ASCII)
         $sw.NewLine = "`n"
-        foreach ($line in $pem) {
-            $sw.WriteLine($line)
+        if ($InputObject -is [string]) {
+            $sw.Write($InputObject)
+        } else {
+            foreach ($line in $InputObject) {
+                $sw.WriteLine($line)
+            }
         }
     } finally { if ($null -ne $sw) { $sw.Close() } }
 

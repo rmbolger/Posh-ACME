@@ -10,7 +10,7 @@ using Org.BouncyCastle.Math;
 namespace CryptoHelper;
 
 [Cmdlet(VerbsData.ConvertTo, "PemPrivateKey")]
-[OutputType(typeof(string[]))]
+[OutputType(typeof(string))]
 public sealed class ConvertToPemPrivateKeyCommand : PSCmdlet
 {
     [Parameter(Mandatory = true, ValueFromPipeline = true)]
@@ -56,7 +56,7 @@ public sealed class ConvertToPemPrivateKeyCommand : PSCmdlet
             throw new ArgumentException($"Unsupported JWK key type: {keyType}", nameof(Jwk));
         }
 
-        WriteObject(CryptoEncoding.ToPemLines(pemLabel, encodedKey), enumerateCollection: false);
+        WriteObject(CryptoEncoding.ToPem(pemLabel, encodedKey));
     }
 
     private string GetRequiredValue(string name)

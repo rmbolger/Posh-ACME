@@ -37,7 +37,7 @@ internal static class CryptoEncoding
         return privateKeyInfo.GetDerEncoded();
     }
 
-    internal static string[] ToPemLines(string label, byte[] encoded)
+    internal static string ToPem(string label, byte[] encoded)
     {
         string base64 = Convert.ToBase64String(encoded);
         var lines = new List<string> { $"-----BEGIN {label}-----" };
@@ -46,11 +46,7 @@ internal static class CryptoEncoding
             lines.Add(base64.Substring(offset, Math.Min(64, base64.Length - offset)));
         }
         lines.Add($"-----END {label}-----");
-        return lines.ToArray();
-    }
 
-    internal static string ToPem(string label, byte[] encoded)
-    {
-        return string.Join("\n", ToPemLines(label, encoded)) + "\n";
+        return string.Join("\n", lines.ToArray()) + "\n";
     }
 }

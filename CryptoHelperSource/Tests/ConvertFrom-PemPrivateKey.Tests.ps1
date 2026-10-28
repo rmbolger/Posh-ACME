@@ -85,7 +85,7 @@ Describe "ConvertFrom-PemPrivateKey" {
             param($JWK)
 
             # serialize a known JWK to PEM, then import it through CryptoHelper
-            $pem = [string]::Join([Environment]::NewLine, (ConvertTo-PemPrivateKey -Jwk $JWK))
+            $pem = ConvertTo-PemPrivateKey -Jwk $JWK
 
             { $pem | ConvertFrom-PemPrivateKey } | Should -Not -Throw
             $netkey = $pem | ConvertFrom-PemPrivateKey
@@ -124,7 +124,7 @@ Describe "ConvertFrom-PemPrivateKey" {
             param($JWK)
 
             # serialize a known JWK to PEM, then import it through CryptoHelper
-            $pem = [string]::Join([Environment]::NewLine, (ConvertTo-PemPrivateKey -Jwk $JWK))
+            $pem = ConvertTo-PemPrivateKey -Jwk $JWK
 
             { $pem | ConvertFrom-PemPrivateKey } | Should -Not -Throw
             $netkey = $pem | ConvertFrom-PemPrivateKey

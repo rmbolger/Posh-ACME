@@ -15,6 +15,7 @@ Describe 'Export-PAAccountKey' {
         }
 
         $pem | Should -Match '^-----BEGIN EC PRIVATE KEY-----'
-        $pem | Should -Match '-----END EC PRIVATE KEY-----'
+        $pem | Should -Match "-----END EC PRIVATE KEY-----`n\z"
+        $pem | Should -Not -Match "`r"
     }
 }
