@@ -7,7 +7,8 @@ function Export-PAAccountKey {
         [string]$ID,
         [Parameter(Mandatory)]
         [string]$OutputFile,
-        [switch]$Force
+        [switch]$Force,
+        [switch]$LegacyFormat
     )
 
     Begin {
@@ -59,7 +60,7 @@ function Export-PAAccountKey {
             }
         }
 
-        $keyPem = ConvertTo-PemPrivateKey -Jwk $jwk
+        $keyPem = ConvertTo-PemPrivateKey -Jwk $jwk -LegacyFormat:$LegacyFormat
         Export-Pem $keyPem $OutputFile
 
     }

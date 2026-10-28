@@ -146,4 +146,26 @@ Describe "ConvertFrom-PemPrivateKey" {
             $netParam.D        | Should -Be (ConvertFrom-Base64Url $JWK.d -AsByteArray)
         }
     }
+
+    It 'Exports <keyType> as <format> PEM' -TestCases @(
+        @{ jwk = $rsa2048jwk; keyType = 'RSA'; format = 'PKCS8'; label = 'PRIVATE KEY'; legacy = $false }
+        @{ jwk = $rsa2048jwk; keyType = 'RSA'; format = 'PKCS1'; label = 'RSA PRIVATE KEY'; legacy = $true }
+        @{ jwk = $ec256jwk; keyType = 'EC'; format = 'PKCS8'; label = 'PRIVATE KEY'; legacy = $false }
+        @{ jwk = $ec256jwk; keyType = 'EC'; format = 'SEC1'; label = 'EC PRIVATE KEY'; legacy = $true }
+    ) {
+        InModuleScope Posh-ACME -Parameters @{ JWK = $jwk; Label = $label; Legacy = $legacy } {
+            param($JWK, $Label, $Legacy)
+
+            $pem = if ($Legacy) {
+                ConvertTo-PemPrivateKey -Jwk $JWK -LegacyFormat
+            } else {
+                ConvertTo-PemPrivateKey -Jwk $JWK
+            }
+            $pem | Should -Match "^-----BEGIN $Label-----"
+            $pem | Should -Match "-----END $Label-----`n\z"
+            $netKey = $pem | ConvertFrom-PemPrivateKey
+            $netKey | Should -BeOfType 'System.Security.Cryptography.AsymmetricAlgorithm'
+            $netKey.Dispose()
+        }
+    }
 }

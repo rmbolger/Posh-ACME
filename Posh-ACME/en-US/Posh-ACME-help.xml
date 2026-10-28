@@ -109,7 +109,7 @@
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>The account key is saved as an unencrypted Base64 encoded PEM file.</maml:para>
+      <maml:para>The account key is saved as an unencrypted Base64 encoded PEM file in PKCS#8 format by default. Use `-LegacyFormat` to export RSA keys in PKCS#1 format or EC keys in SEC1 format instead.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -142,6 +142,17 @@
           <maml:name>Force</maml:name>
           <maml:description>
             <maml:para>If specified and the output file already exists, it will be overwritten. Without the switch, a confirmation prompt will be presented.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>LegacyFormat</maml:name>
+          <maml:description>
+            <maml:para>Export the key in an algorithm-specific format: PKCS#1 for RSA keys or SEC1 for EC keys, rather than PKCS#8.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -202,6 +213,18 @@
         <maml:name>Force</maml:name>
         <maml:description>
           <maml:para>If specified and the output file already exists, it will be overwritten. Without the switch, a confirmation prompt will be presented.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>LegacyFormat</maml:name>
+        <maml:description>
+          <maml:para>Export the key in an algorithm-specific format: PKCS#1 for RSA keys or SEC1 for EC keys, rather than PKCS#8.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>

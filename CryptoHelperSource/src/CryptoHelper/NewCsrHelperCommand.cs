@@ -219,7 +219,7 @@ public sealed class NewCsrHelperCommand : PSCmdlet
     {
         if (keyPair.Private is ECPrivateKeyParameters ecPrivate && keyPair.Public is ECPublicKeyParameters ecPublic)
         {
-            return CryptoEncoding.ToPem("EC PRIVATE KEY", CryptoEncoding.EncodeEcPrivateKey(ecPrivate, ecPublic));
+            return CryptoEncoding.ToPem("EC PRIVATE KEY", CryptoEncoding.EncodeEcLegacyPrivateKey(ecPrivate, ecPublic));
         }
 
         if (keyPair.Private is RsaPrivateCrtKeyParameters rsaPrivate)

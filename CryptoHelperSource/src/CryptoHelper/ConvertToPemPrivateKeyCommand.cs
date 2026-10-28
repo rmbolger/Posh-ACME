@@ -16,6 +16,9 @@ public sealed class ConvertToPemPrivateKeyCommand : PSCmdlet
     [Parameter(Mandatory = true, ValueFromPipeline = true)]
     public IDictionary Jwk { get; set; } = new Hashtable();
 
+    [Parameter]
+    public SwitchParameter LegacyFormat { get; set; }
+
     protected override void ProcessRecord()
     {
         string keyType = GetRequiredValue("kty");
@@ -34,8 +37,10 @@ public sealed class ConvertToPemPrivateKeyCommand : PSCmdlet
                 GetBigInteger("dq"),  // exponent2
                 GetBigInteger("qi")); // coefficient
 
-            encodedKey = CryptoEncoding.EncodeRsaPrivateKey(privateKey);
-            pemLabel = "PRIVATE KEY";
+            encodedKey = LegacyFormat
+                ? CryptoEncoding.EncodeRsaLegacyPrivateKey(privateKey)
+                : CryptoEncoding.EncodeRsaPrivateKey(privateKey);
+            pemLabel = LegacyFormat ? "RSA PRIVATE KEY" : "PRIVATE KEY";
         }
         else if (keyType == "EC")
         {
@@ -48,8 +53,10 @@ public sealed class ConvertToPemPrivateKeyCommand : PSCmdlet
             var d = GetBigInteger("d"); // private key value
             var publicKey = new ECPublicKeyParameters("EC", curve.Curve.CreatePoint(x, y), curveOid);
             var privateKey = new ECPrivateKeyParameters("EC", d, curveOid);
-            encodedKey = CryptoEncoding.EncodeEcPrivateKey(privateKey, publicKey);
-            pemLabel = "EC PRIVATE KEY";
+            encodedKey = LegacyFormat
+                ? CryptoEncoding.EncodeEcLegacyPrivateKey(privateKey, publicKey)
+                : CryptoEncoding.EncodeEcPrivateKey(privateKey);
+            pemLabel = LegacyFormat ? "EC PRIVATE KEY" : "PRIVATE KEY";
         }
         else
         {

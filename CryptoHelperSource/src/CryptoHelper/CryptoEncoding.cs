@@ -27,7 +27,25 @@ internal static class CryptoEncoding
         return PrivateKeyInfoFactory.CreatePrivateKeyInfo(privateKey).GetDerEncoded();
     }
 
-    internal static byte[] EncodeEcPrivateKey(ECPrivateKeyParameters privateKey, ECPublicKeyParameters publicKey)
+    internal static byte[] EncodeRsaLegacyPrivateKey(RsaPrivateCrtKeyParameters privateKey)
+    {
+        return new Org.BouncyCastle.Asn1.Pkcs.RsaPrivateKeyStructure(
+            privateKey.Modulus,
+            privateKey.PublicExponent,
+            privateKey.Exponent,
+            privateKey.P,
+            privateKey.Q,
+            privateKey.DP,
+            privateKey.DQ,
+            privateKey.QInv).GetDerEncoded();
+    }
+
+    internal static byte[] EncodeEcPrivateKey(ECPrivateKeyParameters privateKey)
+    {
+        return PrivateKeyInfoFactory.CreatePrivateKeyInfo(privateKey).GetDerEncoded();
+    }
+
+    internal static byte[] EncodeEcLegacyPrivateKey(ECPrivateKeyParameters privateKey, ECPublicKeyParameters publicKey)
     {
         var privateKeyInfo = new ECPrivateKeyStructure(
             privateKey.Parameters.N.BitLength,

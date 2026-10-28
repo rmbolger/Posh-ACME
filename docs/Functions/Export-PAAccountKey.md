@@ -14,12 +14,13 @@ Export an ACME account private key.
 ## Syntax
 
 ```powershell
-Export-PAAccountKey [[-ID] <String>] -OutputFile <String> [-Force] [-WhatIf] [-Confirm] [<CommonParameters>]
+Export-PAAccountKey [[-ID] <String>] -OutputFile <String> [-Force] [-LegacyFormat] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ## Description
 
-The account key is saved as an unencrypted Base64 encoded PEM file.
+The account key is saved as an unencrypted Base64 encoded PEM file in PKCS#8 format by default. Use `-LegacyFormat` to export RSA keys in PKCS#1 format or EC keys in SEC1 format instead.
 
 ## Examples
 
@@ -86,6 +87,21 @@ Accept wildcard characters: False
 ### -Force
 If specified and the output file already exists, it will be overwritten.
 Without the switch, a confirmation prompt will be presented.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LegacyFormat
+Export the key in an algorithm-specific format: PKCS#1 for RSA keys or SEC1 for EC keys, rather than PKCS#8.
 
 ```yaml
 Type: SwitchParameter
