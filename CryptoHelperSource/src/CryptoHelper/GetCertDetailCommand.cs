@@ -58,8 +58,8 @@ public sealed class GetCertDetailCommand : PSCmdlet
             Asn1OctetString? keyIdentifier = AuthorityKeyIdentifier.GetInstance(akiExtension.GetOctets()).KeyIdentifier;
             if (keyIdentifier is not null)
             {
-                string encodedKeyIdentifier = ToBase64Url(keyIdentifier.GetOctets());
-                string encodedSerial = ToBase64Url(certificate.SerialNumber.ToByteArray());
+                string encodedKeyIdentifier = CryptoEncoding.ToBase64Url(keyIdentifier.GetOctets());
+                string encodedSerial = CryptoEncoding.ToBase64Url(certificate.SerialNumber.ToByteArray());
                 ariId = $"{encodedKeyIdentifier}.{encodedSerial}";
             }
         }
@@ -74,10 +74,5 @@ public sealed class GetCertDetailCommand : PSCmdlet
         result.Properties.Add(new PSNoteProperty("Serial", certificate.SerialNumber.ToString()));
         result.Properties.Add(new PSNoteProperty("AllSANs", altNames.ToArray()));
         WriteObject(result);
-    }
-
-    private static string ToBase64Url(byte[] value)
-    {
-        return Convert.ToBase64String(value).TrimEnd('=').Replace('+', '-').Replace('/', '_');
     }
 }

@@ -36,7 +36,7 @@ public sealed class GetCsrDetailCommand : PSCmdlet
         }
 
         // convert the CSR to Base64Url and determine the key length
-        string base64Url = ToBase64Url(csr.GetEncoded());
+        string base64Url = CryptoEncoding.ToBase64Url(csr.GetEncoded());
         string keyLength = GetKeyLength(csr.GetPublicKey());
 
         // extract the domain names from the CSR's subject and SAN extensions
@@ -164,11 +164,6 @@ public sealed class GetCsrDetailCommand : PSCmdlet
         }
 
         return null;
-    }
-
-    private static string ToBase64Url(byte[] value)
-    {
-        return Convert.ToBase64String(value).TrimEnd('=').Replace('+', '-').Replace('/', '_');
     }
 
     private void WriteResult(string base64Url, string keyLength, IEnumerable<string> domain, bool ocspMustStaple)

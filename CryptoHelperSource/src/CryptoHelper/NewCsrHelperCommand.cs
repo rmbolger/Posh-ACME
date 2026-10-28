@@ -3,13 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Collections;
 using System.Management.Automation;
-using System.Text;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Nist;
 using Org.BouncyCastle.Asn1.Pkcs;
-using Org.BouncyCastle.Asn1.Sec;
 using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Asn1.X9;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Parameters;
@@ -141,8 +138,8 @@ public sealed class NewCsrHelperCommand : PSCmdlet
         byte[] requestBytes = request.GetEncoded();
         var result = new PSObject();
         result.Properties.Add(new PSNoteProperty("PrivateKeyPem", privateKeyPem));
-        result.Properties.Add(new PSNoteProperty("RequestPem", ToPem("CERTIFICATE REQUEST", requestBytes)));
-        result.Properties.Add(new PSNoteProperty("Base64Url", ToBase64Url(requestBytes)));
+        result.Properties.Add(new PSNoteProperty("RequestPem", CryptoEncoding.ToPem("CERTIFICATE REQUEST", requestBytes)));
+        result.Properties.Add(new PSNoteProperty("Base64Url", CryptoEncoding.ToBase64Url(requestBytes)));
         WriteObject(result);
     }
 
@@ -222,36 +219,14 @@ public sealed class NewCsrHelperCommand : PSCmdlet
     {
         if (keyPair.Private is ECPrivateKeyParameters ecPrivate && keyPair.Public is ECPublicKeyParameters ecPublic)
         {
-            int orderBitLength = ecPrivate.Parameters.N.BitLength;
-            var parameters = new X962Parameters(ecPrivate.PublicKeyParamSet);
-            var publicKey = new DerBitString(ecPublic.Q.GetEncoded());
-            var privateKey = new ECPrivateKeyStructure(orderBitLength, ecPrivate.D, publicKey, parameters);
-            return ToPem("EC PRIVATE KEY", privateKey.GetDerEncoded());
+            return CryptoEncoding.ToPem("EC PRIVATE KEY", CryptoEncoding.EncodeEcPrivateKey(ecPrivate, ecPublic));
         }
 
         if (keyPair.Private is RsaPrivateCrtKeyParameters rsaPrivate)
         {
-            return ToPem("PRIVATE KEY", PrivateKeyInfoFactory.CreatePrivateKeyInfo(rsaPrivate).GetDerEncoded());
+            return CryptoEncoding.ToPem("PRIVATE KEY", CryptoEncoding.EncodeRsaPrivateKey(rsaPrivate));
         }
 
         throw new ArgumentException("Unsupported private key type.", nameof(keyPair));
-    }
-
-    private static string ToPem(string label, byte[] encoded)
-    {
-        string base64 = Convert.ToBase64String(encoded);
-        var pem = new StringBuilder();
-        pem.Append("-----BEGIN ").Append(label).Append("-----\n");
-        for (int index = 0; index < base64.Length; index += 64)
-        {
-            pem.Append(base64, index, Math.Min(64, base64.Length - index)).Append('\n');
-        }
-        pem.Append("-----END ").Append(label).Append("-----\n");
-        return pem.ToString();
-    }
-
-    private static string ToBase64Url(byte[] value)
-    {
-        return Convert.ToBase64String(value).TrimEnd('=').Replace('+', '-').Replace('/', '_');
     }
 }

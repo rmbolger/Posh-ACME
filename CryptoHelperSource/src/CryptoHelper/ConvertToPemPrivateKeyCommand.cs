@@ -1,15 +1,11 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Management.Automation;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Nist;
-using Org.BouncyCastle.Asn1.Sec;
-using Org.BouncyCastle.Asn1.X9;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
-using Org.BouncyCastle.Pkcs;
 
 namespace CryptoHelper;
 
@@ -38,7 +34,7 @@ public sealed class ConvertToPemPrivateKeyCommand : PSCmdlet
                 GetBigInteger("dq"),  // exponent2
                 GetBigInteger("qi")); // coefficient
 
-            encodedKey = PrivateKeyInfoFactory.CreatePrivateKeyInfo(privateKey).GetDerEncoded();
+            encodedKey = CryptoEncoding.EncodeRsaPrivateKey(privateKey);
             pemLabel = "PRIVATE KEY";
         }
         else if (keyType == "EC")
@@ -52,13 +48,7 @@ public sealed class ConvertToPemPrivateKeyCommand : PSCmdlet
             var d = GetBigInteger("d"); // private key value
             var publicKey = new ECPublicKeyParameters("EC", curve.Curve.CreatePoint(x, y), curveOid);
             var privateKey = new ECPrivateKeyParameters("EC", d, curveOid);
-            var privateKeyInfo = new ECPrivateKeyStructure(
-                privateKey.Parameters.N.BitLength,
-                privateKey.D,
-                new DerBitString(publicKey.Q.GetEncoded()),
-                new X962Parameters(curveOid));
-
-            encodedKey = privateKeyInfo.GetDerEncoded();
+            encodedKey = CryptoEncoding.EncodeEcPrivateKey(privateKey, publicKey);
             pemLabel = "EC PRIVATE KEY";
         }
         else
@@ -66,7 +56,7 @@ public sealed class ConvertToPemPrivateKeyCommand : PSCmdlet
             throw new ArgumentException($"Unsupported JWK key type: {keyType}", nameof(Jwk));
         }
 
-        WriteObject(ToPemLines(pemLabel, encodedKey), enumerateCollection: false);
+        WriteObject(CryptoEncoding.ToPemLines(pemLabel, encodedKey), enumerateCollection: false);
     }
 
     private string GetRequiredValue(string name)
@@ -87,25 +77,6 @@ public sealed class ConvertToPemPrivateKeyCommand : PSCmdlet
 
     private BigInteger GetBigInteger(string name)
     {
-        return new BigInteger(1, FromBase64Url(GetRequiredValue(name)));
-    }
-
-    private static byte[] FromBase64Url(string value)
-    {
-        string base64 = value.Replace('-', '+').Replace('_', '/');
-        base64 = base64.PadRight(base64.Length + ((4 - base64.Length % 4) % 4), '=');
-        return Convert.FromBase64String(base64);
-    }
-
-    private static string[] ToPemLines(string label, byte[] encodedKey)
-    {
-        string base64 = Convert.ToBase64String(encodedKey);
-        var lines = new List<string> { $"-----BEGIN {label}-----" };
-        for (int offset = 0; offset < base64.Length; offset += 64)
-        {
-            lines.Add(base64.Substring(offset, Math.Min(64, base64.Length - offset)));
-        }
-        lines.Add($"-----END {label}-----");
-        return lines.ToArray();
+        return new BigInteger(1, CryptoEncoding.FromBase64Url(GetRequiredValue(name)));
     }
 }
