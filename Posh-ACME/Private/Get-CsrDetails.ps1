@@ -13,7 +13,7 @@ function Get-CsrDetails {
     #   KeyLength : The key length value using our Posh-ACME nomeclature
     #   OCSPMustStaple : Boolean indicating whether the OCSP Must Staple flag is set
     #   Base64Url : The Base64Url encoded bytes of the raw request
-    #   PemLines  : The original lines from the file/string PEM request content
+    #   Pem       : The normalized PEM request content
 
     # Allow for CSRs being passed directly as a string value in addition to a
     # filesystem path. Anything missing the correct header string will be treated
@@ -33,6 +33,7 @@ function Get-CsrDetails {
         $csrPem = $CSRPath
         $pemLines = $CSRPath.Trim() -split "(?:`r)?`n"
     }
+    $normalizedPem = ($pemLines -join "`n") + "`n"
 
     Write-Debug "Attempting to parse CSR pem"
     $csrDetails = Get-CsrDetail -Pem $csrPem
@@ -46,6 +47,6 @@ function Get-CsrDetails {
         KeyLength = $csrDetails.KeyLength
         OCSPMustStaple = $csrDetails.OCSPMustStaple
         Base64Url = $csrDetails.Base64Url
-        PemLines = $pemLines
+        Pem = $normalizedPem
     }
 }

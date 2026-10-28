@@ -57,7 +57,7 @@ Describe "Get-CsrDetails" {
                 $result.Domain         | Should -BeExactly @('example.com')
                 $result.KeyLength      | Should -BeExactly '2048'
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
-                $result.PemLines.Count | Should -Be 15
+                (($result.Pem -split "`n").Count - 1) | Should -Be 15
                 $warnings.Message -join ' ' | Should -Match 'No Certificate Attributes found in CSR.'
             }
         }
@@ -73,7 +73,7 @@ Describe "Get-CsrDetails" {
                 $result.KeyLength      | Should -BeExactly '2048'
                 $result.OCSPMustStaple | Should -BeFalse
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
-                $result.PemLines.Count | Should -Be 19
+                (($result.Pem -split "`n").Count - 1) | Should -Be 19
             }
         }
 
@@ -87,7 +87,7 @@ Describe "Get-CsrDetails" {
                 $result.KeyLength      | Should -BeExactly '2048'
                 $result.OCSPMustStaple | Should -BeFalse
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
-                $result.PemLines.Count | Should -Be 19
+                (($result.Pem -split "`n").Count - 1) | Should -Be 19
             }
         }
     }
@@ -102,7 +102,7 @@ Describe "Get-CsrDetails" {
                 $result.KeyLength      | Should -BeExactly '2048'
                 $result.OCSPMustStaple | Should -BeFalse
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
-                $result.PemLines.Count | Should -Be 3
+                (($result.Pem -split "`n").Count - 1) | Should -Be 3
             }
         }
 
@@ -116,7 +116,7 @@ Describe "Get-CsrDetails" {
                 $result.KeyLength      | Should -BeExactly '2048'
                 $result.OCSPMustStaple | Should -BeFalse
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
-                $result.PemLines.Count | Should -Be 3
+                (($result.Pem -split "`n").Count - 1) | Should -Be 3
             }
         }
     }
@@ -131,7 +131,7 @@ Describe "Get-CsrDetails" {
                 $result.KeyLength      | Should -BeExactly '2048'
                 $result.OCSPMustStaple | Should -BeTrue
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
-                $result.PemLines.Count | Should -Be 16
+                (($result.Pem -split "`n").Count - 1) | Should -Be 16
             }
         }
     }
@@ -146,7 +146,7 @@ Describe "Get-CsrDetails" {
                 $result.KeyLength      | Should -BeExactly "4096"
                 $result.OCSPMustStaple | Should -BeTrue
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
-                $result.PemLines.Count | Should -Be 28
+                (($result.Pem -split "`n").Count - 1) | Should -Be 28
             }
         }
     }
@@ -161,7 +161,7 @@ Describe "Get-CsrDetails" {
                 $result.KeyLength      | Should -BeExactly "ec-256"
                 $result.OCSPMustStaple | Should -BeFalse
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
-                $result.PemLines.Count | Should -Be 11
+                (($result.Pem -split "`n").Count - 1) | Should -Be 11
             }
         }
     }
@@ -191,10 +191,27 @@ Describe "Get-CsrDetails" {
                 $result.KeyLength      | Should -BeExactly "ec-521"
                 $result.OCSPMustStaple | Should -BeFalse
                 { $result.Base64Url | ConvertFrom-Base64Url } | Should -Not -Throw
-                $result.PemLines.Count | Should -Be 13
+                (($result.Pem -split "`n").Count - 1) | Should -Be 13
                 $sanWarnings.Count | Should -Be 2
                 $sanWarnings.Message -join ' ' | Should -Match 'TagNo 1'
                 $sanWarnings.Message -join ' ' | Should -Match 'TagNo 6'
+            }
+        }
+    }
+
+    Context "Normalized PEM output" {
+        It "Trims surrounding whitespace and normalizes CRLF to LF for string input" {
+            Copy-Item "$PSScriptRoot\TestFiles\rsa-2048-noCN-singleSAN.csr" 'TestDrive:\test.csr'
+            $csrString = " `t`r`n" + ((Get-Content 'TestDrive:\test.csr' -Raw).Trim() -replace "`r?`n", "`r`n") + "`r`n `t "
+            $expectedPem = (($csrString.Trim() -split "(?:`r)?`n") -join "`n") + "`n"
+
+            InModuleScope Posh-ACME -Parameters @{ CSRString = $csrString; ExpectedPem = $expectedPem } {
+                param($CSRString, $ExpectedPem)
+
+                $result = Get-CsrDetails -CSRPath $CSRString
+                $result.Pem | Should -BeExactly $ExpectedPem
+                $result.Pem | Should -Not -Match "`r"
+                $result.Pem | Should -Match "-----END CERTIFICATE REQUEST-----`n\z"
             }
         }
     }

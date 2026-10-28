@@ -379,7 +379,7 @@ function New-PAOrder {
     # Make a local copy of the specified CSR
     if ('FromCSR' -eq $PSCmdlet.ParameterSetName) {
         $csrDest = Join-Path $order.Folder 'request.csr'
-        Export-Pem $csrDetails.PemLines $csrDest
+        Export-Pem $csrDetails.Pem $csrDest
     }
 
     # Determine whether to remove the old private key. This is necessary if it exists
