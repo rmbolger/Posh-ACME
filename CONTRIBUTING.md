@@ -55,7 +55,7 @@ powershell.exe -C "Invoke-Pester"
 pwsh.exe -C "Invoke-Pester"
 ```
 
-Keep in mind, the tests should be able to pass on both Windows PowerShell 5.1 and PowerShell 6+ on any OS.
+Keep in mind, the tests should be able to pass on both Windows PowerShell 5.1 and PowerShell 6+ on any supported OS.
 
 ## Features and Functionality
 

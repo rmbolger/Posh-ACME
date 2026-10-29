@@ -24,6 +24,7 @@ if (-not $PSEdition -or $PSEdition -eq 'Desktop') {
     }
 }
 
+# Import the embedded CryptoHelper module
 Import-Module (Join-Path $PSScriptRoot 'CryptoHelper/CryptoHelper.psd1') -Scope Local -ErrorAction Stop
 
 # Get public and private function definition files.
