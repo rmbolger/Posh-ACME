@@ -101,12 +101,6 @@ function New-Csr {
     ]]::new()
 
     # create the extensions we care about
-    $basicConstraints = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
-        $false, # not critical
-        [Org.BouncyCastle.Asn1.DerOctetString]::new(
-            [Org.BouncyCastle.Asn1.X509.BasicConstraints]::new($false) # not a CA
-        )
-    )
     if ($Order.KeyLength -like 'ec-*') {
         # Only DigitalSignature on ECC certs because KeyEncipherment not supported
         $keyUsage = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
@@ -129,12 +123,6 @@ function New-Csr {
             )
         )
     }
-    $ski = [Org.BouncyCastle.Asn1.X509.X509Extension]::new(
-        $false, # not critical
-        [Org.BouncyCastle.Asn1.DerOctetString]::new(
-            [Org.BouncyCastle.X509.Extension.SubjectKeyIdentifierStructure]::new($keyPair.Public)
-        )
-    )
 
     # create SANs based on the identifier types
     $genNames = $Order.identifiers | ForEach-Object {
@@ -162,10 +150,8 @@ function New-Csr {
     )
 
     # add them to a DerSet object
-    $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::BasicConstraints, $basicConstraints)
     $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::KeyUsage, $keyUsage)
     $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::SubjectAlternativeName, $sans)
-    $extDict.Add([Org.BouncyCastle.Asn1.X509.X509Extensions]::SubjectKeyIdentifier, $ski)
 
     # add OCSP Must Staple if requested
     if ($Order.OCSPMustStaple) {
