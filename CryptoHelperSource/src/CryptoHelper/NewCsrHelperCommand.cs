@@ -66,10 +66,6 @@ public sealed class NewCsrHelperCommand : PSCmdlet
         // prep the extensions
         var extensions = new Dictionary<DerObjectIdentifier, X509Extension>
         {
-            // Not a CA certificate
-            [X509Extensions.BasicConstraints] = new X509Extension(
-                false,
-                new DerOctetString(new BasicConstraints(false))),
             // Key usage: DigitalSignature and optionally KeyEncipherment for non-EC keys
             [X509Extensions.KeyUsage] = new X509Extension(
                 true,
@@ -77,11 +73,7 @@ public sealed class NewCsrHelperCommand : PSCmdlet
                     KeyUsage.DigitalSignature |
                     (KeyLength.StartsWith("ec-", StringComparison.OrdinalIgnoreCase)
                         ? 0
-                        : KeyUsage.KeyEncipherment)))),
-            // Subject Key Identifier
-            [X509Extensions.SubjectKeyIdentifier] = new X509Extension(
-                false,
-                new DerOctetString(X509ExtensionUtilities.CreateSubjectKeyIdentifier(keyPair.Public)))
+                        : KeyUsage.KeyEncipherment))))
         };
 
         // build the SAN list
