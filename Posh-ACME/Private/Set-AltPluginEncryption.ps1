@@ -127,7 +127,7 @@ function Set-AltPluginEncryption {
 
         # re-export all the plugin args
         $orderData | ForEach-Object {
-            Write-Debug "Re-exporting plugin args for order '$($_.Order.Name)' with plugins $($_.Order.Plugin -join ',') and data $($_.PluginArgs | ConvertTo-Json -Depth 5)"
+            Write-Debug "Re-exporting plugin args for order '$($_.Order.Name)' with plugins $($_.Order.Plugin -join ',') and args $($_.PluginArgs.Keys -join ',')"
             Export-PluginArgs @_ -IgnoreExisting
         }
     }

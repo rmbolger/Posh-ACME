@@ -242,7 +242,10 @@ function New-PACertificate {
 
         # create a new order
         Write-Verbose "Creating a new order '$($Name)' for $($Domain -join ', ')"
-        Write-Debug "New order params: `n$($orderParams | ConvertTo-Json -Depth 5)"
+        # log the plugin arg names but not their values, which are often credentials
+        $dbgParams = $orderParams.Clone()
+        if ($dbgParams.PluginArgs) { $dbgParams.PluginArgs = @($dbgParams.PluginArgs.Keys) }
+        Write-Debug "New order params: `n$($dbgParams | ConvertTo-Json -Depth 5)"
         $order = New-PAOrder @orderParams -Force
 
     } else {
@@ -273,7 +276,9 @@ function New-PACertificate {
                 $setOrderParams.$_ = $PSBoundParameters.$_
             }
         }
-        Write-Debug "Set order params: `n$($setOrderParams | ConvertTo-Json -Depth 5)"
+        $dbgParams = $setOrderParams.Clone()
+        if ($dbgParams.PluginArgs) { $dbgParams.PluginArgs = @($dbgParams.PluginArgs.Keys) }
+        Write-Debug "Set order params: `n$($dbgParams | ConvertTo-Json -Depth 5)"
         $order | Set-PAOrder @setOrderParams
         $order = Get-PAOrder
     }
