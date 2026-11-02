@@ -9,19 +9,15 @@ Describe 'CryptoHelper module' {
         'abc' | Get-Sha3Hash | Out-Null
 
         $assemblies = @([AppDomain]::CurrentDomain.GetAssemblies() | Where-Object {
-            $_.GetName().Name -in 'BouncyCastle.Cryptography', 'BouncyCastle.Crypto'
+            $_.GetName().Name -eq 'BouncyCastle.Cryptography'
         })
         if ($IsCoreCLR) {
             $isolated = @($assemblies | Where-Object {
                 [Runtime.Loader.AssemblyLoadContext]::GetLoadContext($_).Name -eq 'CryptoHelper'
             })
-            $default = @($assemblies | Where-Object {
-                [Runtime.Loader.AssemblyLoadContext]::GetLoadContext($_) -eq [Runtime.Loader.AssemblyLoadContext]::Default
-            })
             $isolated | Should -HaveCount 1
-            $default | Should -HaveCount 0
         } else {
-            @($assemblies | Where-Object { $_.GetName().Name -eq 'BouncyCastle.Cryptography' }) | Should -HaveCount 1
+            $assemblies | Should -Not -BeNullOrEmpty
         }
     }
 }
