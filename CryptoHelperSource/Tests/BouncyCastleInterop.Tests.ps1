@@ -1,4 +1,4 @@
-Describe 'CryptoHelper with an earlier 2.x BouncyCastle.Cryptography already loaded' {
+Describe 'CryptoHelper with an earlier 2.x BouncyCastle.Cryptography already loaded' -Skip:($PSVersionTable.PSEdition -eq 'Desktop') {
     BeforeAll {
         $packageRoot = if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else {
             Join-Path ([Environment]::GetFolderPath('UserProfile')) '.nuget/packages'
