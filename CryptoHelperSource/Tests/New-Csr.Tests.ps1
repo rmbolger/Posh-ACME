@@ -1,4 +1,4 @@
-Describe 'New-CsrHelper' {
+Describe 'New-Csr' {
     BeforeAll {
         $modulePath = Join-Path $PSScriptRoot '../../Posh-ACME/CryptoHelper/CryptoHelper.psd1'
         Import-Module $modulePath -Force -ErrorAction Stop
@@ -13,7 +13,7 @@ Describe 'New-CsrHelper' {
             @{ type = 'ip'; value = '192.0.2.1' }
         )
 
-        $result = New-CsrHelper -KeyLength $KeyLength -Subject 'CN=example.com' `
+        $result = New-Csr -KeyLength $KeyLength -Subject 'CN=example.com' `
             -Identifiers $identifiers -OCSPMustStaple $true
         $details = $result.RequestPem | Get-CsrDetail
 
@@ -25,12 +25,12 @@ Describe 'New-CsrHelper' {
     }
 
     It 'Rejects unsupported EC key sizes' {
-        { New-CsrHelper -KeyLength 'ec-192' -Subject 'CN=example.com' } |
+        { New-Csr -KeyLength 'ec-192' -Subject 'CN=example.com' } |
             Should -Throw '*Unsupported EC key size*'
     }
 
     It 'Rejects invalid private-key PEM' {
-        { New-CsrHelper -KeyLength 'ec-256' -Subject 'CN=example.com' -PrivateKeyPem 'not a PEM key' } |
+        { New-Csr -KeyLength 'ec-256' -Subject 'CN=example.com' -PrivateKeyPem 'not a PEM key' } |
             Should -Throw '*supported RSA or EC private key*'
     }
 }

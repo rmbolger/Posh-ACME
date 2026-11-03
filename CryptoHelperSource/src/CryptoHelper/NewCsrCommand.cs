@@ -16,9 +16,9 @@ using Org.BouncyCastle.Security;
 
 namespace CryptoHelper;
 
-[Cmdlet(VerbsCommon.New, "CsrHelper")]
+[Cmdlet(VerbsCommon.New, "Csr")]
 [OutputType(typeof(PSObject))]
-public sealed class NewCsrHelperCommand : PSCmdlet
+public sealed class NewCsrCommand : PSCmdlet
 {
     [Parameter(Mandatory = true)]
     public string KeyLength { get; set; } = string.Empty;

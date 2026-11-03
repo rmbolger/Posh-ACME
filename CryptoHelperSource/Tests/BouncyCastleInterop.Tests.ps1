@@ -34,7 +34,7 @@ Describe 'CryptoHelper with an earlier 2.x BouncyCastle.Cryptography already loa
 
     It 'binds BouncyCastle by assembly identity after preloading 2.2.1' {
         'abc' | Get-Sha3Hash | Should -BeExactly '3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532'
-        $request = New-CsrHelper -KeyLength '2048' -Subject 'CN=interop.example'
+        $request = New-Csr -KeyLength '2048' -Subject 'CN=interop.example'
         $request.RequestPem | Should -Match '-----BEGIN CERTIFICATE REQUEST-----'
 
         $assemblies = @([AppDomain]::CurrentDomain.GetAssemblies() | Where-Object {

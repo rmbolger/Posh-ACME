@@ -1,4 +1,4 @@
-function New-Csr {
+function Build-Csr {
     [CmdletBinding()]
     [OutputType('System.String')]
     param(
@@ -45,7 +45,7 @@ function New-Csr {
         OCSPMustStaple = [bool]$Order.OCSPMustStaple
         PrivateKeyPem = $keyPem
     }
-    $csrResult = New-CsrHelper @csrParams
+    $csrResult = New-Csr @csrParams
 
     # write the private key to a file if it was newly created
     if (-not $keyExists -and $csrResult.PrivateKeyPem) {

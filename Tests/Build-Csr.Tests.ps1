@@ -1,4 +1,4 @@
-Describe "New-Csr" {
+Describe "Build-Csr" {
 
     BeforeAll {
         # copy a fake config root to the test drive
@@ -33,11 +33,11 @@ Describe "New-Csr" {
                     identifiers    = @(@{ type = 'dns'; value = 'example.com' })
                 }
 
-                { New-Csr $order } | Should -Not -Throw
-                $csr = New-Csr $order
+                { Build-Csr $order } | Should -Not -Throw
+                $csr = Build-Csr $order
                 $csr | Should -Not -BeNullOrEmpty
 
-                # New-Csr also writes the PEM request, which is what Get-CsrDetails can read
+                # Build-Csr also writes the PEM request, which is what Get-CsrDetails can read
                 $details = Get-CsrDetails (Join-Path $orderFolder 'request.csr')
                 $details.OCSPMustStaple | Should -Be $MustStaple
                 $details.Domain | Should -Be @('example.com')
@@ -63,7 +63,7 @@ Describe "New-Csr" {
                     )
                 }
 
-                New-Csr $order | Should -Not -BeNullOrEmpty
+                Build-Csr $order | Should -Not -BeNullOrEmpty
                 $details = Get-CsrDetails (Join-Path $orderFolder 'request.csr')
                 $details.Domain | Should -BeExactly @('example.com', '192.0.2.1', 'www.example.com', '2001:db8::1')
             }

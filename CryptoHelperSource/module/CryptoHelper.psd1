@@ -16,7 +16,7 @@
         'Get-PfxEncodingDetail'
         'Get-CsrDetail'
         'Get-Sha3Hash'
-        'New-CsrHelper'
+        'New-Csr'
         'New-Pfx'
     )
     VariablesToExport = @()

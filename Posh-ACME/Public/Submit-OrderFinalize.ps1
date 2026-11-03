@@ -49,7 +49,7 @@ function Submit-OrderFinalize {
             $msg = "Creating new certificate request with key length $($Order.KeyLength)"
             if ($Order.OCSPMustStaple) { $msg += " and OCSP Must-Staple" }
             Write-Verbose "$msg."
-            $csr = New-Csr $Order
+            $csr = Build-Csr $Order
         } else {
             Write-Verbose "Using the provided certificate request."
             $csr = $order.CSRBase64Url
