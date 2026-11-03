@@ -24,6 +24,20 @@ if (-not $PSEdition -or $PSEdition -eq 'Desktop') {
     }
 }
 
+# Before we import CryptoHelper, warn if there are any older versions of BouncyCastle.Cryptography
+# already loaded on Desktop edition
+if (-not $PSEdition -or $PSEdition -eq 'Desktop') {
+    $bcAssemblies = [AppDomain]::CurrentDomain.GetAssemblies() | Where-Object {
+        $_.GetName().Name -eq 'BouncyCastle.Cryptography'
+    }
+    foreach ($bc in $bcAssemblies) {
+        $bcVersion = [version]([Diagnostics.FileVersionInfo]::GetVersionInfo($bc.Location).FileVersion)
+        if ($bcVersion -lt [version]'2.7.0.0') {
+            Write-Warning "An older version of BouncyCastle.Cryptography is loaded, $($bcVersion). Expected 2.7.0 or later. This may cause compatibility issues with Posh-ACME. Please start a new PowerShell session to ensure a clean environment."
+        }
+    }
+}
+
 # Import the embedded CryptoHelper module
 Import-Module (Join-Path $PSScriptRoot 'CryptoHelper/CryptoHelper.psd1') -Scope Local -ErrorAction Stop
 
