@@ -24,11 +24,13 @@ internal static class CryptoEncoding
 
     internal static byte[] EncodeRsaPrivateKey(RsaPrivateCrtKeyParameters privateKey)
     {
+        // Encode the RSA private key using the PKCS#8 format
         return PrivateKeyInfoFactory.CreatePrivateKeyInfo(privateKey).GetDerEncoded();
     }
 
     internal static byte[] EncodeRsaLegacyPrivateKey(RsaPrivateCrtKeyParameters privateKey)
     {
+        // Encode the RSA private key using the legacy PKCS#1 format
         return new Org.BouncyCastle.Asn1.Pkcs.RsaPrivateKeyStructure(
             privateKey.Modulus,
             privateKey.PublicExponent,
@@ -42,11 +44,13 @@ internal static class CryptoEncoding
 
     internal static byte[] EncodeEcPrivateKey(ECPrivateKeyParameters privateKey)
     {
+        // Encode the EC private key using the PKCS#8 format
         return PrivateKeyInfoFactory.CreatePrivateKeyInfo(privateKey).GetDerEncoded();
     }
 
     internal static byte[] EncodeEcLegacyPrivateKey(ECPrivateKeyParameters privateKey, ECPublicKeyParameters publicKey)
     {
+        // Encode the EC private key using the legacy format (SEC 1)
         var privateKeyInfo = new ECPrivateKeyStructure(
             privateKey.Parameters.N.BitLength,
             privateKey.D,
@@ -57,6 +61,8 @@ internal static class CryptoEncoding
 
     internal static string ToPem(string label, byte[] encoded)
     {
+        // Encode the given byte array into a PEM-formatted string with the
+        // specified label and unix-style line endings
         string base64 = Convert.ToBase64String(encoded);
         var lines = new List<string> { $"-----BEGIN {label}-----" };
         for (int offset = 0; offset < base64.Length; offset += 64)

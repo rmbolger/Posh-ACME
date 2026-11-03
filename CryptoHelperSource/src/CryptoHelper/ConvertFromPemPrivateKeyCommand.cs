@@ -42,7 +42,7 @@ public sealed class ConvertFromPemPrivateKeyCommand : PSCmdlet
     {
         RSA rsa = RSA.Create();
         // RSAParameters requires D to be the same length as Modulus and the rest of the
-        // private params to be half that length. But like the EC D value above, calling
+        // private params to be half that length. But like the EC D value, calling
         // ToByteArrayUnsigned() on the BouncyCastle values drops any leading zero bytes
         // which makes ImportParameters throw "Bad Data". BouncyCastle's own converter
         // takes care of the padding for us.

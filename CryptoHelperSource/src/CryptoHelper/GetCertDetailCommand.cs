@@ -28,6 +28,8 @@ public sealed class GetCertDetailCommand : PSCmdlet
         }
 
         string[] issuerCNs = certificate.IssuerDN.GetValueList(X509Name.CN).ToArray();
+
+        // grab DNS and IP SANs from the certificate, ignore everything else
         var altNames = new List<string>();
         foreach (IList<object> name in certificate.GetSubjectAlternativeNames() ?? Array.Empty<IList<object>>())
         {
@@ -48,9 +50,12 @@ public sealed class GetCertDetailCommand : PSCmdlet
             }
         }
 
+        // compute the cert thumbprint
         using var sha1 = SHA1.Create();
         string thumbprint = BitConverter.ToString(sha1.ComputeHash(certificate.GetEncoded())).Replace("-", "");
 
+        // compute the ARI ID
+        // https://www.rfc-editor.org/info/rfc9773/#section-4.1
         string? ariId = null;
         Asn1OctetString? akiExtension = certificate.GetExtensionValue(X509Extensions.AuthorityKeyIdentifier);
         if (akiExtension is not null)
@@ -64,6 +69,7 @@ public sealed class GetCertDetailCommand : PSCmdlet
             }
         }
 
+        // return everything we've gathered
         var result = new PSObject();
         result.Properties.Add(new PSNoteProperty("IssuerCNs", issuerCNs));
         result.Properties.Add(new PSNoteProperty("Subject", certificate.SubjectDN.ToString()));

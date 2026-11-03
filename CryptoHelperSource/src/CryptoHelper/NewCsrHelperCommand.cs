@@ -13,7 +13,6 @@ using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math.EC.Multiplier;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
-using Org.BouncyCastle.X509.Extension;
 
 namespace CryptoHelper;
 
