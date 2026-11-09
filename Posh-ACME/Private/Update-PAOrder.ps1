@@ -98,8 +98,16 @@ function Update-PAOrder {
                     $PSCmdlet.WriteError($_)
                 }
 
-                if ($resp.suggestedWindow) {
-                    $renewAfter = Repair-ISODate $resp.suggestedWindow.start
+                $window = $resp.suggestedWindow
+                $timestamp = '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$'
+                $start = $window.start -as [DateTimeOffset]
+                $end = $window.end -as [DateTimeOffset]
+                if ($null -ne $start -and $end -gt $start -and
+                    ($window.start -is [DateTime] -or $window.start -match $timestamp) -and
+                    ($window.end -is [DateTime] -or $window.end -match $timestamp)) {
+                    $renewAfter = if ($window.start -is [DateTime]) {
+                        $start.UtcDateTime.ToString('o')
+                    } else { $window.start }
                     if ($renewAfter -ne $Order.RenewAfter) {
                         Write-Verbose "Updating renewal window to $renewAfter from ARI response"
                         $Order.RenewAfter = $renewAfter
@@ -111,7 +119,7 @@ function Update-PAOrder {
                     }
 
                     # Warn if the new window is in the past
-                    if ((Get-DateTimeOffsetNow) -gt [DateTimeOffset]::Parse($renewAfter)) {
+                    if ((Get-DateTimeOffsetNow) -gt $start) {
                         Write-Warning "The ACME Server has indicated this order's certificate should be renewed AS SOON AS POSSIBLE."
                     }
                 }
