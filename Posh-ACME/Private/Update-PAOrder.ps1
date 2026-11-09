@@ -103,8 +103,8 @@ function Update-PAOrder {
                 $start = $window.start -as [DateTimeOffset]
                 $end = $window.end -as [DateTimeOffset]
                 if ($null -ne $start -and $end -gt $start -and
-                    ($window.start -is [DateTime] -or $window.start -match $timestamp) -and
-                    ($window.end -is [DateTime] -or $window.end -match $timestamp)) {
+                    (($window.start -is [DateTime] -and $window.start.Kind -ne [DateTimeKind]::Unspecified) -or $window.start -match $timestamp) -and
+                    (($window.end -is [DateTime] -and $window.end.Kind -ne [DateTimeKind]::Unspecified) -or $window.end -match $timestamp)) {
                     $renewAfter = if ($window.start -is [DateTime]) {
                         $start.UtcDateTime.ToString('o')
                     } else { $window.start }

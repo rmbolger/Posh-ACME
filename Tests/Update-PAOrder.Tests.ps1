@@ -64,6 +64,8 @@ Describe "Update-PAOrder" {
             @{ Case = 'malformed end'; Start = '2025-12-01T00:00:00Z'; End = 'invalid' }
             @{ Case = 'malformed start'; Start = 'invalid'; End = '2026-01-02T00:00:00Z' }
             @{ Case = 'date without a time'; Start = '2025-12-01'; End = '2026-01-02T00:00:00Z' }
+            @{ Case = 'deserialized start without a time zone'; Start = '2025-12-01T00:00:00'; End = '2026-01-02T00:00:00Z'; Deserialize = $true }
+            @{ Case = 'deserialized end without a time zone'; Start = '2025-12-01T00:00:00Z'; End = '2026-01-02T00:00:00'; Deserialize = $true }
             @{ Case = 'valid future window'; Start = '2026-01-10T00:00:00.1Z'; End = '2026-01-10T00:00:00.9Z'; Expected = '2026-01-10T00:00:00.1Z' }
             @{ Case = 'deserialized dates'; Start = ([DateTimeOffset]'2026-01-10T00:00:00.1Z').LocalDateTime; End = ([DateTimeOffset]'2026-01-10T00:00:00.9Z').UtcDateTime; Expected = '2026-01-10T00:00:00.1000000Z' }
         ) {
@@ -80,10 +82,10 @@ Describe "Update-PAOrder" {
                 PfxPass     = 'poshacme'
             }
             if (-not $Expected) { $Expected = $testOrder.RenewAfter }
+            $ariResponse = [pscustomobject]@{ suggestedWindow = [pscustomobject]@{ start = $Start; end = $End } }
+            if ($Deserialize) { $ariResponse = $ariResponse | ConvertTo-Json | ConvertFrom-Json }
             Mock -ModuleName Posh-ACME Get-PAOrder { $testOrder }
-            Mock -ModuleName Posh-ACME Invoke-RestMethod {
-                [pscustomobject]@{ suggestedWindow = [pscustomobject]@{ start = $Start; end = $End } }
-            }
+            Mock -ModuleName Posh-ACME Invoke-RestMethod { $ariResponse }
 
             Submit-Renewal -NoSkipManualDns -WarningAction SilentlyContinue -ErrorAction Stop
 
