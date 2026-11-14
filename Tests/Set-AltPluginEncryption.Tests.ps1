@@ -51,6 +51,16 @@ Describe "Set-AltPluginEncryption" {
             }
         }
 
+        It "Doesn't write plugin arg values to the debug stream" {
+            InModuleScope -ModuleName Posh-ACME {
+                Import-PAConfig
+                Mock Get-PAPluginArgs { @{ FakeToken = 'Hunter2Sentinel' } }
+                $DebugPreference = 'Continue'
+                $log = Get-PAAccount | Set-AltPluginEncryption -Enable 5>&1 | Out-String
+                $log | Should -Not -Match 'Hunter2Sentinel'
+            }
+        }
+
         It "Resets Alt Encryption Key" {
             InModuleScope -ModuleName Posh-ACME {
                 # set an old fake sskey on the account
