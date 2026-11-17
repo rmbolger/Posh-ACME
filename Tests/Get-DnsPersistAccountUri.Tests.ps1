@@ -94,6 +94,23 @@ Describe "Get-DnsPersistAccountUri" {
         $records[0].HashedAccountUri | Should -Not -Be $records[1].HashedAccountUri
     }
 
+    It "Rejects an AccountHashPrefix with characters not permitted by section 4.1" -TestCases @(
+        @{ Prefix = 'https://ca.example/a;b/'; Reason = 'semicolon' }
+        @{ Prefix = 'https://ca.example/a,b/'; Reason = 'comma' }
+        @{ Prefix = 'https://ca.example/a"b/'; Reason = 'double quote' }
+        @{ Prefix = 'https://ca.example/a\b/'; Reason = 'backslash' }
+        @{ Prefix = 'https://ca.example/a b/'; Reason = 'space' }
+        @{ Prefix = 'https://ca.example/caf' + [char]0x00E9 + '/'; Reason = 'non-ASCII' }
+    ) {
+        { Get-DnsPersistAccountUri -Domain 'example.com' -Account $account -AccountHashPrefix $Prefix } | Should -Throw '*dns-persist-01 is unavailable*'
+    }
+
+    It "Uses a prefix containing percent-encoding and reserved characters unchanged" {
+        $prefix = 'https://ca.example/a%20b/!$&()*+=/'
+        $actualUri = Get-DnsPersistAccountUri -Domain 'example.com' -Account $account -AccountHashPrefix $prefix
+        $actualUri.HashedAccountUri.StartsWith($prefix + 'sha-256/', [StringComparison]::Ordinal) | Should -BeTrue
+    }
+
     It "Rejects invalid normalized domains" -TestCases @(
         @{ Domain = '   '; Reason = 'empty domain' }
         @{ Domain = '.'; Reason = 'no labels' }

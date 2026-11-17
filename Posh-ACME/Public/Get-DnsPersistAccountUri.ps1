@@ -85,6 +85,13 @@ function Get-DnsPersistAccountUri {
             }
         }
 
+        # Verify the prefix before using it unchanged. Characters outside this set (including ';', '"', '\'
+        # and whitespace) would corrupt the issue-value or its DNS master-file encoding.
+        # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-03.html#section-4.1
+        if ($AccountHashPrefix -cnotmatch '^[A-Za-z0-9\-._~%:/?#\[\]@!$&''()*+=]+$') {
+            throw "AccountHashPrefix '$AccountHashPrefix' is missing or contains characters not permitted by draft-ietf-acme-dns-persist-03 section 4.1."
+        }
+
         $recordDomain = if ($isWildcard) { "*.$Domain" } else { $Domain }
         $hashDomain = if ($NoDomainCorrelationMitigation) { '*' } else { $Domain }
 
