@@ -54,8 +54,6 @@ function Publish-DnsPersistChallenge {
             $Plugin = 'Manual'
         }
 
-        $idn = [Globalization.IdnMapping]::new()
-
         # get the current account for later if it wasn't passed in
         if (-not $Account) {
             $Account = Get-PAAccount
@@ -147,7 +145,7 @@ function Publish-DnsPersistChallenge {
                     $addWildcard = $true
                 }
 
-                $fqdn = $idn.GetAscii($fqdn.Trim().TrimEnd('.').ToLowerInvariant().Normalize([Text.NormalizationForm]::FormC)).ToLowerInvariant()
+                $fqdn = ConvertTo-DnsPersistDomain $fqdn
 
                 # correlate the plugin args to the auth by index or use the last one available.
                 if ($Plugin.Count -gt $i) {
@@ -190,7 +188,7 @@ function Publish-DnsPersistChallenge {
         # All other parameter sets have an explicit list of domains to process.
         for ($i=0; $i -lt $Domain.Count; $i++) {
 
-            $fqdn = $Domain[$i].Trim().TrimEnd('.')
+            $fqdn = $Domain[$i].Trim()
 
             $addWildcard = $false
             if ($fqdn.StartsWith('*.', [StringComparison]::Ordinal)) {
@@ -208,7 +206,7 @@ function Publish-DnsPersistChallenge {
                 $addWildcard = $true
             }
 
-            $fqdn = $idn.GetAscii($fqdn.ToLowerInvariant().Normalize([Text.NormalizationForm]::FormC)).ToLowerInvariant()
+            $fqdn = ConvertTo-DnsPersistDomain $fqdn
 
             # correlate the plugin args to the auth by index or use the last one available.
             if ($Plugin.Count -gt $i) {

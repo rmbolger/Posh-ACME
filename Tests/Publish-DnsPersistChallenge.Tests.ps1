@@ -14,7 +14,7 @@ Describe "Publish-DnsPersistChallenge" {
 
     It "Uses the A-label for an account object's record owner and hash" {
         $expectedUri = (Get-DnsPersistAccountUri -Domain 'xn--bcher-kva.de' -Account $account -AccountHashPrefix $prefix).HashedAccountUri
-        $output = Publish-DnsPersistChallenge -Domain $unicodeDomain -Account $account -AccountHashPrefix $prefix `
+        $output = Publish-DnsPersistChallenge -Domain 'xn--bcher-kva.de.' -Account $account -AccountHashPrefix $prefix `
             -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
 
         ($output -replace '\s+', '') | Should -Match ([regex]::Escape("_validation-persist.xn--bcher-kva.de->`"authority.example;accounturi=$expectedUri`""))
@@ -26,7 +26,7 @@ Describe "Publish-DnsPersistChallenge" {
         $expectedUri = Get-DnsPersistAccountUri -Domain 'xn--bcher-kva.de' -AccountUri $accountUri `
             -KeyThumbprint $thumbprint -AccountHashPrefix $prefix
         $expectedUri = $expectedUri.HashedAccountUri
-        $output = Publish-DnsPersistChallenge -Domain "*.$unicodeDomain" -AccountUri $accountUri `
+        $output = Publish-DnsPersistChallenge -Domain '*.xn--bcher-kva.de.' -AccountUri $accountUri `
             -KeyThumbprint $thumbprint -AccountHashPrefix $prefix -IssuerDomainName 'authority.example' `
             -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
 
@@ -35,7 +35,7 @@ Describe "Publish-DnsPersistChallenge" {
 
     It "Normalizes an advanced record owner without changing its supplied hash" {
         $hashedUri = 'https://ca.example/account-hash/sha-256/external'
-        $output = Publish-DnsPersistChallenge -Domain $unicodeDomain -HashedAccountUri $hashedUri `
+        $output = Publish-DnsPersistChallenge -Domain 'xn--bcher-kva.de.' -HashedAccountUri $hashedUri `
             -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
 
         ($output -replace '\s+', '') | Should -Match ([regex]::Escape("_validation-persist.xn--bcher-kva.de->`"authority.example;accounturi=$hashedUri`""))
@@ -44,7 +44,7 @@ Describe "Publish-DnsPersistChallenge" {
     It "Normalizes order authorization names before publishing" {
         Mock -ModuleName Posh-ACME Get-PAAuthorization {
             [pscustomobject]@{
-                fqdn = $unicodeDomain
+                fqdn = 'xn--bcher-kva.de.'
                 challenges = @([pscustomobject]@{ type = 'dns-persist-01'; issuerDomainNames = @('authority.example') })
             }
         }
@@ -56,14 +56,14 @@ Describe "Publish-DnsPersistChallenge" {
         ($output -replace '\s+', '') | Should -Match ([regex]::Escape("_validation-persist.xn--bcher-kva.de->`"authority.example;accounturi=$expectedUri`""))
     }
 
-    It "Normalizes each Unicode domain supplied through the pipeline" {
-        $otherDomain = [string]::Concat('m', [char]0x00FC, 'nchen.de.')
-        $output = $unicodeDomain, $otherDomain | Publish-DnsPersistChallenge `
-            -HashedAccountUri 'https://ca.example/account-hash/sha-256/external' `
-            -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
+    It "Rejects Unicode domain names instead of converting them" {
+        { Publish-DnsPersistChallenge -Domain $unicodeDomain -HashedAccountUri 'https://ca.example/account-hash/sha-256/external' `
+            -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 } | Should -Throw '*non-ASCII*'
+    }
 
-        $output | Should -Match '_validation-persist\.xn--bcher-kva\.de ->'
-        $output | Should -Match '_validation-persist\.xn--mnchen-3ya\.de ->'
+    It "Rejects a domain with more than one trailing dot" {
+        { Publish-DnsPersistChallenge -Domain 'example.com..' -HashedAccountUri 'https://ca.example/account-hash/sha-256/external' `
+            -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 } | Should -Throw '*trailing dot*'
     }
 
     It "Publishes normalized owners with a shared opt-out hash from the helper" {

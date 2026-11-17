@@ -58,33 +58,22 @@ function Get-DnsPersistAccountUri {
             }
             $AccountHashPrefix = $server.meta.accountHashPrefix
         }
-
-        # Prepare the IDN mapping object for later use in domain normalization
-        $idn = [Globalization.IdnMapping]::new()
     }
 
     Process {
         trap { $PSCmdlet.ThrowTerminatingError($_) }
 
-        # Normalize the domain name according to draft suggestions
-        # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-02.html#section-9.2
+        # Normalize the domain name according to draft-ietf-acme-dns-persist-03 section 12.2
+        # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-03.html#section-12.2
         $origDomain = $Domain
-        $Domain = $Domain.Trim().ToLowerInvariant().Normalize([Text.NormalizationForm]::FormC)
 
-        # Remove accidentally included wildcard prefix and any trailing dots
+        # Remove accidentally included wildcard prefix before normalizing the name
+        $Domain = $Domain.Trim()
         $isWildcard = $Domain.StartsWith('*.', [StringComparison]::Ordinal)
         if ($isWildcard) {
             $Domain = $Domain.Substring(2)
         }
-        $Domain = $Domain.TrimEnd('.')
-
-        # double check the domain isn't empty now
-        if (-not $Domain) {
-            throw 'Domain is empty after removing whitespace and wildcard prefixes.'
-        }
-
-        # convert the domain to its ASCII-compatible encoding (A-label) form
-        $Domain = $idn.GetAscii($Domain).ToLowerInvariant()
+        $Domain = ConvertTo-DnsPersistDomain $Domain
         Write-Debug "Domain '$origDomain' normalized to '$Domain'"
 
         if ($Domain.Length -gt 253) {

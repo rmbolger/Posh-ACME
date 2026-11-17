@@ -9,14 +9,20 @@ Describe "Get-DnsPersistAccountUri" {
         $account = Get-PAAccount -ID acct1
     }
 
-    It "Converts IDN input to its A-label form" {
+    It "Rejects non-ASCII input instead of converting it" {
         # Powershell 5.1 doesn't seem to like Unicode domain literals directly, so we construct it using [char] codes
         $unicodeDomain = [string]::Concat('b', [char]0x00FC, 'cher.de.')
-        $unicodeUri = Get-DnsPersistAccountUri -Domain $unicodeDomain -Account $account -AccountHashPrefix 'https://ca.example/account-hash/'
-        $asciiUri = Get-DnsPersistAccountUri -Domain 'xn--bcher-kva.de' -Account $account -AccountHashPrefix 'https://ca.example/account-hash/'
+        { Get-DnsPersistAccountUri -Domain $unicodeDomain -Account $account -AccountHashPrefix 'https://ca.example/account-hash/' } | Should -Throw '*non-ASCII*'
+    }
 
-        $unicodeUri.Domain | Should -Be 'xn--bcher-kva.de'
-        $unicodeUri.HashedAccountUri | Should -Be $asciiUri.HashedAccountUri
+    It "Lowercases only ASCII letters and removes a single trailing root dot" {
+        $dottedUri = Get-DnsPersistAccountUri -Domain 'XN--FA-HIA.example.' -Account $account -AccountHashPrefix 'https://ca.example/account-hash/'
+        $plainUri = Get-DnsPersistAccountUri -Domain 'xn--fa-hia.example' -Account $account -AccountHashPrefix 'https://ca.example/account-hash/'
+        $otherUri = Get-DnsPersistAccountUri -Domain 'fass.example' -Account $account -AccountHashPrefix 'https://ca.example/account-hash/'
+
+        $dottedUri.Domain | Should -Be 'xn--fa-hia.example'
+        $dottedUri.HashedAccountUri | Should -Be $plainUri.HashedAccountUri
+        $otherUri.HashedAccountUri | Should -Not -Be $plainUri.HashedAccountUri
     }
 
     It "Strips wildcard prefixes" {
@@ -92,6 +98,7 @@ Describe "Get-DnsPersistAccountUri" {
         @{ Domain = '   '; Reason = 'empty domain' }
         @{ Domain = '.'; Reason = 'no labels' }
         @{ Domain = 'example..com'; Reason = 'empty label' }
+        @{ Domain = 'example.com..'; Reason = 'more than one trailing dot' }
         @{ Domain = '-example.com'; Reason = 'label starts with hyphen' }
         @{ Domain = 'example-.com'; Reason = 'label ends with hyphen' }
         @{ Domain = '*'; Reason = 'opt-out hash is not a DNS owner' }
