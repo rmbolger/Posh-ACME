@@ -309,6 +309,46 @@ Describe "Publish-DnsPersistChallenge" {
         $records[0].hashAcctUri | Should -Be 'https://ca.example/hash/existing'
     }
 
+    It "Warns when a cached record expires within the next hour" {
+        $cachePath = 'TestDrive:\PersistedChallenges.json'
+        $record = [pscustomobject]@{
+            fqdn = 'soon.example.com'
+            issuer = 'authority.example'
+            hashAcctUri = 'https://ca.example/hash/soon'
+            addWildcard = $false
+            persistUntil = [DateTimeOffset]::UtcNow.AddMinutes(30).ToUnixTimeSeconds()
+            fromAcctUri = ''
+            fromAcctThumb = ''
+        }
+        ConvertTo-Json -InputObject @($record) -Depth 5 | Set-Content $cachePath
+
+        Publish-DnsPersistChallenge -Domain 'soon.example.com' `
+            -HashedAccountUri 'https://ca.example/hash/soon' -IssuerDomainName 'authority.example' `
+            -Plugin Manual -PluginArgs $pluginArgs -WarningAction SilentlyContinue -WarningVariable warnings 6>&1 | Out-Null
+
+        "$warnings" | Should -Match 'cached dns-persist-01 record for soon.example.com'
+    }
+
+    It "Does not warn when a cached record is valid beyond the next hour" {
+        $cachePath = 'TestDrive:\PersistedChallenges.json'
+        $record = [pscustomobject]@{
+            fqdn = 'later.example.com'
+            issuer = 'authority.example'
+            hashAcctUri = 'https://ca.example/hash/later'
+            addWildcard = $false
+            persistUntil = [DateTimeOffset]::UtcNow.AddDays(2).ToUnixTimeSeconds()
+            fromAcctUri = ''
+            fromAcctThumb = ''
+        }
+        ConvertTo-Json -InputObject @($record) -Depth 5 | Set-Content $cachePath
+
+        Publish-DnsPersistChallenge -Domain 'later.example.com' `
+            -HashedAccountUri 'https://ca.example/hash/later' -IssuerDomainName 'authority.example' `
+            -Plugin Manual -PluginArgs $pluginArgs -WarningVariable warnings 6>&1 | Out-Null
+
+        "$warnings" | Should -Not -Match 'cached dns-persist-01 record'
+    }
+
     It "Retains each piped record's expiration" {
         Remove-Item 'TestDrive:\PersistedChallenges.json' -ErrorAction Ignore
         $inputRecords = @(

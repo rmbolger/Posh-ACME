@@ -272,6 +272,22 @@ function Publish-DnsPersistChallenge {
                 $a=$_.fqdn.Split('.'); [array]::Reverse($a); $a -join '.'
             },hashAcctUri
 
+        # Warn about previously published records that have expired or will expire within the next hour.
+        # This only checks the local cache. No DNS queries are made.
+        $expiryCutoff = [DateTimeOffset]::UtcNow.AddHours(1)
+        $cachedChals = @(Get-PublishedPersistChallenge)
+        foreach ($chal in $orderedChals) {
+            $expiring = $cachedChals | Where-Object {
+                $_.Domain -eq $chal.fqdn -and
+                $_.HashedAccountUri -eq $chal.hashAcctUri -and
+                $_.IssuerDomainName -eq $chal.issuer -and
+                $_.PersistUntil -and $_.PersistUntil -le $expiryCutoff
+            }
+            if ($expiring) {
+                Write-Warning "The cached dns-persist-01 record for $($chal.fqdn) has a persistUntil of $($expiring[0].PersistUntil.ToString('o')), which has expired or expires within 1 hour."
+            }
+        }
+
         # process challenges by plugin
         $modified = $orderedChals | Group-Object plugin | ForEach-Object {
 

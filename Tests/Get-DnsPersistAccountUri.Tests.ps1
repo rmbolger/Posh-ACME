@@ -102,7 +102,7 @@ Describe "Get-DnsPersistAccountUri" {
         @{ Prefix = 'https://ca.example/a b/'; Reason = 'space' }
         @{ Prefix = 'https://ca.example/caf' + [char]0x00E9 + '/'; Reason = 'non-ASCII' }
     ) {
-        { Get-DnsPersistAccountUri -Domain 'example.com' -Account $account -AccountHashPrefix $Prefix } | Should -Throw '*dns-persist-01 is unavailable*'
+        { Get-DnsPersistAccountUri -Domain 'example.com' -Account $account -AccountHashPrefix $Prefix } | Should -Throw '*not permitted by draft-ietf-acme-dns-persist-03 section 4.1*'
     }
 
     It "Uses a prefix containing percent-encoding and reserved characters unchanged" {
