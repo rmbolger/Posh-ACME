@@ -26,6 +26,25 @@ function ConvertTo-DnsPersistDomain {
             throw "Domain '$Domain' contains non-ASCII characters. Convert internationalized names to their A-label (xn--) form first."
         }
 
+        # IP identifiers are represented by their normalized reverse zone name.
+        # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-03.html#section-7.1
+        if (Test-IPShaped $name) {
+            $ip = $null
+            if (-not [Net.IPAddress]::TryParse($name, [ref]$ip) -or $name.Contains('%')) {
+                throw "IP address '$Domain' is not valid."
+            }
+            $bytes = $ip.GetAddressBytes()
+            if ($ip.AddressFamily -eq [Net.Sockets.AddressFamily]::InterNetwork) {
+                # reject forms like leading zeros that don't round-trip to the canonical address
+                if ($ip.ToString() -ne $name) {
+                    throw "IPv4 address '$Domain' must use decimal octets without leading zeros."
+                }
+                return (($bytes[3..0]) -join '.') + '.in-addr.arpa'
+            }
+            $nibbles = (($bytes | ForEach-Object { $_.ToString('x2') }) -join '').ToCharArray()
+            return (($nibbles[31..0]) -join '.') + '.ip6.arpa'
+        }
+
         return $name.ToLowerInvariant()
 
     }

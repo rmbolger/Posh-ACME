@@ -33,6 +33,34 @@ Describe "Get-DnsPersistAccountUri" {
         $prefixedUri.HashedAccountUri | Should -Be $plainUri.HashedAccountUri
     }
 
+    It "Uses the IPv4 reverse zone name for the hashed domain" {
+        # draft-ietf-acme-dns-persist-03 section 7.3 IPv4 example
+        $actualUri = Get-DnsPersistAccountUri `
+            -Domain '192.0.2.1' `
+            -AccountUri 'https://ca.example/acct/123' `
+            -KeyThumbprint 'NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs' `
+            -AccountHashPrefix 'https://ca.example/account-hash/'
+
+        $actualUri.Domain | Should -Be '1.2.0.192.in-addr.arpa'
+        $actualUri.HashedAccountUri | Should -Be 'https://ca.example/account-hash/sha-256/CnwSwHOHJbE-X_FSkydPTw6dGMovluSdRsY3_tmA-0E'
+    }
+
+    It "Uses the IPv6 reverse zone name for the hashed domain" {
+        # draft-ietf-acme-dns-persist-03 section 7.3 IPv6 example
+        $actualUri = Get-DnsPersistAccountUri `
+            -Domain '2001:db8::1' `
+            -AccountUri 'https://ca.example/acct/123' `
+            -KeyThumbprint 'NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs' `
+            -AccountHashPrefix 'https://ca.example/account-hash/'
+
+        $actualUri.Domain | Should -Be ('1.' + ('0.' * 23) + '8.b.d.0.1.0.0.2.ip6.arpa')
+        $actualUri.HashedAccountUri | Should -Be 'https://ca.example/account-hash/sha-256/9RLd7iwi0v30KV01dsPwGvSBucGEYgsJhDNCxk8Nb9g'
+    }
+
+    It "Rejects IPv4 addresses with leading zeros" {
+        { Get-DnsPersistAccountUri -Domain '192.0.2.01' -Account $account -AccountHashPrefix 'https://ca.example/account-hash/' } | Should -Throw '*192.0.2.01*'
+    }
+
     It "Hashes the domain length as a single octet" {
         $accountKeyAuthorization = Get-KeyAuthorization -Token 'test' -Account $account
         $thumbprint = $accountKeyAuthorization.Split('.')[1]

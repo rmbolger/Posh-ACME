@@ -15,7 +15,8 @@ function Get-DnsPersistAccountUri {
         [switch]$NoDomainCorrelationMitigation
     )
 
-    # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-02.html#section-4.1
+    # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-03.html#section-4.1
+    # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-03.html#section-7
 
     Begin {
         trap { $PSCmdlet.ThrowTerminatingError($_) }
@@ -66,12 +67,17 @@ function Get-DnsPersistAccountUri {
         # Normalize the domain name according to draft-ietf-acme-dns-persist-03 section 12.2
         # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-03.html#section-12.2
         $origDomain = $Domain
-
-        # Remove accidentally included wildcard prefix before normalizing the name
         $Domain = $Domain.Trim()
-        $isWildcard = $Domain.StartsWith('*.', [StringComparison]::Ordinal)
-        if ($isWildcard) {
-            $Domain = $Domain.Substring(2)
+
+        $isIP = Test-IPShaped $Domain
+        $isWildcard = $false
+
+        # Strip wildcard prefixes on domain names before normalizing the name
+        if (-not $isIP) {
+            $isWildcard = $Domain.StartsWith('*.', [StringComparison]::Ordinal)
+            if ($isWildcard) {
+                $Domain = $Domain.Substring(2)
+            }
         }
         $Domain = ConvertTo-DnsPersistDomain $Domain
         Write-Debug "Domain '$origDomain' normalized to '$Domain'"

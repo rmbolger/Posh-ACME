@@ -20,6 +20,22 @@ Describe "Publish-DnsPersistChallenge" {
         ($output -replace '\s+', '') | Should -Match ([regex]::Escape("_validation-persist.xn--bcher-kva.de->`"authority.example;accounturi=$expectedUri`""))
     }
 
+    It "Uses the ip-validation label and reverse zone for IP identifiers" {
+        $expectedUri = (Get-DnsPersistAccountUri -Domain '1.2.0.192.in-addr.arpa' -Account $account -AccountHashPrefix $prefix).HashedAccountUri
+        $output = Publish-DnsPersistChallenge -Domain '192.0.2.1' -Account $account -AccountHashPrefix $prefix `
+            -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
+
+        ($output -replace '\s+', '') | Should -Match ([regex]::Escape("_ip-validation-persist.1.2.0.192.in-addr.arpa->`"authority.example;accounturi=$expectedUri`""))
+    }
+
+    It "Omits the wildcard policy for IP identifiers" {
+        $output = Publish-DnsPersistChallenge -Domain '192.0.2.1' -Account $account -AccountHashPrefix $prefix `
+            -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs -AllowWildcard 6>&1 | Out-String
+
+        ($output -replace '\s+', '') | Should -Match '_ip-validation-persist\.1\.2\.0\.192\.in-addr\.arpa->"authority\.example;accounturi=[^";]+"'
+        ($output -replace '\s+', '') | Should -Not -Match 'policy=wildcard'
+    }
+
     It "Uses the A-label for explicit account details and wildcard policy" {
         $accountUri = 'https://ca.example/acct/123'
         $thumbprint = 'NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs'
@@ -307,6 +323,28 @@ Describe "Publish-DnsPersistChallenge" {
         $records | Should -HaveCount 1
         $records[0].fqdn | Should -Be 'persist.example.com'
         $records[0].hashAcctUri | Should -Be 'https://ca.example/hash/existing'
+    }
+
+    It "Appends an IP challenge when a DNS challenge with the same reverse name is cached" {
+        $cachePath = 'TestDrive:\PersistedChallenges.json'
+        $reverseName = '1.2.0.192.in-addr.arpa'
+        $record = [pscustomobject]@{
+            fqdn = $reverseName
+            issuer = 'authority.example'
+            hashAcctUri = 'https://ca.example/hash/reverse'
+            addWildcard = $false
+            persistUntil = $null
+            fromAcctUri = ''
+            fromAcctThumb = ''
+        }
+        ConvertTo-Json -InputObject @($record) -Depth 5 | Set-Content $cachePath
+
+        Publish-DnsPersistChallenge -Domain '192.0.2.1' -HashedAccountUri 'https://ca.example/hash/reverse' `
+            -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-Null
+
+        $records = @(Get-Content $cachePath -Raw | ConvertFrom-Json)
+        $records | Should -HaveCount 2
+        ($records | Where-Object fqdn -eq '192.0.2.1') | Should -Not -BeNullOrEmpty
     }
 
     It "Warns when a cached record expires within the next hour" {
