@@ -40,7 +40,7 @@ Some of the features in the ACME protocol are optional. Others are mandatory but
 | [Cert<br />Revocation][rfc08]                | :white_check_mark:         | :white_check_mark:  | :white_check_mark: | :white_check_mark:                     | :white_check_mark:  |
 | [Challenge<br />Retrying][rfc09]             | :x:                        | :x:                 | :white_check_mark: | :warning:<br />*(Client must request)* | :x:*                |
 | [Variable Cert Lifetime][rfc10]              | :x:*                       | :white_check_mark:  | :x:                | :x:                                    | :x:                 |
-| [ACME Renewal Information (ARI)][rfc11]      | :white_check_mark:         | :white_check_mark:  | :x:                | :x:                                    | :white_check_mark:  |
+| [ACME Renewal Information (ARI)][rfc11]      | :white_check_mark:         | :white_check_mark:  | :white_check_mark: | :white_check_mark:                     | :white_check_mark:  |
 | [ACME Profiles][rfc12]                       | :white_check_mark:         | :white_check_mark:  | :x:                | :x:                                    | :x:                 |
 | [dns-account-01][rfc13]                      | :x:                        | :white_check_mark:  | :x:                | :x:                                    | :x:                 |
 | [dns-persist-01][rfc14]                      | :x: *([Pending][le13])     | :white_check_mark:* | :x:                | :x:                                    | :x:                 |
