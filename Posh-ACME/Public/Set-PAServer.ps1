@@ -151,12 +151,15 @@ function Set-PAServer {
                 }
                 $response = Invoke-WebRequest @iwrSplat @script:UseBasic
             } catch {
+                # put cert validation back the way the current server has it
+                Set-CertValidation ([bool]$curDir.SkipCertificateCheck)
                 $PSCmdlet.ThrowTerminatingError($_)
             }
             try {
                 $dirObj = $response.Content | ConvertFrom-Json
             } catch {
                 Write-Debug "ACME Response: `n$($response.Content)"
+                Set-CertValidation ([bool]$curDir.SkipCertificateCheck)
                 try { throw "ACME response from $($newDir.location) was not valid JSON. Details are in Debug output." }
                 catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
