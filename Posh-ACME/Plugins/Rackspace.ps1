@@ -227,7 +227,6 @@ function Connect-RackspaceDns {
     try {
         $response = Invoke-RestMethod 'https://identity.api.rackspacecloud.com/v2.0/tokens' `
             -Method Post -ContentType 'application/json' -Body $rsAuthBody @script:UseBasic
-        Write-Debug "Rackspace Response: `n$($response | ConvertTo-Json)"
     } catch { throw }
 
     # save what we care about to a script variable
@@ -239,6 +238,8 @@ function Connect-RackspaceDns {
             expires = [DateTimeOffset]::Parse($response.access.token.expires).AddMinutes(-5)
         }
     } else {
+        # only log the response when it's unexpected because a good one contains the session token
+        Write-Debug "Rackspace Response: `n$($response | ConvertTo-Json)"
         throw "Unexpected authentication response from Rackspace API. Enable debug output for details."
     }
 
