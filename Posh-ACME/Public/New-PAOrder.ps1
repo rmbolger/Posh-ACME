@@ -166,10 +166,6 @@ function New-PAOrder {
         url   = $script:Dir.newOrder;
     }
 
-    # super lazy IPv4 address regex, but we just need to be able to
-    # distinguish from an FQDN
-    $reIPv4 = [regex]'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
-
     # build the payload object
     $payload = @{identifiers=@()}
     foreach ($d in $Domain) {
@@ -183,7 +179,7 @@ function New-PAOrder {
         # parsable as an IP address and should be sent as one rather than a
         # DNS name.
 
-        if ($d -match $reIPv4 -or $d -like '*:*') {
+        if (Test-IPShaped $d) {
             Write-Debug "$d identified as IP address. Attempting to parse."
             $ip = [ipaddress]$d
 
