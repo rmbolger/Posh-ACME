@@ -342,7 +342,7 @@ Describe "Publish-DnsPersistChallenge" {
         Publish-DnsPersistChallenge -Domain '192.0.2.1' -HashedAccountUri 'https://ca.example/hash/reverse' `
             -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-Null
 
-        $records = @(Get-Content $cachePath -Raw | ConvertFrom-Json)
+        $records = @((Get-Content $cachePath -Raw | ConvertFrom-Json))
         $records | Should -HaveCount 2
         ($records | Where-Object fqdn -eq '192.0.2.1') | Should -Not -BeNullOrEmpty
     }

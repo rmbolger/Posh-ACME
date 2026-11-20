@@ -88,6 +88,20 @@ function Submit-ChallengeValidation {
         # import existing args
         $PluginArgs = Get-PAPluginArgs -Name $Order.Name
 
+        # validate any pre-authorization ancestor domains before publishing anything
+        $persistAncestors = @()
+        if ($PluginArgs.PersistAncestor) {
+            try {
+                if ($Order.DnsVariant -ne 'dns-persist-01') {
+                    throw "PersistAncestor requires the order DnsVariant to be 'dns-persist-01'."
+                }
+                if ($PluginArgs.PublishPersist) {
+                    throw "PersistAncestor cannot be combined with PublishPersist. Ancestor records must be created manually."
+                }
+                $persistAncestors = @($PluginArgs.PersistAncestor | ConvertTo-PersistAncestor)
+            } catch { $PSCmdlet.ThrowTerminatingError($_) }
+        }
+
         # loop through the authorizations looking for challenges to publish and validate
         $published = @()
         $toValidate = @()
@@ -97,13 +111,22 @@ function Submit-ChallengeValidation {
             $pubParams = $null
             $auth = $allAuths[$i]
 
+            # select the nearest ancestor for DNS identifiers. IP identifiers can't use one.
+            # Reset each iteration so a previous identifier's value doesn't carry over.
+            $persistAncestor = $null
+            if ($persistAncestors.Count -gt 0 -and $auth.identifier.type -ne 'ip') {
+                $persistAncestor = Get-PersistAncestor $auth.DNSId $persistAncestors
+            }
+            # the ancestor record is what gets checked when one applies
+            $expiryId = if ($persistAncestor) { $persistAncestor } else { $auth.fqdn }
+
             # warn about cached persist records that are expiring, even if this auth is already valid
             if ($Order.DnsVariant -eq 'dns-persist-01') {
                 $persistChal = $auth.challenges | Where-Object { $_.type -eq 'dns-persist-01' } | Select-Object -First 1
                 if ($persistChal) {
                     $persistIssuer = Get-IssuerFromChallenge $persistChal
                     if ($persistIssuer) {
-                        Test-PersistUntilExpiry -Identifier $auth.fqdn -IssuerDomainName $persistIssuer
+                        Test-PersistUntilExpiry -Identifier $expiryId -IssuerDomainName $persistIssuer
                     }
                 }
             }
@@ -163,6 +186,9 @@ function Submit-ChallengeValidation {
                     } catch { throw }
                 }
 
+                # ancestorDomain is only ever sent with dns-persist-01 challenges
+                $ancestorDomain = if ($chalType -eq 'dns-persist-01') { $persistAncestor } else { $null }
+
                 if ($Order.UseSerialValidation) {
                     # save and validate the challenge before moving on to the next
                     try {
@@ -178,7 +204,7 @@ function Submit-ChallengeValidation {
 
                         # ask the server to validate the challenge
                         Write-Verbose "Requesting challenge validation"
-                        $challenge.url | Send-ChallengeAck -Account $acct
+                        $challenge.url | Send-ChallengeAck -Account $acct -AncestorDomain $ancestorDomain
 
                         # and wait for it to succeed or fail
                         Wait-AuthValidation $auth.location $Order.ValidationTimeout
@@ -199,6 +225,7 @@ function Submit-ChallengeValidation {
                         chalType = $chalType
                         chalUrl = $challenge.url
                         authUrl = $auth.location
+                        ancestorDomain = $ancestorDomain
                     }
                 }
 
@@ -237,7 +264,9 @@ function Submit-ChallengeValidation {
 
             # ask the server to validate the challenges
             Write-Verbose "Requesting challenge validations"
-            $toValidate.chalUrl | Send-ChallengeAck -Account $acct
+            foreach ($tv in $toValidate) {
+                $tv.chalUrl | Send-ChallengeAck -Account $acct -AncestorDomain $tv.ancestorDomain
+            }
 
             # and wait for them to succeed or fail
             Wait-AuthValidation @($toValidate.authUrl) $Order.ValidationTimeout

@@ -158,6 +158,26 @@ New-PACertificate $certNames -Plugin FakeDNS -PluginArgs $pArgs -DnsVariant dns-
 
 This will auto-create the necessary persistent records if they don't exist. But it will not remove them like it normally does with `dns-01` after the order is complete. It will also continue to try and create the persistent records during renewals if they no longer exist for whatever reason.
 
+## Validating Subdomains with an Ancestor Record
+
+A single `_validation-persist` record at a parent domain can validate its subdomains, as described in draft-03. Create that record yourself ahead of time (it must include `policy=wildcard`), then request the certificate with the shared `PersistAncestor` PluginArg. One or more ancestor domains can be supplied, and each identifier uses the nearest ancestor that is a proper parent of it. Identifiers with no matching ancestor are validated at their own name as usual. IP identifiers never use an ancestor.
+
+```powershell
+$certNames = 'a.b.example.com','other.example.com'
+$pArgs = @{
+    FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
+    PersistAncestor = 'example.com','b.example.com'
+}
+New-PACertificate $certNames -Plugin FakeDNS -PluginArgs $pArgs -DnsVariant dns-persist-01
+```
+
+Here `a.b.example.com` uses `b.example.com` and `other.example.com` uses `example.com`. Some things to keep in mind:
+
+* `PersistAncestor` only works with `-DnsVariant dns-persist-01`, and it can't be combined with `PublishPersist`. Ancestor records are never created or removed automatically.
+* Renewals reuse the saved value, so the ancestor record needs to stay in place.
+* Only the `PersistAncestor` values you supply are used. Make sure each one is a parent of the names it should cover.
+* **Google's draft-01 implementation does not support this.** It walks the DNS tree on its own and will likely reject the `ancestorDomain` value. Don't use `PersistAncestor` with Google until they update to draft-03 or later.
+
 ## Migrate an Existing Order from dns-01
 
 ### Check if dns-persist-01 is supported

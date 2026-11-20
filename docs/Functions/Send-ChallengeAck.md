@@ -14,7 +14,8 @@ Notify the ACME server to try validating a challenge.
 ## Syntax
 
 ```powershell
-Send-ChallengeAck [-ChallengeUrl] <String> [[-Account] <Object>] [<CommonParameters>]
+Send-ChallengeAck [-ChallengeUrl] <String> [[-Account] <Object>] [-AncestorDomain <String>]
+ [<CommonParameters>]
 ```
 
 ## Description
@@ -69,6 +70,21 @@ Aliases:
 
 Required: False
 Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AncestorDomain
+The domain name that the ACME server should check to validate a dns-persist-01 challenge. The record must be a valid ancestor of the name being validated and contain the `policy=wildcard` flag.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
