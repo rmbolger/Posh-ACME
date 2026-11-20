@@ -19,6 +19,8 @@ Pre-provisioning is a bit more work up front, but you should only have to do it 
 
 Each unique name published using the variations below will have a persistent record published for it. If there are wildcard names, the `policy=wildcard` flag will be added to that record automatically. This is necessary for the wildcard validations to succeed. You can prevent the automatic addition with the `-NoAutoWildcard` switch, but it will then skip creating the record for that name since it wouldn't work for validation. Alternatively, you may use the `-AllowWildcard` switch to add the wildcard flag to all records even if not technically needed. Just be aware that the `policy=wildcard` flag authorizes all nested sub-domains for that FQDN and ACME account.
 
+IP address identifiers (IPv4 or IPv6) are also supported. Each address is converted to its reverse `.arpa` name and published at `_ip-validation-persist.<arpa name>` instead of `_validation-persist.<name>`. IP records never get the `policy=wildcard` flag, so `-AllowWildcard` has no effect on them.
+
 ### Publish from Pending Order
 
 This method assumes you're publishing from the same Posh-ACME system you're requesting certs from. You'll need to have an ACME server already configured with `Set-PAServer` and an account already created with `New-PAAccount`.
@@ -218,6 +220,7 @@ There are a few reasons you may update or replace your persistent validation rec
   - Account deactivation is non-reversible. If it happens on purpose or due to compromise, all your existing records immediately become invalid and require re-publishing from a new account.
 - You used a PersistUntil value that has expired or will expire soon.
   - An expired record won't validate. You'll want to unpublish the old record and republish a new record with an updated PersistUntil value before the old record expires.
+  - When you request a certificate with `-DnsVariant dns-persist-01`, Posh-ACME warns about any locally cached record for the same identifier and issuer whose PersistUntil has expired or expires within the next hour. This check doesn't query DNS and doesn't verify the account hash, so the warning can also refer to a record published by a different account for the same identifier and issuer.
 
 There are two variations on how to unpublish a persistent record using Posh-ACME.
 
