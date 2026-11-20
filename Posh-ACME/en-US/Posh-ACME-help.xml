@@ -5788,7 +5788,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
           <maml:name>Domain</maml:name>
           <maml:description>
-            <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
+            <maml:para>The domain name(s) or IP address(es) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
@@ -5908,7 +5908,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
           <maml:name>Domain</maml:name>
           <maml:description>
-            <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
+            <maml:para>The domain name(s) or IP address(es) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
@@ -6148,7 +6148,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
           <maml:name>Domain</maml:name>
           <maml:description>
-            <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
+            <maml:para>The domain name(s) or IP address(es) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
@@ -6281,7 +6281,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
         <maml:name>Domain</maml:name>
         <maml:description>
-          <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
+          <maml:para>The domain name(s) or IP address(es) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
@@ -10173,7 +10173,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
           <maml:name>Domain</maml:name>
           <maml:description>
-            <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
+            <maml:para>The domain name(s) or IP address(es) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
@@ -10293,7 +10293,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
           <maml:name>Domain</maml:name>
           <maml:description>
-            <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
+            <maml:para>The domain name(s) or IP address(es) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
@@ -10533,7 +10533,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
           <maml:name>Domain</maml:name>
           <maml:description>
-            <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
+            <maml:para>The domain name(s) or IP address(es) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
@@ -10666,7 +10666,7 @@ Save-Challenge -Plugin $splat.Plugin -PluginArgs $splat.PluginArgs</dev:code>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
         <maml:name>Domain</maml:name>
         <maml:description>
-          <maml:para>The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
+          <maml:para>The domain name(s) or IP address(es) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
