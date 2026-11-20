@@ -96,6 +96,18 @@ function Submit-ChallengeValidation {
 
             $pubParams = $null
             $auth = $allAuths[$i]
+
+            # warn about cached persist records that are expiring, even if this auth is already valid
+            if ($Order.DnsVariant -eq 'dns-persist-01') {
+                $persistChal = $auth.challenges | Where-Object { $_.type -eq 'dns-persist-01' } | Select-Object -First 1
+                if ($persistChal) {
+                    $persistIssuer = Get-IssuerFromChallenge $persistChal
+                    if ($persistIssuer) {
+                        Test-PersistUntilExpiry -Identifier $auth.fqdn -IssuerDomainName $persistIssuer
+                    }
+                }
+            }
+
             if ($auth.status -eq 'pending') {
 
                 # Determine which challenge to publish based on the plugin type and check

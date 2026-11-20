@@ -347,44 +347,82 @@ Describe "Publish-DnsPersistChallenge" {
         ($records | Where-Object fqdn -eq '192.0.2.1') | Should -Not -BeNullOrEmpty
     }
 
-    It "Warns when a cached record expires within the next hour" {
-        $cachePath = 'TestDrive:\PersistedChallenges.json'
-        $record = [pscustomobject]@{
-            fqdn = 'soon.example.com'
-            issuer = 'authority.example'
-            hashAcctUri = 'https://ca.example/hash/soon'
-            addWildcard = $false
-            persistUntil = [DateTimeOffset]::UtcNow.AddMinutes(30).ToUnixTimeSeconds()
-            fromAcctUri = ''
-            fromAcctThumb = ''
+    Context "Test-PersistUntilExpiry" {
+        BeforeEach {
+            $script:expiryCache = 'TestDrive:\PersistedChallenges.json'
         }
-        ConvertTo-Json -InputObject @($record) -Depth 5 | Set-Content $cachePath
 
-        Publish-DnsPersistChallenge -Domain 'soon.example.com' `
-            -HashedAccountUri 'https://ca.example/hash/soon' -IssuerDomainName 'authority.example' `
-            -Plugin Manual -PluginArgs $pluginArgs -WarningAction SilentlyContinue -WarningVariable warnings 6>&1 | Out-Null
+        It "Warns when a cached record expires within the next hour" {
+            $record = [pscustomobject]@{
+                fqdn = 'soon.example.com'
+                issuer = 'authority.example'
+                hashAcctUri = 'https://ca.example/hash/soon'
+                addWildcard = $false
+                persistUntil = [DateTimeOffset]::UtcNow.AddMinutes(30).ToUnixTimeSeconds()
+                fromAcctUri = ''
+                fromAcctThumb = ''
+            }
+            ConvertTo-Json -InputObject @($record) -Depth 5 | Set-Content $script:expiryCache
 
-        "$warnings" | Should -Match 'cached dns-persist-01 record for soon.example.com'
-    }
-
-    It "Does not warn when a cached record is valid beyond the next hour" {
-        $cachePath = 'TestDrive:\PersistedChallenges.json'
-        $record = [pscustomobject]@{
-            fqdn = 'later.example.com'
-            issuer = 'authority.example'
-            hashAcctUri = 'https://ca.example/hash/later'
-            addWildcard = $false
-            persistUntil = [DateTimeOffset]::UtcNow.AddDays(2).ToUnixTimeSeconds()
-            fromAcctUri = ''
-            fromAcctThumb = ''
+            InModuleScope Posh-ACME {
+                Test-PersistUntilExpiry -Identifier '*.soon.example.com' -IssuerDomainName 'authority.example' -WarningVariable warnings 3>$null
+                "$warnings" | Should -Match 'cached dns-persist-01 record for soon.example.com'
+            }
         }
-        ConvertTo-Json -InputObject @($record) -Depth 5 | Set-Content $cachePath
 
-        Publish-DnsPersistChallenge -Domain 'later.example.com' `
-            -HashedAccountUri 'https://ca.example/hash/later' -IssuerDomainName 'authority.example' `
-            -Plugin Manual -PluginArgs $pluginArgs -WarningVariable warnings 6>&1 | Out-Null
+        It "Does not warn when the cached record is valid beyond the next hour" {
+            $record = [pscustomobject]@{
+                fqdn = 'later.example.com'
+                issuer = 'authority.example'
+                hashAcctUri = 'https://ca.example/hash/later'
+                addWildcard = $false
+                persistUntil = [DateTimeOffset]::UtcNow.AddDays(2).ToUnixTimeSeconds()
+                fromAcctUri = ''
+                fromAcctThumb = ''
+            }
+            ConvertTo-Json -InputObject @($record) -Depth 5 | Set-Content $script:expiryCache
 
-        "$warnings" | Should -Not -Match 'cached dns-persist-01 record'
+            InModuleScope Posh-ACME {
+                Test-PersistUntilExpiry -Identifier 'later.example.com' -IssuerDomainName 'authority.example' -WarningVariable warnings 3>$null
+                "$warnings" | Should -BeNullOrEmpty
+            }
+        }
+
+        It "Does not warn when the issuer differs" {
+            $record = [pscustomobject]@{
+                fqdn = 'other.example.com'
+                issuer = 'authority.example'
+                hashAcctUri = 'https://ca.example/hash/other'
+                addWildcard = $false
+                persistUntil = [DateTimeOffset]::UtcNow.AddMinutes(30).ToUnixTimeSeconds()
+                fromAcctUri = ''
+                fromAcctThumb = ''
+            }
+            ConvertTo-Json -InputObject @($record) -Depth 5 | Set-Content $script:expiryCache
+
+            InModuleScope Posh-ACME {
+                Test-PersistUntilExpiry -Identifier 'other.example.com' -IssuerDomainName 'different.example' -WarningVariable warnings 3>$null
+                "$warnings" | Should -BeNullOrEmpty
+            }
+        }
+
+        It "Matches IP identifiers against the lowercased cached value" {
+            $record = [pscustomobject]@{
+                fqdn = '2001:db8::1'
+                issuer = 'authority.example'
+                hashAcctUri = 'https://ca.example/hash/ip'
+                addWildcard = $false
+                persistUntil = [DateTimeOffset]::UtcNow.AddMinutes(30).ToUnixTimeSeconds()
+                fromAcctUri = ''
+                fromAcctThumb = ''
+            }
+            ConvertTo-Json -InputObject @($record) -Depth 5 | Set-Content $script:expiryCache
+
+            InModuleScope Posh-ACME {
+                Test-PersistUntilExpiry -Identifier '2001:DB8::1' -IssuerDomainName 'authority.example' -WarningVariable warnings 3>$null
+                "$warnings" | Should -Match 'cached dns-persist-01 record for 2001:db8::1'
+            }
+        }
     }
 
     It "Retains each piped record's expiration" {
