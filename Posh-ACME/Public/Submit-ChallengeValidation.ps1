@@ -116,6 +116,9 @@ function Submit-ChallengeValidation {
             $persistAncestor = $null
             if ($persistAncestors.Count -gt 0 -and $auth.identifier.type -ne 'ip') {
                 $persistAncestor = Get-PersistAncestor $auth.DNSId $persistAncestors
+                if (-not $persistAncestor) {
+                    Write-Warning "No PersistAncestor value matches '$($auth.DNSId)'. No ancestorDomain will be sent, so validation will use the identifier's own record."
+                }
             }
             # the ancestor record is what gets checked when one applies
             $expiryId = if ($persistAncestor) { $persistAncestor } else { $auth.fqdn }

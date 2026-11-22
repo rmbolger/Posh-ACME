@@ -143,6 +143,15 @@ Describe "Submit-ChallengeValidation PersistAncestor" {
         Should -Invoke Send-ChallengeAck -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter { $AncestorDomain -eq 'b.example.com' }
     }
 
+    It "Warns and sends no ancestor when no PersistAncestor value matches" {
+        Mock Write-Warning -ModuleName Posh-ACME {}
+        $global:TestAuths = @(New-TestAuth 'a.unrelated.net' 'dns' 1)
+        New-TestOrder | Submit-ChallengeValidation
+
+        Should -Invoke Write-Warning -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter { $Message -like "*a.unrelated.net*" }
+        Should -Invoke Send-ChallengeAck -ModuleName Posh-ACME -Times 1 -Exactly -ParameterFilter { -not $AncestorDomain }
+    }
+
     It "Throws when PersistAncestor is used without dns-persist-01" {
         $global:TestAuths = @(New-TestAuth 'a.b.example.com' 'dns' 1)
         { New-TestOrder -DnsVariant 'dns-01' | Submit-ChallengeValidation } | Should -Throw "*requires the order DnsVariant*"
