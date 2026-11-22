@@ -14,10 +14,26 @@ Describe "Publish-DnsPersistChallenge" {
 
     It "Uses the A-label for an account object's record owner and hash" {
         $expectedUri = (Get-DnsPersistAccountUri -Domain 'xn--bcher-kva.de' -Account $account -AccountHashPrefix $prefix).HashedAccountUri
-        $output = Publish-DnsPersistChallenge -Domain $unicodeDomain -Account $account -AccountHashPrefix $prefix `
+        $output = Publish-DnsPersistChallenge -Domain 'xn--bcher-kva.de.' -Account $account -AccountHashPrefix $prefix `
             -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
 
         ($output -replace '\s+', '') | Should -Match ([regex]::Escape("_validation-persist.xn--bcher-kva.de->`"authority.example;accounturi=$expectedUri`""))
+    }
+
+    It "Uses the ip-validation label and reverse zone for IP identifiers" {
+        $expectedUri = (Get-DnsPersistAccountUri -Domain '1.2.0.192.in-addr.arpa' -Account $account -AccountHashPrefix $prefix).HashedAccountUri
+        $output = Publish-DnsPersistChallenge -Domain '192.0.2.1' -Account $account -AccountHashPrefix $prefix `
+            -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
+
+        ($output -replace '\s+', '') | Should -Match ([regex]::Escape("_ip-validation-persist.1.2.0.192.in-addr.arpa->`"authority.example;accounturi=$expectedUri`""))
+    }
+
+    It "Omits the wildcard policy for IP identifiers" {
+        $output = Publish-DnsPersistChallenge -Domain '192.0.2.1' -Account $account -AccountHashPrefix $prefix `
+            -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs -AllowWildcard 6>&1 | Out-String
+
+        ($output -replace '\s+', '') | Should -Match '_ip-validation-persist\.1\.2\.0\.192\.in-addr\.arpa->"authority\.example;accounturi=[^";]+"'
+        ($output -replace '\s+', '') | Should -Not -Match 'policy=wildcard'
     }
 
     It "Uses the A-label for explicit account details and wildcard policy" {
@@ -26,7 +42,7 @@ Describe "Publish-DnsPersistChallenge" {
         $expectedUri = Get-DnsPersistAccountUri -Domain 'xn--bcher-kva.de' -AccountUri $accountUri `
             -KeyThumbprint $thumbprint -AccountHashPrefix $prefix
         $expectedUri = $expectedUri.HashedAccountUri
-        $output = Publish-DnsPersistChallenge -Domain "*.$unicodeDomain" -AccountUri $accountUri `
+        $output = Publish-DnsPersistChallenge -Domain '*.xn--bcher-kva.de.' -AccountUri $accountUri `
             -KeyThumbprint $thumbprint -AccountHashPrefix $prefix -IssuerDomainName 'authority.example' `
             -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
 
@@ -35,7 +51,7 @@ Describe "Publish-DnsPersistChallenge" {
 
     It "Normalizes an advanced record owner without changing its supplied hash" {
         $hashedUri = 'https://ca.example/account-hash/sha-256/external'
-        $output = Publish-DnsPersistChallenge -Domain $unicodeDomain -HashedAccountUri $hashedUri `
+        $output = Publish-DnsPersistChallenge -Domain 'xn--bcher-kva.de.' -HashedAccountUri $hashedUri `
             -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
 
         ($output -replace '\s+', '') | Should -Match ([regex]::Escape("_validation-persist.xn--bcher-kva.de->`"authority.example;accounturi=$hashedUri`""))
@@ -44,7 +60,7 @@ Describe "Publish-DnsPersistChallenge" {
     It "Normalizes order authorization names before publishing" {
         Mock -ModuleName Posh-ACME Get-PAAuthorization {
             [pscustomobject]@{
-                fqdn = $unicodeDomain
+                fqdn = 'xn--bcher-kva.de.'
                 challenges = @([pscustomobject]@{ type = 'dns-persist-01'; issuerDomainNames = @('authority.example') })
             }
         }
@@ -56,14 +72,14 @@ Describe "Publish-DnsPersistChallenge" {
         ($output -replace '\s+', '') | Should -Match ([regex]::Escape("_validation-persist.xn--bcher-kva.de->`"authority.example;accounturi=$expectedUri`""))
     }
 
-    It "Normalizes each Unicode domain supplied through the pipeline" {
-        $otherDomain = [string]::Concat('m', [char]0x00FC, 'nchen.de.')
-        $output = $unicodeDomain, $otherDomain | Publish-DnsPersistChallenge `
-            -HashedAccountUri 'https://ca.example/account-hash/sha-256/external' `
-            -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
+    It "Rejects Unicode domain names instead of converting them" {
+        { Publish-DnsPersistChallenge -Domain $unicodeDomain -HashedAccountUri 'https://ca.example/account-hash/sha-256/external' `
+            -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 } | Should -Throw '*non-ASCII*'
+    }
 
-        $output | Should -Match '_validation-persist\.xn--bcher-kva\.de ->'
-        $output | Should -Match '_validation-persist\.xn--mnchen-3ya\.de ->'
+    It "Rejects a domain with more than one trailing dot" {
+        { Publish-DnsPersistChallenge -Domain 'example.com..' -HashedAccountUri 'https://ca.example/account-hash/sha-256/external' `
+            -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 } | Should -Throw '*trailing dot*'
     }
 
     It "Publishes normalized owners with a shared opt-out hash from the helper" {
@@ -307,6 +323,106 @@ Describe "Publish-DnsPersistChallenge" {
         $records | Should -HaveCount 1
         $records[0].fqdn | Should -Be 'persist.example.com'
         $records[0].hashAcctUri | Should -Be 'https://ca.example/hash/existing'
+    }
+
+    It "Appends an IP challenge when a DNS challenge with the same reverse name is cached" {
+        $cachePath = 'TestDrive:\PersistedChallenges.json'
+        $reverseName = '1.2.0.192.in-addr.arpa'
+        $record = [pscustomobject]@{
+            fqdn = $reverseName
+            issuer = 'authority.example'
+            hashAcctUri = 'https://ca.example/hash/reverse'
+            addWildcard = $false
+            persistUntil = $null
+            fromAcctUri = ''
+            fromAcctThumb = ''
+        }
+        ConvertTo-Json -InputObject @($record) -Depth 5 | Set-Content $cachePath
+
+        Publish-DnsPersistChallenge -Domain '192.0.2.1' -HashedAccountUri 'https://ca.example/hash/reverse' `
+            -IssuerDomainName 'authority.example' -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-Null
+
+        $records = @((Get-Content $cachePath -Raw | ConvertFrom-Json))
+        $records | Should -HaveCount 2
+        ($records | Where-Object fqdn -eq '192.0.2.1') | Should -Not -BeNullOrEmpty
+    }
+
+    Context "Test-PersistUntilExpiry" {
+        BeforeEach {
+            $script:expiryCache = 'TestDrive:\PersistedChallenges.json'
+        }
+
+        It "Warns when a cached record expires within the next hour" {
+            $record = [pscustomobject]@{
+                fqdn = 'soon.example.com'
+                issuer = 'authority.example'
+                hashAcctUri = 'https://ca.example/hash/soon'
+                addWildcard = $false
+                persistUntil = [DateTimeOffset]::UtcNow.AddMinutes(30).ToUnixTimeSeconds()
+                fromAcctUri = ''
+                fromAcctThumb = ''
+            }
+            ConvertTo-Json -InputObject @($record) -Depth 5 | Set-Content $script:expiryCache
+
+            InModuleScope Posh-ACME {
+                Test-PersistUntilExpiry -Identifier '*.soon.example.com' -IssuerDomainName 'authority.example' -WarningVariable warnings 3>$null
+                "$warnings" | Should -Match 'cached dns-persist-01 record for soon.example.com'
+            }
+        }
+
+        It "Does not warn when the cached record is valid beyond the next hour" {
+            $record = [pscustomobject]@{
+                fqdn = 'later.example.com'
+                issuer = 'authority.example'
+                hashAcctUri = 'https://ca.example/hash/later'
+                addWildcard = $false
+                persistUntil = [DateTimeOffset]::UtcNow.AddDays(2).ToUnixTimeSeconds()
+                fromAcctUri = ''
+                fromAcctThumb = ''
+            }
+            ConvertTo-Json -InputObject @($record) -Depth 5 | Set-Content $script:expiryCache
+
+            InModuleScope Posh-ACME {
+                Test-PersistUntilExpiry -Identifier 'later.example.com' -IssuerDomainName 'authority.example' -WarningVariable warnings 3>$null
+                "$warnings" | Should -BeNullOrEmpty
+            }
+        }
+
+        It "Does not warn when the issuer differs" {
+            $record = [pscustomobject]@{
+                fqdn = 'other.example.com'
+                issuer = 'authority.example'
+                hashAcctUri = 'https://ca.example/hash/other'
+                addWildcard = $false
+                persistUntil = [DateTimeOffset]::UtcNow.AddMinutes(30).ToUnixTimeSeconds()
+                fromAcctUri = ''
+                fromAcctThumb = ''
+            }
+            ConvertTo-Json -InputObject @($record) -Depth 5 | Set-Content $script:expiryCache
+
+            InModuleScope Posh-ACME {
+                Test-PersistUntilExpiry -Identifier 'other.example.com' -IssuerDomainName 'different.example' -WarningVariable warnings 3>$null
+                "$warnings" | Should -BeNullOrEmpty
+            }
+        }
+
+        It "Matches IP identifiers against the lowercased cached value" {
+            $record = [pscustomobject]@{
+                fqdn = '2001:db8::1'
+                issuer = 'authority.example'
+                hashAcctUri = 'https://ca.example/hash/ip'
+                addWildcard = $false
+                persistUntil = [DateTimeOffset]::UtcNow.AddMinutes(30).ToUnixTimeSeconds()
+                fromAcctUri = ''
+                fromAcctThumb = ''
+            }
+            ConvertTo-Json -InputObject @($record) -Depth 5 | Set-Content $script:expiryCache
+
+            InModuleScope Posh-ACME {
+                Test-PersistUntilExpiry -Identifier '2001:DB8::1' -IssuerDomainName 'authority.example' -WarningVariable warnings 3>$null
+                "$warnings" | Should -Match 'cached dns-persist-01 record for 2001:db8::1'
+            }
+        }
     }
 
     It "Retains each piped record's expiration" {

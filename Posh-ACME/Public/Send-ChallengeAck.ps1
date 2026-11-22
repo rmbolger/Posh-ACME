@@ -4,7 +4,9 @@ function Send-ChallengeAck {
         [Parameter(Mandatory,Position=0,ValueFromPipeline)]
         [string]$ChallengeUrl,
         [Parameter(Position=1)]
-        [PSTypeName('PoshACME.PAAccount')]$Account
+        [PSTypeName('PoshACME.PAAccount')]$Account,
+        # dns-persist-01 only. Sent as the ancestorDomain challenge response field.
+        [string]$AncestorDomain
     )
 
     Begin {
@@ -35,9 +37,15 @@ function Send-ChallengeAck {
             url = $ChallengeUrl
         }
 
+        # build the challenge response payload
+        $payload = '{}'
+        if ($AncestorDomain) {
+            $payload = @{ ancestorDomain = $AncestorDomain } | ConvertTo-Json -Compress
+        }
+
         # send the notification
         try {
-            Invoke-ACME $header '{}' $Account -EA Stop | Out-Null
+            Invoke-ACME $header $payload $Account -EA Stop | Out-Null
         } catch { throw }
 
     }

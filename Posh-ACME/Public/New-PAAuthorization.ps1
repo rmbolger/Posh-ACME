@@ -26,19 +26,6 @@ function New-PAAuthorization {
             }
         }
         catch { $PSCmdlet.ThrowTerminatingError($_) }
-
-        # super lazy IPv4 address regex, but we just need to be able to
-        # distinguish from an FQDN
-        $reIPv4 = [regex]'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
-
-        # IP identifiers (RFC8738) are an extension to the original ACME protocol
-        # https://tools.ietf.org/html/rfc8738
-        #
-        # So we have to distinguish between domain FQDNs and IPv4/v6 addresses
-        # and send the appropriate identifier type for each one. We don't care
-        # if the IP address entered is actually valid or not, only that it is
-        # parsable as an IP address and should be sent as one rather than a
-        # DNS name.
     }
 
     Process {
@@ -54,7 +41,7 @@ function New-PAAuthorization {
             }
 
             # build the payload object
-            if ($name -match $reIPv4 -or $name -like '*:*') {
+            if (Test-IPShaped $name) {
                 Write-Debug "$name identified as IP address. Attempting to parse."
                 $ip = [ipaddress]$name
 

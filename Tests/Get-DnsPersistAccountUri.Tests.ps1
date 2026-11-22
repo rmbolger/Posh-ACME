@@ -9,14 +9,20 @@ Describe "Get-DnsPersistAccountUri" {
         $account = Get-PAAccount -ID acct1
     }
 
-    It "Converts IDN input to its A-label form" {
+    It "Rejects non-ASCII input instead of converting it" {
         # Powershell 5.1 doesn't seem to like Unicode domain literals directly, so we construct it using [char] codes
         $unicodeDomain = [string]::Concat('b', [char]0x00FC, 'cher.de.')
-        $unicodeUri = Get-DnsPersistAccountUri -Domain $unicodeDomain -Account $account -AccountHashPrefix 'https://ca.example/account-hash/'
-        $asciiUri = Get-DnsPersistAccountUri -Domain 'xn--bcher-kva.de' -Account $account -AccountHashPrefix 'https://ca.example/account-hash/'
+        { Get-DnsPersistAccountUri -Domain $unicodeDomain -Account $account -AccountHashPrefix 'https://ca.example/account-hash/' } | Should -Throw '*non-ASCII*'
+    }
 
-        $unicodeUri.Domain | Should -Be 'xn--bcher-kva.de'
-        $unicodeUri.HashedAccountUri | Should -Be $asciiUri.HashedAccountUri
+    It "Lowercases only ASCII letters and removes a single trailing root dot" {
+        $dottedUri = Get-DnsPersistAccountUri -Domain 'XN--FA-HIA.example.' -Account $account -AccountHashPrefix 'https://ca.example/account-hash/'
+        $plainUri = Get-DnsPersistAccountUri -Domain 'xn--fa-hia.example' -Account $account -AccountHashPrefix 'https://ca.example/account-hash/'
+        $otherUri = Get-DnsPersistAccountUri -Domain 'fass.example' -Account $account -AccountHashPrefix 'https://ca.example/account-hash/'
+
+        $dottedUri.Domain | Should -Be 'xn--fa-hia.example'
+        $dottedUri.HashedAccountUri | Should -Be $plainUri.HashedAccountUri
+        $otherUri.HashedAccountUri | Should -Not -Be $plainUri.HashedAccountUri
     }
 
     It "Strips wildcard prefixes" {
@@ -25,6 +31,34 @@ Describe "Get-DnsPersistAccountUri" {
 
         $prefixedUri.Domain | Should -Be '*.example.com'
         $prefixedUri.HashedAccountUri | Should -Be $plainUri.HashedAccountUri
+    }
+
+    It "Uses the IPv4 reverse zone name for the hashed domain" {
+        # draft-ietf-acme-dns-persist-03 section 7.3 IPv4 example
+        $actualUri = Get-DnsPersistAccountUri `
+            -Domain '192.0.2.1' `
+            -AccountUri 'https://ca.example/acct/123' `
+            -KeyThumbprint 'NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs' `
+            -AccountHashPrefix 'https://ca.example/account-hash/'
+
+        $actualUri.Domain | Should -Be '1.2.0.192.in-addr.arpa'
+        $actualUri.HashedAccountUri | Should -Be 'https://ca.example/account-hash/sha-256/CnwSwHOHJbE-X_FSkydPTw6dGMovluSdRsY3_tmA-0E'
+    }
+
+    It "Uses the IPv6 reverse zone name for the hashed domain" {
+        # draft-ietf-acme-dns-persist-03 section 7.3 IPv6 example
+        $actualUri = Get-DnsPersistAccountUri `
+            -Domain '2001:db8::1' `
+            -AccountUri 'https://ca.example/acct/123' `
+            -KeyThumbprint 'NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs' `
+            -AccountHashPrefix 'https://ca.example/account-hash/'
+
+        $actualUri.Domain | Should -Be ('1.' + ('0.' * 23) + '8.b.d.0.1.0.0.2.ip6.arpa')
+        $actualUri.HashedAccountUri | Should -Be 'https://ca.example/account-hash/sha-256/9RLd7iwi0v30KV01dsPwGvSBucGEYgsJhDNCxk8Nb9g'
+    }
+
+    It "Rejects IPv4 addresses with leading zeros" {
+        { Get-DnsPersistAccountUri -Domain '192.0.2.01' -Account $account -AccountHashPrefix 'https://ca.example/account-hash/' } | Should -Throw '*192.0.2.01*'
     }
 
     It "Hashes the domain length as a single octet" {
@@ -88,10 +122,28 @@ Describe "Get-DnsPersistAccountUri" {
         $records[0].HashedAccountUri | Should -Not -Be $records[1].HashedAccountUri
     }
 
+    It "Rejects an AccountHashPrefix with characters not permitted by section 4.1" -TestCases @(
+        @{ Prefix = 'https://ca.example/a;b/'; Reason = 'semicolon' }
+        @{ Prefix = 'https://ca.example/a,b/'; Reason = 'comma' }
+        @{ Prefix = 'https://ca.example/a"b/'; Reason = 'double quote' }
+        @{ Prefix = 'https://ca.example/a\b/'; Reason = 'backslash' }
+        @{ Prefix = 'https://ca.example/a b/'; Reason = 'space' }
+        @{ Prefix = 'https://ca.example/caf' + [char]0x00E9 + '/'; Reason = 'non-ASCII' }
+    ) {
+        { Get-DnsPersistAccountUri -Domain 'example.com' -Account $account -AccountHashPrefix $Prefix } | Should -Throw '*not permitted by draft-ietf-acme-dns-persist-03 section 4.1*'
+    }
+
+    It "Uses a prefix containing percent-encoding and reserved characters unchanged" {
+        $prefix = 'https://ca.example/a%20b/!$&()*+=/'
+        $actualUri = Get-DnsPersistAccountUri -Domain 'example.com' -Account $account -AccountHashPrefix $prefix
+        $actualUri.HashedAccountUri.StartsWith($prefix + 'sha-256/', [StringComparison]::Ordinal) | Should -BeTrue
+    }
+
     It "Rejects invalid normalized domains" -TestCases @(
         @{ Domain = '   '; Reason = 'empty domain' }
         @{ Domain = '.'; Reason = 'no labels' }
         @{ Domain = 'example..com'; Reason = 'empty label' }
+        @{ Domain = 'example.com..'; Reason = 'more than one trailing dot' }
         @{ Domain = '-example.com'; Reason = 'label starts with hyphen' }
         @{ Domain = 'example-.com'; Reason = 'label ends with hyphen' }
         @{ Domain = '*'; Reason = 'opt-out hash is not a DNS owner' }

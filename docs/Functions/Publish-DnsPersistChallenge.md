@@ -169,7 +169,7 @@ Accept wildcard characters: False
 ```
 
 ### -Domain
-The domain name(s) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.
+The domain name(s) or IP address(es) that the challenge record will be published for. Wildcard prefixed names such as `*.example.com` are allowed and will have the `policy=wildcard` field added automatically unless `-NoAutoWildcard` is specified.
 
 ```yaml
 Type: String[]
