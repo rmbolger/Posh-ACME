@@ -15,7 +15,8 @@ function Get-DnsPersistAccountUri {
         [switch]$NoDomainCorrelationMitigation
     )
 
-    # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-02.html#section-4.1
+    # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-03.html#section-4.1
+    # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-03.html#section-7
 
     Begin {
         trap { $PSCmdlet.ThrowTerminatingError($_) }
@@ -58,33 +59,27 @@ function Get-DnsPersistAccountUri {
             }
             $AccountHashPrefix = $server.meta.accountHashPrefix
         }
-
-        # Prepare the IDN mapping object for later use in domain normalization
-        $idn = [Globalization.IdnMapping]::new()
     }
 
     Process {
         trap { $PSCmdlet.ThrowTerminatingError($_) }
 
-        # Normalize the domain name according to draft suggestions
-        # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-02.html#section-9.2
+        # Normalize the domain name according to draft-ietf-acme-dns-persist-03 section 12.2
+        # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-03.html#section-12.2
         $origDomain = $Domain
-        $Domain = $Domain.Trim().ToLowerInvariant().Normalize([Text.NormalizationForm]::FormC)
+        $Domain = $Domain.Trim()
 
-        # Remove accidentally included wildcard prefix and any trailing dots
-        $isWildcard = $Domain.StartsWith('*.', [StringComparison]::Ordinal)
-        if ($isWildcard) {
-            $Domain = $Domain.Substring(2)
+        $isIP = Test-IPShaped $Domain
+        $isWildcard = $false
+
+        # Strip wildcard prefixes on domain names before normalizing the name
+        if (-not $isIP) {
+            $isWildcard = $Domain.StartsWith('*.', [StringComparison]::Ordinal)
+            if ($isWildcard) {
+                $Domain = $Domain.Substring(2)
+            }
         }
-        $Domain = $Domain.TrimEnd('.')
-
-        # double check the domain isn't empty now
-        if (-not $Domain) {
-            throw 'Domain is empty after removing whitespace and wildcard prefixes.'
-        }
-
-        # convert the domain to its ASCII-compatible encoding (A-label) form
-        $Domain = $idn.GetAscii($Domain).ToLowerInvariant()
+        $Domain = ConvertTo-DnsPersistDomain $Domain
         Write-Debug "Domain '$origDomain' normalized to '$Domain'"
 
         if ($Domain.Length -gt 253) {
@@ -94,6 +89,13 @@ function Get-DnsPersistAccountUri {
             if ($label.Length -gt 63 -or $label -cnotmatch '^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$') {
                 throw "Domain contains an invalid DNS label: $label"
             }
+        }
+
+        # Verify the prefix before using it unchanged. Characters outside this set (including ';', '"', '\'
+        # and whitespace) would corrupt the issue-value or its DNS master-file encoding.
+        # https://www.ietf.org/archive/id/draft-ietf-acme-dns-persist-03.html#section-4.1
+        if ($AccountHashPrefix -cnotmatch '^[A-Za-z0-9\-._~%:/?#\[\]@!$&''()*+=]+$') {
+            throw "AccountHashPrefix '$AccountHashPrefix' is missing or contains characters not permitted by draft-ietf-acme-dns-persist-03 section 4.1."
         }
 
         $recordDomain = if ($isWildcard) { "*.$Domain" } else { $Domain }

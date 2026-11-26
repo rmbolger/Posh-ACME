@@ -54,8 +54,6 @@ function Publish-DnsPersistChallenge {
             $Plugin = 'Manual'
         }
 
-        $idn = [Globalization.IdnMapping]::new()
-
         # get the current account for later if it wasn't passed in
         if (-not $Account) {
             $Account = Get-PAAccount
@@ -112,13 +110,13 @@ function Publish-DnsPersistChallenge {
             # loop through the auths by index so we can correlate them to the associated plugin
             $auths = @($Order | Get-PAAuthorization)
             for ($i=0; $i -lt $auths.Count; $i++) {
-                $fqdn = $auths[$i].fqdn
+                $idRaw = $auths[$i].fqdn
                 $addWildcard = $false
 
                 # skip any auths that don't have a dns-persist-01 challenge
                 $challenge = $auths[$i].challenges | Where-Object { $_.type -eq 'dns-persist-01' }
                 if (-not $challenge) {
-                    Write-Warning "Authz for $fqdn contains no dns-persist-01 challenge. Skipping."
+                    Write-Warning "Authz for $idRaw contains no dns-persist-01 challenge. Skipping."
                     continue
                 }
 
@@ -127,27 +125,30 @@ function Publish-DnsPersistChallenge {
                 if (-not $issuer) {
                     $issuer = Get-IssuerFromChallenge $challenge
                     if (-not $issuer) {
-                        Write-Warning "Unable to determine issuer domain name from dns-persist-01 challenge for $fqdn."
+                        Write-Warning "Unable to determine issuer domain name from dns-persist-01 challenge for $idRaw."
                         continue
                     }
                 }
 
-                if ($fqdn.StartsWith('*.', [StringComparison]::Ordinal)) {
+                if ($idRaw.StartsWith('*.', [StringComparison]::Ordinal)) {
                     # Add the wildcard flag unless -NoAutoWildcard is specified and -AllowWildcard is not specified.
                     if ($NoAutoWildcard -and -not $AllowWildcard) {
-                        Write-Warning "Skipping $fqdn because -NoAutoWildcard was specified."
+                        Write-Warning "Skipping $idRaw because -NoAutoWildcard was specified."
                         continue
                     } else {
                         $addWildcard = $true
                     }
                     # strip the wildcard characters for the rest of the processing since the validation record doesn't need them.
-                    $fqdn = $fqdn.Substring(2)
+                    $idRaw = $idRaw.Substring(2)
                 }
                 if ($AllowWildcard) {
                     $addWildcard = $true
                 }
 
-                $fqdn = $idn.GetAscii($fqdn.Trim().TrimEnd('.').ToLowerInvariant().Normalize([Text.NormalizationForm]::FormC)).ToLowerInvariant()
+                $recordLabel = if (Test-IPShaped $idRaw) { '_ip-validation-persist' } else { '_validation-persist' }
+                $idDnsName = ConvertTo-DnsPersistDomain $idRaw
+                # the identifier keeps IP addresses as provided so the cache can be piped back in
+                $idConverted = if ($recordLabel -eq '_ip-validation-persist') { $idRaw.ToLowerInvariant() } else { $idDnsName }
 
                 # correlate the plugin args to the auth by index or use the last one available.
                 if ($Plugin.Count -gt $i) {
@@ -158,7 +159,7 @@ function Publish-DnsPersistChallenge {
 
                 # generate the hashed account URI for the challenge
                 $getUriParams = @{
-                    Domain            = $fqdn
+                    Domain            = $idDnsName
                     AccountHashPrefix = $AccountHashPrefix
                     AccountUri        = $Account.location
                     KeyThumbprint     = $Account.thumbprint
@@ -171,8 +172,10 @@ function Publish-DnsPersistChallenge {
 
                 # add the challenge information to the collection
                 $chalCollection.Add([pscustomobject]@{
-                    fqdn          = $fqdn
+                    fqdn          = $idConverted
+                    idDnsName     = $idDnsName
                     hashAcctUri   = $hashAcctUri
+                    recordLabel   = $recordLabel
                     issuer        = $issuer
                     plugin        = $p
                     pArgs         = $PluginArgs
@@ -190,25 +193,28 @@ function Publish-DnsPersistChallenge {
         # All other parameter sets have an explicit list of domains to process.
         for ($i=0; $i -lt $Domain.Count; $i++) {
 
-            $fqdn = $Domain[$i].Trim().TrimEnd('.')
+            $idRaw = $Domain[$i].Trim()
 
             $addWildcard = $false
-            if ($fqdn.StartsWith('*.', [StringComparison]::Ordinal)) {
+            if ($idRaw.StartsWith('*.', [StringComparison]::Ordinal)) {
                 # Add the wildcard flag unless -NoAutoWildcard is specified and -AllowWildcard is not specified.
                 if ($NoAutoWildcard -and -not $AllowWildcard) {
-                    Write-Warning "Skipping $fqdn because -NoAutoWildcard was specified."
+                    Write-Warning "Skipping $idRaw because -NoAutoWildcard was specified."
                     continue
                 } else {
                     $addWildcard = $true
                 }
                 # strip the wildcard characters for the rest of the processing since the validation record doesn't need them.
-                $fqdn = $fqdn.Substring(2)
+                $idRaw = $idRaw.Substring(2)
             }
             if ($AllowWildcard) {
                 $addWildcard = $true
             }
 
-            $fqdn = $idn.GetAscii($fqdn.ToLowerInvariant().Normalize([Text.NormalizationForm]::FormC)).ToLowerInvariant()
+            $recordLabel = if (Test-IPShaped $idRaw) { '_ip-validation-persist' } else { '_validation-persist' }
+            $idDnsName = ConvertTo-DnsPersistDomain $idRaw
+            # the identifier keeps IP addresses as provided so the cache can be piped back in
+            $idConverted = if ($recordLabel -eq '_ip-validation-persist') { $idRaw.ToLowerInvariant() } else { $idDnsName }
 
             # correlate the plugin args to the auth by index or use the last one available.
             if ($Plugin.Count -gt $i) {
@@ -230,7 +236,7 @@ function Publish-DnsPersistChallenge {
 
                 # Build the call to Get-DnsPersistAccountUri based the parameter set.
                 $getUriParams = @{
-                    Domain            = $fqdn
+                    Domain            = $idDnsName
                     AccountHashPrefix = $AccountHashPrefix
                 }
                 if ($NoDomainCorrelationMitigation) {
@@ -252,8 +258,10 @@ function Publish-DnsPersistChallenge {
 
             # add the challenge information to the collection
             $chalCollection.Add([pscustomobject]@{
-                fqdn          = $fqdn
+                fqdn          = $idConverted
                 hashAcctUri   = $hashAcctUri
+                idDnsName     = $idDnsName
+                recordLabel   = $recordLabel
                 issuer        = $IssuerDomainName
                 plugin        = $p
                 pArgs         = $PluginArgs
@@ -290,11 +298,12 @@ function Publish-DnsPersistChallenge {
 
                     Write-Verbose "Publishing dns-persist-01 challenge for $($chal.fqdn) using Plugin $($chal.plugin)."
 
-                    $recordName = "_validation-persist.$($chal.fqdn)"
+                    $recordName = "$($chal.recordLabel).$($chal.idDnsName)"
 
                     # build the TXT value based on the input parameters
                     $txtValue = '{0}; accounturi={1}' -f $chal.issuer, $chal.hashAcctUri
-                    if ($chal.addWildcard) {
+                    # draft-03 section 7.2 says IP records must not include a policy
+                    if ($chal.addWildcard -and $chal.recordLabel -eq '_validation-persist') {
                         $txtValue += '; policy=wildcard'
                     }
                     if ($chal.persistUntil) {
@@ -333,14 +342,14 @@ function Publish-DnsPersistChallenge {
             $existing = @()
         }
         $toSave = $modified | Where-Object {
-            $fqdn        = $_.fqdn
+            $idConverted = $_.fqdn
             $issuer      = $_.issuer
             $hashAcctUri = $_.hashAcctUri
             $addWildcard = $_.addWildcard
             $expires = $_.persistUntil
 
             -not ($existing | Where-Object {
-                $_.fqdn -eq $fqdn -and
+                $_.fqdn -eq $idConverted -and
                 $_.issuer -eq $issuer -and
                 $_.hashAcctUri -eq $hashAcctUri -and
                 $_.addWildcard -eq $addWildcard -and

@@ -67,6 +67,23 @@ Describe "Unpublish-DnsPersistChallenge" {
         $compact | Should -Match ([regex]::Escape("_validation-persist.other.example.com->`"authority.example;accounturi=$uri;policy=wildcard`""))
     }
 
+    It "Unpublishes a cached IP challenge piped from Get-PublishedPersistChallenge under the IP label" {
+        @(
+            [pscustomobject]@{
+                fqdn = '192.0.2.1'; issuer = 'authority.example'
+                hashAcctUri = 'https://ca.example/hash/ip'; addWildcard = $false
+                persistUntil = $null; fromAcctUri = ''; fromAcctThumb = ''
+            }
+        ) | ConvertTo-Json -Depth 5 | Set-Content 'TestDrive:\PersistedChallenges.json'
+
+        $output = Get-PublishedPersistChallenge | Unpublish-DnsPersistChallenge `
+            -Plugin Manual -PluginArgs $pluginArgs 6>&1 | Out-String
+
+        $output | Should -Match ([regex]::Escape('_ip-validation-persist.1.2.0.192.in-addr.arpa ->'))
+        $remaining = Get-Content 'TestDrive:\PersistedChallenges.json' -Raw | ConvertFrom-Json
+        @($remaining) | Should -HaveCount 0
+    }
+
     It "Unpublishes every cached challenge piped from Get-PublishedPersistChallenge" {
         @(
             [pscustomobject]@{

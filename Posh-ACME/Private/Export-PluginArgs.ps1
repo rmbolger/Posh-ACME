@@ -104,7 +104,7 @@ function Export-PluginArgs {
         })
 
         # Add the set of plugin-agnostic parameter names
-        $paramNames += 'PublishPersist'
+        $paramNames += 'PublishPersist','PersistAncestor'
 
         # Remove any old args that may conflict with the new ones
         foreach ($key in @($pData.Keys)) {

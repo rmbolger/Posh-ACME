@@ -19,6 +19,8 @@ Pre-provisioning is a bit more work up front, but you should only have to do it 
 
 Each unique name published using the variations below will have a persistent record published for it. If there are wildcard names, the `policy=wildcard` flag will be added to that record automatically. This is necessary for the wildcard validations to succeed. You can prevent the automatic addition with the `-NoAutoWildcard` switch, but it will then skip creating the record for that name since it wouldn't work for validation. Alternatively, you may use the `-AllowWildcard` switch to add the wildcard flag to all records even if not technically needed. Just be aware that the `policy=wildcard` flag authorizes all nested sub-domains for that FQDN and ACME account.
 
+IP address identifiers (IPv4 or IPv6) are also supported. Each address is converted to its reverse `.arpa` name and published at `_ip-validation-persist.<arpa name>` instead of `_validation-persist.<name>`. IP records never get the `policy=wildcard` flag, so `-AllowWildcard` has no effect on them.
+
 ### Publish from Pending Order
 
 This method assumes you're publishing from the same Posh-ACME system you're requesting certs from. You'll need to have an ACME server already configured with `Set-PAServer` and an account already created with `New-PAAccount`.
@@ -156,6 +158,26 @@ New-PACertificate $certNames -Plugin FakeDNS -PluginArgs $pArgs -DnsVariant dns-
 
 This will auto-create the necessary persistent records if they don't exist. But it will not remove them like it normally does with `dns-01` after the order is complete. It will also continue to try and create the persistent records during renewals if they no longer exist for whatever reason.
 
+## Validating Subdomains with an Ancestor Record
+
+A single `_validation-persist` record at a parent domain can validate its subdomains, as described in draft-03. Create that record yourself ahead of time (it must include `policy=wildcard`), then request the certificate with the shared `PersistAncestor` PluginArg. One or more ancestor domains can be supplied, and each identifier uses the nearest ancestor that is a proper parent of it. Identifiers with no matching ancestor are validated at their own name as usual. IP identifiers never use an ancestor.
+
+```powershell
+$certNames = 'a.b.example.com','other.example.com'
+$pArgs = @{
+    FDToken = (Read-Host 'FakeDNS API Token' -AsSecureString)
+    PersistAncestor = 'example.com','b.example.com'
+}
+New-PACertificate $certNames -Plugin FakeDNS -PluginArgs $pArgs -DnsVariant dns-persist-01
+```
+
+Here `a.b.example.com` uses `b.example.com` and `other.example.com` uses `example.com`. Some things to keep in mind:
+
+* `PersistAncestor` only works with `-DnsVariant dns-persist-01`, and it can't be combined with `PublishPersist`. Ancestor records are never created or removed automatically.
+* Renewals reuse the saved value, so the ancestor record needs to stay in place.
+* Only the `PersistAncestor` values you supply are used. Make sure each one is a parent of the names it should cover.
+* **Google's draft-01 implementation does not support this.** It walks the DNS tree on its own and will likely reject the `ancestorDomain` value. Don't use `PersistAncestor` with Google until they update to draft-03 or later.
+
 ## Migrate an Existing Order from dns-01
 
 ### Check if dns-persist-01 is supported
@@ -218,6 +240,7 @@ There are a few reasons you may update or replace your persistent validation rec
   - Account deactivation is non-reversible. If it happens on purpose or due to compromise, all your existing records immediately become invalid and require re-publishing from a new account.
 - You used a PersistUntil value that has expired or will expire soon.
   - An expired record won't validate. You'll want to unpublish the old record and republish a new record with an updated PersistUntil value before the old record expires.
+  - When you request a certificate with `-DnsVariant dns-persist-01`, Posh-ACME warns about any locally cached record for the same identifier and issuer whose PersistUntil has expired or expires within the next hour. This check doesn't query DNS and doesn't verify the account hash, so the warning can also refer to a record published by a different account for the same identifier and issuer.
 
 There are two variations on how to unpublish a persistent record using Posh-ACME.
 
