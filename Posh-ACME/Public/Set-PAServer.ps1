@@ -126,8 +126,9 @@ function Set-PAServer {
         if ('SkipCertificateCheck' -in $PSBoundParameters.Keys) {
             Set-CertValidation -Skip $SkipCertificateCheck.IsPresent
         }
-        elseif ($curDir -and $curDir.SkipCertificateCheck) {
-            Set-CertValidation -Skip $true
+        else {
+            # use the saved value for this server, or the default for a new one
+            Set-CertValidation -Skip ([bool]$newDir.SkipCertificateCheck)
         }
 
         # refresh the server details if they don't already exist or NoRefresh

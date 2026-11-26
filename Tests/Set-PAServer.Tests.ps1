@@ -57,4 +57,38 @@ Describe "Set-PAServer" {
             Get-SkipState | Should -BeFalse
         }
     }
+
+    Context "Directory request for a different server" {
+
+        BeforeAll {
+            Mock -ModuleName Posh-ACME Write-Debug {}
+            Mock -ModuleName Posh-ACME Write-Host {}
+            # remember whether cert validation was being skipped when the request was made
+            Mock -ModuleName Posh-ACME Invoke-WebRequest {
+                $script:skipAtRequest = Get-SkipState
+                [pscustomobject]@{
+                    Content = '{"newAccount":"a","newOrder":"o","newNonce":"n","keyChange":"k","revokeCert":"r"}'
+                    Headers = @{ 'Replay-Nonce' = 'nonce' }
+                }
+            }
+        }
+
+        AfterAll {
+            Set-PAServer -Name srvr1 -NoRefresh
+        }
+
+        # srvr1 does not skip cert validation and srvr2 does
+        It "Uses the <Desc> setting when switching from <From>" -TestCases @(
+            @{ From='srvr1'; To=@{Name='srvr2'};                                 Skip=$true;  Desc="saved server's" }
+            @{ From='srvr2'; To=@{Name='srvr1'};                                 Skip=$false; Desc="saved server's" }
+            @{ From='srvr2'; To=@{DirectoryUrl='https://acme3.test/directory'}; Skip=$false; Desc='default' }
+        ) {
+            Set-PAServer -Name $From -NoRefresh
+            $script:skipAtRequest = $null
+
+            Set-PAServer @To
+            $script:skipAtRequest | Should -Be $Skip
+            Get-SkipState | Should -Be $Skip
+        }
+    }
 }
