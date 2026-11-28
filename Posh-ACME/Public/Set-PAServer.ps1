@@ -126,8 +126,9 @@ function Set-PAServer {
         if ('SkipCertificateCheck' -in $PSBoundParameters.Keys) {
             Set-CertValidation -Skip $SkipCertificateCheck.IsPresent
         }
-        elseif ($curDir -and $curDir.SkipCertificateCheck) {
-            Set-CertValidation -Skip $true
+        else {
+            # use the saved value for this server, or the default for a new one
+            Set-CertValidation -Skip ([bool]$newDir.SkipCertificateCheck)
         }
 
         # refresh the server details if they don't already exist or NoRefresh
@@ -151,12 +152,15 @@ function Set-PAServer {
                 }
                 $response = Invoke-WebRequest @iwrSplat @script:UseBasic
             } catch {
+                # put cert validation back the way the current server has it
+                Set-CertValidation ([bool]$curDir.SkipCertificateCheck)
                 $PSCmdlet.ThrowTerminatingError($_)
             }
             try {
                 $dirObj = $response.Content | ConvertFrom-Json
             } catch {
                 Write-Debug "ACME Response: `n$($response.Content)"
+                Set-CertValidation ([bool]$curDir.SkipCertificateCheck)
                 try { throw "ACME response from $($newDir.location) was not valid JSON. Details are in Debug output." }
                 catch { $PSCmdlet.ThrowTerminatingError($_) }
             }
