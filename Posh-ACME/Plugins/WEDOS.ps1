@@ -205,7 +205,7 @@ function Invoke-Wedos {
     # Concatenate the username, hashed password, and hour
     # and then SHA1 hash the whole thing
     $authRaw = '{0}{1}{2}' -f $Credential.Username,$pHash,$hour
-    Write-Debug "authRaw = $authRaw"
+    Write-Debug "authRaw = $($authRaw.Replace($pHash,'REDACTED'))"
     $hashBytes = $sha1.ComputeHash([Text.Encoding]::UTF8.GetBytes($authRaw))
     $auth = [BitConverter]::ToString($hashBytes).Replace('-','').ToLower()
 
